@@ -1,72 +1,63 @@
 code_id,code_name,first_appearance,evolution_notes,frequency,interview_progression,saturation_point
-CODE_001,Transcription,Interview 001,Identified through global analysis,10,"Interview 001, Interview 003, Interview 004, Interview 009, Interview 014, Interview 015, Interview 016, Interview 017, Interview 018",Interview 014
-CODE_002,Coding_and_Thematic_Analysis,Interview 001,Identified through global analysis,15,"Interview 001, Interview 002, Interview 003, Interview 004, Interview 006, Interview 008, Interview 009, Interview 010, Interview 011, Interview 012, Interview 013, Interview 014, Interview 015, Interview 016, Interview 018",Interview 014
-CODE_003,Data_Summarization,Interview 001,Identified through global analysis,12,"Interview 001, Interview 003, Interview 004, Interview 005, Interview 007, Interview 009, Interview 010, Interview 011, Interview 014, Interview 015, Interview 016, Interview 018",Interview 014
-CODE_004,Qualitative_Research_Support,Interview 001,Identified through global analysis,15,"Interview 001, Interview 002, Interview 003, Interview 004, Interview 006, Interview 008, Interview 009, Interview 010, Interview 011, Interview 012, Interview 013, Interview 014, Interview 015, Interview 016, Interview 018",Interview 014
-CODE_005,AI_Applications_and_Use_Cases,Interview 001,Identified through global analysis,18,"Interview 001, Interview 002, Interview 003, Interview 004, Interview 005, Interview 006, Interview 007, Interview 008, Interview 009, Interview 010, Interview 011, Interview 012, Interview 013, Interview 014, Interview 015, Interview 016, Interview 017, Interview 018",Interview 014
-CODE_006,Recruitment_and_Sampling_Support,Interview 001,Identified through global analysis,4,"Interview 001, Interview 003, Interview 009",Interview 014
-CODE_007,Search_Strategy_and_Discovery,Interview 001,Identified through global analysis,10,"Interview 001, Interview 004, Interview 005, Interview 006, Interview 007, Interview 009, Interview 010, Interview 011, Interview 015, Interview 018",Interview 014
-CODE_008,Literature_and_Document_Review,Interview 001,Identified through global analysis,15,"Interview 001, Interview 002, Interview 003, Interview 004, Interview 005, Interview 006, Interview 007, Interview 008, Interview 009, Interview 010, Interview 011, Interview 013, Interview 015, Interview 016, Interview 018",Interview 014
-CODE_009,Document_Summarization_and_Extraction,Interview 001,Identified through global analysis,13,"Interview 001, Interview 002, Interview 003, Interview 004, Interview 005, Interview 007, Interview 009, Interview 010, Interview 011, Interview 013, Interview 015, Interview 016, Interview 018",Interview 014
-CODE_010,AI_Agents_and_Virtual_Populations,Interview 001,Identified through global analysis,4,"Interview 001, Interview 003, Interview 009, Interview 014",Interview 014
-CODE_011,Advanced_AI_Research_Methods,Interview 001,Identified through global analysis,7,"Interview 001, Interview 003, Interview 007, Interview 009, Interview 014, Interview 017, Interview 018",Interview 014
-CODE_012,Nuance_and_Context_Loss,Interview 001,Identified through global analysis,8,"Interview 001, Interview 004, Interview 005, Interview 009, Interview 010, Interview 011, Interview 013, Interview 016",Interview 014
-CODE_013,Accuracy_and_Reliability_Concerns,Interview 001,Identified through global analysis,13,"Interview 001, Interview 003, Interview 004, Interview 005, Interview 006, Interview 008, Interview 009, Interview 010, Interview 011, Interview 012, Interview 013, Interview 014, Interview 016",Interview 014
-CODE_014,Challenges_and_Risks_of_AI_Adoption,Interview 001,Identified through global analysis,18,"Interview 001, Interview 002, Interview 003, Interview 004, Interview 005, Interview 006, Interview 007, Interview 008, Interview 009, Interview 010, Interview 011, Interview 012, Interview 013, Interview 014, Interview 015, Interview 016, Interview 017, Interview 018",Interview 014
-CODE_015,Trust_in_AI_Output,Interview 001,Identified through global analysis,11,"Interview 001, Interview 004, Interview 005, Interview 008, Interview 009, Interview 010, Interview 011, Interview 012, Interview 013, Interview 014, Interview 016",Interview 014
-CODE_016,Human_Impact_and_Skill_Erosion,Interview 001,Identified through global analysis,10,"Interview 001, Interview 002, Interview 004, Interview 008, Interview 009, Interview 010, Interview 011, Interview 013, Interview 014, Interview 018",Interview 014
-CODE_017,Deskilling_of_Junior_Researchers,Interview 002,Identified through global analysis,4,"Interview 002, Interview 008, Interview 018",Interview 014
-CODE_018,Competitive_Advantage,Interview 002,Identified through global analysis,5,"Interview 002, Interview 005, Interview 007, Interview 012, Interview 018",Interview 014
-CODE_019,Opportunities_and_Benefits_of_AI_Integration,Interview 001,Identified through global analysis,18,"Interview 001, Interview 002, Interview 003, Interview 004, Interview 005, Interview 006, Interview 007, Interview 008, Interview 009, Interview 010, Interview 011, Interview 012, Interview 013, Interview 014, Interview 015, Interview 016, Interview 017, Interview 018",Interview 014
-CODE_020,Efficiency_and_Time_Savings,Interview 001,Identified through global analysis,17,"Interview 001, Interview 002, Interview 003, Interview 004, Interview 005, Interview 006, Interview 007, Interview 008, Interview 009, Interview 010, Interview 011, Interview 012, Interview 013, Interview 014, Interview 015, Interview 016, Interview 018",Interview 014
-CODE_021,Training_and_Education,Interview 003,Identified through global analysis,7,"Interview 003, Interview 005, Interview 008, Interview 012, Interview 014, Interview 018",Interview 014
-CODE_022,AI_Adoption_and_Implementation_Strategy_at_Rand,Interview 001,Identified through global analysis,18,"Interview 001, Interview 002, Interview 003, Interview 004, Interview 005, Interview 006, Interview 007, Interview 008, Interview 009, Interview 010, Interview 011, Interview 012, Interview 013, Interview 014, Interview 015, Interview 016, Interview 017, Interview 018",Interview 014
-CODE_023,Use_Case_Examples,Interview 003,Identified through global analysis,4,"Interview 003, Interview 005, Interview 018",Interview 014
-CODE_024,Common_Methods_at_Rand,Interview 001,Identified through global analysis,10,"Interview 001, Interview 002, Interview 003, Interview 005, Interview 006, Interview 007, Interview 009, Interview 010, Interview 011, Interview 015",Interview 014
-CODE_025,Research_Methods_Overview,Interview 001,Identified through global analysis,18,"Interview 001, Interview 002, Interview 003, Interview 004, Interview 005, Interview 006, Interview 007, Interview 008, Interview 009, Interview 010, Interview 011, Interview 012, Interview 013, Interview 014, Interview 015, Interview 016, Interview 017, Interview 018",Interview 014
-CODE_026,Methodological_Challenges_General,Interview 001,Identified through global analysis,10,"Interview 001, Interview 003, Interview 004, Interview 005, Interview 006, Interview 008, Interview 009, Interview 013, Interview 014, Interview 015",Interview 014
-CODE_027,High_Impact_Methods,Interview 002,Identified through global analysis,5,"Interview 002, Interview 003, Interview 009, Interview 013, Interview 016",Interview 014
-CODE_028,Data_Wrangling_and_Preparation,Interview 003,Identified through global analysis,10,"Interview 003, Interview 004, Interview 005, Interview 006, Interview 008, Interview 012, Interview 013, Interview 015, Interview 016, Interview 018",Interview 014
-CODE_029,Quantitative_Research_Support,Interview 003,Identified through global analysis,11,"Interview 003, Interview 004, Interview 005, Interview 006, Interview 008, Interview 009, Interview 012, Interview 013, Interview 015, Interview 016, Interview 018",Interview 014
-CODE_030,Statistical_Modeling_and_Analysis,Interview 003,Identified through global analysis,6,"Interview 003, Interview 009, Interview 012, Interview 013, Interview 016",Interview 014
-CODE_031,Survey_Design_and_Measures,Interview 003,Identified through global analysis,5,"Interview 003, Interview 008, Interview 009, Interview 016",Interview 014
-CODE_032,Code_Generation_and_Debugging,Interview 003,Identified through global analysis,6,"Interview 003, Interview 005, Interview 009, Interview 012, Interview 018",Interview 014
-CODE_033,Meeting_Management,Interview 003,Identified through global analysis,3,"Interview 003, Interview 007, Interview 015",Interview 014
-CODE_034,Project_Management_and_Administrative_Support,Interview 003,Identified through global analysis,11,"Interview 003, Interview 005, Interview 006, Interview 007, Interview 009, Interview 010, Interview 011, Interview 012, Interview 013, Interview 015, Interview 016, Interview 018",Interview 014
-CODE_035,Proposal_Development,Interview 003,Identified through global analysis,7,"Interview 003, Interview 005, Interview 009, Interview 010, Interview 011, Interview 013, Interview 016, Interview 018",Interview 014
-CODE_036,Report_Writing_and_Editing,Interview 003,Identified through global analysis,9,"Interview 003, Interview 005, Interview 007, Interview 009, Interview 010, Interview 011, Interview 015, Interview 016, Interview 018",Interview 014
-CODE_037,Overfitting_and_Data_Mining,Interview 003,Identified through global analysis,2,Interview 003,Interview 014
-CODE_038,Tool_Availability_and_Access,Interview 003,Identified through global analysis,7,"Interview 003, Interview 006, Interview 007, Interview 010, Interview 011, Interview 012, Interview 015",Interview 014
-CODE_039,Organizational_and_Technical_Barriers,Interview 002,Identified through global analysis,11,"Interview 002, Interview 003, Interview 004, Interview 005, Interview 006, Interview 007, Interview 010, Interview 011, Interview 012, Interview 015, Interview 018",Interview 014
-CODE_040,Lack_of_Clear_Guidance_and_Policy,Interview 002,Identified through global analysis,7,"Interview 002, Interview 005, Interview 008, Interview 012, Interview 014, Interview 016",Interview 014
-CODE_041,Internal_Tool_Development_vs_External_Acquisition,Interview 007,Identified through global analysis,3,"Interview 007, Interview 012",Interview 014
-CODE_042,Strategic_Vision_and_Roadmap,Interview 007,Identified through global analysis,2,"Interview 007, Interview 012",Interview 014
-CODE_043,Wargaming_and_Simulation,Interview 002,Identified through global analysis,4,"Interview 002, Interview 007, Interview 010, Interview 011",Interview 014
-CODE_044,Dissemination_and_Communication,Interview 007,Identified through global analysis,5,"Interview 007, Interview 009, Interview 010, Interview 011, Interview 018",Interview 014
-CODE_045,Compliance_and_Quality_Assurance,Interview 007,Identified through global analysis,4,"Interview 007, Interview 010, Interview 011, Interview 016",Interview 014
-CODE_046,Incentives_and_Funding,Interview 007,Identified through global analysis,3,"Interview 007, Interview 012",Interview 014
-CODE_047,AI_Budget_Stipends,Interview 012,Identified through global analysis,1,Interview 012,Interview 014
-CODE_048,Knowledge_Sharing_and_Collaboration,Interview 004,Identified through global analysis,4,"Interview 004, Interview 005, Interview 012, Interview 018",Interview 014
-CODE_049,Hallucinations_and_Fabrication,Interview 001,Identified through global analysis,6,"Interview 001, Interview 003, Interview 004, Interview 005, Interview 008, Interview 009, Interview 010, Interview 011, Interview 016",Interview 014
-CODE_050,Loss_of_Intimacy_with_Data,Interview 001,Identified through global analysis,3,"Interview 001, Interview 014, Interview 013",Interview 014
-CODE_051,Researcher_Anxiety,Interview 004,Identified through global analysis,2,"Interview 004, Interview 005",Interview 014
-CODE_052,Lack_of_Standardized_Data_Infrastructure,Interview 012,Identified through global analysis,3,"Interview 012, Interview 013",Interview 014
-CODE_053,Data_Privacy_and_Confidentiality,Interview 003,Identified through global analysis,4,"Interview 003, Interview 006, Interview 014, Interview 015",Interview 014
-CODE_054,Ethical_and_Trust_Issues,Interview 003,Identified through global analysis,7,"Interview 003, Interview 005, Interview 006, Interview 008, Interview 009, Interview 014, Interview 016",Interview 014
-CODE_055,Intellectual_Property,Interview 005,Identified through global analysis,1,Interview 005,Interview 014
-CODE_056,Transparency_and_Black_Box,Interview 004,Identified through global analysis,3,"Interview 004, Interview 014",Interview 014
-CODE_057,HSPC_and_IRB_Adaptation,Interview 003,Identified through global analysis,3,"Interview 003, Interview 006, Interview 009, Interview 014",Interview 014
-CODE_058,Policy_and_Guidance,Interview 003,Identified through global analysis,4,"Interview 003, Interview 004, Interview 009, Interview 014, Interview 016",Interview 014
-CODE_059,AI_Protocols_and_Disclaimers,Interview 004,Identified through global analysis,2,"Interview 004, Interview 010, Interview 011, Interview 016",Interview 014
-CODE_060,Enhanced_Capacity_and_Scale,Interview 004,Identified through global analysis,4,"Interview 004, Interview 006, Interview 009, Interview 017",Interview 014
-CODE_061,Improved_Quality_and_Rigor,Interview 004,Identified through global analysis,3,"Interview 004, Interview 012, Interview 014",Interview 014
-CODE_062,New_Research_Capabilities,Interview 006,Identified through global analysis,2,"Interview 006, Interview 017",Interview 014
-CODE_063,Forecasting,Interview 007,Identified through global analysis,2,"Interview 007, Interview 017",Interview 014
-CODE_064,Red_Teaming,Interview 007,Identified through global analysis,2,Interview 007,Interview 014
-CODE_065,Expert_Elicitation_Support,Interview 007,Identified through global analysis,2,"Interview 007, Interview 009",Interview 014
-CODE_066,Gap_Identification,Interview 009,Identified through global analysis,2,Interview 009,Interview 014
-CODE_067,Synthesis_and_Review_of_Reviews,Interview 009,Identified through global analysis,2,Interview 009,Interview 014
-CODE_068,Resource_Allocation_and_Planning,Interview 005,Identified through global analysis,1,Interview 005,Interview 014
-CODE_069,Dedicated_AI_Staff,Interview 004,Identified through global analysis,1,Interview 004,Interview 014
-CODE_070,Resistance_to_Change,Interview 004,Identified through global analysis,1,"Interview 004, Interview 018",Interview 014
-CODE_071,Interview_Protocol_Design,Interview 003,Identified through global analysis,1,Interview 003,Interview 014
+C1.1,Qualitative Analysis Automation,Interview 001,Identified through global analysis,15,"Interview 001, Interview 002, Interview 003, Interview 004, Interview 005, Interview 006, Interview 007, Interview 008, Interview 009, Interview 010, Interview 011, Interview 013, Interview 014, Interview 015, Interview 018",Interview 014
+C1.1.1,AI Transcription,Interview 001,Identified through global analysis,7,"Interview 001, Interview 005, Interview 009, Interview 010, Interview 011, Interview 014, Interview 015",Interview 014
+C1.1.2,AI Coding,Interview 001,Identified through global analysis,12,"Interview 001, Interview 002, Interview 003, Interview 004, Interview 005, Interview 006, Interview 009, Interview 010, Interview 011, Interview 013, Interview 014, Interview 015",Interview 014
+C1.1.3,AI Thematic Analysis,Interview 001,Identified through global analysis,6,"Interview 001, Interview 004, Interview 009, Interview 010, Interview 011, Interview 014",Interview 014
+C1.1.4,AI De-identification,Interview 004,Identified through global analysis,3,"Interview 004, Interview 006, Interview 014",Interview 014
+C1.1.5,AI Quote Tracing,Interview 003,Identified through global analysis,1,Interview 003,Interview 014
+C1.2,Literature Review Automation,Interview 001,Identified through global analysis,15,"Interview 001, Interview 002, Interview 003, Interview 004, Interview 005, Interview 006, Interview 007, Interview 008, Interview 009, Interview 010, Interview 011, Interview 013, Interview 014, Interview 015, Interview 018",Interview 014
+C1.2.1,AI Search Strategy,Interview 001,Identified through global analysis,3,"Interview 001, Interview 004, Interview 009",Interview 014
+C1.2.2,AI Document Summarization,Interview 003,Identified through global analysis,7,"Interview 003, Interview 005, Interview 007, Interview 008, Interview 009, Interview 010, Interview 011",Interview 014
+C1.2.3,AI Data Extraction,Interview 003,Identified through global analysis,6,"Interview 003, Interview 005, Interview 006, Interview 012, Interview 013, Interview 018",Interview 014
+C1.2.4,AI Gap Identification,Interview 009,Identified through global analysis,2,"Interview 009, Interview 018",Interview 014
+C1.2.5,AI Source Validation,Interview 005,Identified through global analysis,2,"Interview 005, Interview 009",Interview 014
+C1.3,Quantitative Analysis Automation,Interview 001,Identified through global analysis,10,"Interview 001, Interview 003, Interview 005, Interview 006, Interview 009, Interview 012, Interview 013, Interview 014, Interview 016, Interview 018",Interview 014
+C1.3.1,AI Code Generation/Correction,Interview 003,Identified through global analysis,6,"Interview 003, Interview 005, Interview 012, Interview 013, Interview 016, Interview 018",Interview 014
+C1.3.2,AI Statistical Model Optimization,Interview 003,Identified through global analysis,3,"Interview 003, Interview 009, Interview 012",Interview 014
+C1.3.3,AI Data Wrangling,Interview 012,Identified through global analysis,4,"Interview 012, Interview 013, Interview 014, Interview 018",Interview 014
+C1.3.4,AI Entity Resolution,Interview 012,Identified through global analysis,1,Interview 012,Interview 014
+C1.4,Research Workflow Automation,Interview 003,Identified through global analysis,15,"Interview 003, Interview 004, Interview 005, Interview 006, Interview 007, Interview 008, Interview 009, Interview 010, Interview 011, Interview 012, Interview 013, Interview 014, Interview 015, Interview 016, Interview 018",Interview 014
+C1.4.1,AI Meeting Minutes,Interview 003,Identified through global analysis,4,"Interview 003, Interview 007, Interview 010, Interview 011",Interview 014
+C1.4.2,AI Proposal Writing,Interview 005,Identified through global analysis,7,"Interview 005, Interview 008, Interview 009, Interview 010, Interview 011, Interview 013, Interview 018",Interview 014
+C1.4.3,AI Report Generation/Editing,Interview 003,Identified through global analysis,7,"Interview 003, Interview 007, Interview 010, Interview 011, Interview 013, Interview 015, Interview 016",Interview 014
+C1.4.4,AI Dissemination/Communication,Interview 009,Identified through global analysis,3,"Interview 009, Interview 010, Interview 011",Interview 014
+C1.4.5,AI Wargaming/TTX Augmentation,Interview 002,Identified through global analysis,4,"Interview 002, Interview 007, Interview 010, Interview 011",Interview 014
+C1.4.6,AI Forecasting,Interview 002,Identified through global analysis,3,"Interview 002, Interview 007, Interview 017",Interview 014
+C1.4.7,AI Survey Design,Interview 009,Identified through global analysis,3,"Interview 009, Interview 014, Interview 016",Interview 014
+C1.4.8,AI Partner Identification,Interview 001,Identified through global analysis,2,"Interview 001, Interview 016",Interview 014
+C1.4.9,AI 508 Compliance,Interview 016,Identified through global analysis,1,Interview 016,Interview 014
+C2.1,Accuracy and Trust,Interview 001,Identified through global analysis,14,"Interview 001, Interview 003, Interview 004, Interview 005, Interview 006, Interview 007, Interview 008, Interview 009, Interview 010, Interview 011, Interview 012, Interview 013, Interview 014, Interview 016",Interview 014
+C2.1.1,Hallucinations,Interview 001,Identified through global analysis,8,"Interview 001, Interview 004, Interview 005, Interview 008, Interview 009, Interview 010, Interview 011, Interview 016",Interview 014
+C2.1.2,Nuance and Context Loss,Interview 001,Identified through global analysis,7,"Interview 001, Interview 004, Interview 005, Interview 008, Interview 009, Interview 012, Interview 013",Interview 014
+C2.1.3,Bias in AI,Interview 008,Identified through global analysis,2,"Interview 008, Interview 014",Interview 014
+C2.1.4,Over-reliance/Blind Trust,Interview 005,Identified through global analysis,5,"Interview 005, Interview 008, Interview 013, Interview 016, Interview 018",Interview 014
+C2.2,Ethical and Methodological Concerns,Interview 003,Identified through global analysis,10,"Interview 003, Interview 004, Interview 005, Interview 006, Interview 008, Interview 009, Interview 012, Interview 013, Interview 014, Interview 018",Interview 014
+C2.2.1,Data Privacy/CUI,Interview 004,Identified through global analysis,6,"Interview 004, Interview 006, Interview 012, Interview 013, Interview 014, Interview 015",Interview 014
+C2.2.2,Consent for Data Use,Interview 014,Identified through global analysis,1,Interview 014,Interview 014
+C2.2.3,Impact on Researcher Skill Development,Interview 002,Identified through global analysis,4,"Interview 002, Interview 005, Interview 008, Interview 018",Interview 014
+C2.2.4,Loss of Data Intimacy,Interview 001,Identified through global analysis,4,"Interview 001, Interview 013, Interview 014, Interview 018",Interview 014
+C2.2.5,Publication Validity,Interview 009,Identified through global analysis,2,"Interview 009, Interview 014",Interview 014
+C2.3,Institutional Barriers,Interview 002,Identified through global analysis,12,"Interview 002, Interview 003, Interview 004, Interview 005, Interview 006, Interview 007, Interview 009, Interview 010, Interview 011, Interview 012, Interview 015, Interview 018",Interview 014
+C2.3.1,Outdated Internal Tools,Interview 003,Identified through global analysis,7,"Interview 003, Interview 005, Interview 006, Interview 007, Interview 010, Interview 011, Interview 015",Interview 014
+C2.3.2,Lack of Clear Guidance,Interview 002,Identified through global analysis,8,"Interview 002, Interview 004, Interview 005, Interview 008, Interview 012, Interview 014, Interview 016, Interview 018",Interview 014
+C2.3.3,Data Silos/Fragmentation,Interview 012,Identified through global analysis,3,"Interview 012, Interview 013, Interview 018",Interview 014
+C2.3.4,Cost/Resource Constraints,Interview 001,Identified through global analysis,4,"Interview 001, Interview 009, Interview 012, Interview 018",Interview 014
+C2.3.5,Classified Environment Limitations,Interview 003,Identified through global analysis,4,"Interview 003, Interview 004, Interview 010, Interview 011",Interview 014
+C3.1,Time Savings,Interview 001,Identified through global analysis,14,"Interview 001, Interview 002, Interview 003, Interview 004, Interview 005, Interview 007, Interview 008, Interview 009, Interview 010, Interview 011, Interview 012, Interview 013, Interview 016, Interview 018",Interview 014
+C3.2,Capacity Augmentation,Interview 001,Identified through global analysis,7,"Interview 001, Interview 004, Interview 006, Interview 012, Interview 017, Interview 018",Interview 014
+C3.3,New Research Avenues,Interview 006,Identified through global analysis,5,"Interview 006, Interview 007, Interview 009, Interview 014, Interview 018",Interview 014
+C3.4,Enhanced Quality,Interview 003,Identified through global analysis,5,"Interview 003, Interview 004, Interview 012, Interview 016, Interview 018",Interview 014
+C4.1,Training and Education,Interview 005,Identified through global analysis,6,"Interview 005, Interview 008, Interview 009, Interview 014, Interview 016, Interview 018",Interview 014
+C4.2,Incentive Structures,Interview 007,Identified through global analysis,3,"Interview 007, Interview 012, Interview 018",Interview 014
+C4.3,Build vs. Buy vs. License,Interview 007,Identified through global analysis,3,"Interview 007, Interview 012, Interview 017",Interview 014
+C4.4,Strategic Roadmap,Interview 012,Identified through global analysis,1,Interview 012,Interview 014
+C4.5,Skunkworks/Experimentation,Interview 016,Identified through global analysis,2,"Interview 016, Interview 018",Interview 014
+C5.1,Data Wrangling,Interview 004,Identified through global analysis,5,"Interview 004, Interview 005, Interview 012, Interview 013, Interview 018",Interview 014
+C5.2,Data Lakes,Interview 012,Identified through global analysis,2,"Interview 012, Interview 018",Interview 014
+C5.3,Data Standardization,Interview 002,Identified through global analysis,3,"Interview 002, Interview 006, Interview 012",Interview 014
+C5.4,Data Access,Interview 001,Identified through global analysis,5,"Interview 001, Interview 006, Interview 012, Interview 013, Interview 018",Interview 014
+C1,AI Applications,Interview 001,Identified through global analysis,18,"Interview 001, Interview 002, Interview 003, Interview 004, Interview 005, Interview 006, Interview 007, Interview 008, Interview 009, Interview 010, Interview 011, Interview 012, Interview 013, Interview 014, Interview 015, Interview 016, Interview 017, Interview 018",Interview 014
+C2,Challenges and Risks,Interview 001,Identified through global analysis,18,"Interview 001, Interview 002, Interview 003, Interview 004, Interview 005, Interview 006, Interview 007, Interview 008, Interview 009, Interview 010, Interview 011, Interview 012, Interview 013, Interview 014, Interview 015, Interview 016, Interview 017, Interview 018",Interview 014
+C3,Opportunities and Benefits,Interview 001,Identified through global analysis,18,"Interview 001, Interview 002, Interview 003, Interview 004, Interview 005, Interview 006, Interview 007, Interview 008, Interview 009, Interview 010, Interview 011, Interview 012, Interview 013, Interview 014, Interview 015, Interview 016, Interview 017, Interview 018",Interview 014
+C4,Institutional Adoption,Interview 002,Identified through global analysis,14,"Interview 002, Interview 003, Interview 004, Interview 005, Interview 006, Interview 007, Interview 008, Interview 009, Interview 010, Interview 011, Interview 012, Interview 014, Interview 016, Interview 018",Interview 014
+C5,Data Management,Interview 001,Identified through global analysis,10,"Interview 001, Interview 004, Interview 005, Interview 006, Interview 012, Interview 013, Interview 014, Interview 015, Interview 016, Interview 018",Interview 014

@@ -2,22 +2,20 @@
 ## Comprehensive Analysis Report
 
 **Generated:** July 29, 2025  
-**Analysis Period:** 397.6 seconds  
+**Analysis Period:** 440.0 seconds  
 **Research Methodology:** LLM-Native Qualitative Coding with Grounded Theory  
 
 ---
 
 ## Executive Summary
 
-This report presents a comprehensive qualitative analysis of **18 interviews** examining how AI methods are being integrated into qualitative research practices at RAND Corporation. Using an innovative LLM-native approach that processes all interviews simultaneously (leveraging the 1M+ token context window), we identified **5 major themes**, **71 hierarchical codes**, and **25 exemplar quotes** with full traceability.
+This report presents a comprehensive qualitative analysis of **18 interviews** examining how AI methods are being integrated into qualitative research practices at RAND Corporation. Using an innovative LLM-native approach that processes all interviews simultaneously (leveraging the 1M+ token context window), we identified **5 major themes**, **62 hierarchical codes**, and **10 exemplar quotes** with full traceability.
 
 ### Key Findings
 
 **Research Question:** How are AI methods being integrated into qualitative research practices?
 
-**Emergent Theory:** AI integration into qualitative research practices at RAND is characterized by a tension between the immense opportunities for efficiency and enhanced capacity, and significant challenges related to accuracy, ethical concerns, and the potential erosion of core human research skills. While AI is increasingly being adopted for rote tasks like transcription, coding, and document summarization, its application for higher-level analytical and interpretive work is met with skepticism due to concerns about nuance, hallucinations, and the 'black box' nature of models.
-
-The organizational strategy for AI adoption at RAND is fragmented, lacking clear, centralized guidance, sufficient training, and consistent access to cutting-edge tools, leading to uneven adoption. A key emergent theory is that successful AI integration requires a shift from viewing AI as an "easy button" to a "better button", necessitating a human-AI hybrid model where AI augments, rather than replaces, human expertise, and where strategic investments in data infrastructure, targeted training, and clear ethical protocols are prioritized to maintain RAND's competitive edge and research integrity.
+**Emergent Theory:** The integration of AI into qualitative research practices at RAND is characterized by a dual imperative: leveraging AI for efficiency and scale in routine, labor-intensive tasks, while simultaneously navigating significant challenges related to accuracy, trust, ethical implications, and institutional inertia. While AI offers transformative potential for data management, analysis, and dissemination, its 'black box' nature and propensity for 'hallucinations' necessitate a human-in-the-loop approach to preserve methodological rigor, nuance, and the 'intimacy' with data crucial for generating credible insights. Successful adoption hinges on a strategic institutional roadmap that prioritizes targeted training, clear ethical guidelines, and a shift towards viewing AI as a 'Co-researcher' or 'better button' rather than a complete replacement for human expertise, particularly in complex, context-dependent research domains.
 
 ---
 
@@ -43,15 +41,15 @@ This analysis employed an innovative methodology that leverages Large Language M
 └─────────────────┘     └──────────────────┘     └─────────────────┘
         │                        │                        │
         ▼                        ▼                        ▼
-   127,738 words            5 themes               25 exemplar quotes
-   170,317 tokens           71 codes               Full traceability
+   127,738 words            5 themes               10 exemplar quotes
+   170,317 tokens           62 codes               Full traceability
 ```
 
 ### Processing Statistics
 
 - **Total Words Analyzed:** 127,738 (~7,096 words per interview)
 - **Token Usage:** 170,317 tokens (1 token ≈ 0.75 words)
-- **Processing Time:** 397.6 seconds (~6.6 minutes)
+- **Processing Time:** 440.0 seconds (~7.3 minutes)
 - **Analysis Calls:** 2 LLM calls total (vs. traditional 36-40 calls)
 - **Coverage:** 100% of interviews represented in all themes
 
@@ -63,11 +61,11 @@ This analysis employed an innovative methodology that leverages Large Language M
 
 | Theme ID | Theme Name | Prevalence | Interviews | Confidence |
 |----------|------------|------------|------------|------------|
-| THEME_001 | AI Applications and Use Cases | 100% | 18/18 | 95% |
-| THEME_002 | Challenges and Risks of AI Adoption | 100% | 18/18 | 95% |
-| THEME_003 | Opportunities and Benefits of AI Integration | 100% | 18/18 | 95% |
-| THEME_004 | AI Adoption and Implementation Strategy at Rand | 100% | 18/18 | 95% |
-| THEME_005 | Research Methods Overview | 100% | 18/18 | 90% |
+| T1 | AI Applications in Research | 100% | 18/18 | 95% |
+| T2 | Challenges and Risks of AI Adoption | 100% | 18/18 | 90% |
+| T3 | Opportunities for Efficiency and Innovation | 100% | 18/18 | 90% |
+| T4 | Institutional Adoption and Strategy | 78% | 14/18 | 85% |
+| T5 | Data Management and Quality | 56% | 10/18 | 80% |
 
 ### Key Insights by Theme
 
@@ -112,7 +110,7 @@ This analysis employed an innovative methodology that leverages Large Language M
 
 ## Code Structure and Hierarchy
 
-The analysis identified **71 codes** organized in a hierarchical structure with parent-child relationships. Key code families include:
+The analysis identified **62 codes** organized in a hierarchical structure with parent-child relationships. Key code families include:
 
 ### AI Applications (CODE_001 family)
 - AI_Qualitative_Analysis (12 mentions)

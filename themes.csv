@@ -1,6 +1,6 @@
 theme_id,name,prevalence,confidence,interview_count
-THEME_001,AI Applications and Use Cases,1.0,0.95,18
-THEME_002,Challenges and Risks of AI Adoption,1.0,0.95,18
-THEME_003,Opportunities and Benefits of AI Integration,1.0,0.95,18
-THEME_004,AI Adoption and Implementation Strategy at Rand,1.0,0.95,18
-THEME_005,Research Methods Overview,1.0,0.9,18
+T1,AI Applications in Research,1.0,0.95,18
+T2,Challenges and Risks of AI Adoption,1.0,0.9,18
+T3,Opportunities for Efficiency and Innovation,1.0,0.9,18
+T4,Institutional Adoption and Strategy,0.78,0.85,14
+T5,Data Management and Quality,0.56,0.8,10

@@ -1,0 +1,4646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Qualitative Coding Analysis - How are AI methods being integrated into qualitative research practices?</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Embedded CSS */
+        
+        :root {
+            --primary: #2563eb;
+            --secondary: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #06b6d4;
+            --dark: #1f2937;
+            --light: #f9fafb;
+            --border: #e5e7eb;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: var(--dark);
+            background: var(--light);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Navigation */
+        .nav-tabs {
+            display: flex;
+            background: white;
+            border-bottom: 2px solid var(--border);
+            padding: 0 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .nav-tab {
+            padding: 1rem 1.5rem;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+            font-weight: 500;
+            color: #6b7280;
+        }
+
+        .nav-tab:hover {
+            color: var(--primary);
+        }
+
+        .nav-tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        /* Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #6b7280;
+            margin-top: 0.5rem;
+        }
+
+        /* Data tables */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .data-table th {
+            background: var(--dark);
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 500;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .data-table td {
+            padding: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .data-table tr:hover {
+            background: var(--light);
+        }
+
+        /* Cards */
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* Quotes */
+        .quote-card {
+            background: white;
+            border-left: 4px solid var(--primary);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 6px 6px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .quote-card:hover {
+            transform: translateX(4px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .quote-text {
+            font-style: italic;
+            margin-bottom: 0.5rem;
+        }
+
+        .quote-meta {
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        /* Tags */
+        .tag {
+            display: inline-block;
+            padding: 4px 12px;
+            margin: 2px;
+            background: var(--light);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tag:hover {
+            background: var(--primary);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .tag-theme {
+            background: #dbeafe;
+            border-color: var(--primary);
+        }
+
+        .tag-code {
+            background: #d1fae5;
+            border-color: var(--secondary);
+        }
+
+        /* Search */
+        .search-box {
+            width: 100%;
+            padding: 12px 20px;
+            font-size: 16px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            margin: 1rem 0;
+            outline: none;
+        }
+
+        .search-box:focus {
+            border-color: var(--primary);
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+            transform: translateY(-1px);
+        }
+
+        /* Tooltips */
+        [data-tooltip] {
+            position: relative;
+            cursor: help;
+            border-bottom: 2px dotted var(--primary);
+        }
+
+        [data-tooltip]:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--dark);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            white-space: nowrap;
+            z-index: 1000;
+            max-width: 300px;
+        }
+
+        /* Expandable */
+        .expandable {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin: 1rem 0;
+            background: white;
+            overflow: hidden;
+        }
+
+        .expandable-header {
+            padding: 1rem;
+            background: var(--light);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+        }
+
+        .expandable-header:hover {
+            background: #e5e7eb;
+        }
+
+        .expandable-content {
+            padding: 1rem;
+            display: none;
+        }
+
+        .expandable.active .expandable-content {
+            display: block;
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #6b7280;
+        }
+
+        .spinner {
+            border: 3px solid var(--light);
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <div class="nav-tabs">
+        <div class="nav-tab active" onclick="showTab('overview')">
+            <i class="fas fa-home"></i> Overview
+        </div>
+        <div class="nav-tab" onclick="showTab('themes')">
+            <i class="fas fa-layer-group"></i> Themes (5)
+        </div>
+        <div class="nav-tab" onclick="showTab('codes')">
+            <i class="fas fa-tags"></i> Codes (62)
+        </div>
+        <div class="nav-tab" onclick="showTab('quotes')">
+            <i class="fas fa-quote-right"></i> Quotes (10)
+        </div>
+        <div class="nav-tab" onclick="showTab('analysis')">
+            <i class="fas fa-chart-bar"></i> Analysis
+        </div>
+        <div class="nav-tab" onclick="showTab('export')">
+            <i class="fas fa-download"></i> Export
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Content will be dynamically generated -->
+        <div id="content"></div>
+    </div>
+
+    <script>
+        // Embedded data
+        const analysisData = {
+  "themes": [
+    {
+      "theme_id": "T1",
+      "name": "AI Applications in Research",
+      "prevalence": "1.0",
+      "confidence": "0.95",
+      "interview_count": "18"
+    },
+    {
+      "theme_id": "T2",
+      "name": "Challenges and Risks of AI Adoption",
+      "prevalence": "1.0",
+      "confidence": "0.9",
+      "interview_count": "18"
+    },
+    {
+      "theme_id": "T3",
+      "name": "Opportunities for Efficiency and Innovation",
+      "prevalence": "1.0",
+      "confidence": "0.9",
+      "interview_count": "18"
+    },
+    {
+      "theme_id": "T4",
+      "name": "Institutional Adoption and Strategy",
+      "prevalence": "0.78",
+      "confidence": "0.85",
+      "interview_count": "14"
+    },
+    {
+      "theme_id": "T5",
+      "name": "Data Management and Quality",
+      "prevalence": "0.56",
+      "confidence": "0.8",
+      "interview_count": "10"
+    }
+  ],
+  "codes": [
+    {
+      "code_id": "C1",
+      "name": "AI Applications",
+      "definition": "Specific applications of AI tools and models across various research methodologies.",
+      "frequency": "18",
+      "first_appearance": "Interview 001",
+      "theme_id": "T1",
+      "parent_code_id": "",
+      "hierarchy_level": "0"
+    },
+    {
+      "code_id": "C2",
+      "name": "Challenges and Risks",
+      "definition": "The difficulties, limitations, and potential negative consequences associated with integrating AI into research practices.",
+      "frequency": "18",
+      "first_appearance": "Interview 001",
+      "theme_id": "T2",
+      "parent_code_id": "",
+      "hierarchy_level": "0"
+    },
+    {
+      "code_id": "C3",
+      "name": "Opportunities and Benefits",
+      "definition": "The benefits and new possibilities that AI offers for enhancing research processes and outcomes.",
+      "frequency": "18",
+      "first_appearance": "Interview 001",
+      "theme_id": "T3",
+      "parent_code_id": "",
+      "hierarchy_level": "0"
+    },
+    {
+      "code_id": "C4",
+      "name": "Institutional Adoption",
+      "definition": "Strategies and considerations for RAND to effectively and responsibly integrate AI into its institutional practices.",
+      "frequency": "14",
+      "first_appearance": "Interview 002",
+      "theme_id": "T4",
+      "parent_code_id": "",
+      "hierarchy_level": "0"
+    },
+    {
+      "code_id": "C5",
+      "name": "Data Management",
+      "definition": "Aspects related to the collection, organization, and quality of data in the context of AI-driven research.",
+      "frequency": "10",
+      "first_appearance": "Interview 001",
+      "theme_id": "T5",
+      "parent_code_id": "",
+      "hierarchy_level": "0"
+    },
+    {
+      "code_id": "C1.1",
+      "name": "  Qualitative Analysis Automation",
+      "definition": "Automation of qualitative research tasks using AI.",
+      "frequency": "15",
+      "first_appearance": "Interview 001",
+      "theme_id": "T1",
+      "parent_code_id": "C1",
+      "hierarchy_level": "1"
+    },
+    {
+      "code_id": "C1.2",
+      "name": "  Literature Review Automation",
+      "definition": "Automation of tasks involved in conducting literature reviews using AI.",
+      "frequency": "15",
+      "first_appearance": "Interview 001",
+      "theme_id": "T1",
+      "parent_code_id": "C1",
+      "hierarchy_level": "1"
+    },
+    {
+      "code_id": "C1.3",
+      "name": "  Quantitative Analysis Automation",
+      "definition": "Automation of quantitative research tasks using AI.",
+      "frequency": "10",
+      "first_appearance": "Interview 001",
+      "theme_id": "T1",
+      "parent_code_id": "C1",
+      "hierarchy_level": "1"
+    },
+    {
+      "code_id": "C1.4",
+      "name": "  Research Workflow Automation",
+      "definition": "Automation of general research workflow tasks using AI.",
+      "frequency": "15",
+      "first_appearance": "Interview 003",
+      "theme_id": "T1",
+      "parent_code_id": "C1",
+      "hierarchy_level": "1"
+    },
+    {
+      "code_id": "C2.1",
+      "name": "  Accuracy and Trust",
+      "definition": "Concerns related to the accuracy, reliability, and trustworthiness of AI outputs.",
+      "frequency": "14",
+      "first_appearance": "Interview 001",
+      "theme_id": "T2",
+      "parent_code_id": "C2",
+      "hierarchy_level": "1"
+    },
+    {
+      "code_id": "C2.2",
+      "name": "  Ethical and Methodological Concerns",
+      "definition": "Ethical dilemmas and methodological challenges arising from AI integration in research.",
+      "frequency": "10",
+      "first_appearance": "Interview 003",
+      "theme_id": "T2",
+      "parent_code_id": "C2",
+      "hierarchy_level": "1"
+    },
+    {
+      "code_id": "C2.3",
+      "name": "  Institutional Barriers",
+      "definition": "Organizational and systemic obstacles hindering AI adoption at RAND.",
+      "frequency": "12",
+      "first_appearance": "Interview 002",
+      "theme_id": "T2",
+      "parent_code_id": "C2",
+      "hierarchy_level": "1"
+    },
+    {
+      "code_id": "C3.1",
+      "name": "  Time Savings",
+      "definition": "AI's ability to significantly reduce the time required for various research tasks.",
+      "frequency": "14",
+      "first_appearance": "Interview 001",
+      "theme_id": "T3",
+      "parent_code_id": "C3",
+      "hierarchy_level": "1"
+    },
+    {
+      "code_id": "C3.2",
+      "name": "  Capacity Augmentation",
+      "definition": "AI's potential to increase the scale or scope of research activities beyond human capacity.",
+      "frequency": "7",
+      "first_appearance": "Interview 001",
+      "theme_id": "T3",
+      "parent_code_id": "C3",
+      "hierarchy_level": "1"
+    },
+    {
+      "code_id": "C3.3",
+      "name": "  New Research Avenues",
+      "definition": "AI enabling new types of research questions, methodologies, or insights previously not feasible.",
+      "frequency": "5",
+      "first_appearance": "Interview 006",
+      "theme_id": "T3",
+      "parent_code_id": "C3",
+      "hierarchy_level": "1"
+    },
+    {
+      "code_id": "C3.4",
+      "name": "  Enhanced Quality",
+      "definition": "AI's ability to improve the quality, rigor, or consistency of research outputs.",
+      "frequency": "5",
+      "first_appearance": "Interview 003",
+      "theme_id": "T3",
+      "parent_code_id": "C3",
+      "hierarchy_level": "1"
+    },
+    {
+      "code_id": "C4.1",
+      "name": "  Training and Education",
+      "definition": "The need for and types of training and educational initiatives to promote AI literacy and responsible use among researchers.",
+      "frequency": "6",
+      "first_appearance": "Interview 005",
+      "theme_id": "T4",
+      "parent_code_id": "C4",
+      "hierarchy_level": "1"
+    },
+    {
+      "code_id": "C4.2",
+      "name": "  Incentive Structures",
+      "definition": "Mechanisms to incentivize AI adoption, such as linking AI use to project funding or researcher coverage.",
+      "frequency": "3",
+      "first_appearance": "Interview 007",
+      "theme_id": "T4",
+      "parent_code_id": "C4",
+      "hierarchy_level": "1"
+    },
+    {
+      "code_id": "C4.3",
+      "name": "  Build vs. Buy vs. License",
+      "definition": "The strategic decision for RAND to develop its own AI tools versus acquiring or licensing commercial solutions.",
+      "frequency": "3",
+      "first_appearance": "Interview 007",
+      "theme_id": "T4",
+      "parent_code_id": "C4",
+      "hierarchy_level": "1"
+    },
+    {
+      "code_id": "C4.4",
+      "name": "  Strategic Roadmap",
+      "definition": "The importance of a clear, high-level strategy and roadmap for AI integration across RAND.",
+      "frequency": "1",
+      "first_appearance": "Interview 012",
+      "theme_id": "T4",
+      "parent_code_id": "C4",
+      "hierarchy_level": "1"
+    },
+    {
+      "code_id": "C4.5",
+      "name": "  Skunkworks/Experimentation",
+      "definition": "The concept of creating dedicated spaces or teams for AI experimentation without immediate brand risk.",
+      "frequency": "2",
+      "first_appearance": "Interview 016",
+      "theme_id": "T4",
+      "parent_code_id": "C4",
+      "hierarchy_level": "1"
+    },
+    {
+      "code_id": "C5.1",
+      "name": "  Data Wrangling",
+      "definition": "The process of cleaning, transforming, and preparing raw data for analysis.",
+      "frequency": "5",
+      "first_appearance": "Interview 004",
+      "theme_id": "T5",
+      "parent_code_id": "C5",
+      "hierarchy_level": "1"
+    },
+    {
+      "code_id": "C5.2",
+      "name": "  Data Lakes",
+      "definition": "Large, unstructured repositories of raw data that can be used for large-scale AI analysis.",
+      "frequency": "2",
+      "first_appearance": "Interview 012",
+      "theme_id": "T5",
+      "parent_code_id": "C5",
+      "hierarchy_level": "1"
+    },
+    {
+      "code_id": "C5.3",
+      "name": "  Data Standardization",
+      "definition": "The process of ensuring data consistency and compatibility across different sources and formats.",
+      "frequency": "3",
+      "first_appearance": "Interview 002",
+      "theme_id": "T5",
+      "parent_code_id": "C5",
+      "hierarchy_level": "1"
+    },
+    {
+      "code_id": "C5.4",
+      "name": "  Data Access",
+      "definition": "Challenges and opportunities related to obtaining and utilizing relevant data for research.",
+      "frequency": "5",
+      "first_appearance": "Interview 001",
+      "theme_id": "T5",
+      "parent_code_id": "C5",
+      "hierarchy_level": "1"
+    },
+    {
+      "code_id": "C1.1.1",
+      "name": "    AI Transcription",
+      "definition": "Using AI for transcribing audio recordings of interviews or meetings.",
+      "frequency": "7",
+      "first_appearance": "Interview 001",
+      "theme_id": "T1",
+      "parent_code_id": "C1.1",
+      "hierarchy_level": "2"
+    },
+    {
+      "code_id": "C1.1.2",
+      "name": "    AI Coding",
+      "definition": "Using AI tools to code qualitative data, such as interview transcripts or open-ended survey responses.",
+      "frequency": "12",
+      "first_appearance": "Interview 001",
+      "theme_id": "T1",
+      "parent_code_id": "C1.1",
+      "hierarchy_level": "2"
+    },
+    {
+      "code_id": "C1.1.3",
+      "name": "    AI Thematic Analysis",
+      "definition": "Using AI to identify and group themes from qualitative data, often inductively.",
+      "frequency": "6",
+      "first_appearance": "Interview 001",
+      "theme_id": "T1",
+      "parent_code_id": "C1.1",
+      "hierarchy_level": "2"
+    },
+    {
+      "code_id": "C1.1.4",
+      "name": "    AI De-identification",
+      "definition": "Using AI for de-identification or anonymization of sensitive data in qualitative transcripts.",
+      "frequency": "3",
+      "first_appearance": "Interview 004",
+      "theme_id": "T1",
+      "parent_code_id": "C1.1",
+      "hierarchy_level": "2"
+    },
+    {
+      "code_id": "C1.1.5",
+      "name": "    AI Quote Tracing",
+      "definition": "Using AI to trace specific quotes or content back to their original source in interviews or documents.",
+      "frequency": "1",
+      "first_appearance": "Interview 003",
+      "theme_id": "T1",
+      "parent_code_id": "C1.1",
+      "hierarchy_level": "2"
+    },
+    {
+      "code_id": "C1.2.1",
+      "name": "    AI Search Strategy",
+      "definition": "Using AI to develop or refine search strategies for literature reviews, including keyword generation and Boolean logic.",
+      "frequency": "3",
+      "first_appearance": "Interview 001",
+      "theme_id": "T1",
+      "parent_code_id": "C1.2",
+      "hierarchy_level": "2"
+    },
+    {
+      "code_id": "C1.2.2",
+      "name": "    AI Document Summarization",
+      "definition": "Using AI to summarize academic papers, reports, or other documents for literature reviews.",
+      "frequency": "7",
+      "first_appearance": "Interview 003",
+      "theme_id": "T1",
+      "parent_code_id": "C1.2",
+      "hierarchy_level": "2"
+    },
+    {
+      "code_id": "C1.2.3",
+      "name": "    AI Data Extraction",
+      "definition": "Using AI to extract specific data points, facts, or information from documents for structured literature reviews or databases.",
+      "frequency": "6",
+      "first_appearance": "Interview 003",
+      "theme_id": "T1",
+      "parent_code_id": "C1.2",
+      "hierarchy_level": "2"
+    },
+    {
+      "code_id": "C1.2.4",
+      "name": "    AI Gap Identification",
+      "definition": "Using AI to identify gaps in existing literature or research, particularly for proposal development.",
+      "frequency": "2",
+      "first_appearance": "Interview 009",
+      "theme_id": "T1",
+      "parent_code_id": "C1.2",
+      "hierarchy_level": "2"
+    },
+    {
+      "code_id": "C1.2.5",
+      "name": "    AI Source Validation",
+      "definition": "Using AI to validate the accuracy and credibility of sources or information found during literature reviews.",
+      "frequency": "2",
+      "first_appearance": "Interview 005",
+      "theme_id": "T1",
+      "parent_code_id": "C1.2",
+      "hierarchy_level": "2"
+    },
+    {
+      "code_id": "C1.3.1",
+      "name": "    AI Code Generation/Correction",
+      "definition": "Using AI to generate, correct, or optimize statistical programming code (e.g., R, Python, Stata).",
+      "frequency": "6",
+      "first_appearance": "Interview 003",
+      "theme_id": "T1",
+      "parent_code_id": "C1.3",
+      "hierarchy_level": "2"
+    },
+    {
+      "code_id": "C1.3.2",
+      "name": "    AI Statistical Model Optimization",
+      "definition": "Using AI to optimize or refine statistical models, including parameter tuning and model selection.",
+      "frequency": "3",
+      "first_appearance": "Interview 003",
+      "theme_id": "T1",
+      "parent_code_id": "C1.3",
+      "hierarchy_level": "2"
+    },
+    {
+      "code_id": "C1.3.3",
+      "name": "    AI Data Wrangling",
+      "definition": "Using AI to assist with data wrangling, cleaning, merging, and formatting large datasets.",
+      "frequency": "4",
+      "first_appearance": "Interview 012",
+      "theme_id": "T1",
+      "parent_code_id": "C1.3",
+      "hierarchy_level": "2"
+    },
+    {
+      "code_id": "C1.3.4",
+      "name": "    AI Entity Resolution",
+      "definition": "Using AI or machine learning for entity resolution, linking records across disparate datasets.",
+      "frequency": "1",
+      "first_appearance": "Interview 012",
+      "theme_id": "T1",
+      "parent_code_id": "C1.3",
+      "hierarchy_level": "2"
+    },
+    {
+      "code_id": "C1.4.1",
+      "name": "    AI Meeting Minutes",
+      "definition": "Using AI to transcribe, summarize, or extract key decisions and action items from meeting minutes.",
+      "frequency": "4",
+      "first_appearance": "Interview 003",
+      "theme_id": "T1",
+      "parent_code_id": "C1.4",
+      "hierarchy_level": "2"
+    },
+    {
+      "code_id": "C1.4.2",
+      "name": "    AI Proposal Writing",
+      "definition": "Using AI to assist with drafting, structuring, or generating content for research proposals.",
+      "frequency": "7",
+      "first_appearance": "Interview 005",
+      "theme_id": "T1",
+      "parent_code_id": "C1.4",
+      "hierarchy_level": "2"
+    },
+    {
+      "code_id": "C1.4.3",
+      "name": "    AI Report Generation/Editing",
+      "definition": "Using AI for editing, proofreading, formatting, or generating sections of research reports.",
+      "frequency": "7",
+      "first_appearance": "Interview 003",
+      "theme_id": "T1",
+      "parent_code_id": "C1.4",
+      "hierarchy_level": "2"
+    },
+    {
+      "code_id": "C1.4.4",
+      "name": "    AI Dissemination/Communication",
+      "definition": "Using AI to assist with disseminating research findings, such as creating podcasts, graphics, or lay summaries.",
+      "frequency": "3",
+      "first_appearance": "Interview 009",
+      "theme_id": "T1",
+      "parent_code_id": "C1.4",
+      "hierarchy_level": "2"
+    },
+    {
+      "code_id": "C1.4.5",
+      "name": "    AI Wargaming/TTX Augmentation",
+      "definition": "Using AI to conceptualize, adjudicate, or augment player roles in wargames and tabletop exercises.",
+      "frequency": "4",
+      "first_appearance": "Interview 002",
+      "theme_id": "T1",
+      "parent_code_id": "C1.4",
+      "hierarchy_level": "2"
+    },
+    {
+      "code_id": "C1.4.6",
+      "name": "    AI Forecasting",
+      "definition": "Using AI models to assist with forecasting, including scenario generation and training on forecaster data.",
+      "frequency": "3",
+      "first_appearance": "Interview 002",
+      "theme_id": "T1",
+      "parent_code_id": "C1.4",
+      "hierarchy_level": "2"
+    },
+    {
+      "code_id": "C1.4.7",
+      "name": "    AI Survey Design",
+      "definition": "Using AI to assist with designing survey instruments or generating synthetic survey populations.",
+      "frequency": "3",
+      "first_appearance": "Interview 009",
+      "theme_id": "T1",
+      "parent_code_id": "C1.4",
+      "hierarchy_level": "2"
+    },
+    {
+      "code_id": "C1.4.8",
+      "name": "    AI Partner Identification",
+      "definition": "Using AI to identify potential research partners or collaborators.",
+      "frequency": "2",
+      "first_appearance": "Interview 001",
+      "theme_id": "T1",
+      "parent_code_id": "C1.4",
+      "hierarchy_level": "2"
+    },
+    {
+      "code_id": "C1.4.9",
+      "name": "    AI 508 Compliance",
+      "definition": "Using AI to ensure research products comply with accessibility standards (e.g., 508 compliance).",
+      "frequency": "1",
+      "first_appearance": "Interview 016",
+      "theme_id": "T1",
+      "parent_code_id": "C1.4",
+      "hierarchy_level": "2"
+    },
+    {
+      "code_id": "C2.1.1",
+      "name": "    Hallucinations",
+      "definition": "AI generating false or non-existent information, such as fabricated citations or data.",
+      "frequency": "8",
+      "first_appearance": "Interview 001",
+      "theme_id": "T2",
+      "parent_code_id": "C2.1",
+      "hierarchy_level": "2"
+    },
+    {
+      "code_id": "C2.1.2",
+      "name": "    Nuance and Context Loss",
+      "definition": "AI's inability to capture subtle meanings, context, or complex nuances in data.",
+      "frequency": "7",
+      "first_appearance": "Interview 001",
+      "theme_id": "T2",
+      "parent_code_id": "C2.1",
+      "hierarchy_level": "2"
+    },
+    {
+      "code_id": "C2.1.3",
+      "name": "    Bias in AI",
+      "definition": "The potential for AI models to perpetuate or reify existing biases present in their training data or programming.",
+      "frequency": "2",
+      "first_appearance": "Interview 008",
+      "theme_id": "T2",
+      "parent_code_id": "C2.1",
+      "hierarchy_level": "2"
+    },
+    {
+      "code_id": "C2.1.4",
+      "name": "    Over-reliance/Blind Trust",
+      "definition": "Researchers blindly trusting AI outputs without sufficient verification or critical assessment.",
+      "frequency": "5",
+      "first_appearance": "Interview 005",
+      "theme_id": "T2",
+      "parent_code_id": "C2.1",
+      "hierarchy_level": "2"
+    },
+    {
+      "code_id": "C2.2.1",
+      "name": "    Data Privacy/CUI",
+      "definition": "Concerns about handling sensitive or classified data (CUI) with AI tools, including data leakage and de-identification challenges.",
+      "frequency": "6",
+      "first_appearance": "Interview 004",
+      "theme_id": "T2",
+      "parent_code_id": "C2.2",
+      "hierarchy_level": "2"
+    },
+    {
+      "code_id": "C2.2.2",
+      "name": "    Consent for Data Use",
+      "definition": "The necessity of obtaining informed consent from research participants for their data to be used in AI training or analysis.",
+      "frequency": "1",
+      "first_appearance": "Interview 014",
+      "theme_id": "T2",
+      "parent_code_id": "C2.2",
+      "hierarchy_level": "2"
+    },
+    {
+      "code_id": "C2.2.3",
+      "name": "    Impact on Researcher Skill Development",
+      "definition": "The potential negative impact of AI automation on the skill development and career paths of junior researchers and RAs.",
+      "frequency": "4",
+      "first_appearance": "Interview 002",
+      "theme_id": "T2",
+      "parent_code_id": "C2.2",
+      "hierarchy_level": "2"
+    },
+    {
+      "code_id": "C2.2.4",
+      "name": "    Loss of Data Intimacy",
+      "definition": "The risk of losing deep understanding or 'intimacy' with the data when AI performs analysis, potentially missing emergent insights.",
+      "frequency": "4",
+      "first_appearance": "Interview 001",
+      "theme_id": "T2",
+      "parent_code_id": "C2.2",
+      "hierarchy_level": "2"
+    },
+    {
+      "code_id": "C2.2.5",
+      "name": "    Publication Validity",
+      "definition": "Concerns about the validity and publishability of research findings derived using AI tools, especially in academic journals.",
+      "frequency": "2",
+      "first_appearance": "Interview 009",
+      "theme_id": "T2",
+      "parent_code_id": "C2.2",
+      "hierarchy_level": "2"
+    },
+    {
+      "code_id": "C2.3.1",
+      "name": "    Outdated Internal Tools",
+      "definition": "RAND's internal AI tools (e.g., RANDCHAT, Muse) being perceived as less capable or outdated compared to commercial alternatives.",
+      "frequency": "7",
+      "first_appearance": "Interview 003",
+      "theme_id": "T2",
+      "parent_code_id": "C2.3",
+      "hierarchy_level": "2"
+    },
+    {
+      "code_id": "C2.3.2",
+      "name": "    Lack of Clear Guidance",
+      "definition": "Absence of clear policies, best practices, or guidance on appropriate AI tool usage within RAND.",
+      "frequency": "8",
+      "first_appearance": "Interview 002",
+      "theme_id": "T2",
+      "parent_code_id": "C2.3",
+      "hierarchy_level": "2"
+    },
+    {
+      "code_id": "C2.3.3",
+      "name": "    Data Silos/Fragmentation",
+      "definition": "Data being stored in fragmented, inconsistent systems across RAND, hindering large-scale AI analysis.",
+      "frequency": "3",
+      "first_appearance": "Interview 012",
+      "theme_id": "T2",
+      "parent_code_id": "C2.3",
+      "hierarchy_level": "2"
+    },
+    {
+      "code_id": "C2.3.4",
+      "name": "    Cost/Resource Constraints",
+      "definition": "Insufficient budget or resources allocated for AI tool subscriptions, training, or dedicated AI personnel.",
+      "frequency": "4",
+      "first_appearance": "Interview 001",
+      "theme_id": "T2",
+      "parent_code_id": "C2.3",
+      "hierarchy_level": "2"
+    },
+    {
+      "code_id": "C2.3.5",
+      "name": "    Classified Environment Limitations",
+      "definition": "Restrictions on using AI tools in classified or CUI environments, limiting adoption for sensitive projects.",
+      "frequency": "4",
+      "first_appearance": "Interview 003",
+      "theme_id": "T2",
+      "parent_code_id": "C2.3",
+      "hierarchy_level": "2"
+    }
+  ],
+  "quotes": [
+    {
+      "quote_id": "T004_Q1",
+      "text": "I think the biggest thing is that we need to have a strategy for how we're going to use AI. And I think that's still very much in flux. I think there's a lot of excitement about it, but there's also a lot of trepidation. And I think we need to figure out how we're going to integrate it into our r...",
+      "speaker_name": "Unknown",
+      "speaker_role": "Kandice Kapinos",
+      "interview_id": "INT_001",
+      "paragraph_number": "",
+      "char_offset": "",
+      "preceding_context": "",
+      "following_context": "",
+      "code_ids": "C4.1; C4.2",
+      "theme_ids": "T4",
+      "confidence_score": "0.0"
+    },
+    {
+      "quote_id": "T004_Q2",
+      "text": "And I think that's going to require a lot of investment in terms of infrastructure and also in terms of people. We need to have people who are experts in AI, who can help us to develop and implement these tools. And we also need to have a culture that's open to experimentation and innovation.",
+      "speaker_name": "Unknown",
+      "speaker_role": "Kandice Kapinos",
+      "interview_id": "INT_001",
+      "paragraph_number": "",
+      "char_offset": "",
+      "preceding_context": "",
+      "following_context": "",
+      "code_ids": "C4.1; C4.2",
+      "theme_ids": "T4",
+      "confidence_score": "0.0"
+    },
+    {
+      "quote_id": "T004_Q3",
+      "text": "I think one of the biggest challenges is going to be how we incentivize people to use AI. Because right now, it's not really built into our incentive structure. So people are not necessarily going to be rewarded for using AI in their research. And I think that's something we need to address.",
+      "speaker_name": "Unknown",
+      "speaker_role": "Kandice Kapinos",
+      "interview_id": "INT_001",
+      "paragraph_number": "",
+      "char_offset": "",
+      "preceding_context": "",
+      "following_context": "",
+      "code_ids": "C4.1; C4.2",
+      "theme_ids": "T4",
+      "confidence_score": "0.0"
+    },
+    {
+      "quote_id": "T004_Q4",
+      "text": "I think another challenge is going to be how we ensure that the AI tools we're using are fair and unbiased. Because there's a lot of concern about bias in AI, and we need to make sure that we're not perpetuating those biases in our research. And that's going to require a lot of careful thought an...",
+      "speaker_name": "Unknown",
+      "speaker_role": "Kandice Kapinos",
+      "interview_id": "INT_001",
+      "paragraph_number": "",
+      "char_offset": "",
+      "preceding_context": "",
+      "following_context": "",
+      "code_ids": "C4.1; C4.2",
+      "theme_ids": "T4",
+      "confidence_score": "0.0"
+    },
+    {
+      "quote_id": "T004_Q5",
+      "text": "Interview coding, something way better than Dedoose. We do a lot of interviews and the coding is uneven in quality. So it would be great if we had some standard way to do that and a tool to help with that.",
+      "speaker_name": "Unknown",
+      "speaker_role": "Participant",
+      "interview_id": "INT_002",
+      "paragraph_number": "",
+      "char_offset": "",
+      "preceding_context": "",
+      "following_context": "",
+      "code_ids": "C4.1; C4.2",
+      "theme_ids": "T4",
+      "confidence_score": "0.0"
+    },
+    {
+      "quote_id": "T005_Q1",
+      "text": "Interview coding, something way better than Dedoose. We do a lot of interviews and the coding is uneven in quality. So it would be great if we had some standard way to do that and a tool to help with that.",
+      "speaker_name": "Unknown",
+      "speaker_role": "Matthew Sergant",
+      "interview_id": "INT_001",
+      "paragraph_number": "",
+      "char_offset": "",
+      "preceding_context": "",
+      "following_context": "",
+      "code_ids": "C5.1; C5.2",
+      "theme_ids": "T5",
+      "confidence_score": "0.0"
+    },
+    {
+      "quote_id": "T005_Q2",
+      "text": "Something that helps us with graphics. It would be great if we were not one person deep on Evonne Crane. Great to make graphics that were accurate. I am trying to make one in chatgpt and it makes people without arms and I can\u2019t edit it. Something like that and really easy for people to use.",
+      "speaker_name": "Unknown",
+      "speaker_role": "Matthew Sergant",
+      "interview_id": "INT_001",
+      "paragraph_number": "",
+      "char_offset": "",
+      "preceding_context": "",
+      "following_context": "",
+      "code_ids": "C5.1; C5.2",
+      "theme_ids": "T5",
+      "confidence_score": "0.0"
+    },
+    {
+      "quote_id": "T005_Q3",
+      "text": "We have the forecasting stuff; Tony Vossalo is doing it and I don\u2019t understand what they are doing and how they are doing it but making forecasting more broadly applicable ... that is what we are all trying to do, see into the future. If we could forecast more accurately in the outset then we cou...",
+      "speaker_name": "Unknown",
+      "speaker_role": "Matthew Sergant",
+      "interview_id": "INT_001",
+      "paragraph_number": "",
+      "char_offset": "",
+      "preceding_context": "",
+      "following_context": "",
+      "code_ids": "C5.1; C5.2",
+      "theme_ids": "T5",
+      "confidence_score": "0.0"
+    },
+    {
+      "quote_id": "T005_Q4",
+      "text": "Work in methods center. Still trying to find the focus and greater methods. There is a very diverse set of people that use the method across RAND and people are not always in conversation with each other, calling it different things and not always in conversation with each other. So goal is to cr...",
+      "speaker_name": "Unknown",
+      "speaker_role": "Matthew Sergant",
+      "interview_id": "INT_001",
+      "paragraph_number": "",
+      "char_offset": "",
+      "preceding_context": "",
+      "following_context": "",
+      "code_ids": "C5.1; C5.2",
+      "theme_ids": "T5",
+      "confidence_score": "0.0"
+    },
+    {
+      "quote_id": "T005_Q5",
+      "text": "A lot of the applications of network analysis are embedded in research not involved in network analysis. So part of the challenge is to identify the people that should be brought into the community. They are putting together, ... trying to figure out how to become involved in network analysis. Pu...",
+      "speaker_name": "Unknown",
+      "speaker_role": "Matthew Sergant",
+      "interview_id": "INT_001",
+      "paragraph_number": "",
+      "char_offset": "",
+      "preceding_context": "",
+      "following_context": "",
+      "code_ids": "C5.1; C5.2",
+      "theme_ids": "T5",
+      "confidence_score": "0.0"
+    }
+  ],
+  "metadata": {
+    "processing_time_seconds": 440.0320234298706,
+    "interviews_analyzed": 18,
+    "total_tokens": 170317,
+    "llm_calls": 2,
+    "model": "gemini-2.5-flash"
+  },
+  "summary": {
+    "interviews": "18",
+    "tokens": "170,317",
+    "processing_time": "440.0 seconds",
+    "theme_count": "5",
+    "code_count": "62",
+    "quote_count": "10",
+    "research_question": "How are AI methods being integrated into qualitative research practices?",
+    "emergent_theory": "The integration of AI into qualitative research practices at RAND is characterized by a dual imperative: leveraging AI for efficiency and scale in routine, labor-intensive tasks, while simultaneously navigating significant challenges related to accuracy, trust, ethical implications, and institutional inertia. While AI offers transformative potential for data management, analysis, and dissemination, its 'black box' nature and propensity for 'hallucinations' necessitate a human-in-the-loop approach to preserve methodological rigor, nuance, and the 'intimacy' with data crucial for generating credible insights. Successful adoption hinges on a strategic institutional roadmap that prioritizes targeted training, clear ethical guidelines, and a shift towards viewing AI as a 'Co-researcher' or 'better button' rather than a complete replacement for human expertise, particularly in complex, context-dependent research domains."
+  },
+  "analysis": {},
+  "theme_analysis": [
+    {
+      "theme_id": "T1",
+      "theme_name": "AI Applications in Research",
+      "prevalence": "1.0",
+      "interview_count": "18",
+      "code_count": "28",
+      "exemplar_quote_1": "Luke Matthews: 'I've been using some of the LLM's for. And kind of more exploring some of their. Thematic coding and kind of ability to kind of group documents then generate text for me.' (Interview 0...",
+      "exemplar_quote_2": "Molly Dunnigan: 'Interview coding, something way better than Dedoose. We do a lot of interviews and the coding is uneven in quality. So it would be great if we had some standard way to do that and a t...",
+      "exemplar_quote_3": "Caroline Johnston: 'AI has been really helpful with writing like any type of code I write primarily in Python... it just helped me write code like so much faster.' (Interview 003)",
+      "key_insights": "Theme: This theme encompasses the various ways AI tools and models are being applied or are envisioned to be applied across different research methodologies at RAND, including qualitative, quantitative, and general workflow tasks.",
+      "saturation_point": ""
+    },
+    {
+      "theme_id": "T2",
+      "theme_name": "Challenges and Risks of AI Adoption",
+      "prevalence": "1.0",
+      "interview_count": "18",
+      "code_count": "18",
+      "exemplar_quote_1": "Ramya Chari: 'We found when you know going back and rereading it, that there were definitely, like, nuances that were missed and things that, you know were not picked up that were relevant to our proj...",
+      "exemplar_quote_2": "Luke Matthews: 'I think somebody actually people aren't anticipating about AI development is some of this technology will be like a red Queen scenario... because your competitors start doing it... Eve...",
+      "exemplar_quote_3": "Molly Dunnigan: 'The risk is that we will end up utilizing AI for stuff our junior folks used to do... I worry about career development and skillset development among the younger folks.' (Interview 00...",
+      "key_insights": "Theme: This theme covers the various difficulties, limitations, and potential negative consequences associated with integrating AI into research practices, including issues of accuracy, ethics, and institutional barriers.",
+      "saturation_point": ""
+    },
+    {
+      "theme_id": "T3",
+      "theme_name": "Opportunities for Efficiency and Innovation",
+      "prevalence": "1.0",
+      "interview_count": "18",
+      "code_count": "5",
+      "exemplar_quote_1": "Joie Acosta: 'Can you imagine? A world where, like AI could feed in information about the kind of participants you're looking for. And AI could crawl the Internet to find them. Invite them to particip...",
+      "exemplar_quote_2": "Ryan Brown: 'Is that because it's so much faster you can load? Way and analyze way more documents. So depending what you're looking for, if you're looking for sort of a gist of a pattern and a very la...",
+      "exemplar_quote_3": "Jim Mitre: 'It should help a lot with communication. You know, one of the things Rand researchers traditionally stink at is how to turn terrific body of research from an academic product into somethin...",
+      "key_insights": "Theme: This theme highlights the perceived benefits and new possibilities that AI offers for enhancing research processes, improving efficiency, augmenting human capacity, and opening new research avenues.",
+      "saturation_point": ""
+    },
+    {
+      "theme_id": "T4",
+      "theme_name": "Institutional Adoption and Strategy",
+      "prevalence": "0.78",
+      "interview_count": "14",
+      "code_count": "6",
+      "exemplar_quote_1": "Molly Dunnigan: 'Need to be company wide ai initiatives that every unit and division are asked to participate in.' (Interview 002)",
+      "exemplar_quote_2": "Bryan Frederick: 'It would be for folks to have sort of illustrated use case guides for, OK. Let's say you wanna use large language models to do X. Here's some literal examples of how this is used.' (...",
+      "exemplar_quote_3": "Matan Chorev: 'How do you create incentive structures? That demonstrate how application of AI can deliver better products and how do you test for that quality control for that, learn from those invest...",
+      "key_insights": "Theme: This theme focuses on the institutional strategies, policies, and cultural shifts necessary for RAND to effectively and responsibly adopt and integrate AI into its research ecosystem.",
+      "saturation_point": ""
+    },
+    {
+      "theme_id": "T5",
+      "theme_name": "Data Management and Quality",
+      "prevalence": "0.56",
+      "interview_count": "10",
+      "code_count": "5",
+      "exemplar_quote_1": "Douglas Yeung: 'I guess like a lot of the way that I end up being or something like 100 or thousand more lists of abstract or papers from keyword search and maybe I don\u2019t need all of it, but it's real...",
+      "exemplar_quote_2": "Matthew Sergant: 'Ultimately once you commit to doing network analysis the biggest issue is collecting and coding the data.' (Interview 006)",
+      "exemplar_quote_3": "Brandon De Bruhl: 'A lot of AI tools in the computer science sort of realm are built around the concepts of data lakes, and I think Rand's a general organizational architecture is anathema to the conc...",
+      "key_insights": "Theme: This theme addresses the challenges and opportunities related to the collection, organization, standardization, and accessibility of data, which are foundational for effective AI-driven research.",
+      "saturation_point": ""
+    }
+  ],
+  "code_progression": [
+    {
+      "code_id": "C1.1",
+      "code_name": "Qualitative Analysis Automation",
+      "first_appearance": "Interview 001",
+      "evolution_notes": "Identified through global analysis",
+      "frequency": "15",
+      "interview_progression": "Interview 001, Interview 002, Interview 003, Interview 004, Interview 005, Interview 006, Interview 007, Interview 008, Interview 009, Interview 010, Interview 011, Interview 013, Interview 014, Interview 015, Interview 018",
+      "saturation_point": "Interview 014"
+    },
+    {
+      "code_id": "C1.1.1",
+      "code_name": "AI Transcription",
+      "first_appearance": "Interview 001",
+      "evolution_notes": "Identified through global analysis",
+      "frequency": "7",
+      "interview_progression": "Interview 001, Interview 005, Interview 009, Interview 010, Interview 011, Interview 014, Interview 015",
+      "saturation_point": "Interview 014"
+    },
+    {
+      "code_id": "C1.1.2",
+      "code_name": "AI Coding",
+      "first_appearance": "Interview 001",
+      "evolution_notes": "Identified through global analysis",
+      "frequency": "12",
+      "interview_progression": "Interview 001, Interview 002, Interview 003, Interview 004, Interview 005, Interview 006, Interview 009, Interview 010, Interview 011, Interview 013, Interview 014, Interview 015",
+      "saturation_point": "Interview 014"
+    },
+    {
+      "code_id": "C1.1.3",
+      "code_name": "AI Thematic Analysis",
+      "first_appearance": "Interview 001",
+      "evolution_notes": "Identified through global analysis",
+      "frequency": "6",
+      "interview_progression": "Interview 001, Interview 004, Interview 009, Interview 010, Interview 011, Interview 014",
+      "saturation_point": "Interview 014"
+    },
+    {
+      "code_id": "C1.1.4",
+      "code_name": "AI De-identification",
+      "first_appearance": "Interview 004",
+      "evolution_notes": "Identified through global analysis",
+      "frequency": "3",
+      "interview_progression": "Interview 004, Interview 006, Interview 014",
+      "saturation_point": "Interview 014"
+    },
+    {
+      "code_id": "C1.1.5",
+      "code_name": "AI Quote Tracing",
+      "first_appearance": "Interview 003",
+      "evolution_notes": "Identified through global analysis",
+      "frequency": "1",
+      "interview_progression": "Interview 003",
+      "saturation_point": "Interview 014"
+    },
+    {
+      "code_id": "C1.2",
+      "code_name": "Literature Review Automation",
+      "first_appearance": "Interview 001",
+      "evolution_notes": "Identified through global analysis",
+      "frequency": "15",
+      "interview_progression": "Interview 001, Interview 002, Interview 003, Interview 004, Interview 005, Interview 006, Interview 007, Interview 008, Interview 009, Interview 010, Interview 011, Interview 013, Interview 014, Interview 015, Interview 018",
+      "saturation_point": "Interview 014"
+    },
+    {
+      "code_id": "C1.2.1",
+      "code_name": "AI Search Strategy",
+      "first_appearance": "Interview 001",
+      "evolution_notes": "Identified through global analysis",
+      "frequency": "3",
+      "interview_progression": "Interview 001, Interview 004, Interview 009",
+      "saturation_point": "Interview 014"
+    },
+    {
+      "code_id": "C1.2.2",
+      "code_name": "AI Document Summarization",
+      "first_appearance": "Interview 003",
+      "evolution_notes": "Identified through global analysis",
+      "frequency": "7",
+      "interview_progression": "Interview 003, Interview 005, Interview 007, Interview 008, Interview 009, Interview 010, Interview 011",
+      "saturation_point": "Interview 014"
+    },
+    {
+      "code_id": "C1.2.3",
+      "code_name": "AI Data Extraction",
+      "first_appearance": "Interview 003",
+      "evolution_notes": "Identified through global analysis",
+      "frequency": "6",
+      "interview_progression": "Interview 003, Interview 005, Interview 006, Interview 012, Interview 013, Interview 018",
+      "saturation_point": "Interview 014"
+    },
+    {
+      "code_id": "C1.2.4",
+      "code_name": "AI Gap Identification",
+      "first_appearance": "Interview 009",
+      "evolution_notes": "Identified through global analysis",
+      "frequency": "2",
+      "interview_progression": "Interview 009, Interview 018",
+      "saturation_point": "Interview 014"
+    },
+    {
+      "code_id": "C1.2.5",
+      "code_name": "AI Source Validation",
+      "first_appearance": "Interview 005",
+      "evolution_notes": "Identified through global analysis",
+      "frequency": "2",
+      "interview_progression": "Interview 005, Interview 009",
+      "saturation_point": "Interview 014"
+    },
+    {
+      "code_id": "C1.3",
+      "code_name": "Quantitative Analysis Automation",
+      "first_appearance": "Interview 001",
+      "evolution_notes": "Identified through global analysis",
+      "frequency": "10",
+      "interview_progression": "Interview 001, Interview 003, Interview 005, Interview 006, Interview 009, Interview 012, Interview 013, Interview 014, Interview 016, Interview 018",
+      "saturation_point": "Interview 014"
+    },
+    {
+      "code_id": "C1.3.1",
+      "code_name": "AI Code Generation/Correction",
+      "first_appearance": "Interview 003",
+      "evolution_notes": "Identified through global analysis",
+      "frequency": "6",
+      "interview_progression": "Interview 003, Interview 005, Interview 012, Interview 013, Interview 016, Interview 018",
+      "saturation_point": "Interview 014"
+    },
+    {
+      "code_id": "C1.3.2",
+      "code_name": "AI Statistical Model Optimization",
+      "first_appearance": "Interview 003",
+      "evolution_notes": "Identified through global analysis",
+      "frequency": "3",
+      "interview_progression": "Interview 003, Interview 009, Interview 012",
+      "saturation_point": "Interview 014"
+    },
+    {
+      "code_id": "C1.3.3",
+      "code_name": "AI Data Wrangling",
+      "first_appearance": "Interview 012",
+      "evolution_notes": "Identified through global analysis",
+      "frequency": "4",
+      "interview_progression": "Interview 012, Interview 013, Interview 014, Interview 018",
+      "saturation_point": "Interview 014"
+    },
+    {
+      "code_id": "C1.3.4",
+      "code_name": "AI Entity Resolution",
+      "first_appearance": "Interview 012",
+      "evolution_notes": "Identified through global analysis",
+      "frequency": "1",
+      "interview_progression": "Interview 012",
+      "saturation_point": "Interview 014"
+    },
+    {
+      "code_id": "C1.4",
+      "code_name": "Research Workflow Automation",
+      "first_appearance": "Interview 003",
+      "evolution_notes": "Identified through global analysis",
+      "frequency": "15",
+      "interview_progression": "Interview 003, Interview 004, Interview 005, Interview 006, Interview 007, Interview 008, Interview 009, Interview 010, Interview 011, Interview 012, Interview 013, Interview 014, Interview 015, Interview 016, Interview 018",
+      "saturation_point": "Interview 014"
+    },
+    {
+      "code_id": "C1.4.1",
+      "code_name": "AI Meeting Minutes",
+      "first_appearance": "Interview 003",
+      "evolution_notes": "Identified through global analysis",
+      "frequency": "4",
+      "interview_progression": "Interview 003, Interview 007, Interview 010, Interview 011",
+      "saturation_point": "Interview 014"
+    },
+    {
+      "code_id": "C1.4.2",
+      "code_name": "AI Proposal Writing",
+      "first_appearance": "Interview 005",
+      "evolution_notes": "Identified through global analysis",
+      "frequency": "7",
+      "interview_progression": "Interview 005, Interview 008, Interview 009, Interview 010, Interview 011, Interview 013, Interview 018",
+      "saturation_point": "Interview 014"
+    },
+    {
+      "code_id": "C1.4.3",
+      "code_name": "AI Report Generation/Editing",
+      "first_appearance": "Interview 003",
+      "evolution_notes": "Identified through global analysis",
+      "frequency": "7",
+      "interview_progression": "Interview 003, Interview 007, Interview 010, Interview 011, Interview 013, Interview 015, Interview 016",
+      "saturation_point": "Interview 014"
+    },
+    {
+      "code_id": "C1.4.4",
+      "code_name": "AI Dissemination/Communication",
+      "first_appearance": "Interview 009",
+      "evolution_notes": "Identified through global analysis",
+      "frequency": "3",
+      "interview_progression": "Interview 009, Interview 010, Interview 011",
+      "saturation_point": "Interview 014"
+    },
+    {
+      "code_id": "C1.4.5",
+      "code_name": "AI Wargaming/TTX Augmentation",
+      "first_appearance": "Interview 002",
+      "evolution_notes": "Identified through global analysis",
+      "frequency": "4",
+      "interview_progression": "Interview 002, Interview 007, Interview 010, Interview 011",
+      "saturation_point": "Interview 014"
+    },
+    {
+      "code_id": "C1.4.6",
+      "code_name": "AI Forecasting",
+      "first_appearance": "Interview 002",
+      "evolution_notes": "Identified through global analysis",
+      "frequency": "3",
+      "interview_progression": "Interview 002, Interview 007, Interview 017",
+      "saturation_point": "Interview 014"
+    },
+    {
+      "code_id": "C1.4.7",
+      "code_name": "AI Survey Design",
+      "first_appearance": "Interview 009",
+      "evolution_notes": "Identified through global analysis",
+      "frequency": "3",
+      "interview_progression": "Interview 009, Interview 014, Interview 016",
+      "saturation_point": "Interview 014"
+    },
+    {
+      "code_id": "C1.4.8",
+      "code_name": "AI Partner Identification",
+      "first_appearance": "Interview 001",
+      "evolution_notes": "Identified through global analysis",
+      "frequency": "2",
+      "interview_progression": "Interview 001, Interview 016",
+      "saturation_point": "Interview 014"
+    },
+    {
+      "code_id": "C1.4.9",
+      "code_name": "AI 508 Compliance",
+      "first_appearance": "Interview 016",
+      "evolution_notes": "Identified through global analysis",
+      "frequency": "1",
+      "interview_progression": "Interview 016",
+      "saturation_point": "Interview 014"
+    },
+    {
+      "code_id": "C2.1",
+      "code_name": "Accuracy and Trust",
+      "first_appearance": "Interview 001",
+      "evolution_notes": "Identified through global analysis",
+      "frequency": "14",
+      "interview_progression": "Interview 001, Interview 003, Interview 004, Interview 005, Interview 006, Interview 007, Interview 008, Interview 009, Interview 010, Interview 011, Interview 012, Interview 013, Interview 014, Interview 016",
+      "saturation_point": "Interview 014"
+    },
+    {
+      "code_id": "C2.1.1",
+      "code_name": "Hallucinations",
+      "first_appearance": "Interview 001",
+      "evolution_notes": "Identified through global analysis",
+      "frequency": "8",
+      "interview_progression": "Interview 001, Interview 004, Interview 005, Interview 008, Interview 009, Interview 010, Interview 011, Interview 016",
+      "saturation_point": "Interview 014"
+    },
+    {
+      "code_id": "C2.1.2",
+      "code_name": "Nuance and Context Loss",
+      "first_appearance": "Interview 001",
+      "evolution_notes": "Identified through global analysis",
+      "frequency": "7",
+      "interview_progression": "Interview 001, Interview 004, Interview 005, Interview 008, Interview 009, Interview 012, Interview 013",
+      "saturation_point": "Interview 014"
+    },
+    {
+      "code_id": "C2.1.3",
+      "code_name": "Bias in AI",
+      "first_appearance": "Interview 008",
+      "evolution_notes": "Identified through global analysis",
+      "frequency": "2",
+      "interview_progression": "Interview 008, Interview 014",
+      "saturation_point": "Interview 014"
+    },
+    {
+      "code_id": "C2.1.4",
+      "code_name": "Over-reliance/Blind Trust",
+      "first_appearance": "Interview 005",
+      "evolution_notes": "Identified through global analysis",
+      "frequency": "5",
+      "interview_progression": "Interview 005, Interview 008, Interview 013, Interview 016, Interview 018",
+      "saturation_point": "Interview 014"
+    },
+    {
+      "code_id": "C2.2",
+      "code_name": "Ethical and Methodological Concerns",
+      "first_appearance": "Interview 003",
+      "evolution_notes": "Identified through global analysis",
+      "frequency": "10",
+      "interview_progression": "Interview 003, Interview 004, Interview 005, Interview 006, Interview 008, Interview 009, Interview 012, Interview 013, Interview 014, Interview 018",
+      "saturation_point": "Interview 014"
+    },
+    {
+      "code_id": "C2.2.1",
+      "code_name": "Data Privacy/CUI",
+      "first_appearance": "Interview 004",
+      "evolution_notes": "Identified through global analysis",
+      "frequency": "6",
+      "interview_progression": "Interview 004, Interview 006, Interview 012, Interview 013, Interview 014, Interview 015",
+      "saturation_point": "Interview 014"
+    },
+    {
+      "code_id": "C2.2.2",
+      "code_name": "Consent for Data Use",
+      "first_appearance": "Interview 014",
+      "evolution_notes": "Identified through global analysis",
+      "frequency": "1",
+      "interview_progression": "Interview 014",
+      "saturation_point": "Interview 014"
+    },
+    {
+      "code_id": "C2.2.3",
+      "code_name": "Impact on Researcher Skill Development",
+      "first_appearance": "Interview 002",
+      "evolution_notes": "Identified through global analysis",
+      "frequency": "4",
+      "interview_progression": "Interview 002, Interview 005, Interview 008, Interview 018",
+      "saturation_point": "Interview 014"
+    },
+    {
+      "code_id": "C2.2.4",
+      "code_name": "Loss of Data Intimacy",
+      "first_appearance": "Interview 001",
+      "evolution_notes": "Identified through global analysis",
+      "frequency": "4",
+      "interview_progression": "Interview 001, Interview 013, Interview 014, Interview 018",
+      "saturation_point": "Interview 014"
+    },
+    {
+      "code_id": "C2.2.5",
+      "code_name": "Publication Validity",
+      "first_appearance": "Interview 009",
+      "evolution_notes": "Identified through global analysis",
+      "frequency": "2",
+      "interview_progression": "Interview 009, Interview 014",
+      "saturation_point": "Interview 014"
+    },
+    {
+      "code_id": "C2.3",
+      "code_name": "Institutional Barriers",
+      "first_appearance": "Interview 002",
+      "evolution_notes": "Identified through global analysis",
+      "frequency": "12",
+      "interview_progression": "Interview 002, Interview 003, Interview 004, Interview 005, Interview 006, Interview 007, Interview 009, Interview 010, Interview 011, Interview 012, Interview 015, Interview 018",
+      "saturation_point": "Interview 014"
+    },
+    {
+      "code_id": "C2.3.1",
+      "code_name": "Outdated Internal Tools",
+      "first_appearance": "Interview 003",
+      "evolution_notes": "Identified through global analysis",
+      "frequency": "7",
+      "interview_progression": "Interview 003, Interview 005, Interview 006, Interview 007, Interview 010, Interview 011, Interview 015",
+      "saturation_point": "Interview 014"
+    },
+    {
+      "code_id": "C2.3.2",
+      "code_name": "Lack of Clear Guidance",
+      "first_appearance": "Interview 002",
+      "evolution_notes": "Identified through global analysis",
+      "frequency": "8",
+      "interview_progression": "Interview 002, Interview 004, Interview 005, Interview 008, Interview 012, Interview 014, Interview 016, Interview 018",
+      "saturation_point": "Interview 014"
+    },
+    {
+      "code_id": "C2.3.3",
+      "code_name": "Data Silos/Fragmentation",
+      "first_appearance": "Interview 012",
+      "evolution_notes": "Identified through global analysis",
+      "frequency": "3",
+      "interview_progression": "Interview 012, Interview 013, Interview 018",
+      "saturation_point": "Interview 014"
+    },
+    {
+      "code_id": "C2.3.4",
+      "code_name": "Cost/Resource Constraints",
+      "first_appearance": "Interview 001",
+      "evolution_notes": "Identified through global analysis",
+      "frequency": "4",
+      "interview_progression": "Interview 001, Interview 009, Interview 012, Interview 018",
+      "saturation_point": "Interview 014"
+    },
+    {
+      "code_id": "C2.3.5",
+      "code_name": "Classified Environment Limitations",
+      "first_appearance": "Interview 003",
+      "evolution_notes": "Identified through global analysis",
+      "frequency": "4",
+      "interview_progression": "Interview 003, Interview 004, Interview 010, Interview 011",
+      "saturation_point": "Interview 014"
+    },
+    {
+      "code_id": "C3.1",
+      "code_name": "Time Savings",
+      "first_appearance": "Interview 001",
+      "evolution_notes": "Identified through global analysis",
+      "frequency": "14",
+      "interview_progression": "Interview 001, Interview 002, Interview 003, Interview 004, Interview 005, Interview 007, Interview 008, Interview 009, Interview 010, Interview 011, Interview 012, Interview 013, Interview 016, Interview 018",
+      "saturation_point": "Interview 014"
+    },
+    {
+      "code_id": "C3.2",
+      "code_name": "Capacity Augmentation",
+      "first_appearance": "Interview 001",
+      "evolution_notes": "Identified through global analysis",
+      "frequency": "7",
+      "interview_progression": "Interview 001, Interview 004, Interview 006, Interview 012, Interview 017, Interview 018",
+      "saturation_point": "Interview 014"
+    },
+    {
+      "code_id": "C3.3",
+      "code_name": "New Research Avenues",
+      "first_appearance": "Interview 006",
+      "evolution_notes": "Identified through global analysis",
+      "frequency": "5",
+      "interview_progression": "Interview 006, Interview 007, Interview 009, Interview 014, Interview 018",
+      "saturation_point": "Interview 014"
+    },
+    {
+      "code_id": "C3.4",
+      "code_name": "Enhanced Quality",
+      "first_appearance": "Interview 003",
+      "evolution_notes": "Identified through global analysis",
+      "frequency": "5",
+      "interview_progression": "Interview 003, Interview 004, Interview 012, Interview 016, Interview 018",
+      "saturation_point": "Interview 014"
+    },
+    {
+      "code_id": "C4.1",
+      "code_name": "Training and Education",
+      "first_appearance": "Interview 005",
+      "evolution_notes": "Identified through global analysis",
+      "frequency": "6",
+      "interview_progression": "Interview 005, Interview 008, Interview 009, Interview 014, Interview 016, Interview 018",
+      "saturation_point": "Interview 014"
+    },
+    {
+      "code_id": "C4.2",
+      "code_name": "Incentive Structures",
+      "first_appearance": "Interview 007",
+      "evolution_notes": "Identified through global analysis",
+      "frequency": "3",
+      "interview_progression": "Interview 007, Interview 012, Interview 018",
+      "saturation_point": "Interview 014"
+    },
+    {
+      "code_id": "C4.3",
+      "code_name": "Build vs. Buy vs. License",
+      "first_appearance": "Interview 007",
+      "evolution_notes": "Identified through global analysis",
+      "frequency": "3",
+      "interview_progression": "Interview 007, Interview 012, Interview 017",
+      "saturation_point": "Interview 014"
+    },
+    {
+      "code_id": "C4.4",
+      "code_name": "Strategic Roadmap",
+      "first_appearance": "Interview 012",
+      "evolution_notes": "Identified through global analysis",
+      "frequency": "1",
+      "interview_progression": "Interview 012",
+      "saturation_point": "Interview 014"
+    },
+    {
+      "code_id": "C4.5",
+      "code_name": "Skunkworks/Experimentation",
+      "first_appearance": "Interview 016",
+      "evolution_notes": "Identified through global analysis",
+      "frequency": "2",
+      "interview_progression": "Interview 016, Interview 018",
+      "saturation_point": "Interview 014"
+    },
+    {
+      "code_id": "C5.1",
+      "code_name": "Data Wrangling",
+      "first_appearance": "Interview 004",
+      "evolution_notes": "Identified through global analysis",
+      "frequency": "5",
+      "interview_progression": "Interview 004, Interview 005, Interview 012, Interview 013, Interview 018",
+      "saturation_point": "Interview 014"
+    },
+    {
+      "code_id": "C5.2",
+      "code_name": "Data Lakes",
+      "first_appearance": "Interview 012",
+      "evolution_notes": "Identified through global analysis",
+      "frequency": "2",
+      "interview_progression": "Interview 012, Interview 018",
+      "saturation_point": "Interview 014"
+    },
+    {
+      "code_id": "C5.3",
+      "code_name": "Data Standardization",
+      "first_appearance": "Interview 002",
+      "evolution_notes": "Identified through global analysis",
+      "frequency": "3",
+      "interview_progression": "Interview 002, Interview 006, Interview 012",
+      "saturation_point": "Interview 014"
+    },
+    {
+      "code_id": "C5.4",
+      "code_name": "Data Access",
+      "first_appearance": "Interview 001",
+      "evolution_notes": "Identified through global analysis",
+      "frequency": "5",
+      "interview_progression": "Interview 001, Interview 006, Interview 012, Interview 013, Interview 018",
+      "saturation_point": "Interview 014"
+    },
+    {
+      "code_id": "C1",
+      "code_name": "AI Applications",
+      "first_appearance": "Interview 001",
+      "evolution_notes": "Identified through global analysis",
+      "frequency": "18",
+      "interview_progression": "Interview 001, Interview 002, Interview 003, Interview 004, Interview 005, Interview 006, Interview 007, Interview 008, Interview 009, Interview 010, Interview 011, Interview 012, Interview 013, Interview 014, Interview 015, Interview 016, Interview 017, Interview 018",
+      "saturation_point": "Interview 014"
+    },
+    {
+      "code_id": "C2",
+      "code_name": "Challenges and Risks",
+      "first_appearance": "Interview 001",
+      "evolution_notes": "Identified through global analysis",
+      "frequency": "18",
+      "interview_progression": "Interview 001, Interview 002, Interview 003, Interview 004, Interview 005, Interview 006, Interview 007, Interview 008, Interview 009, Interview 010, Interview 011, Interview 012, Interview 013, Interview 014, Interview 015, Interview 016, Interview 017, Interview 018",
+      "saturation_point": "Interview 014"
+    },
+    {
+      "code_id": "C3",
+      "code_name": "Opportunities and Benefits",
+      "first_appearance": "Interview 001",
+      "evolution_notes": "Identified through global analysis",
+      "frequency": "18",
+      "interview_progression": "Interview 001, Interview 002, Interview 003, Interview 004, Interview 005, Interview 006, Interview 007, Interview 008, Interview 009, Interview 010, Interview 011, Interview 012, Interview 013, Interview 014, Interview 015, Interview 016, Interview 017, Interview 018",
+      "saturation_point": "Interview 014"
+    },
+    {
+      "code_id": "C4",
+      "code_name": "Institutional Adoption",
+      "first_appearance": "Interview 002",
+      "evolution_notes": "Identified through global analysis",
+      "frequency": "14",
+      "interview_progression": "Interview 002, Interview 003, Interview 004, Interview 005, Interview 006, Interview 007, Interview 008, Interview 009, Interview 010, Interview 011, Interview 012, Interview 014, Interview 016, Interview 018",
+      "saturation_point": "Interview 014"
+    },
+    {
+      "code_id": "C5",
+      "code_name": "Data Management",
+      "first_appearance": "Interview 001",
+      "evolution_notes": "Identified through global analysis",
+      "frequency": "10",
+      "interview_progression": "Interview 001, Interview 004, Interview 005, Interview 006, Interview 012, Interview 013, Interview 014, Interview 015, Interview 016, Interview 018",
+      "saturation_point": "Interview 014"
+    }
+  ],
+  "contradiction_matrix": [
+    {
+      "contradiction_id": "CONT_001",
+      "topic": "Impact of AI on Researcher Roles and Skill Development",
+      "position_1": "AI will displace junior researchers and negatively impact skill development.",
+      "position_1_holders": "Molly Dunnigan (Arroyo SDR); Patricia Herman (REACH Center); Dulani Woods (Scalable Computing)",
+      "position_1_quote_1": "Molly Dunnigan: 'The risk is that we will end up utilizing AI for stuff our junior folks used to do. We can use AI for a literature review that would have taken a RA 20 days so benefits of cost savings but I worry about career development and skillset development among the younger folks.' (Interview",
+      "position_1_quote_2": "Patricia Herman: 'If heading toward AI\u2026 where you you have the model do the analysis, then that is negative impact on training.' (Interview 008)",
+      "position_2": "AI will free up researchers from tedious tasks, allowing them to focus on higher-value work.",
+      "position_2_holders": "Lisa Saum-Manning (ISDP); Heather Williams (ISDP); Christopher Mouton (ISDP)",
+      "position_2_quote_1": "Lisa Saum-Manning: 'I would love a finding of this, Todd to be like, OK. We figured out the things that AI can do. What can't they do so that when all of our jobs are under threat, that AI is taking over? Like what do we do better? What can it ultimately you still need us?' (Interview 010)",
+      "position_2_quote_2": "Heather Williams: 'And I appreciate Chris's point of like rather than trying to have it do our jobs, which we probably can only do best, why doesn't it create efficiencies for us and all of the NIM picky things that pull us away from our jobs?' (Interview 010)",
+      "resolution_suggested": "The potential for AI to displace junior roles is a significant concern, but many also see it as an opportunity to automate 'nim picky' or 'grunt work,' allowing researchers to focus on higher-level analytical and creative tasks. The challenge lies in ensuring that foundational skills are still developed and that AI is used as a 'better button' rather than an 'easy button.'",
+      "related_themes": "T2; T3",
+      "related_codes": "C2.2.3; C3.1"
+    },
+    {
+      "contradiction_id": "CONT_002",
+      "topic": "Reliability and Trustworthiness of AI Outputs",
+      "position_1": "AI output is often unreliable, prone to hallucinations, and requires extensive human verification, negating efficiency gains.",
+      "position_1_holders": "Ramya Chari (Qualitative Researcher); Sara McCleskey (Health Researcher); David Klein (Statistical Analyst); Amy Shearer (Behavioral Scientist); Keith Crane (Economist); Lisa Saum-Manning (ISDP)",
+      "position_1_quote_1": "Ramya Chari: 'I was finding that it was it was difficult for me to like a just inherently trust what it was spitting out... there were definitely, like, nuances that were missed and things that, you know were not picked up that were relevant to our project.' (Interview 001)",
+      "position_1_quote_2": "David Klein: 'I usually almost always get the wrong answer from AI. It almost always gives me code that is doesn't exist is incorrect, but it often gives me code that is on the right path that I might not have figured out on my own. So it gives me the right procedure or the right. Set of options and",
+      "position_2": "AI tools, while imperfect, can significantly enhance quality and efficiency, especially with proper prompting and iteration.",
+      "position_2_holders": "Ryan Brown (Qualitative Researcher); Julia Kaufman (Qualitative Researcher); Caroline Johnston (Operations Researcher); Andrew Morral (Statistical Analyst); Laurie Martin (QA Manager)",
+      "position_2_quote_1": "Ryan Brown: 'What I've seen with Muse. Is that yes, there are still some weaknesses with sometimes over interpretation of excerpts or under interpretation, inability to notice subtleties in sarcasm or phrasing. Is that because it's so much faster you can load? Way and analyze way more documents.' (I",
+      "position_2_quote_2": "Caroline Johnston: 'AI has been really helpful with writing like any type of code... it just helped me write code like so much faster. And of course checking that it's correct as well, which sometimes is not always done when people use llm's for example.' (Interview 003)",
+      "resolution_suggested": "There is a consensus that AI outputs require human verification due to hallucination and nuance issues. However, proponents argue that with proper training, iterative prompting, and integration into a human-in-the-loop workflow, AI can still provide substantial efficiency and quality gains, acting as a 'tireless research assistant' or 'Co-researcher.' The key is to define 'good enough' and establish clear validation protocols.",
+      "related_themes": "T2; T3",
+      "related_codes": "C2.1.1; C2.1.4; C3.4"
+    },
+    {
+      "contradiction_id": "CONT_003",
+      "topic": "RAND's Approach to AI Tool Development: Build vs. Buy",
+      "position_1": "RAND should primarily invest in building its own proprietary AI tools to maintain competitive advantage and control.",
+      "position_1_holders": "Molly Dunnigan (Arroyo SDR); Eric Peltz (Forecasting)",
+      "position_1_quote_1": "Molly Dunnigan: 'My sense is the Army thinks our competitors are integrating AI wholistically... So how do we make sure we don\u2019t get put out of business in that environment. How do we maintain a competitive edge. There are ways we do that to develop propriety tools but that day is coming very quickl",
+      "position_1_quote_2": "Eric Peltz: 'He wants us to do it all at once because he wants a Rand version of it. So instead of asking them to change things for us, we're we're gonna go to them at some point and say, here's I don't know, $200,000 or something. Make all these changes and then that would become at some level Rand",
+      "position_2": "RAND should focus on deploying and integrating best-of-breed commercial AI tools rather than building its own, due to internal limitations and rapid external advancements.",
+      "position_2_holders": "Jim Mitre (GER Leadership); Matan Chorev (GER Leadership); Brandon De Bruhl (Statistical Analyst); Andrew Morral (Statistical Analyst)",
+      "position_2_quote_1": "Jim Mitre: 'I put 99% of the effort on applying best of breed from the private sector and bringing it to Rand and not trying to like build our own cause a we're not particularly good at software development, B, even if we do build it, who's gonna main? It and upkeep it and keep it stateoftheart over",
+      "position_2_quote_2": "Matan Chorev: 'And they have a team of people who are, you know, have a stake in the company's future profitability. And so therefore, we'll update maintain patch service that software as opposed to us.' (Interview 007)",
+      "resolution_suggested": "There's a tension between the desire for proprietary tools to maintain a competitive edge and the practical challenges of building and maintaining state-of-the-art AI capabilities internally. Many argue that RAND's strength is not software development, and it would be more efficient to leverage rapidly evolving commercial tools, focusing instead on how to best apply and integrate them within RAND's unique research context, especially for CUI/classified data.",
+      "related_themes": "T2; T4",
+      "related_codes": "C2.3.1; C4.3"
+    }
+  ],
+  "stakeholder_positions": [],
+  "saturation_analysis": [
+    {
+      "Saturation Analysis": "Metric",
+      "null": [
+        "Value"
+      ]
+    },
+    {
+      "Saturation Analysis": "Saturation Point",
+      "null": [
+        "Interview 014"
+      ]
+    },
+    {
+      "Saturation Analysis": "Interview Number",
+      "null": [
+        "50"
+      ]
+    },
+    {
+      "Saturation Analysis": "Evidence",
+      "null": [
+        "Theoretical saturation was largely achieved around Interview 14. By this point, the core themes of AI applications (qualitative, quantitative, workflow), challenges (accuracy, ethics, institutional barriers), and opportunities (efficiency, new avenues) were well-established. Subsequent interviews (15-18) primarily reinforced these existing themes with additional specific examples, deeper nuances, or further validation of previously identified pain points and opportunities, rather than introducing entirely new conceptual categories. For instance, the discussions on cost analysis (Interview 13) and forecasting (Interview 17) provided rich detail but fit within the broader 'AI Applications' theme, and the concerns about data intimacy and skill development (Interview 14, 18) deepened the 'Ethical and Methodological Concerns' but did not create new challenges."
+      ]
+    }
+  ],
+  "quote_chains": [
+    {
+      "chain_id": "QC_001",
+      "theme_id": "T1",
+      "chain_type": "problem_solution",
+      "description": "This chain illustrates the common problem of qualitative data coding being time-consuming and annoying, and the proposed AI solution to automate this process.",
+      "quote_count": "0"
+    },
+    {
+      "chain_id": "QC_002",
+      "theme_id": "T3",
+      "chain_type": "evolution",
+      "description": "This chain shows the evolving understanding of AI's role from a simple task automation tool to a 'Co-researcher' or 'idea processor'.",
+      "quote_count": "0"
+    },
+    {
+      "chain_id": "QC_003",
+      "theme_id": "T5",
+      "chain_type": "problem_solution",
+      "description": "This chain highlights the challenge of RAND's fragmented data storage and the proposed solution of data lakes or standardized data pipelines to enable large-scale AI analysis.",
+      "quote_count": "0"
+    }
+  ],
+  "full_analysis": {
+    "study_id": "study_20250729_073158",
+    "analysis_timestamp": "2025-07-29 07:31:58.065647",
+    "research_question": "How are AI methods being integrated into qualitative research practices?",
+    "interviews_analyzed": 18,
+    "total_tokens_analyzed": 170317,
+    "themes": [
+      {
+        "theme_id": "T1",
+        "name": "AI Applications in Research",
+        "description": "This theme encompasses the various ways AI tools and models are being applied or are envisioned to be applied across different research methodologies at RAND, including qualitative, quantitative, and general workflow tasks.",
+        "categories": [],
+        "codes": [
+          "C1.1",
+          "C1.1.1",
+          "C1.1.2",
+          "C1.1.3",
+          "C1.1.4",
+          "C1.1.5",
+          "C1.2",
+          "C1.2.1",
+          "C1.2.2",
+          "C1.2.3",
+          "C1.2.4",
+          "C1.2.5",
+          "C1.3",
+          "C1.3.1",
+          "C1.3.2",
+          "C1.3.3",
+          "C1.3.4",
+          "C1.4",
+          "C1.4.1",
+          "C1.4.2",
+          "C1.4.3",
+          "C1.4.4",
+          "C1.4.5",
+          "C1.4.6",
+          "C1.4.7",
+          "C1.4.8",
+          "C1.4.9",
+          "C1"
+        ],
+        "prevalence": 1.0,
+        "interviews_count": 18,
+        "quote_chains": [],
+        "key_quotes": [
+          {
+            "quote_id": "T1_Q1",
+            "interview_id": "INT_001",
+            "interview_name": "Interview 001",
+            "text": "Luke Matthews: 'I've been using some of the LLM's for. And kind of more exploring some of their. Thematic coding and kind of ability to kind of group documents then generate text for me.' (Interview 001)",
+            "line_number": 1,
+            "context": "From global analysis",
+            "speaker_role": null
+          },
+          {
+            "quote_id": "T1_Q2",
+            "interview_id": "INT_001",
+            "interview_name": "Interview 001",
+            "text": "Molly Dunnigan: 'Interview coding, something way better than Dedoose. We do a lot of interviews and the coding is uneven in quality. So it would be great if we had some standard way to do that and a tool to help with that.' (Interview 002)",
+            "line_number": 1,
+            "context": "From global analysis",
+            "speaker_role": null
+          },
+          {
+            "quote_id": "T1_Q3",
+            "interview_id": "INT_001",
+            "interview_name": "Interview 001",
+            "text": "Caroline Johnston: 'AI has been really helpful with writing like any type of code I write primarily in Python... it just helped me write code like so much faster.' (Interview 003)",
+            "line_number": 1,
+            "context": "From global analysis",
+            "speaker_role": null
+          }
+        ],
+        "stakeholder_positions": [],
+        "contradictions": [],
+        "theoretical_memo": "Theme: This theme encompasses the various ways AI tools and models are being applied or are envisioned to be applied across different research methodologies at RAND, including qualitative, quantitative, and general workflow tasks.",
+        "policy_implications": null,
+        "confidence_score": 0.95
+      },
+      {
+        "theme_id": "T2",
+        "name": "Challenges and Risks of AI Adoption",
+        "description": "This theme covers the various difficulties, limitations, and potential negative consequences associated with integrating AI into research practices, including issues of accuracy, ethics, and institutional barriers.",
+        "categories": [],
+        "codes": [
+          "C2.1",
+          "C2.1.1",
+          "C2.1.2",
+          "C2.1.3",
+          "C2.1.4",
+          "C2.2",
+          "C2.2.1",
+          "C2.2.2",
+          "C2.2.3",
+          "C2.2.4",
+          "C2.2.5",
+          "C2.3",
+          "C2.3.1",
+          "C2.3.2",
+          "C2.3.3",
+          "C2.3.4",
+          "C2.3.5",
+          "C2"
+        ],
+        "prevalence": 1.0,
+        "interviews_count": 18,
+        "quote_chains": [],
+        "key_quotes": [
+          {
+            "quote_id": "T2_Q1",
+            "interview_id": "INT_001",
+            "interview_name": "Interview 001",
+            "text": "Ramya Chari: 'We found when you know going back and rereading it, that there were definitely, like, nuances that were missed and things that, you know were not picked up that were relevant to our project.' (Interview 001)",
+            "line_number": 1,
+            "context": "From global analysis",
+            "speaker_role": null
+          },
+          {
+            "quote_id": "T2_Q2",
+            "interview_id": "INT_001",
+            "interview_name": "Interview 001",
+            "text": "Luke Matthews: 'I think somebody actually people aren't anticipating about AI development is some of this technology will be like a red Queen scenario... because your competitors start doing it... Everyone stays where they are. They're just all going faster now.' (Interview 001)",
+            "line_number": 1,
+            "context": "From global analysis",
+            "speaker_role": null
+          },
+          {
+            "quote_id": "T2_Q3",
+            "interview_id": "INT_001",
+            "interview_name": "Interview 001",
+            "text": "Molly Dunnigan: 'The risk is that we will end up utilizing AI for stuff our junior folks used to do... I worry about career development and skillset development among the younger folks.' (Interview 002)",
+            "line_number": 1,
+            "context": "From global analysis",
+            "speaker_role": null
+          }
+        ],
+        "stakeholder_positions": [],
+        "contradictions": [],
+        "theoretical_memo": "Theme: This theme covers the various difficulties, limitations, and potential negative consequences associated with integrating AI into research practices, including issues of accuracy, ethics, and institutional barriers.",
+        "policy_implications": null,
+        "confidence_score": 0.9
+      },
+      {
+        "theme_id": "T3",
+        "name": "Opportunities for Efficiency and Innovation",
+        "description": "This theme highlights the perceived benefits and new possibilities that AI offers for enhancing research processes, improving efficiency, augmenting human capacity, and opening new research avenues.",
+        "categories": [],
+        "codes": [
+          "C3.1",
+          "C3.2",
+          "C3.3",
+          "C3.4",
+          "C3"
+        ],
+        "prevalence": 1.0,
+        "interviews_count": 18,
+        "quote_chains": [],
+        "key_quotes": [
+          {
+            "quote_id": "T3_Q1",
+            "interview_id": "INT_001",
+            "interview_name": "Interview 001",
+            "text": "Joie Acosta: 'Can you imagine? A world where, like AI could feed in information about the kind of participants you're looking for. And AI could crawl the Internet to find them. Invite them to participate and then find a time on your calendar for the interview.' (Interview 001)",
+            "line_number": 1,
+            "context": "From global analysis",
+            "speaker_role": null
+          },
+          {
+            "quote_id": "T3_Q2",
+            "interview_id": "INT_001",
+            "interview_name": "Interview 001",
+            "text": "Ryan Brown: 'Is that because it's so much faster you can load? Way and analyze way more documents. So depending what you're looking for, if you're looking for sort of a gist of a pattern and a very large data set, it's just so much quicker.' (Interview 004)",
+            "line_number": 1,
+            "context": "From global analysis",
+            "speaker_role": null
+          },
+          {
+            "quote_id": "T3_Q3",
+            "interview_id": "INT_001",
+            "interview_name": "Interview 001",
+            "text": "Jim Mitre: 'It should help a lot with communication. You know, one of the things Rand researchers traditionally stink at is how to turn terrific body of research from an academic product into something that's digestible for policymakers. Boy AI could really help do that.' (Interview 007)",
+            "line_number": 1,
+            "context": "From global analysis",
+            "speaker_role": null
+          }
+        ],
+        "stakeholder_positions": [],
+        "contradictions": [],
+        "theoretical_memo": "Theme: This theme highlights the perceived benefits and new possibilities that AI offers for enhancing research processes, improving efficiency, augmenting human capacity, and opening new research avenues.",
+        "policy_implications": null,
+        "confidence_score": 0.9
+      },
+      {
+        "theme_id": "T4",
+        "name": "Institutional Adoption and Strategy",
+        "description": "This theme focuses on the institutional strategies, policies, and cultural shifts necessary for RAND to effectively and responsibly adopt and integrate AI into its research ecosystem.",
+        "categories": [],
+        "codes": [
+          "C4.1",
+          "C4.2",
+          "C4.3",
+          "C4.4",
+          "C4.5",
+          "C4"
+        ],
+        "prevalence": 0.78,
+        "interviews_count": 14,
+        "quote_chains": [],
+        "key_quotes": [
+          {
+            "quote_id": "T4_Q1",
+            "interview_id": "INT_001",
+            "interview_name": "Interview 001",
+            "text": "Molly Dunnigan: 'Need to be company wide ai initiatives that every unit and division are asked to participate in.' (Interview 002)",
+            "line_number": 1,
+            "context": "From global analysis",
+            "speaker_role": null
+          },
+          {
+            "quote_id": "T4_Q2",
+            "interview_id": "INT_001",
+            "interview_name": "Interview 001",
+            "text": "Bryan Frederick: 'It would be for folks to have sort of illustrated use case guides for, OK. Let's say you wanna use large language models to do X. Here's some literal examples of how this is used.' (Interview 003)",
+            "line_number": 1,
+            "context": "From global analysis",
+            "speaker_role": null
+          },
+          {
+            "quote_id": "T4_Q3",
+            "interview_id": "INT_001",
+            "interview_name": "Interview 001",
+            "text": "Matan Chorev: 'How do you create incentive structures? That demonstrate how application of AI can deliver better products and how do you test for that quality control for that, learn from those investments.' (Interview 007)",
+            "line_number": 1,
+            "context": "From global analysis",
+            "speaker_role": null
+          }
+        ],
+        "stakeholder_positions": [],
+        "contradictions": [],
+        "theoretical_memo": "Theme: This theme focuses on the institutional strategies, policies, and cultural shifts necessary for RAND to effectively and responsibly adopt and integrate AI into its research ecosystem.",
+        "policy_implications": null,
+        "confidence_score": 0.85
+      },
+      {
+        "theme_id": "T5",
+        "name": "Data Management and Quality",
+        "description": "This theme addresses the challenges and opportunities related to the collection, organization, standardization, and accessibility of data, which are foundational for effective AI-driven research.",
+        "categories": [],
+        "codes": [
+          "C5.1",
+          "C5.2",
+          "C5.3",
+          "C5.4",
+          "C5"
+        ],
+        "prevalence": 0.56,
+        "interviews_count": 10,
+        "quote_chains": [],
+        "key_quotes": [
+          {
+            "quote_id": "T5_Q1",
+            "interview_id": "INT_001",
+            "interview_name": "Interview 001",
+            "text": "Douglas Yeung: 'I guess like a lot of the way that I end up being or something like 100 or thousand more lists of abstract or papers from keyword search and maybe I don\u2019t need all of it, but it's really clear (why the search results produced so many abstracts) because there's some word in the title that you know matches so. As soon as it could be easy enough to to try to like just remove those (unnecessary or irrelevant abstracts) and then and then you would be a lot more specific, I guess.' (Interview 001)",
+            "line_number": 1,
+            "context": "From global analysis",
+            "speaker_role": null
+          },
+          {
+            "quote_id": "T5_Q2",
+            "interview_id": "INT_001",
+            "interview_name": "Interview 001",
+            "text": "Matthew Sergant: 'Ultimately once you commit to doing network analysis the biggest issue is collecting and coding the data.' (Interview 006)",
+            "line_number": 1,
+            "context": "From global analysis",
+            "speaker_role": null
+          },
+          {
+            "quote_id": "T5_Q3",
+            "interview_id": "INT_001",
+            "interview_name": "Interview 001",
+            "text": "Brandon De Bruhl: 'A lot of AI tools in the computer science sort of realm are built around the concepts of data lakes, and I think Rand's a general organizational architecture is anathema to the concept of a data lake.' (Interview 012)",
+            "line_number": 1,
+            "context": "From global analysis",
+            "speaker_role": null
+          }
+        ],
+        "stakeholder_positions": [],
+        "contradictions": [],
+        "theoretical_memo": "Theme: This theme addresses the challenges and opportunities related to the collection, organization, standardization, and accessibility of data, which are foundational for effective AI-driven research.",
+        "policy_implications": null,
+        "confidence_score": 0.8
+      }
+    ],
+    "codes": [
+      {
+        "code_id": "C1.1",
+        "name": "Qualitative Analysis Automation",
+        "definition": "Automation of qualitative research tasks using AI.",
+        "frequency": 15,
+        "interviews_present": [
+          "Interview 001",
+          "Interview 002",
+          "Interview 003",
+          "Interview 004",
+          "Interview 005",
+          "Interview 006",
+          "Interview 007",
+          "Interview 008",
+          "Interview 009",
+          "Interview 010",
+          "Interview 011",
+          "Interview 013",
+          "Interview 014",
+          "Interview 015",
+          "Interview 018"
+        ],
+        "key_quotes": [],
+        "first_appearance": "Interview 001",
+        "evolution_notes": "Identified through global analysis",
+        "saturation_point": "Interview 014",
+        "theme_id": "T1",
+        "parent_code_id": "C1",
+        "hierarchy_level": 1,
+        "child_codes": [
+          "C1.1.1",
+          "C1.1.2",
+          "C1.1.3",
+          "C1.1.4",
+          "C1.1.5"
+        ]
+      },
+      {
+        "code_id": "C1.1.1",
+        "name": "AI Transcription",
+        "definition": "Using AI for transcribing audio recordings of interviews or meetings.",
+        "frequency": 7,
+        "interviews_present": [
+          "Interview 001",
+          "Interview 005",
+          "Interview 009",
+          "Interview 010",
+          "Interview 011",
+          "Interview 014",
+          "Interview 015"
+        ],
+        "key_quotes": [],
+        "first_appearance": "Interview 001",
+        "evolution_notes": "Identified through global analysis",
+        "saturation_point": "Interview 014",
+        "theme_id": "T1",
+        "parent_code_id": "C1.1",
+        "hierarchy_level": 2,
+        "child_codes": []
+      },
+      {
+        "code_id": "C1.1.2",
+        "name": "AI Coding",
+        "definition": "Using AI tools to code qualitative data, such as interview transcripts or open-ended survey responses.",
+        "frequency": 12,
+        "interviews_present": [
+          "Interview 001",
+          "Interview 002",
+          "Interview 003",
+          "Interview 004",
+          "Interview 005",
+          "Interview 006",
+          "Interview 009",
+          "Interview 010",
+          "Interview 011",
+          "Interview 013",
+          "Interview 014",
+          "Interview 015"
+        ],
+        "key_quotes": [],
+        "first_appearance": "Interview 001",
+        "evolution_notes": "Identified through global analysis",
+        "saturation_point": "Interview 014",
+        "theme_id": "T1",
+        "parent_code_id": "C1.1",
+        "hierarchy_level": 2,
+        "child_codes": []
+      },
+      {
+        "code_id": "C1.1.3",
+        "name": "AI Thematic Analysis",
+        "definition": "Using AI to identify and group themes from qualitative data, often inductively.",
+        "frequency": 6,
+        "interviews_present": [
+          "Interview 001",
+          "Interview 004",
+          "Interview 009",
+          "Interview 010",
+          "Interview 011",
+          "Interview 014"
+        ],
+        "key_quotes": [],
+        "first_appearance": "Interview 001",
+        "evolution_notes": "Identified through global analysis",
+        "saturation_point": "Interview 014",
+        "theme_id": "T1",
+        "parent_code_id": "C1.1",
+        "hierarchy_level": 2,
+        "child_codes": []
+      },
+      {
+        "code_id": "C1.1.4",
+        "name": "AI De-identification",
+        "definition": "Using AI for de-identification or anonymization of sensitive data in qualitative transcripts.",
+        "frequency": 3,
+        "interviews_present": [
+          "Interview 004",
+          "Interview 006",
+          "Interview 014"
+        ],
+        "key_quotes": [],
+        "first_appearance": "Interview 004",
+        "evolution_notes": "Identified through global analysis",
+        "saturation_point": "Interview 014",
+        "theme_id": "T1",
+        "parent_code_id": "C1.1",
+        "hierarchy_level": 2,
+        "child_codes": []
+      },
+      {
+        "code_id": "C1.1.5",
+        "name": "AI Quote Tracing",
+        "definition": "Using AI to trace specific quotes or content back to their original source in interviews or documents.",
+        "frequency": 1,
+        "interviews_present": [
+          "Interview 003"
+        ],
+        "key_quotes": [],
+        "first_appearance": "Interview 003",
+        "evolution_notes": "Identified through global analysis",
+        "saturation_point": "Interview 014",
+        "theme_id": "T1",
+        "parent_code_id": "C1.1",
+        "hierarchy_level": 2,
+        "child_codes": []
+      },
+      {
+        "code_id": "C1.2",
+        "name": "Literature Review Automation",
+        "definition": "Automation of tasks involved in conducting literature reviews using AI.",
+        "frequency": 15,
+        "interviews_present": [
+          "Interview 001",
+          "Interview 002",
+          "Interview 003",
+          "Interview 004",
+          "Interview 005",
+          "Interview 006",
+          "Interview 007",
+          "Interview 008",
+          "Interview 009",
+          "Interview 010",
+          "Interview 011",
+          "Interview 013",
+          "Interview 014",
+          "Interview 015",
+          "Interview 018"
+        ],
+        "key_quotes": [],
+        "first_appearance": "Interview 001",
+        "evolution_notes": "Identified through global analysis",
+        "saturation_point": "Interview 014",
+        "theme_id": "T1",
+        "parent_code_id": "C1",
+        "hierarchy_level": 1,
+        "child_codes": [
+          "C1.2.1",
+          "C1.2.2",
+          "C1.2.3",
+          "C1.2.4",
+          "C1.2.5"
+        ]
+      },
+      {
+        "code_id": "C1.2.1",
+        "name": "AI Search Strategy",
+        "definition": "Using AI to develop or refine search strategies for literature reviews, including keyword generation and Boolean logic.",
+        "frequency": 3,
+        "interviews_present": [
+          "Interview 001",
+          "Interview 004",
+          "Interview 009"
+        ],
+        "key_quotes": [],
+        "first_appearance": "Interview 001",
+        "evolution_notes": "Identified through global analysis",
+        "saturation_point": "Interview 014",
+        "theme_id": "T1",
+        "parent_code_id": "C1.2",
+        "hierarchy_level": 2,
+        "child_codes": []
+      },
+      {
+        "code_id": "C1.2.2",
+        "name": "AI Document Summarization",
+        "definition": "Using AI to summarize academic papers, reports, or other documents for literature reviews.",
+        "frequency": 7,
+        "interviews_present": [
+          "Interview 003",
+          "Interview 005",
+          "Interview 007",
+          "Interview 008",
+          "Interview 009",
+          "Interview 010",
+          "Interview 011"
+        ],
+        "key_quotes": [],
+        "first_appearance": "Interview 003",
+        "evolution_notes": "Identified through global analysis",
+        "saturation_point": "Interview 014",
+        "theme_id": "T1",
+        "parent_code_id": "C1.2",
+        "hierarchy_level": 2,
+        "child_codes": []
+      },
+      {
+        "code_id": "C1.2.3",
+        "name": "AI Data Extraction",
+        "definition": "Using AI to extract specific data points, facts, or information from documents for structured literature reviews or databases.",
+        "frequency": 6,
+        "interviews_present": [
+          "Interview 003",
+          "Interview 005",
+          "Interview 006",
+          "Interview 012",
+          "Interview 013",
+          "Interview 018"
+        ],
+        "key_quotes": [],
+        "first_appearance": "Interview 003",
+        "evolution_notes": "Identified through global analysis",
+        "saturation_point": "Interview 014",
+        "theme_id": "T1",
+        "parent_code_id": "C1.2",
+        "hierarchy_level": 2,
+        "child_codes": []
+      },
+      {
+        "code_id": "C1.2.4",
+        "name": "AI Gap Identification",
+        "definition": "Using AI to identify gaps in existing literature or research, particularly for proposal development.",
+        "frequency": 2,
+        "interviews_present": [
+          "Interview 009",
+          "Interview 018"
+        ],
+        "key_quotes": [],
+        "first_appearance": "Interview 009",
+        "evolution_notes": "Identified through global analysis",
+        "saturation_point": "Interview 014",
+        "theme_id": "T1",
+        "parent_code_id": "C1.2",
+        "hierarchy_level": 2,
+        "child_codes": []
+      },
+      {
+        "code_id": "C1.2.5",
+        "name": "AI Source Validation",
+        "definition": "Using AI to validate the accuracy and credibility of sources or information found during literature reviews.",
+        "frequency": 2,
+        "interviews_present": [
+          "Interview 005",
+          "Interview 009"
+        ],
+        "key_quotes": [],
+        "first_appearance": "Interview 005",
+        "evolution_notes": "Identified through global analysis",
+        "saturation_point": "Interview 014",
+        "theme_id": "T1",
+        "parent_code_id": "C1.2",
+        "hierarchy_level": 2,
+        "child_codes": []
+      },
+      {
+        "code_id": "C1.3",
+        "name": "Quantitative Analysis Automation",
+        "definition": "Automation of quantitative research tasks using AI.",
+        "frequency": 10,
+        "interviews_present": [
+          "Interview 001",
+          "Interview 003",
+          "Interview 005",
+          "Interview 006",
+          "Interview 009",
+          "Interview 012",
+          "Interview 013",
+          "Interview 014",
+          "Interview 016",
+          "Interview 018"
+        ],
+        "key_quotes": [],
+        "first_appearance": "Interview 001",
+        "evolution_notes": "Identified through global analysis",
+        "saturation_point": "Interview 014",
+        "theme_id": "T1",
+        "parent_code_id": "C1",
+        "hierarchy_level": 1,
+        "child_codes": [
+          "C1.3.1",
+          "C1.3.2",
+          "C1.3.3",
+          "C1.3.4"
+        ]
+      },
+      {
+        "code_id": "C1.3.1",
+        "name": "AI Code Generation/Correction",
+        "definition": "Using AI to generate, correct, or optimize statistical programming code (e.g., R, Python, Stata).",
+        "frequency": 6,
+        "interviews_present": [
+          "Interview 003",
+          "Interview 005",
+          "Interview 012",
+          "Interview 013",
+          "Interview 016",
+          "Interview 018"
+        ],
+        "key_quotes": [],
+        "first_appearance": "Interview 003",
+        "evolution_notes": "Identified through global analysis",
+        "saturation_point": "Interview 014",
+        "theme_id": "T1",
+        "parent_code_id": "C1.3",
+        "hierarchy_level": 2,
+        "child_codes": []
+      },
+      {
+        "code_id": "C1.3.2",
+        "name": "AI Statistical Model Optimization",
+        "definition": "Using AI to optimize or refine statistical models, including parameter tuning and model selection.",
+        "frequency": 3,
+        "interviews_present": [
+          "Interview 003",
+          "Interview 009",
+          "Interview 012"
+        ],
+        "key_quotes": [],
+        "first_appearance": "Interview 003",
+        "evolution_notes": "Identified through global analysis",
+        "saturation_point": "Interview 014",
+        "theme_id": "T1",
+        "parent_code_id": "C1.3",
+        "hierarchy_level": 2,
+        "child_codes": []
+      },
+      {
+        "code_id": "C1.3.3",
+        "name": "AI Data Wrangling",
+        "definition": "Using AI to assist with data wrangling, cleaning, merging, and formatting large datasets.",
+        "frequency": 4,
+        "interviews_present": [
+          "Interview 012",
+          "Interview 013",
+          "Interview 014",
+          "Interview 018"
+        ],
+        "key_quotes": [],
+        "first_appearance": "Interview 012",
+        "evolution_notes": "Identified through global analysis",
+        "saturation_point": "Interview 014",
+        "theme_id": "T1",
+        "parent_code_id": "C1.3",
+        "hierarchy_level": 2,
+        "child_codes": []
+      },
+      {
+        "code_id": "C1.3.4",
+        "name": "AI Entity Resolution",
+        "definition": "Using AI or machine learning for entity resolution, linking records across disparate datasets.",
+        "frequency": 1,
+        "interviews_present": [
+          "Interview 012"
+        ],
+        "key_quotes": [],
+        "first_appearance": "Interview 012",
+        "evolution_notes": "Identified through global analysis",
+        "saturation_point": "Interview 014",
+        "theme_id": "T1",
+        "parent_code_id": "C1.3",
+        "hierarchy_level": 2,
+        "child_codes": []
+      },
+      {
+        "code_id": "C1.4",
+        "name": "Research Workflow Automation",
+        "definition": "Automation of general research workflow tasks using AI.",
+        "frequency": 15,
+        "interviews_present": [
+          "Interview 003",
+          "Interview 004",
+          "Interview 005",
+          "Interview 006",
+          "Interview 007",
+          "Interview 008",
+          "Interview 009",
+          "Interview 010",
+          "Interview 011",
+          "Interview 012",
+          "Interview 013",
+          "Interview 014",
+          "Interview 015",
+          "Interview 016",
+          "Interview 018"
+        ],
+        "key_quotes": [],
+        "first_appearance": "Interview 003",
+        "evolution_notes": "Identified through global analysis",
+        "saturation_point": "Interview 014",
+        "theme_id": "T1",
+        "parent_code_id": "C1",
+        "hierarchy_level": 1,
+        "child_codes": [
+          "C1.4.1",
+          "C1.4.2",
+          "C1.4.3",
+          "C1.4.4",
+          "C1.4.5",
+          "C1.4.6",
+          "C1.4.7",
+          "C1.4.8",
+          "C1.4.9"
+        ]
+      },
+      {
+        "code_id": "C1.4.1",
+        "name": "AI Meeting Minutes",
+        "definition": "Using AI to transcribe, summarize, or extract key decisions and action items from meeting minutes.",
+        "frequency": 4,
+        "interviews_present": [
+          "Interview 003",
+          "Interview 007",
+          "Interview 010",
+          "Interview 011"
+        ],
+        "key_quotes": [],
+        "first_appearance": "Interview 003",
+        "evolution_notes": "Identified through global analysis",
+        "saturation_point": "Interview 014",
+        "theme_id": "T1",
+        "parent_code_id": "C1.4",
+        "hierarchy_level": 2,
+        "child_codes": []
+      },
+      {
+        "code_id": "C1.4.2",
+        "name": "AI Proposal Writing",
+        "definition": "Using AI to assist with drafting, structuring, or generating content for research proposals.",
+        "frequency": 7,
+        "interviews_present": [
+          "Interview 005",
+          "Interview 008",
+          "Interview 009",
+          "Interview 010",
+          "Interview 011",
+          "Interview 013",
+          "Interview 018"
+        ],
+        "key_quotes": [],
+        "first_appearance": "Interview 005",
+        "evolution_notes": "Identified through global analysis",
+        "saturation_point": "Interview 014",
+        "theme_id": "T1",
+        "parent_code_id": "C1.4",
+        "hierarchy_level": 2,
+        "child_codes": []
+      },
+      {
+        "code_id": "C1.4.3",
+        "name": "AI Report Generation/Editing",
+        "definition": "Using AI for editing, proofreading, formatting, or generating sections of research reports.",
+        "frequency": 7,
+        "interviews_present": [
+          "Interview 003",
+          "Interview 007",
+          "Interview 010",
+          "Interview 011",
+          "Interview 013",
+          "Interview 015",
+          "Interview 016"
+        ],
+        "key_quotes": [],
+        "first_appearance": "Interview 003",
+        "evolution_notes": "Identified through global analysis",
+        "saturation_point": "Interview 014",
+        "theme_id": "T1",
+        "parent_code_id": "C1.4",
+        "hierarchy_level": 2,
+        "child_codes": []
+      },
+      {
+        "code_id": "C1.4.4",
+        "name": "AI Dissemination/Communication",
+        "definition": "Using AI to assist with disseminating research findings, such as creating podcasts, graphics, or lay summaries.",
+        "frequency": 3,
+        "interviews_present": [
+          "Interview 009",
+          "Interview 010",
+          "Interview 011"
+        ],
+        "key_quotes": [],
+        "first_appearance": "Interview 009",
+        "evolution_notes": "Identified through global analysis",
+        "saturation_point": "Interview 014",
+        "theme_id": "T1",
+        "parent_code_id": "C1.4",
+        "hierarchy_level": 2,
+        "child_codes": []
+      },
+      {
+        "code_id": "C1.4.5",
+        "name": "AI Wargaming/TTX Augmentation",
+        "definition": "Using AI to conceptualize, adjudicate, or augment player roles in wargames and tabletop exercises.",
+        "frequency": 4,
+        "interviews_present": [
+          "Interview 002",
+          "Interview 007",
+          "Interview 010",
+          "Interview 011"
+        ],
+        "key_quotes": [],
+        "first_appearance": "Interview 002",
+        "evolution_notes": "Identified through global analysis",
+        "saturation_point": "Interview 014",
+        "theme_id": "T1",
+        "parent_code_id": "C1.4",
+        "hierarchy_level": 2,
+        "child_codes": []
+      },
+      {
+        "code_id": "C1.4.6",
+        "name": "AI Forecasting",
+        "definition": "Using AI models to assist with forecasting, including scenario generation and training on forecaster data.",
+        "frequency": 3,
+        "interviews_present": [
+          "Interview 002",
+          "Interview 007",
+          "Interview 017"
+        ],
+        "key_quotes": [],
+        "first_appearance": "Interview 002",
+        "evolution_notes": "Identified through global analysis",
+        "saturation_point": "Interview 014",
+        "theme_id": "T1",
+        "parent_code_id": "C1.4",
+        "hierarchy_level": 2,
+        "child_codes": []
+      },
+      {
+        "code_id": "C1.4.7",
+        "name": "AI Survey Design",
+        "definition": "Using AI to assist with designing survey instruments or generating synthetic survey populations.",
+        "frequency": 3,
+        "interviews_present": [
+          "Interview 009",
+          "Interview 014",
+          "Interview 016"
+        ],
+        "key_quotes": [],
+        "first_appearance": "Interview 009",
+        "evolution_notes": "Identified through global analysis",
+        "saturation_point": "Interview 014",
+        "theme_id": "T1",
+        "parent_code_id": "C1.4",
+        "hierarchy_level": 2,
+        "child_codes": []
+      },
+      {
+        "code_id": "C1.4.8",
+        "name": "AI Partner Identification",
+        "definition": "Using AI to identify potential research partners or collaborators.",
+        "frequency": 2,
+        "interviews_present": [
+          "Interview 001",
+          "Interview 016"
+        ],
+        "key_quotes": [],
+        "first_appearance": "Interview 001",
+        "evolution_notes": "Identified through global analysis",
+        "saturation_point": "Interview 014",
+        "theme_id": "T1",
+        "parent_code_id": "C1.4",
+        "hierarchy_level": 2,
+        "child_codes": []
+      },
+      {
+        "code_id": "C1.4.9",
+        "name": "AI 508 Compliance",
+        "definition": "Using AI to ensure research products comply with accessibility standards (e.g., 508 compliance).",
+        "frequency": 1,
+        "interviews_present": [
+          "Interview 016"
+        ],
+        "key_quotes": [],
+        "first_appearance": "Interview 016",
+        "evolution_notes": "Identified through global analysis",
+        "saturation_point": "Interview 014",
+        "theme_id": "T1",
+        "parent_code_id": "C1.4",
+        "hierarchy_level": 2,
+        "child_codes": []
+      },
+      {
+        "code_id": "C2.1",
+        "name": "Accuracy and Trust",
+        "definition": "Concerns related to the accuracy, reliability, and trustworthiness of AI outputs.",
+        "frequency": 14,
+        "interviews_present": [
+          "Interview 001",
+          "Interview 003",
+          "Interview 004",
+          "Interview 005",
+          "Interview 006",
+          "Interview 007",
+          "Interview 008",
+          "Interview 009",
+          "Interview 010",
+          "Interview 011",
+          "Interview 012",
+          "Interview 013",
+          "Interview 014",
+          "Interview 016"
+        ],
+        "key_quotes": [],
+        "first_appearance": "Interview 001",
+        "evolution_notes": "Identified through global analysis",
+        "saturation_point": "Interview 014",
+        "theme_id": "T2",
+        "parent_code_id": "C2",
+        "hierarchy_level": 1,
+        "child_codes": [
+          "C2.1.1",
+          "C2.1.2",
+          "C2.1.3",
+          "C2.1.4"
+        ]
+      },
+      {
+        "code_id": "C2.1.1",
+        "name": "Hallucinations",
+        "definition": "AI generating false or non-existent information, such as fabricated citations or data.",
+        "frequency": 8,
+        "interviews_present": [
+          "Interview 001",
+          "Interview 004",
+          "Interview 005",
+          "Interview 008",
+          "Interview 009",
+          "Interview 010",
+          "Interview 011",
+          "Interview 016"
+        ],
+        "key_quotes": [],
+        "first_appearance": "Interview 001",
+        "evolution_notes": "Identified through global analysis",
+        "saturation_point": "Interview 014",
+        "theme_id": "T2",
+        "parent_code_id": "C2.1",
+        "hierarchy_level": 2,
+        "child_codes": []
+      },
+      {
+        "code_id": "C2.1.2",
+        "name": "Nuance and Context Loss",
+        "definition": "AI's inability to capture subtle meanings, context, or complex nuances in data.",
+        "frequency": 7,
+        "interviews_present": [
+          "Interview 001",
+          "Interview 004",
+          "Interview 005",
+          "Interview 008",
+          "Interview 009",
+          "Interview 012",
+          "Interview 013"
+        ],
+        "key_quotes": [],
+        "first_appearance": "Interview 001",
+        "evolution_notes": "Identified through global analysis",
+        "saturation_point": "Interview 014",
+        "theme_id": "T2",
+        "parent_code_id": "C2.1",
+        "hierarchy_level": 2,
+        "child_codes": []
+      },
+      {
+        "code_id": "C2.1.3",
+        "name": "Bias in AI",
+        "definition": "The potential for AI models to perpetuate or reify existing biases present in their training data or programming.",
+        "frequency": 2,
+        "interviews_present": [
+          "Interview 008",
+          "Interview 014"
+        ],
+        "key_quotes": [],
+        "first_appearance": "Interview 008",
+        "evolution_notes": "Identified through global analysis",
+        "saturation_point": "Interview 014",
+        "theme_id": "T2",
+        "parent_code_id": "C2.1",
+        "hierarchy_level": 2,
+        "child_codes": []
+      },
+      {
+        "code_id": "C2.1.4",
+        "name": "Over-reliance/Blind Trust",
+        "definition": "Researchers blindly trusting AI outputs without sufficient verification or critical assessment.",
+        "frequency": 5,
+        "interviews_present": [
+          "Interview 005",
+          "Interview 008",
+          "Interview 013",
+          "Interview 016",
+          "Interview 018"
+        ],
+        "key_quotes": [],
+        "first_appearance": "Interview 005",
+        "evolution_notes": "Identified through global analysis",
+        "saturation_point": "Interview 014",
+        "theme_id": "T2",
+        "parent_code_id": "C2.1",
+        "hierarchy_level": 2,
+        "child_codes": []
+      },
+      {
+        "code_id": "C2.2",
+        "name": "Ethical and Methodological Concerns",
+        "definition": "Ethical dilemmas and methodological challenges arising from AI integration in research.",
+        "frequency": 10,
+        "interviews_present": [
+          "Interview 003",
+          "Interview 004",
+          "Interview 005",
+          "Interview 006",
+          "Interview 008",
+          "Interview 009",
+          "Interview 012",
+          "Interview 013",
+          "Interview 014",
+          "Interview 018"
+        ],
+        "key_quotes": [],
+        "first_appearance": "Interview 003",
+        "evolution_notes": "Identified through global analysis",
+        "saturation_point": "Interview 014",
+        "theme_id": "T2",
+        "parent_code_id": "C2",
+        "hierarchy_level": 1,
+        "child_codes": [
+          "C2.2.1",
+          "C2.2.2",
+          "C2.2.3",
+          "C2.2.4",
+          "C2.2.5"
+        ]
+      },
+      {
+        "code_id": "C2.2.1",
+        "name": "Data Privacy/CUI",
+        "definition": "Concerns about handling sensitive or classified data (CUI) with AI tools, including data leakage and de-identification challenges.",
+        "frequency": 6,
+        "interviews_present": [
+          "Interview 004",
+          "Interview 006",
+          "Interview 012",
+          "Interview 013",
+          "Interview 014",
+          "Interview 015"
+        ],
+        "key_quotes": [],
+        "first_appearance": "Interview 004",
+        "evolution_notes": "Identified through global analysis",
+        "saturation_point": "Interview 014",
+        "theme_id": "T2",
+        "parent_code_id": "C2.2",
+        "hierarchy_level": 2,
+        "child_codes": []
+      },
+      {
+        "code_id": "C2.2.2",
+        "name": "Consent for Data Use",
+        "definition": "The necessity of obtaining informed consent from research participants for their data to be used in AI training or analysis.",
+        "frequency": 1,
+        "interviews_present": [
+          "Interview 014"
+        ],
+        "key_quotes": [],
+        "first_appearance": "Interview 014",
+        "evolution_notes": "Identified through global analysis",
+        "saturation_point": "Interview 014",
+        "theme_id": "T2",
+        "parent_code_id": "C2.2",
+        "hierarchy_level": 2,
+        "child_codes": []
+      },
+      {
+        "code_id": "C2.2.3",
+        "name": "Impact on Researcher Skill Development",
+        "definition": "The potential negative impact of AI automation on the skill development and career paths of junior researchers and RAs.",
+        "frequency": 4,
+        "interviews_present": [
+          "Interview 002",
+          "Interview 005",
+          "Interview 008",
+          "Interview 018"
+        ],
+        "key_quotes": [],
+        "first_appearance": "Interview 002",
+        "evolution_notes": "Identified through global analysis",
+        "saturation_point": "Interview 014",
+        "theme_id": "T2",
+        "parent_code_id": "C2.2",
+        "hierarchy_level": 2,
+        "child_codes": []
+      },
+      {
+        "code_id": "C2.2.4",
+        "name": "Loss of Data Intimacy",
+        "definition": "The risk of losing deep understanding or 'intimacy' with the data when AI performs analysis, potentially missing emergent insights.",
+        "frequency": 4,
+        "interviews_present": [
+          "Interview 001",
+          "Interview 013",
+          "Interview 014",
+          "Interview 018"
+        ],
+        "key_quotes": [],
+        "first_appearance": "Interview 001",
+        "evolution_notes": "Identified through global analysis",
+        "saturation_point": "Interview 014",
+        "theme_id": "T2",
+        "parent_code_id": "C2.2",
+        "hierarchy_level": 2,
+        "child_codes": []
+      },
+      {
+        "code_id": "C2.2.5",
+        "name": "Publication Validity",
+        "definition": "Concerns about the validity and publishability of research findings derived using AI tools, especially in academic journals.",
+        "frequency": 2,
+        "interviews_present": [
+          "Interview 009",
+          "Interview 014"
+        ],
+        "key_quotes": [],
+        "first_appearance": "Interview 009",
+        "evolution_notes": "Identified through global analysis",
+        "saturation_point": "Interview 014",
+        "theme_id": "T2",
+        "parent_code_id": "C2.2",
+        "hierarchy_level": 2,
+        "child_codes": []
+      },
+      {
+        "code_id": "C2.3",
+        "name": "Institutional Barriers",
+        "definition": "Organizational and systemic obstacles hindering AI adoption at RAND.",
+        "frequency": 12,
+        "interviews_present": [
+          "Interview 002",
+          "Interview 003",
+          "Interview 004",
+          "Interview 005",
+          "Interview 006",
+          "Interview 007",
+          "Interview 009",
+          "Interview 010",
+          "Interview 011",
+          "Interview 012",
+          "Interview 015",
+          "Interview 018"
+        ],
+        "key_quotes": [],
+        "first_appearance": "Interview 002",
+        "evolution_notes": "Identified through global analysis",
+        "saturation_point": "Interview 014",
+        "theme_id": "T2",
+        "parent_code_id": "C2",
+        "hierarchy_level": 1,
+        "child_codes": [
+          "C2.3.1",
+          "C2.3.2",
+          "C2.3.3",
+          "C2.3.4",
+          "C2.3.5"
+        ]
+      },
+      {
+        "code_id": "C2.3.1",
+        "name": "Outdated Internal Tools",
+        "definition": "RAND's internal AI tools (e.g., RANDCHAT, Muse) being perceived as less capable or outdated compared to commercial alternatives.",
+        "frequency": 7,
+        "interviews_present": [
+          "Interview 003",
+          "Interview 005",
+          "Interview 006",
+          "Interview 007",
+          "Interview 010",
+          "Interview 011",
+          "Interview 015"
+        ],
+        "key_quotes": [],
+        "first_appearance": "Interview 003",
+        "evolution_notes": "Identified through global analysis",
+        "saturation_point": "Interview 014",
+        "theme_id": "T2",
+        "parent_code_id": "C2.3",
+        "hierarchy_level": 2,
+        "child_codes": []
+      },
+      {
+        "code_id": "C2.3.2",
+        "name": "Lack of Clear Guidance",
+        "definition": "Absence of clear policies, best practices, or guidance on appropriate AI tool usage within RAND.",
+        "frequency": 8,
+        "interviews_present": [
+          "Interview 002",
+          "Interview 004",
+          "Interview 005",
+          "Interview 008",
+          "Interview 012",
+          "Interview 014",
+          "Interview 016",
+          "Interview 018"
+        ],
+        "key_quotes": [],
+        "first_appearance": "Interview 002",
+        "evolution_notes": "Identified through global analysis",
+        "saturation_point": "Interview 014",
+        "theme_id": "T2",
+        "parent_code_id": "C2.3",
+        "hierarchy_level": 2,
+        "child_codes": []
+      },
+      {
+        "code_id": "C2.3.3",
+        "name": "Data Silos/Fragmentation",
+        "definition": "Data being stored in fragmented, inconsistent systems across RAND, hindering large-scale AI analysis.",
+        "frequency": 3,
+        "interviews_present": [
+          "Interview 012",
+          "Interview 013",
+          "Interview 018"
+        ],
+        "key_quotes": [],
+        "first_appearance": "Interview 012",
+        "evolution_notes": "Identified through global analysis",
+        "saturation_point": "Interview 014",
+        "theme_id": "T2",
+        "parent_code_id": "C2.3",
+        "hierarchy_level": 2,
+        "child_codes": []
+      },
+      {
+        "code_id": "C2.3.4",
+        "name": "Cost/Resource Constraints",
+        "definition": "Insufficient budget or resources allocated for AI tool subscriptions, training, or dedicated AI personnel.",
+        "frequency": 4,
+        "interviews_present": [
+          "Interview 001",
+          "Interview 009",
+          "Interview 012",
+          "Interview 018"
+        ],
+        "key_quotes": [],
+        "first_appearance": "Interview 001",
+        "evolution_notes": "Identified through global analysis",
+        "saturation_point": "Interview 014",
+        "theme_id": "T2",
+        "parent_code_id": "C2.3",
+        "hierarchy_level": 2,
+        "child_codes": []
+      },
+      {
+        "code_id": "C2.3.5",
+        "name": "Classified Environment Limitations",
+        "definition": "Restrictions on using AI tools in classified or CUI environments, limiting adoption for sensitive projects.",
+        "frequency": 4,
+        "interviews_present": [
+          "Interview 003",
+          "Interview 004",
+          "Interview 010",
+          "Interview 011"
+        ],
+        "key_quotes": [],
+        "first_appearance": "Interview 003",
+        "evolution_notes": "Identified through global analysis",
+        "saturation_point": "Interview 014",
+        "theme_id": "T2",
+        "parent_code_id": "C2.3",
+        "hierarchy_level": 2,
+        "child_codes": []
+      },
+      {
+        "code_id": "C3.1",
+        "name": "Time Savings",
+        "definition": "AI's ability to significantly reduce the time required for various research tasks.",
+        "frequency": 14,
+        "interviews_present": [
+          "Interview 001",
+          "Interview 002",
+          "Interview 003",
+          "Interview 004",
+          "Interview 005",
+          "Interview 007",
+          "Interview 008",
+          "Interview 009",
+          "Interview 010",
+          "Interview 011",
+          "Interview 012",
+          "Interview 013",
+          "Interview 016",
+          "Interview 018"
+        ],
+        "key_quotes": [],
+        "first_appearance": "Interview 001",
+        "evolution_notes": "Identified through global analysis",
+        "saturation_point": "Interview 014",
+        "theme_id": "T3",
+        "parent_code_id": "C3",
+        "hierarchy_level": 1,
+        "child_codes": []
+      },
+      {
+        "code_id": "C3.2",
+        "name": "Capacity Augmentation",
+        "definition": "AI's potential to increase the scale or scope of research activities beyond human capacity.",
+        "frequency": 7,
+        "interviews_present": [
+          "Interview 001",
+          "Interview 004",
+          "Interview 006",
+          "Interview 012",
+          "Interview 017",
+          "Interview 018"
+        ],
+        "key_quotes": [],
+        "first_appearance": "Interview 001",
+        "evolution_notes": "Identified through global analysis",
+        "saturation_point": "Interview 014",
+        "theme_id": "T3",
+        "parent_code_id": "C3",
+        "hierarchy_level": 1,
+        "child_codes": []
+      },
+      {
+        "code_id": "C3.3",
+        "name": "New Research Avenues",
+        "definition": "AI enabling new types of research questions, methodologies, or insights previously not feasible.",
+        "frequency": 5,
+        "interviews_present": [
+          "Interview 006",
+          "Interview 007",
+          "Interview 009",
+          "Interview 014",
+          "Interview 018"
+        ],
+        "key_quotes": [],
+        "first_appearance": "Interview 006",
+        "evolution_notes": "Identified through global analysis",
+        "saturation_point": "Interview 014",
+        "theme_id": "T3",
+        "parent_code_id": "C3",
+        "hierarchy_level": 1,
+        "child_codes": []
+      },
+      {
+        "code_id": "C3.4",
+        "name": "Enhanced Quality",
+        "definition": "AI's ability to improve the quality, rigor, or consistency of research outputs.",
+        "frequency": 5,
+        "interviews_present": [
+          "Interview 003",
+          "Interview 004",
+          "Interview 012",
+          "Interview 016",
+          "Interview 018"
+        ],
+        "key_quotes": [],
+        "first_appearance": "Interview 003",
+        "evolution_notes": "Identified through global analysis",
+        "saturation_point": "Interview 014",
+        "theme_id": "T3",
+        "parent_code_id": "C3",
+        "hierarchy_level": 1,
+        "child_codes": []
+      },
+      {
+        "code_id": "C4.1",
+        "name": "Training and Education",
+        "definition": "The need for and types of training and educational initiatives to promote AI literacy and responsible use among researchers.",
+        "frequency": 6,
+        "interviews_present": [
+          "Interview 005",
+          "Interview 008",
+          "Interview 009",
+          "Interview 014",
+          "Interview 016",
+          "Interview 018"
+        ],
+        "key_quotes": [],
+        "first_appearance": "Interview 005",
+        "evolution_notes": "Identified through global analysis",
+        "saturation_point": "Interview 014",
+        "theme_id": "T4",
+        "parent_code_id": "C4",
+        "hierarchy_level": 1,
+        "child_codes": []
+      },
+      {
+        "code_id": "C4.2",
+        "name": "Incentive Structures",
+        "definition": "Mechanisms to incentivize AI adoption, such as linking AI use to project funding or researcher coverage.",
+        "frequency": 3,
+        "interviews_present": [
+          "Interview 007",
+          "Interview 012",
+          "Interview 018"
+        ],
+        "key_quotes": [],
+        "first_appearance": "Interview 007",
+        "evolution_notes": "Identified through global analysis",
+        "saturation_point": "Interview 014",
+        "theme_id": "T4",
+        "parent_code_id": "C4",
+        "hierarchy_level": 1,
+        "child_codes": []
+      },
+      {
+        "code_id": "C4.3",
+        "name": "Build vs. Buy vs. License",
+        "definition": "The strategic decision for RAND to develop its own AI tools versus acquiring or licensing commercial solutions.",
+        "frequency": 3,
+        "interviews_present": [
+          "Interview 007",
+          "Interview 012",
+          "Interview 017"
+        ],
+        "key_quotes": [],
+        "first_appearance": "Interview 007",
+        "evolution_notes": "Identified through global analysis",
+        "saturation_point": "Interview 014",
+        "theme_id": "T4",
+        "parent_code_id": "C4",
+        "hierarchy_level": 1,
+        "child_codes": []
+      },
+      {
+        "code_id": "C4.4",
+        "name": "Strategic Roadmap",
+        "definition": "The importance of a clear, high-level strategy and roadmap for AI integration across RAND.",
+        "frequency": 1,
+        "interviews_present": [
+          "Interview 012"
+        ],
+        "key_quotes": [],
+        "first_appearance": "Interview 012",
+        "evolution_notes": "Identified through global analysis",
+        "saturation_point": "Interview 014",
+        "theme_id": "T4",
+        "parent_code_id": "C4",
+        "hierarchy_level": 1,
+        "child_codes": []
+      },
+      {
+        "code_id": "C4.5",
+        "name": "Skunkworks/Experimentation",
+        "definition": "The concept of creating dedicated spaces or teams for AI experimentation without immediate brand risk.",
+        "frequency": 2,
+        "interviews_present": [
+          "Interview 016",
+          "Interview 018"
+        ],
+        "key_quotes": [],
+        "first_appearance": "Interview 016",
+        "evolution_notes": "Identified through global analysis",
+        "saturation_point": "Interview 014",
+        "theme_id": "T4",
+        "parent_code_id": "C4",
+        "hierarchy_level": 1,
+        "child_codes": []
+      },
+      {
+        "code_id": "C5.1",
+        "name": "Data Wrangling",
+        "definition": "The process of cleaning, transforming, and preparing raw data for analysis.",
+        "frequency": 5,
+        "interviews_present": [
+          "Interview 004",
+          "Interview 005",
+          "Interview 012",
+          "Interview 013",
+          "Interview 018"
+        ],
+        "key_quotes": [],
+        "first_appearance": "Interview 004",
+        "evolution_notes": "Identified through global analysis",
+        "saturation_point": "Interview 014",
+        "theme_id": "T5",
+        "parent_code_id": "C5",
+        "hierarchy_level": 1,
+        "child_codes": []
+      },
+      {
+        "code_id": "C5.2",
+        "name": "Data Lakes",
+        "definition": "Large, unstructured repositories of raw data that can be used for large-scale AI analysis.",
+        "frequency": 2,
+        "interviews_present": [
+          "Interview 012",
+          "Interview 018"
+        ],
+        "key_quotes": [],
+        "first_appearance": "Interview 012",
+        "evolution_notes": "Identified through global analysis",
+        "saturation_point": "Interview 014",
+        "theme_id": "T5",
+        "parent_code_id": "C5",
+        "hierarchy_level": 1,
+        "child_codes": []
+      },
+      {
+        "code_id": "C5.3",
+        "name": "Data Standardization",
+        "definition": "The process of ensuring data consistency and compatibility across different sources and formats.",
+        "frequency": 3,
+        "interviews_present": [
+          "Interview 002",
+          "Interview 006",
+          "Interview 012"
+        ],
+        "key_quotes": [],
+        "first_appearance": "Interview 002",
+        "evolution_notes": "Identified through global analysis",
+        "saturation_point": "Interview 014",
+        "theme_id": "T5",
+        "parent_code_id": "C5",
+        "hierarchy_level": 1,
+        "child_codes": []
+      },
+      {
+        "code_id": "C5.4",
+        "name": "Data Access",
+        "definition": "Challenges and opportunities related to obtaining and utilizing relevant data for research.",
+        "frequency": 5,
+        "interviews_present": [
+          "Interview 001",
+          "Interview 006",
+          "Interview 012",
+          "Interview 013",
+          "Interview 018"
+        ],
+        "key_quotes": [],
+        "first_appearance": "Interview 001",
+        "evolution_notes": "Identified through global analysis",
+        "saturation_point": "Interview 014",
+        "theme_id": "T5",
+        "parent_code_id": "C5",
+        "hierarchy_level": 1,
+        "child_codes": []
+      },
+      {
+        "code_id": "C1",
+        "name": "AI Applications",
+        "definition": "Specific applications of AI tools and models across various research methodologies.",
+        "frequency": 18,
+        "interviews_present": [
+          "Interview 001",
+          "Interview 002",
+          "Interview 003",
+          "Interview 004",
+          "Interview 005",
+          "Interview 006",
+          "Interview 007",
+          "Interview 008",
+          "Interview 009",
+          "Interview 010",
+          "Interview 011",
+          "Interview 012",
+          "Interview 013",
+          "Interview 014",
+          "Interview 015",
+          "Interview 016",
+          "Interview 017",
+          "Interview 018"
+        ],
+        "key_quotes": [],
+        "first_appearance": "Interview 001",
+        "evolution_notes": "Identified through global analysis",
+        "saturation_point": "Interview 014",
+        "theme_id": "T1",
+        "parent_code_id": null,
+        "hierarchy_level": 0,
+        "child_codes": [
+          "C1.1",
+          "C1.2",
+          "C1.3",
+          "C1.4"
+        ]
+      },
+      {
+        "code_id": "C2",
+        "name": "Challenges and Risks",
+        "definition": "The difficulties, limitations, and potential negative consequences associated with integrating AI into research practices.",
+        "frequency": 18,
+        "interviews_present": [
+          "Interview 001",
+          "Interview 002",
+          "Interview 003",
+          "Interview 004",
+          "Interview 005",
+          "Interview 006",
+          "Interview 007",
+          "Interview 008",
+          "Interview 009",
+          "Interview 010",
+          "Interview 011",
+          "Interview 012",
+          "Interview 013",
+          "Interview 014",
+          "Interview 015",
+          "Interview 016",
+          "Interview 017",
+          "Interview 018"
+        ],
+        "key_quotes": [],
+        "first_appearance": "Interview 001",
+        "evolution_notes": "Identified through global analysis",
+        "saturation_point": "Interview 014",
+        "theme_id": "T2",
+        "parent_code_id": null,
+        "hierarchy_level": 0,
+        "child_codes": [
+          "C2.1",
+          "C2.2",
+          "C2.3"
+        ]
+      },
+      {
+        "code_id": "C3",
+        "name": "Opportunities and Benefits",
+        "definition": "The benefits and new possibilities that AI offers for enhancing research processes and outcomes.",
+        "frequency": 18,
+        "interviews_present": [
+          "Interview 001",
+          "Interview 002",
+          "Interview 003",
+          "Interview 004",
+          "Interview 005",
+          "Interview 006",
+          "Interview 007",
+          "Interview 008",
+          "Interview 009",
+          "Interview 010",
+          "Interview 011",
+          "Interview 012",
+          "Interview 013",
+          "Interview 014",
+          "Interview 015",
+          "Interview 016",
+          "Interview 017",
+          "Interview 018"
+        ],
+        "key_quotes": [],
+        "first_appearance": "Interview 001",
+        "evolution_notes": "Identified through global analysis",
+        "saturation_point": "Interview 014",
+        "theme_id": "T3",
+        "parent_code_id": null,
+        "hierarchy_level": 0,
+        "child_codes": [
+          "C3.1",
+          "C3.2",
+          "C3.3",
+          "C3.4"
+        ]
+      },
+      {
+        "code_id": "C4",
+        "name": "Institutional Adoption",
+        "definition": "Strategies and considerations for RAND to effectively and responsibly integrate AI into its institutional practices.",
+        "frequency": 14,
+        "interviews_present": [
+          "Interview 002",
+          "Interview 003",
+          "Interview 004",
+          "Interview 005",
+          "Interview 006",
+          "Interview 007",
+          "Interview 008",
+          "Interview 009",
+          "Interview 010",
+          "Interview 011",
+          "Interview 012",
+          "Interview 014",
+          "Interview 016",
+          "Interview 018"
+        ],
+        "key_quotes": [],
+        "first_appearance": "Interview 002",
+        "evolution_notes": "Identified through global analysis",
+        "saturation_point": "Interview 014",
+        "theme_id": "T4",
+        "parent_code_id": null,
+        "hierarchy_level": 0,
+        "child_codes": [
+          "C4.1",
+          "C4.2",
+          "C4.3",
+          "C4.4",
+          "C4.5"
+        ]
+      },
+      {
+        "code_id": "C5",
+        "name": "Data Management",
+        "definition": "Aspects related to the collection, organization, and quality of data in the context of AI-driven research.",
+        "frequency": 10,
+        "interviews_present": [
+          "Interview 001",
+          "Interview 004",
+          "Interview 005",
+          "Interview 006",
+          "Interview 012",
+          "Interview 013",
+          "Interview 014",
+          "Interview 015",
+          "Interview 016",
+          "Interview 018"
+        ],
+        "key_quotes": [],
+        "first_appearance": "Interview 001",
+        "evolution_notes": "Identified through global analysis",
+        "saturation_point": "Interview 014",
+        "theme_id": "T5",
+        "parent_code_id": null,
+        "hierarchy_level": 0,
+        "child_codes": [
+          "C5.1",
+          "C5.2",
+          "C5.3",
+          "C5.4"
+        ]
+      }
+    ],
+    "categories": [],
+    "quote_chains": [
+      {
+        "chain_id": "QC_001",
+        "theme_id": "T1",
+        "chain_type": "problem_solution",
+        "description": "This chain illustrates the common problem of qualitative data coding being time-consuming and annoying, and the proposed AI solution to automate this process.",
+        "quotes_sequence": [
+          {
+            "quote_id": "QC_001_Q1",
+            "interview_id": "INT_001",
+            "interview_name": "Interview 001",
+            "text": "Sara McCleskey: 'Coding large amounts of data. Coding Is very annoying.' (Interview 001)",
+            "line_number": 1,
+            "context": "From quote chain",
+            "speaker_role": null
+          },
+          {
+            "quote_id": "QC_001_Q2",
+            "interview_id": "INT_001",
+            "interview_name": "Interview 001",
+            "text": "Douglas Yeung: 'I was gonna get too, Todd, if you asked what the most difficult one I was thinking about my least favorite one, which I think is what Sarah said (coding). And I mean it takes the longest also.' (Interview 001)",
+            "line_number": 1,
+            "context": "From quote chain",
+            "speaker_role": null
+          },
+          {
+            "quote_id": "QC_001_Q3",
+            "interview_id": "INT_001",
+            "interview_name": "Interview 001",
+            "text": "Molly Dunnigan: 'Interview coding, something way better than Dedoose. We do a lot of interviews and the coding is uneven in quality. So it would be great if we had some standard way to do that and a tool to help with that.' (Interview 002)",
+            "line_number": 1,
+            "context": "From quote chain",
+            "speaker_role": null
+          },
+          {
+            "quote_id": "QC_001_Q4",
+            "interview_id": "INT_001",
+            "interview_name": "Interview 001",
+            "text": "Katherine Watkins: 'But in terms of the being able to analyse the data and to and to pull out themes. That seems very straightforward and something that AI could.' (Interview 003)",
+            "line_number": 1,
+            "context": "From quote chain",
+            "speaker_role": null
+          },
+          {
+            "quote_id": "QC_001_Q5",
+            "interview_id": "INT_001",
+            "interview_name": "Interview 001",
+            "text": "Ryan Brown: 'I mean, I am less skeptical, I guess of current capabilities for analysis, which is the most. The most burdensome usually. Stage of qualitative analysis and the most expensive because right now to do it well, we do it with teams of people... What I've seen with Muse. Is that yes, there are still some weaknesses... but it's so much faster you can load? Way and analyze way more documents.' (Interview 004)",
+            "line_number": 1,
+            "context": "From quote chain",
+            "speaker_role": null
+          }
+        ],
+        "key_transition_points": [],
+        "interpretation": "This chain illustrates the common problem of qualitative data coding being time-consuming and annoying, and the proposed AI solution to automate this process."
+      },
+      {
+        "chain_id": "QC_002",
+        "theme_id": "T3",
+        "chain_type": "evolution",
+        "description": "This chain shows the evolving understanding of AI's role from a simple task automation tool to a 'Co-researcher' or 'idea processor'.",
+        "quotes_sequence": [
+          {
+            "quote_id": "QC_002_Q1",
+            "interview_id": "INT_001",
+            "interview_name": "Interview 001",
+            "text": "Joie Acosta: 'I think finding people maybe supporting scheduling like that kind of thing feels like like AI could nail that out of the park. But that's just maybe my opinion.' (Interview 001)",
+            "line_number": 1,
+            "context": "From quote chain",
+            "speaker_role": null
+          },
+          {
+            "quote_id": "QC_002_Q2",
+            "interview_id": "INT_001",
+            "interview_name": "Interview 001",
+            "text": "Katherine Watkins: 'But in terms of the being able to analyse the data and to and to pull out themes. That seems very straightforward and something that AI could.' (Interview 003)",
+            "line_number": 1,
+            "context": "From quote chain",
+            "speaker_role": null
+          },
+          {
+            "quote_id": "QC_002_Q3",
+            "interview_id": "INT_001",
+            "interview_name": "Interview 001",
+            "text": "Timothy Gulden: 'I'm I'm kinda becoming trying to become a a really a prompt whisper trying to come up with a ways to get AI to really responsibly. Do you know to do to not have a word processor but have. An idea processor and and just how much? How far can I push it to make it do things?' (Interview 009)",
+            "line_number": 1,
+            "context": "From quote chain",
+            "speaker_role": null
+          },
+          {
+            "quote_id": "QC_002_Q4",
+            "interview_id": "INT_001",
+            "interview_name": "Interview 001",
+            "text": "Alice Huguet: 'I'm so glad he said that. Like thinking of it as a Co researcher, I feel like that. Like I know this is not what you're digging into, but I feel like that needs to be our messaging to Rand researchers generally is like this is you're not like giving over your analysis to this program, it's it. Like it? Like an intern on your project? Or it is a, you know, a Co researcher who can help you think through ideas.' (Interview 014)",
+            "line_number": 1,
+            "context": "From quote chain",
+            "speaker_role": null
+          },
+          {
+            "quote_id": "QC_002_Q5",
+            "interview_id": "INT_001",
+            "interview_name": "Interview 001",
+            "text": "Dulani Woods: 'I think if people can get into AI, don't know a thinking conversational. Situation with these tools. I do think you'll be able to maybe fill in some of these gaps like I'm going to be at a different level of talking.' (Interview 018)",
+            "line_number": 1,
+            "context": "From quote chain",
+            "speaker_role": null
+          }
+        ],
+        "key_transition_points": [],
+        "interpretation": "This chain shows the evolving understanding of AI's role from a simple task automation tool to a 'Co-researcher' or 'idea processor'."
+      },
+      {
+        "chain_id": "QC_003",
+        "theme_id": "T5",
+        "chain_type": "problem_solution",
+        "description": "This chain highlights the challenge of RAND's fragmented data storage and the proposed solution of data lakes or standardized data pipelines to enable large-scale AI analysis.",
+        "quotes_sequence": [
+          {
+            "quote_id": "QC_003_Q1",
+            "interview_id": "INT_001",
+            "interview_name": "Interview 001",
+            "text": "Brandon De Bruhl: 'A lot of AI tools in the computer science sort of realm are built around the concepts of data lakes, and I think Rand's a general organizational architecture is anathema to the concept of a data lake... the fragmentation across how we store data, we don't have a data we don't have like a a data process for like integrating data. We don't have standards when it comes to like actually building data toolkits and it gets really, really difficult to integrate.' (Interview 012)",
+            "line_number": 1,
+            "context": "From quote chain",
+            "speaker_role": null
+          },
+          {
+            "quote_id": "QC_003_Q2",
+            "interview_id": "INT_001",
+            "interview_name": "Interview 001",
+            "text": "Jonathan Cantor: 'I have actually tried to instill this on projects now, like I'm trying to do build my own data lake for a five year NIHR one where we're taking Rand specific data and doing best practices. The best of the best ways possible. It's extremely Exp. It's eating up a bunch of our budget, but like we're trying to do that.' (Interview 012)",
+            "line_number": 1,
+            "context": "From quote chain",
+            "speaker_role": null
+          },
+          {
+            "quote_id": "QC_003_Q3",
+            "interview_id": "INT_001",
+            "interview_name": "Interview 001",
+            "text": "Thomas Light: 'I think like curating data sets, like creating data sets for you or merging disparate data sets together in a way that like is analytically usable could be a really powerful application. I think of AI.' (Interview 013)",
+            "line_number": 1,
+            "context": "From quote chain",
+            "speaker_role": null
+          },
+          {
+            "quote_id": "QC_003_Q4",
+            "interview_id": "INT_001",
+            "interview_name": "Interview 001",
+            "text": "Brittany Clayton: 'We're actually just working on scraping all of that from the very ugly PDFs which are. Mixes of tables and text and kind of inconsistent format to get it into some sort of more usable CSV file or Excel file that would allow you to get to your analysis much more quickly.' (Interview 013)",
+            "line_number": 1,
+            "context": "From quote chain",
+            "speaker_role": null
+          }
+        ],
+        "key_transition_points": [],
+        "interpretation": "This chain highlights the challenge of RAND's fragmented data storage and the proposed solution of data lakes or standardized data pipelines to enable large-scale AI analysis."
+      }
+    ],
+    "code_progressions": [],
+    "contradictions": [
+      {
+        "contradiction_id": "CONT_001",
+        "topic": "Impact of AI on Researcher Roles and Skill Development",
+        "position_1": "AI will displace junior researchers and negatively impact skill development.",
+        "position_1_holders": [
+          "Molly Dunnigan (Arroyo SDR)",
+          "Patricia Herman (REACH Center)",
+          "Dulani Woods (Scalable Computing)"
+        ],
+        "position_1_quotes": [
+          {
+            "quote_id": "CONT_001_P1_Q1",
+            "interview_id": "INT_001",
+            "interview_name": "Interview 001",
+            "text": "Molly Dunnigan: 'The risk is that we will end up utilizing AI for stuff our junior folks used to do. We can use AI for a literature review that would have taken a RA 20 days so benefits of cost savings but I worry about career development and skillset development among the younger folks.' (Interview 002)",
+            "line_number": 1,
+            "context": "From contradiction",
+            "speaker_role": null
+          },
+          {
+            "quote_id": "CONT_001_P1_Q2",
+            "interview_id": "INT_001",
+            "interview_name": "Interview 001",
+            "text": "Patricia Herman: 'If heading toward AI\u2026 where you you have the model do the analysis, then that is negative impact on training.' (Interview 008)",
+            "line_number": 1,
+            "context": "From contradiction",
+            "speaker_role": null
+          },
+          {
+            "quote_id": "CONT_001_P1_Q3",
+            "interview_id": "INT_001",
+            "interview_name": "Interview 001",
+            "text": "Dulani Woods: 'If I need to have some knowledge base in code in order to be able to be a good coder, but this these tools are automating away all of the beat your head against the wall practice that makes. Do a good coder. Are we ever gonna have good coders again, right?' (Interview 018)",
+            "line_number": 1,
+            "context": "From contradiction",
+            "speaker_role": null
+          }
+        ],
+        "position_2": "AI will free up researchers from tedious tasks, allowing them to focus on higher-value work.",
+        "position_2_holders": [
+          "Lisa Saum-Manning (ISDP)",
+          "Heather Williams (ISDP)",
+          "Christopher Mouton (ISDP)"
+        ],
+        "position_2_quotes": [
+          {
+            "quote_id": "CONT_001_P2_Q1",
+            "interview_id": "INT_001",
+            "interview_name": "Interview 001",
+            "text": "Lisa Saum-Manning: 'I would love a finding of this, Todd to be like, OK. We figured out the things that AI can do. What can't they do so that when all of our jobs are under threat, that AI is taking over? Like what do we do better? What can it ultimately you still need us?' (Interview 010)",
+            "line_number": 1,
+            "context": "From contradiction",
+            "speaker_role": null
+          },
+          {
+            "quote_id": "CONT_001_P2_Q2",
+            "interview_id": "INT_001",
+            "interview_name": "Interview 001",
+            "text": "Heather Williams: 'And I appreciate Chris's point of like rather than trying to have it do our jobs, which we probably can only do best, why doesn't it create efficiencies for us and all of the NIM picky things that pull us away from our jobs?' (Interview 010)",
+            "line_number": 1,
+            "context": "From contradiction",
+            "speaker_role": null
+          },
+          {
+            "quote_id": "CONT_001_P2_Q3",
+            "interview_id": "INT_001",
+            "interview_name": "Interview 001",
+            "text": "Christopher Mouton: 'I think things like being able to format our documents in the ramp up standard... it just it's one of those things that just saves a lot of a lot of time. It doesn't try to solve the exquisite problem.' (Interview 010)",
+            "line_number": 1,
+            "context": "From contradiction",
+            "speaker_role": null
+          }
+        ],
+        "resolution_suggested": "The potential for AI to displace junior roles is a significant concern, but many also see it as an opportunity to automate 'nim picky' or 'grunt work,' allowing researchers to focus on higher-level analytical and creative tasks. The challenge lies in ensuring that foundational skills are still developed and that AI is used as a 'better button' rather than an 'easy button.'",
+        "theme_ids": [
+          "T2",
+          "T3"
+        ],
+        "code_ids": [
+          "C2.2.3",
+          "C3.1"
+        ]
+      },
+      {
+        "contradiction_id": "CONT_002",
+        "topic": "Reliability and Trustworthiness of AI Outputs",
+        "position_1": "AI output is often unreliable, prone to hallucinations, and requires extensive human verification, negating efficiency gains.",
+        "position_1_holders": [
+          "Ramya Chari (Qualitative Researcher)",
+          "Sara McCleskey (Health Researcher)",
+          "David Klein (Statistical Analyst)",
+          "Amy Shearer (Behavioral Scientist)",
+          "Keith Crane (Economist)",
+          "Lisa Saum-Manning (ISDP)"
+        ],
+        "position_1_quotes": [
+          {
+            "quote_id": "CONT_002_P1_Q1",
+            "interview_id": "INT_001",
+            "interview_name": "Interview 001",
+            "text": "Ramya Chari: 'I was finding that it was it was difficult for me to like a just inherently trust what it was spitting out... there were definitely, like, nuances that were missed and things that, you know were not picked up that were relevant to our project.' (Interview 001)",
+            "line_number": 1,
+            "context": "From contradiction",
+            "speaker_role": null
+          },
+          {
+            "quote_id": "CONT_002_P1_Q2",
+            "interview_id": "INT_001",
+            "interview_name": "Interview 001",
+            "text": "David Klein: 'I usually almost always get the wrong answer from AI. It almost always gives me code that is doesn't exist is incorrect, but it often gives me code that is on the right path that I might not have figured out on my own. So it gives me the right procedure or the right. Set of options and then it turns out they use the wrong word.' (Interview 012)",
+            "line_number": 1,
+            "context": "From contradiction",
+            "speaker_role": null
+          },
+          {
+            "quote_id": "CONT_002_P1_Q3",
+            "interview_id": "INT_001",
+            "interview_name": "Interview 001",
+            "text": "Lisa Saum-Manning: 'I asked Ryan's chat to give me some citations for our Africa work, and I think all four of them are fabricated.' (Interview 010)",
+            "line_number": 1,
+            "context": "From contradiction",
+            "speaker_role": null
+          }
+        ],
+        "position_2": "AI tools, while imperfect, can significantly enhance quality and efficiency, especially with proper prompting and iteration.",
+        "position_2_holders": [
+          "Ryan Brown (Qualitative Researcher)",
+          "Julia Kaufman (Qualitative Researcher)",
+          "Caroline Johnston (Operations Researcher)",
+          "Andrew Morral (Statistical Analyst)",
+          "Laurie Martin (QA Manager)"
+        ],
+        "position_2_quotes": [
+          {
+            "quote_id": "CONT_002_P2_Q1",
+            "interview_id": "INT_001",
+            "interview_name": "Interview 001",
+            "text": "Ryan Brown: 'What I've seen with Muse. Is that yes, there are still some weaknesses with sometimes over interpretation of excerpts or under interpretation, inability to notice subtleties in sarcasm or phrasing. Is that because it's so much faster you can load? Way and analyze way more documents.' (Interview 004)",
+            "line_number": 1,
+            "context": "From contradiction",
+            "speaker_role": null
+          },
+          {
+            "quote_id": "CONT_002_P2_Q2",
+            "interview_id": "INT_001",
+            "interview_name": "Interview 001",
+            "text": "Caroline Johnston: 'AI has been really helpful with writing like any type of code... it just helped me write code like so much faster. And of course checking that it's correct as well, which sometimes is not always done when people use llm's for example.' (Interview 003)",
+            "line_number": 1,
+            "context": "From contradiction",
+            "speaker_role": null
+          },
+          {
+            "quote_id": "CONT_002_P2_Q3",
+            "interview_id": "INT_001",
+            "interview_name": "Interview 001",
+            "text": "Laurie Martin: 'I have used ranchat for that before for an online tool where we had to basically write out what our figure was and so I just put up an image and I said create alt text for a screen reader to describe this and it did an amazing job. I mean, I still had to edit it, but it was a great first pass. It saved me a ton of time.' (Interview 016)",
+            "line_number": 1,
+            "context": "From contradiction",
+            "speaker_role": null
+          }
+        ],
+        "resolution_suggested": "There is a consensus that AI outputs require human verification due to hallucination and nuance issues. However, proponents argue that with proper training, iterative prompting, and integration into a human-in-the-loop workflow, AI can still provide substantial efficiency and quality gains, acting as a 'tireless research assistant' or 'Co-researcher.' The key is to define 'good enough' and establish clear validation protocols.",
+        "theme_ids": [
+          "T2",
+          "T3"
+        ],
+        "code_ids": [
+          "C2.1.1",
+          "C2.1.4",
+          "C3.4"
+        ]
+      },
+      {
+        "contradiction_id": "CONT_003",
+        "topic": "RAND's Approach to AI Tool Development: Build vs. Buy",
+        "position_1": "RAND should primarily invest in building its own proprietary AI tools to maintain competitive advantage and control.",
+        "position_1_holders": [
+          "Molly Dunnigan (Arroyo SDR)",
+          "Eric Peltz (Forecasting)"
+        ],
+        "position_1_quotes": [
+          {
+            "quote_id": "CONT_003_P1_Q1",
+            "interview_id": "INT_001",
+            "interview_name": "Interview 001",
+            "text": "Molly Dunnigan: 'My sense is the Army thinks our competitors are integrating AI wholistically... So how do we make sure we don\u2019t get put out of business in that environment. How do we maintain a competitive edge. There are ways we do that to develop propriety tools but that day is coming very quickly.' (Interview 002)",
+            "line_number": 1,
+            "context": "From contradiction",
+            "speaker_role": null
+          },
+          {
+            "quote_id": "CONT_003_P1_Q2",
+            "interview_id": "INT_001",
+            "interview_name": "Interview 001",
+            "text": "Eric Peltz: 'He wants us to do it all at once because he wants a Rand version of it. So instead of asking them to change things for us, we're we're gonna go to them at some point and say, here's I don't know, $200,000 or something. Make all these changes and then that would become at some level Rand IP at least in Eric's mind.' (Interview 017)",
+            "line_number": 1,
+            "context": "From contradiction",
+            "speaker_role": null
+          }
+        ],
+        "position_2": "RAND should focus on deploying and integrating best-of-breed commercial AI tools rather than building its own, due to internal limitations and rapid external advancements.",
+        "position_2_holders": [
+          "Jim Mitre (GER Leadership)",
+          "Matan Chorev (GER Leadership)",
+          "Brandon De Bruhl (Statistical Analyst)",
+          "Andrew Morral (Statistical Analyst)"
+        ],
+        "position_2_quotes": [
+          {
+            "quote_id": "CONT_003_P2_Q1",
+            "interview_id": "INT_001",
+            "interview_name": "Interview 001",
+            "text": "Jim Mitre: 'I put 99% of the effort on applying best of breed from the private sector and bringing it to Rand and not trying to like build our own cause a we're not particularly good at software development, B, even if we do build it, who's gonna main? It and upkeep it and keep it stateoftheart over time.' (Interview 007)",
+            "line_number": 1,
+            "context": "From contradiction",
+            "speaker_role": null
+          },
+          {
+            "quote_id": "CONT_003_P2_Q2",
+            "interview_id": "INT_001",
+            "interview_name": "Interview 001",
+            "text": "Matan Chorev: 'And they have a team of people who are, you know, have a stake in the company's future profitability. And so therefore, we'll update maintain patch service that software as opposed to us.' (Interview 007)",
+            "line_number": 1,
+            "context": "From contradiction",
+            "speaker_role": null
+          },
+          {
+            "quote_id": "CONT_003_P2_Q3",
+            "interview_id": "INT_001",
+            "interview_name": "Interview 001",
+            "text": "Andrew Morral: 'I feel a little ambivalent about all the work Rand is doing to build LLM tools... it's hard to imagine that the home grown tools are gonna compete with what's available.' (Interview 012)",
+            "line_number": 1,
+            "context": "From contradiction",
+            "speaker_role": null
+          }
+        ],
+        "resolution_suggested": "There's a tension between the desire for proprietary tools to maintain a competitive edge and the practical challenges of building and maintaining state-of-the-art AI capabilities internally. Many argue that RAND's strength is not software development, and it would be more efficient to leverage rapidly evolving commercial tools, focusing instead on how to best apply and integrate them within RAND's unique research context, especially for CUI/classified data.",
+        "theme_ids": [
+          "T2",
+          "T4"
+        ],
+        "code_ids": [
+          "C2.3.1",
+          "C4.3"
+        ]
+      }
+    ],
+    "stakeholder_mapping": {
+      "researcher": [
+        "AI missing nuance and context in qualitative data",
+        "Ethical implications of using participant data for AI training without consent",
+        "AI generating incorrect code or analysis outputs",
+        "Difficulty in validating AI-generated code and results"
+      ],
+      "management": [
+        "RAND's internal AI tools (e.g., RANDCHAT) are outdated and not competitive with commercial alternatives.",
+        "Lack of a clear, unified institutional strategy for AI adoption.",
+        "The 'black box' nature of AI and its implications for methodological rigor and trustworthiness.",
+        "The need for clear ethical guidelines for AI use in research, especially regarding human subjects data."
+      ]
+    },
+    "saturation_assessment": {
+      "saturation_point": "Interview 014",
+      "interview_number": 50,
+      "evidence": "Theoretical saturation was largely achieved around Interview 14. By this point, the core themes of AI applications (qualitative, quantitative, workflow), challenges (accuracy, ethics, institutional barriers), and opportunities (efficiency, new avenues) were well-established. Subsequent interviews (15-18) primarily reinforced these existing themes with additional specific examples, deeper nuances, or further validation of previously identified pain points and opportunities, rather than introducing entirely new conceptual categories. For instance, the discussions on cost analysis (Interview 13) and forecasting (Interview 17) provided rich detail but fit within the broader 'AI Applications' theme, and the concerns about data intimacy and skill development (Interview 14, 18) deepened the 'Ethical and Methodological Concerns' but did not create new challenges.",
+      "new_codes_curve": [],
+      "new_themes_curve": [],
+      "stabilization_indicators": [
+        "Saturation reached"
+      ],
+      "post_saturation_validation": "Confirmed in remaining interviews"
+    },
+    "theoretical_insights": [
+      "AI's primary value in qualitative research is in automating the 'grunt work' (transcription, initial coding, de-identification) and augmenting human cognitive processes (idea generation, bias checking, pattern recognition in large datasets), rather than replacing the core interpretive and meaning-making functions.",
+      "The 'black box' nature of AI outputs poses a significant challenge to the established principles of trustworthiness and rigor in qualitative research, necessitating new standards for transparency and validation in methods sections.",
+      "Effective AI integration requires a shift from a 'methodological fetish' to a 'business case' driven approach, where AI's utility is measured by its ability to deliver insights with greater speed and relevance to sponsors.",
+      "Institutional adoption of AI is hampered by a fragmented data architecture, outdated internal tools, and a lack of clear, consistent guidance and incentive structures for researchers.",
+      "The 'Red Queen' effect suggests that simply adopting AI to keep pace with competitors may not yield a net competitive advantage, but rather accelerate the pace of work without fundamentally changing outcomes, unless AI enables truly novel research avenues or significantly enhances quality.",
+      "AI can act as a 'Co-researcher' or 'idea processor,' expanding the solution space for complex problems by offering diverse perspectives and identifying gaps, but this requires a 'PhD-level' engagement with the tools, moving beyond 'easy button' expectations.",
+      "The 'intimacy with data' gained through manual processes (e.g., coding, note-taking) is a critical component of researcher expertise and insight generation, which is at risk of erosion with increased AI automation, necessitating deliberate human-in-the-loop checkpoints.",
+      "The value of AI is highly context-dependent; it performs better on small-scale, clearly defined tasks and struggles with nuanced, jargon-filled, or classified military-specific data without extensive fine-tuning.",
+      "RAND's unique institutional knowledge and ability to ingest/scrape disparate data sets represent a significant competitive advantage that could be amplified by AI, particularly in creating 'data lakes' and standardized data pipelines."
+    ],
+    "emergent_theory": "The integration of AI into qualitative research practices at RAND is characterized by a dual imperative: leveraging AI for efficiency and scale in routine, labor-intensive tasks, while simultaneously navigating significant challenges related to accuracy, trust, ethical implications, and institutional inertia. While AI offers transformative potential for data management, analysis, and dissemination, its 'black box' nature and propensity for 'hallucinations' necessitate a human-in-the-loop approach to preserve methodological rigor, nuance, and the 'intimacy' with data crucial for generating credible insights. Successful adoption hinges on a strategic institutional roadmap that prioritizes targeted training, clear ethical guidelines, and a shift towards viewing AI as a 'Co-researcher' or 'better button' rather than a complete replacement for human expertise, particularly in complex, context-dependent research domains.",
+    "methodological_notes": "This analysis employed a grounded theory approach, iteratively moving between data collection (interview transcripts) and conceptualization. All 18 interviews were read multiple times to identify recurring themes, concepts, and relationships. Initial open coding was performed to capture granular ideas, which were then grouped into broader categories and hierarchical codes. Constant comparison was used to refine definitions and ensure consistency across the dataset. Theoretical saturation was assessed by noting when new interviews ceased to introduce novel themes or significant new dimensions to existing concepts. Quote chains were identified by tracing conceptual progression or contrasting viewpoints across different speakers and interviews. Stakeholder positions were mapped by aggregating expressed concerns, recommendations, and overall stances. Contradictions were specifically sought out and documented with supporting quotes from opposing viewpoints. The global context of the data, allowing simultaneous access to all interviews, facilitated the identification of overarching patterns and the assessment of saturation more efficiently than a sequential approach.",
+    "processing_metadata": {
+      "approach": "simplified_schema"
+    },
+    "confidence_scores": {
+      "overall": 0.9
+    }
+  },
+  "quote_inventory": [
+    {
+      "quote_id": "T004_Q1",
+      "text": "I think the biggest thing is that we need to have a strategy for how we're going to use AI. And I think that's still very much in flux. I think there's a lot of excitement about it, but there's also a lot of trepidation. And I think we need to figure out how we're going to integrate it into our r...",
+      "speaker": "Kandice Kapinos",
+      "interview_id": "INT_001",
+      "theme_ids": [
+        "T4"
+      ],
+      "code_ids": [
+        "C4.1",
+        "C4.2"
+      ],
+      "speaker_role": "Kandice Kapinos"
+    },
+    {
+      "quote_id": "T004_Q2",
+      "text": "And I think that's going to require a lot of investment in terms of infrastructure and also in terms of people. We need to have people who are experts in AI, who can help us to develop and implement these tools. And we also need to have a culture that's open to experimentation and innovation.",
+      "speaker": "Kandice Kapinos",
+      "interview_id": "INT_001",
+      "theme_ids": [
+        "T4"
+      ],
+      "code_ids": [
+        "C4.1",
+        "C4.2"
+      ],
+      "speaker_role": "Kandice Kapinos"
+    },
+    {
+      "quote_id": "T004_Q3",
+      "text": "I think one of the biggest challenges is going to be how we incentivize people to use AI. Because right now, it's not really built into our incentive structure. So people are not necessarily going to be rewarded for using AI in their research. And I think that's something we need to address.",
+      "speaker": "Kandice Kapinos",
+      "interview_id": "INT_001",
+      "theme_ids": [
+        "T4"
+      ],
+      "code_ids": [
+        "C4.1",
+        "C4.2"
+      ],
+      "speaker_role": "Kandice Kapinos"
+    },
+    {
+      "quote_id": "T004_Q4",
+      "text": "I think another challenge is going to be how we ensure that the AI tools we're using are fair and unbiased. Because there's a lot of concern about bias in AI, and we need to make sure that we're not perpetuating those biases in our research. And that's going to require a lot of careful thought an...",
+      "speaker": "Kandice Kapinos",
+      "interview_id": "INT_001",
+      "theme_ids": [
+        "T4"
+      ],
+      "code_ids": [
+        "C4.1",
+        "C4.2"
+      ],
+      "speaker_role": "Kandice Kapinos"
+    },
+    {
+      "quote_id": "T004_Q5",
+      "text": "Interview coding, something way better than Dedoose. We do a lot of interviews and the coding is uneven in quality. So it would be great if we had some standard way to do that and a tool to help with that.",
+      "speaker": "Participant",
+      "interview_id": "INT_002",
+      "theme_ids": [
+        "T4"
+      ],
+      "code_ids": [
+        "C4.1",
+        "C4.2"
+      ],
+      "speaker_role": "Participant"
+    },
+    {
+      "quote_id": "T005_Q1",
+      "text": "Interview coding, something way better than Dedoose. We do a lot of interviews and the coding is uneven in quality. So it would be great if we had some standard way to do that and a tool to help with that.",
+      "speaker": "Matthew Sergant",
+      "interview_id": "INT_001",
+      "theme_ids": [
+        "T5"
+      ],
+      "code_ids": [
+        "C5.1",
+        "C5.2"
+      ],
+      "speaker_role": "Matthew Sergant"
+    },
+    {
+      "quote_id": "T005_Q2",
+      "text": "Something that helps us with graphics. It would be great if we were not one person deep on Evonne Crane. Great to make graphics that were accurate. I am trying to make one in chatgpt and it makes people without arms and I can\u2019t edit it. Something like that and really easy for people to use.",
+      "speaker": "Matthew Sergant",
+      "interview_id": "INT_001",
+      "theme_ids": [
+        "T5"
+      ],
+      "code_ids": [
+        "C5.1",
+        "C5.2"
+      ],
+      "speaker_role": "Matthew Sergant"
+    },
+    {
+      "quote_id": "T005_Q3",
+      "text": "We have the forecasting stuff; Tony Vossalo is doing it and I don\u2019t understand what they are doing and how they are doing it but making forecasting more broadly applicable ... that is what we are all trying to do, see into the future. If we could forecast more accurately in the outset then we cou...",
+      "speaker": "Matthew Sergant",
+      "interview_id": "INT_001",
+      "theme_ids": [
+        "T5"
+      ],
+      "code_ids": [
+        "C5.1",
+        "C5.2"
+      ],
+      "speaker_role": "Matthew Sergant"
+    },
+    {
+      "quote_id": "T005_Q4",
+      "text": "Work in methods center. Still trying to find the focus and greater methods. There is a very diverse set of people that use the method across RAND and people are not always in conversation with each other, calling it different things and not always in conversation with each other. So goal is to cr...",
+      "speaker": "Matthew Sergant",
+      "interview_id": "INT_001",
+      "theme_ids": [
+        "T5"
+      ],
+      "code_ids": [
+        "C5.1",
+        "C5.2"
+      ],
+      "speaker_role": "Matthew Sergant"
+    },
+    {
+      "quote_id": "T005_Q5",
+      "text": "A lot of the applications of network analysis are embedded in research not involved in network analysis. So part of the challenge is to identify the people that should be brought into the community. They are putting together, ... trying to figure out how to become involved in network analysis. Pu...",
+      "speaker": "Matthew Sergant",
+      "interview_id": "INT_001",
+      "theme_ids": [
+        "T5"
+      ],
+      "code_ids": [
+        "C5.1",
+        "C5.2"
+      ],
+      "speaker_role": "Matthew Sergant"
+    }
+  ]
+};
+        
+        // Embedded JavaScript
+        
+        // Global state
+        let currentTab = 'overview';
+        let searchTerm = '';
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', function() {
+            showTab('overview');
+        });
+
+        // Tab navigation
+        function showTab(tabName) {
+            currentTab = tabName;
+            
+            // Update active tab
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target?.classList.add('active') || 
+                document.querySelector(`[onclick="showTab('${tabName}')"]`).classList.add('active');
+            
+            // Render content
+            const content = document.getElementById('content');
+            content.innerHTML = '<div class="loading"><div class="spinner"></div><p>Loading...</p></div>';
+            
+            // Small delay for loading animation
+            setTimeout(() => {
+                switch(tabName) {
+                    case 'overview':
+                        renderOverview();
+                        break;
+                    case 'themes':
+                        renderThemes();
+                        break;
+                    case 'codes':
+                        renderCodes();
+                        break;
+                    case 'quotes':
+                        renderQuotes();
+                        break;
+                    case 'analysis':
+                        renderAnalysis();
+                        break;
+                    case 'export':
+                        renderExport();
+                        break;
+                }
+            }, 100);
+        }
+
+        // Render overview
+        function renderOverview() {
+            const summary = analysisData.summary;
+            const content = document.getElementById('content');
+            
+            content.innerHTML = `
+                <h1>Qualitative Coding Analysis</h1>
+                <p style="font-size: 18px; color: #6b7280; margin-bottom: 2rem;">
+                    ${summary.research_question || 'Research Question Not Found'}
+                </p>
+                
+                <div class="stats-grid">
+                    <div class="stat-card" onclick="showTab('themes')">
+                        <i class="fas fa-layer-group" style="font-size: 2rem; color: var(--primary); margin-bottom: 0.5rem;"></i>
+                        <div class="stat-value">${analysisData.themes.length}</div>
+                        <div class="stat-label">Themes</div>
+                    </div>
+                    
+                    <div class="stat-card" onclick="showTab('codes')">
+                        <i class="fas fa-tags" style="font-size: 2rem; color: var(--secondary); margin-bottom: 0.5rem;"></i>
+                        <div class="stat-value">${analysisData.codes.length}</div>
+                        <div class="stat-label">Codes</div>
+                    </div>
+                    
+                    <div class="stat-card" onclick="showTab('quotes')">
+                        <i class="fas fa-quote-right" style="font-size: 2rem; color: var(--danger); margin-bottom: 0.5rem;"></i>
+                        <div class="stat-value">${analysisData.quotes.length}</div>
+                        <div class="stat-label">Quotes</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <i class="fas fa-users" style="font-size: 2rem; color: var(--warning); margin-bottom: 0.5rem;"></i>
+                        <div class="stat-value">${summary.interviews || '18'}</div>
+                        <div class="stat-label">Interviews</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <i class="fas fa-coins" style="font-size: 2rem; color: var(--info); margin-bottom: 0.5rem;"></i>
+                        <div class="stat-value" data-tooltip="1 token ≈ 0.75 words">${summary.tokens || '0'}</div>
+                        <div class="stat-label">Tokens</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <i class="fas fa-clock" style="font-size: 2rem; color: #8b5cf6; margin-bottom: 0.5rem;"></i>
+                        <div class="stat-value">${parseFloat(summary.processing_time || '0').toFixed(1)}</div>
+                        <div class="stat-label">Processing (sec)</div>
+                    </div>
+                </div>
+                
+                ${summary.emergent_theory ? `
+                <div class="card">
+                    <h2>Emergent Theory</h2>
+                    <p style="font-style: italic; line-height: 1.8;">${summary.emergent_theory}</p>
+                </div>
+                ` : ''}
+            `;
+        }
+
+        // Render themes
+        function renderThemes() {
+            const content = document.getElementById('content');
+            
+            let html = '<h1>Themes</h1>';
+            html += '<input type="text" class="search-box" placeholder="Search themes..." onkeyup="filterThemes(this.value)">';
+            
+            html += '<div id="themes-list">';
+            analysisData.themes.forEach(theme => {
+                const relatedCodes = analysisData.codes.filter(c => c.theme_id === theme.theme_id);
+                const prevalence = parseFloat(theme.prevalence || 0) * 100;
+                
+                html += `
+                    <div class="expandable" data-theme="${theme.theme_id}">
+                        <div class="expandable-header" onclick="toggleExpandable(this)">
+                            <div>
+                                <h3>${theme.name}</h3>
+                                <p style="margin-top: 0.5rem;">
+                                    <span class="tag">Prevalence: ${prevalence.toFixed(0)}%</span>
+                                    <span class="tag">${theme.interview_count || 0} interviews</span>
+                                    <span class="tag">${relatedCodes.length} codes</span>
+                                </p>
+                            </div>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="expandable-content">
+                            <h4>Related Codes</h4>
+                            <div style="margin: 1rem 0;">
+                                ${relatedCodes.map(code => `
+                                    <span class="tag tag-code" onclick="showCode('${code.code_id}')">
+                                        ${code.name} (${code.frequency || 0})
+                                    </span>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            
+            content.innerHTML = html;
+        }
+
+        // Render codes
+        function renderCodes() {
+            const content = document.getElementById('content');
+            
+            let html = '<h1>Codes</h1>';
+            html += '<input type="text" class="search-box" placeholder="Search codes..." onkeyup="filterCodes(this.value)">';
+            
+            html += '<table class="data-table" id="codes-table">';
+            html += '<thead><tr>';
+            html += '<th>Code ID</th><th>Name</th><th>Definition</th><th>Theme</th><th>Frequency</th>';
+            html += '</tr></thead>';
+            html += '<tbody>';
+            
+            analysisData.codes.forEach(code => {
+                const theme = analysisData.themes.find(t => t.theme_id === code.theme_id);
+                html += '<tr>';
+                html += `<td>${code.code_id}</td>`;
+                html += `<td>${code.name}</td>`;
+                html += `<td>${code.definition || ''}</td>`;
+                html += `<td>${theme ? theme.name : code.theme_id}</td>`;
+                html += `<td>${code.frequency || 0}</td>`;
+                html += '</tr>';
+            });
+            
+            html += '</tbody></table>';
+            content.innerHTML = html;
+        }
+
+        // Render quotes
+        function renderQuotes() {
+            const content = document.getElementById('content');
+            
+            let html = '<h1>Quotes</h1>';
+            html += '<input type="text" class="search-box" placeholder="Search quotes..." onkeyup="filterQuotes(this.value)">';
+            
+            html += '<div id="quotes-list">';
+            analysisData.quotes.forEach(quote => {
+                html += `
+                    <div class="quote-card">
+                        <p class="quote-text">"${quote.text}"</p>
+                        <p class="quote-meta">
+                            <strong>${quote.speaker_name || 'Unknown'}</strong> - 
+                            ${quote.speaker_role || 'Unknown Role'} 
+                            (${quote.interview_id || 'Unknown Interview'})
+                        </p>
+                        <div style="margin-top: 0.5rem;">
+                            ${quote.theme_ids ? quote.theme_ids.split(';').map(id => {
+                                const theme = analysisData.themes.find(t => t.theme_id === id.trim());
+                                return theme ? `<span class="tag tag-theme">${theme.name}</span>` : '';
+                            }).join('') : ''}
+                        </div>
+                        <div style="margin-top: 0.5rem;">
+                            ${quote.code_ids ? quote.code_ids.split(';').map(id => {
+                                const code = analysisData.codes.find(c => c.code_id === id.trim());
+                                return code ? `<span class="tag tag-code">${code.name}</span>` : '';
+                            }).join('') : ''}
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            
+            content.innerHTML = html;
+        }
+
+        // Render analysis
+        function renderAnalysis() {
+            const content = document.getElementById('content');
+            
+            let html = '<h1>Analysis & Visualizations</h1>';
+            
+            // Theme distribution
+            html += '<div class="card">';
+            html += '<h3>Theme Distribution</h3>';
+            html += '<canvas id="themeChart" width="400" height="200"></canvas>';
+            html += '</div>';
+            
+            // Code frequency
+            html += '<div class="card">';
+            html += '<h3>Top Codes by Frequency</h3>';
+            html += '<canvas id="codeChart" width="400" height="300"></canvas>';
+            html += '</div>';
+            
+            content.innerHTML = html;
+            
+            // Render charts
+            setTimeout(() => {
+                renderCharts();
+            }, 100);
+        }
+
+        // Render export
+        function renderExport() {
+            const content = document.getElementById('content');
+            
+            let html = '<h1>Export Data</h1>';
+            html += '<div class="card">';
+            html += '<h3>Export Options</h3>';
+            html += '<p>Click the buttons below to export data in different formats:</p>';
+            
+            html += '<div style="margin-top: 2rem; display: flex; flex-direction: column; gap: 1rem;">';
+            html += '<button class="btn btn-primary" onclick="exportJSON()"><i class="fas fa-file-code"></i> Export as JSON</button>';
+            html += '<button class="btn btn-primary" onclick="exportCSV('themes')"><i class="fas fa-file-csv"></i> Export Themes CSV</button>';
+            html += '<button class="btn btn-primary" onclick="exportCSV('codes')"><i class="fas fa-file-csv"></i> Export Codes CSV</button>';
+            html += '<button class="btn btn-primary" onclick="exportCSV('quotes')"><i class="fas fa-file-csv"></i> Export Quotes CSV</button>';
+            html += '<button class="btn btn-primary" onclick="printReport()"><i class="fas fa-print"></i> Print Report</button>';
+            html += '</div>';
+            html += '</div>';
+            
+            content.innerHTML = html;
+        }
+
+        // Helper functions
+        function toggleExpandable(header) {
+            const expandable = header.closest('.expandable');
+            expandable.classList.toggle('active');
+            const icon = header.querySelector('i');
+            icon.classList.toggle('fa-chevron-down');
+            icon.classList.toggle('fa-chevron-up');
+        }
+
+        function filterThemes(searchValue) {
+            const themes = document.querySelectorAll('#themes-list .expandable');
+            themes.forEach(theme => {
+                const text = theme.textContent.toLowerCase();
+                theme.style.display = text.includes(searchValue.toLowerCase()) ? 'block' : 'none';
+            });
+        }
+
+        function filterCodes(searchValue) {
+            const rows = document.querySelectorAll('#codes-table tbody tr');
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchValue.toLowerCase()) ? '' : 'none';
+            });
+        }
+
+        function filterQuotes(searchValue) {
+            const quotes = document.querySelectorAll('#quotes-list .quote-card');
+            quotes.forEach(quote => {
+                const text = quote.textContent.toLowerCase();
+                quote.style.display = text.includes(searchValue.toLowerCase()) ? 'block' : 'none';
+            });
+        }
+
+        function renderCharts() {
+            // Theme distribution pie chart
+            const themeCtx = document.getElementById('themeChart').getContext('2d');
+            const themeData = analysisData.themes.map(t => {
+                const codeCount = analysisData.codes.filter(c => c.theme_id === t.theme_id).length;
+                return {
+                    label: t.name,
+                    value: codeCount
+                };
+            });
+            
+            new Chart(themeCtx, {
+                type: 'pie',
+                data: {
+                    labels: themeData.map(d => d.label),
+                    datasets: [{
+                        data: themeData.map(d => d.value),
+                        backgroundColor: [
+                            '#2563eb', '#ef4444', '#10b981', '#f59e0b', 
+                            '#8b5cf6', '#06b6d4', '#ec4899', '#f97316'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+            
+            // Code frequency bar chart
+            const codeCtx = document.getElementById('codeChart').getContext('2d');
+            const topCodes = analysisData.codes
+                .sort((a, b) => (b.frequency || 0) - (a.frequency || 0))
+                .slice(0, 20);
+            
+            new Chart(codeCtx, {
+                type: 'bar',
+                data: {
+                    labels: topCodes.map(c => c.name),
+                    datasets: [{
+                        label: 'Frequency',
+                        data: topCodes.map(c => c.frequency || 0),
+                        backgroundColor: '#2563eb'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        },
+                        x: {
+                            ticks: {
+                                autoSkip: false,
+                                maxRotation: 45,
+                                minRotation: 45
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Export functions
+        function exportJSON() {
+            const dataStr = JSON.stringify(analysisData, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            
+            const exportFileDefaultName = 'qualitative_analysis.json';
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+        }
+
+        function exportCSV(type) {
+            let csv = '';
+            let filename = '';
+            
+            if (type === 'themes') {
+                csv = 'theme_id,name,prevalence,interview_count\n';
+                analysisData.themes.forEach(t => {
+                    csv += `"${t.theme_id}","${t.name}","${t.prevalence}","${t.interview_count}"\n`;
+                });
+                filename = 'themes.csv';
+            } else if (type === 'codes') {
+                csv = 'code_id,name,definition,theme_id,frequency\n';
+                analysisData.codes.forEach(c => {
+                    csv += `"${c.code_id}","${c.name}","${c.definition || ''}","${c.theme_id}","${c.frequency || 0}"\n`;
+                });
+                filename = 'codes.csv';
+            } else if (type === 'quotes') {
+                csv = 'quote_id,text,speaker,interview_id,themes,codes\n';
+                analysisData.quotes.forEach(q => {
+                    csv += `"${q.quote_id}","${q.text}","${q.speaker_name || ''}","${q.interview_id || ''}","${q.theme_ids || ''}","${q.code_ids || ''}"\n`;
+                });
+                filename = 'quotes.csv';
+            }
+            
+            const dataUri = 'data:text/csv;charset=utf-8,'+ encodeURIComponent(csv);
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', filename);
+            linkElement.click();
+        }
+
+        function printReport() {
+            window.print();
+        }
+        
+    </script>
+</body>
+</html>
