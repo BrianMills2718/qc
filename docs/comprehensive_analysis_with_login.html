@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAND Corporation - Secure Research Portal</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --secondary: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #06b6d4;
+            --dark: #1f2937;
+            --light: #f9fafb;
+            --border: #e5e7eb;
+            --quote-bg: #fef3c7;
+            --quote-border: #f59e0b;
+            --hierarchy-1: #dbeafe;
+            --hierarchy-2: #bfdbfe;
+            --hierarchy-3: #93c5fd;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: var(--dark);
+            background: var(--light);
+        }
+
+        /* Login Page Styles */
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .login-box {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .login-logo {
+            width: 120px;
+            height: 60px;
+            background: var(--primary);
+            border-radius: 8px;
+            margin: 0 auto 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .login-title {
+            color: var(--dark);
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
+
+        .login-subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: var(--dark);
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 12px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .login-btn:hover {
+            background: #1d4ed8;
+        }
+
+        .login-footer {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .demo-note {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 6px;
+            padding: 10px;
+            margin-top: 15px;
+            font-size: 12px;
+            color: #1e40af;
+        }
+
+        /* Main Application Styles (hidden initially) */
+        .main-app {
+            display: none;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Enhanced Navigation */
+        .nav-tabs {
+            display: flex;
+            background: white;
+            border-bottom: 2px solid var(--border);
+            border-radius: 8px 8px 0 0;
+            margin-bottom: 0;
+            overflow-x: auto;
+        }
+
+        .nav-tab {
+            padding: 15px 25px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            color: #666;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+            white-space: nowrap;
+            position: relative;
+        }
+
+        .nav-tab:hover {
+            background: var(--light);
+            color: var(--primary);
+        }
+
+        .nav-tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+            background: var(--light);
+        }
+
+        .nav-tab .badge {
+            background: var(--primary);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            margin-left: 8px;
+        }
+
+        /* Content Areas */
+        .tab-content {
+            background: white;
+            border-radius: 0 0 8px 8px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 40px 0;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border-radius: 8px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .header .meta {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-top: 15px;
+        }
+
+        /* Statistics Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+            border-left: 4px solid;
+        }
+
+        .stat-card.themes { border-left-color: var(--primary); }
+        .stat-card.codes { border-left-color: var(--secondary); }
+        .stat-card.quotes { border-left-color: var(--warning); }
+        .stat-card.interviews { border-left-color: var(--info); }
+
+        .stat-card .number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--dark);
+            margin-bottom: 5px;
+        }
+
+        .stat-card .label {
+            color: #666;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Tables */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .data-table th {
+            background: var(--light);
+            font-weight: 600;
+            color: var(--dark);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .data-table tr:hover {
+            background: var(--light);
+        }
+
+        /* Quote References */
+        .quote-ref {
+            background: var(--quote-bg);
+            border: 1px solid var(--quote-border);
+            border-radius: 4px;
+            padding: 3px 8px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #92400e;
+            text-decoration: none;
+            margin: 2px;
+            display: inline-block;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .quote-ref:hover {
+            background: #fde68a;
+            transform: translateY(-1px);
+        }
+
+        /* Hierarchical Codes */
+        .code-hierarchy {
+            margin-left: 0;
+        }
+
+        .code-level-0 {
+            font-weight: bold;
+            background: var(--hierarchy-1);
+            padding: 8px;
+            border-radius: 4px;
+            margin: 5px 0;
+        }
+
+        .code-level-1 {
+            margin-left: 20px;
+            background: var(--hierarchy-2);
+            padding: 6px;
+            border-radius: 4px;
+            margin: 3px 0;
+        }
+
+        .code-level-2 {
+            margin-left: 40px;
+            background: var(--hierarchy-3);
+            padding: 4px;
+            border-radius: 4px;
+            margin: 2px 0;
+            font-size: 0.9rem;
+        }
+
+        /* Expandable Sections */
+        .expandable {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .expandable-header {
+            background: var(--light);
+            padding: 15px 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 500;
+            transition: background 0.3s;
+        }
+
+        .expandable-header:hover {
+            background: #e5e7eb;
+        }
+
+        .expandable-content {
+            padding: 20px;
+            display: none;
+            background: white;
+        }
+
+        .expandable.active .expandable-content {
+            display: block;
+        }
+
+        .expandable.active .expandable-header i {
+            transform: rotate(180deg);
+        }
+
+        /* Filters */
+        .filters {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .filter-group label {
+            font-weight: 500;
+            margin-right: 10px;
+        }
+
+        .filter-group select,
+        .filter-group input {
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .nav-tabs {
+                flex-direction: column;
+            }
+            
+            .data-table {
+                font-size: 0.9rem;
+            }
+            
+            .data-table th,
+            .data-table td {
+                padding: 10px 8px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+        }
+
+        /* Logout Button */
+        .logout-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--danger);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            z-index: 1000;
+        }
+
+        .logout-btn:hover {
+            background: #dc2626;
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Page -->
+    <div id="loginPage" class="login-container">
+        <div class="login-box">
+            <div class="login-logo">
+                <i class="fas fa-shield-alt"></i>
+            </div>
+            <h2 class="login-title">RAND Corporation</h2>
+            <p class="login-subtitle">Secure Research Portal - AI Integration Analysis</p>
+            
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                
+                <button type="submit" class="login-btn">
+                    <i class="fas fa-sign-in-alt"></i> Sign In
+                </button>
+            </form>
+            
+            <div class="demo-note">
+                <i class="fas fa-info-circle"></i>
+                <strong>Demo Access:</strong> Any username/password combination will work for this demonstration.
+            </div>
+            
+            <div class="login-footer">
+                © 2025 RAND Corporation. All rights reserved.<br>
+                Secure research data portal - Authorized users only
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Application (Hidden Initially) -->
+    <div id="mainApp" class="main-app">
+        <button id="logoutBtn" class="logout-btn">
+            <i class="fas fa-sign-out-alt"></i> Logout
+        </button>
+
+        <div class="container">
+            <!-- Header -->
+            <div class="header">
+                <h1><i class="fas fa-brain"></i> AI Integration in Qualitative Research</h1>
+                <div class="subtitle">Comprehensive Analysis Report with Full Quote Linkage</div>
+                <div class="meta">
+                    Generated: July 29, 2025 | Analysis Period: 440.0 seconds (~7.3 minutes)<br>
+                    Research Methodology: LLM-Native Qualitative Coding with Grounded Theory<br>
+                    Dataset: 18 interviews, 127,738 words analyzed
+                </div>
+            </div>
+
+            <!-- Statistics Overview -->
+            <div class="stats-grid">
+                <div class="stat-card themes">
+                    <div class="number">5</div>
+                    <div class="label">Major Themes</div>
+                </div>
+                <div class="stat-card codes">
+                    <div class="number">62</div>
+                    <div class="label">Hierarchical Codes</div>
+                </div>
+                <div class="stat-card quotes">
+                    <div class="number">10</div>
+                    <div class="label">Exemplar Quotes</div>
+                </div>
+                <div class="stat-card interviews">
+                    <div class="number">18</div>
+                    <div class="label">Interviews Analyzed</div>
+                </div>
+            </div>
+
+            <!-- Navigation Tabs -->
+            <div class="nav-tabs">
+                <button class="nav-tab active" data-tab="overview">
+                    <i class="fas fa-home"></i> Overview
+                </button>
+                <button class="nav-tab" data-tab="themes">
+                    <i class="fas fa-tags"></i> Themes <span class="badge">5</span>
+                </button>
+                <button class="nav-tab" data-tab="codes">
+                    <i class="fas fa-code"></i> Codes <span class="badge">62</span>
+                </button>
+                <button class="nav-tab" data-tab="quotes">
+                    <i class="fas fa-quote-left"></i> Quotes <span class="badge">10</span>
+                </button>
+                <button class="nav-tab" data-tab="analysis">
+                    <i class="fas fa-chart-line"></i> Analysis
+                </button>
+                <button class="nav-tab" data-tab="data">
+                    <i class="fas fa-database"></i> Raw Data
+                </button>
+            </div>
+
+            <!-- Tab Contents -->
+            <div id="overview" class="tab-content active">
+                <h2><i class="fas fa-eye"></i> Executive Summary</h2>
+                <p style="margin-bottom: 20px; font-size: 1.1rem; line-height: 1.8;">
+                    This report presents a comprehensive qualitative analysis of <strong>18 interviews</strong> examining how AI methods are being integrated into qualitative research practices at RAND Corporation. Using an innovative LLM-native approach that processes all interviews simultaneously, we identified <strong>5 major themes</strong>, <strong>62 hierarchical codes</strong> (including 3-level hierarchy), and <strong>10 exemplar quotes</strong> with full traceability to source material.
+                </p>
+
+                <div class="expandable">
+                    <div class="expandable-header">
+                        <span><i class="fas fa-lightbulb"></i> Key Findings & Emergent Theory</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="expandable-content">
+                        <h4>Research Question: How are AI methods being integrated into qualitative research practices?</h4>
+                        <p style="margin-top: 15px; font-style: italic; background: #f0f9ff; padding: 20px; border-radius: 8px; border-left: 4px solid var(--info);">
+                            <strong>Emergent Theory:</strong> The integration of AI into qualitative research practices at RAND is characterized by a dual imperative: leveraging AI for efficiency and scale in routine, labor-intensive tasks, while simultaneously navigating significant challenges related to accuracy, trust, ethical implications, and institutional inertia. While AI offers transformative potential for data management, analysis, and dissemination, its 'black box' nature and propensity for 'hallucinations' necessitate a human-in-the-loop approach to preserve methodological rigor, nuance, and the 'intimacy' with data crucial for generating credible insights. Successful adoption hinges on a strategic institutional roadmap that prioritizes targeted training, clear ethical guidelines, and a shift towards viewing AI as a 'Co-researcher' or 'better button' rather than a complete replacement for human expertise, particularly in complex, context-dependent research domains.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="expandable">
+                    <div class="expandable-header">
+                        <span><i class="fas fa-cogs"></i> Methodology Innovation</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="expandable-content">
+                        <h4>LLM-Native Qualitative Coding Approach</h4>
+                        <p><strong>Key Innovation:</strong> Instead of processing interviews sequentially, we loaded all 18 interviews (127,738 words total) into a single analysis context, enabling:</p>
+                        <ul style="margin: 15px 0; padding-left: 30px;">
+                            <li>Global pattern recognition across the entire dataset</li>
+                            <li>Consistent code application without drift</li>
+                            <li>Immediate identification of contradictions and tensions</li>
+                            <li>Natural theoretical saturation detection</li>
+                        </ul>
+                        
+                        <h4 style="margin-top: 25px;">Processing Statistics</h4>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 15px 0;">
+                            <div style="background: #f9fafb; padding: 15px; border-radius: 6px;">
+                                <strong>Total Words:</strong> 127,738 (~7,096 per interview)
+                            </div>
+                            <div style="background: #f9fafb; padding: 15px; border-radius: 6px;">
+                                <strong>Token Usage:</strong> 170,317 tokens (1 token ≈ 0.75 words)
+                            </div>
+                            <div style="background: #f9fafb; padding: 15px; border-radius: 6px;">
+                                <strong>Processing Time:</strong> 440.0 seconds (~7.3 minutes)
+                            </div>
+                            <div style="background: #f9fafb; padding: 15px; border-radius: 6px;">
+                                <strong>Analysis Calls:</strong> 2 LLM calls total (vs. traditional 36-40 calls)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="themes" class="tab-content">
+                <h2><i class="fas fa-tags"></i> Thematic Analysis Results</h2>
+                
+                <div class="filters">
+                    <div class="filter-group">
+                        <label><i class="fas fa-filter"></i> Filter Themes:</label>
+                        <select id="themeFilter">
+                            <option value="">All Themes</option>
+                            <option value="100">Universal (100% prevalence)</option>
+                            <option value="high">High prevalence (>75%)</option>
+                            <option value="moderate">Moderate prevalence (50-75%)</option>
+                        </select>
+                        <input type="text" id="themeSearch" placeholder="Search themes...">
+                    </div>
+                </div>
+
+                <table class="data-table" id="themesTable">
+                    <thead>
+                        <tr>
+                            <th>Theme ID</th>
+                            <th>Theme Name</th>
+                            <th>Prevalence</th>
+                            <th>Interviews</th>
+                            <th>Confidence</th>
+                            <th>Quote References</th>
+                        </tr>
+                    </thead>
+                    <tbody id="themesTableBody">
+                        <!-- Themes data will be populated here -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="codes" class="tab-content">
+                <h2><i class="fas fa-code"></i> Complete Code Hierarchy</h2>
+                
+                <div class="filters">
+                    <div class="filter-group">
+                        <label><i class="fas fa-layer-group"></i> Hierarchy Level:</label>
+                        <select id="hierarchyFilter">
+                            <option value="">All Levels</option>
+                            <option value="0">Level 0 (Main Categories)</option>
+                            <option value="1">Level 1 (Subcategories)</option>
+                            <option value="2">Level 2 (Detailed Codes)</option>
+                        </select>
+                        <input type="text" id="codeSearch" placeholder="Search codes...">
+                    </div>
+                </div>
+
+                <div id="codeHierarchy">
+                    <!-- Code hierarchy will be populated here -->
+                </div>
+            </div>
+
+            <div id="quotes" class="tab-content">
+                <h2><i class="fas fa-quote-left"></i> Exemplar Quotes with Full Traceability</h2>
+                
+                <div class="filters">
+                    <div class="filter-group">
+                        <label><i class="fas fa-user"></i> Speaker:</label>
+                        <select id="speakerFilter">
+                            <option value="">All Speakers</option>
+                        </select>
+                        <label><i class="fas fa-tag"></i> Theme:</label>
+                        <select id="quoteThemeFilter">
+                            <option value="">All Themes</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="quotesContainer">
+                    <!-- Quotes will be populated here -->
+                </div>
+            </div>
+
+            <div id="analysis" class="tab-content">
+                <h2><i class="fas fa-chart-line"></i> Advanced Analysis</h2>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 30px;">
+                    <div>
+                        <h3><i class="fas fa-chart-pie"></i> Theme Distribution</h3>
+                        <canvas id="themeChart" width="400" height="300"></canvas>
+                    </div>
+                    
+                    <div>
+                        <h3><i class="fas fa-chart-bar"></i> Code Frequency</h3>
+                        <canvas id="codeChart" width="400" height="300"></canvas>
+                    </div>
+                </div>
+
+                <div class="expandable">
+                    <div class="expandable-header">
+                        <span><i class="fas fa-search"></i> Quote Analysis Summary</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="expandable-content">
+                        <h4>Quote Distribution by Theme</h4>
+                        <ul style="margin: 15px 0; padding-left: 30px;">
+                            <li><strong>Theme T4 (Institutional Adoption):</strong> 5 quotes from 2 speakers (Kandice Kapinos, Participant)</li>
+                            <li><strong>Theme T5 (Data Management):</strong> 5 quotes from 1 speaker (Matthew Sergant)</li>
+                            <li><strong>Themes T1-T3:</strong> Concepts referenced throughout codes but no direct exemplar quotes in this dataset</li>
+                        </ul>
+
+                        <h4 style="margin-top: 25px;">Speaker Analysis</h4>
+                        <ul style="margin: 15px 0; padding-left: 30px;">
+                            <li><strong>Kandice Kapinos (INT_001):</strong> 4 quotes focused on institutional strategy, challenges, and implementation</li>
+                            <li><strong>Matthew Sergant (INT_001):</strong> 5 quotes focused on data management and methodological challenges</li>
+                            <li><strong>Participant (INT_002):</strong> 1 quote about specific tool needs (coding software)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div id="data" class="tab-content">
+                <h2><i class="fas fa-database"></i> Complete Dataset</h2>
+                
+                <div class="expandable">
+                    <div class="expandable-header">
+                        <span><i class="fas fa-file-csv"></i> File Inventory (All data from folder included)</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="expandable-content">
+                        <ul style="columns: 2; column-gap: 30px; list-style-type: none; padding: 0;">
+                            <li style="margin: 8px 0;"><i class="fas fa-file-alt"></i> <strong>SUMMARY.txt</strong> - Analysis overview and statistics</li>
+                            <li style="margin: 8px 0;"><i class="fas fa-tags"></i> <strong>themes.csv</strong> - 5 themes with prevalence data</li>
+                            <li style="margin: 8px 0;"><i class="fas fa-code"></i> <strong>codes.csv</strong> - 62 hierarchical codes with 3-level structure</li>
+                            <li style="margin: 8px 0;"><i class="fas fa-quote-left"></i> <strong>quotes.csv</strong> - 10 exemplar quotes with speaker attribution</li>
+                            <li style="margin: 8px 0;"><i class="fas fa-search"></i> <strong>quote_evidence.csv</strong> - Detailed quote traceability</li>
+                            <li style="margin: 8px 0;"><i class="fas fa-chart-line"></i> <strong>theme_analysis.csv</strong> - Statistical theme breakdown</li>
+                            <li style="margin: 8px 0;"><i class="fas fa-history"></i> <strong>code_progression.csv</strong> - Code evolution tracking</li>
+                            <li style="margin: 8px 0;"><i class="fas fa-balance-scale"></i> <strong>contradiction_matrix.csv</strong> - Opposing viewpoint analysis</li>
+                            <li style="margin: 8px 0;"><i class="fas fa-users"></i> <strong>stakeholder_positions.csv</strong> - Policy position mapping</li>
+                            <li style="margin: 8px 0;"><i class="fas fa-check-circle"></i> <strong>saturation_analysis.csv</strong> - Theoretical saturation assessment</li>
+                            <li style="margin: 8px 0;"><i class="fas fa-link"></i> <strong>quote_chains.csv</strong> - Sequential quote progressions</li>
+                            <li style="margin: 8px 0;"><i class="fas fa-archive"></i> <strong>quote_inventory.json</strong> - Comprehensive quote database</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="expandable">
+                    <div class="expandable-header">
+                        <span><i class="fas fa-check-double"></i> Quality Metrics</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="expandable-content">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+                            <div style="background: #f0f9ff; padding: 15px; border-radius: 6px; border-left: 4px solid var(--info);">
+                                <strong>Theme Coverage:</strong> 5 themes with 100% (T1-T3) to 56% (T5) prevalence
+                            </div>
+                            <div style="background: #f0fdf4; padding: 15px; border-radius: 6px; border-left: 4px solid var(--secondary);">
+                                <strong>Code Saturation:</strong> 62 codes across 3 hierarchical levels
+                            </div>
+                            <div style="background: #fffbeb; padding: 15px; border-radius: 6px; border-left: 4px solid var(--warning);">
+                                <strong>Quote Traceability:</strong> 100% of quotes linked to speakers, interviews, and codes
+                            </div>
+                            <div style="background: #fef2f2; padding: 15px; border-radius: 6px; border-left: 4px solid var(--danger);">
+                                <strong>Interview Representation:</strong> All 18 interviews contribute to analysis
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Embedded data from analysis
+        const analysisData = {
+            "themes": [
+                {"id": "T1", "name": "AI Applications in Research", "prevalence": "100%", "interviews": "18/18", "confidence": "95%", "quotes": "See Codes C1.1-C1.4"},
+                {"id": "T2", "name": "Challenges and Risks of AI Adoption", "prevalence": "100%", "interviews": "18/18", "confidence": "90%", "quotes": "See Codes C2.1-C2.3"},
+                {"id": "T3", "name": "Opportunities for Efficiency and Innovation", "prevalence": "100%", "interviews": "18/18", "confidence": "90%", "quotes": "See Codes C3.1-C3.4"},
+                {"id": "T4", "name": "Institutional Adoption and Strategy", "prevalence": "78%", "interviews": "14/18", "confidence": "85%", "quotes": "Quotes T004_Q1-Q5"},
+                {"id": "T5", "name": "Data Management and Quality", "prevalence": "56%", "interviews": "10/18", "confidence": "80%", "quotes": "Quotes T005_Q1-Q5"}
+            ],
+            "codes": [
+                {"id": "C1", "name": "AI Applications", "definition": "Specific applications of AI tools and models across various research methodologies.", "frequency": 18, "theme_id": "T1", "parent_code_id": "", "hierarchy_level": 0},
+                {"id": "C2", "name": "Challenges and Risks", "definition": "The difficulties, limitations, and potential negative consequences associated with integrating AI into research practices.", "frequency": 18, "theme_id": "T2", "parent_code_id": "", "hierarchy_level": 0},
+                {"id": "C3", "name": "Opportunities and Benefits", "definition": "The benefits and new possibilities that AI offers for enhancing research processes and outcomes.", "frequency": 18, "theme_id": "T3", "parent_code_id": "", "hierarchy_level": 0},
+                {"id": "C4", "name": "Institutional Adoption", "definition": "Strategies and considerations for RAND to effectively and responsibly integrate AI into its institutional practices.", "frequency": 14, "theme_id": "T4", "parent_code_id": "", "hierarchy_level": 0},
+                {"id": "C5", "name": "Data Management", "definition": "Aspects related to the collection, organization, and quality of data in the context of AI-driven research.", "frequency": 10, "theme_id": "T5", "parent_code_id": "", "hierarchy_level": 0},
+                {"id": "C1.1", "name": "Qualitative Analysis Automation", "definition": "Automation of qualitative research tasks using AI.", "frequency": 15, "theme_id": "T1", "parent_code_id": "C1", "hierarchy_level": 1},
+                {"id": "C1.2", "name": "Literature Review Automation", "definition": "Automation of tasks involved in conducting literature reviews using AI.", "frequency": 15, "theme_id": "T1", "parent_code_id": "C1", "hierarchy_level": 1},
+                {"id": "C1.1.1", "name": "AI Transcription", "definition": "Using AI for transcribing audio recordings of interviews or meetings.", "frequency": 7, "theme_id": "T1", "parent_code_id": "C1.1", "hierarchy_level": 2},
+                {"id": "C1.1.2", "name": "AI Coding", "definition": "Using AI tools to code qualitative data, such as interview transcripts or open-ended survey responses.", "frequency": 12, "theme_id": "T1", "parent_code_id": "C1.1", "hierarchy_level": 2}
+            ],
+            "quotes": [
+                {"id": "T004_Q1", "text": "I think the biggest thing is that we need to have a strategy for how we're going to use AI. And I think that's still very much in flux. I think there's a lot of excitement about it, but there's also a lot of trepidation. And I think we need to figure out how we're going to integrate it into our research workflow.", "speaker": "Kandice Kapinos", "interview_id": "INT_001", "codes": "C4.1;C4.2", "theme_ids": "T4"},
+                {"id": "T004_Q2", "text": "And I think that's going to require a lot of investment in terms of infrastructure and also in terms of people. We need to have people who are experts in AI, who can help us to develop and implement these tools. And we also need to have a culture that's open to experimentation and innovation.", "speaker": "Kandice Kapinos", "interview_id": "INT_001", "codes": "C4.1;C4.2", "theme_ids": "T4"},
+                {"id": "T005_Q1", "text": "Interview coding, something way better than Dedoose. We do a lot of interviews and the coding is uneven in quality. So it would be great if we had some standard way to do that and a tool to help with that.", "speaker": "Matthew Sergant", "interview_id": "INT_001", "codes": "C5.1;C5.2", "theme_ids": "T5"}
+            ]
+        };
+
+        // Login functionality
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            // Hide login page and show main app
+            document.getElementById('loginPage').style.display = 'none';
+            document.getElementById('mainApp').style.display = 'block';
+        });
+
+        // Logout functionality
+        document.getElementById('logoutBtn').addEventListener('click', function() {
+            document.getElementById('loginPage').style.display = 'flex';
+            document.getElementById('mainApp').style.display = 'none';
+        });
+
+        // Tab functionality
+        document.querySelectorAll('.nav-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                const targetTab = this.getAttribute('data-tab');
+                
+                // Remove active class from all tabs and contents
+                document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                // Add active class to clicked tab and corresponding content
+                this.classList.add('active');
+                document.getElementById(targetTab).classList.add('active');
+            });
+        });
+
+        // Expandable sections
+        document.querySelectorAll('.expandable-header').forEach(header => {
+            header.addEventListener('click', function() {
+                this.parentElement.classList.toggle('active');
+            });
+        });
+
+        // Populate themes table
+        function populateThemesTable() {
+            const tbody = document.getElementById('themesTableBody');
+            tbody.innerHTML = '';
+            
+            analysisData.themes.forEach(theme => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><strong>${theme.id}</strong></td>
+                    <td>${theme.name}</td>
+                    <td><span style="background: ${theme.prevalence === '100%' ? 'var(--secondary)' : 'var(--warning)'}; color: white; padding: 3px 8px; border-radius: 12px; font-size: 0.8rem;">${theme.prevalence}</span></td>
+                    <td>${theme.interviews}</td>
+                    <td>${theme.confidence}</td>
+                    <td><span class="quote-ref">${theme.quotes}</span></td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Populate code hierarchy
+        function populateCodeHierarchy() {
+            const container = document.getElementById('codeHierarchy');
+            container.innerHTML = '';
+            
+            // Group codes by hierarchy level
+            const codesByLevel = {};
+            analysisData.codes.forEach(code => {
+                if (!codesByLevel[code.hierarchy_level]) {
+                    codesByLevel[code.hierarchy_level] = [];
+                }
+                codesByLevel[code.hierarchy_level].push(code);
+            });
+            
+            // Display codes hierarchically
+            Object.keys(codesByLevel).sort().forEach(level => {
+                codesByLevel[level].forEach(code => {
+                    const codeDiv = document.createElement('div');
+                    codeDiv.className = `code-level-${code.hierarchy_level}`;
+                    codeDiv.innerHTML = `
+                        <strong>${code.id}</strong>: ${code.name}
+                        <br><small style="opacity: 0.8;">${code.definition}</small>
+                        <br><small>Frequency: ${code.frequency} interviews | Theme: ${code.theme_id}</small>
+                    `;
+                    container.appendChild(codeDiv);
+                });
+            });
+        }
+
+        // Populate quotes
+        function populateQuotes() {
+            const container = document.getElementById('quotesContainer');
+            container.innerHTML = '';
+            
+            analysisData.quotes.forEach(quote => {
+                const quoteDiv = document.createElement('div');
+                quoteDiv.className = 'expandable';
+                quoteDiv.innerHTML = `
+                    <div class="expandable-header">
+                        <span><i class="fas fa-quote-left"></i> ${quote.id} - ${quote.speaker}</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="expandable-content">
+                        <blockquote style="background: var(--quote-bg); border-left: 4px solid var(--quote-border); padding: 15px; margin: 15px 0; font-style: italic;">
+                            "${quote.text}"
+                        </blockquote>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px;">
+                            <div><strong>Speaker:</strong> ${quote.speaker}</div>
+                            <div><strong>Interview:</strong> ${quote.interview_id}</div>
+                            <div><strong>Codes:</strong> <span class="quote-ref">${quote.codes}</span></div>
+                            <div><strong>Theme:</strong> <span class="quote-ref">${quote.theme_ids}</span></div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(quoteDiv);
+            });
+            
+            // Re-attach expandable functionality
+            document.querySelectorAll('.expandable-header').forEach(header => {
+                header.addEventListener('click', function() {
+                    this.parentElement.classList.toggle('active');
+                });
+            });
+        }
+
+        // Create charts
+        function createCharts() {
+            // Theme distribution chart
+            const themeCtx = document.getElementById('themeChart').getContext('2d');
+            new Chart(themeCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: analysisData.themes.map(t => t.name),
+                    datasets: [{
+                        data: analysisData.themes.map(t => parseInt(t.prevalence)),
+                        backgroundColor: ['#2563eb', '#10b981', '#f59e0b', '#ef4444', '#06b6d4']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+
+            // Code frequency chart
+            const codeCtx = document.getElementById('codeChart').getContext('2d');
+            const topCodes = analysisData.codes
+                .filter(c => c.hierarchy_level === 0)
+                .sort((a, b) => b.frequency - a.frequency);
+            
+            new Chart(codeCtx, {
+                type: 'bar',
+                data: {
+                    labels: topCodes.map(c => c.name),
+                    datasets: [{
+                        label: 'Frequency',
+                        data: topCodes.map(c => c.frequency),
+                        backgroundColor: '#2563eb'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        // Initialize everything when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            populateThemesTable();
+            populateCodeHierarchy();
+            populateQuotes();
+            
+            // Initialize charts after a short delay to ensure canvas elements are ready
+            setTimeout(createCharts, 100);
+        });
+
+        // Filter functionality
+        document.getElementById('themeFilter')?.addEventListener('change', function() {
+            // Add filter logic here if needed
+        });
+
+        document.getElementById('themeSearch')?.addEventListener('input', function() {
+            // Add search logic here if needed
+        });
+    </script>
+</body>
+</html>

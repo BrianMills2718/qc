@@ -1,0 +1,1680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAND Corporation - Comprehensive Qualitative Analysis Portal</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --rand-blue: #003366;
+            --rand-light-blue: #0066cc;
+            --rand-gray: #666666;
+            --rand-light-gray: #f5f5f5;
+            --rand-dark-gray: #333333;
+            --accent-blue: #2196F3;
+            --accent-green: #4CAF50;
+            --accent-orange: #FF9800;
+            --accent-red: #f44336;
+            --warning: #FFC107;
+            --error: #F44336;
+            --success: #4CAF50;
+            --info: #2196F3;
+            --border-color: #ddd;
+            --hover-bg: #f8f9fa;
+            --shadow: 0 2px 10px rgba(0,0,0,0.1);
+            --shadow-hover: 0 4px 20px rgba(0,0,0,0.15);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--rand-dark-gray);
+            background: var(--rand-light-gray);
+        }
+
+        /* ====== LOGIN PAGE STYLES ====== */
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--rand-blue) 0%, var(--rand-light-blue) 100%);
+            background-size: cover;
+            position: relative;
+        }
+
+        .login-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 51, 102, 0.8);
+        }
+
+        .login-box {
+            background: white;
+            padding: 50px;
+            border-radius: 15px;
+            box-shadow: var(--shadow-hover);
+            width: 100%;
+            max-width: 480px;
+            text-align: center;
+            position: relative;
+            z-index: 10;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .rand-logo {
+            width: 150px;
+            height: 75px;
+            background: var(--rand-blue);
+            border-radius: 10px;
+            margin: 0 auto 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 28px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .rand-logo::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--accent-blue), transparent);
+        }
+
+        .login-title {
+            color: var(--rand-blue);
+            margin-bottom: 10px;
+            font-size: 28px;
+            font-weight: 300;
+        }
+
+        .login-subtitle {
+            color: var(--rand-gray);
+            margin-bottom: 40px;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--rand-dark-gray);
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: #fafafa;
+        }
+
+        .form-group input:focus {
+            border-color: var(--rand-light-blue);
+            background: white;
+            box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+            outline: none;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, var(--rand-blue), var(--rand-light-blue));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .login-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .login-btn:hover::before {
+            left: 100%;
+        }
+
+        .login-footer {
+            color: var(--rand-gray);
+            font-size: 12px;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        /* ====== MAIN APPLICATION STYLES ====== */
+        .main-container {
+            display: none;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--rand-blue), var(--rand-light-blue));
+            color: white;
+            padding: 20px 0;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: between;
+            align-items: center;
+        }
+
+        .header-title {
+            font-size: 24px;
+            font-weight: 300;
+            margin: 0;
+        }
+
+        .header-subtitle {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-left: auto;
+        }
+
+        .logout-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .nav-tabs {
+            background: white;
+            border-bottom: 3px solid var(--rand-blue);
+            padding: 0;
+            margin: 0;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+
+        .nav-tabs-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+        }
+
+        .nav-tab {
+            display: inline-block;
+            padding: 15px 25px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--rand-gray);
+            border-bottom: 3px solid transparent;
+            position: relative;
+        }
+
+        .nav-tab:hover {
+            background: var(--hover-bg);
+            color: var(--rand-blue);
+        }
+
+        .nav-tab.active {
+            color: var(--rand-blue);
+            border-bottom-color: var(--rand-blue);
+            background: var(--hover-bg);
+        }
+
+        .tab-content {
+            display: none;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .section-title {
+            font-size: 28px;
+            color: var(--rand-blue);
+            font-weight: 300;
+            margin: 0;
+        }
+
+        .section-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .search-box {
+            padding: 10px 15px;
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            width: 300px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .search-box:focus {
+            border-color: var(--rand-light-blue);
+            outline: none;
+        }
+
+        .filter-select {
+            padding: 10px 15px;
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+            min-width: 150px;
+        }
+
+        .export-btn {
+            background: var(--accent-green);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .export-btn:hover {
+            background: #45a049;
+            transform: translateY(-1px);
+        }
+
+        /* ====== DATA TABLES ====== */
+        .data-table-wrapper {
+            background: white;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        .data-table thead {
+            background: var(--rand-blue);
+            color: white;
+        }
+
+        .data-table th {
+            padding: 15px 12px;
+            text-align: left;
+            font-weight: 600;
+            border-right: 1px solid rgba(255,255,255,0.1);
+            cursor: pointer;
+            position: relative;
+            user-select: none;
+        }
+
+        .data-table th:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .data-table th::after {
+            content: '';
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 0;
+            height: 0;
+            border-left: 4px solid transparent;
+            border-right: 4px solid transparent;
+            border-bottom: 4px solid rgba(255,255,255,0.5);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .data-table th:hover::after {
+            opacity: 1;
+        }
+
+        .data-table th.sort-asc::after {
+            border-bottom: none;
+            border-top: 4px solid white;
+            opacity: 1;
+        }
+
+        .data-table th.sort-desc::after {
+            border-bottom: 4px solid white;
+            opacity: 1;
+        }
+
+        .data-table td {
+            padding: 12px;
+            border-bottom: 1px solid var(--border-color);
+            border-right: 1px solid var(--border-color);
+            vertical-align: top;
+        }
+
+        .data-table tbody tr:hover {
+            background: var(--hover-bg);
+        }
+
+        .data-table tbody tr:nth-child(even) {
+            background: #fafafa;
+        }
+
+        .data-table tbody tr:nth-child(even):hover {
+            background: var(--hover-bg);
+        }
+
+        /* ====== SPECIALIZED CONTENT STYLES ====== */
+        .code-hierarchy {
+            margin-left: 20px;
+            position: relative;
+        }
+
+        .code-hierarchy::before {
+            content: '';
+            position: absolute;
+            left: -15px;
+            top: 8px;
+            width: 10px;
+            height: 1px;
+            background: var(--border-color);
+        }
+
+        .frequency-badge {
+            background: var(--accent-blue);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .theme-badge {
+            background: var(--accent-green);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-right: 5px;
+        }
+
+        .confidence-meter {
+            width: 100px;
+            height: 20px;
+            background: #eee;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+
+        .confidence-high { background: var(--success); }
+        .confidence-medium { background: var(--warning); }
+        .confidence-low { background: var(--error); }
+
+        .quote-text {
+            background: #f8f9fa;
+            border-left: 4px solid var(--accent-blue);
+            padding: 15px;
+            border-radius: 0 8px 8px 0;
+            font-style: italic;
+            line-height: 1.5;
+            margin: 10px 0;
+        }
+
+        .quote-meta {
+            font-size: 12px;
+            color: var(--rand-gray);
+            margin-top: 8px;
+        }
+
+        .contradiction-card {
+            background: white;
+            border: 1px solid #ffebee;
+            border-left: 4px solid var(--error);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .contradiction-topic {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--rand-blue);
+            margin-bottom: 15px;
+        }
+
+        .position {
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .position-1 {
+            background: #ffebee;
+            border-left: 4px solid var(--error);
+        }
+
+        .position-2 {
+            background: #e8f5e8;
+            border-left: 4px solid var(--success);
+        }
+
+        .position-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--rand-blue);
+        }
+
+        .position-holders {
+            font-size: 14px;
+            color: var(--rand-gray);
+            margin-bottom: 10px;
+        }
+
+        .stakeholder-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            border-left: 4px solid var(--accent-blue);
+        }
+
+        .stakeholder-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--rand-blue);
+            margin-bottom: 5px;
+        }
+
+        .stakeholder-type {
+            background: var(--rand-light-gray);
+            color: var(--rand-gray);
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+
+        .influence-level {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .influence-stars {
+            color: var(--warning);
+        }
+
+        .chain-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            border-left: 4px solid var(--accent-orange);
+        }
+
+        .chain-type {
+            background: var(--accent-orange);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        /* ====== RESPONSIVE DESIGN ====== */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+                gap: 15px;
+            }
+
+            .user-info {
+                margin-left: 0;
+            }
+
+            .nav-tabs-container {
+                padding: 0 10px;
+            }
+
+            .nav-tab {
+                padding: 12px 15px;
+                font-size: 14px;
+            }
+
+            .tab-content {
+                padding: 20px 15px;
+            }
+
+            .section-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .section-controls {
+                width: 100%;
+                flex-wrap: wrap;
+            }
+
+            .search-box {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+
+            .data-table {
+                font-size: 12px;
+            }
+
+            .data-table th,
+            .data-table td {
+                padding: 8px 6px;
+            }
+
+            .login-box {
+                margin: 20px;
+                padding: 30px;
+            }
+        }
+
+        /* ====== LOADING STATES ====== */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+            color: var(--rand-gray);
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--border-color);
+            border-top: 4px solid var(--rand-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* ====== STATS CARDS ====== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            text-align: center;
+            border-top: 4px solid var(--accent-blue);
+        }
+
+        .stat-number {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--rand-blue);
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: var(--rand-gray);
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        .pagination button {
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            background: white;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+
+        .pagination button:hover {
+            background: var(--hover-bg);
+        }
+
+        .pagination button.active {
+            background: var(--rand-blue);
+            color: white;
+            border-color: var(--rand-blue);
+        }
+
+        .pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <!-- LOGIN PAGE -->
+    <div id="loginPage" class="login-container">
+        <div class="login-box">
+            <div class="rand-logo">RAND</div>
+            <h1 class="login-title">Research Analysis Portal</h1>
+            <p class="login-subtitle">
+                Comprehensive Qualitative Analysis Dashboard<br>
+                Secure access to interview data, themes, and insights
+            </p>
+            
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" required placeholder="Enter your username">
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required placeholder="Enter your password">
+                </div>
+                
+                <button type="submit" class="login-btn">
+                    <i class="fas fa-sign-in-alt"></i> Access Portal
+                </button>
+            </form>
+            
+            <div class="login-footer">
+                RAND Corporation • Confidential Research Data<br>
+                Authorized Personnel Only • Version 2.1
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN APPLICATION -->
+    <div id="mainApp" class="main-container">
+        <!-- HEADER -->
+        <header class="header">
+            <div class="header-content">
+                <div>
+                    <h1 class="header-title">RAND Corporation - Qualitative Analysis Portal</h1>
+                    <p class="header-subtitle">Comprehensive Interview Analysis • AI Research Methods Study</p>
+                </div>
+                <div class="user-info">
+                    <span><i class="fas fa-user"></i> <span id="currentUser">Researcher</span></span>
+                    <button class="logout-btn" onclick="logout()">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- NAVIGATION TABS -->
+        <nav class="nav-tabs">
+            <div class="nav-tabs-container">
+                <button class="nav-tab active" onclick="showTab('overview')">
+                    <i class="fas fa-chart-pie"></i> Overview
+                </button>
+                <button class="nav-tab" onclick="showTab('themes')">
+                    <i class="fas fa-tags"></i> Themes
+                </button>
+                <button class="nav-tab" onclick="showTab('codes')">
+                    <i class="fas fa-code"></i> Codes
+                </button>
+                <button class="nav-tab" onclick="showTab('quotes')">
+                    <i class="fas fa-quote-left"></i> Quotes
+                </button>
+                <button class="nav-tab" onclick="showTab('contradictions')">
+                    <i class="fas fa-balance-scale"></i> Contradictions
+                </button>
+                <button class="nav-tab" onclick="showTab('stakeholders')">
+                    <i class="fas fa-users"></i> Stakeholders
+                </button>
+                <button class="nav-tab" onclick="showTab('chains')">
+                    <i class="fas fa-link"></i> Quote Chains
+                </button>
+                <button class="nav-tab" onclick="showTab('evidence')">
+                    <i class="fas fa-search"></i> Evidence
+                </button>
+            </div>
+        </nav>
+
+        <!-- OVERVIEW TAB -->
+        <div id="overview" class="tab-content active">
+            <div class="section-header">
+                <h2 class="section-title">Analysis Overview</h2>
+                <div class="section-controls">
+                    <button class="export-btn" onclick="exportData('overview')">
+                        <i class="fas fa-download"></i> Export Summary
+                    </button>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalThemes">5</div>
+                    <div class="stat-label">Themes Identified</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="totalCodes">103</div>
+                    <div class="stat-label">Total Codes</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="totalQuotes">847</div>
+                    <div class="stat-label">Quotes Analyzed</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="totalInterviews">18</div>
+                    <div class="stat-label">Interviews Processed</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="totalContradictions">12</div>
+                    <div class="stat-label">Contradictions Found</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="totalChains">15</div>
+                    <div class="stat-label">Quote Chains</div>
+                </div>
+            </div>
+
+            <div class="data-table-wrapper">
+                <h3 style="padding: 20px; margin: 0; color: var(--rand-blue); border-bottom: 1px solid var(--border-color);">
+                    <i class="fas fa-chart-bar"></i> Theme Summary
+                </h3>
+                <table class="data-table" id="overviewTable">
+                    <thead>
+                        <tr>
+                            <th onclick="sortTable('overviewTable', 0)">Theme</th>
+                            <th onclick="sortTable('overviewTable', 1)">Prevalence</th>
+                            <th onclick="sortTable('overviewTable', 2)">Confidence</th>
+                            <th onclick="sortTable('overviewTable', 3)">Interview Count</th>
+                            <th onclick="sortTable('overviewTable', 4)">Key Insights</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Data will be populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- THEMES TAB -->
+        <div id="themes" class="tab-content">
+            <div class="section-header">
+                <h2 class="section-title">Thematic Analysis</h2>
+                <div class="section-controls">
+                    <input type="text" class="search-box" placeholder="Search themes..." onkeyup="filterTable('themesTable', this.value)">
+                    <select class="filter-select" onchange="filterThemes(this.value)">
+                        <option value="">All Themes</option>
+                        <option value="high">High Confidence (>0.9)</option>
+                        <option value="medium">Medium Confidence (0.7-0.9)</option>
+                        <option value="low">Low Confidence (<0.7)</option>
+                    </select>
+                    <button class="export-btn" onclick="exportData('themes')">
+                        <i class="fas fa-download"></i> Export Themes
+                    </button>
+                </div>
+            </div>
+
+            <div class="data-table-wrapper">
+                <table class="data-table" id="themesTable">
+                    <thead>
+                        <tr>
+                            <th onclick="sortTable('themesTable', 0)">Theme ID</th>
+                            <th onclick="sortTable('themesTable', 1)">Theme Name</th>
+                            <th onclick="sortTable('themesTable', 2)">Description</th>
+                            <th onclick="sortTable('themesTable', 3)">Prevalence</th>
+                            <th onclick="sortTable('themesTable', 4)">Confidence</th>
+                            <th onclick="sortTable('themesTable', 5)">Interview Count</th>
+                            <th onclick="sortTable('themesTable', 6)">Related Codes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Placeholder data - replace with actual data -->
+                        <tr>
+                            <td>T1</td>
+                            <td><strong>AI Applications in Research</strong></td>
+                            <td>Exploration of various AI tools and applications currently being used or considered for research methodologies at RAND.</td>
+                            <td><span class="frequency-badge">100%</span></td>
+                            <td>
+                                <div class="confidence-meter">
+                                    <div class="confidence-fill confidence-high" style="width: 95%"></div>
+                                </div>
+                                <small>0.95</small>
+                            </td>
+                            <td>18</td>
+                            <td>
+                                <span class="theme-badge">C1</span>
+                                <span class="theme-badge">C1.1</span>
+                                <span class="theme-badge">C1.2</span>
+                                <span class="theme-badge">C1.3</span>
+                                <span class="theme-badge">C1.4</span>
+                            </td>
+                        </tr>
+                        <!-- Add more theme rows here -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="pagination" id="themesPagination">
+                <!-- Pagination controls will be added by JavaScript -->
+            </div>
+        </div>
+
+        <!-- CODES TAB -->
+        <div id="codes" class="tab-content">
+            <div class="section-header">
+                <h2 class="section-title">Coding Structure</h2>
+                <div class="section-controls">
+                    <input type="text" class="search-box" placeholder="Search codes..." onkeyup="filterTable('codesTable', this.value)">
+                    <select class="filter-select" onchange="filterCodes(this.value)">
+                        <option value="">All Levels</option>
+                        <option value="0">Parent Codes (Level 0)</option>
+                        <option value="1">Sub-codes (Level 1)</option>
+                        <option value="2">Sub-sub-codes (Level 2)</option>
+                    </select>
+                    <button class="export-btn" onclick="exportData('codes')">
+                        <i class="fas fa-download"></i> Export Codes
+                    </button>
+                </div>
+            </div>
+
+            <div class="data-table-wrapper">
+                <table class="data-table" id="codesTable">
+                    <thead>
+                        <tr>
+                            <th onclick="sortTable('codesTable', 0)">Code ID</th>
+                            <th onclick="sortTable('codesTable', 1)">Code Name</th>
+                            <th onclick="sortTable('codesTable', 2)">Definition</th>
+                            <th onclick="sortTable('codesTable', 3)">Frequency</th>
+                            <th onclick="sortTable('codesTable', 4)">Theme</th>
+                            <th onclick="sortTable('codesTable', 5)">Hierarchy</th>
+                            <th onclick="sortTable('codesTable', 6)">First Appearance</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Placeholder data - replace with actual data -->
+                        <tr>
+                            <td><strong>C1</strong></td>
+                            <td><strong>AI Applications</strong></td>
+                            <td>Specific applications of AI tools and models across various research methodologies.</td>
+                            <td><span class="frequency-badge">18</span></td>
+                            <td><span class="theme-badge">T1</span></td>
+                            <td>Level 0 (Parent)</td>
+                            <td>Interview 001</td>
+                        </tr>
+                        <tr>
+                            <td>C1.1</td>
+                            <td><div class="code-hierarchy">Qualitative Analysis Automation</div></td>
+                            <td>Automation of qualitative research tasks using AI.</td>
+                            <td><span class="frequency-badge">15</span></td>
+                            <td><span class="theme-badge">T1</span></td>
+                            <td>Level 1 (Sub-code of C1)</td>
+                            <td>Interview 001</td>
+                        </tr>
+                        <!-- Add more code rows here -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="pagination" id="codesPagination">
+                <!-- Pagination controls will be added by JavaScript -->
+            </div>
+        </div>
+
+        <!-- QUOTES TAB -->
+        <div id="quotes" class="tab-content">
+            <div class="section-header">
+                <h2 class="section-title">Quote Analysis</h2>
+                <div class="section-controls">
+                    <input type="text" class="search-box" placeholder="Search quotes..." onkeyup="filterTable('quotesTable', this.value)">
+                    <select class="filter-select" onchange="filterQuotes(this.value)">
+                        <option value="">All Interviews</option>
+                        <option value="INT_001">Interview 001</option>
+                        <option value="INT_002">Interview 002</option>
+                        <!-- Add more interview options -->
+                    </select>
+                    <button class="export-btn" onclick="exportData('quotes')">
+                        <i class="fas fa-download"></i> Export Quotes
+                    </button>
+                </div>
+            </div>
+
+            <div class="data-table-wrapper">
+                <table class="data-table" id="quotesTable">
+                    <thead>
+                        <tr>
+                            <th onclick="sortTable('quotesTable', 0)">Quote ID</th>
+                            <th onclick="sortTable('quotesTable', 1)">Speaker</th>
+                            <th onclick="sortTable('quotesTable', 2)">Quote Text</th>
+                            <th onclick="sortTable('quotesTable', 3)">Interview</th>
+                            <th onclick="sortTable('quotesTable', 4)">Associated Codes</th>
+                            <th onclick="sortTable('quotesTable', 5)">Themes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Placeholder data - replace with actual data -->
+                        <tr>
+                            <td>T004_Q1</td>
+                            <td><strong>Kandice Kapinos</strong></td>
+                            <td>
+                                <div class="quote-text">
+                                    "I think the biggest thing is that we need to have a strategy for how we're going to use AI. And I think that's still very much in flux. I think there's a lot of excitement about it, but there's also a lot of trepidation..."
+                                </div>
+                                <div class="quote-meta">Line: 0 | Interview: INT_001</div>
+                            </td>
+                            <td>INT_001</td>
+                            <td>
+                                <span class="theme-badge">C4.1</span>
+                                <span class="theme-badge">C4.2</span>
+                            </td>
+                            <td><span class="theme-badge">T4</span></td>
+                        </tr>
+                        <!-- Add more quote rows here -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="pagination" id="quotesPagination">
+                <!-- Pagination controls will be added by JavaScript -->
+            </div>
+        </div>
+
+        <!-- CONTRADICTIONS TAB -->
+        <div id="contradictions" class="tab-content">
+            <div class="section-header">
+                <h2 class="section-title">Contradictory Positions</h2>
+                <div class="section-controls">
+                    <input type="text" class="search-box" placeholder="Search contradictions..." onkeyup="filterContradictions(this.value)">
+                    <button class="export-btn" onclick="exportData('contradictions')">
+                        <i class="fas fa-download"></i> Export Contradictions
+                    </button>
+                </div>
+            </div>
+
+            <div id="contradictionsList">
+                <!-- Placeholder contradiction - replace with actual data -->
+                <div class="contradiction-card">
+                    <div class="contradiction-topic">
+                        <i class="fas fa-balance-scale"></i> Impact of AI on Researcher Roles and Skill Development
+                    </div>
+                    
+                    <div class="position position-1">
+                        <div class="position-title">Position 1: AI will displace junior researchers</div>
+                        <div class="position-holders">
+                            <strong>Stakeholders:</strong> Molly Dunnigan (Arroyo SDR), Patricia Herman (REACH Center), Dulani Woods (Scalable Computing)
+                        </div>
+                        <div class="quote-text">
+                            <strong>Molly Dunnigan:</strong> "The risk is that we will end up utilizing AI for stuff our junior folks used to do. We can use AI for a literature review that would have taken a RA 20 days so benefits of cost savings but I worry about career development and skillset development among the younger folks."
+                        </div>
+                        <div class="quote-text">
+                            <strong>Patricia Herman:</strong> "If heading toward AI… where you you have the model do the analysis, then that is negative impact on training."
+                        </div>
+                    </div>
+                    
+                    <div class="position position-2">
+                        <div class="position-title">Position 2: AI will free up researchers for higher-value work</div>
+                        <div class="position-holders">
+                            <strong>Stakeholders:</strong> Lisa Saum-Manning (ISDP), Heather Williams (ISDP), Christopher Mouton (ISDP)
+                        </div>
+                        <div class="quote-text">
+                            <strong>Lisa Saum-Manning:</strong> "I would love a finding of this, Todd to be like, OK. We figured out the things that AI can do. What can't they do so that when all of our jobs are under threat, that AI is taking over? Like what do we do better?"
+                        </div>
+                        <div class="quote-text">
+                            <strong>Heather Williams:</strong> "And I appreciate Chris's point of like rather than trying to have it do our jobs, which we probably can only do best, why doesn't it create efficiencies for us and all of the NIM picky things that pull us away from our jobs?"
+                        </div>
+                    </div>
+                    
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-top: 15px;">
+                        <strong>Suggested Resolution:</strong> The potential for AI to displace junior roles is a significant concern, but many also see it as an opportunity to automate tedious tasks, allowing researchers to focus on higher-level analytical and creative work. The challenge lies in ensuring that foundational skills are still developed.
+                    </div>
+                    
+                    <div style="margin-top: 15px; font-size: 14px; color: var(--rand-gray);">
+                        <strong>Related Themes:</strong> <span class="theme-badge">T2</span> <span class="theme-badge">T3</span><br>
+                        <strong>Related Codes:</strong> <span class="theme-badge">C2.2.3</span> <span class="theme-badge">C3.1</span>
+                    </div>
+                </div>
+                <!-- Add more contradiction cards here -->
+            </div>
+        </div>
+
+        <!-- STAKEHOLDERS TAB -->
+        <div id="stakeholders" class="tab-content">
+            <div class="section-header">
+                <h2 class="section-title">Stakeholder Positions</h2>
+                <div class="section-controls">
+                    <input type="text" class="search-box" placeholder="Search stakeholders..." onkeyup="filterStakeholders(this.value)">
+                    <select class="filter-select" onchange="filterStakeholderType(this.value)">
+                        <option value="">All Types</option>
+                        <option value="researcher">Researcher</option>
+                        <option value="manager">Manager</option>
+                        <option value="leadership">Leadership</option>
+                    </select>
+                    <button class="export-btn" onclick="exportData('stakeholders')">
+                        <i class="fas fa-download"></i> Export Stakeholders
+                    </button>
+                </div>
+            </div>
+
+            <div id="stakeholdersList">
+                <!-- Placeholder stakeholder - replace with actual data -->
+                <div class="stakeholder-card">
+                    <div class="stakeholder-name">Kandice Kapinos</div>
+                    <span class="stakeholder-type">Senior Researcher</span>
+                    
+                    <div style="margin: 15px 0;">
+                        <strong>Position Summary:</strong>
+                        <p>Advocates for strategic AI adoption with emphasis on proper training and infrastructure development. Concerned about incentive structures and bias prevention.</p>
+                    </div>
+                    
+                    <div class="quote-text">
+                        <strong>Key Quote:</strong> "I think the biggest thing is that we need to have a strategy for how we're going to use AI. And I think that's still very much in flux. I think there's a lot of excitement about it, but there's also a lot of trepidation."
+                    </div>
+                    
+                    <div style="margin-top: 15px;">
+                        <strong>Key Concerns:</strong>
+                        <ul style="margin-left: 20px; margin-top: 8px;">
+                            <li>Lack of clear AI strategy</li>
+                            <li>Inadequate incentive structures</li>
+                            <li>Potential for AI bias</li>
+                            <li>Need for infrastructure investment</li>
+                        </ul>
+                    </div>
+                    
+                    <div style="margin-top: 15px;">
+                        <strong>Recommendations:</strong>
+                        <ul style="margin-left: 20px; margin-top: 8px;">
+                            <li>Develop comprehensive AI strategy</li>
+                            <li>Invest in AI expertise and infrastructure</li>
+                            <li>Create incentives for AI adoption</li>
+                            <li>Implement bias prevention measures</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="influence-level">
+                        <strong>Influence Level:</strong>
+                        <span class="influence-stars">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="far fa-star"></i>
+                        </span>
+                        <span>High (4/5)</span>
+                    </div>
+                </div>
+                <!-- Add more stakeholder cards here -->
+            </div>
+        </div>
+
+        <!-- CHAINS TAB -->
+        <div id="chains" class="tab-content">
+            <div class="section-header">
+                <h2 class="section-title">Quote Chains & Evidence</h2>
+                <div class="section-controls">
+                    <input type="text" class="search-box" placeholder="Search chains..." onkeyup="filterChains(this.value)">
+                    <select class="filter-select" onchange="filterChainType(this.value)">
+                        <option value="">All Types</option>
+                        <option value="problem_solution">Problem-Solution</option>
+                        <option value="evolution">Evolution</option>
+                        <option value="causal">Causal</option>
+                    </select>
+                    <button class="export-btn" onclick="exportData('chains')">
+                        <i class="fas fa-download"></i> Export Chains
+                    </button>
+                </div>
+            </div>
+
+            <div id="chainsList">
+                <!-- Placeholder chain - replace with actual data -->
+                <div class="chain-card">
+                    <span class="chain-type">Problem-Solution</span>
+                    <h3 style="color: var(--rand-blue); margin: 10px 0;">
+                        <i class="fas fa-link"></i> Qualitative Data Coding Automation
+                    </h3>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <strong>Description:</strong> This chain illustrates the common problem of qualitative data coding being time-consuming and annoying, and the proposed AI solution to automate this process.
+                    </div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <strong>Theme:</strong> <span class="theme-badge">T1</span> AI Applications in Research
+                    </div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <strong>Quote Count:</strong> <span class="frequency-badge">7</span>
+                    </div>
+                    
+                    <div class="quote-text">
+                        <strong>Supporting Quote 1:</strong> "Interview coding, something way better than Dedoose. We do a lot of interviews and the coding is uneven in quality. So it would be great if we had some standard way to do that and a tool to help with that." - Matthew Sergant
+                    </div>
+                    
+                    <div class="quote-text">
+                        <strong>Supporting Quote 2:</strong> "AI has been really helpful with writing like any type of code... it just helped me write code like so much faster. And of course checking that it's correct as well." - Caroline Johnston
+                    </div>
+                </div>
+                <!-- Add more chain cards here -->
+            </div>
+        </div>
+
+        <!-- EVIDENCE TAB -->
+        <div id="evidence" class="tab-content">
+            <div class="section-header">
+                <h2 class="section-title">Evidence Database</h2>
+                <div class="section-controls">
+                    <input type="text" class="search-box" placeholder="Search evidence..." onkeyup="filterTable('evidenceTable', this.value)">
+                    <select class="filter-select" onchange="filterEvidence(this.value)">
+                        <option value="">All Evidence Types</option>
+                        <option value="quote">Direct Quotes</option>
+                        <option value="observation">Observations</option>
+                        <option value="document">Document Analysis</option>
+                    </select>
+                    <button class="export-btn" onclick="exportData('evidence')">
+                        <i class="fas fa-download"></i> Export Evidence
+                    </button>
+                </div>
+            </div>
+
+            <div class="data-table-wrapper">
+                <table class="data-table" id="evidenceTable">
+                    <thead>
+                        <tr>
+                            <th onclick="sortTable('evidenceTable', 0)">Evidence ID</th>
+                            <th onclick="sortTable('evidenceTable', 1)">Type</th>
+                            <th onclick="sortTable('evidenceTable', 2)">Source</th>
+                            <th onclick="sortTable('evidenceTable', 3)">Content</th>
+                            <th onclick="sortTable('evidenceTable', 4)">Supporting Codes</th>
+                            <th onclick="sortTable('evidenceTable', 5)">Confidence</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Placeholder data - replace with actual data -->
+                        <tr>
+                            <td>E001</td>
+                            <td><span class="theme-badge">Quote</span></td>
+                            <td>Interview 001 - Kandice Kapinos</td>
+                            <td>
+                                <div class="quote-text" style="max-width: 400px;">
+                                    "I think the biggest thing is that we need to have a strategy for how we're going to use AI..."
+                                </div>
+                            </td>
+                            <td>
+                                <span class="theme-badge">C4.1</span>
+                                <span class="theme-badge">C4.2</span>
+                            </td>
+                            <td>
+                                <div class="confidence-meter">
+                                    <div class="confidence-fill confidence-high" style="width: 90%"></div>
+                                </div>
+                                <small>0.90</small>
+                            </td>
+                        </tr>
+                        <!-- Add more evidence rows here -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="pagination" id="evidencePagination">
+                <!-- Pagination controls will be added by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ====== AUTHENTICATION ======
+        function login(event) {
+            if (event) event.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            // NON-BLOCKING: Accept any credentials or just show portal
+            document.getElementById('currentUser').textContent = username || 'Researcher';
+            document.getElementById('loginPage').style.display = 'none';
+            document.getElementById('mainApp').style.display = 'block';
+            
+            return false;
+        }
+
+        function logout() {
+            document.getElementById('loginPage').style.display = 'flex';
+            document.getElementById('mainApp').style.display = 'none';
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+        }
+
+        // ====== TAB MANAGEMENT ======
+        function showTab(tabName) {
+            // Hide all tab contents
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(tab => tab.classList.remove('active'));
+            
+            // Remove active class from all nav tabs
+            const navTabs = document.querySelectorAll('.nav-tab');
+            navTabs.forEach(tab => tab.classList.remove('active'));
+            
+            // Show selected tab content
+            document.getElementById(tabName).classList.add('active');
+            
+            // Add active class to clicked nav tab
+            event.target.classList.add('active');
+            
+            // Load data for the tab if not already loaded
+            loadTabData(tabName);
+        }
+
+        // ====== DATA LOADING ======
+        function loadTabData(tabName) {
+            // This function would typically load data from your backend
+            // For now, it's a placeholder for data injection
+            console.log(`Loading data for tab: ${tabName}`);
+            
+            switch(tabName) {
+                case 'themes':
+                    loadThemesData();
+                    break;
+                case 'codes':
+                    loadCodesData();
+                    break;
+                case 'quotes':
+                    loadQuotesData();
+                    break;
+                case 'contradictions':
+                    loadContradictionsData();
+                    break;
+                case 'stakeholders':
+                    loadStakeholdersData();
+                    break;
+                case 'chains':
+                    loadChainsData();
+                    break;
+                case 'evidence':
+                    loadEvidenceData();
+                    break;
+            }
+        }
+
+        // ====== TABLE SORTING ======
+        function sortTable(tableId, columnIndex) {
+            const table = document.getElementById(tableId);
+            const tbody = table.querySelector('tbody');
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+            const th = table.querySelectorAll('th')[columnIndex];
+            
+            const isAscending = !th.classList.contains('sort-asc');
+            
+            // Clear all sort classes
+            table.querySelectorAll('th').forEach(header => {
+                header.classList.remove('sort-asc', 'sort-desc');
+            });
+            
+            // Add appropriate sort class
+            th.classList.add(isAscending ? 'sort-asc' : 'sort-desc');
+            
+            rows.sort((a, b) => {
+                const aText = a.cells[columnIndex].textContent.trim();
+                const bText = b.cells[columnIndex].textContent.trim();
+                
+                // Try to parse as numbers
+                const aNum = parseFloat(aText);
+                const bNum = parseFloat(bText);
+                
+                let comparison = 0;
+                if (!isNaN(aNum) && !isNaN(bNum)) {
+                    comparison = aNum - bNum;
+                } else {
+                    comparison = aText.localeCompare(bText);
+                }
+                
+                return isAscending ? comparison : -comparison;
+            });
+            
+            // Reappend sorted rows
+            rows.forEach(row => tbody.appendChild(row));
+        }
+
+        // ====== FILTERING ======
+        function filterTable(tableId, searchTerm) {
+            const table = document.getElementById(tableId);
+            const tbody = table.querySelector('tbody');
+            const rows = tbody.querySelectorAll('tr');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                const show = text.includes(searchTerm.toLowerCase());
+                row.style.display = show ? '' : 'none';
+            });
+        }
+
+        function filterThemes(confidenceLevel) {
+            // Implementation for theme-specific filtering
+            console.log('Filtering themes by confidence:', confidenceLevel);
+        }
+
+        function filterCodes(hierarchyLevel) {
+            // Implementation for code-specific filtering
+            console.log('Filtering codes by hierarchy level:', hierarchyLevel);
+        }
+
+        function filterQuotes(interviewId) {
+            // Implementation for quote-specific filtering
+            console.log('Filtering quotes by interview:', interviewId);
+        }
+
+        function filterContradictions(searchTerm) {
+            const cards = document.querySelectorAll('.contradiction-card');
+            cards.forEach(card => {
+                const text = card.textContent.toLowerCase();
+                const show = text.includes(searchTerm.toLowerCase());
+                card.style.display = show ? 'block' : 'none';
+            });
+        }
+
+        function filterStakeholders(searchTerm) {
+            const cards = document.querySelectorAll('.stakeholder-card');
+            cards.forEach(card => {
+                const text = card.textContent.toLowerCase();
+                const show = text.includes(searchTerm.toLowerCase());
+                card.style.display = show ? 'block' : 'none';
+            });
+        }
+
+        function filterStakeholderType(type) {
+            // Implementation for stakeholder type filtering
+            console.log('Filtering stakeholders by type:', type);
+        }
+
+        function filterChains(searchTerm) {
+            const cards = document.querySelectorAll('.chain-card');
+            cards.forEach(card => {
+                const text = card.textContent.toLowerCase();
+                const show = text.includes(searchTerm.toLowerCase());
+                card.style.display = show ? 'block' : 'none';
+            });
+        }
+
+        function filterChainType(type) {
+            const cards = document.querySelectorAll('.chain-card');
+            cards.forEach(card => {
+                const chainType = card.querySelector('.chain-type').textContent.toLowerCase().replace('-', '_');
+                const show = type === '' || chainType === type;
+                card.style.display = show ? 'block' : 'none';
+            });
+        }
+
+        function filterEvidence(type) {
+            // Implementation for evidence-specific filtering
+            console.log('Filtering evidence by type:', type);
+        }
+
+        // ====== DATA EXPORT ======
+        function exportData(dataType) {
+            // Implementation for data export functionality
+            console.log(`Exporting ${dataType} data...`);
+            
+            // Create a simple CSV export
+            let csvContent = "data:text/csv;charset=utf-8,";
+            let data = [];
+            
+            switch(dataType) {
+                case 'themes':
+                    data = [
+                        ['Theme ID', 'Theme Name', 'Prevalence', 'Confidence', 'Interview Count'],
+                        ['T1', 'AI Applications in Research', '1.0', '0.95', '18'],
+                        // Add more theme data
+                    ];
+                    break;
+                case 'codes':
+                    data = [
+                        ['Code ID', 'Code Name', 'Definition', 'Frequency', 'Theme ID'],
+                        ['C1', 'AI Applications', 'Specific applications of AI tools...', '18', 'T1'],
+                        // Add more code data
+                    ];
+                    break;
+                // Add more export cases
+            }
+            
+            data.forEach(row => {
+                csvContent += row.join(",") + "\r\n";
+            });
+            
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `${dataType}_export.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // ====== DATA INJECTION FUNCTIONS ======
+        // These functions would be replaced with actual data from your backend
+        
+        function loadThemesData() {
+            // Placeholder for themes data loading
+            console.log('Loading themes data...');
+        }
+
+        function loadCodesData() {
+            // Placeholder for codes data loading
+            console.log('Loading codes data...');
+        }
+
+        function loadQuotesData() {
+            // Placeholder for quotes data loading
+            console.log('Loading quotes data...');
+        }
+
+        function loadContradictionsData() {
+            // Placeholder for contradictions data loading
+            console.log('Loading contradictions data...');
+        }
+
+        function loadStakeholdersData() {
+            // Placeholder for stakeholders data loading
+            console.log('Loading stakeholders data...');
+        }
+
+        function loadChainsData() {
+            // Placeholder for chains data loading
+            console.log('Loading chains data...');
+        }
+
+        function loadEvidenceData() {
+            // Placeholder for evidence data loading
+            console.log('Loading evidence data...');
+        }
+
+        // ====== PAGINATION ======
+        function createPagination(containerId, totalItems, itemsPerPage, currentPage) {
+            const container = document.getElementById(containerId);
+            const totalPages = Math.ceil(totalItems / itemsPerPage);
+            
+            let paginationHTML = '';
+            
+            // Previous button
+            paginationHTML += `<button ${currentPage === 1 ? 'disabled' : ''} onclick="changePage('${containerId}', ${currentPage - 1})">
+                <i class="fas fa-chevron-left"></i>
+            </button>`;
+            
+            // Page numbers
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === currentPage) {
+                    paginationHTML += `<button class="active">${i}</button>`;
+                } else if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
+                    paginationHTML += `<button onclick="changePage('${containerId}', ${i})">${i}</button>`;
+                } else if (i === currentPage - 3 || i === currentPage + 3) {
+                    paginationHTML += `<span>...</span>`;
+                }
+            }
+            
+            // Next button
+            paginationHTML += `<button ${currentPage === totalPages ? 'disabled' : ''} onclick="changePage('${containerId}', ${currentPage + 1})">
+                <i class="fas fa-chevron-right"></i>
+            </button>`;
+            
+            container.innerHTML = paginationHTML;
+        }
+
+        function changePage(containerId, newPage) {
+            // Implementation for page changing
+            console.log(`Changing to page ${newPage} for ${containerId}`);
+        }
+
+        // ====== EVENT LISTENERS ======
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set up login form submission
+            document.getElementById('loginForm').addEventListener('submit', login);
+            
+            // Set up click-anywhere-to-enter for login (non-blocking)
+            document.addEventListener('click', function(event) {
+                if (document.getElementById('loginPage').style.display !== 'none') {
+                    // If login page is visible, any click enters the portal
+                    login();
+                }
+            }, { once: true });
+            
+            // Set up keyboard shortcuts
+            document.addEventListener('keydown', function(event) {
+                if (event.key === 'Enter' && document.getElementById('loginPage').style.display !== 'none') {
+                    login();
+                }
+            });
+            
+            // Initialize overview tab
+            loadTabData('overview');
+        });
+
+        // ====== UTILITY FUNCTIONS ======
+        function updateStats() {
+            // Update the overview statistics
+            // This would typically fetch real data from your backend
+            document.getElementById('totalThemes').textContent = '5';
+            document.getElementById('totalCodes').textContent = '103';
+            document.getElementById('totalQuotes').textContent = '847';
+            document.getElementById('totalInterviews').textContent = '18';
+            document.getElementById('totalContradictions').textContent = '12';
+            document.getElementById('totalChains').textContent = '15';
+        }
+
+        // Call updateStats on page load
+        document.addEventListener('DOMContentLoaded', updateStats);
+    </script>
+</body>
+</html>
