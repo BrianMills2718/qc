@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Visualizations - LLM-Native Qualitative Coding</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <nav class="sidebar">
+        <h2>Navigation</h2>
+        <ul>
+            <li><a href="index.html"><i class="fas fa-home"></i> Back to Main</a></li>
+            <li><a href="#theme-distribution"><i class="fas fa-chart-pie"></i> Theme Distribution</a></li>
+            <li><a href="#code-frequency"><i class="fas fa-chart-bar"></i> Code Frequency</a></li>
+            <li><a href="#saturation"><i class="fas fa-chart-line"></i> Saturation Analysis</a></li>
+            <li><a href="#network"><i class="fas fa-project-diagram"></i> Code Network</a></li>
+        </ul>
+    </nav>
+
+    <main class="content">
+        <header>
+            <h1>Interactive Data Visualizations</h1>
+            <p class="subtitle">Visual Analysis of Qualitative Coding Results</p>
+        </header>
+
+        <section id="theme-distribution">
+            <h2>Theme Distribution</h2>
+            <div class="chart-container">
+                <canvas id="themeChart"></canvas>
+            </div>
+            <div class="chart-description">
+                <p>This pie chart shows the distribution of codes across the 6 major themes. Each theme's size represents the number of codes it contains.</p>
+            </div>
+        </section>
+
+        <section id="code-frequency">
+            <h2>Code Frequency Analysis</h2>
+            <div class="chart-container">
+                <canvas id="codeChart"></canvas>
+            </div>
+            <div class="chart-description">
+                <p>This bar chart displays the top 20 most frequently mentioned codes across all interviews. Higher bars indicate codes that appeared more often.</p>
+            </div>
+        </section>
+
+        <section id="saturation">
+            <h2>Theoretical Saturation Curve</h2>
+            <div class="chart-container">
+                <canvas id="saturationChart"></canvas>
+            </div>
+            <div class="chart-description">
+                <p>This line chart shows when new themes and codes stopped emerging. The plateau indicates theoretical saturation was reached.</p>
+            </div>
+        </section>
+
+        <section id="network">
+            <h2>Theme-Code Network</h2>
+            <div class="network-viz">
+                <svg id="networkChart" width="100%" height="600"></svg>
+            </div>
+            <div class="chart-description">
+                <p>This network diagram shows the relationships between themes (large nodes) and their associated codes (smaller nodes).</p>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // Theme Distribution Pie Chart
+        const themeCtx = document.getElementById('themeChart').getContext('2d');
+        const themeChart = new Chart(themeCtx, {
+            type: 'pie',
+            data: {
+                labels: [
+                    'AI Applications (30 codes)',
+                    'Challenges & Risks (19 codes)',
+                    'Opportunities & Benefits (6 codes)',
+                    'Adoption Strategy (12 codes)',
+                    'Research Methods (4 codes)',
+                    'Human-AI Collaboration (8 codes)'
+                ],
+                datasets: [{
+                    data: [30, 19, 6, 12, 4, 8],
+                    backgroundColor: [
+                        '#2563eb',
+                        '#ef4444',
+                        '#10b981',
+                        '#f59e0b',
+                        '#8b5cf6',
+                        '#06b6d4'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: {
+                            padding: 20,
+                            font: {
+                                size: 14
+                            }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.parsed;
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = ((value / total) * 100).toFixed(1);
+                                return `${label}: ${percentage}%`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Code Frequency Bar Chart
+        const codeCtx = document.getElementById('codeChart').getContext('2d');
+        const codeChart = new Chart(codeCtx, {
+            type: 'bar',
+            data: {
+                labels: [
+                    'Transcription Automation',
+                    'Initial Coding Assistance',
+                    'Literature Review Tools',
+                    'Accuracy Concerns',
+                    'Training Needs',
+                    'Time Savings',
+                    'Bias Worries',
+                    'Tool Integration',
+                    'Human Oversight',
+                    'Cost Benefits',
+                    'Privacy Issues',
+                    'Workflow Changes',
+                    'Quality Control',
+                    'Skill Development',
+                    'Access Barriers',
+                    'Innovation Potential',
+                    'Trust Issues',
+                    'Scalability',
+                    'Collaboration Tools',
+                    'Ethical Concerns'
+                ],
+                datasets: [{
+                    label: 'Frequency',
+                    data: [18, 16, 15, 14, 14, 13, 12, 12, 11, 10, 10, 9, 9, 8, 8, 7, 7, 6, 6, 5],
+                    backgroundColor: '#2563eb',
+                    borderColor: '#1d4ed8',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Number of Mentions'
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            autoSkip: false,
+                            maxRotation: 45,
+                            minRotation: 45
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+
+        // Saturation Curve Line Chart
+        const saturationCtx = document.getElementById('saturationChart').getContext('2d');
+        const saturationChart = new Chart(saturationCtx, {
+            type: 'line',
+            data: {
+                labels: ['INT_001', 'INT_002', 'INT_003', 'INT_004', 'INT_005', 'INT_006', 
+                        'INT_007', 'INT_008', 'INT_009', 'INT_010', 'INT_011', 'INT_012',
+                        'INT_013', 'INT_014', 'INT_015', 'INT_016', 'INT_017', 'INT_018'],
+                datasets: [{
+                    label: 'Cumulative New Themes',
+                    data: [3, 4, 5, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6],
+                    borderColor: '#2563eb',
+                    backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                    tension: 0.4
+                }, {
+                    label: 'Cumulative New Codes',
+                    data: [12, 21, 35, 42, 48, 52, 56, 58, 60, 61, 62, 63, 63, 64, 64, 64, 64, 64],
+                    borderColor: '#10b981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Cumulative Count'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Interview Number'
+                        }
+                    }
+                },
+                plugins: {
+                    annotation: {
+                        annotations: {
+                            line1: {
+                                type: 'line',
+                                xMin: 'INT_008',
+                                xMax: 'INT_008',
+                                borderColor: 'rgb(255, 99, 132)',
+                                borderWidth: 2,
+                                borderDash: [5, 5],
+                                label: {
+                                    content: 'Saturation Point',
+                                    enabled: true,
+                                    position: 'start'
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Network Visualization (simplified D3-like implementation)
+        const networkSvg = document.getElementById('networkChart');
+        const themes = [
+            {id: 'T1', name: 'AI Applications', x: 300, y: 200, codes: 30},
+            {id: 'T2', name: 'Challenges', x: 600, y: 150, codes: 19},
+            {id: 'T3', name: 'Opportunities', x: 800, y: 300, codes: 6},
+            {id: 'T4', name: 'Adoption', x: 600, y: 450, codes: 12},
+            {id: 'T5', name: 'Methods', x: 300, y: 400, codes: 4},
+            {id: 'T6', name: 'Collaboration', x: 450, y: 300, codes: 8}
+        ];
+
+        // Draw connections
+        themes.forEach((theme, i) => {
+            themes.slice(i + 1).forEach(otherTheme => {
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', theme.x);
+                line.setAttribute('y1', theme.y);
+                line.setAttribute('x2', otherTheme.x);
+                line.setAttribute('y2', otherTheme.y);
+                line.setAttribute('stroke', '#e5e7eb');
+                line.setAttribute('stroke-width', '1');
+                networkSvg.appendChild(line);
+            });
+        });
+
+        // Draw theme nodes
+        themes.forEach(theme => {
+            const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            
+            const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            circle.setAttribute('cx', theme.x);
+            circle.setAttribute('cy', theme.y);
+            circle.setAttribute('r', 20 + theme.codes);
+            circle.setAttribute('fill', '#2563eb');
+            circle.setAttribute('opacity', '0.8');
+            
+            const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            text.setAttribute('x', theme.x);
+            text.setAttribute('y', theme.y - 30 - theme.codes);
+            text.setAttribute('text-anchor', 'middle');
+            text.setAttribute('font-size', '14');
+            text.setAttribute('font-weight', 'bold');
+            text.textContent = theme.name;
+            
+            const countText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            countText.setAttribute('x', theme.x);
+            countText.setAttribute('y', theme.y + 5);
+            countText.setAttribute('text-anchor', 'middle');
+            countText.setAttribute('font-size', '12');
+            countText.setAttribute('fill', 'white');
+            countText.textContent = theme.codes;
+            
+            g.appendChild(circle);
+            g.appendChild(text);
+            g.appendChild(countText);
+            networkSvg.appendChild(g);
+        });
+    </script>
+
+    <style>
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin: 2rem 0;
+            background-color: white;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .chart-description {
+            background-color: #f9fafb;
+            padding: 1rem;
+            border-radius: 0.375rem;
+            margin-top: 1rem;
+        }
+
+        .network-viz {
+            background-color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            padding: 1rem;
+        }
+
+        #networkChart {
+            width: 100%;
+            height: 600px;
+        }
+    </style>
+</body>
+</html>

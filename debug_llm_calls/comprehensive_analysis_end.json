@@ -1,0 +1,13 @@
+{
+  "call_id": "comprehensive_analysis",
+  "timestamp": "2025-07-29T08:08:11.030631",
+  "end_time": 1753801691.0290911,
+  "duration_seconds": 274.41910433769226,
+  "success": true,
+  "error": null,
+  "response_info": {
+    "type": "GlobalCodingResult",
+    "repr": "GlobalCodingResult(study_id='study_20250729_080811', analysis_timestamp=datetime.datetime(2025, 7, 29, 8, 8, 11, 27992), research_question='What are methods being used, what is important about methods, and how does AI fit into this?', interviews_analyzed=18, total_tokens_analyzed=170317, themes=[CrossInterviewTheme(theme_id='THEME_001', name='AI_Impact_on_Research_Process', description='How AI technologies are fundamentally altering or have the potential to alter the various stages and overall w"
+  },
+  "status": "completed"
+}

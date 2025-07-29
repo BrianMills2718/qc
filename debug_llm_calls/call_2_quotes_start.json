@@ -1,0 +1,13 @@
+{
+  "call_id": "call_2_quotes",
+  "timestamp": "2025-07-29T05:19:01.812120",
+  "start_time": 1753791541.8121204,
+  "prompt_length": 852,
+  "prompt_preview": "Based on this analysis, provide a complete quote inventory.\n\nANALYSIS SUMMARY:\n- 4 themes found\n- 18 codes identified  \n- 3 interviews analyzed\n\nFor EACH theme and code from the analysis, provide 2-3 exemplar quotes with:\n- Exact quote text including speaker identification (e.g., \"Sara McCleskey (Researcher): quote here\")\n- Which theme(s) and code(s) the quote supports\n- Brief context\n\nReturn as JSON with this structure:\n{\n  \"quote_inventory\": [\n    {\n      \"quote_id\": \"Q001\",\n      \"text\": \"Ful...",
+  "config": {
+    "temperature": 0.2,
+    "max_output_tokens": 15000,
+    "response_mime_type": "application/json"
+  },
+  "status": "started"
+}

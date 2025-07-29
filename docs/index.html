@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLM-Native Qualitative Coding Analysis</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <h2>Navigation</h2>
+        <ul>
+            <li><a href="#overview"><i class="fas fa-home"></i> Overview</a></li>
+            <li><a href="#methodology"><i class="fas fa-cogs"></i> Methodology</a></li>
+            <li><a href="#terminology"><i class="fas fa-book"></i> Terminology</a></li>
+            <li><a href="#process"><i class="fas fa-tasks"></i> Process Flow</a></li>
+            <li><a href="#outputs"><i class="fas fa-file-csv"></i> Output Files</a></li>
+            <li><a href="#results"><i class="fas fa-chart-bar"></i> Results</a></li>
+            <li><a href="#technical"><i class="fas fa-code"></i> Technical Details</a></li>
+        </ul>
+    </nav>
+
+    <main class="content">
+        <header>
+            <h1>LLM-Native Qualitative Coding Analysis</h1>
+            <p class="subtitle">AI Integration in Qualitative Research Practices at RAND</p>
+        </header>
+
+        <section id="overview">
+            <h2>Overview</h2>
+            <div class="info-box">
+                <h3>What is LLM-Native Qualitative Coding?</h3>
+                <p>LLM-Native Qualitative Coding is a revolutionary approach that leverages Large Language Models (LLMs) to perform comprehensive qualitative analysis across multiple interviews simultaneously. Unlike traditional methods that process interviews sequentially, this approach enables:</p>
+                <ul>
+                    <li><strong>Global Pattern Recognition</strong>: Identifies themes across all interviews at once</li>
+                    <li><strong>Cross-Interview Analysis</strong>: Detects contradictions and consensus patterns</li>
+                    <li><strong>Automatic Code Generation</strong>: Creates hierarchical coding structures</li>
+                    <li><strong>Evidence Traceability</strong>: Links every finding to specific quotes</li>
+                </ul>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <i class="fas fa-users"></i>
+                    <h4>18</h4>
+                    <p>Interviews Analyzed</p>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-coins"></i>
+                    <h4>170,317</h4>
+                    <p>Tokens Processed</p>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-layer-group"></i>
+                    <h4>6</h4>
+                    <p>Major Themes</p>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-tags"></i>
+                    <h4>64</h4>
+                    <p>Unique Codes</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="methodology">
+            <h2>Methodology</h2>
+            
+            <div class="methodology-flow">
+                <h3>Two-Call LLM Pipeline</h3>
+                <div class="pipeline-diagram">
+                    <pre class="ascii-art">
+┌─────────────────┐     ┌──────────────────┐     ┌─────────────────┐
+│  18 Interview   │     │  Call 1: Global  │     │ Call 2: Quote   │
+│   Documents     │ ──► │    Analysis      │ ──► │   Extraction    │
+│  (.docx files)  │     │ (Gemini 2.5)     │     │ (Gemini 2.5)    │
+└─────────────────┘     └──────────────────┘     └─────────────────┘
+        │                        │                         │
+        │                        ▼                         ▼
+        │               ┌─────────────────┐       ┌─────────────────┐
+        │               │ Themes & Codes  │       │ Traceable Quotes│
+        └─────────────► │   Generated     │ ────► │   Extracted     │
+                        └─────────────────┘       └─────────────────┘
+                                 │                         │
+                                 └─────────┬───────────────┘
+                                           ▼
+                                 ┌───────────────────┐
+                                 │  10 CSV Outputs   │
+                                 │  + JSON Analysis  │
+                                 └───────────────────┘
+                    </pre>
+                </div>
+            </div>
+
+            <div class="method-details">
+                <h3>Grounded Theory Approach</h3>
+                <p>Our methodology follows grounded theory principles but leverages AI's ability to process all data simultaneously:</p>
+                <ol>
+                    <li><strong>Open Coding</strong>: LLM identifies concepts across all interviews</li>
+                    <li><strong>Axial Coding</strong>: Establishes relationships between codes</li>
+                    <li><strong>Selective Coding</strong>: Develops overarching themes</li>
+                    <li><strong>Theoretical Saturation</strong>: Tracks when new insights cease</li>
+                </ol>
+            </div>
+        </section>
+
+        <section id="terminology">
+            <h2>Terminology Glossary</h2>
+            
+            <div class="glossary">
+                <dl>
+                    <dt>Theme</dt>
+                    <dd>A major pattern or concept that emerges across multiple interviews. Each theme represents a significant finding about AI integration in qualitative research.</dd>
+                    
+                    <dt>Code</dt>
+                    <dd>A specific concept or idea within a theme. Codes are more granular than themes and directly link to quotes from interviews.</dd>
+                    
+                    <dt>Quote</dt>
+                    <dd>An exact excerpt from an interview that provides evidence for a code or theme. Each quote is traceable to its source.</dd>
+                    
+                    <dt>Prevalence</dt>
+                    <dd>The proportion of interviews in which a theme or code appears. A prevalence of 1.0 means it appears in all 18 interviews.</dd>
+                    
+                    <dt>Chain Type</dt>
+                    <dd>The relationship pattern between related quotes:
+                        <ul>
+                            <li><strong>Evolution</strong>: Ideas that develop over time</li>
+                            <li><strong>Contradiction</strong>: Opposing viewpoints</li>
+                            <li><strong>Consensus Building</strong>: Agreement formation</li>
+                            <li><strong>Problem-Solution</strong>: Issues and their resolutions</li>
+                        </ul>
+                    </dd>
+                    
+                    <dt>Saturation Point</dt>
+                    <dd>The interview number where no new insights for a theme emerged. Indicates theoretical completeness.</dd>
+                    
+                    <dt>Token</dt>
+                    <dd>A unit of text processing. Approximately 4 characters or 0.75 words. Our 170,317 tokens represent ~127,738 words.</dd>
+                </dl>
+            </div>
+        </section>
+
+        <section id="process">
+            <h2>Detailed Process Flow</h2>
+            
+            <div class="process-steps">
+                <h3>Step-by-Step Analysis Process</h3>
+                
+                <div class="step">
+                    <h4>Step 1: Document Loading</h4>
+                    <pre class="code-block">
+Input: 18 .docx files
+Process:
+  - Parse each document using python-docx
+  - Extract text while preserving structure
+  - Identify speaker labels (for transcripts)
+  - Count tokens for each document
+Output: Structured text with metadata
+                    </pre>
+                </div>
+
+                <div class="step">
+                    <h4>Step 2: Global Analysis (LLM Call 1)</h4>
+                    <pre class="code-block">
+Input: All 18 interviews combined (170,317 tokens)
+Prompt Components:
+  1. Research question
+  2. Methodological instructions
+  3. Full interview texts
+  
+Process:
+  - Gemini 2.5 Flash processes all interviews
+  - Temperature: 0.3 (balanced creativity/consistency)
+  - Max output: 60,000 tokens
+  - Response format: Structured JSON
+  
+Output: 
+  - 6 major themes with descriptions
+  - 64 hierarchical codes
+  - Theoretical insights
+  - Saturation analysis
+                    </pre>
+                </div>
+
+                <div class="step">
+                    <h4>Step 3: Quote Extraction (LLM Call 2)</h4>
+                    <pre class="code-block">
+Input: 
+  - Themes and codes from Call 1
+  - Original interview texts
+  
+Process:
+  - Gemini 2.5 Flash extracts supporting quotes
+  - Temperature: 0.1 (high precision)
+  - Max output: 15,000 tokens
+  - Retry logic: 3 attempts with simplification
+  
+Output:
+  - 30 traceable quotes
+  - Speaker attribution
+  - Theme/code linkages
+  - Confidence scores
+                    </pre>
+                </div>
+
+                <div class="step">
+                    <h4>Step 4: Data Transformation</h4>
+                    <pre class="code-block">
+Input: JSON responses from both LLM calls
+Process:
+  - Validate data integrity
+  - Fix common LLM response issues
+  - Normalize chain types
+  - Convert prevalence strings to floats
+  - Build relationships
+  
+Output: 10 specialized CSV files + JSON
+                    </pre>
+                </div>
+            </div>
+        </section>
+
+        <section id="outputs">
+            <h2>Output Files Explained</h2>
+            
+            <div class="output-files">
+                <div class="file-card">
+                    <h3><i class="fas fa-file-csv"></i> themes.csv</h3>
+                    <p>High-level themes discovered across all interviews</p>
+                    <table class="data-table">
+                        <tr>
+                            <th>Column</th>
+                            <th>Description</th>
+                            <th>Example</th>
+                        </tr>
+                        <tr>
+                            <td>theme_id</td>
+                            <td>Unique identifier</td>
+                            <td>THEME_001</td>
+                        </tr>
+                        <tr>
+                            <td>name</td>
+                            <td>Theme title</td>
+                            <td>AI Applications in Research</td>
+                        </tr>
+                        <tr>
+                            <td>description</td>
+                            <td>Detailed explanation</td>
+                            <td>This theme encompasses...</td>
+                        </tr>
+                        <tr>
+                            <td>prevalence</td>
+                            <td>Proportion of interviews (0-1)</td>
+                            <td>1.0 (appears in all)</td>
+                        </tr>
+                        <tr>
+                            <td>saturation_interview</td>
+                            <td>When theme was complete</td>
+                            <td>INT_008</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="file-card">
+                    <h3><i class="fas fa-file-csv"></i> codes.csv</h3>
+                    <p>Detailed codes within each theme</p>
+                    <table class="data-table">
+                        <tr>
+                            <th>Column</th>
+                            <th>Description</th>
+                            <th>Example</th>
+                        </tr>
+                        <tr>
+                            <td>code_id</td>
+                            <td>Unique identifier</td>
+                            <td>CODE_001</td>
+                        </tr>
+                        <tr>
+                            <td>theme_id</td>
+                            <td>Parent theme</td>
+                            <td>THEME_001</td>
+                        </tr>
+                        <tr>
+                            <td>name</td>
+                            <td>Code label</td>
+                            <td>Transcription Automation</td>
+                        </tr>
+                        <tr>
+                            <td>definition</td>
+                            <td>What this code captures</td>
+                            <td>Use of AI for converting...</td>
+                        </tr>
+                        <tr>
+                            <td>frequency</td>
+                            <td>Times mentioned</td>
+                            <td>12</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="file-card">
+                    <h3><i class="fas fa-file-csv"></i> quote_evidence.csv</h3>
+                    <p>Full quote traceability with context</p>
+                    <table class="data-table">
+                        <tr>
+                            <th>Column</th>
+                            <th>Description</th>
+                            <th>Example</th>
+                        </tr>
+                        <tr>
+                            <td>quote_id</td>
+                            <td>Unique identifier</td>
+                            <td>Q001</td>
+                        </tr>
+                        <tr>
+                            <td>text</td>
+                            <td>Exact quote</td>
+                            <td>"AI has been really helpful..."</td>
+                        </tr>
+                        <tr>
+                            <td>speaker_name</td>
+                            <td>Who said it</td>
+                            <td>Caroline Johnston</td>
+                        </tr>
+                        <tr>
+                            <td>interview_id</td>
+                            <td>Source interview</td>
+                            <td>INT_003</td>
+                        </tr>
+                        <tr>
+                            <td>code_ids</td>
+                            <td>Related codes</td>
+                            <td>CODE_005; CODE_011</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="file-card">
+                    <h3><i class="fas fa-file-csv"></i> theme_analysis.csv</h3>
+                    <p>Statistical analysis with exemplar quotes</p>
+                    <table class="data-table">
+                        <tr>
+                            <th>Column</th>
+                            <th>Description</th>
+                            <th>Example</th>
+                        </tr>
+                        <tr>
+                            <td>theme_id</td>
+                            <td>Theme identifier</td>
+                            <td>THEME_001</td>
+                        </tr>
+                        <tr>
+                            <td>interview_count</td>
+                            <td>Interviews with theme</td>
+                            <td>18</td>
+                        </tr>
+                        <tr>
+                            <td>code_count</td>
+                            <td>Number of codes</td>
+                            <td>30</td>
+                        </tr>
+                        <tr>
+                            <td>exemplar_quote_1</td>
+                            <td>Best example quote</td>
+                            <td>"Luke Matthews: I've been..."</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="file-card">
+                    <h3><i class="fas fa-file-csv"></i> contradiction_matrix.csv</h3>
+                    <p>Opposing viewpoints identified</p>
+                    <table class="data-table">
+                        <tr>
+                            <th>Column</th>
+                            <th>Description</th>
+                            <th>Example</th>
+                        </tr>
+                        <tr>
+                            <td>issue</td>
+                            <td>Topic of disagreement</td>
+                            <td>AI replacing researchers</td>
+                        </tr>
+                        <tr>
+                            <td>position_1</td>
+                            <td>First viewpoint</td>
+                            <td>AI will replace junior tasks</td>
+                        </tr>
+                        <tr>
+                            <td>position_2</td>
+                            <td>Opposing view</td>
+                            <td>AI augments human work</td>
+                        </tr>
+                        <tr>
+                            <td>evidence_1</td>
+                            <td>Supporting quotes</td>
+                            <td>INT_002: "The risk is..."</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section id="results">
+            <h2>Key Results</h2>
+            
+            <div class="results-summary">
+                <h3>Emergent Theory</h3>
+                <blockquote class="theory">
+                    AI integration into qualitative research practices at RAND is characterized by a tension between leveraging AI for efficiency and scalability in routine, labor-intensive tasks (like transcription, initial coding, and data wrangling) and the critical need to maintain human oversight, contextual understanding, and ethical rigor. While early adopters are experimenting with diverse commercial and internal tools to accelerate processes and generate new ideas, widespread adoption is hampered by concerns over AI accuracy, potential for bias, loss of researcher intimacy with data, and the lack of clear institutional guidance, training, and integrated tool ecosystems, particularly for classified or sensitive data. The future vision involves AI as a 'co-researcher' or 'expert system' that fundamentally redefines research products and workflows, shifting human effort towards higher-order analytic thinking, quality assurance, and strategic problem framing, rather than being solely a tool for task automation.
+                </blockquote>
+            </div>
+
+            <div class="themes-overview">
+                <h3>Major Themes Discovered</h3>
+                <div class="theme-cards">
+                    <div class="theme-card">
+                        <h4>Theme 1: AI Applications and Use Cases</h4>
+                        <p>Current and potential AI applications across research methods</p>
+                        <div class="theme-stats">
+                            <span>Prevalence: 100%</span>
+                            <span>30 codes</span>
+                        </div>
+                    </div>
+                    <div class="theme-card">
+                        <h4>Theme 2: Challenges and Risks</h4>
+                        <p>Obstacles and concerns about AI integration</p>
+                        <div class="theme-stats">
+                            <span>Prevalence: 100%</span>
+                            <span>19 codes</span>
+                        </div>
+                    </div>
+                    <div class="theme-card">
+                        <h4>Theme 3: Opportunities and Benefits</h4>
+                        <p>Advantages and future potential of AI</p>
+                        <div class="theme-stats">
+                            <span>Prevalence: 100%</span>
+                            <span>6 codes</span>
+                        </div>
+                    </div>
+                    <div class="theme-card">
+                        <h4>Theme 4: Adoption Strategy</h4>
+                        <p>How RAND should implement AI tools</p>
+                        <div class="theme-stats">
+                            <span>Prevalence: 100%</span>
+                            <span>12 codes</span>
+                        </div>
+                    </div>
+                    <div class="theme-card">
+                        <h4>Theme 5: Research Methods Context</h4>
+                        <p>Common methods and their challenges</p>
+                        <div class="theme-stats">
+                            <span>Prevalence: 100%</span>
+                            <span>4 codes</span>
+                        </div>
+                    </div>
+                    <div class="theme-card">
+                        <h4>Theme 6: Human-AI Collaboration</h4>
+                        <p>The future of human-AI partnership</p>
+                        <div class="theme-stats">
+                            <span>Prevalence: 83%</span>
+                            <span>8 codes</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="technical">
+            <h2>Technical Implementation</h2>
+            
+            <div class="tech-details">
+                <h3>System Architecture</h3>
+                <pre class="code-block">
+qualitative_coding_clean/
+├── qc/                          # Core package
+│   ├── core/                    # Main processing
+│   │   ├── better_global_analyzer.py  # Two-call pipeline
+│   │   ├── simple_gemini_client.py    # LLM interface
+│   │   └── error_recovery.py         # Error handling
+│   ├── models/                  # Data structures
+│   │   └── simplified_schemas.py      # Pydantic models
+│   └── parsing/                 # Document parsing
+│       └── docx_parser.py            # Word doc handler
+├── anonymize_data.py            # Name anonymization
+└── run_full_ai_analysis.py     # Main script
+                </pre>
+
+                <h3>Key Technical Features</h3>
+                <ul>
+                    <li><strong>Retry Logic</strong>: 3 attempts with progressive simplification</li>
+                    <li><strong>Error Recovery</strong>: Handles JSON parsing, validation errors</li>
+                    <li><strong>Token Management</strong>: Optimized prompts to stay within limits</li>
+                    <li><strong>Data Validation</strong>: Pydantic schemas ensure data integrity</li>
+                    <li><strong>Anonymization</strong>: Built-in script to protect privacy</li>
+                </ul>
+
+                <h3>Performance Metrics</h3>
+                <div class="perf-stats">
+                    <div class="perf-item">
+                        <strong>Processing Time:</strong> ~5-6 minutes for 18 interviews
+                    </div>
+                    <div class="perf-item">
+                        <strong>Token Efficiency:</strong> 170K input → 80K output
+                    </div>
+                    <div class="perf-item">
+                        <strong>Success Rate:</strong> 95%+ with retry logic
+                    </div>
+                    <div class="perf-item">
+                        <strong>Cost:</strong> ~$0.85 per full analysis
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>LLM-Native Qualitative Coding System | Built with Gemini 2.5 Flash</p>
+        <p>View on <a href="https://github.com/yourusername/qualitative_coding_clean">GitHub</a></p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

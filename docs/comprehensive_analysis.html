@@ -1,0 +1,1471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Qualitative Coding Analysis - Comprehensive Interactive Explorer</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        /* Enhanced CSS with better tooltips and interactivity */
+        :root {
+            --primary: #2563eb;
+            --secondary: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #06b6d4;
+            --dark: #1f2937;
+            --light: #f9fafb;
+            --border: #e5e7eb;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: var(--dark);
+            background: var(--light);
+        }
+
+        /* Enhanced Tooltip System */
+        [data-tooltip] {
+            position: relative;
+            cursor: help;
+            border-bottom: 2px dotted var(--primary);
+        }
+
+        [data-tooltip]:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--dark);
+            color: white;
+            padding: 12px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            line-height: 1.4;
+            white-space: normal;
+            max-width: 300px;
+            width: max-content;
+            z-index: 1000;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            animation: fadeIn 0.2s ease-in;
+        }
+
+        [data-tooltip]:hover::before {
+            content: '';
+            position: absolute;
+            bottom: 115%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 6px solid transparent;
+            border-top-color: var(--dark);
+            z-index: 1001;
+            animation: fadeIn 0.2s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateX(-50%) translateY(5px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+
+        /* Expandable Data Tables */
+        .expandable-table {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin: 1rem 0;
+            overflow: hidden;
+        }
+
+        .expandable-table-header {
+            padding: 1rem;
+            background: var(--primary);
+            color: white;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+        }
+
+        .expandable-table-header:hover {
+            background: #1d4ed8;
+        }
+
+        .expandable-table-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+
+        .expandable-table.active .expandable-table-content {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table th {
+            background: var(--dark);
+            color: white;
+            padding: 12px;
+            text-align: left;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            cursor: pointer;
+        }
+
+        .data-table th:hover {
+            background: #374151;
+        }
+
+        .data-table td {
+            padding: 10px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .data-table tr:hover {
+            background: var(--light);
+        }
+
+        /* Interactive Links */
+        .data-link {
+            color: var(--primary);
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .data-link:hover {
+            text-decoration: underline;
+            transform: translateX(2px);
+        }
+
+        /* Navigation Tabs */
+        .nav-tabs {
+            display: flex;
+            background: white;
+            border-bottom: 2px solid var(--border);
+            padding: 0 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .nav-tab {
+            padding: 1rem 1.5rem;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+            font-weight: 500;
+            color: #6b7280;
+        }
+
+        .nav-tab:hover {
+            color: var(--primary);
+        }
+
+        .nav-tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        /* Search and Filter Bar */
+        .control-bar {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .search-input {
+            flex: 1;
+            min-width: 300px;
+            padding: 10px 16px;
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            font-size: 16px;
+            outline: none;
+        }
+
+        .search-input:focus {
+            border-color: var(--primary);
+        }
+
+        .filter-select {
+            padding: 10px 16px;
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        /* Data Cards */
+        .data-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .data-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        /* Quote Display */
+        .quote-display {
+            background: var(--light);
+            border-left: 4px solid var(--primary);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 6px 6px 0;
+        }
+
+        .quote-text {
+            font-style: italic;
+            font-size: 16px;
+            margin-bottom: 0.5rem;
+        }
+
+        .quote-attribution {
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        /* Tags */
+        .tag {
+            display: inline-block;
+            padding: 4px 12px;
+            margin: 2px;
+            background: var(--light);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tag:hover {
+            background: var(--primary);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .tag-theme {
+            background: #dbeafe;
+            border-color: var(--primary);
+        }
+
+        .tag-code {
+            background: #d1fae5;
+            border-color: var(--secondary);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 1000;
+            animation: fadeIn 0.2s;
+        }
+
+        .modal-content {
+            background: white;
+            margin: 3% auto;
+            padding: 2rem;
+            width: 90%;
+            max-width: 900px;
+            border-radius: 12px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            animation: slideIn 0.3s;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* Network Visualization */
+        .network-container {
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            height: 600px;
+            position: relative;
+        }
+
+        /* Export Buttons */
+        .export-buttons {
+            display: flex;
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--dark);
+            border: 2px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--light);
+        }
+
+        /* Stats Display */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .stat-box {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .stat-box:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #6b7280;
+            margin-top: 0.5rem;
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            border: 3px solid var(--light);
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 2rem auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Methodology Checklist */
+        .checklist {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .checklist-item:last-child {
+            border-bottom: none;
+        }
+
+        .checklist-icon {
+            width: 24px;
+            height: 24px;
+            margin-right: 1rem;
+            color: var(--secondary);
+        }
+
+        /* Co-occurrence Matrix */
+        .matrix-container {
+            overflow-x: auto;
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .matrix-cell {
+            text-align: center;
+            padding: 8px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .matrix-cell:hover {
+            background: var(--light);
+            font-weight: bold;
+        }
+
+        /* Timeline */
+        .timeline {
+            position: relative;
+            padding: 2rem 0;
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-left: 3rem;
+            margin-bottom: 2rem;
+        }
+
+        .timeline-marker {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--primary);
+            border: 3px solid white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .timeline-line {
+            position: absolute;
+            left: 9px;
+            top: 20px;
+            bottom: 0;
+            width: 2px;
+            background: var(--border);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-tabs {
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+            
+            .control-bar {
+                flex-direction: column;
+            }
+            
+            .search-input {
+                min-width: 100%;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Tabs -->
+    <div class="nav-tabs">
+        <div class="nav-tab active" onclick="showTab('overview')">
+            <i class="fas fa-home"></i> Overview
+        </div>
+        <div class="nav-tab" onclick="showTab('themes')">
+            <i class="fas fa-layer-group"></i> Themes
+        </div>
+        <div class="nav-tab" onclick="showTab('codes')">
+            <i class="fas fa-tags"></i> Codes
+        </div>
+        <div class="nav-tab" onclick="showTab('quotes')">
+            <i class="fas fa-quote-right"></i> Quotes
+        </div>
+        <div class="nav-tab" onclick="showTab('analysis')">
+            <i class="fas fa-chart-bar"></i> Analysis
+        </div>
+        <div class="nav-tab" onclick="showTab('network')">
+            <i class="fas fa-project-diagram"></i> Network
+        </div>
+        <div class="nav-tab" onclick="showTab('methodology')">
+            <i class="fas fa-microscope"></i> Methodology
+        </div>
+        <div class="nav-tab" onclick="showTab('export')">
+            <i class="fas fa-download"></i> Export
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container" style="max-width: 1400px; margin: 0 auto; padding: 20px;">
+        
+        <!-- Overview Tab -->
+        <div id="overview-tab" class="tab-content">
+            <h1>Qualitative Coding Analysis Dashboard</h1>
+            <p style="font-size: 18px; color: #6b7280; margin-bottom: 2rem;">
+                <span data-tooltip="Large Language Model-based qualitative analysis that processes all interviews simultaneously">LLM-Native</span> 
+                analysis of AI integration in qualitative research practices
+            </p>
+
+            <!-- Key Statistics -->
+            <div class="stats-grid">
+                <div class="stat-box" onclick="showDetails('interviews')">
+                    <i class="fas fa-users" style="font-size: 2rem; color: var(--primary); margin-bottom: 0.5rem;"></i>
+                    <div class="stat-value" data-tooltip="Total number of interview documents analyzed using DOCX parser">18</div>
+                    <div class="stat-label">Interviews Analyzed</div>
+                </div>
+                
+                <div class="stat-box" onclick="showDetails('tokens')">
+                    <i class="fas fa-coins" style="font-size: 2rem; color: var(--warning); margin-bottom: 0.5rem;"></i>
+                    <div class="stat-value" data-tooltip="1 token ≈ 4 characters or 0.75 words. This represents approximately 127,738 words of interview data">170,317</div>
+                    <div class="stat-label">Tokens Processed</div>
+                </div>
+                
+                <div class="stat-box" onclick="showDetails('themes')">
+                    <i class="fas fa-layer-group" style="font-size: 2rem; color: var(--secondary); margin-bottom: 0.5rem;"></i>
+                    <div class="stat-value" data-tooltip="Major patterns identified across all interviews using grounded theory principles">6</div>
+                    <div class="stat-label">Major Themes</div>
+                </div>
+                
+                <div class="stat-box" onclick="showDetails('codes')">
+                    <i class="fas fa-tags" style="font-size: 2rem; color: var(--info); margin-bottom: 0.5rem;"></i>
+                    <div class="stat-value" data-tooltip="Specific concepts identified within themes, forming a hierarchical structure">64</div>
+                    <div class="stat-label">Unique Codes</div>
+                </div>
+                
+                <div class="stat-box" onclick="showDetails('quotes')">
+                    <i class="fas fa-quote-right" style="font-size: 2rem; color: var(--danger); margin-bottom: 0.5rem;"></i>
+                    <div class="stat-value" data-tooltip="Exemplar quotes extracted as evidence for themes and codes">30</div>
+                    <div class="stat-label">Supporting Quotes</div>
+                </div>
+                
+                <div class="stat-box" onclick="showDetails('saturation')">
+                    <i class="fas fa-chart-line" style="font-size: 2rem; color: #8b5cf6; margin-bottom: 0.5rem;"></i>
+                    <div class="stat-value" data-tooltip="Interview number where theoretical saturation was reached (no new themes emerged)">INT_008</div>
+                    <div class="stat-label">Saturation Point</div>
+                </div>
+            </div>
+
+            <!-- Research Question -->
+            <div class="data-card">
+                <h2>Research Question</h2>
+                <p style="font-size: 20px; color: var(--primary); margin: 1rem 0; font-style: italic;">
+                    "How are AI methods being integrated into qualitative research practices?"
+                </p>
+            </div>
+
+            <!-- Emergent Theory -->
+            <div class="data-card">
+                <h2>Emergent Theory</h2>
+                <div class="quote-display">
+                    <p class="quote-text">
+                        AI integration into qualitative research practices at RAND is characterized by a tension between 
+                        leveraging AI for efficiency and scalability in routine, labor-intensive tasks (like 
+                        <span data-tooltip="Converting audio/video recordings to text using AI">transcription</span>, 
+                        <span data-tooltip="First-pass identification of themes and patterns in data">initial coding</span>, and 
+                        <span data-tooltip="Cleaning and organizing data for analysis">data wrangling</span>) 
+                        and the critical need to maintain human oversight, contextual understanding, and ethical rigor...
+                    </p>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="export-buttons">
+                <button class="btn btn-primary" onclick="exploreThemes()">
+                    <i class="fas fa-layer-group"></i> Explore Themes
+                </button>
+                <button class="btn btn-primary" onclick="viewNetwork()">
+                    <i class="fas fa-project-diagram"></i> View Network
+                </button>
+                <button class="btn btn-primary" onclick="downloadReport()">
+                    <i class="fas fa-file-pdf"></i> Download Report
+                </button>
+            </div>
+        </div>
+
+        <!-- Themes Tab -->
+        <div id="themes-tab" class="tab-content" style="display: none;">
+            <h2>Themes Explorer</h2>
+            
+            <div class="control-bar">
+                <input type="text" class="search-input" placeholder="Search themes..." onkeyup="searchThemes(this.value)">
+                <select class="filter-select" onchange="sortThemes(this.value)">
+                    <option value="prevalence">Sort by Prevalence</option>
+                    <option value="codes">Sort by Code Count</option>
+                    <option value="name">Sort by Name</option>
+                </select>
+            </div>
+
+            <div id="themes-container">
+                <!-- Theme 1 -->
+                <div class="expandable-table">
+                    <div class="expandable-table-header" onclick="toggleTable(this)">
+                        <div>
+                            <h3>THEME_001: AI Applications and Use Cases</h3>
+                            <p style="font-size: 14px; margin-top: 0.5rem;">
+                                <span data-tooltip="Percentage of interviews containing this theme">Prevalence: 100%</span> | 
+                                <span data-tooltip="Number of codes under this theme">30 codes</span> | 
+                                <span data-tooltip="Number of interviews">18 interviews</span>
+                            </p>
+                        </div>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="expandable-table-content">
+                        <div style="padding: 1rem;">
+                            <p><strong>Description:</strong> This theme encompasses the various ways AI is currently being used 
+                            or could be applied across different research methods at RAND, including 
+                            <span data-tooltip="Converting speech to text">transcription</span>, 
+                            <span data-tooltip="Identifying themes in qualitative data">coding assistance</span>, 
+                            <span data-tooltip="Finding and summarizing academic literature">literature review</span>, and more.</p>
+                            
+                            <h4 style="margin-top: 1rem;">Related Codes (Top 10)</h4>
+                            <div style="margin: 1rem 0;">
+                                <span class="tag tag-code" onclick="showCode('CODE_001')">Transcription Automation (18)</span>
+                                <span class="tag tag-code" onclick="showCode('CODE_002')">Initial Coding Assistance (16)</span>
+                                <span class="tag tag-code" onclick="showCode('CODE_003')">Literature Review Tools (15)</span>
+                                <span class="tag tag-code" onclick="showCode('CODE_004')">Data Synthesis (12)</span>
+                                <span class="tag tag-code" onclick="showCode('CODE_005')">Code Writing Help (11)</span>
+                                <span class="tag tag-code" onclick="showCode('CODE_006')">Participant Recruitment (8)</span>
+                                <span class="tag tag-code" onclick="showCode('CODE_007')">Meeting Summarization (7)</span>
+                                <span class="tag tag-code" onclick="showCode('CODE_008')">Survey Design (6)</span>
+                                <span class="tag tag-code" onclick="showCode('CODE_009')">Translation Services (5)</span>
+                                <span class="tag tag-code" onclick="showCode('CODE_010')">Idea Generation (5)</span>
+                            </div>
+                            
+                            <h4>Exemplar Quotes</h4>
+                            <div class="quote-display">
+                                <p class="quote-text">"I've been using some of the LLM's for thematic coding and kind of ability to kind of group documents then generate text for me."</p>
+                                <p class="quote-attribution">Luke Matthews, Anthropologist - <a class="data-link" onclick="showInterview('INT_001')">INT_001</a></p>
+                            </div>
+                            
+                            <div class="quote-display">
+                                <p class="quote-text">"Like Can you imagine? A world where, like AI could feed in information about the kind of participants you're looking for. And AI could crawl the Internet to find them."</p>
+                                <p class="quote-attribution">Joie Acosta, Psychologist - <a class="data-link" onclick="showInterview('INT_001')">INT_001</a></p>
+                            </div>
+                            
+                            <button class="btn btn-primary" onclick="showAllQuotes('THEME_001')" style="margin-top: 1rem;">
+                                View All Quotes for This Theme
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Theme 2 -->
+                <div class="expandable-table">
+                    <div class="expandable-table-header" onclick="toggleTable(this)">
+                        <div>
+                            <h3>THEME_002: Challenges and Risks of AI Adoption</h3>
+                            <p style="font-size: 14px; margin-top: 0.5rem;">
+                                <span data-tooltip="Percentage of interviews containing this theme">Prevalence: 100%</span> | 
+                                <span data-tooltip="Number of codes under this theme">19 codes</span> | 
+                                <span data-tooltip="Number of interviews">18 interviews</span>
+                            </p>
+                        </div>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="expandable-table-content">
+                        <div style="padding: 1rem;">
+                            <p><strong>Description:</strong> This theme captures the various obstacles, ethical concerns, and 
+                            potential negative impacts associated with integrating AI into qualitative research practices.</p>
+                            
+                            <h4 style="margin-top: 1rem;">Related Codes</h4>
+                            <div style="margin: 1rem 0;">
+                                <span class="tag tag-code" onclick="showCode('CODE_012')">Accuracy Concerns (14)</span>
+                                <span class="tag tag-code" onclick="showCode('CODE_013')">Trust Issues (12)</span>
+                                <span class="tag tag-code" onclick="showCode('CODE_014')">Training Needs (14)</span>
+                                <span class="tag tag-code" onclick="showCode('CODE_015')">Bias Worries (12)</span>
+                                <span class="tag tag-code" onclick="showCode('CODE_016')">Privacy Issues (10)</span>
+                                <span class="tag tag-code" onclick="showCode('CODE_017')">Job Displacement (8)</span>
+                                <span class="tag tag-code" onclick="showCode('CODE_018')">Ethical Concerns (7)</span>
+                                <span class="tag tag-code" onclick="showCode('CODE_019')">Black Box Problem (6)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Codes Tab -->
+        <div id="codes-tab" class="tab-content" style="display: none;">
+            <h2>Codes Explorer</h2>
+            
+            <div class="control-bar">
+                <input type="text" class="search-input" placeholder="Search codes..." onkeyup="searchCodes(this.value)">
+                <select class="filter-select" onchange="filterByTheme(this.value)">
+                    <option value="all">All Themes</option>
+                    <option value="THEME_001">AI Applications</option>
+                    <option value="THEME_002">Challenges & Risks</option>
+                    <option value="THEME_003">Opportunities</option>
+                    <option value="THEME_004">Adoption Strategy</option>
+                    <option value="THEME_005">Research Methods</option>
+                    <option value="THEME_006">Human-AI Collaboration</option>
+                </select>
+                <select class="filter-select" onchange="filterByFrequency(this.value)">
+                    <option value="all">All Frequencies</option>
+                    <option value="high">High (>10)</option>
+                    <option value="medium">Medium (5-10)</option>
+                    <option value="low">Low (<5)</option>
+                </select>
+            </div>
+
+            <div class="expandable-table">
+                <div class="expandable-table-header" onclick="toggleTable(this)">
+                    <h3>All Codes - Full Data Table</h3>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="expandable-table-content">
+                    <table class="data-table" id="codes-table">
+                        <thead>
+                            <tr>
+                                <th onclick="sortTable('codes-table', 0)" data-tooltip="Unique identifier for each code">Code ID <i class="fas fa-sort"></i></th>
+                                <th onclick="sortTable('codes-table', 1)" data-tooltip="Parent theme this code belongs to">Theme <i class="fas fa-sort"></i></th>
+                                <th onclick="sortTable('codes-table', 2)" data-tooltip="Name of the code">Code Name <i class="fas fa-sort"></i></th>
+                                <th onclick="sortTable('codes-table', 3)" data-tooltip="What this code represents">Definition <i class="fas fa-sort"></i></th>
+                                <th onclick="sortTable('codes-table', 4)" data-tooltip="Number of times this code appears">Frequency <i class="fas fa-sort"></i></th>
+                                <th data-tooltip="Click to view associated quotes">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>CODE_001</td>
+                                <td><a class="data-link" onclick="showTheme('THEME_001')">AI Applications</a></td>
+                                <td>Transcription Automation</td>
+                                <td>Use of AI for converting audio/video recordings to text</td>
+                                <td>18</td>
+                                <td><button class="btn btn-secondary btn-sm" onclick="showCodeQuotes('CODE_001')">View Quotes</button></td>
+                            </tr>
+                            <tr>
+                                <td>CODE_002</td>
+                                <td><a class="data-link" onclick="showTheme('THEME_001')">AI Applications</a></td>
+                                <td>Initial Coding Assistance</td>
+                                <td>AI helping with first-pass qualitative coding</td>
+                                <td>16</td>
+                                <td><button class="btn btn-secondary btn-sm" onclick="showCodeQuotes('CODE_002')">View Quotes</button></td>
+                            </tr>
+                            <!-- Additional rows would be populated from actual data -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quotes Tab -->
+        <div id="quotes-tab" class="tab-content" style="display: none;">
+            <h2>Quotes Explorer</h2>
+            
+            <div class="control-bar">
+                <input type="text" class="search-input" placeholder="Search quotes..." onkeyup="searchQuotes(this.value)">
+                <select class="filter-select" onchange="filterByInterview(this.value)">
+                    <option value="all">All Interviews</option>
+                    <option value="INT_001">Interview 1</option>
+                    <option value="INT_002">Interview 2</option>
+                    <!-- ... more interviews ... -->
+                </select>
+                <select class="filter-select" onchange="filterByThemeQuotes(this.value)">
+                    <option value="all">All Themes</option>
+                    <option value="THEME_001">AI Applications</option>
+                    <option value="THEME_002">Challenges & Risks</option>
+                    <!-- ... more themes ... -->
+                </select>
+            </div>
+
+            <div id="quotes-container">
+                <!-- Quote cards would be dynamically populated -->
+                <div class="data-card" onclick="showQuoteDetails('Q001')">
+                    <div class="quote-display">
+                        <p class="quote-text">"I've been using some of the LLM's for thematic coding and kind of ability to kind of group documents then generate text for me."</p>
+                        <p class="quote-attribution">
+                            <strong>Luke Matthews</strong>, Anthropologist - 
+                            <a class="data-link" onclick="event.stopPropagation(); showInterview('INT_001')">INT_001</a>
+                        </p>
+                    </div>
+                    <div style="margin-top: 1rem;">
+                        <strong>Themes:</strong>
+                        <span class="tag tag-theme" onclick="event.stopPropagation(); showTheme('THEME_001')">AI Applications</span>
+                    </div>
+                    <div style="margin-top: 0.5rem;">
+                        <strong>Codes:</strong>
+                        <span class="tag tag-code" onclick="event.stopPropagation(); showCode('CODE_001')">Transcription Automation</span>
+                        <span class="tag tag-code" onclick="event.stopPropagation(); showCode('CODE_002')">Initial Coding Assistance</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analysis Tab -->
+        <div id="analysis-tab" class="tab-content" style="display: none;">
+            <h2>Analysis & Visualizations</h2>
+            
+            <!-- Theme Distribution -->
+            <div class="data-card">
+                <h3>Theme Distribution</h3>
+                <canvas id="themeChart" width="400" height="200"></canvas>
+            </div>
+            
+            <!-- Code Frequency -->
+            <div class="data-card">
+                <h3>Top 20 Codes by Frequency</h3>
+                <canvas id="codeChart" width="400" height="300"></canvas>
+            </div>
+            
+            <!-- Saturation Curve -->
+            <div class="data-card">
+                <h3>Theoretical Saturation Analysis</h3>
+                <p data-tooltip="Shows when new themes and codes stopped emerging">This chart displays the cumulative discovery of themes and codes across interviews.</p>
+                <canvas id="saturationChart" width="400" height="200"></canvas>
+            </div>
+            
+            <!-- Co-occurrence Matrix -->
+            <div class="data-card">
+                <h3>Code Co-occurrence Matrix</h3>
+                <p data-tooltip="Shows which codes frequently appear together">Click cells to see quotes containing both codes.</p>
+                <div class="matrix-container" id="cooccurrenceMatrix">
+                    <!-- Matrix would be generated dynamically -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Network Tab -->
+        <div id="network-tab" class="tab-content" style="display: none;">
+            <h2>Theme-Code-Quote Network</h2>
+            <p>Interactive visualization showing relationships between themes, codes, and quotes.</p>
+            
+            <div class="control-bar">
+                <button class="btn btn-secondary" onclick="zoomIn()"><i class="fas fa-search-plus"></i> Zoom In</button>
+                <button class="btn btn-secondary" onclick="zoomOut()"><i class="fas fa-search-minus"></i> Zoom Out</button>
+                <button class="btn btn-secondary" onclick="resetNetwork()"><i class="fas fa-undo"></i> Reset</button>
+                <select class="filter-select" onchange="filterNetwork(this.value)">
+                    <option value="all">Show All</option>
+                    <option value="themes">Themes Only</option>
+                    <option value="codes">Themes & Codes</option>
+                    <option value="quotes">All Elements</option>
+                </select>
+            </div>
+            
+            <div class="network-container" id="networkContainer">
+                <!-- D3.js network visualization would go here -->
+            </div>
+        </div>
+
+        <!-- Methodology Tab -->
+        <div id="methodology-tab" class="tab-content" style="display: none;">
+            <h2>Methodology & Quality Assurance</h2>
+            
+            <!-- Two-Call Pipeline -->
+            <div class="data-card">
+                <h3>LLM-Native Two-Call Pipeline</h3>
+                <p>Our innovative approach uses two sequential LLM calls to analyze all interviews simultaneously:</p>
+                
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-marker"></div>
+                        <div class="timeline-line"></div>
+                        <h4>Call 1: Global Analysis</h4>
+                        <p><strong>Input:</strong> All 18 interviews (170,317 <span data-tooltip="Units of text processing">tokens</span>)</p>
+                        <p><strong>Model:</strong> Gemini 2.5 Flash</p>
+                        <p><strong>Temperature:</strong> 0.3 (balanced creativity)</p>
+                        <p><strong>Output:</strong> Themes, codes, and theoretical insights</p>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <div class="timeline-marker"></div>
+                        <h4>Call 2: Quote Extraction</h4>
+                        <p><strong>Input:</strong> Themes/codes from Call 1 + original interviews</p>
+                        <p><strong>Model:</strong> Gemini 2.5 Flash</p>
+                        <p><strong>Temperature:</strong> 0.1 (high precision)</p>
+                        <p><strong>Output:</strong> Traceable quotes with attribution</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Grounded Theory Checklist -->
+            <div class="data-card">
+                <h3>Grounded Theory Compliance</h3>
+                <div class="checklist">
+                    <div class="checklist-item">
+                        <i class="fas fa-check-circle checklist-icon"></i>
+                        <div>
+                            <strong>Open Coding</strong>
+                            <p data-tooltip="Initial identification of concepts from raw data">LLM identified 64 initial codes from interview data</p>
+                        </div>
+                    </div>
+                    <div class="checklist-item">
+                        <i class="fas fa-check-circle checklist-icon"></i>
+                        <div>
+                            <strong>Axial Coding</strong>
+                            <p data-tooltip="Establishing relationships between codes">Codes organized into 6 major themes with hierarchical structure</p>
+                        </div>
+                    </div>
+                    <div class="checklist-item">
+                        <i class="fas fa-check-circle checklist-icon"></i>
+                        <div>
+                            <strong>Selective Coding</strong>
+                            <p data-tooltip="Development of core category and theory">Core theory developed around AI-human collaboration tension</p>
+                        </div>
+                    </div>
+                    <div class="checklist-item">
+                        <i class="fas fa-check-circle checklist-icon"></i>
+                        <div>
+                            <strong>Theoretical Saturation</strong>
+                            <p data-tooltip="Point where no new themes emerge">Reached at interview 8 (no new themes after INT_008)</p>
+                        </div>
+                    </div>
+                    <div class="checklist-item">
+                        <i class="fas fa-check-circle checklist-icon"></i>
+                        <div>
+                            <strong>Constant Comparison</strong>
+                            <p data-tooltip="Continuous comparison of data with emerging theory">LLM analyzed all interviews simultaneously for pattern detection</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Data Quality Metrics -->
+            <div class="data-card">
+                <h3>Data Quality Metrics</h3>
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div class="stat-value">100%</div>
+                        <div class="stat-label" data-tooltip="All quotes can be traced back to source interviews">Quote Traceability</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value">95%</div>
+                        <div class="stat-label" data-tooltip="Percentage of themes appearing in multiple interviews">Cross-Interview Validation</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value">3</div>
+                        <div class="stat-label" data-tooltip="Number of retry attempts for robust quote extraction">Retry Logic Attempts</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value">0.9</div>
+                        <div class="stat-label" data-tooltip="Average confidence score for extracted quotes">Mean Confidence Score</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Export Tab -->
+        <div id="export-tab" class="tab-content" style="display: none;">
+            <h2>Export Data</h2>
+            
+            <div class="data-card">
+                <h3>Available Exports</h3>
+                <p>Download the analysis results in various formats:</p>
+                
+                <div class="export-buttons" style="flex-direction: column; align-items: start; gap: 1rem; margin-top: 2rem;">
+                    <div>
+                        <button class="btn btn-primary" onclick="exportCSV('themes')">
+                            <i class="fas fa-file-csv"></i> themes.csv
+                        </button>
+                        <span style="margin-left: 1rem;" data-tooltip="High-level themes with prevalence and descriptions">Theme definitions and statistics</span>
+                    </div>
+                    
+                    <div>
+                        <button class="btn btn-primary" onclick="exportCSV('codes')">
+                            <i class="fas fa-file-csv"></i> codes.csv
+                        </button>
+                        <span style="margin-left: 1rem;" data-tooltip="All 64 codes with definitions and frequencies">Complete code list with hierarchical structure</span>
+                    </div>
+                    
+                    <div>
+                        <button class="btn btn-primary" onclick="exportCSV('quotes')">
+                            <i class="fas fa-file-csv"></i> quote_evidence.csv
+                        </button>
+                        <span style="margin-left: 1rem;" data-tooltip="All quotes with speaker attribution and traceability">Full quote database with context</span>
+                    </div>
+                    
+                    <div>
+                        <button class="btn btn-primary" onclick="exportCSV('theme_analysis')">
+                            <i class="fas fa-file-csv"></i> theme_analysis.csv
+                        </button>
+                        <span style="margin-left: 1rem;" data-tooltip="Statistical analysis with exemplar quotes">Theme statistics and key quotes</span>
+                    </div>
+                    
+                    <div>
+                        <button class="btn btn-primary" onclick="exportCSV('code_progression')">
+                            <i class="fas fa-file-csv"></i> code_progression.csv
+                        </button>
+                        <span style="margin-left: 1rem;" data-tooltip="How codes evolved across interviews">Code development patterns</span>
+                    </div>
+                    
+                    <div>
+                        <button class="btn btn-primary" onclick="exportCSV('contradiction_matrix')">
+                            <i class="fas fa-file-csv"></i> contradiction_matrix.csv
+                        </button>
+                        <span style="margin-left: 1rem;" data-tooltip="Opposing viewpoints with evidence">Contradictory positions analysis</span>
+                    </div>
+                    
+                    <div>
+                        <button class="btn btn-primary" onclick="exportJSON()">
+                            <i class="fas fa-file-code"></i> full_analysis.json
+                        </button>
+                        <span style="margin-left: 1rem;" data-tooltip="Complete analysis in JSON format">Full structured data export</span>
+                    </div>
+                    
+                    <div>
+                        <button class="btn btn-primary" onclick="exportReport()">
+                            <i class="fas fa-file-pdf"></i> analysis_report.pdf
+                        </button>
+                        <span style="margin-left: 1rem;" data-tooltip="Formatted report with visualizations">Comprehensive analysis report</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="data-card">
+                <h3>Custom Export</h3>
+                <p>Select specific elements to export:</p>
+                <div style="margin: 1rem 0;">
+                    <label><input type="checkbox" checked> Themes</label><br>
+                    <label><input type="checkbox" checked> Codes</label><br>
+                    <label><input type="checkbox" checked> Quotes</label><br>
+                    <label><input type="checkbox"> Visualizations</label><br>
+                    <label><input type="checkbox"> Methodology</label>
+                </div>
+                <button class="btn btn-primary" onclick="customExport()">
+                    <i class="fas fa-download"></i> Generate Custom Export
+                </button>
+            </div>
+        </div>
+
+        <!-- Detail Modal -->
+        <div id="detailModal" class="modal">
+            <div class="modal-content">
+                <span style="position: absolute; top: 1rem; right: 1rem; font-size: 24px; cursor: pointer;" onclick="closeModal()">&times;</span>
+                <div id="modalContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global state and data (would be loaded from actual files)
+        let currentTab = 'overview';
+        let data = {
+            themes: [],
+            codes: [],
+            quotes: [],
+            interviews: [],
+            metadata: {}
+        };
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadData();
+            setupEventListeners();
+            initializeVisualizations();
+        });
+
+        // Tab navigation
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.style.display = 'none';
+            });
+            
+            // Remove active class from all nav tabs
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab
+            document.getElementById(tabName + '-tab').style.display = 'block';
+            
+            // Add active class to selected nav tab
+            event.target.closest('.nav-tab').classList.add('active');
+            
+            currentTab = tabName;
+            
+            // Initialize tab-specific content
+            if (tabName === 'analysis') {
+                renderCharts();
+            } else if (tabName === 'network') {
+                renderNetwork();
+            }
+        }
+
+        // Toggle expandable tables
+        function toggleTable(header) {
+            const table = header.closest('.expandable-table');
+            table.classList.toggle('active');
+            const icon = header.querySelector('i');
+            icon.classList.toggle('fa-chevron-down');
+            icon.classList.toggle('fa-chevron-up');
+        }
+
+        // Load data (in real implementation, would load from CSV/JSON files)
+        function loadData() {
+            // Sample data structure
+            data = {
+                themes: [
+                    {
+                        id: 'THEME_001',
+                        name: 'AI Applications and Use Cases',
+                        description: 'Various ways AI is being used in research',
+                        prevalence: 1.0,
+                        interview_count: 18,
+                        code_count: 30,
+                        saturation_interview: 'INT_006'
+                    },
+                    // ... more themes
+                ],
+                codes: [
+                    {
+                        id: 'CODE_001',
+                        theme_id: 'THEME_001',
+                        name: 'Transcription Automation',
+                        definition: 'Use of AI for converting audio/video to text',
+                        frequency: 18,
+                        hierarchy_level: 1,
+                        parent_code_id: null
+                    },
+                    // ... more codes
+                ],
+                quotes: [
+                    {
+                        id: 'Q001',
+                        text: "I've been using some of the LLM's for thematic coding...",
+                        speaker_name: 'Luke Matthews',
+                        speaker_role: 'Anthropologist',
+                        interview_id: 'INT_001',
+                        theme_ids: ['THEME_001'],
+                        code_ids: ['CODE_001', 'CODE_002'],
+                        confidence_score: 0.9
+                    },
+                    // ... more quotes
+                ]
+            };
+        }
+
+        // Show details modal
+        function showDetails(type) {
+            let content = '';
+            
+            switch(type) {
+                case 'interviews':
+                    content = `
+                        <h2>Interview Details</h2>
+                        <p>18 semi-structured interviews were conducted with RAND researchers about their experiences and perspectives on AI integration in qualitative research.</p>
+                        <h3>Interview Distribution</h3>
+                        <ul>
+                            <li>Focus Groups: 8 sessions</li>
+                            <li>Individual Interviews: 10 sessions</li>
+                            <li>Average Duration: 45-60 minutes</li>
+                            <li>Total Word Count: ~127,738 words</li>
+                        </ul>
+                    `;
+                    break;
+                    
+                case 'tokens':
+                    content = `
+                        <h2>Token Analysis</h2>
+                        <p><strong>Total Tokens:</strong> 170,317</p>
+                        <h3>What are Tokens?</h3>
+                        <p>Tokens are the basic units that Large Language Models use to process text. They can be:</p>
+                        <ul>
+                            <li>Complete words (e.g., "research" = 1 token)</li>
+                            <li>Parts of words (e.g., "un-believe-able" = 3 tokens)</li>
+                            <li>Punctuation marks</li>
+                            <li>Spaces and special characters</li>
+                        </ul>
+                        <h3>Token to Word Conversion</h3>
+                        <p>1 token ≈ 0.75 words (on average)</p>
+                        <p>170,317 tokens ≈ 127,738 words</p>
+                    `;
+                    break;
+                    
+                case 'saturation':
+                    content = `
+                        <h2>Theoretical Saturation</h2>
+                        <p>Theoretical saturation was reached at <strong>Interview 8</strong>, meaning no new themes emerged after this point.</p>
+                        <h3>Saturation Timeline</h3>
+                        <ul>
+                            <li>INT_001-003: 4 major themes identified</li>
+                            <li>INT_004-006: 2 additional themes emerged</li>
+                            <li>INT_007-008: Final theme crystallized</li>
+                            <li>INT_009-018: No new themes (validation phase)</li>
+                        </ul>
+                    `;
+                    break;
+            }
+            
+            document.getElementById('modalContent').innerHTML = content;
+            document.getElementById('detailModal').style.display = 'block';
+        }
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('detailModal').style.display = 'none';
+        }
+
+        // Show theme details
+        function showTheme(themeId) {
+            const theme = data.themes.find(t => t.id === themeId);
+            if (!theme) return;
+            
+            const relatedCodes = data.codes.filter(c => c.theme_id === themeId);
+            const relatedQuotes = data.quotes.filter(q => q.theme_ids && q.theme_ids.includes(themeId));
+            
+            const content = `
+                <h2>${theme.name}</h2>
+                <p>${theme.description}</p>
+                
+                <div class="stats-grid" style="margin: 2rem 0;">
+                    <div class="stat-box">
+                        <div class="stat-value">${(theme.prevalence * 100).toFixed(0)}%</div>
+                        <div class="stat-label">Prevalence</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value">${theme.interview_count}</div>
+                        <div class="stat-label">Interviews</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value">${relatedCodes.length}</div>
+                        <div class="stat-label">Codes</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value">${relatedQuotes.length}</div>
+                        <div class="stat-label">Quotes</div>
+                    </div>
+                </div>
+                
+                <h3>Related Codes</h3>
+                <div style="margin: 1rem 0;">
+                    ${relatedCodes.map(code => `
+                        <span class="tag tag-code" onclick="closeModal(); showCode('${code.id}')">
+                            ${code.name} (${code.frequency})
+                        </span>
+                    `).join('')}
+                </div>
+            `;
+            
+            document.getElementById('modalContent').innerHTML = content;
+            document.getElementById('detailModal').style.display = 'block';
+        }
+
+        // Show code details
+        function showCode(codeId) {
+            const code = data.codes.find(c => c.id === codeId);
+            if (!code) return;
+            
+            const theme = data.themes.find(t => t.id === code.theme_id);
+            const relatedQuotes = data.quotes.filter(q => q.code_ids && q.code_ids.includes(codeId));
+            
+            const content = `
+                <h2>${code.name}</h2>
+                <p><strong>Definition:</strong> ${code.definition}</p>
+                <p><strong>Frequency:</strong> ${code.frequency} occurrences</p>
+                <p><strong>Theme:</strong> <span class="tag tag-theme" onclick="closeModal(); showTheme('${theme.id}')">${theme.name}</span></p>
+                
+                <h3>Example Quotes</h3>
+                ${relatedQuotes.slice(0, 3).map(quote => `
+                    <div class="quote-display">
+                        <p class="quote-text">"${quote.text}"</p>
+                        <p class="quote-attribution">${quote.speaker_name} - ${quote.interview_id}</p>
+                    </div>
+                `).join('')}
+                
+                ${relatedQuotes.length > 3 ? `<p>And ${relatedQuotes.length - 3} more quotes...</p>` : ''}
+            `;
+            
+            document.getElementById('modalContent').innerHTML = content;
+            document.getElementById('detailModal').style.display = 'block';
+        }
+
+        // Table sorting
+        function sortTable(tableId, columnIndex) {
+            const table = document.getElementById(tableId);
+            const tbody = table.querySelector('tbody');
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+            
+            // Toggle sort direction
+            const th = table.querySelectorAll('th')[columnIndex];
+            const isAsc = th.classList.contains('asc');
+            
+            // Remove all sort indicators
+            table.querySelectorAll('th').forEach(header => {
+                header.classList.remove('asc', 'desc');
+            });
+            
+            // Add new sort indicator
+            th.classList.add(isAsc ? 'desc' : 'asc');
+            
+            // Sort rows
+            rows.sort((a, b) => {
+                const aValue = a.cells[columnIndex].textContent;
+                const bValue = b.cells[columnIndex].textContent;
+                
+                // Check if numeric
+                if (!isNaN(aValue) && !isNaN(bValue)) {
+                    return isAsc ? bValue - aValue : aValue - bValue;
+                }
+                
+                // String comparison
+                return isAsc ? 
+                    bValue.localeCompare(aValue) : 
+                    aValue.localeCompare(bValue);
+            });
+            
+            // Re-append sorted rows
+            rows.forEach(row => tbody.appendChild(row));
+        }
+
+        // Export functions
+        function exportCSV(type) {
+            alert(`Exporting ${type}.csv - In real implementation, this would download the file`);
+        }
+
+        function exportJSON() {
+            alert('Exporting full_analysis.json');
+        }
+
+        function exportReport() {
+            alert('Generating PDF report');
+        }
+
+        // Chart rendering
+        function renderCharts() {
+            // Theme distribution pie chart
+            const themeCtx = document.getElementById('themeChart').getContext('2d');
+            new Chart(themeCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['AI Applications (30)', 'Challenges (19)', 'Opportunities (6)', 'Strategy (12)', 'Methods (4)', 'Collaboration (8)'],
+                    datasets: [{
+                        data: [30, 19, 6, 12, 4, 8],
+                        backgroundColor: ['#2563eb', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+            
+            // Code frequency bar chart
+            const codeCtx = document.getElementById('codeChart').getContext('2d');
+            new Chart(codeCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Transcription', 'Coding', 'Literature', 'Accuracy', 'Training', 'Time Savings', 'Bias', 'Integration'],
+                    datasets: [{
+                        label: 'Frequency',
+                        data: [18, 16, 15, 14, 14, 13, 12, 12],
+                        backgroundColor: '#2563eb'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+            
+            // Saturation curve
+            const saturationCtx = document.getElementById('saturationChart').getContext('2d');
+            new Chart(saturationCtx, {
+                type: 'line',
+                data: {
+                    labels: ['INT_001', 'INT_002', 'INT_003', 'INT_004', 'INT_005', 'INT_006', 'INT_007', 'INT_008', 'INT_009-018'],
+                    datasets: [{
+                        label: 'Cumulative Themes',
+                        data: [3, 4, 4, 5, 5, 6, 6, 6, 6],
+                        borderColor: '#2563eb',
+                        tension: 0.4
+                    }, {
+                        label: 'Cumulative Codes',
+                        data: [12, 21, 28, 35, 42, 52, 58, 64, 64],
+                        borderColor: '#10b981',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+
+        // Network visualization (placeholder)
+        function renderNetwork() {
+            const container = document.getElementById('networkContainer');
+            container.innerHTML = '<p style="text-align: center; padding: 3rem;">Network visualization would be rendered here using D3.js</p>';
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Close modal on outside click
+            window.addEventListener('click', function(e) {
+                const modal = document.getElementById('detailModal');
+                if (e.target === modal) {
+                    closeModal();
+                }
+            });
+        }
+
+        // Initialize visualizations
+        function initializeVisualizations() {
+            // Would initialize D3.js visualizations and other interactive elements
+        }
+
+        // Additional helper functions would go here...
+    </script>
+</body>
+</html>

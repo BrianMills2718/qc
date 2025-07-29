@@ -1,0 +1,192 @@
+You have 103 total interviews (18 AI + 85 Africa), which confirms the ~86 interview scale. For this scale, Neo4j is overkill. Here are simpler alternatives:
+
+  Scale Analysis: 86 Interviews
+
+  Estimated Data Complexity:
+  - ~50-150 unique codes across all interviews
+  - ~10-25 major themes
+  - ~500-1500 coded segments
+  - Cross-interview relationships manageable in memory
+
+  Verdict: This is medium-scale qualitative coding - sophisticated enough to need relationship analysis, but small enough for simpler solutions.
+
+  Recommended Simpler Alternatives
+
+  Option 1: Pandas + JSON (Recommended)
+
+  # Store everything in structured JSON, analyze with pandas
+  interview_results = {
+      "interview_001": {
+          "themes": [...],
+          "codes": [...],
+          "segments": [...]
+      }
+  }
+
+  # Cross-interview analysis
+  import pandas as pd
+  import json
+
+  def analyze_code_cooccurrence(results):
+      # Flatten all coded segments
+      segments_df = pd.DataFrame([
+          {
+              'interview_id': iid,
+              'segment_id': seg['id'],
+              'codes': seg['codes'],
+              'theme': seg['theme']
+          }
+          for iid, interview in results.items()
+          for seg in interview['segments']
+      ])
+
+      # Co-occurrence matrix
+      from itertools import combinations
+      cooccurrences = []
+      for _, row in segments_df.iterrows():
+          for code1, code2 in combinations(row['codes'], 2):
+              cooccurrences.append({'code1': code1, 'code2': code2})
+
+      return pd.DataFrame(cooccurrences).value_counts()
+
+  Pros:
+  - Already familiar tooling
+  - Easy CSV export for analysis
+  - Good performance for 86 interviews
+  - Simple backup/sharing (just JSON files)
+
+  Option 2: SQLite + Simple Queries
+
+  # Simple relational structure
+  import sqlite3
+
+  def setup_qc_database():
+      conn = sqlite3.connect('qualitative_coding.db')
+
+      conn.execute('''
+          CREATE TABLE interviews (
+              id TEXT PRIMARY KEY,
+              title TEXT,
+              participant_id TEXT,
+              date DATE
+          )
+      ''')
+
+      conn.execute('''
+          CREATE TABLE codes (
+              id TEXT PRIMARY KEY,
+              name TEXT,
+              definition TEXT,
+              theme_id TEXT
+          )
+      ''')
+
+      conn.execute('''
+          CREATE TABLE coded_segments (
+              id TEXT PRIMARY KEY,
+              interview_id TEXT,
+              code_id TEXT,
+              quote TEXT,
+              line_start INTEGER,
+              line_end INTEGER,
+              FOREIGN KEY (interview_id) REFERENCES interviews (id),
+              FOREIGN KEY (code_id) REFERENCES codes (id)
+          )
+      ''')
+
+  # Simple relationship queries
+  def get_code_cooccurrences(conn):
+      return conn.execute('''
+          SELECT c1.name, c2.name, COUNT(*) as frequency
+          FROM coded_segments cs1
+          JOIN coded_segments cs2 ON cs1.interview_id = cs2.interview_id
+          JOIN codes c1 ON cs1.code_id = c1.id
+          JOIN codes c2 ON cs2.code_id = c2.id
+          WHERE c1.id < c2.id
+          GROUP BY c1.id, c2.id
+          ORDER BY frequency DESC
+      ''').fetchall()
+
+  Pros:
+  - More structured than JSON
+  - SQL queries for relationships
+  - Still lightweight
+  - Portable (single file)
+
+  Option 3: NetworkX for Graph Analysis (Best of Both Worlds)
+
+  import networkx as nx
+  import json
+
+  def build_code_network(results):
+      """Build code relationship network without database"""
+      G = nx.Graph()
+
+      # Add nodes (codes)
+      all_codes = set()
+      for interview in results.values():
+          for segment in interview['segments']:
+              all_codes.update(segment['codes'])
+
+      G.add_nodes_from(all_codes)
+
+      # Add edges (co-occurrences)
+      for interview in results.values():
+          for segment in interview['segments']:
+              codes = segment['codes']
+              for i, code1 in enumerate(codes):
+                  for code2 in codes[i+1:]:
+                      if G.has_edge(code1, code2):
+                          G[code1][code2]['weight'] += 1
+                      else:
+                          G.add_edge(code1, code2, weight=1)
+
+      return G
+
+  # Network analysis
+  def analyze_code_centrality(G):
+      centrality = nx.betweenness_centrality(G, weight='weight')
+      return sorted(centrality.items(), key=lambda x: x[1], reverse=True)
+
+  def find_code_communities(G):
+      return list(nx.community.greedy_modularity_communities(G))
+
+  Pros:
+  - Graph analysis without database overhead
+  - Rich network analysis capabilities
+  - Visualization with matplotlib/plotly
+  - JSON storage + in-memory graph processing
+
+  My Recommendation: NetworkX + JSON
+
+  For 86 interviews, I'd recommend:
+
+  # Storage: Simple JSON files
+  {
+      "session_metadata": {...},
+      "interviews": {
+          "interview_001": {
+              "metadata": {...},
+              "themes": [...],
+              "codes": [...],
+              "segments": [...]
+          }
+      },
+      "cross_interview_analysis": {
+          "theme_evolution": [...],
+          "code_consolidation": [...],
+          "theoretical_insights": [...]
+      }
+  }
+
+  # Analysis: NetworkX for relationships
+  # Visualization: matplotlib/plotly for networks
+  # Export: CSV/Excel for statistical analysis
+
+  Why This Works Better Than Neo4j at Your Scale:
+  1. Simpler setup: No database server
+  2. Easier debugging: Just JSON files
+  3. Better portability: Share analysis by copying files
+  4. Sufficient power: NetworkX handles graph analysis well for 86 interviews
+  5. Lower complexity: One less system to maintain
+  6. Still gets you: Code networks, theme relationships, cross-interview patterns

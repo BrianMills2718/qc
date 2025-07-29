@@ -1,0 +1,12 @@
+{
+  "call_id": "quote_extraction",
+  "timestamp": "2025-07-29T08:08:11.031137",
+  "start_time": 1753801691.0311377,
+  "prompt_length": 16,
+  "prompt_preview": "Quote extraction",
+  "config": {
+    "max_output_tokens": 20000,
+    "temperature": 0.1
+  },
+  "status": "started"
+}

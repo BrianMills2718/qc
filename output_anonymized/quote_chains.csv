@@ -1,0 +1,4 @@
+chain_id,theme_id,chain_type,description,quote_count
+QC_001,THEME_006,evolution,"This chain illustrates the evolving perception of AI's role in research, from initial skepticism to its potential as a 'co-researcher' or 'better button'.",0
+QC_002,THEME_001,problem_solution,This chain highlights the recurring problem of data wrangling and the proposed solution of AI-powered data lakes and pipelines.,0
+QC_003,THEME_005,consensus_building,"This chain shows a growing consensus on the need for better, more tailored AI training and guidance at Rand.",0

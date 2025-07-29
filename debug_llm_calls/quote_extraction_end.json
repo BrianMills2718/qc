@@ -1,0 +1,13 @@
+{
+  "call_id": "quote_extraction",
+  "timestamp": "2025-07-29T08:07:47.775286",
+  "end_time": 1753801667.7752864,
+  "duration_seconds": 52.72290754318237,
+  "success": true,
+  "error": null,
+  "response_info": {
+    "type": "list",
+    "repr": "[{'quote_id': 'T001_FB', 'text': '[Quote extraction failed for AI_Impact_on_Research_Process - see full analysis for themes]', 'speaker_role': 'System', 'interview_id': 'Multiple', 'theme_ids': ['THEME_001'], 'code_ids': [], 'context': 'Fallback placeholder', 'confidence': 0.0}, {'quote_id': 'T002_S1_Q1', 'text': 'coding, something way better than Dedoose. We do a lot of interviews and the coding is uneven in quality. So it would be great if we had some standard way to do that and a tool to help"
+  },
+  "status": "completed"
+}

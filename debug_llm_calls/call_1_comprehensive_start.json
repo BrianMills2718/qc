@@ -1,0 +1,12 @@
+{
+  "call_id": "call_1_comprehensive",
+  "timestamp": "2025-07-29T05:18:13.647285",
+  "start_time": 1753791493.647286,
+  "prompt_length": 29,
+  "prompt_preview": "Comprehensive analysis prompt",
+  "config": {
+    "max_output_tokens": 60000,
+    "temperature": 0.3
+  },
+  "status": "started"
+}

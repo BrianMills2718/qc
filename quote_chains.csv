@@ -1,0 +1,5 @@
+chain_id,theme_id,chain_type,description,quote_count
+CHAIN_001,THEME_002,evolution,"Evolution of concerns regarding AI accuracy and nuance, from initial skepticism to specific examples of hallucinations and missed context.",0
+CHAIN_002,THEME_004,problem_solution,"Problem of fragmented AI tool access and lack of clear guidance, leading to calls for centralized support, budgets, and clear policies.",0
+CHAIN_003,THEME_002,evolution,"The evolving concern about AI's impact on human skills and the 'art' of research, from general job displacement fears to specific worries about deskilling and loss of data intimacy.",0
+CHAIN_004,THEME_001,evolution,"Progression of AI applications from basic transcription and coding to more complex tasks like scenario generation, forecasting, and full report drafting.",0

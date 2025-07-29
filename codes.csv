@@ -1,0 +1,72 @@
+code_id,name,definition,frequency,first_appearance,theme_id,parent_code_id,hierarchy_level
+CODE_005,AI_Applications_and_Use_Cases,Broad category for all identified ways AI is currently being used or could be used in research.,18,Interview 001,THEME_001,,0
+CODE_014,Challenges_and_Risks_of_AI_Adoption,"Broad category for obstacles, ethical concerns, and negative impacts of AI integration.",18,Interview 001,THEME_002,,0
+CODE_019,Opportunities_and_Benefits_of_AI_Integration,"Broad category for advantages, efficiencies, and future potential of AI in research.",18,Interview 001,THEME_003,,0
+CODE_022,AI_Adoption_and_Implementation_Strategy_at_Rand,"Broad category for how RAND should approach AI integration, including training, funding, policy, and strategic vision.",18,Interview 001,THEME_004,,0
+CODE_025,Research_Methods_Overview,"Broad category for general discussions about research methods, their challenges, and impact.",18,Interview 001,THEME_005,,0
+CODE_004,  Qualitative_Research_Support,AI applications specifically aiding qualitative research methods.,15,Interview 001,THEME_001,CODE_000,1
+CODE_008,  Literature_and_Document_Review,AI applications supporting the process of reviewing and synthesizing existing literature and documents.,15,Interview 001,THEME_001,CODE_005,1
+CODE_011,  Advanced_AI_Research_Methods,Novel or complex AI applications that represent new frontiers in research methodology.,7,Interview 001,THEME_001,CODE_005,1
+CODE_029,  Quantitative_Research_Support,AI applications specifically aiding quantitative research methods.,11,Interview 003,THEME_001,CODE_005,1
+CODE_034,  Project_Management_and_Administrative_Support,"AI applications assisting with general project management, administrative tasks, and organizational workflows.",11,Interview 003,THEME_001,CODE_005,1
+CODE_013,  Accuracy_and_Reliability_Concerns,Concerns about the correctness and consistency of AI-generated outputs.,13,Interview 001,THEME_002,CODE_014,1
+CODE_016,  Human_Impact_and_Skill_Erosion,"Concerns about AI diminishing human skills, job roles, or the depth of researcher engagement.",10,Interview 001,THEME_002,CODE_014,1
+CODE_039,  Organizational_and_Technical_Barriers,"Challenges related to RAND's infrastructure, policies, or internal culture hindering AI adoption.",11,Interview 002,THEME_002,CODE_014,1
+CODE_054,  Ethical_and_Trust_Issues,"Broader ethical considerations and challenges related to trust, bias, and intellectual property in AI use.",7,Interview 003,THEME_002,CODE_014,1
+CODE_018,  Competitive_Advantage,"The potential for AI to give RAND or its competitors an edge in research speed, quality, or relevance.",5,Interview 002,THEME_003,CODE_019,1
+CODE_020,  Efficiency_and_Time_Savings,AI's ability to reduce the time and labor required for various research tasks.,17,Interview 001,THEME_003,CODE_019,1
+CODE_060,  Enhanced_Capacity_and_Scale,"AI's ability to enable researchers to handle larger datasets, conduct more analyses, or expand the scope of their work.",4,Interview 004,THEME_003,CODE_019,1
+CODE_061,  Improved_Quality_and_Rigor,"AI's potential to enhance the accuracy, consistency, and overall scientific rigor of research outputs.",3,Interview 004,THEME_003,CODE_019,1
+CODE_062,  New_Research_Capabilities,AI enabling entirely new types of research questions or methodological approaches previously impossible or impractical.,2,Interview 006,THEME_003,CODE_019,1
+CODE_021,  Training_and_Education,The need for and types of training to help RAND researchers effectively use AI tools.,7,Interview 003,THEME_004,CODE_022,1
+CODE_041,  Internal_Tool_Development_vs_External_Acquisition,Debate over whether RAND should build its own AI tools or license/integrate existing commercial solutions.,3,Interview 007,THEME_004,CODE_022,1
+CODE_042,  Strategic_Vision_and_Roadmap,"The need for a high-level, comprehensive strategy for AI adoption at RAND, including goals and benchmarking.",2,Interview 007,THEME_004,CODE_022,1
+CODE_046,  Incentives_and_Funding,Discussions about financial or organizational incentives needed to promote AI adoption.,3,Interview 007,THEME_004,CODE_022,1
+CODE_048,  Knowledge_Sharing_and_Collaboration,"The importance of internal RAND platforms, discussions, and practices for sharing AI knowledge and best practices.",4,Interview 004,THEME_004,CODE_022,1
+CODE_058,  Policy_and_Guidance,"Development of internal RAND policies, protocols, and disclaimers for AI use.",4,Interview 003,THEME_004,CODE_022,1
+CODE_024,  Common_Methods_at_Rand,Identification of frequently used research methods across RAND.,10,Interview 001,THEME_005,CODE_025,1
+CODE_026,  Methodological_Challenges_General,"General difficulties or 'long poles in the tent' encountered in traditional research methods, regardless of AI.",10,Interview 001,THEME_005,CODE_025,1
+CODE_027,  High_Impact_Methods,"Discussion about which methods are considered most important, yield actionable results, or have significant influence.",5,Interview 002,THEME_005,CODE_025,1
+CODE_002,    Coding_and_Thematic_Analysis,"Using AI to identify, categorize, and group themes or concepts within qualitative data (e.g., interview transcripts, social media posts).",15,Interview 001,THEME_001,CODE_004,2
+CODE_003,    Data_Summarization,"Using AI to generate concise summaries of large volumes of text data (e.g., interviews, documents).",12,Interview 001,THEME_001,CODE_004,2
+CODE_006,    Recruitment_and_Sampling_Support,"Using AI to identify, recruit, and schedule research participants.",4,Interview 001,THEME_001,CODE_004,2
+CODE_065,    Expert_Elicitation_Support,"Using AI to automate aspects of expert elicitation methods like Delphi (e.g., summarizing responses, generating discussion questions).",2,Interview 007,THEME_001,CODE_004,2
+CODE_071,    Interview_Protocol_Design,Using AI to assist in developing and refining interview questions or protocols.,1,Interview 003,THEME_001,CODE_004,2
+CODE_001,    Transcription,"Using AI to convert audio to text, including speaker differentiation and cleaning.",10,Interview 001,THEME_001,CODE_005,2
+CODE_007,    Search_Strategy_and_Discovery,"Using AI to refine search terms, identify relevant literature, and discover overlooked sources.",10,Interview 001,THEME_001,CODE_008,2
+CODE_009,    Document_Summarization_and_Extraction,"Using AI to summarize documents or extract specific information (e.g., data points, themes) from them.",13,Interview 001,THEME_001,CODE_008,2
+CODE_066,    Gap_Identification,"Using AI to identify gaps in existing literature or research areas, particularly for proposal development.",2,Interview 009,THEME_001,CODE_008,2
+CODE_067,    Synthesis_and_Review_of_Reviews,Using AI to synthesize findings across multiple studies or to conduct reviews of existing systematic reviews.,2,Interview 009,THEME_001,CODE_008,2
+CODE_010,    AI_Agents_and_Virtual_Populations,"Creating AI personas or simulated populations for research, testing, or scenario analysis.",4,Interview 001,THEME_001,CODE_011,2
+CODE_043,    Wargaming_and_Simulation,"Using AI to assist in designing, adjudicating, or augmenting wargames and simulations.",4,Interview 002,THEME_001,CODE_011,2
+CODE_063,    Forecasting,"Using AI to assist in developing forecastable questions, assessing probabilities, or creating AI models of forecasters.",2,Interview 007,THEME_001,CODE_011,2
+CODE_064,    Red_Teaming,"Using AI to challenge assumptions, identify weaknesses, or test the robustness of research findings or models.",2,Interview 007,THEME_001,CODE_011,2
+CODE_012,    Nuance_and_Context_Loss,"AI's difficulty in capturing subtle meanings, sarcasm, or the broader context of qualitative data.",8,Interview 001,THEME_002,CODE_013,2
+CODE_015,    Trust_in_AI_Output,Hesitation or lack of confidence in directly using AI-generated results without human verification.,11,Interview 001,THEME_002,CODE_013,2
+CODE_037,    Overfitting_and_Data_Mining,The risk of AI leading to statistical overfitting or inappropriate data mining practices.,2,Interview 003,THEME_002,CODE_013,2
+CODE_049,    Hallucinations_and_Fabrication,"AI generating incorrect, made-up, or non-existent information, especially references or quotes.",6,Interview 001,THEME_002,CODE_013,2
+CODE_017,    Deskilling_of_Junior_Researchers,Worry that AI will automate tasks crucial for the development of junior researchers' skills.,4,Interview 002,THEME_002,CODE_016,2
+CODE_050,    Loss_of_Intimacy_with_Data,Concern that AI automation reduces the researcher's deep understanding and connection with the raw data.,3,Interview 001,THEME_002,CODE_016,2
+CODE_051,    Researcher_Anxiety,Fear or discomfort among researchers regarding AI's potential impact on their roles and relevance.,2,Interview 004,THEME_002,CODE_016,2
+CODE_023,    Use_Case_Examples,"Providing concrete, illustrated examples of how AI can be successfully applied in research.",4,Interview 003,THEME_004,CODE_021,2
+CODE_028,    Data_Wrangling_and_Preparation,"Using AI to clean, de-identify, harmonize, and structure raw data for analysis.",10,Interview 003,THEME_001,CODE_029,2
+CODE_030,    Statistical_Modeling_and_Analysis,"Using AI to assist with statistical model selection, execution, and interpretation.",6,Interview 003,THEME_001,CODE_029,2
+CODE_031,    Survey_Design_and_Measures,"Using AI to generate survey questions, identify validated measures, and optimize survey instruments.",5,Interview 003,THEME_001,CODE_029,2
+CODE_032,    Code_Generation_and_Debugging,"Using AI to write, optimize, or debug programming code (e.g., Python, R, Stata).",6,Interview 003,THEME_001,CODE_029,2
+CODE_033,    Meeting_Management,"Using AI for meeting transcription, summarizing, identifying key decisions, and tracking action items.",3,Interview 003,THEME_001,CODE_034,2
+CODE_035,    Proposal_Development,"Using AI to assist in writing proposals, identifying gaps, and structuring content.",7,Interview 003,THEME_001,CODE_034,2
+CODE_036,    Report_Writing_and_Editing,"Using AI to draft, edit, proofread, and format research reports and publications.",9,Interview 003,THEME_001,CODE_034,2
+CODE_044,    Dissemination_and_Communication,"Using AI to create diverse formats for research dissemination (e.g., podcasts, tailored summaries) and improve communication with policymakers.",5,Interview 007,THEME_001,CODE_034,2
+CODE_045,    Compliance_and_Quality_Assurance,"Using AI to ensure research products adhere to style guides, compliance standards (e.g., 508), and internal quality checks.",4,Interview 007,THEME_001,CODE_034,2
+CODE_068,    Resource_Allocation_and_Planning,"Using AI for internal RAND resource management, such as labor forecasting or project staffing.",1,Interview 005,THEME_001,CODE_034,2
+CODE_038,    Tool_Availability_and_Access,"Challenges related to RAND's internal AI tools (e.g., RandChat) being less capable than external ones, or lack of access to external tools.",7,Interview 003,THEME_002,CODE_039,2
+CODE_040,    Lack_of_Clear_Guidance_and_Policy,"Absence or ambiguity in RAND's official guidelines for AI use, especially regarding ethics and acceptable practices.",7,Interview 002,THEME_002,CODE_039,2
+CODE_052,    Lack_of_Standardized_Data_Infrastructure,"The challenge of fragmented and inconsistent data storage and management at RAND, hindering large-scale AI application.",3,Interview 012,THEME_002,CODE_039,2
+CODE_070,    Resistance_to_Change,Reluctance or hesitation among researchers to adopt new AI tools or methods.,1,Interview 004,THEME_002,CODE_039,2
+CODE_047,    AI_Budget_Stipends,Proposals for providing individual researchers with a budget to purchase AI tools.,1,Interview 012,THEME_004,CODE_046,2
+CODE_069,    Dedicated_AI_Staff,The idea of hiring or assigning dedicated AI programmers/experts to research projects.,1,Interview 004,THEME_004,CODE_046,2
+CODE_053,    Data_Privacy_and_Confidentiality,"Concerns about protecting sensitive or classified data when using AI tools, especially external ones.",4,Interview 003,THEME_002,CODE_054,2
+CODE_055,    Intellectual_Property,Concerns about AI inadvertently using or 'stealing' intellectual property from training data or generating content too similar to existing work.,1,Interview 005,THEME_002,CODE_054,2
+CODE_056,    Transparency_and_Black_Box,"The difficulty in understanding how AI models arrive at their conclusions, leading to a 'black box' problem.",3,Interview 004,THEME_002,CODE_054,2
+CODE_057,    HSPC_and_IRB_Adaptation,The need for Human Subjects Protection Committee (HSPC) and Institutional Review Board (IRB) guidelines to adapt to AI use in research.,3,Interview 003,THEME_004,CODE_058,2
+CODE_059,    AI_Protocols_and_Disclaimers,"Specific guidelines or statements about how AI was used in a research project, for transparency and accountability.",2,Interview 004,THEME_004,CODE_058,2

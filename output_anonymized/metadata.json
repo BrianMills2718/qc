@@ -1,0 +1,7 @@
+{
+  "processing_time_seconds": 322.5961208343506,
+  "interviews_analyzed": 18,
+  "total_tokens": 170317,
+  "llm_calls": 2,
+  "model": "gemini-2.5-flash"
+}

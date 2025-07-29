@@ -1,0 +1,65 @@
+# Environment files with secrets
+.env
+*.env
+**/.env
+track2_api/.env
+track1_backend/.env
+universal_model_tester/.env
+
+# API Keys and secrets
+*.key
+*.pem
+*api_key*
+*API_KEY*
+secrets/
+credentials/
+config.json
+settings.json
+
+# Additional environment protection
+.env.local
+.env.development
+.env.production
+.env.test
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Cache and temporary files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+.pytest_cache/
+.coverage
+htmlcov/
+.gemini-cache/
+debug_responses/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Log files
+*.log
+logs/
+provenance_logs/
+
+# Output directories
+output/
+*_output/
+test_output*/
+*analysis.md
+integration_test_report.json
+
+# Submodules and external repos
+gemini-cli/

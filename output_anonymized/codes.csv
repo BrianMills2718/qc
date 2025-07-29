@@ -1,0 +1,65 @@
+code_id,name,definition,frequency,first_appearance,theme_id,parent_code_id,hierarchy_level
+AI_APPLICATIONS,AI Applications,Specific ways AI is being or could be applied to research methods.,18,Interview 001,THEME_001,,0
+AI_RESEARCH_QUALITY,AI and Research Quality,"Discussions and concerns regarding AI's impact on the quality, rigor, and trustworthiness of research.",18,Interview 001,THEME_004,,0
+BENEFITS_AI_ADOPTION,Benefits of AI Adoption,Perceived advantages and positive impacts of integrating AI into research methods.,18,Interview 001,THEME_003,,0
+CHALLENGES_AI_ADOPTION,Challenges of AI Adoption,Obstacles and difficulties encountered in the adoption and effective use of AI in research.,18,Interview 001,THEME_002,,0
+FUTURE_IMPACT_AI,Future Impact of AI,"Speculations and concerns about the long-term impact of AI on research roles, competitiveness, and the nature of knowledge work.",18,Interview 001,THEME_006,,0
+INSTITUTIONAL_STRATEGY,Institutional Strategy & Support,"Ideas and recommendations for Rand's institutional approach to AI adoption, support, and investment.",18,Interview 002,THEME_005,,0
+AI_APP_001,  AI Qualitative Analysis,AI applications in qualitative data analysis.,12,Interview 001,THEME_001,AI_APPLICATIONS,1
+AI_APP_002,  AI Quantitative Analysis,AI applications in quantitative data analysis and modeling.,10,Interview 001,THEME_001,AI_APPLICATIONS,1
+AI_APP_003,  AI Literature Review,Using AI to assist with literature reviews and document analysis.,15,Interview 001,THEME_001,AI_APPLICATIONS,1
+AI_APP_004,  AI Proposal Writing,Using AI to assist with proposal writing.,6,Interview 005,THEME_001,AI_APPLICATIONS,1
+AI_APP_005,  AI Wargaming,Using AI in wargaming and tabletop exercises.,4,Interview 002,THEME_001,AI_APPLICATIONS,1
+AI_APP_006,  AI Dissemination,Using AI to assist with research dissemination and communication.,4,Interview 007,THEME_001,AI_APPLICATIONS,1
+AI_APP_007,  AI Project Management,Using AI for general project management tasks.,4,Interview 003,THEME_001,AI_APPLICATIONS,1
+AI_APP_008,  AI Forecasting,Using AI for forecasting and predictive analysis.,3,Interview 002,THEME_001,AI_APPLICATIONS,1
+QUAL_001,  Human-AI Interface,The necessity of human oversight and interaction with AI tools to ensure quality and rigor.,10,Interview 004,THEME_004,AI_RESEARCH_QUALITY,1
+QUAL_002,  Loss of Data Intimacy,Concerns that AI use might lead to a loss of researcher's intimacy or deep understanding of the data.,4,Interview 001,THEME_004,AI_RESEARCH_QUALITY,1
+QUAL_003,  AI Publication Validity,Challenges related to publishing AI-assisted research in scientific journals due to validity concerns.,1,Interview 009,THEME_004,AI_RESEARCH_QUALITY,1
+BEN_001,  AI Efficiency & Speed,AI's ability to significantly increase efficiency and speed in research tasks.,12,Interview 001,THEME_003,BENEFITS_AI_ADOPTION,1
+BEN_002,  AI Capacity & Scalability,AI's potential to increase research capacity and scalability.,4,Interview 004,THEME_003,BENEFITS_AI_ADOPTION,1
+BEN_003,  AI Idea Generation,"AI's utility in generating new ideas, hypotheses, or perspectives.",4,Interview 007,THEME_003,BENEFITS_AI_ADOPTION,1
+CHAL_001,  AI Accuracy & Trust,"Concerns about the accuracy, trustworthiness, or potential for hallucination in AI outputs.",14,Interview 001,THEME_002,CHALLENGES_AI_ADOPTION,1
+CHAL_002,  AI Data Access & Security,"Challenges related to data access, security, and management for AI tools.",7,Interview 003,THEME_002,CHALLENGES_AI_ADOPTION,1
+CHAL_003,  AI Tool Proliferation,Challenges related to the proliferation of AI tools and the time/effort to learn them.,2,Interview 012,THEME_002,CHALLENGES_AI_ADOPTION,1
+CHAL_004,  AI Training Gaps,Gaps in training and education for Rand researchers on how to effectively and ethically use AI.,6,Interview 003,THEME_002,CHALLENGES_AI_ADOPTION,1
+CHAL_005,  AI Ethical Concerns,"Concerns about the ethical implications of using AI in research, including consent and bias.",5,Interview 001,THEME_002,CHALLENGES_AI_ADOPTION,1
+CHAL_006,  Institutional Resistance,"Institutional resistance or hesitation to adopt AI, stemming from various factors.",4,Interview 004,THEME_002,CHALLENGES_AI_ADOPTION,1
+FUT_001,  AI Job Displacement,Concerns about AI potentially displacing human jobs in research.,3,Interview 001,THEME_006,FUTURE_IMPACT_AI,1
+FUT_002,  AI Role Transformation,"The idea that AI will transform researcher roles, requiring new skills or focus.",2,Interview 012,THEME_006,FUTURE_IMPACT_AI,1
+FUT_003,  Red Queen Scenario,"The 'Red Queen' effect, where AI adoption leads to everyone running faster just to stay in the same place competitively.",1,Interview 001,THEME_006,FUTURE_IMPACT_AI,1
+FUT_004,  New AI Product Models,"New models for Rand's research products, potentially involving AI-driven expert systems or conversational interfaces.",1,Interview 018,THEME_006,FUTURE_IMPACT_AI,1
+INST_001,  Centralized AI Guidance,"The need for clear, centralized guidance and policies on AI use at Rand.",6,Interview 002,THEME_005,INSTITUTIONAL_STRATEGY,1
+INST_002,  Improved AI Training,The need for improved AI training programs for Rand researchers.,5,Interview 005,THEME_005,INSTITUTIONAL_STRATEGY,1
+INST_003,  Build vs. Buy AI Tools,Discussion on whether Rand should build its own AI tools or license/buy commercial ones.,3,Interview 007,THEME_005,INSTITUTIONAL_STRATEGY,1
+INST_004,  AI Incentive Structures,The need for incentive structures to promote AI adoption and reward its effective use.,2,Interview 007,THEME_005,INSTITUTIONAL_STRATEGY,1
+INST_005,  AI Tool Budget,The idea of allocating a dedicated budget or stipend for researchers to acquire AI tools.,1,Interview 012,THEME_005,INSTITUTIONAL_STRATEGY,1
+INST_006,  Cross-Pollination/Sharing,The need for cross-divisional or cross-unit collaboration and sharing of AI best practices.,3,Interview 004,THEME_005,INSTITUTIONAL_STRATEGY,1
+INST_007,  AI Product Manager Role,The suggestion for a dedicated 'product manager' role to bridge researchers and AI developers.,1,Interview 007,THEME_005,INSTITUTIONAL_STRATEGY,1
+AI_APP_001_001,    AI Transcription,Using AI for transcribing audio/video recordings.,5,Interview 001,THEME_001,AI_APP_001,2
+AI_APP_001_002,    AI Coding,"Using AI for coding qualitative data (e.g., interview transcripts, open-ended survey responses).",10,Interview 001,THEME_001,AI_APP_001,2
+AI_APP_001_003,    AI Theme Generation,Using AI to generate themes or patterns from qualitative data.,6,Interview 001,THEME_001,AI_APP_001,2
+AI_APP_001_004,    AI De-identification,Using AI for de-identification of sensitive data in qualitative transcripts.,3,Interview 004,THEME_001,AI_APP_001,2
+AI_APP_002_001,    AI Data Wrangling,"Using AI to assist with data wrangling, cleaning, and preparation.",5,Interview 003,THEME_001,AI_APP_002,2
+AI_APP_002_002,    AI Model Building,Using AI to assist with building or optimizing statistical and simulation models.,4,Interview 003,THEME_001,AI_APP_002,2
+AI_APP_002_003,    AI Code Generation,"Using AI for generating or debugging programming code (e.g., Python, R, Stata).",6,Interview 003,THEME_001,AI_APP_002,2
+AI_APP_003_001,    AI Search Strategy,Using AI to develop search strategies or identify relevant documents.,5,Interview 001,THEME_001,AI_APP_003,2
+AI_APP_003_002,    AI Document Extraction,"Using AI to extract specific information (e.g., numbers, parameters, facts) from documents.",6,Interview 003,THEME_001,AI_APP_003,2
+AI_APP_003_003,    AI Literature Synthesis,Using AI to summarize or synthesize findings from multiple literature sources.,10,Interview 001,THEME_001,AI_APP_003,2
+AI_APP_004_001,    AI Outline Generation (Proposals),Using AI to generate outlines or structures for proposals.,1,Interview 018,THEME_001,AI_APP_004,2
+AI_APP_004_002,    AI Content Drafting (Proposals),"Using AI to draft content for proposal sections (e.g., executive summaries, boilerplate).",3,Interview 005,THEME_001,AI_APP_004,2
+AI_APP_004_003,    AI Partner Identification,Using AI to identify potential partners for proposals or projects.,3,Interview 001,THEME_001,AI_APP_004,2
+AI_APP_005_001,    AI Scenario Generation (Wargaming),Using AI to generate or improve scenarios for wargames.,2,Interview 007,THEME_001,AI_APP_005,2
+AI_APP_005_002,    AI Adjudication/Player Roles (Wargaming),Using AI to assist with adjudication or player roles in wargames.,2,Interview 010,THEME_001,AI_APP_005,2
+AI_APP_006_001,    AI Content Adaptation (Dissemination),"Using AI to summarize reports or adapt content for different audiences (e.g., podcasts, lay terms).",3,Interview 007,THEME_001,AI_APP_006,2
+AI_APP_006_002,    AI Formatting/Compliance,"Using AI for formatting reports or ensuring compliance (e.g., 508, style guides).",3,Interview 007,THEME_001,AI_APP_006,2
+AI_APP_007_001,    AI Timeline Management,"Using AI to manage project timelines or critical paths (e.g., Gantt charts, IRB processes).",1,Interview 003,THEME_001,AI_APP_007,2
+AI_APP_007_002,    AI Meeting Minutes,Using AI to generate meeting minutes or action items.,3,Interview 003,THEME_001,AI_APP_007,2
+AI_APP_008_001,    AI Question Formulation (Forecasting),Using AI to formulate forecastable questions or identify trends.,2,Interview 007,THEME_001,AI_APP_008,2
+AI_APP_008_002,    AI Forecaster Modeling,Using AI to model or train on human forecaster behavior.,1,Interview 017,THEME_001,AI_APP_008,2
+CHAL_001_001,    AI Nuance/Context Loss,"AI's inability to capture or understand nuance, context, or subtleties in data.",6,Interview 001,THEME_002,CHAL_001,2
+CHAL_001_002,    AI Hallucination,"AI generating false or fabricated information, especially references.",5,Interview 001,THEME_002,CHAL_001,2
+CHAL_002_001,    AI & Classified/CUI Data,Difficulty using AI tools with classified or CUI (Controlled Unclassified Information) data.,4,Interview 003,THEME_002,CHAL_002,2
+CHAL_002_002,    Data Fragmentation/Lakes,Challenges related to fragmented data storage and lack of integrated 'data lakes' at Rand.,2,Interview 012,THEME_002,CHAL_002,2
+CHAL_005_001,    AI & Bias/IP,Concerns about AI inadvertently taking intellectual property or perpetuating existing biases.,2,Interview 005,THEME_002,CHAL_005,2
+QUAL_001_001,    AI Validation Standards,The need for validation and clear standards for AI-generated research outputs.,6,Interview 001,THEME_004,QUAL_001,2

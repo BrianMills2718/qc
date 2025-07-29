@@ -1,0 +1,17 @@
+{
+  "call_id": "call_2_quotes",
+  "timestamp": "2025-07-29T05:19:39.843846",
+  "end_time": 1753791579.8438463,
+  "duration_seconds": 38.03172588348389,
+  "success": true,
+  "error": null,
+  "response_info": {
+    "type": "dict",
+    "keys": [
+      "quote_inventory",
+      "metadata"
+    ],
+    "size": 11796
+  },
+  "status": "completed"
+}

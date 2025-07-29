@@ -1,0 +1,13 @@
+{
+  "call_id": "call_1_comprehensive",
+  "timestamp": "2025-07-29T05:19:01.811606",
+  "end_time": 1753791541.8110917,
+  "duration_seconds": 48.16380572319031,
+  "success": true,
+  "error": null,
+  "response_info": {
+    "type": "GlobalCodingResult",
+    "repr": "GlobalCodingResult(study_id='study_20250729_051901', analysis_timestamp=datetime.datetime(2025, 7, 29, 5, 19, 1, 810583), research_question='How are AI methods being integrated into qualitative research practices?', interviews_analyzed=3, total_tokens_analyzed=25677, themes=[CrossInterviewTheme(theme_id='T1', name='AI Applications in Qualitative Research', description='This theme encompasses the various ways AI is being considered or used to assist in qualitative research methods, from data coll"
+  },
+  "status": "completed"
+}

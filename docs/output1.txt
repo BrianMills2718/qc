@@ -1,0 +1,162 @@
+PS C:\Users\Brian\projects\qualitative_coding_clean>  python -u run_analysis_utf8_fixed.py 2>&1 | tee full_analysis10.log
+python : 2025-07-29 07:11:46,162 - run_full_ai_analysis - INFO - ============================================================
+At line:1 char:2
++  python -u run_analysis_utf8_fixed.py 2>&1 | tee full_analysis10.log
++  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (2025-07-29 07:1...===============:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+2025-07-29 07:11:46,162 - run_full_ai_analysis - INFO - Starting FULL AI Interviews Analysis
+2025-07-29 07:11:46,162 - run_full_ai_analysis - INFO - Timestamp: 2025-07-29 07:11:46.162489
+2025-07-29 07:11:46,162 - run_full_ai_analysis - INFO - ============================================================
+2025-07-29 07:11:46,273 - qc.utils.token_counter - INFO - Initialized TokenCounter with gpt-4 encoding
+2025-07-29 07:11:46,273 - qc.core.simple_gemini_client - INFO - {"timestamp": "2025-07-29T14:11:46.273571", "level": "info", "event": "Initialized SimpleGeminiClient", "trace_id": "2d1735ca-1371-441e-95ad-e7e057ff08a4", "model": "gemini-2.5-flash", 
+"max_output_tokens": 60000, "debug_dir": "debug_responses"}
+2025-07-29 07:11:46,273 - qc.core.better_global_analyzer - INFO - Found 18 interview files in C:\Users\Brian\projects\qualitative_coding_clean\data\interviews\AI_Interviews_all_2025.0728\Interviews
+2025-07-29 07:11:46,274 - run_full_ai_analysis - INFO - Analyzing all 18 AI interviews...
+2025-07-29 07:11:46,274 - qc.core.better_global_analyzer - INFO - Loading 18 interviews...
+2025-07-29 07:11:46,274 - qc.utils.token_counter - INFO - Initialized TokenCounter with gpt-4 encoding
+2025-07-29 07:11:46,396 - qc.parsing.docx_parser - INFO - Successfully parsed AI and Methods focus group July 23 2025.docx: 8595 words, 11173 estimated tokens
+2025-07-29 07:11:46,396 - qc.core.load_and_verify_interviews - INFO - Loaded Interview 001: AI and Methods focus group July 23 2025.docx (8595 words)
+2025-07-29 07:11:46,415 - qc.parsing.docx_parser - INFO - Successfully parsed AI assessment Arroyo SDR.docx: 1133 words, 1472 estimated tokens
+2025-07-29 07:11:46,415 - qc.core.load_and_verify_interviews - INFO - Loaded Interview 002: AI assessment Arroyo SDR.docx (1133 words)
+2025-07-29 07:11:46,563 - qc.parsing.docx_parser - INFO - Successfully parsed Focus Group on AI and Methods 7_7.docx: 9659 words, 12556 estimated tokens
+2025-07-29 07:11:46,563 - qc.core.load_and_verify_interviews - INFO - Loaded Interview 003: Focus Group on AI and Methods 7_7.docx (9659 words)
+2025-07-29 07:11:46,663 - qc.parsing.docx_parser - INFO - Successfully parsed Focus Group_ AI and Qualitative methods (3).docx: 8040 words, 10452 estimated tokens
+2025-07-29 07:11:46,663 - qc.core.load_and_verify_interviews - INFO - Loaded Interview 004: Focus Group_ AI and Qualitative methods (3).docx (8040 words)
+2025-07-29 07:11:46,688 - qc.parsing.docx_parser - INFO - Successfully parsed Interview Kandice Kapinos.docx: 1911 words, 2484 estimated tokens
+2025-07-29 07:11:46,688 - qc.parsing.docx_parser - INFO - Successfully parsed Interview Kandice Kapinos.docx: 1911 words, 2484 estimated tokens
+2025-07-29 07:11:46,688 - qc.core.load_and_verify_interviews - INFO - Loaded Interview 005: Interview Kandice Kapinos.docx (1911 words)
+2025-07-29 07:11:46,712 - qc.parsing.docx_parser - INFO - Successfully parsed Interview social network methods center.docx: 1914 words, 2488 estimated tokens
+2025-07-29 07:11:46,712 - qc.core.load_and_verify_interviews - INFO - Loaded Interview 006: Interview social network methods center.docx (1914 words)
+2025-07-29 07:11:46,927 - qc.parsing.docx_parser - INFO - Successfully parsed Interview with GER leadership.docx: 8315 words, 10809 estimated tokens
+2025-07-29 07:11:46,927 - qc.core.load_and_verify_interviews - INFO - Loaded Interview 007: Interview with GER leadership.docx (8315 words)
+2025-07-29 07:11:46,952 - qc.parsing.docx_parser - INFO - Successfully parsed Interview with Patricia Herman.docx: 1683 words, 2187 estimated tokens
+2025-07-29 07:11:46,952 - qc.core.load_and_verify_interviews - INFO - Loaded Interview 008: Interview with Patricia Herman.docx (1683 words)
+2025-07-29 07:11:47,054 - qc.parsing.docx_parser - INFO - Successfully parsed RAND AI and Methods focus group.July 8.docx: 9378 words, 12191 estimated tokens
+2025-07-29 07:11:47,054 - qc.core.load_and_verify_interviews - INFO - Loaded Interview 009: RAND AI and Methods focus group.July 8.docx (9378 words)
+2025-07-29 07:11:47,154 - qc.parsing.docx_parser - INFO - Successfully parsed RAND AI and Research Methods Discussion ISDP.docx: 7389 words, 9605 estimated tokens
+2025-07-29 07:11:47,154 - qc.core.load_and_verify_interviews - INFO - Loaded Interview 010: RAND AI and Research Methods Discussion ISDP.docx (7389 words)
+2025-07-29 07:11:47,255 - qc.parsing.docx_parser - INFO - Successfully parsed RAND AI and Research Methods Discussion.ISDP.docx: 7389 words, 9605 estimated tokens
+2025-07-29 07:11:47,256 - qc.core.load_and_verify_interviews - INFO - Loaded Interview 011: RAND AI and Research Methods Discussion.ISDP.docx (7389 words)
+2025-07-29 07:11:47,399 - qc.parsing.docx_parser - INFO - Successfully parsed RAND AI and Statistical Methods Reboot.docx: 10544 words, 13707 estimated tokens
+2025-07-29 07:11:47,399 - qc.core.load_and_verify_interviews - INFO - Loaded Interview 012: RAND AI and Statistical Methods Reboot.docx (10544 words)
+2025-07-29 07:11:47,506 - qc.parsing.docx_parser - INFO - Successfully parsed RAND AI method and cost analysis July 15 2025.docx: 8565 words, 11134 estimated tokens
+2025-07-29 07:11:47,507 - qc.core.load_and_verify_interviews - INFO - Loaded Interview 013: RAND AI method and cost analysis July 15 2025.docx (8565 words)
+2025-07-29 07:11:47,665 - qc.parsing.docx_parser - INFO - Successfully parsed RAND Methods Alice Huguet.docx: 9826 words, 12773 estimated tokens
+2025-07-29 07:11:47,665 - qc.core.load_and_verify_interviews - INFO - Loaded Interview 014: RAND Methods Alice Huguet.docx (9826 words)
+2025-07-29 07:11:47,735 - qc.parsing.docx_parser - INFO - Successfully parsed RAND Methods and AI. Resource Management, PAF.docx: 5100 words, 6630 estimated tokens
+2025-07-29 07:11:47,735 - qc.core.load_and_verify_interviews - INFO - Loaded Interview 015: RAND Methods and AI. Resource Management, PAF.docx (5100 words)
+2025-07-29 07:11:47,878 - qc.parsing.docx_parser - INFO - Successfully parsed RAND Methods and AI. SEW Quality Assurance Managers.docx: 8843 words, 11495 estimated tokens
+2025-07-29 07:11:47,879 - qc.core.load_and_verify_interviews - INFO - Loaded Interview 016: RAND Methods and AI. SEW Quality Assurance Managers.docx (8843 words)
+2025-07-29 07:11:48,043 - qc.parsing.docx_parser - INFO - Successfully parsed RAND Methods and AI.Vassalo.docx: 9344 words, 12147 estimated tokens
+2025-07-29 07:11:48,043 - qc.core.load_and_verify_interviews - INFO - Loaded Interview 017: RAND Methods and AI.Vassalo.docx (9344 words)
+2025-07-29 07:11:48,133 - qc.parsing.docx_parser - INFO - Successfully parsed RAND Methods.Dulani.docx: 8459 words, 10996 estimated tokens
+2025-07-29 07:11:48,133 - qc.core.load_and_verify_interviews - INFO - Loaded Interview 018: RAND Methods.Dulani.docx (8459 words)
+2025-07-29 07:11:48,222 - qc.core.better_global_analyzer - INFO - Loaded 18 interviews with 170,317 tokens
+2025-07-29 07:11:48,222 - qc.core.better_global_analyzer - INFO - Performing comprehensive global analysis (Call 1)...
+2025-07-29 07:11:48,223 - qc.core.enhanced_logging - INFO - LLM Call comprehensive_analysis started:
+2025-07-29 07:11:48,223 - qc.core.enhanced_logging - INFO -   - Prompt length: 72 chars
+2025-07-29 07:11:48,223 - qc.core.enhanced_logging - INFO -   - Max output tokens: 60000
+2025-07-29 07:11:48,223 - qc.core.enhanced_logging - INFO -   - Temperature: 0.3                                                                                                                                                                                  ture":    
+2025-07-29 07:11:48,223 - qc.core.simple_gemini_client - INFO - {"timestamp": "2025-07-29T14:11:48.223725", "level": "info", "event": "theme_extraction_started", "trace_id": "de90e13d-3035-4e32-bd24-db24a4b6105f", "prompt_length": 701977, "config": {"temperature":
+0.3, "max_output_tokens": 60000, "response_mime_type": "application/json", "response_schema": "SimpleGlobalResult"}}
+2025-07-29 07:16:19,007 - qc.core.simple_gemini_client - INFO - {"timestamp": "2025-07-29T14:16:19.006278", "level": "info", "event": "parsing_json_response", "trace_id": "de90e13d-3035-4e32-bd24-db24a4b6105f", "response_length": 83705}
+2025-07-29 07:16:19,010 - qc.core.enhanced_logging - INFO - LLM Call comprehensive_analysis completed in 270.8s
+2025-07-29 07:16:19,010 - qc.core.enhanced_logging - INFO -   - Response type: GlobalCodingResult
+2025-07-29 07:16:19,010 - qc.core.better_global_analyzer - INFO - Call 1 complete: 5 themes, 99 codes
+2025-07-29 07:16:19,010 - qc.core.better_global_analyzer - INFO - Extracting traceable quotes (Call 2)...      
+2025-07-29 07:16:19,011 - qc.core.enhanced_logging - INFO - LLM Call quote_extraction started:
+2025-07-29 07:16:19,011 - qc.core.enhanced_logging - INFO -   - Prompt length: 16 chars
+2025-07-29 07:16:19,011 - qc.core.enhanced_logging - INFO -   - Max output tokens: 20000
+2025-07-29 07:16:19,011 - qc.core.enhanced_logging - INFO -   - Temperature: 0.1
+2025-07-29 07:16:19,011 - qc.core.better_global_analyzer - INFO - Starting parallel quote extraction for themes
+2025-07-29 07:16:19,012 - qc.core.better_global_analyzer - INFO - Split interviews into 10 chunks
+2025-07-29 07:16:19,012 - qc.core.simple_gemini_client - INFO - {"timestamp": "2025-07-29T14:16:19.012415", "level": "info", "event": "theme_extraction_started", "trace_id": "ca5b839f-20f0-4fcb-938d-6202f12b30d3", "prompt_length": 3234, "config": 
+{"temperature": 0.1, "max_output_tokens": 5000, "response_mime_type": "application/json"}}
+2025-07-29 07:16:44,257 - qc.core.simple_gemini_client - WARNING - {"timestamp": "2025-07-29T14:16:44.257789", "level": "warning", "event": "empty_response_received", "trace_id": "ca5b839f-20f0-4fcb-938d-6202f12b30d3", "attempt": 1}
+2025-07-29 07:16:44,257 - qc.core.simple_gemini_client - INFO - {"timestamp": "2025-07-29T14:16:44.257865", "level": "info", "event": "retrying_with_shorter_prompt", "trace_id": "ca5b839f-20f0-4fcb-938d-6202f12b30d3"}
+2025-07-29 07:17:10,087 - qc.core.simple_gemini_client - WARNING - {"timestamp": "2025-07-29T14:17:10.087754", "level": "warning", "event": "empty_response_received", "trace_id": "ca5b839f-20f0-4fcb-938d-6202f12b30d3", "attempt": 2}
+2025-07-29 07:17:10,087 - qc.core.simple_gemini_client - INFO - {"timestamp": "2025-07-29T14:17:10.087754", "level": "info", "event": "retrying_with_shorter_prompt", "trace_id": "ca5b839f-20f0-4fcb-938d-6202f12b30d3"}
+2025-07-29 07:17:35,661 - qc.core.simple_gemini_client - WARNING - {"timestamp": "2025-07-29T14:17:35.661616", "level": "warning", "event": "empty_response_received", "trace_id": "ca5b839f-20f0-4fcb-938d-6202f12b30d3", "attempt": 3}
+2025-07-29 07:17:35,661 - qc.core.better_global_analyzer - INFO - Extracted 0 quotes for theme THEME_001
+2025-07-29 07:17:35,661 - qc.core.simple_gemini_client - INFO - {"timestamp": "2025-07-29T14:17:35.661616", "level": "info", "event": "theme_extraction_started", "trace_id": "d14befd0-b9ca-4ded-bc59-b151f4a87dbd", "prompt_length": 2418, "config": 
+{"temperature": 0.1, "max_output_tokens": 5000, "response_mime_type": "application/json"}}
+2025-07-29 07:17:55,354 - qc.core.simple_gemini_client - INFO - {"timestamp": "2025-07-29T14:17:55.354643", "level": "info", "event": "parsing_json_response", "trace_id": "d14befd0-b9ca-4ded-bc59-b151f4a87dbd", "response_length": 18}
+2025-07-29 07:17:55,354 - qc.core.better_global_analyzer - INFO - Extracted 0 quotes for theme THEME_002
+2025-07-29 07:17:55,355 - qc.core.simple_gemini_client - INFO - {"timestamp": "2025-07-29T14:17:55.355602", "level": "info", "event": "theme_extraction_started", "trace_id": "fbde50f7-d13c-489a-a63e-ddaa9f6a7ade", "prompt_length": 2277, "config": 
+{"temperature": 0.1, "max_output_tokens": 5000, "response_mime_type": "application/json"}}
+2025-07-29 07:18:11,837 - qc.core.simple_gemini_client - INFO - {"timestamp": "2025-07-29T14:18:11.837176", "level": "info", "event": "parsing_json_response", "trace_id": "fbde50f7-d13c-489a-a63e-ddaa9f6a7ade", "response_length": 18}
+2025-07-29 07:18:11,837 - qc.core.better_global_analyzer - INFO - Extracted 0 quotes for theme THEME_003
+2025-07-29 07:18:11,837 - qc.core.simple_gemini_client - INFO - {"timestamp": "2025-07-29T14:18:11.837176", "level": "info", "event": "theme_extraction_started", "trace_id": "f35ddd35-0762-4933-a85d-408098e6acd5", "prompt_length": 2354, "config": 
+{"temperature": 0.1, "max_output_tokens": 5000, "response_mime_type": "application/json"}}
+2025-07-29 07:18:40,175 - qc.core.simple_gemini_client - INFO - {"timestamp": "2025-07-29T14:18:40.175195", "level": "info", "event": "parsing_json_response", "trace_id": "f35ddd35-0762-4933-a85d-408098e6acd5", "response_length": 18}
+2025-07-29 07:18:40,175 - qc.core.better_global_analyzer - INFO - Extracted 0 quotes for theme THEME_004
+2025-07-29 07:18:40,175 - qc.core.simple_gemini_client - INFO - {"timestamp": "2025-07-29T14:18:40.175195", "level": "info", "event": "theme_extraction_started", "trace_id": "f950450a-9b2b-446f-b90d-4aa9f147835d", "prompt_length": 3163, "config": 
+{"temperature": 0.1, "max_output_tokens": 5000, "response_mime_type": "application/json"}}
+2025-07-29 07:19:00,924 - qc.core.simple_gemini_client - INFO - {"timestamp": "2025-07-29T14:19:00.924389", "level": "info", "event": "parsing_json_response", "trace_id": "f950450a-9b2b-446f-b90d-4aa9f147835d", "response_length": 2696}
+2025-07-29 07:19:00,924 - qc.core.better_global_analyzer - INFO - Extracted 5 quotes for theme THEME_005
+2025-07-29 07:19:00,925 - qc.core.better_global_analyzer - INFO - Total quotes extracted: 5
+2025-07-29 07:19:00,925 - qc.core.enhanced_logging - INFO - LLM Call quote_extraction completed in 161.9s
+2025-07-29 07:19:00,925 - qc.core.enhanced_logging - INFO -   - Response type: list
+2025-07-29 07:19:00,925 - qc.core.better_global_analyzer - INFO - Call 2 complete: 5 quotes extracted
+2025-07-29 07:19:00,927 - qc.core.programmatic_csv_generator - INFO - Generated 8 CSV files programmatically
+2025-07-29 07:19:00,927 - qc.core.better_global_analyzer - INFO - Analysis complete in 434.7 seconds
+2025-07-29 07:19:00,928 - qc.core.programmatic_csv_generator - INFO - Saved themes.csv (319 bytes)
+2025-07-29 07:19:00,928 - qc.core.programmatic_csv_generator - INFO - Saved codes.csv (14891 bytes)
+2025-07-29 07:19:00,929 - qc.core.programmatic_csv_generator - INFO - Saved quotes.csv (1835 bytes)
+2025-07-29 07:19:00,929 - qc.core.programmatic_csv_generator - INFO - Saved theme_analysis.csv (4447 bytes)
+2025-07-29 07:19:00,929 - qc.core.programmatic_csv_generator - INFO - Saved code_progression.csv (15856 bytes)
+2025-07-29 07:19:00,930 - qc.core.programmatic_csv_generator - INFO - Saved quote_evidence.csv (1978 bytes)
+2025-07-29 07:19:00,930 - qc.core.programmatic_csv_generator - INFO - Saved contradiction_matrix.csv (5650 bytes)
+2025-07-29 07:19:00,930 - qc.core.programmatic_csv_generator - INFO - Saved stakeholder_positions.csv (123 bytes)
+2025-07-29 07:19:00,931 - qc.core.programmatic_csv_generator - INFO - Saved quote_chains.csv (944 bytes)
+2025-07-29 07:19:00,931 - qc.core.programmatic_csv_generator - INFO - Saved saturation_analysis.csv (678 bytes)
+2025-07-29 07:19:00,935 - qc.core.better_global_analyzer - INFO - Exported all results to C:\Users\Brian\projects\qualitative_coding_clean\output\full_ai_analysis_20250729_071900
+
+============================================================
+FULL AI INTERVIEWS ANALYSIS COMPLETE
+============================================================
+
+INTERVIEWS ANALYZED: 18
+TOTAL TOKENS: 170,317
+PROCESSING TIME: 434.7 seconds
+
+THEMES FOUND: 5
+  - THEME_001: AI_Integration_in_Research_Methods (prevalence: 100%)
+  - THEME_002: Challenges_of_AI_Adoption (prevalence: 94%)
+  - THEME_003: Benefits_of_AI_Adoption (prevalence: 94%)
+  - THEME_004: Institutional_Strategy_and_Adoption (prevalence: 83%)
+  - THEME_005: Data_Management_and_Quality (prevalence: 56%)
+
+CODES IDENTIFIED: 99
+TOP 10 CODES BY FREQUENCY:
+  - AI_Applications: 18 occurrences
+  - AI_Limitations: 15 occurrences
+  - AI_Literature_Review: 14 occurrences
+  - Efficiency_and_Speed: 13 occurrences
+  - AI_Qualitative_Analysis: 12 occurrences
+  - AI_Project_Lifecycle_Support: 12 occurrences
+  - AI_Coding: 10 occurrences
+  - AI_Accuracy_and_Hallucinations: 10 occurrences
+  - Time_Savings: 10 occurrences
+  - Adoption_Enablers: 10 occurrences
+
+QUOTES EXTRACTED: 5
+QUOTE CHAINS: 4
+
+THEORETICAL SATURATION:
+  - Reached at: Interview 50
+  - Evidence: By Interview 014, all major themes regarding AI applications, challenges, benefits, and institutional considerations were well-established. Subsequent interviews (015-018) primarily reinforced existing categories, provided additional specific examples (e.g., 508 compliance, specific data wrangling tools like Cursor/Notebook LM), or offered deeper nuances within established categories (e.g., the 'better button' idea, the 'build vs. buy' dilemma). No new overarching themes or fundamentally distinct 
+categories of AI impact or adoption strategies emerged after Interview 014.
+
+EMERGENT THEORY:
+The integration of AI into qualitative research practices at RAND is characterized by a complex interplay of perceived benefits and significant challenges, driving an urgent need for institutional strategic adaptation. While AI offers substantial gains in efficiency, speed, and analytical capacity by automating tedious tasks like transcription, coding, literature review, and data wrangling, its adoption is hampered by concerns regarding accuracy (hallucinations), loss of nuance, ethical implications (data consent, IP), and the potential erosion of foundational research skills. RAND's current approach is fragmented, with internal tools often lagging commercial counterparts, and a lack of clear, centralized guidance. To effectively integrate AI, RAND must transition from a 'build-it-yourself' to a 'buy-and-adapt' strategy, invest in robust data infrastructure (e.g., data lakes for classified data), and cultivate a culture of 'better button' experimentation. This requires targeted training, transparent AI protocols, and a re-evaluation of research products to prioritize dynamic, conversational insights over traditional static reports, ultimately maintaining RAND's competitive edge and upholding its commitment to rigorous, trustworthy analysis in an AI-driven landscape.    
+
+============================================================
+Results exported to: C:\Users\Brian\projects\qualitative_coding_clean\output\full_ai_analysis_20250729_071900
+============================================================
+
+
+[SUCCESS] FULL AI INTERVIEWS ANALYSIS COMPLETED SUCCESSFULLY!
+PS C:\Users\Brian\projects\qualitative_coding_clean> 

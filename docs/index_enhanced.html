@@ -1,0 +1,1229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLM-Native Qualitative Coding Analysis - Interactive Explorer</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Enhanced styles with tooltips and interactivity */
+        :root {
+            --primary: #2563eb;
+            --secondary: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #06b6d4;
+            --dark: #1f2937;
+            --light: #f3f4f6;
+            --border: #e5e7eb;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: var(--dark);
+            background: var(--light);
+        }
+
+        /* Tooltip System */
+        .tooltip {
+            position: relative;
+            cursor: help;
+            border-bottom: 2px dotted var(--primary);
+            display: inline-block;
+        }
+
+        .tooltip:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--dark);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 14px;
+            white-space: nowrap;
+            max-width: 300px;
+            z-index: 1000;
+            margin-bottom: 5px;
+        }
+
+        .tooltip:hover::before {
+            content: '';
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 5px solid transparent;
+            border-top-color: var(--dark);
+            margin-bottom: -5px;
+        }
+
+        /* Interactive Elements */
+        .clickable {
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .clickable:hover {
+            color: var(--primary);
+            transform: translateY(-1px);
+        }
+
+        /* Expandable Sections */
+        .expandable {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin: 1rem 0;
+            background: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .expandable-header {
+            padding: 1rem;
+            background: var(--light);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+        }
+
+        .expandable-header:hover {
+            background: #e5e7eb;
+        }
+
+        .expandable-content {
+            padding: 1rem;
+            display: none;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .expandable.active .expandable-content {
+            display: block;
+        }
+
+        .expandable-icon {
+            transition: transform 0.3s;
+        }
+
+        .expandable.active .expandable-icon {
+            transform: rotate(180deg);
+        }
+
+        /* Data Tables */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        .data-table th {
+            background: var(--dark);
+            color: white;
+            padding: 12px;
+            text-align: left;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .data-table td {
+            padding: 10px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .data-table tr:hover {
+            background: var(--light);
+        }
+
+        /* Linked Data */
+        .data-link {
+            color: var(--primary);
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .data-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Search Box */
+        .search-container {
+            position: sticky;
+            top: 0;
+            background: white;
+            padding: 1rem;
+            border-bottom: 2px solid var(--border);
+            z-index: 100;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 12px 20px;
+            font-size: 16px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            outline: none;
+        }
+
+        .search-box:focus {
+            border-color: var(--primary);
+        }
+
+        /* Navigation Breadcrumbs */
+        .breadcrumbs {
+            padding: 1rem;
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        .breadcrumbs a {
+            color: var(--primary);
+            text-decoration: none;
+            margin: 0 5px;
+        }
+
+        /* Modal for Details */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .modal-content {
+            background: white;
+            margin: 5% auto;
+            padding: 2rem;
+            width: 90%;
+            max-width: 800px;
+            border-radius: 8px;
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-size: 24px;
+            cursor: pointer;
+            color: #6b7280;
+        }
+
+        .modal-close:hover {
+            color: var(--dark);
+        }
+
+        /* Tag System */
+        .tag {
+            display: inline-block;
+            padding: 4px 12px;
+            margin: 2px;
+            background: var(--light);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tag:hover {
+            background: var(--primary);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .tag.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Quote Display */
+        .quote-card {
+            background: var(--light);
+            border-left: 4px solid var(--primary);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+        }
+
+        .quote-text {
+            font-style: italic;
+            margin-bottom: 0.5rem;
+        }
+
+        .quote-meta {
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: transform 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .stat-label {
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        /* Filter Controls */
+        .filter-container {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .filter-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .filter-select {
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            outline: none;
+        }
+
+        /* Progress Indicators */
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: var(--light);
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 0.5rem 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary);
+            transition: width 0.3s;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .modal-content {
+                width: 95%;
+                margin: 2% auto;
+                padding: 1rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Search and Navigation -->
+    <div class="search-container">
+        <input type="text" class="search-box" placeholder="Search themes, codes, quotes, or any text..." id="globalSearch">
+        <div class="breadcrumbs" id="breadcrumbs">
+            <a href="#" onclick="showOverview()">Overview</a>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container" style="max-width: 1200px; margin: 0 auto; padding: 20px;">
+        
+        <!-- Overview Section -->
+        <section id="overview-section">
+            <h1>LLM-Native Qualitative Coding Analysis</h1>
+            <p style="font-size: 18px; color: #6b7280; margin-bottom: 2rem;">
+                Interactive exploration of AI integration in qualitative research practices
+            </p>
+
+            <!-- Key Stats -->
+            <div class="stats-grid">
+                <div class="stat-card clickable" onclick="showAllInterviews()">
+                    <i class="fas fa-users" style="font-size: 2rem; color: var(--primary); margin-bottom: 0.5rem;"></i>
+                    <div class="stat-number tooltip" data-tooltip="Total number of interview documents analyzed">18</div>
+                    <div class="stat-label">Interviews Analyzed</div>
+                </div>
+                
+                <div class="stat-card clickable" onclick="showTokenDetails()">
+                    <i class="fas fa-coins" style="font-size: 2rem; color: var(--warning); margin-bottom: 0.5rem;"></i>
+                    <div class="stat-number tooltip" data-tooltip="1 token ≈ 4 characters or 0.75 words. Total represents ~127,738 words">170,317</div>
+                    <div class="stat-label">Tokens Processed</div>
+                </div>
+                
+                <div class="stat-card clickable" onclick="showAllThemes()">
+                    <i class="fas fa-layer-group" style="font-size: 2rem; color: var(--secondary); margin-bottom: 0.5rem;"></i>
+                    <div class="stat-number tooltip" data-tooltip="Major patterns identified across all interviews">6</div>
+                    <div class="stat-label">Major Themes</div>
+                </div>
+                
+                <div class="stat-card clickable" onclick="showAllCodes()">
+                    <i class="fas fa-tags" style="font-size: 2rem; color: var(--info); margin-bottom: 0.5rem;"></i>
+                    <div class="stat-number tooltip" data-tooltip="Specific concepts within themes">64</div>
+                    <div class="stat-label">Unique Codes</div>
+                </div>
+                
+                <div class="stat-card clickable" onclick="showAllQuotes()">
+                    <i class="fas fa-quote-right" style="font-size: 2rem; color: var(--danger); margin-bottom: 0.5rem;"></i>
+                    <div class="stat-number tooltip" data-tooltip="Exemplar quotes extracted as evidence">30</div>
+                    <div class="stat-label">Supporting Quotes</div>
+                </div>
+                
+                <div class="stat-card">
+                    <i class="fas fa-clock" style="font-size: 2rem; color: #8b5cf6; margin-bottom: 0.5rem;"></i>
+                    <div class="stat-number tooltip" data-tooltip="Total processing time for analysis">5.4</div>
+                    <div class="stat-label">Minutes to Process</div>
+                </div>
+            </div>
+
+            <!-- Methodology Overview -->
+            <div class="expandable">
+                <div class="expandable-header">
+                    <h2>
+                        <span class="tooltip" data-tooltip="The systematic approach used to analyze interviews">Methodology</span>
+                        Overview
+                    </h2>
+                    <i class="fas fa-chevron-down expandable-icon"></i>
+                </div>
+                <div class="expandable-content">
+                    <h3>Two-Call LLM Pipeline</h3>
+                    <p>Our approach leverages 
+                        <span class="tooltip" data-tooltip="Large Language Models - AI systems trained on vast text data">LLMs</span> 
+                        to perform comprehensive qualitative analysis:</p>
+                    
+                    <ol>
+                        <li>
+                            <strong>Call 1: Global Analysis</strong>
+                            <ul>
+                                <li>All 18 interviews processed simultaneously (170,317 
+                                    <span class="tooltip" data-tooltip="Units of text, ~4 characters each">tokens</span>)
+                                </li>
+                                <li>Identifies 
+                                    <span class="tooltip" data-tooltip="Major patterns across interviews">themes</span> and 
+                                    <span class="tooltip" data-tooltip="Specific concepts within themes">codes</span> globally
+                                </li>
+                                <li>Uses 
+                                    <span class="tooltip" data-tooltip="Theory development from data rather than testing hypotheses">grounded theory</span> principles
+                                </li>
+                                <li>Temperature: 0.3 (balanced creativity/consistency)</li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>Call 2: Quote Extraction</strong>
+                            <ul>
+                                <li>Extracts exemplar quotes for each theme/code</li>
+                                <li>Ensures 
+                                    <span class="tooltip" data-tooltip="Ability to trace findings back to source">traceability</span>
+                                </li>
+                                <li>Temperature: 0.1 (high precision)</li>
+                                <li>Includes retry logic for robustness</li>
+                            </ul>
+                        </li>
+                    </ol>
+
+                    <div style="background: var(--light); padding: 1rem; border-radius: 4px; margin-top: 1rem;">
+                        <h4>Key Innovation</h4>
+                        <p>Unlike traditional sequential coding, our LLM-native approach processes all interviews simultaneously, 
+                        enabling cross-interview pattern recognition and 
+                        <span class="tooltip" data-tooltip="Point where no new themes emerge">theoretical saturation</span> detection.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Research Question -->
+            <div class="expandable">
+                <div class="expandable-header">
+                    <h2>Research Question & Theory</h2>
+                    <i class="fas fa-chevron-down expandable-icon"></i>
+                </div>
+                <div class="expandable-content">
+                    <h3>Research Question</h3>
+                    <p style="font-size: 18px; font-style: italic; color: var(--primary); margin: 1rem 0;">
+                        "How are AI methods being integrated into qualitative research practices?"
+                    </p>
+
+                    <h3>Emergent Theory</h3>
+                    <div class="quote-card">
+                        <p class="quote-text">
+                            AI integration into qualitative research practices at RAND is characterized by a tension between 
+                            leveraging AI for efficiency and scalability in routine, labor-intensive tasks (like transcription, 
+                            initial coding, and data wrangling) and the critical need to maintain human oversight, contextual 
+                            understanding, and ethical rigor. While early adopters are experimenting with diverse commercial 
+                            and internal tools to accelerate processes and generate new ideas, widespread adoption is hampered 
+                            by concerns over AI accuracy, potential for bias, loss of researcher intimacy with data, and the 
+                            lack of clear institutional guidance, training, and integrated tool ecosystems, particularly for 
+                            classified or sensitive data. The future vision involves AI as a 'co-researcher' or 'expert system' 
+                            that fundamentally redefines research products and workflows, shifting human effort towards 
+                            higher-order analytic thinking, quality assurance, and strategic problem framing, rather than 
+                            being solely a tool for task automation.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Themes Explorer -->
+        <section id="themes-section" style="display: none;">
+            <h2>Themes Explorer</h2>
+            <div class="filter-container">
+                <div class="filter-group">
+                    <label>Sort by:</label>
+                    <select class="filter-select" onchange="sortThemes(this.value)">
+                        <option value="prevalence">Prevalence</option>
+                        <option value="codes">Number of Codes</option>
+                        <option value="name">Name</option>
+                    </select>
+                    
+                    <label>Filter:</label>
+                    <select class="filter-select" onchange="filterThemes(this.value)">
+                        <option value="all">All Themes</option>
+                        <option value="universal">Universal (100%)</option>
+                        <option value="common">Common (>75%)</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div id="themes-container"></div>
+        </section>
+
+        <!-- Codes Explorer -->
+        <section id="codes-section" style="display: none;">
+            <h2>Codes Explorer</h2>
+            <div class="filter-container">
+                <div class="filter-group">
+                    <label>Theme:</label>
+                    <select class="filter-select" id="themeFilter" onchange="filterCodes()">
+                        <option value="all">All Themes</option>
+                    </select>
+                    
+                    <label>Frequency:</label>
+                    <select class="filter-select" onchange="filterByFrequency(this.value)">
+                        <option value="all">All</option>
+                        <option value="high">High (>10)</option>
+                        <option value="medium">Medium (5-10)</option>
+                        <option value="low">Low (<5)</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div id="codes-container"></div>
+        </section>
+
+        <!-- Quotes Explorer -->
+        <section id="quotes-section" style="display: none;">
+            <h2>Quotes Explorer</h2>
+            <div class="filter-container">
+                <div class="filter-group">
+                    <label>Interview:</label>
+                    <select class="filter-select" id="interviewFilter" onchange="filterQuotes()">
+                        <option value="all">All Interviews</option>
+                    </select>
+                    
+                    <label>Theme:</label>
+                    <select class="filter-select" id="quoteThemeFilter" onchange="filterQuotes()">
+                        <option value="all">All Themes</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div id="quotes-container"></div>
+        </section>
+
+        <!-- Detail Modal -->
+        <div id="detailModal" class="modal">
+            <div class="modal-content">
+                <span class="modal-close" onclick="closeModal()">&times;</span>
+                <div id="modalContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample data (would be loaded from actual CSV/JSON files)
+        const data = {
+            themes: [
+                {
+                    id: 'THEME_001',
+                    name: 'AI Applications and Use Cases',
+                    description: 'Current and potential applications of AI across different research methods at RAND',
+                    prevalence: 1.0,
+                    interview_count: 18,
+                    code_count: 30,
+                    exemplar_quotes: [
+                        "I've been using some of the LLM's for thematic coding... - Luke Matthews (INT_001)",
+                        "AI could crawl the Internet to find participants... - Joie Acosta (INT_001)",
+                        "AI has been really helpful with writing Python code... - Caroline Johnston (INT_003)"
+                    ]
+                },
+                {
+                    id: 'THEME_002',
+                    name: 'Challenges and Risks of AI Adoption',
+                    description: 'Obstacles, ethical concerns, and potential negative impacts of AI integration',
+                    prevalence: 1.0,
+                    interview_count: 18,
+                    code_count: 19,
+                    exemplar_quotes: [
+                        "It was difficult for me to inherently trust what it was spitting out... - Ramya Chari (INT_001)",
+                        "AI can't replace us in reading transcripts and understanding context... - Joie Acosta (INT_001)",
+                        "The risk is that we will end up utilizing AI for stuff our junior folks used to do... - Molly Dunnigan (INT_002)"
+                    ]
+                },
+                {
+                    id: 'THEME_003',
+                    name: 'Opportunities and Benefits',
+                    description: 'Perceived advantages and future potential of AI integration',
+                    prevalence: 1.0,
+                    interview_count: 18,
+                    code_count: 6
+                },
+                {
+                    id: 'THEME_004',
+                    name: 'AI Adoption and Implementation Strategy',
+                    description: 'How RAND should approach widespread AI adoption',
+                    prevalence: 1.0,
+                    interview_count: 18,
+                    code_count: 12
+                },
+                {
+                    id: 'THEME_005',
+                    name: 'Research Methods Overview',
+                    description: 'Common research methods and their challenges',
+                    prevalence: 1.0,
+                    interview_count: 18,
+                    code_count: 4
+                },
+                {
+                    id: 'THEME_006',
+                    name: 'Human-AI Collaboration',
+                    description: 'The future of human-AI partnership in research',
+                    prevalence: 0.83,
+                    interview_count: 15,
+                    code_count: 8
+                }
+            ],
+            codes: [
+                {
+                    id: 'CODE_001',
+                    theme_id: 'THEME_001',
+                    name: 'Transcription Automation',
+                    definition: 'Use of AI for converting audio/video to text',
+                    frequency: 18,
+                    example_quotes: ['Meeting minutes transcription...', 'Automatic transcription saves time...']
+                },
+                {
+                    id: 'CODE_002',
+                    theme_id: 'THEME_001',
+                    name: 'Initial Coding Assistance',
+                    definition: 'AI helping with first-pass qualitative coding',
+                    frequency: 16,
+                    example_quotes: ['AI can identify initial themes...', 'Helps with pattern recognition...']
+                },
+                {
+                    id: 'CODE_003',
+                    theme_id: 'THEME_001',
+                    name: 'Literature Review Tools',
+                    definition: 'AI for searching and synthesizing literature',
+                    frequency: 15,
+                    example_quotes: ['AI helps find relevant papers...', 'Summarizes key findings...']
+                },
+                {
+                    id: 'CODE_012',
+                    theme_id: 'THEME_002',
+                    name: 'Accuracy Concerns',
+                    definition: 'Worries about AI making mistakes or hallucinating',
+                    frequency: 14,
+                    example_quotes: ['Sometimes misses nuances...', 'Hallucination is a real problem...']
+                },
+                {
+                    id: 'CODE_014',
+                    theme_id: 'THEME_002',
+                    name: 'Training Needs',
+                    definition: 'Need for education on AI tools and methods',
+                    frequency: 14,
+                    example_quotes: ['Staff need AI training...', 'Don\'t know how to use effectively...']
+                }
+            ],
+            quotes: [
+                {
+                    id: 'Q001',
+                    text: "I've been using some of the LLM's for thematic coding and kind of ability to kind of group documents then generate text for me.",
+                    speaker_name: 'Luke Matthews',
+                    speaker_role: 'Anthropologist',
+                    interview_id: 'INT_001',
+                    theme_ids: ['THEME_001'],
+                    code_ids: ['CODE_001', 'CODE_002'],
+                    confidence: 0.9
+                },
+                {
+                    id: 'Q002',
+                    text: "What I've seen with Muse is that yes, there are still some weaknesses with sometimes over interpretation of excerpts or under interpretation, inability to notice subtleties in sarcasm or phrasing.",
+                    speaker_name: 'Ryan Brown',
+                    speaker_role: 'Qualitative Researcher',
+                    interview_id: 'INT_004',
+                    theme_ids: ['THEME_001', 'THEME_002'],
+                    code_ids: ['CODE_002', 'CODE_012'],
+                    confidence: 0.9
+                }
+            ]
+        };
+
+        // Global state
+        let currentView = 'overview';
+        let searchTerm = '';
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            setupEventListeners();
+            setupTooltips();
+            populateFilters();
+        });
+
+        // Event Listeners
+        function setupEventListeners() {
+            // Search functionality
+            document.getElementById('globalSearch').addEventListener('input', function(e) {
+                searchTerm = e.target.value.toLowerCase();
+                performSearch();
+            });
+
+            // Expandable sections
+            document.querySelectorAll('.expandable-header').forEach(header => {
+                header.addEventListener('click', function() {
+                    this.parentElement.classList.toggle('active');
+                });
+            });
+
+            // Modal close on outside click
+            window.addEventListener('click', function(e) {
+                const modal = document.getElementById('detailModal');
+                if (e.target === modal) {
+                    closeModal();
+                }
+            });
+        }
+
+        // Navigation Functions
+        function showOverview() {
+            hideAllSections();
+            document.getElementById('overview-section').style.display = 'block';
+            updateBreadcrumbs(['Overview']);
+            currentView = 'overview';
+        }
+
+        function showAllThemes() {
+            hideAllSections();
+            document.getElementById('themes-section').style.display = 'block';
+            updateBreadcrumbs(['Overview', 'Themes']);
+            currentView = 'themes';
+            displayThemes(data.themes);
+        }
+
+        function showAllCodes() {
+            hideAllSections();
+            document.getElementById('codes-section').style.display = 'block';
+            updateBreadcrumbs(['Overview', 'Codes']);
+            currentView = 'codes';
+            displayCodes(data.codes);
+        }
+
+        function showAllQuotes() {
+            hideAllSections();
+            document.getElementById('quotes-section').style.display = 'block';
+            updateBreadcrumbs(['Overview', 'Quotes']);
+            currentView = 'quotes';
+            displayQuotes(data.quotes);
+        }
+
+        function hideAllSections() {
+            document.getElementById('overview-section').style.display = 'none';
+            document.getElementById('themes-section').style.display = 'none';
+            document.getElementById('codes-section').style.display = 'none';
+            document.getElementById('quotes-section').style.display = 'none';
+        }
+
+        // Display Functions
+        function displayThemes(themes) {
+            const container = document.getElementById('themes-container');
+            container.innerHTML = '';
+
+            themes.forEach(theme => {
+                const themeCard = document.createElement('div');
+                themeCard.className = 'expandable';
+                themeCard.innerHTML = `
+                    <div class="expandable-header">
+                        <div>
+                            <h3 class="clickable" onclick="showThemeDetails('${theme.id}')">
+                                ${theme.name}
+                            </h3>
+                            <p style="color: #6b7280; margin-top: 0.5rem;">
+                                ${theme.description}
+                            </p>
+                            <div style="margin-top: 0.5rem;">
+                                <span class="tag tooltip" data-tooltip="Proportion of interviews containing this theme">
+                                    Prevalence: ${(theme.prevalence * 100).toFixed(0)}%
+                                </span>
+                                <span class="tag tooltip" data-tooltip="Number of interviews">
+                                    ${theme.interview_count} interviews
+                                </span>
+                                <span class="tag tooltip" data-tooltip="Number of codes in this theme" onclick="showThemeCodes('${theme.id}')">
+                                    ${theme.code_count} codes
+                                </span>
+                            </div>
+                        </div>
+                        <i class="fas fa-chevron-down expandable-icon"></i>
+                    </div>
+                    <div class="expandable-content">
+                        ${theme.exemplar_quotes ? `
+                            <h4>Exemplar Quotes</h4>
+                            ${theme.exemplar_quotes.map(quote => `
+                                <div class="quote-card">
+                                    <p class="quote-text">"${quote}"</p>
+                                </div>
+                            `).join('')}
+                        ` : ''}
+                        <button class="btn" onclick="showThemeCodes('${theme.id}')" style="margin-top: 1rem;">
+                            View All Codes in This Theme
+                        </button>
+                    </div>
+                `;
+                container.appendChild(themeCard);
+            });
+
+            // Re-setup expandable functionality
+            container.querySelectorAll('.expandable-header').forEach(header => {
+                header.addEventListener('click', function(e) {
+                    if (!e.target.classList.contains('clickable') && !e.target.classList.contains('tag')) {
+                        this.parentElement.classList.toggle('active');
+                    }
+                });
+            });
+        }
+
+        function displayCodes(codes) {
+            const container = document.getElementById('codes-container');
+            container.innerHTML = '';
+
+            // Group codes by theme
+            const codesByTheme = {};
+            codes.forEach(code => {
+                if (!codesByTheme[code.theme_id]) {
+                    codesByTheme[code.theme_id] = [];
+                }
+                codesByTheme[code.theme_id].push(code);
+            });
+
+            // Display codes
+            Object.entries(codesByTheme).forEach(([themeId, themeCodes]) => {
+                const theme = data.themes.find(t => t.id === themeId);
+                const themeSection = document.createElement('div');
+                themeSection.innerHTML = `
+                    <h3 style="margin-top: 2rem; color: var(--primary);">
+                        ${theme ? theme.name : 'Unknown Theme'}
+                    </h3>
+                    <div class="codes-grid" style="display: grid; gap: 1rem; margin-top: 1rem;">
+                        ${themeCodes.map(code => `
+                            <div class="expandable">
+                                <div class="expandable-header">
+                                    <div>
+                                        <h4 class="clickable" onclick="showCodeDetails('${code.id}')">
+                                            ${code.name}
+                                        </h4>
+                                        <p style="color: #6b7280; font-size: 14px; margin-top: 0.25rem;">
+                                            ${code.definition}
+                                        </p>
+                                        <span class="tag tooltip" data-tooltip="Number of times this code appears">
+                                            Frequency: ${code.frequency}
+                                        </span>
+                                    </div>
+                                    <i class="fas fa-chevron-down expandable-icon"></i>
+                                </div>
+                                <div class="expandable-content">
+                                    ${code.example_quotes ? `
+                                        <h5>Example Quotes</h5>
+                                        ${code.example_quotes.map(quote => `
+                                            <div class="quote-card">
+                                                <p class="quote-text">"${quote}"</p>
+                                            </div>
+                                        `).join('')}
+                                    ` : ''}
+                                    <button class="btn" onclick="showCodeQuotes('${code.id}')" style="margin-top: 1rem;">
+                                        View All Quotes with This Code
+                                    </button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                container.appendChild(themeSection);
+            });
+
+            // Re-setup expandable functionality
+            container.querySelectorAll('.expandable-header').forEach(header => {
+                header.addEventListener('click', function(e) {
+                    if (!e.target.classList.contains('clickable') && !e.target.classList.contains('tag')) {
+                        this.parentElement.classList.toggle('active');
+                    }
+                });
+            });
+        }
+
+        function displayQuotes(quotes) {
+            const container = document.getElementById('quotes-container');
+            container.innerHTML = '';
+
+            quotes.forEach(quote => {
+                const quoteCard = document.createElement('div');
+                quoteCard.className = 'quote-card';
+                quoteCard.style.cursor = 'pointer';
+                quoteCard.onclick = () => showQuoteDetails(quote.id);
+                
+                quoteCard.innerHTML = `
+                    <p class="quote-text">"${quote.text}"</p>
+                    <div class="quote-meta">
+                        <strong>${quote.speaker_name}</strong> - ${quote.speaker_role} 
+                        <span class="tooltip" data-tooltip="Interview source">(${quote.interview_id})</span>
+                    </div>
+                    <div style="margin-top: 0.5rem;">
+                        ${quote.theme_ids.map(themeId => {
+                            const theme = data.themes.find(t => t.id === themeId);
+                            return `<span class="tag" onclick="event.stopPropagation(); showThemeDetails('${themeId}')">${theme ? theme.name : themeId}</span>`;
+                        }).join('')}
+                    </div>
+                    <div style="margin-top: 0.5rem;">
+                        ${quote.code_ids.map(codeId => {
+                            const code = data.codes.find(c => c.id === codeId);
+                            return `<span class="tag" style="background: var(--info); color: white;" onclick="event.stopPropagation(); showCodeDetails('${codeId}')">${code ? code.name : codeId}</span>`;
+                        }).join('')}
+                    </div>
+                `;
+                
+                container.appendChild(quoteCard);
+            });
+        }
+
+        // Detail Views
+        function showThemeDetails(themeId) {
+            const theme = data.themes.find(t => t.id === themeId);
+            if (!theme) return;
+
+            const relatedCodes = data.codes.filter(c => c.theme_id === themeId);
+            const relatedQuotes = data.quotes.filter(q => q.theme_ids.includes(themeId));
+
+            const content = `
+                <h2>${theme.name}</h2>
+                <p>${theme.description}</p>
+                
+                <div class="stats-grid" style="margin: 2rem 0;">
+                    <div class="stat-card">
+                        <div class="stat-number">${(theme.prevalence * 100).toFixed(0)}%</div>
+                        <div class="stat-label">Prevalence</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${theme.interview_count}</div>
+                        <div class="stat-label">Interviews</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${relatedCodes.length}</div>
+                        <div class="stat-label">Codes</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${relatedQuotes.length}</div>
+                        <div class="stat-label">Quotes</div>
+                    </div>
+                </div>
+
+                <h3>Related Codes</h3>
+                <div style="margin: 1rem 0;">
+                    ${relatedCodes.map(code => `
+                        <div class="tag clickable" onclick="showCodeDetails('${code.id}')">
+                            ${code.name} (${code.frequency})
+                        </div>
+                    `).join('')}
+                </div>
+
+                <h3>Supporting Quotes</h3>
+                ${relatedQuotes.map(quote => `
+                    <div class="quote-card clickable" onclick="showQuoteDetails('${quote.id}')">
+                        <p class="quote-text">"${quote.text}"</p>
+                        <div class="quote-meta">
+                            ${quote.speaker_name} - ${quote.speaker_role} (${quote.interview_id})
+                        </div>
+                    </div>
+                `).join('')}
+            `;
+
+            showModal(content);
+        }
+
+        function showCodeDetails(codeId) {
+            const code = data.codes.find(c => c.id === codeId);
+            if (!code) return;
+
+            const theme = data.themes.find(t => t.id === code.theme_id);
+            const relatedQuotes = data.quotes.filter(q => q.code_ids.includes(codeId));
+
+            const content = `
+                <h2>${code.name}</h2>
+                <p>${code.definition}</p>
+                
+                <p><strong>Theme:</strong> 
+                    <span class="tag clickable" onclick="showThemeDetails('${theme.id}')">
+                        ${theme.name}
+                    </span>
+                </p>
+                
+                <p><strong>Frequency:</strong> ${code.frequency} occurrences</p>
+
+                <h3>Quotes with This Code</h3>
+                ${relatedQuotes.map(quote => `
+                    <div class="quote-card clickable" onclick="showQuoteDetails('${quote.id}')">
+                        <p class="quote-text">"${quote.text}"</p>
+                        <div class="quote-meta">
+                            ${quote.speaker_name} - ${quote.speaker_role} (${quote.interview_id})
+                        </div>
+                    </div>
+                `).join('')}
+            `;
+
+            showModal(content);
+        }
+
+        function showQuoteDetails(quoteId) {
+            const quote = data.quotes.find(q => q.id === quoteId);
+            if (!quote) return;
+
+            const content = `
+                <h2>Quote Details</h2>
+                <div class="quote-card">
+                    <p class="quote-text" style="font-size: 18px;">"${quote.text}"</p>
+                    <div class="quote-meta">
+                        <strong>${quote.speaker_name}</strong> - ${quote.speaker_role}
+                    </div>
+                </div>
+
+                <div style="margin: 2rem 0;">
+                    <p><strong>Interview:</strong> ${quote.interview_id}</p>
+                    <p><strong>Confidence Score:</strong> ${(quote.confidence * 100).toFixed(0)}%</p>
+                </div>
+
+                <h3>Associated Themes</h3>
+                <div style="margin: 1rem 0;">
+                    ${quote.theme_ids.map(themeId => {
+                        const theme = data.themes.find(t => t.id === themeId);
+                        return `
+                            <div class="tag clickable" onclick="showThemeDetails('${themeId}')">
+                                ${theme ? theme.name : themeId}
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+
+                <h3>Associated Codes</h3>
+                <div style="margin: 1rem 0;">
+                    ${quote.code_ids.map(codeId => {
+                        const code = data.codes.find(c => c.id === codeId);
+                        return `
+                            <div class="tag clickable" style="background: var(--info); color: white;" 
+                                 onclick="showCodeDetails('${codeId}')">
+                                ${code ? code.name : codeId}
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+
+            showModal(content);
+        }
+
+        // Utility Functions
+        function showModal(content) {
+            document.getElementById('modalContent').innerHTML = content;
+            document.getElementById('detailModal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('detailModal').style.display = 'none';
+        }
+
+        function updateBreadcrumbs(path) {
+            const breadcrumbs = document.getElementById('breadcrumbs');
+            breadcrumbs.innerHTML = path.map((item, index) => {
+                if (index === 0) {
+                    return `<a href="#" onclick="showOverview()">${item}</a>`;
+                } else if (index === path.length - 1) {
+                    return `<span style="color: var(--dark);">${item}</span>`;
+                } else {
+                    return `<a href="#" onclick="show${item}()">${item}</a>`;
+                }
+            }).join(' <i class="fas fa-chevron-right" style="font-size: 12px; margin: 0 5px;"></i> ');
+        }
+
+        function populateFilters() {
+            // Theme filter in codes section
+            const themeFilter = document.getElementById('themeFilter');
+            if (themeFilter) {
+                data.themes.forEach(theme => {
+                    const option = document.createElement('option');
+                    option.value = theme.id;
+                    option.textContent = theme.name;
+                    themeFilter.appendChild(option);
+                });
+            }
+
+            // Interview filter in quotes section
+            const interviewFilter = document.getElementById('interviewFilter');
+            if (interviewFilter) {
+                for (let i = 1; i <= 18; i++) {
+                    const option = document.createElement('option');
+                    option.value = `INT_${String(i).padStart(3, '0')}`;
+                    option.textContent = `Interview ${i}`;
+                    interviewFilter.appendChild(option);
+                }
+            }
+        }
+
+        // Search functionality
+        function performSearch() {
+            if (!searchTerm) {
+                showOverview();
+                return;
+            }
+
+            // Search in themes
+            const matchingThemes = data.themes.filter(theme => 
+                theme.name.toLowerCase().includes(searchTerm) ||
+                theme.description.toLowerCase().includes(searchTerm)
+            );
+
+            // Search in codes
+            const matchingCodes = data.codes.filter(code =>
+                code.name.toLowerCase().includes(searchTerm) ||
+                code.definition.toLowerCase().includes(searchTerm)
+            );
+
+            // Search in quotes
+            const matchingQuotes = data.quotes.filter(quote =>
+                quote.text.toLowerCase().includes(searchTerm) ||
+                quote.speaker_name.toLowerCase().includes(searchTerm)
+            );
+
+            // Display search results
+            if (matchingThemes.length > 0) {
+                showAllThemes();
+                displayThemes(matchingThemes);
+            } else if (matchingCodes.length > 0) {
+                showAllCodes();
+                displayCodes(matchingCodes);
+            } else if (matchingQuotes.length > 0) {
+                showAllQuotes();
+                displayQuotes(matchingQuotes);
+            }
+        }
+
+        // Additional helper functions
+        function showThemeCodes(themeId) {
+            const codes = data.codes.filter(c => c.theme_id === themeId);
+            showAllCodes();
+            displayCodes(codes);
+            updateBreadcrumbs(['Overview', 'Codes', `Theme: ${data.themes.find(t => t.id === themeId).name}`]);
+        }
+
+        function showCodeQuotes(codeId) {
+            const quotes = data.quotes.filter(q => q.code_ids.includes(codeId));
+            showAllQuotes();
+            displayQuotes(quotes);
+            updateBreadcrumbs(['Overview', 'Quotes', `Code: ${data.codes.find(c => c.id === codeId).name}`]);
+        }
+
+        function showAllInterviews() {
+            // This would show a list of all interviews with their metadata
+            alert('Interview viewer not implemented in this demo');
+        }
+
+        function showTokenDetails() {
+            const content = `
+                <h2>Token Analysis</h2>
+                <p><strong>Total Tokens:</strong> 170,317</p>
+                <p><strong>Approximate Words:</strong> 127,738 (1 token ≈ 0.75 words)</p>
+                <p><strong>Approximate Characters:</strong> 681,268 (1 token ≈ 4 characters)</p>
+                
+                <h3>What are Tokens?</h3>
+                <p>Tokens are the basic units that Large Language Models use to process text. 
+                They can be words, parts of words, punctuation, or spaces. The exact tokenization 
+                depends on the model's training.</p>
+                
+                <h3>Distribution by Interview</h3>
+                <p>Average tokens per interview: ~9,462</p>
+                <p>This represents approximately 7,097 words per interview.</p>
+            `;
+            showModal(content);
+        }
+
+        // Tooltip setup
+        function setupTooltips() {
+            // Tooltips are handled via CSS, but we could enhance with JavaScript if needed
+        }
+
+        // Styling for buttons
+        const style = document.createElement('style');
+        style.textContent = `
+            .btn {
+                background: var(--primary);
+                color: white;
+                border: none;
+                padding: 8px 16px;
+                border-radius: 4px;
+                cursor: pointer;
+                font-size: 14px;
+                transition: all 0.2s;
+            }
+            .btn:hover {
+                background: #1d4ed8;
+                transform: translateY(-1px);
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

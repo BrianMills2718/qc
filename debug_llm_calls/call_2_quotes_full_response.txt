@@ -1,0 +1,451 @@
+{
+  "quote_inventory": [
+    {
+      "quote_id": "Q001",
+      "text": "Participant A: My internet connection just isn't reliable enough for constant video calls. It drops out at least once a day, which is really disruptive.",
+      "speaker_role": "Participant",
+      "theme_ids": [
+        "T1"
+      ],
+      "code_ids": [
+        "C001"
+      ],
+      "context": "Discussing challenges of working from home due to technical issues."
+    },
+    {
+      "quote_id": "Q002",
+      "text": "Participant B: We've had so many issues with our VPN. Sometimes I can't even access shared drives, which completely halts my work.",
+      "speaker_role": "Participant",
+      "theme_ids": [
+        "T1"
+      ],
+      "code_ids": [
+        "C001"
+      ],
+      "context": "Describing technical frustrations with remote setup and access."
+    },
+    {
+      "quote_id": "Q003",
+      "text": "Participant C: I really miss the casual chats by the coffee machine. Working alone all day, every day, can feel quite isolating.",
+      "speaker_role": "Participant",
+      "theme_ids": [
+        "T1",
+        "T3"
+      ],
+      "code_ids": [
+        "C002"
+      ],
+      "context": "Reflecting on the social aspects lost in remote work and feelings of isolation."
+    },
+    {
+      "quote_id": "Q004",
+      "text": "Participant A: There are days when I don't speak to anyone outside of structured meetings. It definitely impacts my mood.",
+      "speaker_role": "Participant",
+      "theme_ids": [
+        "T1",
+        "T3"
+      ],
+      "code_ids": [
+        "C002"
+      ],
+      "context": "Expressing feelings of loneliness due to lack of informal interaction."
+    },
+    {
+      "quote_id": "Q005",
+      "text": "Participant B: My laptop is always open. It's so hard to switch off when your office is literally your living room.",
+      "speaker_role": "Participant",
+      "theme_ids": [
+        "T1",
+        "T3"
+      ],
+      "code_ids": [
+        "C003"
+      ],
+      "context": "Struggling with separating work and personal life boundaries."
+    },
+    {
+      "quote_id": "Q006",
+      "text": "Participant C: I find myself working much longer hours because there's no commute to signal the end of the day. The lines are completely blurred.",
+      "speaker_role": "Participant",
+      "theme_ids": [
+        "T1",
+        "T3"
+      ],
+      "code_ids": [
+        "C003"
+      ],
+      "context": "Discussing increased working hours and difficulty disengaging from work."
+    },
+    {
+      "quote_id": "Q007",
+      "text": "Participant A: Brainstorming sessions are just not the same online. It's harder to read the room and jump in spontaneously.",
+      "speaker_role": "Participant",
+      "theme_ids": [
+        "T1",
+        "T2"
+      ],
+      "code_ids": [
+        "C004"
+      ],
+      "context": "Comparing in-person versus remote collaboration effectiveness."
+    },
+    {
+      "quote_id": "Q008",
+      "text": "Participant B: We often miss those quick, informal check-ins that used to happen naturally in the office. Now everything needs a scheduled call.",
+      "speaker_role": "Participant",
+      "theme_ids": [
+        "T1",
+        "T2"
+      ],
+      "code_ids": [
+        "C004"
+      ],
+      "context": "Highlighting the loss of spontaneous team interaction and its impact on collaboration."
+    },
+    {
+      "quote_id": "Q009",
+      "text": "Participant C: Some days I'm incredibly productive, but other days I struggle to focus with all the distractions at home.",
+      "speaker_role": "Participant",
+      "theme_ids": [
+        "T1"
+      ],
+      "code_ids": [
+        "C005"
+      ],
+      "context": "Describing variability in remote work productivity and focus."
+    },
+    {
+      "quote_id": "Q010",
+      "text": "Participant A: I feel like I get more deep work done without constant interruptions, but then I lose out on quick problem-solving with colleagues.",
+      "speaker_role": "Participant",
+      "theme_ids": [
+        "T1"
+      ],
+      "code_ids": [
+        "C005"
+      ],
+      "context": "Weighing the pros and cons of remote work on individual productivity."
+    },
+    {
+      "quote_id": "Q011",
+      "text": "Participant B: Tools like Slack and email are great for sharing updates, but sometimes you need an immediate answer and it's just not possible.",
+      "speaker_role": "Participant",
+      "theme_ids": [
+        "T2"
+      ],
+      "code_ids": [
+        "C006"
+      ],
+      "context": "Discussing the utility and limitations of asynchronous communication tools."
+    },
+    {
+      "quote_id": "Q012",
+      "text": "Participant C: We've started using more shared documents with comments, which helps keep everyone informed without constant meetings.",
+      "speaker_role": "Participant",
+      "theme_ids": [
+        "T2"
+      ],
+      "code_ids": [
+        "C006"
+      ],
+      "context": "Explaining the adoption of asynchronous methods for efficient information sharing."
+    },
+    {
+      "quote_id": "Q013",
+      "text": "Participant A: Video calls are essential for team meetings and client presentations. You need that face-to-face interaction.",
+      "speaker_role": "Participant",
+      "theme_ids": [
+        "T2"
+      ],
+      "code_ids": [
+        "C007"
+      ],
+      "context": "Emphasizing the importance of real-time visual communication for certain interactions."
+    },
+    {
+      "quote_id": "Q014",
+      "text": "Participant B: For complex discussions, nothing beats a live conversation where you can ask follow-up questions instantly.",
+      "speaker_role": "Participant",
+      "theme_ids": [
+        "T2"
+      ],
+      "code_ids": [
+        "C007"
+      ],
+      "context": "Highlighting the benefits of synchronous communication for nuanced and complex topics."
+    },
+    {
+      "quote_id": "Q015",
+      "text": "Participant C: My inbox is constantly overflowing, and I'm in back-to-back video calls all day. It's exhausting.",
+      "speaker_role": "Participant",
+      "theme_ids": [
+        "T2"
+      ],
+      "code_ids": [
+        "C008"
+      ],
+      "context": "Expressing fatigue from excessive digital communication and meetings."
+    },
+    {
+      "quote_id": "Q016",
+      "text": "Participant A: Sometimes I feel like I spend more time managing communications than actually doing my core work.",
+      "speaker_role": "Participant",
+      "theme_ids": [
+        "T2"
+      ],
+      "code_ids": [
+        "C008"
+      ],
+      "context": "Describing the burden of high-volume communication and its impact on productivity."
+    },
+    {
+      "quote_id": "Q017",
+      "text": "Participant B: Our manager has been great about trusting us to get the work done, regardless of where we are. That autonomy is key.",
+      "speaker_role": "Participant",
+      "theme_ids": [
+        "T2",
+        "T4"
+      ],
+      "code_ids": [
+        "C009"
+      ],
+      "context": "Praising management's approach to remote work, focusing on trust and autonomy."
+    },
+    {
+      "quote_id": "Q018",
+      "text": "Participant C: I feel more empowered to manage my own schedule and tasks, which has really boosted my motivation.",
+      "speaker_role": "Participant",
+      "theme_ids": [
+        "T2",
+        "T4"
+      ],
+      "code_ids": [
+        "C009"
+      ],
+      "context": "Discussing the positive impact of increased autonomy on personal motivation."
+    },
+    {
+      "quote_id": "Q019",
+      "text": "Participant A: It's harder to get informal feedback when you're not bumping into your manager in the hallway. We need more structured check-ins.",
+      "speaker_role": "Participant",
+      "theme_ids": [
+        "T2"
+      ],
+      "code_ids": [
+        "C010"
+      ],
+      "context": "Identifying a gap in informal feedback mechanisms in a remote setting."
+    },
+    {
+      "quote_id": "Q020",
+      "text": "Participant B: Our team has started a 'kudos' channel on Slack, which is a nice way to recognize small achievements publicly.",
+      "speaker_role": "Participant",
+      "theme_ids": [
+        "T2"
+      ],
+      "code_ids": [
+        "C010"
+      ],
+      "context": "Describing a new initiative for peer recognition in a remote team."
+    },
+    {
+      "quote_id": "Q021",
+      "text": "Participant C: The constant pressure to be 'on' and available, even after hours, has definitely led to increased stress levels.",
+      "speaker_role": "Participant",
+      "theme_ids": [
+        "T3"
+      ],
+      "code_ids": [
+        "C011"
+      ],
+      "context": "Discussing the mental toll of remote work expectations and availability."
+    },
+    {
+      "quote_id": "Q022",
+      "text": "Participant A: I've felt close to burnout a few times, especially when juggling work and home responsibilities without a clear break.",
+      "speaker_role": "Participant",
+      "theme_ids": [
+        "T3"
+      ],
+      "code_ids": [
+        "C011"
+      ],
+      "context": "Sharing personal experience with work-related stress and burnout."
+    },
+    {
+      "quote_id": "Q023",
+      "text": "Participant B: Our company introduced a mental wellness program, which has been really helpful. It shows they care.",
+      "speaker_role": "Participant",
+      "theme_ids": [
+        "T3"
+      ],
+      "code_ids": [
+        "C012"
+      ],
+      "context": "Appreciating employer-provided mental health resources and support."
+    },
+    {
+      "quote_id": "Q024",
+      "text": "Participant C: I think managers need more training on how to spot signs of stress or isolation in their remote teams.",
+      "speaker_role": "Participant",
+      "theme_ids": [
+        "T3"
+      ],
+      "code_ids": [
+        "C012"
+      ],
+      "context": "Suggesting improvements for mental health support from leadership."
+    },
+    {
+      "quote_id": "Q025",
+      "text": "Participant A: My back has been bothering me a lot since I started working from my kitchen table. Proper ergonomics are crucial.",
+      "speaker_role": "Participant",
+      "theme_ids": [
+        "T3"
+      ],
+      "code_ids": [
+        "C013"
+      ],
+      "context": "Describing physical discomfort due to inadequate home office setup."
+    },
+    {
+      "quote_id": "Q026",
+      "text": "Participant B: I find myself moving a lot less throughout the day. I have to consciously remind myself to take breaks and walk around.",
+      "speaker_role": "Participant",
+      "theme_ids": [
+        "T3"
+      ],
+      "code_ids": [
+        "C013"
+      ],
+      "context": "Discussing reduced physical activity and its impact in a remote setting."
+    },
+    {
+      "quote_id": "Q027",
+      "text": "Participant C: We try to do virtual coffee breaks and social events, but it's not the same as building camaraderie in person.",
+      "speaker_role": "Participant",
+      "theme_ids": [
+        "T3",
+        "T2"
+      ],
+      "code_ids": [
+        "C014"
+      ],
+      "context": "Efforts to maintain team bonding and cohesion remotely."
+    },
+    {
+      "quote_id": "Q028",
+      "text": "Participant A: I worry about new hires feeling disconnected. It's much harder to integrate them into the team culture remotely.",
+      "speaker_role": "Participant",
+      "theme_ids": [
+        "T3",
+        "T2"
+      ],
+      "code_ids": [
+        "C014"
+      ],
+      "context": "Concerns about onboarding and team integration in a remote environment."
+    },
+    {
+      "quote_id": "Q029",
+      "text": "Participant B: This whole experience has shown us how adaptable we can be as a workforce. We've learned so much.",
+      "speaker_role": "Participant",
+      "theme_ids": [
+        "T4"
+      ],
+      "code_ids": [
+        "C015"
+      ],
+      "context": "Reflecting on the organization's ability to adjust to new work models."
+    },
+    {
+      "quote_id": "Q030",
+      "text": "Participant C: I've had to learn new tools and ways of working very quickly. It's been a steep but valuable learning curve.",
+      "speaker_role": "Participant",
+      "theme_ids": [
+        "T4"
+      ],
+      "code_ids": [
+        "C015"
+      ],
+      "context": "Personal growth and skill acquisition due to changes in work setup."
+    },
+    {
+      "quote_id": "Q031",
+      "text": "Participant A: I'd love a hybrid model \u2013 maybe two days in the office for meetings and collaboration, and the rest at home for focused work.",
+      "speaker_role": "Participant",
+      "theme_ids": [
+        "T4"
+      ],
+      "code_ids": [
+        "C016"
+      ],
+      "context": "Expressing a preference for a flexible hybrid work arrangement."
+    },
+    {
+      "quote_id": "Q032",
+      "text": "Participant B: Going fully remote forever isn't for me, but I also don't want to be in the office five days a week again. Hybrid is the sweet spot.",
+      "speaker_role": "Participant",
+      "theme_ids": [
+        "T4"
+      ],
+      "code_ids": [
+        "C016"
+      ],
+      "context": "Advocating for a balanced approach to future work, favoring hybrid models."
+    },
+    {
+      "quote_id": "Q033",
+      "text": "Participant C: The office should become more of a hub for collaboration and social events, rather than just a place to sit at a desk.",
+      "speaker_role": "Participant",
+      "theme_ids": [
+        "T4"
+      ],
+      "code_ids": [
+        "C017"
+      ],
+      "context": "Suggesting a new, redefined role for the physical office space."
+    },
+    {
+      "quote_id": "Q034",
+      "text": "Participant A: If we do go back, I hope the office is designed for team activities and creative sessions, not just individual cubicles.",
+      "speaker_role": "Participant",
+      "theme_ids": [
+        "T4"
+      ],
+      "code_ids": [
+        "C017"
+      ],
+      "context": "Envisioning a redesigned office environment focused on collaboration."
+    },
+    {
+      "quote_id": "Q035",
+      "text": "Researcher: Based on what you've observed, what new skills do you think are becoming essential for success in this evolving work landscape?",
+      "speaker_role": "Researcher",
+      "theme_ids": [
+        "T4"
+      ],
+      "code_ids": [
+        "C018"
+      ],
+      "context": "Researcher probing about future skill requirements for the evolving work environment."
+    },
+    {
+      "quote_id": "Q036",
+      "text": "Participant B: Digital literacy, self-management, and strong written communication are definitely more critical now than ever before.",
+      "speaker_role": "Participant",
+      "theme_ids": [
+        "T4"
+      ],
+      "code_ids": [
+        "C018"
+      ],
+      "context": "Identifying key skills for success in remote and hybrid work models."
+    }
+  ],
+  "metadata": {
+    "total_quotes": 36,
+    "quotes_per_theme": 9,
+    "coverage": "high"
+  }
+}
