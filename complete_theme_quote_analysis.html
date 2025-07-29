@@ -1,0 +1,1393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Theme-Quote Analysis - AI Integration Research</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --secondary: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #06b6d4;
+            --dark: #1f2937;
+            --light: #f9fafb;
+            --border: #e5e7eb;
+            --quote-bg: #fef3c7;
+            --quote-border: #f59e0b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: var(--dark);
+            background: var(--light);
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 40px 0;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border-radius: 8px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+            border-left: 4px solid;
+        }
+
+        .stat-card.themes { border-left-color: var(--primary); }
+        .stat-card.quotes { border-left-color: var(--warning); }
+        .stat-card.exemplar { border-left-color: var(--secondary); }
+        .stat-card.formal { border-left-color: var(--info); }
+
+        .stat-card .number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--dark);
+            margin-bottom: 5px;
+        }
+
+        .stat-card .label {
+            color: #666;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .theme-section {
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .theme-header {
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 20px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .theme-header h2 {
+            font-size: 1.5rem;
+            margin: 0;
+        }
+
+        .theme-stats {
+            display: flex;
+            gap: 20px;
+            font-size: 0.9rem;
+        }
+
+        .theme-stats span {
+            background: rgba(255,255,255,0.2);
+            padding: 4px 12px;
+            border-radius: 20px;
+        }
+
+        .theme-content {
+            padding: 25px;
+        }
+
+        .theme-description {
+            background: var(--light);
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+
+        .quotes-grid {
+            display: grid;
+            gap: 20px;
+        }
+
+        .quote-card {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .quote-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .quote-header {
+            background: var(--quote-bg);
+            border-bottom: 1px solid var(--quote-border);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .quote-meta {
+            display: flex;
+            gap: 15px;
+            font-size: 0.9rem;
+        }
+
+        .quote-source {
+            background: var(--primary);
+            color: white;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+        }
+
+        .quote-body {
+            padding: 20px;
+        }
+
+        .quote-text {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .quote-text::before {
+            content: '"';
+            font-size: 3rem;
+            color: var(--quote-border);
+            position: absolute;
+            left: -15px;
+            top: -10px;
+            font-family: serif;
+        }
+
+        .quote-text::after {
+            content: '"';
+            font-size: 3rem;
+            color: var(--quote-border);
+            position: absolute;
+            right: -10px;
+            bottom: -20px;
+            font-family: serif;
+        }
+
+        .quote-footer {
+            background: var(--light);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .code-tags {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .code-tag {
+            background: var(--info);
+            color: white;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            text-decoration: none;
+        }
+
+        .code-tag:hover {
+            background: #0891b2;
+        }
+
+        .no-quotes {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+            padding: 40px;
+            background: var(--light);
+            border-radius: 6px;
+        }
+
+        .search-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .search-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .search-controls input,
+        .search-controls select {
+            padding: 10px 15px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .search-controls input {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .theme-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .theme-stats {
+                flex-direction: column;
+                gap: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1><i class="fas fa-link"></i> Complete Theme-Quote Analysis</h1>
+            <div class="subtitle">AI Integration in Qualitative Research - ALL Themes Linked to ALL Quotes</div>
+        </div>
+
+        <!-- Statistics Overview -->
+        <div class="stats-grid">
+            <div class="stat-card themes">
+                <div class="number" id="totalThemes">5</div>
+                <div class="label">Total Themes</div>
+            </div>
+            <div class="stat-card quotes">
+                <div class="number" id="totalQuotes">0</div>
+                <div class="label">Total Quotes</div>
+            </div>
+            <div class="stat-card exemplar">
+                <div class="number" id="exemplarQuotes">0</div>
+                <div class="label">Exemplar Quotes</div>
+            </div>
+            <div class="stat-card formal">
+                <div class="number" id="formalQuotes">0</div>
+                <div class="label">Formal Quotes</div>
+            </div>
+        </div>
+
+        <!-- Search and Filter Section -->
+        <div class="search-section">
+            <div class="search-controls">
+                <input type="text" id="searchInput" placeholder="Search quotes by text, speaker, or theme...">
+                <select id="themeFilter">
+                    <option value="">All Themes</option>
+                </select>
+                <select id="sourceFilter">
+                    <option value="">All Sources</option>
+                    <option value="theme_analysis_exemplar">Exemplar Quotes</option>
+                    <option value="formal_extraction">Formal Extractions</option>
+                </select>
+                <button id="clearFilters" style="background: var(--danger); color: white; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer;">
+                    <i class="fas fa-times"></i> Clear
+                </button>
+            </div>
+        </div>
+
+        <!-- Theme Sections -->
+        <div id="themeSections">
+            <!-- Theme sections will be populated here -->
+        </div>
+    </div>
+
+    <script>
+        // Data from analysis
+        const themes = [
+  {
+    "id": "T1",
+    "name": "AI Applications in Research",
+    "prevalence": 1.0,
+    "confidence": 0.95,
+    "interview_count": 18,
+    "quote_count": 2
+  },
+  {
+    "id": "T2",
+    "name": "Challenges and Risks of AI Adoption",
+    "prevalence": 1.0,
+    "confidence": 0.9,
+    "interview_count": 18,
+    "quote_count": 2
+  },
+  {
+    "id": "T3",
+    "name": "Opportunities for Efficiency and Innovation",
+    "prevalence": 1.0,
+    "confidence": 0.9,
+    "interview_count": 18,
+    "quote_count": 2
+  },
+  {
+    "id": "T4",
+    "name": "Institutional Adoption and Strategy",
+    "prevalence": 0.78,
+    "confidence": 0.85,
+    "interview_count": 14,
+    "quote_count": 7
+  },
+  {
+    "id": "T5",
+    "name": "Data Management and Quality",
+    "prevalence": 0.56,
+    "confidence": 0.8,
+    "interview_count": 10,
+    "quote_count": 8
+  }
+];
+        const quotes = [
+  {
+    "quote_id": "T1_EX1",
+    "text": "I",
+    "speaker": "Luke Matthews",
+    "interview_id": "INT_Unknown",
+    "theme_ids": [
+      "T1"
+    ],
+    "theme_name": "AI Applications in Research",
+    "source": "theme_analysis_exemplar",
+    "exemplar_index": 1
+  },
+  {
+    "quote_id": "T1_EX3",
+    "text": "AI has been really helpful with writing like any type of code I write primarily in Python... it just helped me write code like so much faster.",
+    "speaker": "Caroline Johnston",
+    "interview_id": "INT_003",
+    "theme_ids": [
+      "T1"
+    ],
+    "theme_name": "AI Applications in Research",
+    "source": "theme_analysis_exemplar",
+    "exemplar_index": 3
+  },
+  {
+    "quote_id": "T2_EX2",
+    "text": "I think somebody actually people aren",
+    "speaker": "Luke Matthews",
+    "interview_id": "INT_Unknown",
+    "theme_ids": [
+      "T2"
+    ],
+    "theme_name": "Challenges and Risks of AI Adoption",
+    "source": "theme_analysis_exemplar",
+    "exemplar_index": 2
+  },
+  {
+    "quote_id": "T2_EX3",
+    "text": "The risk is that we will end up utilizing AI for stuff our junior folks used to do... I worry about career development and skillset development among the younger folks.",
+    "speaker": "Molly Dunnigan",
+    "interview_id": "INT_Unknown",
+    "theme_ids": [
+      "T2"
+    ],
+    "theme_name": "Challenges and Risks of AI Adoption",
+    "source": "theme_analysis_exemplar",
+    "exemplar_index": 3
+  },
+  {
+    "quote_id": "T3_EX1",
+    "text": "Can you imagine? A world where, like AI could feed in information about the kind of participants you",
+    "speaker": "Joie Acosta",
+    "interview_id": "INT_Unknown",
+    "theme_ids": [
+      "T3"
+    ],
+    "theme_name": "Opportunities for Efficiency and Innovation",
+    "source": "theme_analysis_exemplar",
+    "exemplar_index": 1
+  },
+  {
+    "quote_id": "T3_EX2",
+    "text": "Is that because it",
+    "speaker": "Ryan Brown",
+    "interview_id": "INT_Unknown",
+    "theme_ids": [
+      "T3"
+    ],
+    "theme_name": "Opportunities for Efficiency and Innovation",
+    "source": "theme_analysis_exemplar",
+    "exemplar_index": 2
+  },
+  {
+    "quote_id": "T4_EX1",
+    "text": "Need to be company wide ai initiatives that every unit and division are asked to participate in.",
+    "speaker": "Molly Dunnigan",
+    "interview_id": "INT_002",
+    "theme_ids": [
+      "T4"
+    ],
+    "theme_name": "Institutional Adoption and Strategy",
+    "source": "theme_analysis_exemplar",
+    "exemplar_index": 1
+  },
+  {
+    "quote_id": "T4_EX2",
+    "text": "It would be for folks to have sort of illustrated use case guides for, OK. Let",
+    "speaker": "Bryan Frederick",
+    "interview_id": "INT_Unknown",
+    "theme_ids": [
+      "T4"
+    ],
+    "theme_name": "Institutional Adoption and Strategy",
+    "source": "theme_analysis_exemplar",
+    "exemplar_index": 2
+  },
+  {
+    "quote_id": "T5_EX1",
+    "text": "I guess like a lot of the way that I end up being or something like 100 or thousand more lists of abstract or papers from keyword search and maybe I don\u2019t need all of it, but it",
+    "speaker": "Douglas Yeung",
+    "interview_id": "INT_Unknown",
+    "theme_ids": [
+      "T5"
+    ],
+    "theme_name": "Data Management and Quality",
+    "source": "theme_analysis_exemplar",
+    "exemplar_index": 1
+  },
+  {
+    "quote_id": "T5_EX2",
+    "text": "Ultimately once you commit to doing network analysis the biggest issue is collecting and coding the data.",
+    "speaker": "Matthew Sergant",
+    "interview_id": "INT_006",
+    "theme_ids": [
+      "T5"
+    ],
+    "theme_name": "Data Management and Quality",
+    "source": "theme_analysis_exemplar",
+    "exemplar_index": 2
+  },
+  {
+    "quote_id": "T5_EX3",
+    "text": "A lot of AI tools in the computer science sort of realm are built around the concepts of data lakes, and I think Rand",
+    "speaker": "Brandon De Bruhl",
+    "interview_id": "INT_Unknown",
+    "theme_ids": [
+      "T5"
+    ],
+    "theme_name": "Data Management and Quality",
+    "source": "theme_analysis_exemplar",
+    "exemplar_index": 3
+  },
+  {
+    "quote_id": "T004_Q1",
+    "text": "I think the biggest thing is that we need to have a strategy for how we're going to use AI. And I think that's still very much in flux. I think there's a lot of excitement about it, but there's also a lot of trepidation. And I think we need to figure out how we're going to integrate it into our r...",
+    "speaker": "Kandice Kapinos",
+    "interview_id": "INT_001",
+    "theme_ids": [
+      "T4"
+    ],
+    "code_ids": [
+      "C4.1",
+      "C4.2"
+    ],
+    "source": "formal_extraction"
+  },
+  {
+    "quote_id": "T004_Q2",
+    "text": "And I think that's going to require a lot of investment in terms of infrastructure and also in terms of people. We need to have people who are experts in AI, who can help us to develop and implement these tools. And we also need to have a culture that's open to experimentation and innovation.",
+    "speaker": "Kandice Kapinos",
+    "interview_id": "INT_001",
+    "theme_ids": [
+      "T4"
+    ],
+    "code_ids": [
+      "C4.1",
+      "C4.2"
+    ],
+    "source": "formal_extraction"
+  },
+  {
+    "quote_id": "T004_Q3",
+    "text": "I think one of the biggest challenges is going to be how we incentivize people to use AI. Because right now, it's not really built into our incentive structure. So people are not necessarily going to be rewarded for using AI in their research. And I think that's something we need to address.",
+    "speaker": "Kandice Kapinos",
+    "interview_id": "INT_001",
+    "theme_ids": [
+      "T4"
+    ],
+    "code_ids": [
+      "C4.1",
+      "C4.2"
+    ],
+    "source": "formal_extraction"
+  },
+  {
+    "quote_id": "T004_Q4",
+    "text": "I think another challenge is going to be how we ensure that the AI tools we're using are fair and unbiased. Because there's a lot of concern about bias in AI, and we need to make sure that we're not perpetuating those biases in our research. And that's going to require a lot of careful thought an...",
+    "speaker": "Kandice Kapinos",
+    "interview_id": "INT_001",
+    "theme_ids": [
+      "T4"
+    ],
+    "code_ids": [
+      "C4.1",
+      "C4.2"
+    ],
+    "source": "formal_extraction"
+  },
+  {
+    "quote_id": "T004_Q5",
+    "text": "Interview coding, something way better than Dedoose. We do a lot of interviews and the coding is uneven in quality. So it would be great if we had some standard way to do that and a tool to help with that.",
+    "speaker": "Participant",
+    "interview_id": "INT_002",
+    "theme_ids": [
+      "T4"
+    ],
+    "code_ids": [
+      "C4.1",
+      "C4.2"
+    ],
+    "source": "formal_extraction"
+  },
+  {
+    "quote_id": "T005_Q1",
+    "text": "Interview coding, something way better than Dedoose. We do a lot of interviews and the coding is uneven in quality. So it would be great if we had some standard way to do that and a tool to help with that.",
+    "speaker": "Matthew Sergant",
+    "interview_id": "INT_001",
+    "theme_ids": [
+      "T5"
+    ],
+    "code_ids": [
+      "C5.1",
+      "C5.2"
+    ],
+    "source": "formal_extraction"
+  },
+  {
+    "quote_id": "T005_Q2",
+    "text": "Something that helps us with graphics. It would be great if we were not one person deep on Evonne Crane. Great to make graphics that were accurate. I am trying to make one in chatgpt and it makes people without arms and I can\u2019t edit it. Something like that and really easy for people to use.",
+    "speaker": "Matthew Sergant",
+    "interview_id": "INT_001",
+    "theme_ids": [
+      "T5"
+    ],
+    "code_ids": [
+      "C5.1",
+      "C5.2"
+    ],
+    "source": "formal_extraction"
+  },
+  {
+    "quote_id": "T005_Q3",
+    "text": "We have the forecasting stuff; Tony Vossalo is doing it and I don\u2019t understand what they are doing and how they are doing it but making forecasting more broadly applicable ... that is what we are all trying to do, see into the future. If we could forecast more accurately in the outset then we cou...",
+    "speaker": "Matthew Sergant",
+    "interview_id": "INT_001",
+    "theme_ids": [
+      "T5"
+    ],
+    "code_ids": [
+      "C5.1",
+      "C5.2"
+    ],
+    "source": "formal_extraction"
+  },
+  {
+    "quote_id": "T005_Q4",
+    "text": "Work in methods center. Still trying to find the focus and greater methods. There is a very diverse set of people that use the method across RAND and people are not always in conversation with each other, calling it different things and not always in conversation with each other. So goal is to cr...",
+    "speaker": "Matthew Sergant",
+    "interview_id": "INT_001",
+    "theme_ids": [
+      "T5"
+    ],
+    "code_ids": [
+      "C5.1",
+      "C5.2"
+    ],
+    "source": "formal_extraction"
+  },
+  {
+    "quote_id": "T005_Q5",
+    "text": "A lot of the applications of network analysis are embedded in research not involved in network analysis. So part of the challenge is to identify the people that should be brought into the community. They are putting together, ... trying to figure out how to become involved in network analysis. Pu...",
+    "speaker": "Matthew Sergant",
+    "interview_id": "INT_001",
+    "theme_ids": [
+      "T5"
+    ],
+    "code_ids": [
+      "C5.1",
+      "C5.2"
+    ],
+    "source": "formal_extraction"
+  }
+];
+        const codes = [
+  {
+    "id": "C1",
+    "name": "AI Applications",
+    "definition": "Specific applications of AI tools and models across various research methodologies.",
+    "frequency": 18,
+    "theme_id": "T1",
+    "parent_code_id": "",
+    "hierarchy_level": 0
+  },
+  {
+    "id": "C2",
+    "name": "Challenges and Risks",
+    "definition": "The difficulties, limitations, and potential negative consequences associated with integrating AI into research practices.",
+    "frequency": 18,
+    "theme_id": "T2",
+    "parent_code_id": "",
+    "hierarchy_level": 0
+  },
+  {
+    "id": "C3",
+    "name": "Opportunities and Benefits",
+    "definition": "The benefits and new possibilities that AI offers for enhancing research processes and outcomes.",
+    "frequency": 18,
+    "theme_id": "T3",
+    "parent_code_id": "",
+    "hierarchy_level": 0
+  },
+  {
+    "id": "C4",
+    "name": "Institutional Adoption",
+    "definition": "Strategies and considerations for RAND to effectively and responsibly integrate AI into its institutional practices.",
+    "frequency": 14,
+    "theme_id": "T4",
+    "parent_code_id": "",
+    "hierarchy_level": 0
+  },
+  {
+    "id": "C5",
+    "name": "Data Management",
+    "definition": "Aspects related to the collection, organization, and quality of data in the context of AI-driven research.",
+    "frequency": 10,
+    "theme_id": "T5",
+    "parent_code_id": "",
+    "hierarchy_level": 0
+  },
+  {
+    "id": "C1.1",
+    "name": "  Qualitative Analysis Automation",
+    "definition": "Automation of qualitative research tasks using AI.",
+    "frequency": 15,
+    "theme_id": "T1",
+    "parent_code_id": "C1",
+    "hierarchy_level": 1
+  },
+  {
+    "id": "C1.2",
+    "name": "  Literature Review Automation",
+    "definition": "Automation of tasks involved in conducting literature reviews using AI.",
+    "frequency": 15,
+    "theme_id": "T1",
+    "parent_code_id": "C1",
+    "hierarchy_level": 1
+  },
+  {
+    "id": "C1.3",
+    "name": "  Quantitative Analysis Automation",
+    "definition": "Automation of quantitative research tasks using AI.",
+    "frequency": 10,
+    "theme_id": "T1",
+    "parent_code_id": "C1",
+    "hierarchy_level": 1
+  },
+  {
+    "id": "C1.4",
+    "name": "  Research Workflow Automation",
+    "definition": "Automation of general research workflow tasks using AI.",
+    "frequency": 15,
+    "theme_id": "T1",
+    "parent_code_id": "C1",
+    "hierarchy_level": 1
+  },
+  {
+    "id": "C2.1",
+    "name": "  Accuracy and Trust",
+    "definition": "Concerns related to the accuracy, reliability, and trustworthiness of AI outputs.",
+    "frequency": 14,
+    "theme_id": "T2",
+    "parent_code_id": "C2",
+    "hierarchy_level": 1
+  },
+  {
+    "id": "C2.2",
+    "name": "  Ethical and Methodological Concerns",
+    "definition": "Ethical dilemmas and methodological challenges arising from AI integration in research.",
+    "frequency": 10,
+    "theme_id": "T2",
+    "parent_code_id": "C2",
+    "hierarchy_level": 1
+  },
+  {
+    "id": "C2.3",
+    "name": "  Institutional Barriers",
+    "definition": "Organizational and systemic obstacles hindering AI adoption at RAND.",
+    "frequency": 12,
+    "theme_id": "T2",
+    "parent_code_id": "C2",
+    "hierarchy_level": 1
+  },
+  {
+    "id": "C3.1",
+    "name": "  Time Savings",
+    "definition": "AI's ability to significantly reduce the time required for various research tasks.",
+    "frequency": 14,
+    "theme_id": "T3",
+    "parent_code_id": "C3",
+    "hierarchy_level": 1
+  },
+  {
+    "id": "C3.2",
+    "name": "  Capacity Augmentation",
+    "definition": "AI's potential to increase the scale or scope of research activities beyond human capacity.",
+    "frequency": 7,
+    "theme_id": "T3",
+    "parent_code_id": "C3",
+    "hierarchy_level": 1
+  },
+  {
+    "id": "C3.3",
+    "name": "  New Research Avenues",
+    "definition": "AI enabling new types of research questions, methodologies, or insights previously not feasible.",
+    "frequency": 5,
+    "theme_id": "T3",
+    "parent_code_id": "C3",
+    "hierarchy_level": 1
+  },
+  {
+    "id": "C3.4",
+    "name": "  Enhanced Quality",
+    "definition": "AI's ability to improve the quality, rigor, or consistency of research outputs.",
+    "frequency": 5,
+    "theme_id": "T3",
+    "parent_code_id": "C3",
+    "hierarchy_level": 1
+  },
+  {
+    "id": "C4.1",
+    "name": "  Training and Education",
+    "definition": "The need for and types of training and educational initiatives to promote AI literacy and responsible use among researchers.",
+    "frequency": 6,
+    "theme_id": "T4",
+    "parent_code_id": "C4",
+    "hierarchy_level": 1
+  },
+  {
+    "id": "C4.2",
+    "name": "  Incentive Structures",
+    "definition": "Mechanisms to incentivize AI adoption, such as linking AI use to project funding or researcher coverage.",
+    "frequency": 3,
+    "theme_id": "T4",
+    "parent_code_id": "C4",
+    "hierarchy_level": 1
+  },
+  {
+    "id": "C4.3",
+    "name": "  Build vs. Buy vs. License",
+    "definition": "The strategic decision for RAND to develop its own AI tools versus acquiring or licensing commercial solutions.",
+    "frequency": 3,
+    "theme_id": "T4",
+    "parent_code_id": "C4",
+    "hierarchy_level": 1
+  },
+  {
+    "id": "C4.4",
+    "name": "  Strategic Roadmap",
+    "definition": "The importance of a clear, high-level strategy and roadmap for AI integration across RAND.",
+    "frequency": 1,
+    "theme_id": "T4",
+    "parent_code_id": "C4",
+    "hierarchy_level": 1
+  },
+  {
+    "id": "C4.5",
+    "name": "  Skunkworks/Experimentation",
+    "definition": "The concept of creating dedicated spaces or teams for AI experimentation without immediate brand risk.",
+    "frequency": 2,
+    "theme_id": "T4",
+    "parent_code_id": "C4",
+    "hierarchy_level": 1
+  },
+  {
+    "id": "C5.1",
+    "name": "  Data Wrangling",
+    "definition": "The process of cleaning, transforming, and preparing raw data for analysis.",
+    "frequency": 5,
+    "theme_id": "T5",
+    "parent_code_id": "C5",
+    "hierarchy_level": 1
+  },
+  {
+    "id": "C5.2",
+    "name": "  Data Lakes",
+    "definition": "Large, unstructured repositories of raw data that can be used for large-scale AI analysis.",
+    "frequency": 2,
+    "theme_id": "T5",
+    "parent_code_id": "C5",
+    "hierarchy_level": 1
+  },
+  {
+    "id": "C5.3",
+    "name": "  Data Standardization",
+    "definition": "The process of ensuring data consistency and compatibility across different sources and formats.",
+    "frequency": 3,
+    "theme_id": "T5",
+    "parent_code_id": "C5",
+    "hierarchy_level": 1
+  },
+  {
+    "id": "C5.4",
+    "name": "  Data Access",
+    "definition": "Challenges and opportunities related to obtaining and utilizing relevant data for research.",
+    "frequency": 5,
+    "theme_id": "T5",
+    "parent_code_id": "C5",
+    "hierarchy_level": 1
+  },
+  {
+    "id": "C1.1.1",
+    "name": "    AI Transcription",
+    "definition": "Using AI for transcribing audio recordings of interviews or meetings.",
+    "frequency": 7,
+    "theme_id": "T1",
+    "parent_code_id": "C1.1",
+    "hierarchy_level": 2
+  },
+  {
+    "id": "C1.1.2",
+    "name": "    AI Coding",
+    "definition": "Using AI tools to code qualitative data, such as interview transcripts or open-ended survey responses.",
+    "frequency": 12,
+    "theme_id": "T1",
+    "parent_code_id": "C1.1",
+    "hierarchy_level": 2
+  },
+  {
+    "id": "C1.1.3",
+    "name": "    AI Thematic Analysis",
+    "definition": "Using AI to identify and group themes from qualitative data, often inductively.",
+    "frequency": 6,
+    "theme_id": "T1",
+    "parent_code_id": "C1.1",
+    "hierarchy_level": 2
+  },
+  {
+    "id": "C1.1.4",
+    "name": "    AI De-identification",
+    "definition": "Using AI for de-identification or anonymization of sensitive data in qualitative transcripts.",
+    "frequency": 3,
+    "theme_id": "T1",
+    "parent_code_id": "C1.1",
+    "hierarchy_level": 2
+  },
+  {
+    "id": "C1.1.5",
+    "name": "    AI Quote Tracing",
+    "definition": "Using AI to trace specific quotes or content back to their original source in interviews or documents.",
+    "frequency": 1,
+    "theme_id": "T1",
+    "parent_code_id": "C1.1",
+    "hierarchy_level": 2
+  },
+  {
+    "id": "C1.2.1",
+    "name": "    AI Search Strategy",
+    "definition": "Using AI to develop or refine search strategies for literature reviews, including keyword generation and Boolean logic.",
+    "frequency": 3,
+    "theme_id": "T1",
+    "parent_code_id": "C1.2",
+    "hierarchy_level": 2
+  },
+  {
+    "id": "C1.2.2",
+    "name": "    AI Document Summarization",
+    "definition": "Using AI to summarize academic papers, reports, or other documents for literature reviews.",
+    "frequency": 7,
+    "theme_id": "T1",
+    "parent_code_id": "C1.2",
+    "hierarchy_level": 2
+  },
+  {
+    "id": "C1.2.3",
+    "name": "    AI Data Extraction",
+    "definition": "Using AI to extract specific data points, facts, or information from documents for structured literature reviews or databases.",
+    "frequency": 6,
+    "theme_id": "T1",
+    "parent_code_id": "C1.2",
+    "hierarchy_level": 2
+  },
+  {
+    "id": "C1.2.4",
+    "name": "    AI Gap Identification",
+    "definition": "Using AI to identify gaps in existing literature or research, particularly for proposal development.",
+    "frequency": 2,
+    "theme_id": "T1",
+    "parent_code_id": "C1.2",
+    "hierarchy_level": 2
+  },
+  {
+    "id": "C1.2.5",
+    "name": "    AI Source Validation",
+    "definition": "Using AI to validate the accuracy and credibility of sources or information found during literature reviews.",
+    "frequency": 2,
+    "theme_id": "T1",
+    "parent_code_id": "C1.2",
+    "hierarchy_level": 2
+  },
+  {
+    "id": "C1.3.1",
+    "name": "    AI Code Generation/Correction",
+    "definition": "Using AI to generate, correct, or optimize statistical programming code (e.g., R, Python, Stata).",
+    "frequency": 6,
+    "theme_id": "T1",
+    "parent_code_id": "C1.3",
+    "hierarchy_level": 2
+  },
+  {
+    "id": "C1.3.2",
+    "name": "    AI Statistical Model Optimization",
+    "definition": "Using AI to optimize or refine statistical models, including parameter tuning and model selection.",
+    "frequency": 3,
+    "theme_id": "T1",
+    "parent_code_id": "C1.3",
+    "hierarchy_level": 2
+  },
+  {
+    "id": "C1.3.3",
+    "name": "    AI Data Wrangling",
+    "definition": "Using AI to assist with data wrangling, cleaning, merging, and formatting large datasets.",
+    "frequency": 4,
+    "theme_id": "T1",
+    "parent_code_id": "C1.3",
+    "hierarchy_level": 2
+  },
+  {
+    "id": "C1.3.4",
+    "name": "    AI Entity Resolution",
+    "definition": "Using AI or machine learning for entity resolution, linking records across disparate datasets.",
+    "frequency": 1,
+    "theme_id": "T1",
+    "parent_code_id": "C1.3",
+    "hierarchy_level": 2
+  },
+  {
+    "id": "C1.4.1",
+    "name": "    AI Meeting Minutes",
+    "definition": "Using AI to transcribe, summarize, or extract key decisions and action items from meeting minutes.",
+    "frequency": 4,
+    "theme_id": "T1",
+    "parent_code_id": "C1.4",
+    "hierarchy_level": 2
+  },
+  {
+    "id": "C1.4.2",
+    "name": "    AI Proposal Writing",
+    "definition": "Using AI to assist with drafting, structuring, or generating content for research proposals.",
+    "frequency": 7,
+    "theme_id": "T1",
+    "parent_code_id": "C1.4",
+    "hierarchy_level": 2
+  },
+  {
+    "id": "C1.4.3",
+    "name": "    AI Report Generation/Editing",
+    "definition": "Using AI for editing, proofreading, formatting, or generating sections of research reports.",
+    "frequency": 7,
+    "theme_id": "T1",
+    "parent_code_id": "C1.4",
+    "hierarchy_level": 2
+  },
+  {
+    "id": "C1.4.4",
+    "name": "    AI Dissemination/Communication",
+    "definition": "Using AI to assist with disseminating research findings, such as creating podcasts, graphics, or lay summaries.",
+    "frequency": 3,
+    "theme_id": "T1",
+    "parent_code_id": "C1.4",
+    "hierarchy_level": 2
+  },
+  {
+    "id": "C1.4.5",
+    "name": "    AI Wargaming/TTX Augmentation",
+    "definition": "Using AI to conceptualize, adjudicate, or augment player roles in wargames and tabletop exercises.",
+    "frequency": 4,
+    "theme_id": "T1",
+    "parent_code_id": "C1.4",
+    "hierarchy_level": 2
+  },
+  {
+    "id": "C1.4.6",
+    "name": "    AI Forecasting",
+    "definition": "Using AI models to assist with forecasting, including scenario generation and training on forecaster data.",
+    "frequency": 3,
+    "theme_id": "T1",
+    "parent_code_id": "C1.4",
+    "hierarchy_level": 2
+  },
+  {
+    "id": "C1.4.7",
+    "name": "    AI Survey Design",
+    "definition": "Using AI to assist with designing survey instruments or generating synthetic survey populations.",
+    "frequency": 3,
+    "theme_id": "T1",
+    "parent_code_id": "C1.4",
+    "hierarchy_level": 2
+  },
+  {
+    "id": "C1.4.8",
+    "name": "    AI Partner Identification",
+    "definition": "Using AI to identify potential research partners or collaborators.",
+    "frequency": 2,
+    "theme_id": "T1",
+    "parent_code_id": "C1.4",
+    "hierarchy_level": 2
+  },
+  {
+    "id": "C1.4.9",
+    "name": "    AI 508 Compliance",
+    "definition": "Using AI to ensure research products comply with accessibility standards (e.g., 508 compliance).",
+    "frequency": 1,
+    "theme_id": "T1",
+    "parent_code_id": "C1.4",
+    "hierarchy_level": 2
+  },
+  {
+    "id": "C2.1.1",
+    "name": "    Hallucinations",
+    "definition": "AI generating false or non-existent information, such as fabricated citations or data.",
+    "frequency": 8,
+    "theme_id": "T2",
+    "parent_code_id": "C2.1",
+    "hierarchy_level": 2
+  },
+  {
+    "id": "C2.1.2",
+    "name": "    Nuance and Context Loss",
+    "definition": "AI's inability to capture subtle meanings, context, or complex nuances in data.",
+    "frequency": 7,
+    "theme_id": "T2",
+    "parent_code_id": "C2.1",
+    "hierarchy_level": 2
+  },
+  {
+    "id": "C2.1.3",
+    "name": "    Bias in AI",
+    "definition": "The potential for AI models to perpetuate or reify existing biases present in their training data or programming.",
+    "frequency": 2,
+    "theme_id": "T2",
+    "parent_code_id": "C2.1",
+    "hierarchy_level": 2
+  },
+  {
+    "id": "C2.1.4",
+    "name": "    Over-reliance/Blind Trust",
+    "definition": "Researchers blindly trusting AI outputs without sufficient verification or critical assessment.",
+    "frequency": 5,
+    "theme_id": "T2",
+    "parent_code_id": "C2.1",
+    "hierarchy_level": 2
+  },
+  {
+    "id": "C2.2.1",
+    "name": "    Data Privacy/CUI",
+    "definition": "Concerns about handling sensitive or classified data (CUI) with AI tools, including data leakage and de-identification challenges.",
+    "frequency": 6,
+    "theme_id": "T2",
+    "parent_code_id": "C2.2",
+    "hierarchy_level": 2
+  },
+  {
+    "id": "C2.2.2",
+    "name": "    Consent for Data Use",
+    "definition": "The necessity of obtaining informed consent from research participants for their data to be used in AI training or analysis.",
+    "frequency": 1,
+    "theme_id": "T2",
+    "parent_code_id": "C2.2",
+    "hierarchy_level": 2
+  },
+  {
+    "id": "C2.2.3",
+    "name": "    Impact on Researcher Skill Development",
+    "definition": "The potential negative impact of AI automation on the skill development and career paths of junior researchers and RAs.",
+    "frequency": 4,
+    "theme_id": "T2",
+    "parent_code_id": "C2.2",
+    "hierarchy_level": 2
+  },
+  {
+    "id": "C2.2.4",
+    "name": "    Loss of Data Intimacy",
+    "definition": "The risk of losing deep understanding or 'intimacy' with the data when AI performs analysis, potentially missing emergent insights.",
+    "frequency": 4,
+    "theme_id": "T2",
+    "parent_code_id": "C2.2",
+    "hierarchy_level": 2
+  },
+  {
+    "id": "C2.2.5",
+    "name": "    Publication Validity",
+    "definition": "Concerns about the validity and publishability of research findings derived using AI tools, especially in academic journals.",
+    "frequency": 2,
+    "theme_id": "T2",
+    "parent_code_id": "C2.2",
+    "hierarchy_level": 2
+  },
+  {
+    "id": "C2.3.1",
+    "name": "    Outdated Internal Tools",
+    "definition": "RAND's internal AI tools (e.g., RANDCHAT, Muse) being perceived as less capable or outdated compared to commercial alternatives.",
+    "frequency": 7,
+    "theme_id": "T2",
+    "parent_code_id": "C2.3",
+    "hierarchy_level": 2
+  },
+  {
+    "id": "C2.3.2",
+    "name": "    Lack of Clear Guidance",
+    "definition": "Absence of clear policies, best practices, or guidance on appropriate AI tool usage within RAND.",
+    "frequency": 8,
+    "theme_id": "T2",
+    "parent_code_id": "C2.3",
+    "hierarchy_level": 2
+  },
+  {
+    "id": "C2.3.3",
+    "name": "    Data Silos/Fragmentation",
+    "definition": "Data being stored in fragmented, inconsistent systems across RAND, hindering large-scale AI analysis.",
+    "frequency": 3,
+    "theme_id": "T2",
+    "parent_code_id": "C2.3",
+    "hierarchy_level": 2
+  },
+  {
+    "id": "C2.3.4",
+    "name": "    Cost/Resource Constraints",
+    "definition": "Insufficient budget or resources allocated for AI tool subscriptions, training, or dedicated AI personnel.",
+    "frequency": 4,
+    "theme_id": "T2",
+    "parent_code_id": "C2.3",
+    "hierarchy_level": 2
+  },
+  {
+    "id": "C2.3.5",
+    "name": "    Classified Environment Limitations",
+    "definition": "Restrictions on using AI tools in classified or CUI environments, limiting adoption for sensitive projects.",
+    "frequency": 4,
+    "theme_id": "T2",
+    "parent_code_id": "C2.3",
+    "hierarchy_level": 2
+  }
+];
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            updateStatistics();
+            populateFilters();
+            renderThemeSections();
+            setupEventListeners();
+        });
+
+        function updateStatistics() {
+            const exemplarCount = quotes.filter(q => q.source === 'theme_analysis_exemplar').length;
+            const formalCount = quotes.filter(q => q.source === 'formal_extraction').length;
+            
+            document.getElementById('totalQuotes').textContent = quotes.length;
+            document.getElementById('exemplarQuotes').textContent = exemplarCount;
+            document.getElementById('formalQuotes').textContent = formalCount;
+        }
+
+        function populateFilters() {
+            const themeFilter = document.getElementById('themeFilter');
+            themes.forEach(theme => {
+                const option = document.createElement('option');
+                option.value = theme.id;
+                option.textContent = `${theme.id}: ${theme.name}`;
+                themeFilter.appendChild(option);
+            });
+        }
+
+        function renderThemeSections() {
+            const container = document.getElementById('themeSections');
+            container.innerHTML = '';
+
+            themes.forEach(theme => {
+                const themeQuotes = quotes.filter(quote => 
+                    quote.theme_ids && quote.theme_ids.includes(theme.id)
+                );
+
+                const themeSection = createThemeSection(theme, themeQuotes);
+                container.appendChild(themeSection);
+            });
+        }
+
+        function createThemeSection(theme, themeQuotes) {
+            const section = document.createElement('div');
+            section.className = 'theme-section';
+            section.setAttribute('data-theme-id', theme.id);
+
+            const prevalencePercent = Math.round(theme.prevalence * 100);
+            
+            section.innerHTML = `
+                <div class="theme-header">
+                    <h2><i class="fas fa-tag"></i> ${theme.id}: ${theme.name}</h2>
+                    <div class="theme-stats">
+                        <span><i class="fas fa-percentage"></i> ${prevalencePercent}% Prevalence</span>
+                        <span><i class="fas fa-users"></i> ${theme.interview_count} Interviews</span>
+                        <span><i class="fas fa-quote-left"></i> ${themeQuotes.length} Quotes</span>
+                    </div>
+                </div>
+                <div class="theme-content">
+                    <div class="quotes-grid" id="quotes-${theme.id}">
+                        ${themeQuotes.length === 0 ? 
+                            '<div class="no-quotes"><i class="fas fa-info-circle"></i> No quotes available for this theme</div>' : 
+                            themeQuotes.map(quote => createQuoteCard(quote)).join('')
+                        }
+                    </div>
+                </div>
+            `;
+
+            return section;
+        }
+
+        function createQuoteCard(quote) {
+            const codes_for_quote = quote.code_ids ? quote.code_ids : [];
+            const sourceLabel = quote.source === 'theme_analysis_exemplar' ? 'Exemplar' : 'Formal';
+            const sourceIcon = quote.source === 'theme_analysis_exemplar' ? 'star' : 'search';
+
+            return `
+                <div class="quote-card" data-quote-id="${quote.quote_id}">
+                    <div class="quote-header">
+                        <div class="quote-meta">
+                            <span><i class="fas fa-user"></i> ${quote.speaker}</span>
+                            <span><i class="fas fa-file-alt"></i> ${quote.interview_id}</span>
+                        </div>
+                        <div class="quote-source">
+                            <i class="fas fa-${sourceIcon}"></i> ${sourceLabel}
+                        </div>
+                    </div>
+                    <div class="quote-body">
+                        <div class="quote-text">${quote.text}</div>
+                    </div>
+                    <div class="quote-footer">
+                        <div class="code-tags">
+                            ${codes_for_quote.map(code_id => 
+                                `<a href="#" class="code-tag" data-code-id="${code_id}">${code_id}</a>`
+                            ).join('')}
+                        </div>
+                        <small style="color: #666;">Quote ID: ${quote.quote_id}</small>
+                    </div>
+                </div>
+            `;
+        }
+
+        function setupEventListeners() {
+            // Search functionality
+            document.getElementById('searchInput').addEventListener('input', filterQuotes);
+            document.getElementById('themeFilter').addEventListener('change', filterQuotes);
+            document.getElementById('sourceFilter').addEventListener('change', filterQuotes);
+            document.getElementById('clearFilters').addEventListener('click', clearFilters);
+        }
+
+        function filterQuotes() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const selectedTheme = document.getElementById('themeFilter').value;
+            const selectedSource = document.getElementById('sourceFilter').value;
+
+            themes.forEach(theme => {
+                const themeSection = document.querySelector(`[data-theme-id="${theme.id}"]`);
+                const quotesContainer = document.getElementById(`quotes-${theme.id}`);
+                
+                let filteredQuotes = quotes.filter(quote => 
+                    quote.theme_ids && quote.theme_ids.includes(theme.id)
+                );
+
+                // Apply filters
+                if (selectedTheme && selectedTheme !== theme.id) {
+                    themeSection.style.display = 'none';
+                    return;
+                }
+
+                if (selectedSource) {
+                    filteredQuotes = filteredQuotes.filter(quote => quote.source === selectedSource);
+                }
+
+                if (searchTerm) {
+                    filteredQuotes = filteredQuotes.filter(quote => 
+                        quote.text.toLowerCase().includes(searchTerm) ||
+                        quote.speaker.toLowerCase().includes(searchTerm) ||
+                        theme.name.toLowerCase().includes(searchTerm)
+                    );
+                }
+
+                // Show/hide theme section
+                themeSection.style.display = filteredQuotes.length > 0 || !searchTerm ? 'block' : 'none';
+
+                // Update quotes display
+                quotesContainer.innerHTML = filteredQuotes.length === 0 ? 
+                    '<div class="no-quotes"><i class="fas fa-search"></i> No quotes match the current filters</div>' :
+                    filteredQuotes.map(quote => createQuoteCard(quote)).join('');
+            });
+        }
+
+        function clearFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('themeFilter').value = '';
+            document.getElementById('sourceFilter').value = '';
+            filterQuotes();
+        }
+    </script>
+</body>
+</html>
