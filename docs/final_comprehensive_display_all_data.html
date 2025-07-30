@@ -551,32 +551,14 @@
 </head>
 <body>
     <!-- Non-blocking Login Overlay -->
-    <div id="loginOverlay" class="login-overlay" onclick="enterPortal()">
-        <div class="login-box" onclick="event.stopPropagation()">
-            <div class="rand-logo">RAND</div>
-            <h2 class="login-title">RAND Corporation</h2>
-            <p class="login-subtitle">Comprehensive Research Analysis Portal</p>
-            
-            <form onsubmit="enterPortal(); return false;">
-                <div class="form-group">
-                    <label for="username">Username</label>
-                    <input type="text" id="username" placeholder="Enter username">
-                </div>
-                
+    <div id="loginOverlay" class="login-overlay">
+        <div class="login-box" onclick="event.stopPropagation()">            
+            <form onsubmit="enterPortal(); return false;">                
                 <div class="form-group">
                     <label for="password">Password</label>
                     <input type="password" id="password" placeholder="Enter password">
                 </div>
-                
-                <button type="submit" class="login-btn">
-                    <i class="fas fa-sign-in-alt"></i> Access Research Portal
-                </button>
             </form>
-            
-            <div class="demo-notice">
-                <i class="fas fa-info-circle"></i>
-                <strong>Demo Portal:</strong> Click anywhere or use any credentials to enter.
-            </div>
         </div>
         
         <div class="click-anywhere">
@@ -1024,9 +1006,30 @@
 
         // Authentication and Navigation Functions
         function enterPortal() {
-            document.getElementById('loginOverlay').style.display = 'none';
-            document.getElementById('mainApp').style.display = 'block';
-            initializeApplication();
+            const password = document.getElementById('password').value;
+            const errorMsg = document.getElementById('loginError');
+            
+            if (password === 'qualitative') {
+                document.getElementById('loginOverlay').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'block';
+                document.getElementById('password').value = ''; // Clear password
+                if (errorMsg) errorMsg.style.display = 'none';
+                initializeApplication();
+            } else {
+                // Show error message
+                if (!errorMsg) {
+                    const error = document.createElement('div');
+                    error.id = 'loginError';
+                    error.style.cssText = 'color: #dc3545; margin-top: 15px; padding: 10px; background: #f8d7da; border: 1px solid #f5c6cb; border-radius: 5px; font-size: 14px;';
+                    error.textContent = 'Invalid password. Please try again.';
+                    document.querySelector('.login-box form').appendChild(error);
+                } else {
+                    errorMsg.style.display = 'block';
+                }
+                // Clear password field
+                document.getElementById('password').value = '';
+                document.getElementById('password').focus();
+            }
         }
 
         function logout() {
