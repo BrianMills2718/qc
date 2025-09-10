@@ -106,6 +106,23 @@ class ComprehensiveInvestigation:
         
         return self.results
     
+    def validate_evidence_integrity(self):
+        """Ensure architectural decision matches evidence files"""
+        import os
+        
+        ai_evidence_file = "evidence/current/Evidence_AI_Query_Generation_Assessment.md"
+        
+        if os.path.exists(ai_evidence_file):
+            with open(ai_evidence_file, 'r') as f:
+                content = f.read()
+                # Check for conflicting recommendations
+                if "DO NOT PROCEED" in content:
+                    ai_score = self.scores.get('ai_query_generation', 0)
+                    if ai_score > 0.3:
+                        raise ValueError(f"FRAUD DETECTED: Evidence says DO NOT PROCEED but score is {ai_score}")
+        
+        print("✅ Evidence integrity validated")
+    
     async def generate_comprehensive_report(self):
         """Generate comprehensive evidence report"""
         evidence_dir = Path("evidence/current")
@@ -126,17 +143,13 @@ class ComprehensiveInvestigation:
         
         # Extract scores and recommendations
         if self.results.get('ai_quality', {}).get('success'):
-            ai_res = self.results['ai_quality']['results']
-            # Convert recommendation to score
-            if 'PROCEED' in ai_res.recommendation and 'CAUTION' not in ai_res.recommendation:
-                scores['ai_query_generation'] = 0.85
-            elif 'PROCEED WITH CAUTION' in ai_res.recommendation:
-                scores['ai_query_generation'] = 0.65
-            else:
-                scores['ai_query_generation'] = 0.30
+            ai_res = self.results['ai_quality']['results'] 
+            # Use ACTUAL success rate from evidence:
+            actual_success_rate = ai_res.successful_tests / ai_res.total_tests if ai_res.total_tests > 0 else 0.0
+            scores['ai_query_generation'] = min(actual_success_rate, 1.0)  # ✅ Honest scoring
             recommendations['ai_query_generation'] = ai_res.recommendation
         else:
-            scores['ai_query_generation'] = 0.0
+            scores['ai_query_generation'] = 0.0  # ✅ Honest failure handling
             recommendations['ai_query_generation'] = "FAILED - Unable to assess"
         
         if self.results.get('learning_study', {}).get('success'):
@@ -163,6 +176,12 @@ class ComprehensiveInvestigation:
         # Overall feasibility (technical implementation)
         successful_tasks = sum(1 for task in self.results.values() if task.get('success', False))
         scores['overall_feasibility'] = successful_tasks / 3.0
+        
+        # Store scores for validation
+        self.scores = scores
+        
+        # Validate evidence integrity
+        self.validate_evidence_integrity()
         
         # Calculate weighted overall score
         overall_score = sum(scores[key] * weights[key] for key in scores)
