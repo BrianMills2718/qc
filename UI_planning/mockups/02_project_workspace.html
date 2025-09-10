@@ -265,6 +265,44 @@
                     </div>
                 </div>
 
+                <!-- Natural Language Query Panel -->
+                <div class="filter-section">
+                    <div class="filter-title">Natural Language Query</div>
+                    <div class="query-panel">
+                        <div class="query-header">
+                            <span class="status-indicator" id="query-status">Ready</span>
+                        </div>
+                        <div class="query-input-group">
+                            <textarea 
+                                id="natural-query" 
+                                placeholder="Ask about your research data... e.g., 'Show me all people who work at large organizations'" 
+                                rows="3"
+                                style="width: 100%; margin-bottom: 0.5rem; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 4px; font-family: inherit; font-size: 0.875rem; resize: vertical;">
+                            </textarea>
+                            <button id="execute-query" class="btn btn-primary" style="width: 100%;">Generate & Execute</button>
+                        </div>
+                        <div class="query-results" id="query-results" style="display: none; margin-top: 1rem;">
+                            <div class="generated-cypher">
+                                <label style="font-size: 0.75rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase;">Generated Cypher:</label>
+                                <code id="cypher-display" style="display: block; background: var(--bg-color); padding: 0.5rem; border-radius: 4px; font-size: 0.75rem; margin-top: 0.25rem; word-break: break-all;"></code>
+                            </div>
+                            <div class="execution-status" style="margin-top: 0.5rem;">
+                                <span id="execution-message" style="font-size: 0.875rem;"></span>
+                            </div>
+                        </div>
+                        
+                        <!-- Query Templates -->
+                        <div class="query-templates" style="margin-top: 1rem;">
+                            <h4 style="font-size: 0.75rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 0.5rem;">Example Queries:</h4>
+                            <div class="template-buttons" style="display: flex; flex-direction: column; gap: 0.25rem;">
+                                <button class="template-btn" onclick="fillTemplate('Show me all people')" style="background: none; border: 1px solid var(--border-color); padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; cursor: pointer; text-align: left;">All People</button>
+                                <button class="template-btn" onclick="fillTemplate('Find people who work at large organizations')" style="background: none; border: 1px solid var(--border-color); padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; cursor: pointer; text-align: left;">Large Org Workers</button>
+                                <button class="template-btn" onclick="fillTemplate('Which codes appear most frequently?')" style="background: none; border: 1px solid var(--border-color); padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; cursor: pointer; text-align: left;">Top Codes</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <button class="btn btn-secondary" style="width: 100%; margin-top: 1rem;">
                     Clear All Filters
                 </button>
@@ -510,6 +548,236 @@
         // Confidence slider
         document.getElementById('confidenceSlider').addEventListener('input', function(e) {
             document.getElementById('confidenceValue').textContent = e.target.value + '%';
+        });
+        
+        // Natural Language Query Processing
+        async function processNaturalLanguageQuery() {
+            const queryInput = document.getElementById('natural-query').value;
+            const statusEl = document.getElementById('query-status');
+            const resultsEl = document.getElementById('query-results');
+            
+            // Pre-validation
+            const validation = validateQuery(queryInput);
+            if (!validation.valid) {
+                showQueryValidationError(validation.error);
+                return;
+            }
+            
+            // Update UI state
+            statusEl.textContent = 'Processing...';
+            statusEl.className = 'status-indicator processing';
+            statusEl.style.color = '#ff9800';
+            
+            try {
+                // Call backend API (to be implemented)
+                const response = await fetch('/api/query/natural-language', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({query: queryInput})
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Display generated Cypher
+                    document.getElementById('cypher-display').textContent = result.cypher;
+                    document.getElementById('execution-message').textContent = 
+                        `Found ${result.data.length} results`;
+                    document.getElementById('execution-message').style.color = 'var(--success-color)';
+                    
+                    // Update graph with results
+                    updateGraphWithQueryResults(result.data);
+                    
+                    statusEl.textContent = 'Success';
+                    statusEl.className = 'status-indicator success';
+                    statusEl.style.color = 'var(--success-color)';
+                } else {
+                    throw new Error(result.error || 'Query failed');
+                }
+                
+                resultsEl.style.display = 'block';
+                
+            } catch (error) {
+                statusEl.textContent = 'Error';
+                statusEl.className = 'status-indicator error';
+                statusEl.style.color = 'var(--error-color)';
+                document.getElementById('execution-message').textContent = 
+                    handleQueryError(error, queryInput);
+                document.getElementById('execution-message').style.color = 'var(--error-color)';
+                resultsEl.style.display = 'block';
+                
+                // Log for debugging
+                console.error('Query processing error:', error);
+                console.log('Original query:', queryInput);
+            }
+        }
+        
+        function updateGraphWithQueryResults(data) {
+            // Convert query results to Cytoscape format
+            const elements = data.map((item, index) => ({
+                data: { 
+                    id: item.id || `result_${index}`, 
+                    label: item.name || item.label || `Result ${index}`,
+                    ...item.properties 
+                }
+            }));
+            
+            // Update existing Cytoscape graph
+            if (window.cy) {
+                // Clear existing elements
+                window.cy.elements().remove();
+                
+                // Add new elements
+                window.cy.add(elements);
+                
+                // Run layout
+                window.cy.layout({ name: 'cose', animate: true }).run();
+                
+                console.log(`Graph updated with ${elements.length} elements`);
+            } else {
+                console.warn('Cytoscape instance not found');
+            }
+        }
+        
+        function handleQueryError(error, queryInput) {
+            console.error('Query processing error:', error);
+            
+            // Categorize errors for user-friendly messages with suggestions
+            let userMessage;
+            let suggestions = [];
+            
+            if (error.message.includes('generate') || error.message.includes('AI')) {
+                userMessage = 'Could not understand the query. Try rephrasing or using simpler language.';
+                suggestions = [
+                    'Try using simpler language',
+                    'Be more specific about what you want to find',
+                    'Use template queries as examples'
+                ];
+            } else if (error.message.includes('Neo4j') || error.message.includes('database')) {
+                userMessage = 'Database connection issue. Please try again in a moment.';
+                suggestions = [
+                    'Wait a moment and try again',
+                    'Check if the server is running',
+                    'Contact administrator if problem persists'
+                ];
+            } else if (error.message.includes('fetch') || error.message.includes('network')) {
+                userMessage = 'Network connection issue. Please check your connection and try again.';
+                suggestions = [
+                    'Check your internet connection',
+                    'Try refreshing the page',
+                    'Verify the server is accessible'
+                ];
+            } else if (error.message.includes('timeout')) {
+                userMessage = 'Query processing took too long. Try a simpler query.';
+                suggestions = [
+                    'Use more specific search terms',
+                    'Try a simpler question',
+                    'Break complex queries into smaller parts'
+                ];
+            } else if (error.message.includes('invalid') || error.message.includes('syntax')) {
+                userMessage = 'Generated query had syntax issues. Please try rephrasing.';
+                suggestions = [
+                    'Try different wording',
+                    'Use template queries as guides',
+                    'Simplify your question'
+                ];
+            } else {
+                userMessage = 'Query processing failed. Please check your input and try again.';
+                suggestions = [
+                    'Try using a template query',
+                    'Check your question for clarity',
+                    'Refresh the page if problems continue'
+                ];
+            }
+            
+            // Log detailed error information for debugging
+            console.group('Query Error Details');
+            console.log('Original query:', queryInput);
+            console.log('Error type:', error.name || 'Unknown');
+            console.log('Error message:', error.message);
+            console.log('Stack trace:', error.stack);
+            console.log('Timestamp:', new Date().toISOString());
+            console.groupEnd();
+            
+            // Add suggestions to the message
+            if (suggestions.length > 0) {
+                userMessage += '\n\nSuggestions:\n• ' + suggestions.join('\n• ');
+            }
+            
+            return userMessage;
+        }
+        
+        function validateQuery(query) {
+            // Pre-validation to catch obvious issues before sending to backend
+            const trimmedQuery = query.trim();
+            
+            if (trimmedQuery.length === 0) {
+                return { valid: false, error: 'Please enter a query' };
+            }
+            
+            if (trimmedQuery.length < 3) {
+                return { valid: false, error: 'Query too short. Please be more specific.' };
+            }
+            
+            if (trimmedQuery.length > 500) {
+                return { valid: false, error: 'Query too long. Please keep it under 500 characters.' };
+            }
+            
+            // Check for potentially problematic patterns
+            const problematicPatterns = [
+                { pattern: /^\s*delete\s+/i, message: 'Delete operations are not allowed' },
+                { pattern: /^\s*drop\s+/i, message: 'Drop operations are not allowed' },
+                { pattern: /^\s*create\s+/i, message: 'Create operations are not allowed in queries' },
+                { pattern: /;\s*delete\s+/i, message: 'Multiple statements with delete not allowed' }
+            ];
+            
+            for (const { pattern, message } of problematicPatterns) {
+                if (pattern.test(trimmedQuery)) {
+                    return { valid: false, error: message };
+                }
+            }
+            
+            return { valid: true };
+        }
+        
+        function showQueryValidationError(message) {
+            const statusEl = document.getElementById('query-status');
+            const resultsEl = document.getElementById('query-results');
+            const messageEl = document.getElementById('execution-message');
+            
+            statusEl.textContent = 'Invalid';
+            statusEl.className = 'status-indicator error';
+            statusEl.style.color = 'var(--error-color)';
+            
+            messageEl.textContent = message;
+            messageEl.style.color = 'var(--error-color)';
+            
+            resultsEl.style.display = 'block';
+            
+            // Auto-hide validation errors after 5 seconds
+            setTimeout(() => {
+                if (statusEl.textContent === 'Invalid') {
+                    statusEl.textContent = 'Ready';
+                    statusEl.className = 'status-indicator';
+                    statusEl.style.color = '';
+                    resultsEl.style.display = 'none';
+                }
+            }, 5000);
+        }
+        
+        function fillTemplate(query) {
+            document.getElementById('natural-query').value = query;
+        }
+        
+        // Wire up event handlers
+        document.getElementById('execute-query').addEventListener('click', processNaturalLanguageQuery);
+        
+        // Allow Enter key to submit query (with Shift+Enter for new line)
+        document.getElementById('natural-query').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                processNaturalLanguageQuery();
+            }
         });
     </script>
 </body>

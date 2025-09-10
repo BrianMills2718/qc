@@ -194,9 +194,19 @@ class QCAPIServer:
             
             return self.active_jobs[job_id]
         
+        # Register natural language query endpoints
+        try:
+            from .query_endpoints import query_endpoints
+            query_endpoints.register_endpoints(self._app)
+            self._logger.info("Natural language query endpoints registered successfully")
+        except Exception as e:
+            self._logger.error(f"Failed to register query endpoints: {e}")
+        
         self.endpoints = [
             {"method": "GET", "path": "/health", "description": "Health check"},
             {"method": "POST", "path": "/analyze", "description": "Start analysis"},
+            {"method": "POST", "path": "/api/query/natural-language", "description": "Natural language to Cypher query"},
+            {"method": "GET", "path": "/api/query/health", "description": "Query system health check"},
             {"method": "GET", "path": "/jobs/{job_id}", "description": "Get job status"}
         ]
     
