@@ -1,0 +1,35 @@
+You are analyzing {num_interviews} interviews to discover entity types and relationships.
+
+ANALYTIC QUESTION: {analytic_question}
+
+PROVIDED ENTITY TYPES TO INCLUDE (MANDATORY):
+{provided_entity_types}
+
+PROVIDED RELATIONSHIP TYPES TO INCLUDE (MANDATORY):
+{provided_relationship_types}
+
+INSTRUCTIONS:
+1. YOU MUST include ALL provided entity and relationship types above
+2. Discover ADDITIONAL types from the interviews
+
+3. ENTITY TYPES (provided + discovered):
+   - Clear name and definition
+   - Examples from the interviews
+   - Importance to the analytic question
+   - Confidence score
+
+4. RELATIONSHIP TYPES (provided + discovered):
+   - Clear name and description
+   - Valid source and target entity types
+   - Examples from the data
+   - Frequency and importance
+
+5. Ensure all types are:
+   - Grounded in the actual interview content
+   - Relevant to the analytic question
+   - Useful for analysis
+
+INTERVIEW CONTENT:
+{combined_text}
+
+Generate a comprehensive schema incorporating all provided types.

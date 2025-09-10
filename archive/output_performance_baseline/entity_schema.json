@@ -1,0 +1,390 @@
+{
+  "entity_types": [
+    {
+      "name": "Researcher",
+      "description": "Individuals who conduct research, often at RAND, possessing various methodological expertise.",
+      "frequency": 15,
+      "example_entities": [
+        "Todd Helmus",
+        "Ramya Chari",
+        "Joie Acosta",
+        "Luke Matthews",
+        "Douglas Yeung",
+        "Molly Dunnigan",
+        "Kandice Kapinos"
+      ],
+      "common_contexts": [
+        "qualitative researcher at Rand",
+        "associate policy researcher",
+        "psychologist by training",
+        "anthropologist",
+        "Director Methods Center for Causal Inference"
+      ],
+      "confidence": 1.0
+    },
+    {
+      "name": "Research Method",
+      "description": "Systematic approaches or techniques used to conduct studies, gather data, and analyze information.",
+      "frequency": 20,
+      "example_entities": [
+        "Interviews",
+        "Focus Groups",
+        "Literature Reviews",
+        "Surveys",
+        "Machine Learning",
+        "Theme Coding",
+        "Scenario Analysis",
+        "Randomized Control Trial",
+        "Synthetic Control Methods"
+      ],
+      "common_contexts": [
+        "methodological areas that you're operating at",
+        "what methods are you applying at Rand",
+        "quiver of methods commonly used",
+        "methods worth investing in"
+      ],
+      "confidence": 1.0
+    },
+    {
+      "name": "AI Tool/Application",
+      "description": "Software or platforms that leverage artificial intelligence to assist with various research tasks.",
+      "frequency": 12,
+      "example_entities": [
+        "Otter",
+        "Dedoose",
+        "Muse",
+        "Expert Lens",
+        "Elicit",
+        "RANDCHAT",
+        "Claude",
+        "ChatGPT",
+        "Palantir"
+      ],
+      "common_contexts": [
+        "using large language models",
+        "early adopter of a lot of these tools",
+        "LLM side",
+        "integrating AI now",
+        "AI tools to help with my code"
+      ],
+      "confidence": 0.95
+    },
+    {
+      "name": "Research Data",
+      "description": "Raw or processed information collected, analyzed, or used as input in research studies.",
+      "frequency": 10,
+      "example_entities": [
+        "Transcripts",
+        "Social Media Data",
+        "Military Records",
+        "Qualitative Data",
+        "Quantitative Data",
+        "Documents",
+        "Abstracts",
+        "Publicly Available Datasets"
+      ],
+      "common_contexts": [
+        "gathering data",
+        "content of a lot of different posts",
+        "converting qualitative data",
+        "coding large amounts of data",
+        "pulling data down"
+      ],
+      "confidence": 0.95
+    },
+    {
+      "name": "Research Output",
+      "description": "Deliverables, findings, or products resulting from research activities.",
+      "frequency": 8,
+      "example_entities": [
+        "Reports",
+        "Proposals",
+        "Recommendations",
+        "Executive Summary",
+        "Graphics",
+        "Articles",
+        "Papers",
+        "Publications"
+      ],
+      "common_contexts": [
+        "write my reports",
+        "proposal writing",
+        "reality Check our recommendations",
+        "most read article"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "name": "Research Challenge",
+      "description": "Difficulties, obstacles, or limitations encountered during the research process.",
+      "frequency": 15,
+      "example_entities": [
+        "Finding the right people",
+        "Recruiting",
+        "Coding large amounts of data",
+        "Trusting AI output",
+        "Nuances missed by AI",
+        "Hallucinations",
+        "Career development",
+        "Competitive disadvantage"
+      ],
+      "common_contexts": [
+        "long pull in the tent",
+        "most difficult, challenging task",
+        "point of frustration",
+        "potential pitfalls",
+        "risks and challenges"
+      ],
+      "confidence": 0.95
+    },
+    {
+      "name": "Organization",
+      "description": "Institutions or entities involved in or affected by research, including research organizations, sponsors, and competitors.",
+      "frequency": 8,
+      "example_entities": [
+        "RAND",
+        "NIH",
+        "Army",
+        "DoD",
+        "Federal Agency",
+        "Palantir"
+      ],
+      "common_contexts": [
+        "qualitative researcher at Rand",
+        "tools available at rand",
+        "AI adoption at Rand",
+        "implementing AI very much in Arroyo",
+        "competitive edge"
+      ],
+      "confidence": 0.9
+    }
+  ],
+  "relationship_types": [
+    {
+      "name": "USES",
+      "description": "Describes the application or utilization of a research method or AI tool by researchers or organizations in their work.",
+      "frequency": 15,
+      "common_source_types": [
+        "Researcher",
+        "Organization"
+      ],
+      "common_target_types": [
+        "Research Method",
+        "AI Tool/Application"
+      ],
+      "directional": true,
+      "example_relationships": [
+        {
+          "source": "Todd Helmus",
+          "target": "interviews",
+          "context": "For me it's a lot of interviews"
+        },
+        {
+          "source": "Kandice Kapinos",
+          "target": "AI tools",
+          "context": "I have used AI tools to help with my code."
+        },
+        {
+          "source": "RAND",
+          "target": "JICM",
+          "context": "RAND maintained for the army called JICM"
+        }
+      ],
+      "confidence": 1.0
+    },
+    {
+      "name": "PERCEIVES",
+      "description": "Captures a researcher's subjective view, feeling, or assessment of a research-related element.",
+      "frequency": 10,
+      "common_source_types": [
+        "Researcher"
+      ],
+      "common_target_types": [
+        "Research Method",
+        "AI Tool/Application",
+        "Research Challenge"
+      ],
+      "directional": true,
+      "example_relationships": [
+        {
+          "source": "Joie Acosta",
+          "target": "Recruiting",
+          "context": "Finding the right people and recruiting them."
+        },
+        {
+          "source": "Sara McCleskey",
+          "target": "Coding",
+          "context": "Coding Is very annoying."
+        },
+        {
+          "source": "Ramya Chari",
+          "target": "Expert Lens",
+          "context": "it was difficult for me to like a just inherently trust what it was spitting out"
+        }
+      ],
+      "confidence": 0.95
+    },
+    {
+      "name": "IMPACTS",
+      "description": "Describes how one element causes a change or consequence in another, particularly concerning AI's influence on research.",
+      "frequency": 8,
+      "common_source_types": [
+        "AI Tool/Application",
+        "Research Method",
+        "Research Challenge"
+      ],
+      "common_target_types": [
+        "Research Process",
+        "Research Output",
+        "Researcher"
+      ],
+      "directional": true,
+      "example_relationships": [
+        {
+          "source": "AI",
+          "target": "implementation science",
+          "context": "the role that AI plays in implementation science"
+        },
+        {
+          "source": "AI",
+          "target": "career development",
+          "context": "I worry about career development and skillset development among the younger folks."
+        },
+        {
+          "source": "Recruitment difficulty",
+          "target": "Research project",
+          "context": "I have stories of my own spectacular recruitment failures"
+        }
+      ],
+      "confidence": 0.9
+    },
+    {
+      "name": "PRODUCES",
+      "description": "Denotes the creation of tangible or intangible results from research activities or AI processing.",
+      "frequency": 5,
+      "common_source_types": [
+        "Researcher",
+        "AI Tool/Application"
+      ],
+      "common_target_types": [
+        "Research Output",
+        "Research Data"
+      ],
+      "directional": true,
+      "example_relationships": [
+        {
+          "source": "Luke Matthews",
+          "target": "statistical quantified output",
+          "context": "producing some kind of statistical quantified output"
+        },
+        {
+          "source": "LLM",
+          "target": "text",
+          "context": "generate text for me"
+        },
+        {
+          "source": "Kandice Kapinos",
+          "target": "executive summary",
+          "context": "take the whole proposal and say write an executive summary"
+        }
+      ],
+      "confidence": 0.85
+    },
+    {
+      "name": "REQUIRES",
+      "description": "Indicates a dependency where a method or process needs certain elements to function or be completed.",
+      "frequency": 3,
+      "common_source_types": [
+        "Research Method",
+        "Research Process"
+      ],
+      "common_target_types": [
+        "Research Data",
+        "Resource"
+      ],
+      "directional": true,
+      "example_relationships": [
+        {
+          "source": "Focus groups",
+          "target": "sample",
+          "context": "focus groups, you kind of gotta have...a sample already to pick from."
+        },
+        {
+          "source": "Systematic reviews",
+          "target": "spreadsheets",
+          "context": "rely on spreadsheets to draft your literature reviews"
+        },
+        {
+          "source": "AI for literature reviews",
+          "target": "trust",
+          "context": "need to really see good evidence that i can trust it before using for lit reviews"
+        }
+      ],
+      "confidence": 0.8
+    },
+    {
+      "name": "SUPPORTS",
+      "description": "Describes how an AI tool or other resource facilitates or aids in the execution of research tasks.",
+      "frequency": 5,
+      "common_source_types": [
+        "AI Tool/Application",
+        "Resource"
+      ],
+      "common_target_types": [
+        "Researcher",
+        "Research Process"
+      ],
+      "directional": true,
+      "example_relationships": [
+        {
+          "source": "Muse",
+          "target": "coding",
+          "context": "RAND has a product to help on the coding side. Right muse."
+        },
+        {
+          "source": "AI",
+          "target": "scheduling",
+          "context": "finding people maybe supporting scheduling like that kind of thing feels like like AI could nail that out of the park."
+        },
+        {
+          "source": "AI",
+          "target": "code",
+          "context": "AI tools to check the code, annotate the code"
+        }
+      ],
+      "confidence": 0.9
+    },
+    {
+      "name": "COMPARES",
+      "description": "Describes the act of assessing similarities and differences between various research elements, often for evaluation.",
+      "frequency": 2,
+      "common_source_types": [
+        "Researcher",
+        "AI Tool/Application"
+      ],
+      "common_target_types": [
+        "Research Method",
+        "AI Tool/Application",
+        "Research Data"
+      ],
+      "directional": true,
+      "example_relationships": [
+        {
+          "source": "Luke Matthews",
+          "target": "LLM for theme coding to supervised machine learning to humans",
+          "context": "comparing Directly, like the LLM for this kind of theme coding to supervise machine learning to humans."
+        },
+        {
+          "source": "Researchers",
+          "target": "RA's and Elicit",
+          "context": "see like whether it was As accurate as our Ra's."
+        }
+      ],
+      "confidence": 0.8
+    }
+  ],
+  "total_entities_found": 7,
+  "total_relationships_found": 7,
+  "discovery_method": "Interviews",
+  "extraction_confidence": 0.9
+}

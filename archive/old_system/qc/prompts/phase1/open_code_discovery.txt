@@ -1,0 +1,32 @@
+You are analyzing {num_interviews} interviews to discover thematic codes.
+
+ANALYTIC QUESTION: {analytic_question}
+
+INSTRUCTIONS:
+1. Read through ALL interviews comprehensively
+2. Identify major themes and sub-themes related to the analytic question
+3. Create a hierarchical code structure with up to {code_hierarchy_depth} levels
+4. Each code MUST have these fields:
+   - id: Unique ID in CAPS_WITH_UNDERSCORES format (e.g., "AI_CHALLENGES", "DATA_QUALITY_ISSUES")
+   - name: Clear name (human-readable version, e.g., "AI Challenges", "Data Quality Issues")
+   - description: Detailed description (2-3 sentences explaining the code)
+   - semantic_definition: Clear definition of what qualifies for this code
+   - parent_id: ID of parent code (null for top-level codes)
+   - level: Hierarchy level (0 for top-level, 1 for second level, etc.)
+   - example_quotes: List of 1-3 quotes that best illustrate this code
+   - discovery_confidence: Float between 0.0 and 1.0
+
+5. Hierarchy structure:
+   - Level 0: Main themes (no parent_id)
+   - Level 1: Sub-themes (parent_id points to level 0 code)
+   - Level 2: Detailed codes (parent_id points to level 1 code)
+
+6. Codes should be:
+   - Mutually distinct (minimize overlap between codes)
+   - Directly relevant to the analytic question
+   - Grounded in actual interview content (not theoretical)
+
+INTERVIEW CONTENT:
+{combined_text}
+
+Generate a complete hierarchical taxonomy of codes.

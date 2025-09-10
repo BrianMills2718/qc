@@ -1,0 +1,218 @@
+{
+  "properties": [
+    {
+      "name": "name",
+      "description": "The full name of the speaker.",
+      "property_type": "text",
+      "frequency": 1,
+      "example_values": [
+        "Kandice Kapinos"
+      ],
+      "is_categorical": false,
+      "possible_values": null,
+      "confidence": 1.0
+    },
+    {
+      "name": "role",
+      "description": "The professional role or title of the speaker.",
+      "property_type": "text",
+      "frequency": 1,
+      "example_values": [
+        "Director Methods Center for Causal Inference"
+      ],
+      "is_categorical": false,
+      "possible_values": null,
+      "confidence": 1.0
+    },
+    {
+      "name": "organization",
+      "description": "The organization or center the speaker is affiliated with.",
+      "property_type": "text",
+      "frequency": 1,
+      "example_values": [
+        "Methods Center for Causal Inference"
+      ],
+      "is_categorical": false,
+      "possible_values": null,
+      "confidence": 1.0
+    },
+    {
+      "name": "tenure_in_current_role",
+      "description": "Indicates how long the speaker has been in their current role.",
+      "property_type": "categorical",
+      "frequency": 1,
+      "example_values": [
+        "relatively new"
+      ],
+      "is_categorical": true,
+      "possible_values": [
+        "new",
+        "relatively new",
+        "established",
+        "long-term"
+      ],
+      "confidence": 0.8
+    },
+    {
+      "name": "expertise_areas",
+      "description": "Specific areas of professional expertise or specialization.",
+      "property_type": "list",
+      "frequency": 1,
+      "example_values": [
+        "causal inference techniques"
+      ],
+      "is_categorical": false,
+      "possible_values": null,
+      "confidence": 0.9
+    },
+    {
+      "name": "uses_ai_tools",
+      "description": "Whether the speaker uses AI tools in their work.",
+      "property_type": "boolean",
+      "frequency": 1,
+      "example_values": [
+        "true"
+      ],
+      "is_categorical": true,
+      "possible_values": [
+        "true",
+        "false"
+      ],
+      "confidence": 1.0
+    },
+    {
+      "name": "ai_tools_used",
+      "description": "Specific AI tools or platforms the speaker has used.",
+      "property_type": "list",
+      "frequency": 1,
+      "example_values": [
+        "RAND Chat",
+        "Claude"
+      ],
+      "is_categorical": false,
+      "possible_values": null,
+      "confidence": 1.0
+    },
+    {
+      "name": "ai_usage_trend",
+      "description": "The trend in the speaker's AI tool usage over time.",
+      "property_type": "categorical",
+      "frequency": 1,
+      "example_values": [
+        "increased use in past 6 months"
+      ],
+      "is_categorical": true,
+      "possible_values": [
+        "increased use",
+        "decreased use",
+        "consistent use",
+        "no use"
+      ],
+      "confidence": 0.8
+    },
+    {
+      "name": "primary_work_activity",
+      "description": "The main professional activity or focus of the speaker.",
+      "property_type": "text",
+      "frequency": 1,
+      "example_values": [
+        "proposal writing"
+      ],
+      "is_categorical": false,
+      "possible_values": null,
+      "confidence": 0.9
+    },
+    {
+      "name": "perception_of_rand_ai_adoption",
+      "description": "The speaker's view on the pace of AI adoption within RAND compared to others.",
+      "property_type": "categorical",
+      "frequency": 1,
+      "example_values": [
+        "slower than others"
+      ],
+      "is_categorical": true,
+      "possible_values": [
+        "slower than others",
+        "on par with others",
+        "faster than others",
+        "unknown"
+      ],
+      "confidence": 0.8
+    },
+    {
+      "name": "personal_feelings_on_ai_impact",
+      "description": "The speaker's personal feelings or concerns regarding the broader impact of AI on their work or profession.",
+      "property_type": "text",
+      "frequency": 1,
+      "example_values": [
+        "fear of being left behind",
+        "feeling a little about it"
+      ],
+      "is_categorical": false,
+      "possible_values": null,
+      "confidence": 0.7
+    },
+    {
+      "name": "ai_concerns",
+      "description": "Specific ethical or practical concerns the speaker has about using AI tools.",
+      "property_type": "list",
+      "frequency": 1,
+      "example_values": [
+        "intellectual property theft",
+        "hallucinations/inaccurate information"
+      ],
+      "is_categorical": false,
+      "possible_values": null,
+      "confidence": 0.9
+    },
+    {
+      "name": "ai_use_cases",
+      "description": "Specific tasks or applications for which the speaker uses AI.",
+      "property_type": "list",
+      "frequency": 1,
+      "example_values": [
+        "fixing code",
+        "proposal writing",
+        "rewriting text",
+        "explaining complex topics",
+        "identifying sensitive content",
+        "literature review",
+        "image generation"
+      ],
+      "is_categorical": false,
+      "possible_values": null,
+      "confidence": 0.9
+    },
+    {
+      "name": "ai_adoption_barriers_at_rand",
+      "description": "Perceived barriers to AI adoption within RAND.",
+      "property_type": "list",
+      "frequency": 1,
+      "example_values": [
+        "hesitancy due to official guidance",
+        "classified work concerns"
+      ],
+      "is_categorical": false,
+      "possible_values": null,
+      "confidence": 0.8
+    },
+    {
+      "name": "need_for_ai_training_at_rand",
+      "description": "Whether the speaker perceives a need for more AI training or education at RAND.",
+      "property_type": "boolean",
+      "frequency": 1,
+      "example_values": [
+        "true"
+      ],
+      "is_categorical": true,
+      "possible_values": [
+        "true",
+        "false"
+      ],
+      "confidence": 0.9
+    }
+  ],
+  "total_speakers_found": 1,
+  "discovery_method": "interview analysis",
+  "extraction_confidence": 0.9
+}

@@ -1,0 +1,20 @@
+[
+  {
+    "interview_id": "AI assessment Arroyo SDR",
+    "filename": "AI assessment Arroyo SDR.docx",
+    "error": "Real hierarchical extraction failed: asyncio.run() cannot be called from a running event loop",
+    "timestamp": "2025-09-05T07:59:28.873978"
+  },
+  {
+    "interview_id": "Focus Group on AI and Methods 7_7",
+    "filename": "Focus Group on AI and Methods 7_7.docx",
+    "error": "Real hierarchical extraction failed: asyncio.run() cannot be called from a running event loop",
+    "timestamp": "2025-09-05T07:59:28.876978"
+  },
+  {
+    "interview_id": "Interview Kandice Kapinos",
+    "filename": "Interview Kandice Kapinos.docx",
+    "error": "Real hierarchical extraction failed: asyncio.run() cannot be called from a running event loop",
+    "timestamp": "2025-09-05T07:59:28.876978"
+  }
+]

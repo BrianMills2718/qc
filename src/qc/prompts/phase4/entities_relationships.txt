@@ -1,0 +1,70 @@
+You are extracting entities and relationships from an interview.
+
+INTERVIEW: {interview_id}
+ANALYTIC QUESTION: {analytic_question}
+
+ENTITY TYPES TO EXTRACT (from Phase 3):
+{formatted_entity_schema}
+
+ALREADY EXTRACTED QUOTES (for context):
+{quote_context}
+
+INSTRUCTIONS:
+1. ENTITY EXTRACTION:
+   - CRITICAL: ONLY extract entities that match the types defined in the schema above
+   - Do NOT create new entity types like "ORGANIZATION" or "RESEARCHER_ROLE" if they're not in the schema
+   - If an entity doesn't fit ANY of the provided types, DO NOT extract it
+   - Entity naming: Use the most complete/formal name mentioned (e.g., "Dr. Jane Smith" not just "Smith")
+   - Each entity needs:
+     * name: The specific instance (e.g., "ChatGPT", "Stanford University")
+     * type: Must EXACTLY match a type ID from the schema above (e.g., "AI_TOOL")
+     * confidence: 1.0 if explicitly named, lower values for inferred entities (0.0 = total guess)
+   
+   WRONG: Do NOT make up types like "ORGANIZATION", "PERSON", "CONCEPT" if not in schema
+
+2. RELATIONSHIP EXTRACTION:
+   - CRITICAL: ONLY use relationship types defined in the schema above
+   - Do NOT create new relationship types if they don't exist in the schema
+   - If no appropriate relationship type exists, DO NOT create a relationship
+   - Do NOT use "USES" as a fallback for unclear relationships
+   - Each relationship needs:
+     * source_entity: Name of the source entity (must be an extracted entity)
+     * relationship_type: Must EXACTLY match a type ID from the schema (e.g., "USES")
+     * target_entity: Name of the target entity (must be an extracted entity)
+     * confidence: 1.0 if explicitly stated, lower for implied relationships (0.0 = total guess)
+   
+   WRONG: Do NOT force relationships that don't make sense with the available types
+
+3. MANY-TO-MANY RELATIONSHIPS:
+   - Entities can have multiple relationships
+   - Same entity pair can have different relationship types
+   - Capture all meaningful connections
+
+INTERVIEW CONTENT:
+{interview_text}
+
+Return a JSON object with:
+- entities: array of entity objects
+- relationships: array of relationship objects
+- total_entities: integer count
+- total_relationships: integer count
+
+Each entity object MUST have these exact fields:
+- name: entity name (string)
+- type: entity type ID from schema (string)
+- confidence: float between 0.0 and 1.0
+- first_mention_quote_id: quote ID or null (string or null)
+- mention_count: integer count of mentions
+- contexts: array of context strings
+
+Each relationship object MUST have these exact fields:
+- source_entity: source entity name (string)
+- source_type: source entity type ID from the entity schema above (REQUIRED - e.g., "AI_TOOL", "PERSON", "ORGANIZATION")
+- target_entity: target entity name (string)  
+- target_type: target entity type ID from the entity schema above (REQUIRED - e.g., "RESEARCH_METHOD", "CONCEPT")
+- relationship_type: relationship type ID from schema (string)
+- confidence: float between 0.0 and 1.0
+- supporting_quote_ids: array of quote IDs
+- contexts: array of context strings
+
+CRITICAL: source_type and target_type are REQUIRED fields. Look up the entity type ID for each entity you extract.

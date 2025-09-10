@@ -1,0 +1,390 @@
+[
+  {
+    "interview_id": "AI assessment Arroyo SDR",
+    "filename": "AI assessment Arroyo SDR.docx",
+    "word_count": 1133,
+    "codes_generated": 6,
+    "processing_time": 20.3157,
+    "codes": [
+      {
+        "code_name": "Research Methods Variety",
+        "description": "A range of qualitative and quantitative methods used in RAND's research, including scenario analysis, historical analysis, case studies, and more.",
+        "quotes": [
+          "Qualitative and quantitative.",
+          "Scenario analysis",
+          "historical analysis",
+          "case studies"
+        ],
+        "confidence": 0.9,
+        "properties": [
+          "diversity of methods",
+          "integration of qualitative and quantitative"
+        ],
+        "dimensions": [
+          "methodological complexity",
+          "adaptability to research questions"
+        ],
+        "extraction_metadata": {
+          "extractor": "hierarchical",
+          "phase": "initial",
+          "derived_from_text": true,
+          "taxonomy_level": 0,
+          "is_root_concept": true
+        }
+      },
+      {
+        "code_name": "Importance of Research Questions",
+        "description": "The necessity for research questions to guide the choice of methods in RAND's research.",
+        "quotes": [
+          "The research question needs to drive this."
+        ],
+        "confidence": 0.85,
+        "properties": [
+          "guiding principle",
+          "method selection"
+        ],
+        "dimensions": [
+          "impact on methodology",
+          "alignment with objectives"
+        ],
+        "extraction_metadata": {
+          "extractor": "hierarchical",
+          "phase": "initial",
+          "derived_from_text": true,
+          "taxonomy_level": 0,
+          "is_root_concept": true
+        }
+      },
+      {
+        "code_name": "Trends in Research Design",
+        "description": "Emerging trends in integrating tools like tabletop exercises (TTXs) into research designs for data collection and confirming findings.",
+        "quotes": [
+          "A lot of people integrate a TTX into their research design.",
+          "I see that as a trend of something we could do."
+        ],
+        "confidence": 0.8,
+        "properties": [
+          "integration of TTXs",
+          "data collection enhancement"
+        ],
+        "dimensions": [
+          "innovation in methodology",
+          "collaboration with sponsors"
+        ],
+        "extraction_metadata": {
+          "extractor": "hierarchical",
+          "phase": "initial",
+          "derived_from_text": true,
+          "taxonomy_level": 0,
+          "is_root_concept": true
+        }
+      },
+      {
+        "code_name": "Need for Improved Coding Tools",
+        "description": "The necessity for better tools for coding interviews to ensure quality and consistency in qualitative research.",
+        "quotes": [
+          "Interview coding, something way better than Dedoose.",
+          "the coding is uneven in quality."
+        ],
+        "confidence": 0.9,
+        "properties": [
+          "quality assurance",
+          "standardization"
+        ],
+        "dimensions": [
+          "user-friendliness",
+          "effectiveness in qualitative analysis"
+        ],
+        "extraction_metadata": {
+          "extractor": "hierarchical",
+          "phase": "initial",
+          "derived_from_text": true,
+          "taxonomy_level": 0,
+          "is_root_concept": true
+        }
+      },
+      {
+        "code_name": "AI Adoption Concerns",
+        "description": "Concerns regarding the implementation of AI in research processes, particularly its impact on junior staff and competitive positioning.",
+        "quotes": [
+          "The risk is that we will end up utilizing AI for stuff our junior folks used to do.",
+          "I do think that is a risk."
+        ],
+        "confidence": 0.85,
+        "properties": [
+          "impact on career development",
+          "competitive risk"
+        ],
+        "dimensions": [
+          "organizational culture",
+          "skillset evolution"
+        ],
+        "extraction_metadata": {
+          "extractor": "hierarchical",
+          "phase": "initial",
+          "derived_from_text": true,
+          "taxonomy_level": 0,
+          "is_root_concept": true
+        }
+      }
+    ],
+    "timestamp": "2025-09-05T08:07:26.690096"
+  },
+  {
+    "interview_id": "Focus Group on AI and Methods 7_7",
+    "filename": "Focus Group on AI and Methods 7_7.docx",
+    "word_count": 9659,
+    "codes_generated": 8,
+    "processing_time": 26.522497,
+    "codes": [
+      {
+        "code_name": "Diverse Group Conversations",
+        "description": "The effort to bring together a diverse group of individuals to share insights and learn from each other.",
+        "quotes": [
+          "the whole point of this is to bring a diverse group of people together."
+        ],
+        "confidence": 0.9,
+        "properties": [
+          "diversity",
+          "collaboration"
+        ],
+        "dimensions": [
+          "group dynamics",
+          "knowledge sharing"
+        ],
+        "extraction_metadata": {
+          "extractor": "hierarchical",
+          "phase": "initial",
+          "derived_from_text": true,
+          "taxonomy_level": 0,
+          "is_root_concept": true
+        }
+      },
+      {
+        "code_name": "Methodological Approaches",
+        "description": "The various research methods employed by participants in their work, including qualitative and quantitative techniques.",
+        "quotes": [
+          "most of my work is more quantitative"
+        ],
+        "confidence": 0.85,
+        "properties": [
+          "qualitative",
+          "quantitative"
+        ],
+        "dimensions": [
+          "method selection",
+          "application context"
+        ],
+        "extraction_metadata": {
+          "extractor": "hierarchical",
+          "phase": "initial",
+          "derived_from_text": true,
+          "taxonomy_level": 0,
+          "is_root_concept": true
+        }
+      },
+      {
+        "code_name": "Challenges in Qualitative Research",
+        "description": "The difficulties faced in qualitative research, particularly in designing effective protocols and finding the right questions.",
+        "quotes": [
+          "the hardest is to find the right questions",
+          "you need the most knowledgeable people, experts who can give you the most information"
+        ],
+        "confidence": 0.8,
+        "properties": [
+          "protocol design",
+          "expertise requirement"
+        ],
+        "dimensions": [
+          "question formulation",
+          "data collection"
+        ],
+        "extraction_metadata": {
+          "extractor": "hierarchical",
+          "phase": "initial",
+          "derived_from_text": true,
+          "taxonomy_level": 0,
+          "is_root_concept": true
+        }
+      },
+      {
+        "code_name": "Data Collection Complexity",
+        "description": "The intricate processes involved in collecting data, especially when new data collection instruments are required.",
+        "quotes": [
+          "designing the data collection instrument"
+        ],
+        "confidence": 0.85,
+        "properties": [
+          "time-consuming",
+          "resource-intensive"
+        ],
+        "dimensions": [
+          "data collection methods",
+          "project timelines"
+        ],
+        "extraction_metadata": {
+          "extractor": "hierarchical",
+          "phase": "initial",
+          "derived_from_text": true,
+          "taxonomy_level": 0,
+          "is_root_concept": true
+        }
+      },
+      {
+        "code_name": "AI in Research",
+        "description": "The application of artificial intelligence tools to assist in various aspects of research, including data analysis and coding.",
+        "quotes": [
+          "AI helps a lot"
+        ],
+        "confidence": 0.9,
+        "properties": [
+          "automation",
+          "efficiency"
+        ],
+        "dimensions": [
+          "data analysis",
+          "coding assistance"
+        ],
+        "extraction_metadata": {
+          "extractor": "hierarchical",
+          "phase": "initial",
+          "derived_from_text": true,
+          "taxonomy_level": 0,
+          "is_root_concept": true
+        }
+      }
+    ],
+    "timestamp": "2025-09-05T08:07:53.212593"
+  },
+  {
+    "interview_id": "Interview Kandice Kapinos",
+    "filename": "Interview Kandice Kapinos.docx",
+    "word_count": 1911,
+    "codes_generated": 5,
+    "processing_time": 23.552796,
+    "codes": [
+      {
+        "code_name": "Causal Inference Methods",
+        "description": "A set of statistical techniques used to estimate causal relationships, particularly in policy evaluation settings.",
+        "quotes": [
+          "First difference-in-difference, that literature on those techniques has evolved a lot in the last 5-10 years so advanced methods that build on that but difference-in-difference is pretty common.",
+          "Synthetic control methods to get it look like an rct.",
+          "Instrumental variables approach and then other techniques that fall into this bucket though less consensus to identifying causal effect."
+        ],
+        "confidence": 0.9,
+        "properties": [
+          "variety of techniques",
+          "evolution over time"
+        ],
+        "dimensions": [
+          "common usage",
+          "advanced methods"
+        ],
+        "extraction_metadata": {
+          "extractor": "hierarchical",
+          "phase": "initial",
+          "derived_from_text": true,
+          "taxonomy_level": 0,
+          "is_root_concept": true
+        }
+      },
+      {
+        "code_name": "AI Utilization in Research",
+        "description": "The application of artificial intelligence tools to assist in various research tasks, including coding, proposal writing, and literature reviews.",
+        "quotes": [
+          "I have used AI tools to help with my code.",
+          "The other thing that I did was a year ago now and not a causal inference, but we did write a python script to use the RAND CHAT to review a bunch of papers."
+        ],
+        "confidence": 0.85,
+        "properties": [
+          "assistance in coding",
+          "enhancement of proposal writing"
+        ],
+        "dimensions": [
+          "frequency of use",
+          "diversity of tasks"
+        ],
+        "extraction_metadata": {
+          "extractor": "hierarchical",
+          "phase": "initial",
+          "derived_from_text": true,
+          "taxonomy_level": 0,
+          "is_root_concept": true
+        }
+      },
+      {
+        "code_name": "Challenges of AI Adoption",
+        "description": "Concerns and barriers faced by researchers regarding the use of AI tools in their work.",
+        "quotes": [
+          "I don\u2019t want to inadvertently take someone else\u2019s intellectual property.",
+          "I guess if you are coding work that classified."
+        ],
+        "confidence": 0.8,
+        "properties": [
+          "concerns about intellectual property",
+          "perceived slow adoption"
+        ],
+        "dimensions": [
+          "personal apprehensions",
+          "organizational barriers"
+        ],
+        "extraction_metadata": {
+          "extractor": "hierarchical",
+          "phase": "initial",
+          "derived_from_text": true,
+          "taxonomy_level": 0,
+          "is_root_concept": true
+        }
+      },
+      {
+        "code_name": "Time-Consuming Aspects of Research",
+        "description": "The processes in causal inference research that require significant time investment, such as data preparation and code checking.",
+        "quotes": [
+          "the time-consuming process of pulling data down, checking code.",
+          "But the time-consuming process of pulling data down, checking code."
+        ],
+        "confidence": 0.9,
+        "properties": [
+          "data preparation",
+          "code validation"
+        ],
+        "dimensions": [
+          "effort required",
+          "complexity of tasks"
+        ],
+        "extraction_metadata": {
+          "extractor": "hierarchical",
+          "phase": "initial",
+          "derived_from_text": true,
+          "taxonomy_level": 0,
+          "is_root_concept": true
+        }
+      },
+      {
+        "code_name": "Need for AI Training",
+        "description": "The perceived necessity for education and training on the effective use of AI tools within the organization.",
+        "quotes": [
+          "There could be more along those lines, showcasing how ppl use it successfully.",
+          "I told several ppl how I use it to check my proposals and esp. this year with changes in funding."
+        ],
+        "confidence": 0.75,
+        "properties": [
+          "lack of training resources",
+          "sharing of successful practices"
+        ],
+        "dimensions": [
+          "organizational support",
+          "individual initiative"
+        ],
+        "extraction_metadata": {
+          "extractor": "hierarchical",
+          "phase": "initial",
+          "derived_from_text": true,
+          "taxonomy_level": 0,
+          "is_root_concept": true
+        }
+      }
+    ],
+    "timestamp": "2025-09-05T08:08:16.765389"
+  }
+]

@@ -1,0 +1,28 @@
+You are analyzing {num_interviews} interviews to discover speaker properties.
+
+ANALYTIC QUESTION: {analytic_question}
+
+PROVIDED SPEAKER PROPERTIES TO INCLUDE (MANDATORY):
+{provided_properties}
+
+INSTRUCTIONS:
+1. YOU MUST include ALL the provided properties above
+2. Discover ADDITIONAL speaker properties from the interviews
+3. Identify all distinct speakers/participants
+4. For each property (provided + discovered):
+   - Name and clear description
+   - Type (categorical, numerical, text)
+   - Possible values with examples
+   - Frequency of occurrence
+
+5. Properties should be:
+   - Relevant to the analytic question
+   - Observable in the interview data
+   - Useful for analysis
+
+6. Total speakers found: Report the count of unique speakers
+
+INTERVIEW CONTENT:
+{combined_text}
+
+Generate a comprehensive schema incorporating all provided properties.

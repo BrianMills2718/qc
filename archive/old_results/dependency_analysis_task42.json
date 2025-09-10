@@ -1,0 +1,762 @@
+{
+  "summary": {
+    "files_analyzed": 71,
+    "runtime_essential": 23,
+    "dead_code_count": 48,
+    "dead_code_percentage": 67.6
+  },
+  "subsystem_breakdown": {
+    "Uncategorized": {
+      "essential_count": 20,
+      "dead_count": 40,
+      "files": [
+        {
+          "module": "src.qc.cli",
+          "path": "src\\qc\\cli.py",
+          "imports": [],
+          "is_essential": false
+        },
+        {
+          "module": "src.qc.cli_automation_viewer",
+          "path": "src\\qc\\cli_automation_viewer.py",
+          "imports": [],
+          "is_essential": false
+        },
+        {
+          "module": "src.qc.analysis.analytical_memos",
+          "path": "src\\qc\\analysis\\analytical_memos.py",
+          "imports": [],
+          "is_essential": true
+        },
+        {
+          "module": "src.qc.analysis.connection_quality_monitor",
+          "path": "src\\qc\\analysis\\connection_quality_monitor.py",
+          "imports": [],
+          "is_essential": false
+        },
+        {
+          "module": "src.qc.analysis.cross_interview_analyzer",
+          "path": "src\\qc\\analysis\\cross_interview_analyzer.py",
+          "imports": [],
+          "is_essential": false
+        },
+        {
+          "module": "src.qc.analysis.discourse_analyzer",
+          "path": "src\\qc\\analysis\\discourse_analyzer.py",
+          "imports": [],
+          "is_essential": false
+        },
+        {
+          "module": "src.qc.analysis.division_insights_analyzer",
+          "path": "src\\qc\\analysis\\division_insights_analyzer.py",
+          "imports": [],
+          "is_essential": false
+        },
+        {
+          "module": "src.qc.analysis.quality_assessment",
+          "path": "src\\qc\\analysis\\quality_assessment.py",
+          "imports": [],
+          "is_essential": false
+        },
+        {
+          "module": "src.qc.analytics.advanced_quote_analytics",
+          "path": "src\\qc\\analytics\\advanced_quote_analytics.py",
+          "imports": [],
+          "is_essential": false
+        },
+        {
+          "module": "src.qc.analytics.quote_aggregator",
+          "path": "src\\qc\\analytics\\quote_aggregator.py",
+          "imports": [],
+          "is_essential": false
+        },
+        {
+          "module": "src.qc.api.main",
+          "path": "src\\qc\\api\\main.py",
+          "imports": [],
+          "is_essential": false
+        },
+        {
+          "module": "src.qc.api.research_integration",
+          "path": "src\\qc\\api\\research_integration.py",
+          "imports": [],
+          "is_essential": false
+        },
+        {
+          "module": "src.qc.api.taxonomy_endpoint",
+          "path": "src\\qc\\api\\taxonomy_endpoint.py",
+          "imports": [],
+          "is_essential": false
+        },
+        {
+          "module": "src.qc.api.websocket_progress",
+          "path": "src\\qc\\api\\websocket_progress.py",
+          "imports": [],
+          "is_essential": false
+        },
+        {
+          "module": "src.qc.audit.audit_trail",
+          "path": "src\\qc\\audit\\audit_trail.py",
+          "imports": [],
+          "is_essential": false
+        },
+        {
+          "module": "src.qc.config.environment",
+          "path": "src\\qc\\config\\environment.py",
+          "imports": [],
+          "is_essential": false
+        },
+        {
+          "module": "src.qc.config.methodology_config",
+          "path": "src\\qc\\config\\methodology_config.py",
+          "imports": [],
+          "is_essential": true
+        },
+        {
+          "module": "src.qc.consolidation.consolidation_schemas",
+          "path": "src\\qc\\consolidation\\consolidation_schemas.py",
+          "imports": [],
+          "is_essential": false
+        },
+        {
+          "module": "src.qc.consolidation.llm_consolidator",
+          "path": "src\\qc\\consolidation\\llm_consolidator.py",
+          "imports": [],
+          "is_essential": false
+        },
+        {
+          "module": "src.qc.core.graceful_degradation",
+          "path": "src\\qc\\core\\graceful_degradation.py",
+          "imports": [],
+          "is_essential": true
+        },
+        {
+          "module": "src.qc.core.llm_client",
+          "path": "src\\qc\\core\\llm_client.py",
+          "imports": [],
+          "is_essential": true
+        },
+        {
+          "module": "src.qc.core.native_gemini_client",
+          "path": "src\\qc\\core\\native_gemini_client.py",
+          "imports": [],
+          "is_essential": true
+        },
+        {
+          "module": "src.qc.core.neo4j_manager",
+          "path": "src\\qc\\core\\neo4j_manager.py",
+          "imports": [],
+          "is_essential": true
+        },
+        {
+          "module": "src.qc.core.robust_cli_operations",
+          "path": "src\\qc\\core\\robust_cli_operations.py",
+          "imports": [],
+          "is_essential": true
+        },
+        {
+          "module": "src.qc.core.schema_config",
+          "path": "src\\qc\\core\\schema_config.py",
+          "imports": [],
+          "is_essential": true
+        },
+        {
+          "module": "src.qc.export.academic_exporters",
+          "path": "src\\qc\\export\\academic_exporters.py",
+          "imports": [],
+          "is_essential": false
+        },
+        {
+          "module": "src.qc.export.automation_exporter",
+          "path": "src\\qc\\export\\automation_exporter.py",
+          "imports": [],
+          "is_essential": false
+        },
+        {
+          "module": "src.qc.export.data_exporter",
+          "path": "src\\qc\\export\\data_exporter.py",
+          "imports": [],
+          "is_essential": false
+        },
+        {
+          "module": "src.qc.external.universal_llm",
+          "path": "src\\qc\\external\\universal_llm.py",
+          "imports": [],
+          "is_essential": false
+        },
+        {
+          "module": "src.qc.extraction.code_first_schemas",
+          "path": "src\\qc\\extraction\\code_first_schemas.py",
+          "imports": [],
+          "is_essential": false
+        },
+        {
+          "module": "src.qc.extraction.dialogue_processor",
+          "path": "src\\qc\\extraction\\dialogue_processor.py",
+          "imports": [],
+          "is_essential": false
+        },
+        {
+          "module": "src.qc.extraction.extraction_schemas",
+          "path": "src\\qc\\extraction\\extraction_schemas.py",
+          "imports": [],
+          "is_essential": true
+        },
+        {
+          "module": "src.qc.extraction.relationship_fixer",
+          "path": "src\\qc\\extraction\\relationship_fixer.py",
+          "imports": [],
+          "is_essential": false
+        },
+        {
+          "module": "src.qc.extraction.schema_parser",
+          "path": "src\\qc\\extraction\\schema_parser.py",
+          "imports": [],
+          "is_essential": false
+        },
+        {
+          "module": "src.qc.extraction.schema_validator",
+          "path": "src\\qc\\extraction\\schema_validator.py",
+          "imports": [],
+          "is_essential": false
+        },
+        {
+          "module": "src.qc.extraction.semantic_code_matcher",
+          "path": "src\\qc\\extraction\\semantic_code_matcher.py",
+          "imports": [],
+          "is_essential": true
+        },
+        {
+          "module": "src.qc.llm.llm_handler",
+          "path": "src\\qc\\llm\\llm_handler.py",
+          "imports": [],
+          "is_essential": true
+        },
+        {
+          "module": "src.qc.monitoring.health",
+          "path": "src\\qc\\monitoring\\health.py",
+          "imports": [],
+          "is_essential": true
+        },
+        {
+          "module": "src.qc.monitoring.system_monitor",
+          "path": "src\\qc\\monitoring\\system_monitor.py",
+          "imports": [],
+          "is_essential": true
+        },
+        {
+          "module": "src.qc.prompts.prompt_loader",
+          "path": "src\\qc\\prompts\\prompt_loader.py",
+          "imports": [],
+          "is_essential": false
+        },
+        {
+          "module": "src.qc.qca.audit_trail_system",
+          "path": "src\\qc\\qca\\audit_trail_system.py",
+          "imports": [],
+          "is_essential": false
+        },
+        {
+          "module": "src.qc.qca.calibration_engine",
+          "path": "src\\qc\\qca\\calibration_engine.py",
+          "imports": [],
+          "is_essential": false
+        },
+        {
+          "module": "src.qc.qca.minimization_engine",
+          "path": "src\\qc\\qca\\minimization_engine.py",
+          "imports": [],
+          "is_essential": false
+        },
+        {
+          "module": "src.qc.qca.truth_table_builder",
+          "path": "src\\qc\\qca\\truth_table_builder.py",
+          "imports": [],
+          "is_essential": false
+        },
+        {
+          "module": "src.qc.query.cypher_builder",
+          "path": "src\\qc\\query\\cypher_builder.py",
+          "imports": [],
+          "is_essential": true
+        },
+        {
+          "module": "src.qc.query.query_templates",
+          "path": "src\\qc\\query\\query_templates.py",
+          "imports": [],
+          "is_essential": false
+        },
+        {
+          "module": "src.qc.reporting.autonomous_reporter",
+          "path": "src\\qc\\reporting\\autonomous_reporter.py",
+          "imports": [],
+          "is_essential": true
+        },
+        {
+          "module": "src.qc.tutorial.interactive_tutorial",
+          "path": "src\\qc\\tutorial\\interactive_tutorial.py",
+          "imports": [],
+          "is_essential": false
+        },
+        {
+          "module": "src.qc.utils.error_handler",
+          "path": "src\\qc\\utils\\error_handler.py",
+          "imports": [],
+          "is_essential": true
+        },
+        {
+          "module": "src.qc.utils.markdown_exporter",
+          "path": "src\\qc\\utils\\markdown_exporter.py",
+          "imports": [],
+          "is_essential": true
+        },
+        {
+          "module": "src.qc.utils.token_manager",
+          "path": "src\\qc\\utils\\token_manager.py",
+          "imports": [],
+          "is_essential": true
+        },
+        {
+          "module": "src.qc.validation.config_manager",
+          "path": "src\\qc\\validation\\config_manager.py",
+          "imports": [],
+          "is_essential": false
+        },
+        {
+          "module": "src.qc.validation.entity_consolidator",
+          "path": "src\\qc\\validation\\entity_consolidator.py",
+          "imports": [],
+          "is_essential": false
+        },
+        {
+          "module": "src.qc.validation.quality_validator",
+          "path": "src\\qc\\validation\\quality_validator.py",
+          "imports": [],
+          "is_essential": false
+        },
+        {
+          "module": "src.qc.validation.relationship_consolidator",
+          "path": "src\\qc\\validation\\relationship_consolidator.py",
+          "imports": [],
+          "is_essential": false
+        },
+        {
+          "module": "src.qc.validation.research_validator",
+          "path": "src\\qc\\validation\\research_validator.py",
+          "imports": [],
+          "is_essential": false
+        },
+        {
+          "module": "src.qc.validation.validation_config",
+          "path": "src\\qc\\validation\\validation_config.py",
+          "imports": [],
+          "is_essential": false
+        },
+        {
+          "module": "src.qc.web_interface.app",
+          "path": "src\\qc\\web_interface\\app.py",
+          "imports": [],
+          "is_essential": false
+        },
+        {
+          "module": "src.qc.workflows.grounded_theory",
+          "path": "src\\qc\\workflows\\grounded_theory.py",
+          "imports": [],
+          "is_essential": true
+        },
+        {
+          "module": "src.qc.workflows.prompt_templates",
+          "path": "src\\qc\\workflows\\prompt_templates.py",
+          "imports": [],
+          "is_essential": true
+        }
+      ]
+    },
+    "Core System": {
+      "essential_count": 1,
+      "dead_count": 0,
+      "files": [
+        {
+          "module": "src.qc.cli_robust",
+          "path": "src\\qc\\cli_robust.py",
+          "imports": [],
+          "is_essential": true
+        }
+      ]
+    },
+    "Analytics": {
+      "essential_count": 0,
+      "dead_count": 2,
+      "files": [
+        {
+          "module": "src.qc.analysis.frequency_analyzer",
+          "path": "src\\qc\\analysis\\frequency_analyzer.py",
+          "imports": [],
+          "is_essential": false
+        },
+        {
+          "module": "src.qc.analysis.real_frequency_analyzer",
+          "path": "src\\qc\\analysis\\real_frequency_analyzer.py",
+          "imports": [],
+          "is_essential": false
+        }
+      ]
+    },
+    "Alternative Extractors": {
+      "essential_count": 2,
+      "dead_count": 3,
+      "files": [
+        {
+          "module": "src.qc.extraction.code_first_extractor",
+          "path": "src\\qc\\extraction\\code_first_extractor.py",
+          "imports": [],
+          "is_essential": false
+        },
+        {
+          "module": "src.qc.extraction.code_first_extractor_parallel",
+          "path": "src\\qc\\extraction\\code_first_extractor_parallel.py",
+          "imports": [],
+          "is_essential": false
+        },
+        {
+          "module": "src.qc.extraction.multi_pass_extractor",
+          "path": "src\\qc\\extraction\\multi_pass_extractor.py",
+          "imports": [],
+          "is_essential": true
+        },
+        {
+          "module": "src.qc.extraction.semantic_quote_extractor",
+          "path": "src\\qc\\extraction\\semantic_quote_extractor.py",
+          "imports": [],
+          "is_essential": true
+        },
+        {
+          "module": "src.qc.extraction.validated_extractor",
+          "path": "src\\qc\\extraction\\validated_extractor.py",
+          "imports": [],
+          "is_essential": false
+        }
+      ]
+    },
+    "QCA Analysis": {
+      "essential_count": 0,
+      "dead_count": 2,
+      "files": [
+        {
+          "module": "src.qc.qca.qca_pipeline",
+          "path": "src\\qc\\qca\\qca_pipeline.py",
+          "imports": [],
+          "is_essential": false
+        },
+        {
+          "module": "src.qc.qca.qca_schemas",
+          "path": "src\\qc\\qca\\qca_schemas.py",
+          "imports": [],
+          "is_essential": false
+        }
+      ]
+    },
+    "Taxonomy System": {
+      "essential_count": 0,
+      "dead_count": 1,
+      "files": [
+        {
+          "module": "src.qc.taxonomy.ai_taxonomy_loader",
+          "path": "src\\qc\\taxonomy\\ai_taxonomy_loader.py",
+          "imports": [],
+          "is_essential": false
+        }
+      ]
+    }
+  },
+  "dead_code_files": [
+    {
+      "module": "src.qc.cli",
+      "path": "src\\qc\\cli.py",
+      "imports": [],
+      "is_essential": false
+    },
+    {
+      "module": "src.qc.cli_automation_viewer",
+      "path": "src\\qc\\cli_automation_viewer.py",
+      "imports": [],
+      "is_essential": false
+    },
+    {
+      "module": "src.qc.analysis.connection_quality_monitor",
+      "path": "src\\qc\\analysis\\connection_quality_monitor.py",
+      "imports": [],
+      "is_essential": false
+    },
+    {
+      "module": "src.qc.analysis.cross_interview_analyzer",
+      "path": "src\\qc\\analysis\\cross_interview_analyzer.py",
+      "imports": [],
+      "is_essential": false
+    },
+    {
+      "module": "src.qc.analysis.discourse_analyzer",
+      "path": "src\\qc\\analysis\\discourse_analyzer.py",
+      "imports": [],
+      "is_essential": false
+    },
+    {
+      "module": "src.qc.analysis.division_insights_analyzer",
+      "path": "src\\qc\\analysis\\division_insights_analyzer.py",
+      "imports": [],
+      "is_essential": false
+    },
+    {
+      "module": "src.qc.analysis.frequency_analyzer",
+      "path": "src\\qc\\analysis\\frequency_analyzer.py",
+      "imports": [],
+      "is_essential": false
+    },
+    {
+      "module": "src.qc.analysis.quality_assessment",
+      "path": "src\\qc\\analysis\\quality_assessment.py",
+      "imports": [],
+      "is_essential": false
+    },
+    {
+      "module": "src.qc.analysis.real_frequency_analyzer",
+      "path": "src\\qc\\analysis\\real_frequency_analyzer.py",
+      "imports": [],
+      "is_essential": false
+    },
+    {
+      "module": "src.qc.analytics.advanced_quote_analytics",
+      "path": "src\\qc\\analytics\\advanced_quote_analytics.py",
+      "imports": [],
+      "is_essential": false
+    },
+    {
+      "module": "src.qc.analytics.quote_aggregator",
+      "path": "src\\qc\\analytics\\quote_aggregator.py",
+      "imports": [],
+      "is_essential": false
+    },
+    {
+      "module": "src.qc.api.main",
+      "path": "src\\qc\\api\\main.py",
+      "imports": [],
+      "is_essential": false
+    },
+    {
+      "module": "src.qc.api.research_integration",
+      "path": "src\\qc\\api\\research_integration.py",
+      "imports": [],
+      "is_essential": false
+    },
+    {
+      "module": "src.qc.api.taxonomy_endpoint",
+      "path": "src\\qc\\api\\taxonomy_endpoint.py",
+      "imports": [],
+      "is_essential": false
+    },
+    {
+      "module": "src.qc.api.websocket_progress",
+      "path": "src\\qc\\api\\websocket_progress.py",
+      "imports": [],
+      "is_essential": false
+    },
+    {
+      "module": "src.qc.audit.audit_trail",
+      "path": "src\\qc\\audit\\audit_trail.py",
+      "imports": [],
+      "is_essential": false
+    },
+    {
+      "module": "src.qc.config.environment",
+      "path": "src\\qc\\config\\environment.py",
+      "imports": [],
+      "is_essential": false
+    },
+    {
+      "module": "src.qc.consolidation.consolidation_schemas",
+      "path": "src\\qc\\consolidation\\consolidation_schemas.py",
+      "imports": [],
+      "is_essential": false
+    },
+    {
+      "module": "src.qc.consolidation.llm_consolidator",
+      "path": "src\\qc\\consolidation\\llm_consolidator.py",
+      "imports": [],
+      "is_essential": false
+    },
+    {
+      "module": "src.qc.export.academic_exporters",
+      "path": "src\\qc\\export\\academic_exporters.py",
+      "imports": [],
+      "is_essential": false
+    },
+    {
+      "module": "src.qc.export.automation_exporter",
+      "path": "src\\qc\\export\\automation_exporter.py",
+      "imports": [],
+      "is_essential": false
+    },
+    {
+      "module": "src.qc.export.data_exporter",
+      "path": "src\\qc\\export\\data_exporter.py",
+      "imports": [],
+      "is_essential": false
+    },
+    {
+      "module": "src.qc.external.universal_llm",
+      "path": "src\\qc\\external\\universal_llm.py",
+      "imports": [],
+      "is_essential": false
+    },
+    {
+      "module": "src.qc.extraction.code_first_extractor",
+      "path": "src\\qc\\extraction\\code_first_extractor.py",
+      "imports": [],
+      "is_essential": false
+    },
+    {
+      "module": "src.qc.extraction.code_first_extractor_parallel",
+      "path": "src\\qc\\extraction\\code_first_extractor_parallel.py",
+      "imports": [],
+      "is_essential": false
+    },
+    {
+      "module": "src.qc.extraction.code_first_schemas",
+      "path": "src\\qc\\extraction\\code_first_schemas.py",
+      "imports": [],
+      "is_essential": false
+    },
+    {
+      "module": "src.qc.extraction.dialogue_processor",
+      "path": "src\\qc\\extraction\\dialogue_processor.py",
+      "imports": [],
+      "is_essential": false
+    },
+    {
+      "module": "src.qc.extraction.relationship_fixer",
+      "path": "src\\qc\\extraction\\relationship_fixer.py",
+      "imports": [],
+      "is_essential": false
+    },
+    {
+      "module": "src.qc.extraction.schema_parser",
+      "path": "src\\qc\\extraction\\schema_parser.py",
+      "imports": [],
+      "is_essential": false
+    },
+    {
+      "module": "src.qc.extraction.schema_validator",
+      "path": "src\\qc\\extraction\\schema_validator.py",
+      "imports": [],
+      "is_essential": false
+    },
+    {
+      "module": "src.qc.extraction.validated_extractor",
+      "path": "src\\qc\\extraction\\validated_extractor.py",
+      "imports": [],
+      "is_essential": false
+    },
+    {
+      "module": "src.qc.prompts.prompt_loader",
+      "path": "src\\qc\\prompts\\prompt_loader.py",
+      "imports": [],
+      "is_essential": false
+    },
+    {
+      "module": "src.qc.qca.audit_trail_system",
+      "path": "src\\qc\\qca\\audit_trail_system.py",
+      "imports": [],
+      "is_essential": false
+    },
+    {
+      "module": "src.qc.qca.calibration_engine",
+      "path": "src\\qc\\qca\\calibration_engine.py",
+      "imports": [],
+      "is_essential": false
+    },
+    {
+      "module": "src.qc.qca.minimization_engine",
+      "path": "src\\qc\\qca\\minimization_engine.py",
+      "imports": [],
+      "is_essential": false
+    },
+    {
+      "module": "src.qc.qca.qca_pipeline",
+      "path": "src\\qc\\qca\\qca_pipeline.py",
+      "imports": [],
+      "is_essential": false
+    },
+    {
+      "module": "src.qc.qca.qca_schemas",
+      "path": "src\\qc\\qca\\qca_schemas.py",
+      "imports": [],
+      "is_essential": false
+    },
+    {
+      "module": "src.qc.qca.truth_table_builder",
+      "path": "src\\qc\\qca\\truth_table_builder.py",
+      "imports": [],
+      "is_essential": false
+    },
+    {
+      "module": "src.qc.query.query_templates",
+      "path": "src\\qc\\query\\query_templates.py",
+      "imports": [],
+      "is_essential": false
+    },
+    {
+      "module": "src.qc.taxonomy.ai_taxonomy_loader",
+      "path": "src\\qc\\taxonomy\\ai_taxonomy_loader.py",
+      "imports": [],
+      "is_essential": false
+    },
+    {
+      "module": "src.qc.tutorial.interactive_tutorial",
+      "path": "src\\qc\\tutorial\\interactive_tutorial.py",
+      "imports": [],
+      "is_essential": false
+    },
+    {
+      "module": "src.qc.validation.config_manager",
+      "path": "src\\qc\\validation\\config_manager.py",
+      "imports": [],
+      "is_essential": false
+    },
+    {
+      "module": "src.qc.validation.entity_consolidator",
+      "path": "src\\qc\\validation\\entity_consolidator.py",
+      "imports": [],
+      "is_essential": false
+    },
+    {
+      "module": "src.qc.validation.quality_validator",
+      "path": "src\\qc\\validation\\quality_validator.py",
+      "imports": [],
+      "is_essential": false
+    },
+    {
+      "module": "src.qc.validation.relationship_consolidator",
+      "path": "src\\qc\\validation\\relationship_consolidator.py",
+      "imports": [],
+      "is_essential": false
+    },
+    {
+      "module": "src.qc.validation.research_validator",
+      "path": "src\\qc\\validation\\research_validator.py",
+      "imports": [],
+      "is_essential": false
+    },
+    {
+      "module": "src.qc.validation.validation_config",
+      "path": "src\\qc\\validation\\validation_config.py",
+      "imports": [],
+      "is_essential": false
+    },
+    {
+      "module": "src.qc.web_interface.app",
+      "path": "src\\qc\\web_interface\\app.py",
+      "imports": [],
+      "is_essential": false
+    }
+  ]
+}

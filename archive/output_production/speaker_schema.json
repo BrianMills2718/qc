@@ -1,0 +1,159 @@
+{
+  "properties": [
+    {
+      "name": "name",
+      "description": "The name of the speaker.",
+      "property_type": "text",
+      "frequency": 7,
+      "example_values": [
+        "Joie Acosta",
+        "Todd Helmus",
+        "Kandice Kapinos"
+      ],
+      "is_categorical": false,
+      "possible_values": null,
+      "confidence": 1.0
+    },
+    {
+      "name": "role",
+      "description": "The professional role, title, or primary area of work of the speaker.",
+      "property_type": "text",
+      "frequency": 7,
+      "example_values": [
+        "Mostly qualitative researcher at Rand",
+        "Director Methods Center for Causal Inference",
+        "anthropologist"
+      ],
+      "is_categorical": false,
+      "possible_values": null,
+      "confidence": 0.9
+    },
+    {
+      "name": "research_focus",
+      "description": "Specific topics or domains of research expertise.",
+      "property_type": "list",
+      "frequency": 7,
+      "example_values": [
+        "irregular warfare",
+        "environmental health",
+        "aging dementia",
+        "implementation science",
+        "misinformation",
+        "security",
+        "causal inference"
+      ],
+      "is_categorical": false,
+      "possible_values": null,
+      "confidence": 0.9
+    },
+    {
+      "name": "methodological_expertise",
+      "description": "Research methodologies and techniques the speaker applies.",
+      "property_type": "list",
+      "frequency": 7,
+      "example_values": [
+        "qualitative research",
+        "interviews",
+        "systematic reviews",
+        "machine learning",
+        "causal inference",
+        "survey methods",
+        "social media analysis"
+      ],
+      "is_categorical": false,
+      "possible_values": null,
+      "confidence": 0.95
+    },
+    {
+      "name": "organization",
+      "description": "The organization the speaker is affiliated with.",
+      "property_type": "text",
+      "frequency": 7,
+      "example_values": [
+        "Rand"
+      ],
+      "is_categorical": false,
+      "possible_values": null,
+      "confidence": 1.0
+    },
+    {
+      "name": "office_location",
+      "description": "The physical office location of the speaker.",
+      "property_type": "text",
+      "frequency": 1,
+      "example_values": [
+        "Boston office"
+      ],
+      "is_categorical": false,
+      "possible_values": null,
+      "confidence": 0.7
+    },
+    {
+      "name": "ai_tool_experience",
+      "description": "Experience and opinions regarding the use of AI tools in research.",
+      "property_type": "list",
+      "frequency": 7,
+      "example_values": [
+        "used AI for code fixing",
+        "used AI for proposal writing",
+        "used AI for literature review",
+        "AI for recruitment",
+        "AI for data analysis/coding",
+        "concerns about AI accuracy/trust"
+      ],
+      "is_categorical": false,
+      "possible_values": null,
+      "confidence": 0.9
+    },
+    {
+      "name": "opinion_on_rand_ai_adoption",
+      "description": "Views on the current state and future potential of AI adoption within RAND.",
+      "property_type": "text",
+      "frequency": 4,
+      "example_values": [
+        "Rand is slower in adoption",
+        "AI could leverage internal knowledge better",
+        "Virtual ALP panels are a business opportunity"
+      ],
+      "is_categorical": false,
+      "possible_values": null,
+      "confidence": 0.8
+    },
+    {
+      "name": "research_challenges",
+      "description": "Identified difficulties or 'long poles in the tent' in the research process.",
+      "property_type": "list",
+      "frequency": 6,
+      "example_values": [
+        "recruitment of participants",
+        "coding qualitative data",
+        "tabulating frequency of themes",
+        "trusting AI for nuanced analysis",
+        "pulling and cleaning data",
+        "validating AI output"
+      ],
+      "is_categorical": false,
+      "possible_values": null,
+      "confidence": 0.9
+    },
+    {
+      "name": "ai_concerns",
+      "description": "Concerns or risks associated with the adoption and use of AI.",
+      "property_type": "list",
+      "frequency": 5,
+      "example_values": [
+        "AI generating content based on other AI content (autophagy/model collapse)",
+        "intellectual property infringement",
+        "hallucinations/inaccurate information",
+        "job displacement",
+        "Red Queen scenario (no net gain)"
+      ],
+      "is_categorical": false,
+      "possible_values": null,
+      "confidence": 0.9
+    }
+  ],
+  "total_speakers_found": 7,
+  "discovery_method": "interview analysis",
+  "extraction_confidence": 0.9
+}

@@ -1,0 +1,151 @@
+# Example Entity and Relationship Type Definitions
+# This file defines what types of entities and relationships to extract
+
+## ENTITY TYPES
+
+### Person
+Description: Individual people mentioned in the interviews
+Identifying patterns: 
+- Named individuals
+- Roles or titles referring to specific people
+- "I", "we", "he", "she" when referring to specific individuals
+Examples: "John Smith", "the CEO", "our data scientist"
+
+### Organization
+Description: Companies, institutions, or organizational units
+Identifying patterns:
+- Company names
+- Department names
+- Institution names
+- "Our company", "the vendor", "the client"
+Examples: "Microsoft", "IT Department", "Stanford University"
+
+### Technology
+Description: Specific technologies, tools, platforms, or systems
+Identifying patterns:
+- Software names
+- Platform names
+- Programming languages
+- AI/ML models
+- System names
+Examples: "TensorFlow", "GPT-4", "Python", "SAP", "our CRM system"
+
+### Method
+Description: Approaches, methodologies, frameworks, or processes
+Identifying patterns:
+- Methodology names
+- Process descriptions
+- Framework references
+- Best practices
+Examples: "Agile methodology", "CRISP-DM", "pilot testing", "change management"
+
+### Concept
+Description: Abstract ideas, principles, or conceptual topics
+Identifying patterns:
+- Abstract nouns
+- Principles
+- Goals or objectives
+- Challenges or benefits
+Examples: "data privacy", "ROI", "digital transformation", "innovation"
+
+### Project
+Description: Specific projects, initiatives, or programs
+Identifying patterns:
+- Project names
+- Initiative descriptions
+- Program references
+Examples: "AI transformation project", "pilot program", "Project Atlas"
+
+### Data
+Description: Datasets, data sources, or types of data
+Identifying patterns:
+- Dataset names
+- Data source descriptions
+- Types of data
+Examples: "customer data", "training dataset", "historical records", "sensor data"
+
+## RELATIONSHIP TYPES
+
+### WORKS_FOR
+Description: Employment relationship between person and organization
+Source types: Person
+Target types: Organization
+Direction: Directional (Person → Organization)
+Examples: "John works for TechCorp", "our CTO"
+
+### USES
+Description: Usage relationship between entity and technology/method
+Source types: Person, Organization, Project
+Target types: Technology, Method, Data
+Direction: Directional
+Examples: "We use TensorFlow", "The project uses agile methodology"
+
+### IMPLEMENTS
+Description: Implementation relationship
+Source types: Organization, Person, Project
+Target types: Technology, Method, Concept
+Direction: Directional
+Examples: "We implemented a new AI system", "The team implements best practices"
+
+### COLLABORATES_WITH
+Description: Collaboration between entities
+Source types: Person, Organization
+Target types: Person, Organization
+Direction: Bidirectional
+Examples: "We partnered with University X", "Teams collaborate on the project"
+
+### MANAGES
+Description: Management or oversight relationship
+Source types: Person
+Target types: Person, Project, Technology
+Direction: Directional
+Examples: "She manages the AI team", "John oversees the implementation"
+
+### DEVELOPS
+Description: Development or creation relationship
+Source types: Person, Organization
+Target types: Technology, Method, Project
+Direction: Directional
+Examples: "The team developed a new model", "We created a custom solution"
+
+### PROVIDES
+Description: Provision of services or resources
+Source types: Organization, Person
+Target types: Technology, Method, Data
+Direction: Directional
+Examples: "The vendor provides the platform", "IT provides support"
+
+### CHALLENGES
+Description: Identifies challenges or obstacles
+Source types: Concept, Technology, Method
+Target types: Organization, Project, Person
+Direction: Directional
+Examples: "Data quality challenges the project", "Integration issues affect the team"
+
+### ENABLES
+Description: Enabling or facilitating relationship
+Source types: Technology, Method, Concept
+Target types: Concept, Project, Organization
+Direction: Directional
+Examples: "AI enables automation", "The platform enables real-time analysis"
+
+### SUPPORTS
+Description: Support relationship
+Source types: Person, Organization, Technology
+Target types: Concept, Project, Method
+Direction: Directional
+Examples: "Leadership supports the initiative", "The tool supports decision-making"
+
+### REQUIRES
+Description: Dependency or requirement relationship
+Source types: Project, Technology, Method
+Target types: Technology, Data, Concept, Person
+Direction: Directional
+Examples: "The project requires clean data", "AI requires expertise"
+
+### IMPACTS
+Description: Impact or effect relationship
+Source types: Technology, Project, Concept
+Target types: Organization, Person, Concept
+Direction: Directional
+Examples: "AI impacts our operations", "The project affects employees"

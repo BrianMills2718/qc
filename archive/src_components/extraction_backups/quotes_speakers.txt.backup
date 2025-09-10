@@ -1,0 +1,71 @@
+You are extracting quotes and speakers from an interview.
+
+INTERVIEW: {interview_id}
+ANALYTIC QUESTION: {analytic_question}
+
+AVAILABLE CODES (from Phase 1):
+{formatted_codes}
+
+SPEAKER PROPERTIES TO EXTRACT (from Phase 2):
+{formatted_speaker_schema}
+
+CRITICAL INSTRUCTIONS FOR QUOTE EXTRACTION:
+1. SELECTIVE EXTRACTION:
+   - ONLY extract quotes that clearly relate to one or more of the codes above
+   - A quote should map to at least one code from the taxonomy
+   - Skip small talk, procedural discussions, or off-topic statements
+   - Focus on statements that address the analytic question
+   - Quality over quantity - better to have 10 relevant coded quotes than 30 uncoded ones
+
+2. CODE APPLICATION:
+   - CRITICAL: Use the EXACT CODE IDs shown in brackets [CODE_ID] above
+   - Each quote MUST have at least one code_id from the taxonomy
+   - Many quotes will relate to MULTIPLE codes - apply all that fit
+   - Analyze how each quote relates to the available codes
+   - Return the code_ids field with exact IDs from the taxonomy
+   - If a statement doesn't map to any code, don't extract it as a quote
+   
+   CORRECT EXAMPLES using actual codes from above:
+   {code_examples}
+   
+   WRONG: Do NOT make up new IDs like "accuracy_concerns" or "ai_challenges"
+
+3. QUOTE BOUNDARIES:
+   - Capture complete thoughts (minimum ~10 words unless exceptionally relevant)
+   - Include enough context for standalone understanding
+   - Use natural semantic boundaries (complete sentences/thoughts)
+   - Record location based on markers in the text:
+     * If you see [Line N] markers: set location_start/end to line numbers, location_type="line"
+     * If you see [Paragraph N] markers: set location_start to paragraph number, location_type="paragraph"
+     * If no markers visible: leave location fields as null
+
+4. SPEAKER IDENTIFICATION:
+   - Identify speaker from available cues (labels, names, context)
+   - For each speaker property from the schema:
+     * Extract the value if clearly stated in the interview
+     * Use null if the property is not mentioned for this speaker
+     * Use "Unknown" only if the property is mentioned but unclear
+   - Speaker name: Use the most specific identifier available
+
+INTERVIEW CONTENT:
+{interview_text}
+
+Return a JSON object with:
+- quotes: array of quote objects
+- speakers: array of speaker objects
+- total_quotes: integer count
+- total_codes_applied: integer count
+
+Each quote object MUST have these exact fields:
+- text: the exact quote text (string)
+- speaker_name: name of the speaker (string)
+- code_ids: array of code IDs from the taxonomy
+- location_start: line/paragraph number or null
+- location_end: line/paragraph end number or null
+- location_type: "line" or "paragraph" or null
+
+Each speaker object MUST have these exact fields:
+- name: speaker's name or identifier (string)
+- confidence: float between 0.0 and 1.0
+- identification_method: how speaker was identified (string)
+- quotes_count: number of quotes from this speaker (integer)

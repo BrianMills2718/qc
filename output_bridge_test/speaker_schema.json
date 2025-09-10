@@ -1,0 +1,198 @@
+{
+  "properties": [
+    {
+      "name": "speaker_role",
+      "description": "The professional role or title of the speaker within their organization.",
+      "property_type": "string",
+      "frequency": 11,
+      "example_values": [
+        "Arroyo SDR",
+        "Associate operations researcher",
+        "Senior economist",
+        "Clinician",
+        "Director Methods Center for Causal Inference"
+      ],
+      "is_categorical": false,
+      "possible_values": null,
+      "confidence": 1.0
+    },
+    {
+      "name": "organization_affiliation",
+      "description": "The primary organization the speaker is affiliated with.",
+      "property_type": "categorical",
+      "frequency": 11,
+      "example_values": [
+        "RAND Corporation",
+        "Rand"
+      ],
+      "is_categorical": true,
+      "possible_values": [
+        "RAND"
+      ],
+      "confidence": 1.0
+    },
+    {
+      "name": "department_or_center",
+      "description": "The specific department, center, or division the speaker belongs to within RAND.",
+      "property_type": "string",
+      "frequency": 7,
+      "example_values": [
+        "Arroyo SDR",
+        "Defense of Political Sciences Department",
+        "Methods Center for Causal Inference",
+        "GER"
+      ],
+      "is_categorical": false,
+      "possible_values": null,
+      "confidence": 0.95
+    },
+    {
+      "name": "tenure_at_rand",
+      "description": "The duration of the speaker's employment or affiliation with RAND.",
+      "property_type": "string",
+      "frequency": 4,
+      "example_values": [
+        "about two or three months ago",
+        "second year PhD",
+        "since 1988",
+        "relatively new in role"
+      ],
+      "is_categorical": false,
+      "possible_values": null,
+      "confidence": 0.9
+    },
+    {
+      "name": "research_area",
+      "description": "The main topical subjects or domains the speaker addresses in their work.",
+      "property_type": "string",
+      "frequency": 11,
+      "example_values": [
+        "national security",
+        "public health",
+        "AI, unmanned systems, robotics",
+        "healthcare and mental health",
+        "Interstate conflict and competition",
+        "causal inference techniques"
+      ],
+      "is_categorical": false,
+      "possible_values": null,
+      "confidence": 1.0
+    },
+    {
+      "name": "research_methods_used",
+      "description": "The research methodologies the speaker commonly applies or is familiar with.",
+      "property_type": "string",
+      "frequency": 11,
+      "example_values": [
+        "Qualitative and quantitative",
+        "wargaming",
+        "statistical analysis",
+        "interviews",
+        "modeling and simulation",
+        "cost analysis",
+        "social media analytics",
+        "optimization",
+        "case studies",
+        "causal inference techniques"
+      ],
+      "is_categorical": false,
+      "possible_values": null,
+      "confidence": 1.0
+    },
+    {
+      "name": "ai_tool_experience",
+      "description": "Specific AI tools or types of AI the speaker has used or is familiar with.",
+      "property_type": "string",
+      "frequency": 6,
+      "example_values": [
+        "ChatGPT",
+        "RANDCHAT",
+        "Claude",
+        "LLMs",
+        "Otter"
+      ],
+      "is_categorical": false,
+      "possible_values": null,
+      "confidence": 0.95
+    },
+    {
+      "name": "ai_application_area",
+      "description": "Specific tasks or applications for which the speaker uses or envisions using AI.",
+      "property_type": "string",
+      "frequency": 7,
+      "example_values": [
+        "literature review",
+        "interview coding",
+        "graphics generation",
+        "fixing code",
+        "proposal writing",
+        "summaries",
+        "meeting minutes",
+        "data cleaning and preparation"
+      ],
+      "is_categorical": false,
+      "possible_values": null,
+      "confidence": 0.95
+    },
+    {
+      "name": "ai_tool_quality_assessment",
+      "description": "The speaker's assessment of the quality or effectiveness of different AI tools, particularly RANDCHAT compared to external LLMs.",
+      "property_type": "categorical",
+      "frequency": 5,
+      "example_values": [
+        "RANDCHAT is not as good as ChatGPT",
+        "Claude is good at writing things",
+        "RANDCHAT gave fake citations"
+      ],
+      "is_categorical": true,
+      "possible_values": [
+        "prefers external LLMs over RANDCHAT",
+        "finds RANDCHAT quality insufficient",
+        "finds RANDCHAT generates fake information",
+        "finds external LLMs good for specific tasks"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "name": "ai_adoption_stance",
+      "description": "The speaker's general perspective, concerns, or recommendations regarding AI adoption at RAND or in research.",
+      "property_type": "string",
+      "frequency": 7,
+      "example_values": [
+        "worried about AI replacing junior staff",
+        "risk to RAND's business",
+        "need for company-wide AI initiatives",
+        "concerned about data mining/overfitting",
+        "concerned about intellectual property",
+        "RAND is slower in AI adoption",
+        "sees AI as beneficial for efficiency",
+        "advocates for use case guides and training"
+      ],
+      "is_categorical": false,
+      "possible_values": null,
+      "confidence": 0.95
+    },
+    {
+      "name": "research_process_challenge",
+      "description": "Specific difficulties or time-consuming aspects of the research process identified by the speaker, often where AI could potentially help.",
+      "property_type": "string",
+      "frequency": 8,
+      "example_values": [
+        "uneven interview coding quality",
+        "difficulty making accurate graphics",
+        "designing interview protocols and questions",
+        "new data collection (permissions, instrument design, OMB review)",
+        "project management (critical paths, coordination)",
+        "analyzing qualitative data (pulling out themes)",
+        "finding the right stakeholders for interviews",
+        "tracing citations",
+        "data cleaning and preparation"
+      ],
+      "is_categorical": false,
+      "possible_values": null,
+      "confidence": 0.95
+    }
+  ],
+  "discovery_method": "qualitative research analysis",
+  "extraction_confidence": 0.95
+}

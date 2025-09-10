@@ -1,0 +1,29 @@
+INFO:src.qc.llm.llm_handler:LLM Handler initialized with defaults: gemini/gemini-2.5-flash, temp=0.0
+[92m14:03:32 - LiteLLM:INFO[0m: utils.py:3230 - 
+LiteLLM completion() model= gemini-2.5-flash; provider = gemini
+INFO:LiteLLM:
+LiteLLM completion() model= gemini-2.5-flash; provider = gemini
+INFO:httpx:HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=AIzaSyDXaLhSWAQhGNHZqdbvY-qFB0jxyPbiiow "HTTP/1.1 200 OK"
+INFO:src.qc.llm.llm_handler:Using maximum available context window (no max_tokens limit)
+[92m14:03:34 - LiteLLM:INFO[0m: utils.py:3230 - 
+LiteLLM completion() model= gemini-2.5-flash; provider = gemini
+INFO:LiteLLM:
+LiteLLM completion() model= gemini-2.5-flash; provider = gemini
+INFO:httpx:HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=AIzaSyDXaLhSWAQhGNHZqdbvY-qFB0jxyPbiiow "HTTP/1.1 200 OK"
+INFO:src.qc.llm.llm_handler:Successfully extracted OpenCode
+=== LiteLLM Integration Diagnostic ===
+PASS: LLMHandler initialization successful
+
+=== Testing Raw LLM Response ===
+Raw response content: '```json
+{"test": "success"}
+```'
+Response length: 31 characters
+Response type: <class 'str'>
+Extracted potential JSON: '{"test": "success"}'
+PASS: Successfully parsed JSON: {'test': 'success'}
+
+=== Testing Structured Extraction ===
+PASS: Structured extraction successful: code_name='AI Replacing Human Judgment' description='Concerns expressed by users regarding artificial intelligence taking over roles that traditionally require human judgment, leading to potential displacement or loss of human control.' properties=['Fear of job displacement', 'Loss of human control', 'Ethical implications', 'Impact on decision-making'] dimensions=['Industry affected', 'Type of judgment (e.g., ethical, creative, analytical)', 'Level of automation', 'User group (e.g., employees, consumers)'] supporting_quotes=['Users are concerned about AI replacing human judgment'] frequency=1 confidence=0.9
+  Result type: <class 'src.qc.workflows.grounded_theory.OpenCode'>
+  Result fields: code_name='AI Replacing Human Judgment', description='Concerns expressed by users regarding artificial intelligence taking over roles that traditionally require human judgment, leading to potential displacement or loss of human control.'

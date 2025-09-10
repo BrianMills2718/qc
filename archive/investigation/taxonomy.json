@@ -1,0 +1,240 @@
+{
+  "codes": [
+    {
+      "id": "AI_RESEARCH_APPLICATIONS",
+      "name": "AI Applications in Research Methods",
+      "description": "This code captures discussions about how Artificial Intelligence tools are currently being used or could potentially be used across various research methodologies at RAND, including qualitative, quantitative, and mixed-methods approaches. It encompasses both existing applications and speculative future uses.",
+      "semantic_definition": "Instances where participants describe or propose the use of AI/LLMs to perform specific tasks within a research project, such as data analysis, literature review, code generation, or project logistics.",
+      "parent_id": null,
+      "level": 0,
+      "example_quotes": [
+        "I've been using some of the LLM's for... thematic coding and kind of ability to kind of group documents then generate text for me",
+        "I've also done things for proposal writing and taken my idea where I want to use a particular design and poke holes in this; What are the problems with this; how can I strengthen this?",
+        "AI has been really helpful with writing like any type of code I write primarily in Python"
+      ],
+      "discovery_confidence": 0.9
+    },
+    {
+      "id": "QUAL_DATA_PROCESSING_AI",
+      "name": "AI for Qualitative Data Processing",
+      "description": "This sub-theme focuses on the application of AI tools to assist with tasks related to qualitative data, such as coding, theme identification, and de-identification of sensitive information in interview transcripts or open-ended survey responses.",
+      "semantic_definition": "Specific examples or proposals of AI being used for coding qualitative data, identifying themes, summarizing open-ended responses, or de-identifying personal information in text.",
+      "parent_id": "AI_RESEARCH_APPLICATIONS",
+      "level": 1,
+      "example_quotes": [
+        "Coding large amounts of data... Coding Is very annoying.",
+        "I've been using some of the LLM's for... thematic coding and kind of ability to kind of group documents",
+        "I mean, we gave Prateek feedback on Muse because we specifically had we had a very specific use which is like when we get all this open-ended data you know thousands and thousands of rows, it's right there and you know it's it's it's short... it just saves us so much time to just like feed it into something like Muse.",
+        "basic data cleaning and de identification... training in AI to be like, you know, any interjection or, you know, simple thing said by this speaker... can be, you know, masked or eliminated, and then something that just that helped with smart de identification."
+      ],
+      "discovery_confidence": 0.95
+    },
+    {
+      "id": "LIT_REVIEW_AI",
+      "name": "AI for Literature Reviews",
+      "description": "This sub-theme covers the use of AI in conducting literature reviews, including tasks like generating search terms, sifting through large volumes of abstracts, summarizing articles, and extracting specific information.",
+      "semantic_definition": "Discussions about using AI for any part of the literature review process, such as search strategy, filtering irrelevant articles, summarizing content, or extracting structured data from papers.",
+      "parent_id": "AI_RESEARCH_APPLICATIONS",
+      "level": 1,
+      "example_quotes": [
+        "I feel like there's, like, you know, probably an AI solution to that [search strategy]",
+        "I asked an LLM for something and explicitly asked to NOT make up references, and it still made up a reference.",
+        "we did write a python script to use the RAND CHAT to review a bunch of papers. So we did the literature review and had it spit out in a spreadsheet a once sentence summary of the paper or we asked it questions, is this paper based in the US?",
+        "Summaries I found AI super helpful and that's probably was one of the... first use cases to summarize stuff, and it's been super helpful saving a lot of time."
+      ],
+      "discovery_confidence": 0.95
+    },
+    {
+      "id": "QUANT_DATA_PROCESSING_AI",
+      "name": "AI for Quantitative Data Processing",
+      "description": "This sub-theme addresses the use of AI tools for tasks within quantitative research, such as writing or debugging statistical code, generating variable names, creating data dictionaries, and performing initial descriptive statistics.",
+      "semantic_definition": "Mentions of AI assisting with programming statistical software (R, Python, Stata), data cleaning, creating metadata (variable names, data dictionaries), or automating initial data exploration steps in quantitative analysis.",
+      "parent_id": "AI_RESEARCH_APPLICATIONS",
+      "level": 1,
+      "example_quotes": [
+        "I have used AI tools to help with my code. I know in general how to execute one of these methods but sometime there are new packages written but my code is having errors so I can take the code and put it in an LLM; can you fix this error or can you write this more concisely?",
+        "what if you could? Put the survey into AI and then say create all the variable names for me, right? ... Here's the data dictionary, essentially, and then here's all the descriptives.",
+        "AI has been really helpful with writing like any type of code I write primarily in Python... it just helped me write code like so much faster."
+      ],
+      "discovery_confidence": 0.9
+    },
+    {
+      "id": "PROJECT_LOGISTICS_AI",
+      "name": "AI for Project Logistics and Management",
+      "description": "This sub-theme covers the potential or actual use of AI to streamline administrative and logistical aspects of research projects, including participant recruitment, scheduling, generating meeting minutes, and optimizing project timelines.",
+      "semantic_definition": "Ideas or examples of AI automating tasks like finding and recruiting research participants, scheduling interviews, transcribing and summarizing meeting discussions, identifying key decisions or action items, or optimizing project workflows (e.g., Gantt charts).",
+      "parent_id": "AI_RESEARCH_APPLICATIONS",
+      "level": 1,
+      "example_quotes": [
+        "Can you imagine? A world where, like AI could feed in information about the kind of participants you're looking for. And AI could crawl the Internet to find them. Invite them to participate and then find a time on your calendar for the interview.",
+        "meeting minutes like just having AI transcribed the meeting minutes put it in like here are the key decisions. Here are the action items.",
+        "if somebody could help me like take a project and say here are. All the things that need to happen in terms of IRB review... and help identify the critical paths so that you're always working. The most efficiently."
+      ],
+      "discovery_confidence": 0.95
+    },
+    {
+      "id": "PROPOSAL_DEVELOPMENT_AI",
+      "name": "AI for Proposal Development",
+      "description": "This sub-theme explores the application of AI tools in the process of writing research proposals, including brainstorming ideas, refining research designs, identifying weaknesses, and generating summaries or visual elements.",
+      "semantic_definition": "Instances where AI is used to assist with drafting proposals, generating executive summaries, critiquing research designs, or creating images for proposals.",
+      "parent_id": "AI_RESEARCH_APPLICATIONS",
+      "level": 1,
+      "example_quotes": [
+        "I've also done things for proposal writing and taken my idea where I want to use a particular design and poke holes in this; What are the problems with this; how can I strengthen this?",
+        "I take the whole proposal and say write an executive summary; it is great at doing that",
+        "I’ve played a little with telling it to, to make an image for proposal. Somewhere you can say, I want something that looks like an experiment but relevant to labor markets."
+      ],
+      "discovery_confidence": 0.9
+    },
+    {
+      "id": "VIRTUAL_ENVIRONMENTS_AI",
+      "name": "AI for Virtual Populations/Environments",
+      "description": "This sub-theme refers to the innovative concept of using AI to create simulated research participants or virtual institutional environments for testing research tools, policies, or recommendations before real-world application.",
+      "semantic_definition": "Proposals or discussions about creating AI agents representing individuals (e.g., from ALP panels) or virtual organizational systems (e.g., DoD departments) to simulate responses, test surveys, or evaluate policy implementation feasibility.",
+      "parent_id": "AI_RESEARCH_APPLICATIONS",
+      "level": 1,
+      "example_quotes": [
+        "if we could take those panels and almost for like each person develop an AI agent of that person program it with like personality traits... basically create virtual populations in essence.",
+        "if there was something like something virtual like that, it's feel like as researchers would be like this, you know, kind of like a place like a sandbox to play in before we go out and and maybe test tools in the real world.",
+        "I feel like there's a way, a better way for us to, like create virtual Systems environments... setting up like a a virtual like DoD where you got different you got your different departments and you've got our wealth of knowledge about each of those departments and. You can say, OK, if I said to do this, How likely is that to work?"
+      ],
+      "discovery_confidence": 0.85
+    },
+    {
+      "id": "AI_CHALLENGES_LIMITATIONS",
+      "name": "AI Challenges and Limitations",
+      "description": "This code captures discussions about the difficulties, drawbacks, and inherent limitations of using AI tools in research, including issues related to accuracy, trust, ethical concerns, and the quality or availability of specific tools.",
+      "semantic_definition": "Any mention of problems, risks, negative impacts, or areas where AI tools fall short in research tasks.",
+      "parent_id": null,
+      "level": 0,
+      "example_quotes": [
+        "there were definitely, like, nuances that were missed and things that, you know were not picked up that were relevant to our project.",
+        "The risk is that we will end up utilizing AI for stuff our junior folks used to do. We can use AI for a literature review that would have taken a RA 20 days so benefits of cost savings but I worry about career development and skillset development among the younger folks.",
+        "I asked an LLM for something and explicitly asked to NOT make up references, and it still made up a reference."
+      ],
+      "discovery_confidence": 0.9
+    },
+    {
+      "id": "ACCURACY_NUANCE_ISSUES",
+      "name": "Accuracy and Nuance Issues",
+      "description": "This sub-theme highlights problems with AI tools related to their accuracy, ability to understand context, detect sarcasm, or capture subtle meanings in data, often leading to over- or under-interpretation and \"hallucinations.\"",
+      "semantic_definition": "Specific instances or concerns where AI output is inaccurate, misses critical context, fails to understand human subtleties (e.g., sarcasm, political sensitivity), or generates fabricated information (hallucinations).",
+      "parent_id": "AI_CHALLENGES_LIMITATIONS",
+      "level": 1,
+      "example_quotes": [
+        "there were definitely, like, nuances that were missed and things that, you know were not picked up that were relevant to our project.",
+        "it missed anything that was nuanced. It sort of wasn't picking up on things.",
+        "I asked an LLM for something and explicitly asked to NOT make up references, and it still made up a reference.",
+        "it doesn't understand sarcasm. There's a lot of jargon around financing in these communities, etc."
+      ],
+      "discovery_confidence": 0.95
+    },
+    {
+      "id": "TRUST_VALIDATION_REQUIREMENTS",
+      "name": "Trust and Validation Requirements",
+      "description": "This sub-theme addresses the critical need for human oversight, verification, and established standards to ensure the reliability and trustworthiness of AI-generated research outputs, including inter-rater reliability and defining \"good enough\" quality.",
+      "semantic_definition": "Discussions about the necessity of human review, checking AI results, performing validation exercises (e.g., inter-rater reliability), defining acceptable error margins, or establishing protocols for ensuring the quality and credibility of AI-assisted research.",
+      "parent_id": "AI_CHALLENGES_LIMITATIONS",
+      "level": 1,
+      "example_quotes": [
+        "it was difficult for me to like a just inherently trust what it was spitting out in a way that maybe you want to just like take it and use it to draw further conclusions.",
+        "I feel like you'd have to do a sub-study just like you do with any sensitivity analysis, like to look at, you know, whether it was accurate up, you know, like do some inter-rater reliability test.",
+        "I think that the thing that I always want to some people is like the human. Interface and I think that the part that makes me worried about using it in research analysis is that I do feel like there are some folks who are not doing delayed post processing.",
+        "what really are the best practices for validation... what do we think the error bar is like? ... how much do we need to know and how much do we need to articulate for the result to be, you know, up to Rand's quality standard."
+      ],
+      "discovery_confidence": 0.95
+    },
+    {
+      "id": "ETHICAL_RISK_CONCERNS",
+      "name": "Ethical and Societal Risk Concerns",
+      "description": "This sub-theme covers broader ethical considerations and potential negative societal impacts of AI adoption in research, such as intellectual property infringement, data mining, job displacement, and the risk of AI models self-corrupting their data.",
+      "semantic_definition": "Concerns related to AI's impact on human jobs, the potential for AI to generate content based on other's IP, the risk of data mining or overfitting in statistical models, or the long-term implications of AI-generated content feeding back into AI training data (AI autophagy).",
+      "parent_id": "AI_CHALLENGES_LIMITATIONS",
+      "level": 1,
+      "example_quotes": [
+        "I feel like every suggestion I'm making is like putting someone out of a job.",
+        "The risk is that we will end up utilizing AI for stuff our junior folks used to do... I worry about career development and skillset development among the younger folks.",
+        "One of the things researchers are increasingly concerned about is data mining, which is going into a data set and just, you know, looking at all these different options.",
+        "as AI continues to create more content. And it like feeds itself and and it's basing that content on some right stuff and some wrong stuff. So it's perpetuating some wrong stuff and it just keeps getting bigger and bigger like it gets it just. It's like feeding itself.",
+        "I don’t want to inadvertently take someone else’s intellectual property."
+      ],
+      "discovery_confidence": 0.9
+    },
+    {
+      "id": "TOOL_QUALITY_AVAILABILITY",
+      "name": "AI Tool Quality and Availability",
+      "description": "This sub-theme addresses practical issues concerning the performance and accessibility of AI tools, particularly RAND's internal AI solutions, and limitations such as lack of access on classified networks.",
+      "semantic_definition": "Complaints or observations about the quality or effectiveness of specific AI tools (e.g., RANDChat vs. ChatGPT), or limitations in their availability, such as not being usable on classified systems.",
+      "parent_id": "AI_CHALLENGES_LIMITATIONS",
+      "level": 1,
+      "example_quotes": [
+        "I've used ranch at a few times and it just hasn't been as good as just using Chachi PT.",
+        "The unavailability of those things on classified networks. So if you work on classified stuff for this whole part of your thing, this whole world doesn't really exist right now, because you can't do any of that.",
+        "I think the RAND CHAT one is not as good, a couple of times I would ask RAND CHAT, are there systematic studies on blah or what do you know about x and y and it would give me papers/citations that were not real."
+      ],
+      "discovery_confidence": 0.9
+    },
+    {
+      "id": "AI_INSTITUTIONAL_ADOPTION",
+      "name": "AI Institutional Adoption and Support",
+      "description": "This code captures discussions about RAND's organizational approach to AI, including current adoption levels, perceived barriers, necessary support structures, and the strategic importance of AI for the institution's future.",
+      "semantic_definition": "Any comments on RAND's current rate of AI adoption, reasons for slow or fast adoption, suggestions for institutional support (training, guidelines), or the strategic imperative for RAND to integrate AI.",
+      "parent_id": null,
+      "level": 0,
+      "example_quotes": [
+        "I think we might be a little bit slower [level of adoption], whether that is right I don’t know. I personally feel others are using this and I should… it is speeding things up for ppl in a way that makes me feel I don’t want to be left behind",
+        "Need to be company wide ai initiatives that every unit and division are asked to participate in.",
+        "I think adoption's pretty low right now for, for. A variety of."
+      ],
+      "discovery_confidence": 0.9
+    },
+    {
+      "id": "BARRIERS_TO_ADOPTION",
+      "name": "Barriers to AI Adoption",
+      "description": "This sub-theme identifies factors that hinder the widespread and effective adoption of AI tools within RAND, such as lack of training, fear of job displacement, uneven knowledge among researchers, and restrictions for classified work.",
+      "semantic_definition": "Specific reasons cited for why AI is not being adopted more widely or effectively at RAND, including concerns about job security, insufficient training or guidance, lack of awareness, or technical/security limitations.",
+      "parent_id": "AI_INSTITUTIONAL_ADOPTION",
+      "level": 1,
+      "example_quotes": [
+        "I think everybody's a little bit scared of of of what's next, right? ... I don't know if it's mistrust or by using this tool. Am I going to? Is that gonna reflect back to me that I am no longer as relevant as I thought that I was?",
+        "The unavailability of those things on classified networks. So if you work on classified stuff for this whole part of your thing, this whole world doesn't really exist right now",
+        "I don’t know if ppl feel like they are not supposed to use these bc I know RAND has its own specific rand chat and rand came out and said don’t use something, so part of me wonders if ppl are hesitant for that reason."
+      ],
+      "discovery_confidence": 0.95
+    },
+    {
+      "id": "FACILITATORS_FOR_ADOPTION",
+      "name": "Facilitators for AI Adoption",
+      "description": "This sub-theme outlines strategies, resources, and institutional changes that could promote the responsible, safe, and efficient adoption of AI technologies at RAND, including training, clear guidelines, and dedicated support.",
+      "semantic_definition": "Suggestions for how RAND can encourage AI use, such as providing use case guides, establishing clear protocols for AI integration, offering training and education, ensuring transparency in AI use, or allocating dedicated AI personnel to projects.",
+      "parent_id": "AI_INSTITUTIONAL_ADOPTION",
+      "level": 1,
+      "example_quotes": [
+        "I would actually love to see more like. Written frameworks or guidelines or like hey, this might be helpful for figuring out if you're having a lot of variation in your thematic you know the categories that it's offer you or something similar.",
+        "folks to have sort of illustrated use case guides for, OK. Let's say you wanna use large language models to do X. Here's some literal examples of how this is used and how this fit into an actual project lifecycle",
+        "I think that the institution has to promote responsible adoption because otherwise we will be left behind in a tool that will make research much faster and much easier.",
+        "all the divisions should go and buy programmers time and be like you're 50% your entire like 50% of your entire job is working on nsrd projects and then they match and pay."
+      ],
+      "discovery_confidence": 0.95
+    },
+    {
+      "id": "COMPETITIVE_IMPERATIVE",
+      "name": "Competitive Imperative for AI",
+      "description": "This sub-theme addresses the strategic necessity for RAND to adopt AI to maintain its competitive edge, avoid being outpaced by other organizations or AI companies, and ensure its research remains relevant and impactful.",
+      "semantic_definition": "Discussions emphasizing that RAND must adopt AI to stay competitive, prevent being put out of business by AI companies, or risk its research becoming antiquated or irrelevant compared to faster, AI-driven outputs from competitors.",
+      "parent_id": "AI_INSTITUTIONAL_ADOPTION",
+      "level": 1,
+      "example_quotes": [
+        "My sense is the Army thinks our competitors are integrating AI wholistically... So how do we make sure we don’t get put out of business in that environment. How do we maintain a competitive edge.",
+        "I'm very worried that in three years we're in China, work will be antiquated, like it'll be like irrelevant, right?",
+        "I think that the institution has to promote responsible adoption because otherwise we will be left behind in a tool that will make research much faster and much easier."
+      ],
+      "discovery_confidence": 0.9
+    }
+  ],
+  "total_codes": 16,
+  "hierarchy_depth": 1,
+  "discovery_method": "Thematic analysis of interview transcripts",
+  "analytic_question": "Investigation test - dialogue structure validation",
+  "extraction_confidence": 0.9
+}

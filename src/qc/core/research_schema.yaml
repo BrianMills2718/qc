@@ -1,0 +1,223 @@
+# Research Schema Configuration
+# Defines entities, properties, and relationships for qualitative research analysis
+
+entities:
+  Person:
+    description: "Individuals mentioned in interviews (researchers, participants, etc.)"
+    extraction_hints: "Look for names, titles, researchers, participants"
+    examples: ["Dr. Smith", "Alice Huguet", "Senior Researcher"]
+    properties:
+      seniority:
+        type: enum
+        values: [junior, mid-level, senior, principal]
+        description: "Career level or seniority"
+        required: false
+      division:
+        type: text
+        description: "Department or division they work in"
+        required: false
+      expertise:
+        type: list
+        description: "Areas of expertise or specialization"
+        required: false
+    relationships:
+      works_at:
+        target_entity: Organization
+        relationship_type: WORKS_AT
+        direction: outgoing
+        description: "Person works at organization"
+      manages:
+        target_entity: Person
+        relationship_type: MANAGES
+        direction: outgoing
+        description: "Person manages another person"
+      collaborates_with:
+        target_entity: Person
+        relationship_type: COLLABORATES_WITH
+        direction: bidirectional
+        description: "People who collaborate"
+      uses:
+        target_entity: Method
+        relationship_type: USES
+        direction: outgoing
+        description: "Person uses method"
+
+  Organization:
+    description: "Organizations, institutions, companies, or groups"
+    extraction_hints: "Look for company names, institutions, departments"
+    examples: ["RAND Corporation", "Microsoft", "Stanford University"]
+    properties:
+      size:
+        type: enum
+        values: [small, medium, large]
+        description: "Organization size"
+        required: false
+      sector:
+        type: enum
+        values: [public, private, nonprofit, academic]
+        description: "Sector type"
+        required: false
+      focus_area:
+        type: text
+        description: "Primary focus or mission"
+        required: false
+    relationships:
+      collaborates_with:
+        target_entity: Organization
+        relationship_type: COLLABORATES_WITH
+        direction: bidirectional
+        description: "Organizations that collaborate"
+      employs:
+        target_entity: Person
+        relationship_type: EMPLOYS
+        direction: outgoing
+        description: "Organization employs person"
+
+  Method:
+    description: "Research methods, methodologies, or approaches"
+    extraction_hints: "Look for research methods, analysis techniques, approaches"
+    examples: ["qualitative analysis", "machine learning", "surveys"]
+    properties:
+      complexity:
+        type: enum
+        values: [low, medium, high]
+        description: "Complexity level"
+        required: false
+      adoption_rate:
+        type: enum
+        values: [low, medium, high]
+        description: "How widely adopted"
+        required: false
+      application_area:
+        type: text
+        description: "Where this method is applied"
+        required: false
+    relationships:
+      used_by:
+        target_entity: Person
+        relationship_type: USED_BY
+        direction: incoming
+        description: "Method used by person"
+      implemented_at:
+        target_entity: Organization
+        relationship_type: IMPLEMENTED_AT
+        direction: outgoing
+        description: "Method implemented at organization"
+
+  Tool:
+    description: "Software tools, platforms, or technologies"
+    extraction_hints: "Look for software names, tools, platforms, AI systems"
+    examples: ["GPT-4", "Python", "SPSS", "NVivo"]
+    properties:
+      complexity:
+        type: enum
+        values: [simple, moderate, complex]
+        description: "Tool complexity"
+        required: false
+      vendor:
+        type: text
+        description: "Tool vendor or creator"
+        required: false
+      adoption_rate:
+        type: enum
+        values: [low, medium, high]
+        description: "Adoption rate"
+        required: false
+      use_cases:
+        type: list
+        description: "Common use cases"
+        required: false
+    relationships:
+      used_by:
+        target_entity: Person
+        relationship_type: USED_BY
+        direction: incoming
+        description: "Tool used by person"
+      used_at:
+        target_entity: Organization
+        relationship_type: USED_AT
+        direction: outgoing
+        description: "Tool used at organization"
+
+  Quote:
+    description: "Individual quotes from interviews with line-based location tracking"
+    extraction_hints: "Extract meaningful semantic units (sentences/paragraphs) from interview text"
+    examples: ["Mouho was the force behind the CA training", "Leadership structures vary by organization"]
+    properties:
+      text:
+        type: text
+        description: "Full text of the quote"
+        required: true
+      line_start:
+        type: integer
+        description: "Starting line number of quote in source interview file"
+        required: true
+      line_end:
+        type: integer
+        description: "Ending line number of quote in source interview file" 
+        required: true
+      line_number:
+        type: integer
+        description: "Primary line number (line_start) for backward compatibility"
+        required: true
+      interview_id:
+        type: text
+        description: "Source interview identifier"
+        required: true
+      speaker:
+        type: text
+        description: "Person speaking (if identifiable)"
+        required: false
+      context:
+        type: text
+        description: "Surrounding context for quote"
+        required: false
+      confidence:
+        type: float
+        description: "Extraction confidence score"
+        required: false
+        default: 0.0
+      semantic_type:
+        type: enum
+        values: [sentence, paragraph, line]
+        description: "Type of semantic unit"
+        required: false
+        default: paragraph
+    relationships:
+      mentions_entity:
+        target_entity: Person
+        relationship_type: MENTIONS
+        direction: outgoing
+        description: "Quote mentions this entity"
+      mentions_organization:
+        target_entity: Organization
+        relationship_type: MENTIONS
+        direction: outgoing
+        description: "Quote mentions this organization"
+      mentions_method:
+        target_entity: Method
+        relationship_type: MENTIONS
+        direction: outgoing
+        description: "Quote mentions this method"
+      mentions_tool:
+        target_entity: Tool
+        relationship_type: MENTIONS
+        direction: outgoing
+        description: "Quote mentions this tool"
+      supports_code:
+        target_entity: Code
+        relationship_type: SUPPORTS
+        direction: outgoing
+        description: "Quote provides evidence for this code"
+      evidences_relationship:
+        target_entity: Relationship
+        relationship_type: EVIDENCES
+        direction: outgoing
+        description: "Quote provides evidence for this relationship"
+
+# Global extraction settings
+settings:
+  min_confidence: 0.7
+  extract_codes: true
+  extract_relationships: true
+  max_entities_per_type: 100

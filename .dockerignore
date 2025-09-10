@@ -1,0 +1,66 @@
+# Docker ignore file for demo and production builds
+
+# Development artifacts
+.git/
+.gitignore
+*.md
+!DEMO.md
+!README.md
+
+# Archive and investigation directories
+archive/
+temp_tests/
+investigation/
+logs/
+*.log
+
+# Test files
+tests/
+pytest.ini
+*test*.py
+test_*
+
+# Development outputs (use pre-built demo data instead)
+outputs/runs/
+outputs/testing/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+.pytest_cache/
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Large data directories (demo uses smaller dataset)
+data/interviews/africa_interviews/
+data/interviews/ai_interviews/AI_Interviews_all_2025.0728/
+
+# Temporary files
+*.tmp
+*.temp
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
+
+# Documentation build
+docs/_build/

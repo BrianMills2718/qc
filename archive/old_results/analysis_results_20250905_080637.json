@@ -1,0 +1,20 @@
+[
+  {
+    "interview_id": "AI assessment Arroyo SDR",
+    "filename": "AI assessment Arroyo SDR.docx",
+    "error": "LLM analysis failed: Raw completion failed: litellm.BadRequestError: OpenAIException - Unsupported parameter: 'max_tokens' is not supported with this model. Use 'max_completion_tokens' instead.",
+    "timestamp": "2025-09-05T08:06:37.452094"
+  },
+  {
+    "interview_id": "Focus Group on AI and Methods 7_7",
+    "filename": "Focus Group on AI and Methods 7_7.docx",
+    "error": "LLM analysis failed: Raw completion failed: litellm.BadRequestError: OpenAIException - Unsupported parameter: 'max_tokens' is not supported with this model. Use 'max_completion_tokens' instead.",
+    "timestamp": "2025-09-05T08:06:37.728188"
+  },
+  {
+    "interview_id": "Interview Kandice Kapinos",
+    "filename": "Interview Kandice Kapinos.docx",
+    "error": "LLM analysis failed: Raw completion failed: litellm.BadRequestError: OpenAIException - Unsupported parameter: 'max_tokens' is not supported with this model. Use 'max_completion_tokens' instead.",
+    "timestamp": "2025-09-05T08:06:37.954974"
+  }
+]

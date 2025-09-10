@@ -1,0 +1,1 @@
+John Smith works at Google and collaborates with Sarah on Kubernetes projects. Sarah also uses Azure and Docker for containerization.

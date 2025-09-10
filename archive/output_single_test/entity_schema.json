@@ -1,0 +1,504 @@
+{
+  "entity_types": [
+    {
+      "name": "Researcher",
+      "description": "Individuals involved in academic or policy research, often with specialized expertise.",
+      "frequency": 5,
+      "example_entities": [
+        "Kandice Kapinos",
+        "researchers",
+        "PH.D. level ppl"
+      ],
+      "common_contexts": [
+        "convener of researchers",
+        "using the subscription based ai products",
+        "honed that overtime",
+        "conducting studies"
+      ],
+      "confidence": 1.0
+    },
+    {
+      "name": "AI Tool/Product",
+      "description": "Software or platforms utilizing artificial intelligence to assist with various tasks.",
+      "frequency": 5,
+      "example_entities": [
+        "Otter",
+        "LLM",
+        "RAND Chat",
+        "Claude",
+        "subscription based ai products"
+      ],
+      "common_contexts": [
+        "used for research",
+        "help with my code",
+        "for proposal writing",
+        "review a bunch of papers",
+        "transcribes and summarizes"
+      ],
+      "confidence": 1.0
+    },
+    {
+      "name": "Causal Inference Method",
+      "description": "Specific statistical or research designs used to determine cause-and-effect relationships.",
+      "frequency": 4,
+      "example_entities": [
+        "difference-in-difference",
+        "Synthetic control methods",
+        "Instrumental variables approach",
+        "Propensity score match",
+        "interrupted timeseries analysis",
+        "randomized control trial"
+      ],
+      "common_contexts": [
+        "methods are in the Quiver for causal inference",
+        "commonly are these methods used at RAND",
+        "expertise in causal inference techniques",
+        "sophisticated statistical methods"
+      ],
+      "confidence": 1.0
+    },
+    {
+      "name": "Organization",
+      "description": "Institutions, centers, or agencies where research is conducted, managed, or funded.",
+      "frequency": 4,
+      "example_entities": [
+        "Methods Center for Causal Inference",
+        "RAND",
+        "Pardee",
+        "GER",
+        "American Society for Health Economists",
+        "federal agency"
+      ],
+      "common_contexts": [
+        "Director Methods Center",
+        "adoption of AI at RAND",
+        "client a federal agency",
+        "host seminars"
+      ],
+      "confidence": 1.0
+    },
+    {
+      "name": "Research Process/Activity",
+      "description": "Stages or tasks involved in conducting research, from planning to analysis.",
+      "frequency": 5,
+      "example_entities": [
+        "proposal writing",
+        "literature review",
+        "data collection",
+        "code checking",
+        "policy evaluation",
+        "preproposal work",
+        "project management",
+        "environmental scans"
+      ],
+      "common_contexts": [
+        "time-consuming process",
+        "help with preproposal work",
+        "do an evaluation",
+        "staff projects",
+        "conducting a trial"
+      ],
+      "confidence": 1.0
+    },
+    {
+      "name": "Code/Script",
+      "description": "Programming instructions or sequences used in data analysis, automation, or software development.",
+      "frequency": 3,
+      "example_entities": [
+        "my code",
+        "R code",
+        "Stata code",
+        "python script"
+      ],
+      "common_contexts": [
+        "help with my code",
+        "fix this error",
+        "convert this R code to Stata code",
+        "checking code",
+        "annotate the code"
+      ],
+      "confidence": 1.0
+    },
+    {
+      "name": "Data",
+      "description": "Information, often numerical or textual, collected, cleaned, and analyzed for research purposes.",
+      "frequency": 3,
+      "example_entities": [
+        "publicly available datasets",
+        "claims",
+        "survey data"
+      ],
+      "common_contexts": [
+        "depends on the data",
+        "pulling data down",
+        "clean and prepare it for use",
+        "massive datasets",
+        "internal budgeting data"
+      ],
+      "confidence": 1.0
+    },
+    {
+      "name": "Patient",
+      "description": "Individuals receiving medical care or participating in studies, often as subjects.",
+      "frequency": 1,
+      "example_entities": [
+        "patients"
+      ],
+      "common_contexts": [
+        "Providers and patients",
+        "using Otter to take notes"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "name": "Provider",
+      "description": "Individuals or entities offering services, such as medical care.",
+      "frequency": 1,
+      "example_entities": [
+        "Providers"
+      ],
+      "common_contexts": [
+        "Providers and patients",
+        "using Otter to take notes"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "name": "Librarian",
+      "description": "Professionals who manage and provide access to information resources, often assisting with research.",
+      "frequency": 1,
+      "example_entities": [
+        "librarian"
+      ],
+      "common_contexts": [
+        "a librarian gave us the initial list"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "name": "Attorney",
+      "description": "Legal professionals who use tools for tasks like tracking legislation or managing time.",
+      "frequency": 1,
+      "example_entities": [
+        "attorney"
+      ],
+      "common_contexts": [
+        "I have a sister who is an attorney",
+        "uses it in ways I would not think of"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "name": "Intellectual Property",
+      "description": "Creations of the mind, such as inventions, literary and artistic works, designs, and symbols, which are legally protected.",
+      "frequency": 2,
+      "example_entities": [
+        "someone else’s intellectual property"
+      ],
+      "common_contexts": [
+        "I don’t want to inadvertently take someone else’s intellectual property",
+        "kind of stealing"
+      ],
+      "confidence": 1.0
+    },
+    {
+      "name": "Training/Education",
+      "description": "Structured learning or instruction provided to enhance skills or knowledge, particularly regarding new technologies like AI.",
+      "frequency": 1,
+      "example_entities": [
+        "Training/education on AI"
+      ],
+      "common_contexts": [
+        "need for Training/education on AI at RAND",
+        "showcasing how ppl use it successfully"
+      ],
+      "confidence": 0.9
+    }
+  ],
+  "relationship_types": [
+    {
+      "name": "USES",
+      "description": "An entity utilizes a tool, method, or concept for a specific purpose.",
+      "frequency": 5,
+      "common_source_types": [
+        "Researcher",
+        "Provider",
+        "Patient",
+        "Attorney",
+        "Organization"
+      ],
+      "common_target_types": [
+        "AI Tool/Product",
+        "Causal Inference Method",
+        "Code/Script",
+        "Data"
+      ],
+      "directional": true,
+      "example_relationships": [
+        {
+          "source": "Providers and patients",
+          "target": "Otter",
+          "context": "Providers and patients and they are using Otter to take notes"
+        },
+        {
+          "source": "researchers",
+          "target": "subscription based ai products",
+          "context": "heard lots of researchers that are using the subscription based ai products"
+        },
+        {
+          "source": "I",
+          "target": "AI tools",
+          "context": "I have used AI tools to help with my code"
+        },
+        {
+          "source": "I",
+          "target": "RAND Chat",
+          "context": "I’ve used the RAND Chat"
+        },
+        {
+          "source": "federal agencies",
+          "target": "Api",
+          "context": "some federal agencies are using the Api"
+        }
+      ],
+      "confidence": 1.0
+    },
+    {
+      "name": "PERFORMS",
+      "description": "An entity carries out a specific process, activity, or task.",
+      "frequency": 4,
+      "common_source_types": [
+        "Researcher",
+        "Organization"
+      ],
+      "common_target_types": [
+        "Research Process/Activity",
+        "Causal Inference Method"
+      ],
+      "directional": true,
+      "example_relationships": [
+        {
+          "source": "Center",
+          "target": "host seminars and journal clubs",
+          "context": "we host seminars and journal clubs"
+        },
+        {
+          "source": "I",
+          "target": "proposal writing",
+          "context": "I’ve been writing proposals non-stop"
+        },
+        {
+          "source": "we",
+          "target": "literature review",
+          "context": "we did the literature review"
+        },
+        {
+          "source": "researcher",
+          "target": "pulling data down",
+          "context": "The researcher has honed that overtime so not easily replicating it. But the time-consuming process of pulling data down"
+        }
+      ],
+      "confidence": 1.0
+    },
+    {
+      "name": "HAS_EXPERTISE_IN",
+      "description": "An entity possesses specialized knowledge or skill in a particular domain or method.",
+      "frequency": 2,
+      "common_source_types": [
+        "Researcher"
+      ],
+      "common_target_types": [
+        "Causal Inference Method",
+        "Research Process/Activity"
+      ],
+      "directional": true,
+      "example_relationships": [
+        {
+          "source": "researchers",
+          "target": "causal inference techniques",
+          "context": "convener of researchers who have expertise in causal inference techniques"
+        },
+        {
+          "source": "ppl",
+          "target": "methods",
+          "context": "hard for ppl who are not experts to understand [methods]"
+        }
+      ],
+      "confidence": 1.0
+    },
+    {
+      "name": "IMPROVES",
+      "description": "An AI tool or method enhances the quality, efficiency, or outcome of a process or code.",
+      "frequency": 3,
+      "common_source_types": [
+        "AI Tool/Product"
+      ],
+      "common_target_types": [
+        "Code/Script",
+        "Research Process/Activity"
+      ],
+      "directional": true,
+      "example_relationships": [
+        {
+          "source": "AI tools",
+          "target": "my code",
+          "context": "I have used AI tools to help with my code"
+        },
+        {
+          "source": "LLM",
+          "target": "proposal writing",
+          "context": "How helpful are LLM’s for proposals."
+        },
+        {
+          "source": "AI",
+          "target": "replicability",
+          "context": "check the code, annotate the code, replicability those are time consuming and for AI."
+        }
+      ],
+      "confidence": 1.0
+    },
+    {
+      "name": "GENERATES",
+      "description": "An AI tool produces new content such as text, summaries, or images.",
+      "frequency": 3,
+      "common_source_types": [
+        "AI Tool/Product"
+      ],
+      "common_target_types": [
+        "Summary",
+        "Text",
+        "Image",
+        "Citation"
+      ],
+      "directional": true,
+      "example_relationships": [
+        {
+          "source": "Otter",
+          "target": "summaries",
+          "context": "it transcribes and summarizes."
+        },
+        {
+          "source": "LLM",
+          "target": "executive summary",
+          "context": "say write an executive summary; it is great at doing that"
+        },
+        {
+          "source": "LLM",
+          "target": "image",
+          "context": "telling it to, to make an image for proposal."
+        }
+      ],
+      "confidence": 1.0
+    },
+    {
+      "name": "IS_PART_OF",
+      "description": "An entity or organization is a component or division within a larger organizational structure.",
+      "frequency": 2,
+      "common_source_types": [
+        "Methods Center for Causal Inference",
+        "Pardee",
+        "GER"
+      ],
+      "common_target_types": [
+        "Organization"
+      ],
+      "directional": true,
+      "example_relationships": [
+        {
+          "source": "Methods Center for Causal Inference",
+          "target": "RAND",
+          "context": "I view the Center as a convener of researchers"
+        },
+        {
+          "source": "Pardee",
+          "target": "GER",
+          "context": "Used to be under Pardee and now GER"
+        }
+      ],
+      "confidence": 0.9
+    },
+    {
+      "name": "REQUIRES",
+      "description": "A method or process necessitates the availability or use of specific data or resources.",
+      "frequency": 1,
+      "common_source_types": [
+        "Causal Inference Method",
+        "Research Process/Activity"
+      ],
+      "common_target_types": [
+        "Data"
+      ],
+      "directional": true,
+      "example_relationships": [
+        {
+          "source": "evaluation",
+          "target": "data",
+          "context": "depends on the data bc what do you have available to do an evaluation"
+        }
+      ],
+      "confidence": 0.9
+    },
+    {
+      "name": "CAUSES_CONCERN_FOR",
+      "description": "An aspect of AI use or its output creates apprehension or ethical concerns for a user.",
+      "frequency": 2,
+      "common_source_types": [
+        "AI Tool/Product",
+        "Intellectual Property"
+      ],
+      "common_target_types": [
+        "Researcher"
+      ],
+      "directional": true,
+      "example_relationships": [
+        {
+          "source": "using AI at RAND",
+          "target": "me",
+          "context": "Anything about using AI at RAND that makes you nervous?"
+        },
+        {
+          "source": "intellectual property",
+          "target": "I",
+          "context": "I don’t want to inadvertently take someone else’s intellectual property."
+        }
+      ],
+      "confidence": 1.0
+    },
+    {
+      "name": "PROVIDES_GUIDANCE_TO",
+      "description": "An entity or tool offers advice, training, or explanatory information to another entity.",
+      "frequency": 2,
+      "common_source_types": [
+        "AI Tool/Product",
+        "Researcher",
+        "Training/Education"
+      ],
+      "common_target_types": [
+        "Researcher"
+      ],
+      "directional": true,
+      "example_relationships": [
+        {
+          "source": "Claude",
+          "target": "me",
+          "context": "can it tell me if this is a valid design."
+        },
+        {
+          "source": "LLM",
+          "target": "ppl",
+          "context": "explain like I’m five."
+        },
+        {
+          "source": "someone super savvy",
+          "target": "others",
+          "context": "could give a rundown of how they use it day to day."
+        }
+      ],
+      "confidence": 1.0
+    }
+  ],
+  "total_entities_found": 13,
+  "total_relationships_found": 9,
+  "discovery_method": "Interview Analysis",
+  "extraction_confidence": 0.95
+}

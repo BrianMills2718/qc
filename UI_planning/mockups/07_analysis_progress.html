@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analysis Progress - QualCode</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        .progress-container {
+            max-width: 800px;
+            margin: 50px auto;
+        }
+        
+        .phase-progress {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #f0f0f0;
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #2E7D32, #4CAF50);
+            border-radius: 15px;
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 15px;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .phase-list {
+            margin-top: 30px;
+        }
+        
+        .phase-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            margin: 10px 0;
+            background: #f9f9f9;
+            border-radius: 8px;
+            border-left: 4px solid #ddd;
+        }
+        
+        .phase-item.completed {
+            border-left-color: #4CAF50;
+            background: #f0f8f0;
+        }
+        
+        .phase-item.active {
+            border-left-color: #1565C0;
+            background: #e8f4fd;
+            animation: pulse 2s infinite;
+        }
+        
+        .phase-item.error {
+            border-left-color: #d32f2f;
+            background: #ffebee;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.8; }
+            100% { opacity: 1; }
+        }
+        
+        .phase-icon {
+            width: 30px;
+            margin-right: 15px;
+            font-size: 20px;
+        }
+        
+        .phase-details {
+            flex: 1;
+        }
+        
+        .phase-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .phase-status {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .phase-time {
+            color: #999;
+            font-size: 14px;
+        }
+        
+        .control-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+            justify-content: center;
+        }
+        
+        .control-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-pause {
+            background: #FFA726;
+            color: white;
+        }
+        
+        .btn-resume {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .btn-cancel {
+            background: #f44336;
+            color: white;
+        }
+        
+        .btn-partial {
+            background: #1565C0;
+            color: white;
+        }
+        
+        .live-updates {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .update-item {
+            padding: 8px;
+            margin: 5px 0;
+            background: white;
+            border-radius: 4px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .update-time {
+            color: #999;
+            font-size: 12px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2E7D32;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .error-banner {
+            background: #ffebee;
+            border: 1px solid #ffcdd2;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .error-banner.show {
+            display: block;
+        }
+        
+        .retry-info {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">🔬 QualCode</div>
+        <div class="nav-links">
+            <a href="01_dashboard.html">Dashboard</a>
+            <a href="#" class="active">Analysis</a>
+        </div>
+    </nav>
+
+    <div class="progress-container">
+        <div class="phase-progress">
+            <h1>🔬 Grounded Theory Analysis in Progress</h1>
+            
+            <!-- Overall Progress -->
+            <div style="margin: 20px 0">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill" style="width: 35%">
+                        35%
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Current Status -->
+            <div style="text-align: center; margin: 20px 0">
+                <h3 id="current-status">Processing Interview 2 of 3...</h3>
+                <p style="color: #666" id="status-detail">Extracting initial codes from transcript</p>
+            </div>
+            
+            <!-- Phase List -->
+            <div class="phase-list">
+                <div class="phase-item completed">
+                    <div class="phase-icon">✅</div>
+                    <div class="phase-details">
+                        <div class="phase-name">Initialization</div>
+                        <div class="phase-status">System ready, 3 interviews loaded</div>
+                    </div>
+                    <div class="phase-time">0:05</div>
+                </div>
+                
+                <div class="phase-item active" id="open-coding-phase">
+                    <div class="phase-icon">🔄</div>
+                    <div class="phase-details">
+                        <div class="phase-name">Open Coding</div>
+                        <div class="phase-status" id="open-coding-status">
+                            Interview 2/3 - Found 47 codes so far
+                        </div>
+                    </div>
+                    <div class="phase-time">2:15</div>
+                </div>
+                
+                <div class="phase-item">
+                    <div class="phase-icon">⏳</div>
+                    <div class="phase-details">
+                        <div class="phase-name">Axial Coding</div>
+                        <div class="phase-status">Waiting...</div>
+                    </div>
+                    <div class="phase-time">--</div>
+                </div>
+                
+                <div class="phase-item">
+                    <div class="phase-icon">⏳</div>
+                    <div class="phase-details">
+                        <div class="phase-name">Selective Coding</div>
+                        <div class="phase-status">Waiting...</div>
+                    </div>
+                    <div class="phase-time">--</div>
+                </div>
+                
+                <div class="phase-item">
+                    <div class="phase-icon">⏳</div>
+                    <div class="phase-details">
+                        <div class="phase-name">Theory Integration</div>
+                        <div class="phase-status">Waiting...</div>
+                    </div>
+                    <div class="phase-time">--</div>
+                </div>
+            </div>
+            
+            <!-- Statistics -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-interviews">2/3</div>
+                    <div class="stat-label">Interviews</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-codes">47</div>
+                    <div class="stat-label">Codes Found</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-categories">--</div>
+                    <div class="stat-label">Categories</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-time">2:20</div>
+                    <div class="stat-label">Elapsed Time</div>
+                </div>
+            </div>
+            
+            <!-- Control Buttons -->
+            <div class="control-buttons">
+                <button class="control-btn btn-pause" id="pause-btn" onclick="pauseAnalysis()">
+                    ⏸️ Pause
+                </button>
+                <button class="control-btn btn-resume" id="resume-btn" onclick="resumeAnalysis()" style="display: none">
+                    ▶️ Resume
+                </button>
+                <button class="control-btn btn-partial" onclick="viewPartialResults()">
+                    📊 View Partial Results
+                </button>
+                <button class="control-btn btn-cancel" onclick="cancelAnalysis()">
+                    ❌ Cancel
+                </button>
+            </div>
+            
+            <!-- Error Banner (hidden by default) -->
+            <div class="error-banner" id="error-banner">
+                <div class="retry-info">
+                    <div>
+                        <strong>⚠️ Error occurred:</strong>
+                        <span id="error-message">LLM timeout on interview 2</span>
+                    </div>
+                    <button class="btn btn-primary" onclick="retryPhase()">Retry</button>
+                </div>
+                <p style="margin-top: 10px; font-size: 14px">
+                    Retry attempt <span id="retry-count">1</span> of 3
+                </p>
+            </div>
+            
+            <!-- Live Updates Feed -->
+            <div class="live-updates">
+                <h4>📡 Live Updates</h4>
+                <div id="updates-feed">
+                    <div class="update-item">
+                        <span>🔍</span>
+                        <span>Found new code: "remote_work_challenges"</span>
+                        <span class="update-time">2:20:15</span>
+                    </div>
+                    <div class="update-item">
+                        <span>🔍</span>
+                        <span>Found new code: "team_communication"</span>
+                        <span class="update-time">2:20:08</span>
+                    </div>
+                    <div class="update-item">
+                        <span>✅</span>
+                        <span>Interview 1 processing complete (23 codes)</span>
+                        <span class="update-time">2:18:45</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // WebSocket connection for real-time updates
+        let ws = null;
+        let sessionId = 'session_' + Date.now();
+        let isPaused = false;
+        
+        function connectWebSocket() {
+            ws = new WebSocket(`ws://localhost:8000/ws/${sessionId}`);
+            
+            ws.onopen = () => {
+                console.log('WebSocket connected');
+                // Start analysis
+                ws.send(JSON.stringify({
+                    command: 'start',
+                    interviews: [], // Would be actual interview data
+                    config: {}
+                }));
+            };
+            
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                updateProgress(data);
+            };
+            
+            ws.onerror = (error) => {
+                console.error('WebSocket error:', error);
+                showError('Connection lost. Retrying...');
+            };
+            
+            ws.onclose = () => {
+                console.log('WebSocket closed');
+                // Attempt reconnection
+                setTimeout(connectWebSocket, 5000);
+            };
+        }
+        
+        function updateProgress(data) {
+            // Update progress bar
+            const progress = Math.round(data.progress * 100);
+            document.getElementById('progress-fill').style.width = progress + '%';
+            document.getElementById('progress-fill').textContent = progress + '%';
+            
+            // Update current status
+            document.getElementById('current-status').textContent = data.message;
+            
+            // Update phase status
+            if (data.details) {
+                if (data.details.codes_so_far !== undefined) {
+                    document.getElementById('stat-codes').textContent = data.details.codes_so_far;
+                }
+                if (data.details.current_interview !== undefined) {
+                    document.getElementById('stat-interviews').textContent = 
+                        `${data.details.current_interview}/3`;
+                }
+            }
+            
+            // Add to live feed
+            if (data.details && data.details.new_codes) {
+                addUpdateToFeed('🔍', `Found ${data.details.new_codes.length} new codes`);
+            }
+            
+            // Handle errors
+            if (data.phase === 'error') {
+                showError(data.message);
+            }
+        }
+        
+        function addUpdateToFeed(icon, message) {
+            const feed = document.getElementById('updates-feed');
+            const update = document.createElement('div');
+            update.className = 'update-item';
+            const time = new Date().toLocaleTimeString();
+            update.innerHTML = `
+                <span>${icon}</span>
+                <span>${message}</span>
+                <span class="update-time">${time}</span>
+            `;
+            feed.insertBefore(update, feed.firstChild);
+            
+            // Keep only last 10 updates
+            while (feed.children.length > 10) {
+                feed.removeChild(feed.lastChild);
+            }
+        }
+        
+        function pauseAnalysis() {
+            if (ws) {
+                ws.send(JSON.stringify({ command: 'pause' }));
+                document.getElementById('pause-btn').style.display = 'none';
+                document.getElementById('resume-btn').style.display = 'block';
+                addUpdateToFeed('⏸️', 'Analysis paused');
+            }
+        }
+        
+        function resumeAnalysis() {
+            if (ws) {
+                ws.send(JSON.stringify({ command: 'resume' }));
+                document.getElementById('pause-btn').style.display = 'block';
+                document.getElementById('resume-btn').style.display = 'none';
+                addUpdateToFeed('▶️', 'Analysis resumed');
+            }
+        }
+        
+        function viewPartialResults() {
+            if (ws) {
+                ws.send(JSON.stringify({ command: 'get_partial' }));
+            }
+            // In real app, would open modal or navigate to results view
+            alert('Partial results would be displayed here');
+        }
+        
+        function cancelAnalysis() {
+            if (confirm('Are you sure you want to cancel the analysis? Partial results will be saved.')) {
+                if (ws) {
+                    ws.send(JSON.stringify({ command: 'cancel' }));
+                    ws.close();
+                }
+                window.location.href = '01_dashboard.html';
+            }
+        }
+        
+        function showError(message) {
+            document.getElementById('error-message').textContent = message;
+            document.getElementById('error-banner').classList.add('show');
+        }
+        
+        function retryPhase() {
+            document.getElementById('error-banner').classList.remove('show');
+            addUpdateToFeed('🔄', 'Retrying failed operation...');
+            // Would trigger retry logic
+        }
+        
+        // Initialize WebSocket connection
+        connectWebSocket();
+        
+        // Update elapsed time
+        let startTime = Date.now();
+        setInterval(() => {
+            const elapsed = Date.now() - startTime;
+            const minutes = Math.floor(elapsed / 60000);
+            const seconds = Math.floor((elapsed % 60000) / 1000);
+            document.getElementById('stat-time').textContent = 
+                `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }, 1000);
+    </script>
+</body>
+</html>

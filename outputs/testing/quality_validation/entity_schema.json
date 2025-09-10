@@ -1,0 +1,379 @@
+{
+  "entity_types": [
+    {
+      "id": "AI_TOOL",
+      "name": "AI Tool",
+      "description": "Software, models, or platforms that leverage artificial intelligence to perform tasks, analyze data, or assist in various research processes. This type is central to understanding how researchers are integrating AI into their methods.",
+      "frequency": 70,
+      "example_entities": [
+        "ChatGPT",
+        "RANDCHAT",
+        "Claude",
+        "Otter"
+      ],
+      "common_contexts": [
+        "used for coding assistance",
+        "literature review and summarization",
+        "proposal writing and editing",
+        "data extraction and analysis",
+        "concerns about quality and intellectual property"
+      ],
+      "confidence": 0.95
+    },
+    {
+      "id": "RESEARCH_METHOD",
+      "name": "Research Method",
+      "description": "Systematic approaches or techniques used to conduct research, collect data, and analyze findings. Understanding the specific methods is crucial for analyzing how AI is being integrated and adapted.",
+      "frequency": 100,
+      "example_entities": [
+        "Qualitative interviewing",
+        "Statistical analysis",
+        "Wargaming",
+        "Causal inference"
+      ],
+      "common_contexts": [
+        "commonly used within methods centers",
+        "high impact work at Rand",
+        "challenging aspects of application",
+        "areas for investment and improvement",
+        "integration with AI tools"
+      ],
+      "confidence": 0.95
+    },
+    {
+      "id": "RESEARCHER",
+      "name": "Researcher",
+      "description": "Individuals involved in conducting, managing, consuming, or supporting research activities. This type represents the 'who' in the analytic question, focusing on their experiences and adaptations to AI.",
+      "frequency": 150,
+      "example_entities": [
+        "Molly Dunnigan",
+        "Lynn Karoly",
+        "Kandice Kapinos",
+        "Research Assistant"
+      ],
+      "common_contexts": [
+        "applying various research methods",
+        "experiencing challenges in research processes",
+        "adopting and experimenting with AI tools",
+        "expressing concerns about AI's impact",
+        "seeking training and education on AI"
+      ],
+      "confidence": 0.95
+    },
+    {
+      "id": "RESEARCH_PROCESS",
+      "name": "Research Process",
+      "description": "Distinct stages, activities, or workflows involved in planning, executing, and disseminating research. AI's impact on these processes, particularly in terms of efficiency and challenges, is a key aspect of adaptation.",
+      "frequency": 80,
+      "example_entities": [
+        "Data collection",
+        "Literature review",
+        "Interview coding",
+        "Project management"
+      ],
+      "common_contexts": [
+        "most challenging aspects of research",
+        "areas where AI automation could be helpful",
+        "time-consuming tasks",
+        "requiring regulatory reviews (OMB, IRB)",
+        "impacted by AI for efficiency or risk"
+      ],
+      "confidence": 0.95
+    },
+    {
+      "id": "RESEARCH_DATA",
+      "name": "Research Data",
+      "description": "Information, observations, or facts collected, generated, or used in research, which can be qualitative or quantitative. AI often processes, analyzes, or extracts insights from this data, making it crucial for understanding AI integration.",
+      "frequency": 70,
+      "example_entities": [
+        "Survey data",
+        "Text data",
+        "Policy variables",
+        "Classified data"
+      ],
+      "common_contexts": [
+        "collected and prepared for use",
+        "analyzed using statistical methods",
+        "processed by AI tools for extraction or summarization",
+        "concerns about sensitive or classified information",
+        "challenges with missing or large datasets"
+      ],
+      "confidence": 0.95
+    },
+    {
+      "id": "RESEARCH_OUTPUT",
+      "name": "Research Output",
+      "description": "Tangible products or deliverables resulting from research activities, often intended for dissemination. AI can assist in the creation, refinement, or summarization of these outputs, influencing research dissemination.",
+      "frequency": 20,
+      "example_entities": [
+        "Report",
+        "Proposal",
+        "Meeting minutes",
+        "Executive summary"
+      ],
+      "common_contexts": [
+        "final products of research projects",
+        "assisted by AI for writing or summarization",
+        "subject to editing and proofreading processes",
+        "aimed at achieving policy impact"
+      ],
+      "confidence": 0.9
+    },
+    {
+      "id": "ORGANIZATION",
+      "name": "Organization",
+      "description": "Institutions, departments, or groups that conduct, fund, or regulate research. The organizational context shapes the adoption and experience of AI tools in research.",
+      "frequency": 40,
+      "example_entities": [
+        "RAND Corporation",
+        "Army",
+        "OMB",
+        "Healthcare systems"
+      ],
+      "common_contexts": [
+        "employer of researchers",
+        "client or sponsor of research",
+        "regulatory body for research processes",
+        "competitor in the research landscape",
+        "setting for AI adoption policies"
+      ],
+      "confidence": 0.9
+    }
+  ],
+  "relationship_types": [
+    {
+      "id": "USES",
+      "name": "Uses",
+      "description": "An entity employs or applies another entity for a specific purpose in research.",
+      "frequency": 50,
+      "common_source_types": [
+        "RESEARCHER",
+        "AI_TOOL"
+      ],
+      "common_target_types": [
+        "AI_TOOL",
+        "RESEARCH_METHOD"
+      ],
+      "directional": true,
+      "example_relationships": [
+        {
+          "source": "researchers",
+          "target": "subscription based ai products",
+          "context": "heard lots of researchers that are using the subscription based ai products"
+        },
+        {
+          "source": "AI tools",
+          "target": "check the code",
+          "context": "you can use the ai tools to check the code"
+        },
+        {
+          "source": "people",
+          "target": "TTX",
+          "context": "A lot of people integrate a TTX into their research design."
+        }
+      ],
+      "confidence": 0.95
+    },
+    {
+      "id": "ASSISTS_IN",
+      "name": "Assists In",
+      "description": "An AI tool provides support or aid in performing a research process or creating a research output.",
+      "frequency": 40,
+      "common_source_types": [
+        "AI_TOOL"
+      ],
+      "common_target_types": [
+        "RESEARCH_PROCESS",
+        "RESEARCH_OUTPUT"
+      ],
+      "directional": true,
+      "example_relationships": [
+        {
+          "source": "AI",
+          "target": "literature review",
+          "context": "We can use AI for a literature review"
+        },
+        {
+          "source": "AI",
+          "target": "summarize stuff",
+          "context": "Summaries I found AI super helpful"
+        },
+        {
+          "source": "AI",
+          "target": "meeting minutes",
+          "context": "just having AI transcribed the meeting minutes put it in like here are the key decisions."
+        }
+      ],
+      "confidence": 0.95
+    },
+    {
+      "id": "IMPACTS",
+      "name": "Impacts",
+      "description": "One entity has a significant effect or influence on another, which can be positive or negative.",
+      "frequency": 15,
+      "common_source_types": [
+        "AI_TOOL",
+        "RESEARCH_METHOD"
+      ],
+      "common_target_types": [
+        "RESEARCHER",
+        "RESEARCH_PROCESS",
+        "ORGANIZATION",
+        "RESEARCH_OUTPUT"
+      ],
+      "directional": true,
+      "example_relationships": [
+        {
+          "source": "AI",
+          "target": "career development and skillset development",
+          "context": "I worry about career development and skillset development among the younger folks."
+        },
+        {
+          "source": "AI",
+          "target": "research being utilized opportunistically",
+          "context": "there is a risk to our research being utilized opportunistically by AI company"
+        },
+        {
+          "source": "policy impact",
+          "target": "conduct a study",
+          "context": "If you knew you could get this out in time to achieve A policy impact quickly. It could impact you know how you even conduct a study"
+        }
+      ],
+      "confidence": 0.9
+    },
+    {
+      "id": "PERFORMS",
+      "name": "Performs",
+      "description": "A researcher carries out a specific research process or applies a research method.",
+      "frequency": 30,
+      "common_source_types": [
+        "RESEARCHER"
+      ],
+      "common_target_types": [
+        "RESEARCH_PROCESS",
+        "RESEARCH_METHOD"
+      ],
+      "directional": true,
+      "example_relationships": [
+        {
+          "source": "Todd Helmus",
+          "target": "qualitative interviewing",
+          "context": "Probably my most common methodology is, is qualitative interviewing"
+        },
+        {
+          "source": "Lynn Karoly",
+          "target": "cost benefit analysis",
+          "context": "I also do a fair amount of cost benefit analysis"
+        },
+        {
+          "source": "Kandice Kapinos",
+          "target": "writing proposals",
+          "context": "I’ve been writing proposals non-stop."
+        }
+      ],
+      "confidence": 0.95
+    },
+    {
+      "id": "GENERATES",
+      "name": "Generates",
+      "description": "One entity creates or produces another entity, such as data or research outputs.",
+      "frequency": 16,
+      "common_source_types": [
+        "RESEARCHER",
+        "AI_TOOL"
+      ],
+      "common_target_types": [
+        "RESEARCH_DATA",
+        "RESEARCH_OUTPUT"
+      ],
+      "directional": true,
+      "example_relationships": [
+        {
+          "source": "scenario team",
+          "target": "scenarios",
+          "context": "some projects have a scenario team and they develop scenarios"
+        },
+        {
+          "source": "AI",
+          "target": "image for proposal",
+          "context": "I’ve played a little with telling it to, to make an image for proposal."
+        },
+        {
+          "source": "AI",
+          "target": "citations",
+          "context": "AI to create these citations for you"
+        }
+      ],
+      "confidence": 0.9
+    },
+    {
+      "id": "CONCERNS_ABOUT",
+      "name": "Concerns About",
+      "description": "A researcher expresses apprehension or worry regarding an AI tool or a research process, often related to ethical, quality, or competitive risks.",
+      "frequency": 7,
+      "common_source_types": [
+        "RESEARCHER"
+      ],
+      "common_target_types": [
+        "AI_TOOL",
+        "RESEARCH_PROCESS"
+      ],
+      "directional": true,
+      "example_relationships": [
+        {
+          "source": "Molly Dunnigan",
+          "target": "implementing AI",
+          "context": "Other thing I’d say is worried about implementing AI very much in Arroyo"
+        },
+        {
+          "source": "researchers",
+          "target": "data mining",
+          "context": "One of the things researchers are increasingly concerned about is data mining"
+        },
+        {
+          "source": "Kandice Kapinos",
+          "target": "intellectual property",
+          "context": "I don’t want to inadvertently take someone else’s intellectual property."
+        }
+      ],
+      "confidence": 0.9
+    },
+    {
+      "id": "REQUIRES",
+      "name": "Requires",
+      "description": "One entity necessitates or depends on another for its execution, completion, or proper functioning.",
+      "frequency": 11,
+      "common_source_types": [
+        "RESEARCH_PROCESS",
+        "RESEARCH_METHOD"
+      ],
+      "common_target_types": [
+        "RESEARCH_DATA",
+        "ORGANIZATION"
+      ],
+      "directional": true,
+      "example_relationships": [
+        {
+          "source": "data collection",
+          "target": "permissions",
+          "context": "we have to get very kinds of permissions to collect the data."
+        },
+        {
+          "source": "survey project",
+          "target": "OMB review",
+          "context": "We're doing a data collection now... and we're having to go through review by OMB"
+        },
+        {
+          "source": "causal inference",
+          "target": "data",
+          "context": "depends on the data bc what do you have available to do an evaluation"
+        }
+      ],
+      "confidence": 0.9
+    }
+  ],
+  "total_entities_found": 530,
+  "total_relationships_found": 169,
+  "discovery_method": "open",
+  "extraction_confidence": 0.93
+}

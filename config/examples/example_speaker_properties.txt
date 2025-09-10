@@ -1,0 +1,66 @@
+# Example Speaker Property Definitions
+# This file defines what properties to track for speakers in interviews
+# The system will extract these properties for each identified speaker
+
+## Required Properties
+
+Role/Position
+- Type: Text field
+- Description: The speaker's job title or role in their organization
+- Examples: "CTO", "Data Scientist", "Project Manager", "CEO"
+- Required: Yes
+
+Organization
+- Type: Text field  
+- Description: The company or institution the speaker represents
+- Examples: "TechCorp Inc.", "University of Example", "StartupAI"
+- Required: Yes
+
+## Optional Properties
+
+Seniority Level
+- Type: Categorical (choose one)
+- Options: Junior, Mid-level, Senior, Executive
+- Description: The speaker's level of seniority in their organization
+- Required: No
+
+Department
+- Type: Categorical
+- Options: IT, Operations, Marketing, Sales, R&D, HR, Finance, Executive
+- Description: The functional area or department the speaker works in
+- Required: No
+
+Years of Experience
+- Type: Number
+- Description: How many years of professional experience the speaker has
+- Required: No
+
+AI Experience Level
+- Type: Categorical
+- Options: Novice, Intermediate, Advanced, Expert
+- Description: The speaker's level of experience with AI technologies
+- Required: No
+
+Industry Sector
+- Type: Text field
+- Description: The industry sector of the speaker's organization
+- Examples: "Healthcare", "Financial Services", "Manufacturing", "Retail"
+- Required: No
+
+Geographic Region
+- Type: Text field
+- Description: Where the speaker/organization is located
+- Examples: "North America", "Europe", "Asia-Pacific"
+- Required: No
+
+Areas of Expertise
+- Type: List (multiple values)
+- Description: The speaker's areas of technical or domain expertise
+- Examples: ["Machine Learning", "Data Engineering", "Business Strategy"]
+- Required: No
+
+Implementation Role
+- Type: Categorical
+- Options: Decision Maker, Implementer, End User, Consultant, Vendor
+- Description: The speaker's role in AI implementation
+- Required: No

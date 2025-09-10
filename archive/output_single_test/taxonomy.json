@@ -1,0 +1,216 @@
+{
+  "codes": [
+    {
+      "id": "AI_Applications_in_Research",
+      "name": "AI Applications in Research",
+      "description": "Encompasses the various ways AI tools are being utilized across different stages and aspects of the research process.",
+      "semantic_definition": "The practical uses and functionalities of artificial intelligence technologies within academic and applied research contexts.",
+      "parent_id": null,
+      "level": 1,
+      "example_quotes": [],
+      "discovery_confidence": 0.9
+    },
+    {
+      "id": "Benefits_of_AI_in_Research",
+      "name": "Benefits of AI in Research",
+      "description": "Advantages and positive impacts observed from the integration of AI tools into research practices.",
+      "semantic_definition": "The positive outcomes and efficiencies gained through the adoption of artificial intelligence in research.",
+      "parent_id": null,
+      "level": 1,
+      "example_quotes": [],
+      "discovery_confidence": 0.9
+    },
+    {
+      "id": "Challenges_and_Limitations_of_AI_in_Research",
+      "name": "Challenges and Limitations of AI in Research",
+      "description": "Difficulties, drawbacks, and inherent constraints associated with using AI tools in a research context.",
+      "semantic_definition": "The obstacles, risks, and inherent boundaries encountered when applying artificial intelligence in research.",
+      "parent_id": null,
+      "level": 1,
+      "example_quotes": [],
+      "discovery_confidence": 0.9
+    },
+    {
+      "id": "AI_Adoption_and_Implementation",
+      "name": "AI Adoption and Implementation",
+      "description": "Factors influencing the integration and widespread use of AI tools within research organizations, including barriers and enablers.",
+      "semantic_definition": "The processes, facilitators, and impediments related to the integration and widespread use of artificial intelligence technologies within research institutions.",
+      "parent_id": null,
+      "level": 1,
+      "example_quotes": [],
+      "discovery_confidence": 0.9
+    },
+    {
+      "id": "AI_Applications_Code_Assistance",
+      "name": "Code Assistance",
+      "description": "Use of AI tools to assist with programming code, including debugging, optimization, and conversion between languages.",
+      "semantic_definition": "The application of AI to improve, correct, or translate computational code used in research.",
+      "parent_id": "AI_Applications_in_Research",
+      "level": 2,
+      "example_quotes": [
+        "I have used AI tools to help with my code. I know in general how to execute one of these methods but sometime there are new packages written but my code is having errors so I can take the code and put it in an LLM; can you fix this error or can you write this more concisely?",
+        "I found someone else’s code and asked can you convert this R code to Stata code and kept playing with it and learned what is good and not good."
+      ],
+      "discovery_confidence": 0.9
+    },
+    {
+      "id": "AI_Applications_Writing_Content_Generation",
+      "name": "Writing and Content Generation",
+      "description": "Utilization of AI for drafting, refining, or generating various forms of written content, such as proposals, summaries, and general text.",
+      "semantic_definition": "The use of AI to create, edit, or enhance textual content for research outputs or administrative tasks.",
+      "parent_id": "AI_Applications_in_Research",
+      "level": 2,
+      "example_quotes": [
+        "I’ve also done things for proposal writing and taken my idea where I want to use a particular design and poke holes in this; What are the problems with this; how can I strengthen this?",
+        "I take the whole proposal and say write an executive summary; it is great at doing that",
+        "I’ve played a little with telling it to, to make an image for proposal."
+      ],
+      "discovery_confidence": 0.9
+    },
+    {
+      "id": "AI_Applications_Text_Simplification_Explanation",
+      "name": "Text Simplification and Explanation",
+      "description": "Employing AI to rephrase complex information into simpler, more accessible language for broader understanding.",
+      "semantic_definition": "The process of using AI to reduce the complexity of written text, making it understandable to non-experts.",
+      "parent_id": "AI_Applications_in_Research",
+      "level": 2,
+      "example_quotes": [
+        "sometimes to re-write or shorten things but not exactly causal inference but to make things shorter. I would take “Reddit explain like I’m 5”. Esp with methods, hard for ppl who are not experts to understand. So I take the text and say explain like I’m five."
+      ],
+      "discovery_confidence": 0.9
+    },
+    {
+      "id": "AI_Applications_Content_Review_Sensitivity_Analysis",
+      "name": "Content Review and Sensitivity Analysis",
+      "description": "Using AI to review text for potentially sensitive language or to identify content that might elicit negative reactions from specific audiences.",
+      "semantic_definition": "The application of AI to analyze and flag text for problematic or controversial phrasing.",
+      "parent_id": "AI_Applications_in_Research",
+      "level": 2,
+      "example_quotes": [
+        "The other thing I’ve done; I’ve taken text and said which of the sentences in here will upset some opposed to DEI and it will flag sentences and makes me look at it again."
+      ],
+      "discovery_confidence": 0.9
+    },
+    {
+      "id": "AI_Applications_Research_Workflow_Automation",
+      "name": "Research Workflow Automation",
+      "description": "Application of AI to automate or streamline repetitive tasks within the research workflow, such as literature reviews or data extraction from documents.",
+      "semantic_definition": "The use of AI to automate and accelerate routine, high-volume tasks in the research process.",
+      "parent_id": "AI_Applications_in_Research",
+      "level": 2,
+      "example_quotes": [
+        "we did write a python script to use the RAND CHAT to review a bunch of papers. So we did the literature review and had it spit out in a spreadsheet a once sentence summary of the paper or we asked it questions, is this paper based in the US? It was not great at this. Also, what is the sample of this paper, x, adults between ages of 18 and 45. so we had it put it in an excel file and so used it to winnow down a set of papers… it was pretty good."
+      ],
+      "discovery_confidence": 0.9
+    },
+    {
+      "id": "AI_Applications_Data_Management_Preparation",
+      "name": "Data Management and Preparation",
+      "description": "Utilizing AI tools to assist with tasks related to data handling, including checking for errors, annotation, and preparing datasets for analysis.",
+      "semantic_definition": "The use of AI to facilitate the organization, cleaning, and readiness of data for research purposes.",
+      "parent_id": "AI_Applications_in_Research",
+      "level": 2,
+      "example_quotes": [
+        "The time-consuming process of pulling data down, checking code. So one thing when I feed it in and there is an error, but then you can use the ai tools to check the code, annotate the code, replicability those are time consuming and for AI.",
+        "Even if you are collecting the data yourself and I was a study that was a trial and we were using survey. We had to go and get it and clean and prepare it for use and check that there are not errors."
+      ],
+      "discovery_confidence": 0.9
+    },
+    {
+      "id": "AI_Applications_Project_Management",
+      "name": "Project Management",
+      "description": "Application of AI to assist with administrative and organizational tasks related to managing research projects, such as budgeting and resource allocation.",
+      "semantic_definition": "The use of AI to support the planning, execution, and oversight of research projects.",
+      "parent_id": "AI_Applications_in_Research",
+      "level": 2,
+      "example_quotes": [
+        "I said I thought it was odd we don’t use some of the internal budgeting and figuring out where ppl have labor allocated to do labor forecasting. Thinking about how we already have a lot of data there and how we can pull it… to staff projects I’m bidding."
+      ],
+      "discovery_confidence": 0.9
+    },
+    {
+      "id": "Benefits_Efficiency_Time_Saving",
+      "name": "Efficiency and Time Saving",
+      "description": "The ability of AI to accelerate research tasks, reduce manual effort, and free up researchers' time for more complex analytical work.",
+      "semantic_definition": "The gain in productivity and reduction in time spent on research activities due to AI assistance.",
+      "parent_id": "Benefits_of_AI_in_Research",
+      "level": 2,
+      "example_quotes": [
+        "it is speeding things up for ppl in a way that makes me feel I don’t want to be left behind",
+        "The time-consuming process of pulling data down, checking code. So one thing when I feed it in and there is an error, but then you can use the ai tools to check the code, annotate the code, replicability those are time consuming and for AI."
+      ],
+      "discovery_confidence": 0.9
+    },
+    {
+      "id": "Challenges_Accuracy_Reliability",
+      "name": "Accuracy and Reliability",
+      "description": "Concerns regarding the precision, truthfulness, and consistency of AI-generated outputs, including the potential for hallucinations or incorrect information.",
+      "semantic_definition": "The degree to which AI outputs are free from errors, consistent, and can be trusted for research purposes.",
+      "parent_id": "Challenges_and_Limitations_of_AI_in_Research",
+      "level": 2,
+      "example_quotes": [
+        "you can’t trust it but sometimes stuff that is off and misses nuance",
+        "it would give me papers/citations that were not real. So I always check."
+      ],
+      "discovery_confidence": 0.9
+    },
+    {
+      "id": "Challenges_Ethical_IP_Concerns",
+      "name": "Ethical and Intellectual Property Concerns",
+      "description": "Worries about the ethical implications of AI use, particularly regarding the potential for plagiarism, misuse of data, or infringement on intellectual property rights.",
+      "semantic_definition": "The moral and legal issues arising from AI's use of existing content, including potential copyright infringement or unauthorized use of intellectual property.",
+      "parent_id": "Challenges_and_Limitations_of_AI_in_Research",
+      "level": 2,
+      "example_quotes": [
+        "I don’t want to inadvertently take someone else’s intellectual property. Saw a thing on john Oliver, ppl making images, based on what is in the public and making something new so it is kind of stealing. I don’t want to take anyone’s intellectual property. But if I were to take my proposal and say write this, is it going to take texts from others?"
+      ],
+      "discovery_confidence": 0.9
+    },
+    {
+      "id": "Challenges_Cognitive_Judgment_Limitations",
+      "name": "Cognitive and Judgment Limitations",
+      "description": "The inherent inability of AI to perform complex human cognitive tasks such as critical thinking, scientific reasoning, or nuanced judgment.",
+      "semantic_definition": "The boundaries of AI's capacity to replicate human-level analytical thought, scientific logic, and subjective evaluation.",
+      "parent_id": "Challenges_and_Limitations_of_AI_in_Research",
+      "level": 2,
+      "example_quotes": [
+        "it is not going to necessarily help you figure out what you need to do. The researcher has honed that overtime so not easily replicating it.",
+        "As opposed to thinking through the logic of the science and thinking is it credible, that is harder (for ai). Not necessarily more time consuming but harder to outsource to an ai tool."
+      ],
+      "discovery_confidence": 0.9
+    },
+    {
+      "id": "AI_Adoption_Organizational_Barriers",
+      "name": "Organizational Adoption Barriers",
+      "description": "Obstacles within an organization that hinder the widespread acceptance and use of AI tools, such as institutional policies, lack of awareness, or perceived risks.",
+      "semantic_definition": "Internal organizational impediments that slow down or prevent the widespread integration of AI technologies.",
+      "parent_id": "AI_Adoption_and_Implementation",
+      "level": 2,
+      "example_quotes": [
+        "Most ppl I ask, at RAND there are not as many ppl using it; the few that have say they use it to do what I am doing to help fix code or wordsmith text.",
+        "I think based on the professional conference I went to, I think we might be a little bit slower [level of adoption], whether that is right I don’t know.",
+        "I don’t know if ppl feel like they are not supposed to use these bc I know RAND has its own specific rand chat and rand came out and said don’t use something, so part of me wonders if ppl are hesitant for that reason."
+      ],
+      "discovery_confidence": 0.9
+    },
+    {
+      "id": "AI_Adoption_Training_Awareness_Needs",
+      "name": "Training and Awareness Needs",
+      "description": "The necessity for educational initiatives and knowledge sharing to inform researchers about AI capabilities, best practices, and successful use cases.",
+      "semantic_definition": "The requirement for structured learning and communication to enhance understanding and promote effective utilization of AI tools among researchers.",
+      "parent_id": "AI_Adoption_and_Implementation",
+      "level": 2,
+      "example_quotes": [
+        "There could be more along those lines, showcasing how ppl use it successfully. A little bit but not a ton and someone super savvy and using it a lot could give a rundown of how they use it day to day.",
+        "Ppl are surprised? Like asking LLM about getting DEI flagged? I don’t think ppl are doing that at rand and I’m not sure why bc we have the rand chat.",
+        "Having ppl using it and sharing. I have a sister who is an attorney and she uses it in ways I would not think of. They track legislation and they are getting summaries or tracking how we spend their time."
+      ],
+      "discovery_confidence": 0.9
+    }
+  ],
+  "total_codes": 17,
+  "hierarchy_depth": 2,
+  "discovery_method": "Thematic analysis of interview transcripts.",
+  "analytic_question": "What are the key themes and challenges in using AI for qualitative research?",
+  "extraction_confidence": 0.95
+}

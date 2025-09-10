@@ -1,0 +1,13 @@
+# Configuration for focused focus group testing
+analytic_question: "How are researchers experiencing and adapting to the integration of AI tools in qualitative research methods?"
+interview_files_dir: "C:/Users/Brian/projects/qualitative_coding/data/interviews/ai_interviews_3_for_test"
+coding_approach: open
+speaker_approach: closed
+entity_approach: closed
+output_dir: "output_focused_test"
+auto_import_neo4j: false
+llm_model: "gemini/gemini-2.5-flash"
+temperature: 0.1
+paradigm: "expert_qualitative_coder"
+max_concurrent_interviews: 1
+code_hierarchy_depth: 2

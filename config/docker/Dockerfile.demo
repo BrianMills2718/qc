@@ -1,0 +1,135 @@
+# Demo Dockerfile for Qualitative Coding Analysis Tool
+# One-Click Demo Environment with Pre-Loaded Sample Analysis
+FROM python:3.11-slim as builder
+
+# Set working directory
+WORKDIR /app
+
+# Copy requirements and install dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir --user -r requirements.txt
+
+# Production runtime stage with demo data
+FROM python:3.11-slim as runtime
+
+# Create non-root user for security
+RUN useradd --create-home --shell /bin/bash app
+
+# Set working directory
+WORKDIR /app
+
+# Copy installed packages from builder
+COPY --from=builder /root/.local /home/app/.local
+
+# Copy application code
+COPY src/qc/ ./qc/
+COPY config/ ./config/
+
+# Copy pre-analyzed demo data
+COPY outputs/current/ ./demo_data/
+COPY data/interviews/ai_interviews_3_for_test/ ./demo_data/source_interviews/
+
+# Create demo startup script
+COPY <<EOF ./demo_startup.py
+#!/usr/bin/env python3
+"""
+One-Click Demo Startup Script
+Launches the qualitative coding analysis tool with pre-loaded AI research data
+"""
+import os
+import sys
+import json
+import shutil
+from pathlib import Path
+
+def setup_demo_environment():
+    """Set up demo environment with pre-loaded data"""
+    print("🚀 Setting up One-Click Demo Environment...")
+    
+    # Copy demo data to expected locations
+    demo_data = Path("/app/demo_data")
+    outputs_dir = Path("/app/outputs")
+    
+    if demo_data.exists():
+        # Ensure outputs directory exists
+        outputs_dir.mkdir(exist_ok=True)
+        
+        # Copy current analysis to outputs
+        if not (outputs_dir / "current").exists():
+            shutil.copytree(demo_data, outputs_dir / "current")
+            print("✅ Pre-analyzed AI research interviews loaded")
+        
+        # Display demo information
+        display_demo_info()
+    else:
+        print("❌ Demo data not found")
+        sys.exit(1)
+
+def display_demo_info():
+    """Display information about the demo dataset"""
+    try:
+        with open("/app/outputs/current/README.md", "r") as f:
+            readme_content = f.read()
+        
+        with open("/app/outputs/current/taxonomy.json", "r") as f:
+            taxonomy = json.load(f)
+            
+        print("\n" + "="*80)
+        print("🎯 QUALITATIVE CODING ANALYSIS TOOL - DEMO ENVIRONMENT")
+        print("="*80)
+        print("\n📊 PRE-LOADED ANALYSIS: AI Research Methods Investigation")
+        print("\n🔍 Research Question:")
+        print("   How are researchers experiencing and adapting to AI integration")
+        print("   in qualitative research methods?")
+        print("\n📝 Dataset:")
+        print("   • 3 interviews (2 individual + 1 focus group)")
+        print("   • 30+ hierarchical thematic codes")
+        print("   • Full entity relationship mapping")
+        print(f"   • {len(taxonomy['codes'])} discovered themes")
+        print("\n🏗️  System Capabilities Demonstrated:")
+        print("   • 4-Phase Code-First Extraction")
+        print("   • Focus Group Dialogue Analysis")
+        print("   • Thematic Connection Detection")
+        print("   • Entity Network Mapping")
+        print("   • Speaker Property Extraction")
+        print("\n🌐 Access Points:")
+        print("   • Web Interface: http://localhost:8000")
+        print("   • API Documentation: http://localhost:8000/docs")
+        print("   • Analysis Results: /app/outputs/current/")
+        print("\n💡 Demo Navigation:")
+        print("   • Browse Codes: Explore 30+ discovered themes")
+        print("   • Quote Explorer: See coded quotes with context")
+        print("   • Entity Networks: Visualize relationships")
+        print("   • Speaker Analysis: Focus group dialogue patterns")
+        print("\n" + "="*80)
+        
+    except Exception as e:
+        print(f"⚠️  Could not load demo info: {e}")
+
+if __name__ == "__main__":
+    setup_demo_environment()
+    
+    # Start the application
+    print("\n🌐 Starting web server...")
+    os.system("python -m qc.cli serve --host 0.0.0.0 --port 8000")
+EOF
+
+# Set ownership to app user
+RUN chown -R app:app /app
+
+# Switch to non-root user
+USER app
+
+# Add local packages to PATH
+ENV PATH=/home/app/.local/bin:$PATH
+ENV PYTHONPATH=/app
+
+# Health check endpoint
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+  CMD python -c "import sys; sys.path.append('/app'); import qc; print('Demo environment healthy')" || exit 1
+
+# Expose port
+EXPOSE 8000
+
+# Demo startup command
+CMD ["python", "demo_startup.py"]

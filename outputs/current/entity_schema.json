@@ -1,0 +1,569 @@
+{
+  "entity_types": [
+    {
+      "id": "AI_TOOL",
+      "name": "AI Tool",
+      "description": "Specific software, platforms, or general AI technologies that leverage artificial intelligence to assist with various tasks. This includes large language models (LLMs) and specialized AI applications.",
+      "frequency": 55,
+      "example_entities": [
+        "RANDCHAT",
+        "ChatGPT",
+        "Claude",
+        "Otter"
+      ],
+      "common_contexts": [
+        "utilizing AI for stuff",
+        "implementing AI",
+        "AI adoption",
+        "AI tools to help with my code",
+        "quality issue with ranchat",
+        "unavailability on classified networks"
+      ],
+      "confidence": 1.0
+    },
+    {
+      "id": "RESEARCH_METHOD",
+      "name": "Research Method",
+      "description": "Systematic approaches, techniques, or procedures used to collect, analyze, and interpret data in research studies.",
+      "frequency": 75,
+      "example_entities": [
+        "Qualitative Interviewing",
+        "Statistical Analysis",
+        "Wargaming",
+        "Literature Review"
+      ],
+      "common_contexts": [
+        "quiver of methods",
+        "commonly used research methods",
+        "applying methods in new ways",
+        "high impact methods",
+        "most challenging aspect of that method",
+        "quantitative methods are most frequently used"
+      ],
+      "confidence": 1.0
+    },
+    {
+      "id": "RESEARCHER",
+      "name": "Researcher",
+      "description": "Individuals who conduct, manage, or consume research, including various roles and levels of experience within an organization.",
+      "frequency": 35,
+      "example_entities": [
+        "Molly Dunnigan",
+        "Lynn Karoly",
+        "Kandice Kapinos",
+        "Junior Folks"
+      ],
+      "common_contexts": [
+        "researchers experiencing and adapting",
+        "skillset development among the younger folks",
+        "diverse group of people",
+        "subject matter experts",
+        "people on my teams do that research",
+        "researcher has honed that overtime"
+      ],
+      "confidence": 1.0
+    },
+    {
+      "id": "ORGANIZATION",
+      "name": "Organization",
+      "description": "Institutions or entities that conduct, sponsor, or are impacted by research, or provide services related to research.",
+      "frequency": 35,
+      "example_entities": [
+        "RAND Corporation",
+        "Arroyo SDR",
+        "Palantir",
+        "Center for Causal Inference"
+      ],
+      "common_contexts": [
+        "RAND Research Methods",
+        "implementing AI very much in Arroyo",
+        "Secretary of the Army wants Palantir and not RAND",
+        "company wide ai initiatives",
+        "adoption of AI at RAND"
+      ],
+      "confidence": 1.0
+    },
+    {
+      "id": "RESEARCH_TASK",
+      "name": "Research Task",
+      "description": "Specific activities or steps involved in the execution of a research project, often areas where AI tools are being applied or considered.",
+      "frequency": 65,
+      "example_entities": [
+        "Data Collection",
+        "Code Writing",
+        "Literature Review",
+        "Project Management",
+        "Data Analysis"
+      ],
+      "common_contexts": [
+        "time consuming task",
+        "challenging aspects",
+        "biggest investments in time and energy",
+        "automating",
+        "applications for AI",
+        "battle rhythm, where AI automation could be helpful",
+        "harder to outsource to an ai tool"
+      ],
+      "confidence": 1.0
+    },
+    {
+      "id": "RESEARCH_CHALLENGE_OR_BENEFIT",
+      "name": "Research Challenge or Benefit",
+      "description": "Difficulties, risks, or advantages encountered by researchers or organizations when conducting research or integrating AI tools.",
+      "frequency": 45,
+      "example_entities": [
+        "Time-consuming Process",
+        "Intellectual Property Risk",
+        "Cost Savings",
+        "Hallucinations",
+        "Career Development Concerns"
+      ],
+      "common_contexts": [
+        "risk is that we will end up utilizing AI",
+        "benefits of cost savings",
+        "worry about career development",
+        "maintain a competitive edge",
+        "promote responsible adoption",
+        "most challenging aspect",
+        "distrustful of the results",
+        "overfitting",
+        "speeding things up",
+        "don’t want to be left behind",
+        "nervous about",
+        "barriers to adoption",
+        "need for Training/education"
+      ],
+      "confidence": 1.0
+    },
+    {
+      "id": "RESEARCH_DATA",
+      "name": "Research Data",
+      "description": "Raw or processed information collected, used, or generated during research.",
+      "frequency": 25,
+      "example_entities": [
+        "qualitative data",
+        "primary data",
+        "sensitive data",
+        "publicly available datasets"
+      ],
+      "common_contexts": [
+        "collecting data",
+        "analyzing data",
+        "data cleaning",
+        "missing data",
+        "data mining",
+        "pulling data down",
+        "data structuring"
+      ],
+      "confidence": 1.0
+    },
+    {
+      "id": "RESEARCH_OUTPUT_PRODUCT",
+      "name": "Research Output/Product",
+      "description": "Tangible deliverables or results produced from research activities.",
+      "frequency": 25,
+      "example_entities": [
+        "report",
+        "article",
+        "infographic",
+        "proposal",
+        "executive summary"
+      ],
+      "common_contexts": [
+        "write their report",
+        "most read article",
+        "make graphics",
+        "accurate recommendations",
+        "final product",
+        "publish",
+        "summaries"
+      ],
+      "confidence": 1.0
+    }
+  ],
+  "relationship_types": [
+    {
+      "id": "USES",
+      "name": "Uses",
+      "description": "A Researcher or Organization employs an AI Tool or Research Method.",
+      "frequency": 25,
+      "common_source_types": [
+        "RESEARCHER",
+        "ORGANIZATION"
+      ],
+      "common_target_types": [
+        "AI_TOOL",
+        "RESEARCH_METHOD"
+      ],
+      "directional": true,
+      "example_relationships": [
+        {
+          "source": "researchers",
+          "target": "subscription based ai products",
+          "context": "researchers that are using the subscription based ai products"
+        },
+        {
+          "source": "I",
+          "target": "AI tools",
+          "context": "I have used AI tools to help with my code"
+        }
+      ],
+      "confidence": 1.0
+    },
+    {
+      "id": "IMPACTS",
+      "name": "Impacts",
+      "description": "An AI Tool or Research Method affects a Research Task, Researcher, Organization, or Research Challenge/Benefit.",
+      "frequency": 25,
+      "common_source_types": [
+        "AI_TOOL",
+        "RESEARCH_METHOD"
+      ],
+      "common_target_types": [
+        "RESEARCH_TASK",
+        "RESEARCHER",
+        "ORGANIZATION",
+        "RESEARCH_CHALLENGE_OR_BENEFIT"
+      ],
+      "directional": true,
+      "example_relationships": [
+        {
+          "source": "AI",
+          "target": "cost savings",
+          "context": "AI for a literature review that would have taken a RA 20 days so benefits of cost savings"
+        },
+        {
+          "source": "AI",
+          "target": "career development and skillset development among the younger folks",
+          "context": "I worry about career development and skillset development among the younger folks"
+        }
+      ],
+      "confidence": 1.0
+    },
+    {
+      "id": "EXPERIENCES",
+      "name": "Experiences",
+      "description": "A Researcher encounters a Research Challenge or Benefit.",
+      "frequency": 20,
+      "common_source_types": [
+        "RESEARCHER"
+      ],
+      "common_target_types": [
+        "RESEARCH_CHALLENGE_OR_BENEFIT"
+      ],
+      "directional": true,
+      "example_relationships": [
+        {
+          "source": "I",
+          "target": "career development and skillset development among the younger folks",
+          "context": "I worry about career development and skillset development among the younger folks"
+        },
+        {
+          "source": "researchers",
+          "target": "data mining",
+          "context": "researchers are increasingly concerned about is data mining"
+        }
+      ],
+      "confidence": 1.0
+    },
+    {
+      "id": "PERFORMS",
+      "name": "Performs",
+      "description": "A Researcher carries out a Research Task.",
+      "frequency": 25,
+      "common_source_types": [
+        "RESEARCHER"
+      ],
+      "common_target_types": [
+        "RESEARCH_TASK"
+      ],
+      "directional": true,
+      "example_relationships": [
+        {
+          "source": "We",
+          "target": "interviews and the coding",
+          "context": "We do a lot of interviews and the coding is uneven in quality."
+        },
+        {
+          "source": "I",
+          "target": "modeling, simulation coding",
+          "context": "I do a lot of modeling, simulation coding"
+        }
+      ],
+      "confidence": 1.0
+    },
+    {
+      "id": "SUPPORTS",
+      "name": "Supports",
+      "description": "An AI Tool assists with a Research Task.",
+      "frequency": 25,
+      "common_source_types": [
+        "AI_TOOL"
+      ],
+      "common_target_types": [
+        "RESEARCH_TASK"
+      ],
+      "directional": true,
+      "example_relationships": [
+        {
+          "source": "AI",
+          "target": "literature review",
+          "context": "AI for a literature review"
+        },
+        {
+          "source": "AI",
+          "target": "writing like any type of code",
+          "context": "AI has been really helpful with writing like any type of code"
+        }
+      ],
+      "confidence": 1.0
+    },
+    {
+      "id": "POSES_CHALLENGE_TO",
+      "name": "Poses Challenge To",
+      "description": "A Research Challenge or Benefit affects a Researcher, Organization, Research Task, or Research Method.",
+      "frequency": 20,
+      "common_source_types": [
+        "RESEARCH_CHALLENGE_OR_BENEFIT"
+      ],
+      "common_target_types": [
+        "RESEARCHER",
+        "ORGANIZATION",
+        "RESEARCH_TASK",
+        "RESEARCH_METHOD"
+      ],
+      "directional": true,
+      "example_relationships": [
+        {
+          "source": "Career development concerns",
+          "target": "younger folks",
+          "context": "I worry about career development and skillset development among the younger folks."
+        },
+        {
+          "source": "Intellectual property risk",
+          "target": "research",
+          "context": "risk to our research being utilized opportunistically by AI company to get ahead and to put us out of business."
+        }
+      ],
+      "confidence": 1.0
+    },
+    {
+      "id": "CONDUCTS",
+      "name": "Conducts",
+      "description": "An Organization performs a Research Task or employs a Research Method.",
+      "frequency": 15,
+      "common_source_types": [
+        "ORGANIZATION"
+      ],
+      "common_target_types": [
+        "RESEARCH_TASK",
+        "RESEARCH_METHOD"
+      ],
+      "directional": true,
+      "example_relationships": [
+        {
+          "source": "RAND",
+          "target": "modeling and simulation",
+          "context": "RAND maintained for the army called JICM, a modeling and simulation tool"
+        },
+        {
+          "source": "Center for Causal Influence",
+          "target": "host seminars and journal clubs",
+          "context": "Center for Causal Influence... host seminars and journal clubs to bring the methods to others"
+        }
+      ],
+      "confidence": 0.9
+    },
+    {
+      "id": "REQUIRES",
+      "name": "Requires",
+      "description": "A Research Method necessitates specific Research Tasks or Research Data.",
+      "frequency": 10,
+      "common_source_types": [
+        "RESEARCH_METHOD"
+      ],
+      "common_target_types": [
+        "RESEARCH_TASK",
+        "RESEARCH_DATA"
+      ],
+      "directional": true,
+      "example_relationships": [
+        {
+          "source": "historical analysis",
+          "target": "document review, archival, interview",
+          "context": "historical analysis... involves document review, archival, interview"
+        },
+        {
+          "source": "new data collection",
+          "target": "investments in time and energy",
+          "context": "biggest investments in time and energy are when new data collection is involved"
+        }
+      ],
+      "confidence": 0.9
+    },
+    {
+      "id": "GENERATES",
+      "name": "Generates",
+      "description": "A Research Task produces Research Data or Research Output/Product.",
+      "frequency": 15,
+      "common_source_types": [
+        "RESEARCH_TASK"
+      ],
+      "common_target_types": [
+        "RESEARCH_DATA",
+        "RESEARCH_OUTPUT_PRODUCT"
+      ],
+      "directional": true,
+      "example_relationships": [
+        {
+          "source": "data collection",
+          "target": "answers",
+          "context": "data collection... you get answers back"
+        },
+        {
+          "source": "AI transcribed the meeting minutes",
+          "target": "key decisions",
+          "context": "AI transcribed the meeting minutes put it in like here are the key decisions."
+        }
+      ],
+      "confidence": 0.9
+    },
+    {
+      "id": "CONTAINS",
+      "name": "Contains",
+      "description": "A Research Output/Product includes Research Data.",
+      "frequency": 10,
+      "common_source_types": [
+        "RESEARCH_OUTPUT_PRODUCT"
+      ],
+      "common_target_types": [
+        "RESEARCH_DATA"
+      ],
+      "directional": true,
+      "example_relationships": [
+        {
+          "source": "report",
+          "target": "cost of different European force posture options",
+          "context": "report on the cost of different European force posture options"
+        },
+        {
+          "source": "spreadsheet",
+          "target": "sentence summary of the paper",
+          "context": "spit out in a spreadsheet a once sentence summary of the paper"
+        }
+      ],
+      "confidence": 0.9
+    },
+    {
+      "id": "PROVIDES_GUIDANCE_ON",
+      "name": "Provides Guidance On",
+      "description": "An Organization or Researcher offers guidance or training on AI Tools or Research Methods.",
+      "frequency": 10,
+      "common_source_types": [
+        "ORGANIZATION",
+        "RESEARCHER"
+      ],
+      "common_target_types": [
+        "AI_TOOL",
+        "RESEARCH_METHOD"
+      ],
+      "directional": true,
+      "example_relationships": [
+        {
+          "source": "Center for Causal Influence",
+          "target": "methods",
+          "context": "Center for Causal Influence... host seminars and journal clubs to bring the methods to others"
+        },
+        {
+          "source": "Bryan Frederick",
+          "target": "large language models",
+          "context": "illustrated use case guides for, OK. Let's say you wanna use large language models to do X."
+        }
+      ],
+      "confidence": 0.9
+    },
+    {
+      "id": "AFFECTS",
+      "name": "Affects",
+      "description": "A Research Challenge or Benefit influences a Research Task or Research Method.",
+      "frequency": 20,
+      "common_source_types": [
+        "RESEARCH_CHALLENGE_OR_BENEFIT"
+      ],
+      "common_target_types": [
+        "RESEARCH_TASK",
+        "RESEARCH_METHOD"
+      ],
+      "directional": true,
+      "example_relationships": [
+        {
+          "source": "Quality Issue",
+          "target": "Interview Coding",
+          "context": "The coding is uneven in quality."
+        },
+        {
+          "source": "Time Investment",
+          "target": "Data Collection",
+          "context": "biggest investments in time and energy are when new data collection is involved"
+        }
+      ],
+      "confidence": 1.0
+    },
+    {
+      "id": "PRODUCES",
+      "name": "Produces",
+      "description": "A Researcher creates a Research Output/Product.",
+      "frequency": 10,
+      "common_source_types": [
+        "RESEARCHER"
+      ],
+      "common_target_types": [
+        "RESEARCH_OUTPUT_PRODUCT"
+      ],
+      "directional": true,
+      "example_relationships": [
+        {
+          "source": "Alex Evans",
+          "target": "article",
+          "context": "Alex Evans wrote on Iran and Russia that made a huge splash."
+        },
+        {
+          "source": "I",
+          "target": "proposals",
+          "context": "I've been writing proposals non-stop."
+        }
+      ],
+      "confidence": 0.9
+    },
+    {
+      "id": "UTILIZES",
+      "name": "Utilizes",
+      "description": "A Research Task employs a Research Method.",
+      "frequency": 10,
+      "common_source_types": [
+        "RESEARCH_TASK"
+      ],
+      "common_target_types": [
+        "RESEARCH_METHOD"
+      ],
+      "directional": true,
+      "example_relationships": [
+        {
+          "source": "Interview Coding",
+          "target": "Interviews",
+          "context": "interview coding, something way better than Dedoose."
+        },
+        {
+          "source": "Quantitative Analysis",
+          "target": "Qualitative Data Collection",
+          "context": "when we finish collecting the data, I have done some quantitative analysis on the results that we got."
+        }
+      ],
+      "confidence": 0.9
+    }
+  ],
+  "total_entities_found": 8,
+  "total_relationships_found": 14,
+  "discovery_method": "open",
+  "extraction_confidence": 0.9
+}

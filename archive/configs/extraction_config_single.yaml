@@ -1,0 +1,17 @@
+# Configuration for testing single interview extraction
+
+analytic_question: "How are researchers experiencing and adapting to the integration of AI tools in qualitative research methods?"
+
+# Directory for testing
+interview_files_dir: "C:/Users/Brian/projects/qualitative_coding/data/interviews/ai_interviews_5_for_test"
+
+coding_approach: open
+speaker_approach: open
+entity_approach: open
+
+output_dir: "output_single_test"
+auto_import_neo4j: false
+
+llm_model: "gemini/gemini-2.5-flash"
+temperature: 0.1
+code_hierarchy_depth: 2

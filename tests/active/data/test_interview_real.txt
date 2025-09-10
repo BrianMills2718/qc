@@ -1,0 +1,29 @@
+Interview with Dr. Sarah Kim, Senior Researcher, Methods Division, RAND Corporation
+
+Interviewer: Can you tell me about how your organization is approaching AI technologies?
+
+Dr. Kim: We're thinking that what RAND's future product would be - my label for it, which is a bit mislabeled because this thing exists in a different way. It's an expert system and so there should be a system that can quickly provide clients with tailored answers based on their specific needs and data. I've been trying to name it since we're recording this. We can call it Randy. Like, hey Randy, what is XY or Z? I think that's a good direction for us.
+
+The challenge we face is that we don't make data accessibility easy. Proposals go into this PDF database that nobody knows even exists, and we don't learn from them. They sit there in a SharePoint thing and once you get into that, you can sort of just start flipping through it, but people don't care about the learning and the knowledge.
+
+Interviewer: What areas do you see as most ripe for AI implementation?
+
+Dr. Kim: At the very other end of the scale, the third rail of RAND is publications and OEA. That process is so ripe for improvement. They've upgraded and modified their process to put it on a Git style backbone so that the text is over here, the formats we can worry about in another way.
+
+But there's frustration with the slow pace of adopting new technologies. That's a lot of time and effort to iterate on that, and you're iterating on it anyway. You probably should have tried 20 different ways before giving up.
+
+Interviewer: What concerns do you have about AI adoption?
+
+Dr. Kim: There's a need for a fundamental cultural shift in how RAND thinks about its products and processes. We should be able to produce variable length documents from the same research, moving away from traditional lengthy reports towards more dynamic interactions with clients.
+
+I also have concerns about skill degradation. If I need to have some knowledge base in code to be a good coder, but these tools are automating away all the practice that makes you good at coding... If you're not actually reading the document and internalizing the knowledge inside it, how can you be trusted to carry away the wisdom and minor caveats?
+
+But I do think there's urgency towards automating things that are automatable so we remain competitive. I prefer automation to AI, honestly. All of our little inefficiencies - getting data in, setting up data to be analyzed, looking across workflows - there's room for improvement.
+
+Interviewer: What about training and knowledge sharing?
+
+Dr. Kim: I think we should be doing training across RAND in chunks. Pick a method center, pick a method - here's what's coming, here's what your colleagues are already doing. Part training and part interactive - let's talk about what your pain points are at work.
+
+For proposal writing specifically, I was asked to write a letter to the NSF to ask for money. Not having done that before, I went into the system and said here's 3 proposals - what were their structures? What did they talk about? Then I took that and made my outline using AI tools to help fill in content gaps.
+
+The publications area has huge potential too. We could leverage AI to improve efficiency and speed of publishing, analyzing successful publications to understand what works.

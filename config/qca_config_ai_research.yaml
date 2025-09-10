@@ -1,0 +1,128 @@
+# QCA Configuration for AI Research Study
+# Analysis of how researchers experience AI integration in qualitative methods
+
+# Input/Output Settings
+input_dir: "output_production_old_violations"  # Directory with coded interview JSON files
+output_dir: "qca_ai_research"                  # Output directory for QCA results
+
+# Conditions Definition (based on discovered codes)
+conditions:
+  # High-level AI adoption pattern
+  - condition_id: "ai_adoption"
+    name: "AI Adoption"
+    description: "High adoption and integration of AI tools"
+    source_type: "code"
+    source_id: "AI_INTEGRATION"
+    calibration:
+      method: "frequency" 
+      theoretical_justification: "Frequency-based calibration reflects literature on AI adoption phases: experimental (rare), regular (moderate), integrated (frequent). Thresholds based on Rogers' Innovation Diffusion Theory."
+      frequency_breakpoints: [2, 5, 8]  # Low, medium, high adoption
+      frequency_thresholds:
+        rare: 0.2
+        moderate: 0.5
+        frequent: 0.8
+      normalization_method: "per_thousand_words"  # CRITICAL FIX: Normalize for interview length
+
+  # Efficiency focus
+  - condition_id: "efficiency_focus"
+    name: "Efficiency Focus"
+    description: "Primary focus on efficiency and productivity gains from AI"
+    source_type: "code"
+    source_id: "ENHANCED_EFFICIENCY"
+    calibration:
+      method: "binary"
+      theoretical_justification: "Binary threshold based on Technology Acceptance Model (TAM): repeated mentions (2+) indicate perceived usefulness as primary adoption driver rather than incidental mention."
+      binary_threshold: 2  # Present if mentioned 2+ times
+      normalization_method: "per_thousand_words"
+
+  # Current AI usage
+  - condition_id: "current_usage"
+    name: "Current AI Usage"
+    description: "Active current use of AI tools in research"
+    source_type: "code"
+    source_id: "AI_OPPORTUNITIES"
+    calibration:
+      method: "frequency"
+      theoretical_justification: "Frequency-based calibration reflects Gartner's AI maturity model: ad-hoc (rare), systematic (moderate), pervasive (frequent). Breakpoints derived from enterprise AI adoption studies."
+      frequency_breakpoints: [1, 3, 6]
+      frequency_thresholds:
+        rare: 0.2
+        moderate: 0.5
+        frequent: 0.8
+      normalization_method: "per_thousand_words"
+
+  # Concerns about AI
+  - condition_id: "ai_concerns"
+    name: "AI Concerns"
+    description: "Significant concerns about AI limitations or risks"
+    source_type: "code"
+    source_id: "AI_CHALLENGES"
+    calibration:
+      method: "fuzzy"
+      theoretical_justification: "Fuzzy calibration reflects psychological literature on concern expression: concerns mentioned 4+ times indicate high anxiety (membership=1.0). Linear scale captures graduated concern levels."
+      fuzzy_function: "min(count / 4, 1.0)"  # Fuzzy scale based on concern frequency
+      normalization_method: "per_thousand_words"
+
+  # Methodological innovation
+  - condition_id: "innovation_focus"
+    name: "Innovation Focus"
+    description: "Focus on AI for methodological innovation vs just efficiency"
+    source_type: "code"
+    source_id: "AI_TRANSFORMATION"
+    calibration:
+      method: "binary"
+      theoretical_justification: "Binary threshold reflects Disruptive Innovation Theory: any mention (1+) of transformation indicates qualitative shift beyond efficiency to methodological change."
+      binary_threshold: 1
+      normalization_method: "none"  # Transformation is binary concept
+
+# Outcomes Definition  
+outcomes:
+  # Positive overall experience
+  - outcome_id: "positive_experience"
+    name: "Positive AI Experience"
+    description: "Overall positive experience with AI integration"
+    source_conditions: ["ai_adoption", "efficiency_focus", "current_usage"]
+    combination_rule: "any"  # Any positive indicator
+    calibration:
+      method: "binary"
+      theoretical_justification: "Binary outcome reflects User Experience Theory: any positive engagement dimension (adoption, efficiency, usage) indicates overall positive experience."
+      binary_threshold: 1
+
+  # High AI integration success
+  - outcome_id: "successful_integration"
+    name: "Successful AI Integration"
+    description: "Successful integration of AI into research workflow"
+    source_conditions: ["ai_adoption", "current_usage"]
+    combination_rule: "min(ai_adoption, current_usage)"  # Both needed
+    calibration:
+      method: "fuzzy"
+      theoretical_justification: "Fuzzy outcome based on Set Theory: successful integration requires BOTH adoption AND usage (minimum of both conditions). Raw combination preserves membership gradation."
+      fuzzy_function: "count"  # Use raw combination result
+
+  # Innovation-driven adoption  
+  - outcome_id: "innovation_driven"
+    name: "Innovation-Driven Adoption"
+    description: "AI adoption driven by innovation rather than just efficiency"
+    source_conditions: ["innovation_focus", "ai_adoption"]
+    combination_rule: "all"  # Both innovation focus AND adoption
+    calibration:
+      method: "binary"
+      theoretical_justification: "Binary outcome based on Innovation Theory: true innovation-driven adoption requires BOTH innovation focus AND actual adoption (conjunction of conditions)."
+      binary_threshold: 1
+
+# Phase Control
+enable_calibration: true     # Phase QCA-1: Code to Set Membership
+enable_truth_table: true     # Phase QCA-2: Truth Table Construction  
+enable_minimization: true    # Phase QCA-3: Boolean Minimization
+
+# CRITICAL FIX: Dual-mode truth tables preserve fuzzy information
+truth_table_mode: "dual"     # Options: "crisp", "fuzzy", "dual" 
+
+# Analysis Settings
+minimum_membership_threshold: 0.5
+case_id_field: "interview_id"
+
+# External Tool Integration
+r_qca_package: false         # Generate R scripts for QCA package (optional - requires R installation)
+python_qca: true             # Generate Python analysis scripts (recommended - uses quine-mccluskey)
+neo4j_export: true           # Generate Neo4j Cypher queries

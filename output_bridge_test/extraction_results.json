@@ -1,0 +1,1086 @@
+{
+  "config": {
+    "analytic_question": "What are the key themes, speaker roles, and entity relationships in AI implementation interviews?",
+    "interview_files_dir": "data/interviews/ai_interviews_3_for_test",
+    "coding_approach": "open",
+    "predefined_codes_file": null,
+    "code_hierarchy_depth": 2,
+    "speaker_approach": "open",
+    "predefined_speaker_schema_file": null,
+    "entity_approach": "open",
+    "predefined_entity_schema_file": null,
+    "output_dir": "output_bridge_test",
+    "auto_import_neo4j": true,
+    "neo4j_uri": null,
+    "neo4j_user": null,
+    "neo4j_password": null,
+    "llm_model": "gemini/gemini-2.5-flash",
+    "temperature": 0.1,
+    "max_concurrent_interviews": 3,
+    "paradigm": "expert_qualitative_coder"
+  },
+  "code_taxonomy": {
+    "codes": [
+      {
+        "id": "AI_ADOPTION_CHALLENGES_AT_RAND",
+        "name": "AI Adoption Challenges at RAND",
+        "description": "This code captures the difficulties and obstacles RAND faces in adopting and integrating AI technologies into its research and operational processes. It includes issues related to internal tools, security, and organizational readiness.",
+        "semantic_definition": "Instances describing specific problems, limitations, or hesitations encountered by RAND researchers or the institution as a whole when attempting to use or implement AI tools and practices.",
+        "parent_id": null,
+        "level": 0,
+        "example_quotes": [],
+        "discovery_confidence": 0.9
+      },
+      {
+        "id": "CURRENT_ADOPTION_LEVEL",
+        "name": "Current AI Adoption Level",
+        "description": "Reflects the perceived current state or rate of AI adoption among RAND researchers, often indicating a slower pace compared to external entities.",
+        "semantic_definition": "Direct statements or observations about how widely or frequently AI tools are currently being used within RAND.",
+        "parent_id": "AI_ADOPTION_CHALLENGES_AT_RAND",
+        "level": 1,
+        "example_quotes": [
+          "Most ppl I ask, at RAND there are not as many ppl using it",
+          "I think we might be a little bit slower [level of adoption]",
+          "adoption's pretty low right now for, for. A variety of."
+        ],
+        "discovery_confidence": 0.9
+      },
+      {
+        "id": "BARRIERS_TO_ADOPTION",
+        "name": "Barriers to AI Adoption",
+        "description": "Specific obstacles hindering the widespread and effective integration of AI tools at RAND, including issues with internal tool quality, security concerns, and lack of clear guidance.",
+        "semantic_definition": "Identification of specific reasons why AI adoption is slow or difficult, such as RANDChat's performance, classified data restrictions, or institutional hesitancy.",
+        "parent_id": "AI_ADOPTION_CHALLENGES_AT_RAND",
+        "level": 1,
+        "example_quotes": [
+          "I've used ranch at a few times and it just hasn't been as good as just using Chachi PT.",
+          "The unavailability of those things on classified networks. So if you work on classified stuff for this whole part of your thing, this whole world doesn't really exist right now, because you can't do any of that.",
+          "part of me wonders if ppl are hesitant for that reason [RAND's stance on external LLMs]."
+        ],
+        "discovery_confidence": 0.9
+      },
+      {
+        "id": "PROMOTING_AI_ADOPTION",
+        "name": "Promoting AI Adoption",
+        "description": "Suggestions and strategies for encouraging and facilitating the responsible and effective use of AI technologies within RAND, focusing on education, training, and sharing best practices.",
+        "semantic_definition": "Recommendations for improving AI literacy, providing practical guidance, or creating platforms for researchers to share successful AI applications.",
+        "parent_id": "AI_ADOPTION_CHALLENGES_AT_RAND",
+        "level": 1,
+        "example_quotes": [
+          "Need to be company wide ai initiatives that every unit and division are asked to participate in.",
+          "It would be for folks to have sort of illustrated use case guides for, OK. Let's say you wanna use large language models to do X. Here's some literal examples of how this is used and how this fit into an actual project lifecycle and turned into an actual product that was published and you know, whatever else walking people through in an illustrated manner.",
+          "There could be more along those lines, showcasing how ppl use it successfully."
+        ],
+        "discovery_confidence": 0.9
+      },
+      {
+        "id": "AI_BENEFITS_USE_CASES",
+        "name": "AI Benefits and Use Cases",
+        "description": "This code encompasses the various advantages and practical applications of AI identified by researchers, highlighting how AI can enhance efficiency, accuracy, and scope across different research methods and project management tasks.",
+        "semantic_definition": "Specific examples or discussions of how AI tools (LLMs, specialized software) are being used or could be used to improve research processes, data handling, analysis, writing, or project management.",
+        "parent_id": null,
+        "level": 0,
+        "example_quotes": [],
+        "discovery_confidence": 0.9
+      },
+      {
+        "id": "AI_FOR_QUALITATIVE_RESEARCH",
+        "name": "AI for Qualitative Research",
+        "description": "Applications of AI specifically designed to assist with qualitative data analysis, such as identifying themes, coding interviews, and organizing textual information.",
+        "semantic_definition": "Use of AI to process, analyze, or manage qualitative data, including transcription, thematic extraction, and citation tracking.",
+        "parent_id": "AI_BENEFITS_USE_CASES",
+        "level": 1,
+        "example_quotes": [
+          "Interview coding, something way better than Dedoose.",
+          "if you could have AI go through the interviews as the first step and help you kind of pick out themes and help you, I think. That would be great.",
+          "It's qualitative coding, but like adding a layer so that AI remembers, remembers and gives you an output which traces back to the original interviews."
+        ],
+        "discovery_confidence": 0.9
+      },
+      {
+        "id": "AI_FOR_QUANTITATIVE_RESEARCH",
+        "name": "AI for Quantitative Research",
+        "description": "Applications of AI that support quantitative research tasks, including code generation and debugging, data preparation, and automated data extraction.",
+        "semantic_definition": "Use of AI to write, debug, or optimize programming code for statistical analysis, create data dictionaries, handle missing data, or automate the collection of structured data.",
+        "parent_id": "AI_BENEFITS_USE_CASES",
+        "level": 1,
+        "example_quotes": [
+          "I have used AI tools to help with my code. I know in general how to execute one of these methods but sometime there are new packages written but my code is having errors so I can take the code and put it in an LLM; can you fix this error or can you write this more concisely?",
+          "what if you could? Put the survey into AI and then say create all the variable names for me, right?",
+          "have the machine go through and extract the relevant text statements or, you know, other information. Maybe it's data from tables so that we can then create these policy variables that go into Models."
+        ],
+        "discovery_confidence": 0.9
+      },
+      {
+        "id": "AI_FOR_LITERATURE_REVIEW_AND_SCANNING",
+        "name": "AI for Literature Review and Scanning",
+        "description": "AI applications that streamline the process of reviewing existing literature, summarizing papers, and conducting environmental scans to gather relevant information efficiently.",
+        "semantic_definition": "Use of AI to perform tasks related to literature synthesis, such as summarizing articles, extracting key information (e.g., sample characteristics, methodology), or identifying relevant studies from large datasets.",
+        "parent_id": "AI_BENEFITS_USE_CASES",
+        "level": 1,
+        "example_quotes": [
+          "We can use AI for a literature review that would have taken a RA 20 days so benefits of cost savings",
+          "we did write a python script to use the RAND CHAT to review a bunch of papers. So we did the literature review and had it spit out in a spreadsheet a once sentence summary of the paper or we asked it questions, is this paper based in the US?",
+          "I think there are really good use case, tools related to literature reviews, environmental scans, that is really good."
+        ],
+        "discovery_confidence": 0.9
+      },
+      {
+        "id": "AI_FOR_PROPOSAL_AND_REPORT_WRITING",
+        "name": "AI for Proposal and Report Writing",
+        "description": "AI tools used to assist in the drafting, refinement, and summarization of research proposals and reports, improving clarity and efficiency.",
+        "semantic_definition": "Use of AI to generate text for proposals (e.g., executive summaries), critique research designs, rephrase content, or shorten documents.",
+        "parent_id": "AI_BENEFITS_USE_CASES",
+        "level": 1,
+        "example_quotes": [
+          "I’ve also done things for proposal writing and taken my idea where I want to use a particular design and poke holes in this; What are the problems with this; how can I strengthen this?",
+          "I take the whole proposal and say write an executive summary; it is great at doing that",
+          "Also, sometimes to re-write or shorten things but not exactly causal inference but to make things shorter."
+        ],
+        "discovery_confidence": 0.9
+      },
+      {
+        "id": "AI_FOR_PROJECT_MANAGEMENT_AND_EFFICIENCY",
+        "name": "AI for Project Management and Efficiency",
+        "description": "AI applications that enhance the administrative and organizational aspects of research projects, such as automating meeting documentation, improving post-processing workflows, and assisting with resource allocation.",
+        "semantic_definition": "Use of AI to automate routine project tasks, including generating meeting minutes, identifying action items, proofreading, editing, or forecasting labor needs.",
+        "parent_id": "AI_BENEFITS_USE_CASES",
+        "level": 1,
+        "example_quotes": [
+          "It's a really silly example, but meeting minutes like just having AI transcribed the meeting minutes put it in like here are the key decisions. Here are the action items.",
+          "The post process. If there were a way to more fully automate that process of the editing, the proofreading everything else were, you know. Dramatically more rapid than they are right now.",
+          "internal budgeting and figuring out where ppl have labor allocated to do labor forecasting."
+        ],
+        "discovery_confidence": 0.9
+      },
+      {
+        "id": "AI_FOR_COMMUNICATION_AND_TRANSLATION",
+        "name": "AI for Communication and Translation",
+        "description": "AI tools used to facilitate communication by translating foreign language content or simplifying complex technical concepts for broader audiences.",
+        "semantic_definition": "Use of AI for language translation or for rephrasing technical or academic text into simpler, more accessible language.",
+        "parent_id": "AI_BENEFITS_USE_CASES",
+        "level": 1,
+        "example_quotes": [
+          "I work with a lot of foreign language literature and AI helps a lot. It's much better than Google Translate",
+          "I’ve taken text and said which of the sentences in here will upset some opposed to DEI and it will flag sentences and makes me look at it again.",
+          "I’ve taken text and said explain like I’m five."
+        ],
+        "discovery_confidence": 0.9
+      },
+      {
+        "id": "AI_FOR_DATA_COLLECTION_AUTOMATION",
+        "name": "AI for Data Collection Automation",
+        "description": "The potential for AI to automate or assist in the primary data collection process, such as conducting interviews or surveys.",
+        "semantic_definition": "Discussions about AI's capability to replace human interviewers or survey administrators in collecting data from respondents.",
+        "parent_id": "AI_BENEFITS_USE_CASES",
+        "level": 1,
+        "example_quotes": [
+          "I'm wondering, you know, do we can we get to a point someday where that kind of data collection is done by machine rather than humans?",
+          "I mean, the machine goes out and does the interviews."
+        ],
+        "discovery_confidence": 0.8
+      },
+      {
+        "id": "AI_RISKS_ETHICAL_CONCERNS",
+        "name": "AI Risks and Ethical Concerns",
+        "description": "This code covers the potential negative consequences, ethical dilemmas, and quality control issues associated with AI use, including concerns about data integrity, intellectual property, and the impact on human expertise.",
+        "semantic_definition": "Discussions about the potential for AI to generate inaccurate or misleading information, compromise data privacy, infringe on intellectual property, or reduce critical thinking skills among researchers.",
+        "parent_id": null,
+        "level": 0,
+        "example_quotes": [],
+        "discovery_confidence": 0.9
+      },
+      {
+        "id": "DATA_INTEGRITY_AND_BIAS",
+        "name": "Data Integrity and Bias",
+        "description": "Concerns related to the accuracy, reliability, and potential biases introduced by AI, including issues like data mining, overfitting, and the generation of false information.",
+        "semantic_definition": "Discussions about the risks of AI producing misleading results (e.g., hallucinations, fake citations), over-interpreting data, or being used in ways that compromise scientific rigor.",
+        "parent_id": "AI_RISKS_ETHICAL_CONCERNS",
+        "level": 1,
+        "example_quotes": [
+          "One of the things researchers are increasingly concerned about is data mining, which is going into a data set and just, you know, looking at all these different options.",
+          "I would hope that kind of any quant researcher right is familiar with the concept of overfitting.",
+          "I would ask RAND CHAT, are there systematic studies on blah or what do you know about x and y and it would give me papers/citations that were not real. So I always check."
+        ],
+        "discovery_confidence": 0.9
+      },
+      {
+        "id": "INTELLECTUAL_PROPERTY_AND_CONFIDENTIALITY",
+        "name": "Intellectual Property and Confidentiality",
+        "description": "Worries about AI systems potentially misusing or exposing sensitive information, including intellectual property, classified data, or confidential research findings.",
+        "semantic_definition": "Concerns that AI might inadvertently plagiarize, reveal proprietary information, or handle classified data inappropriately.",
+        "parent_id": "AI_RISKS_ETHICAL_CONCERNS",
+        "level": 1,
+        "example_quotes": [
+          "I don’t want to inadvertently take someone else’s intellectual property.",
+          "I'm not gonna do that if it has sensitive data right?",
+          "Some stuff on homeland defense is almost all classified that is a place where rand is seen as a thought leader."
+        ],
+        "discovery_confidence": 0.9
+      },
+      {
+        "id": "WORKFORCE_IMPACT_AND_SKILL_EROSION",
+        "name": "Workforce Impact and Skill Erosion",
+        "description": "Concerns about the impact of AI on human labor, particularly the potential for AI to displace junior staff or hinder the development of essential research skills.",
+        "semantic_definition": "Discussions about AI automating tasks traditionally performed by entry-level researchers, potentially affecting career progression or skill acquisition.",
+        "parent_id": "AI_RISKS_ETHICAL_CONCERNS",
+        "level": 1,
+        "example_quotes": [
+          "The risk is that we will end up utilizing AI for stuff our junior folks used to do.",
+          "I worry about career development and skillset development among the younger folks."
+        ],
+        "discovery_confidence": 0.9
+      },
+      {
+        "id": "ETHICAL_GOVERNANCE_AND_OVERSIGHT",
+        "name": "Ethical Governance and Oversight",
+        "description": "The need for robust ethical guidelines, institutional review processes, and governance frameworks to ensure responsible AI development and deployment in research.",
+        "semantic_definition": "Discussions about the necessity of formal processes (e.g., IRB, OMB review) to regulate AI use, protect research subjects, and maintain public trust.",
+        "parent_id": "AI_RISKS_ETHICAL_CONCERNS",
+        "level": 1,
+        "example_quotes": [
+          "How do we promote responsible adoption?",
+          "working with our hspc, the IRB Institutional Review Board, since I'm assuming most all these projects, especially if they involve real people, we'll have to have some type of clearance.",
+          "being sure that we're prepared on the human side for what we need to have in place. To to make it work and protect the subjects that of our research."
+        ],
+        "discovery_confidence": 0.9
+      },
+      {
+        "id": "TRADITIONAL_RESEARCH_METHODS_AND_CHALLENGES",
+        "name": "Traditional Research Methods and Challenges",
+        "description": "This code identifies the range of conventional research methodologies employed at RAND and the inherent difficulties associated with their execution, particularly in data collection, instrument design, and stakeholder engagement.",
+        "semantic_definition": "Mentions of specific research methods (qualitative, quantitative, mixed) and descriptions of the time-consuming, complex, or difficult aspects of applying these methods without AI assistance.",
+        "parent_id": null,
+        "level": 0,
+        "example_quotes": [],
+        "discovery_confidence": 0.9
+      },
+      {
+        "id": "QUALITATIVE_METHODS_USED",
+        "name": "Qualitative Methods Used",
+        "description": "Specific qualitative research approaches commonly employed at RAND, such as interviews, focus groups, and case studies.",
+        "semantic_definition": "Mentions of methods primarily focused on collecting and analyzing non-numerical data to understand experiences, perspectives, or meanings.",
+        "parent_id": "TRADITIONAL_RESEARCH_METHODS_AND_CHALLENGES",
+        "level": 1,
+        "example_quotes": [
+          "Probably my most common methodology is, is qualitative interviewing",
+          "interviews, expert elicitations (which includes interviews, focus groups, TTX), focus groups, surveys,",
+          "I've been also using case studies and some social media analysis"
+        ],
+        "discovery_confidence": 0.9
+      },
+      {
+        "id": "QUANTITATIVE_METHODS_USED",
+        "name": "Quantitative Methods Used",
+        "description": "Specific quantitative research approaches commonly employed at RAND, including statistical analysis, modeling, and causal inference techniques.",
+        "semantic_definition": "Mentions of methods primarily focused on collecting and analyzing numerical data to identify patterns, test hypotheses, or measure relationships.",
+        "parent_id": "TRADITIONAL_RESEARCH_METHODS_AND_CHALLENGES",
+        "level": 1,
+        "example_quotes": [
+          "My primary methods are quantitative, so I'm a optimizer. I do. A lot of modeling, simulation coding",
+          "Statistical analysis and forecasting",
+          "There are a few bread and butter techniques. First difference-in-difference, that literature on those techniques has evolved a lot in the last 5-10 years so advanced methods that build on that but difference-in-difference is pretty common. Synthetic control methods to get it look like an rct. Instrumental variables approach and then other techniques that fall into this bucket though less consensus to identifying causal effect. Propensity score match, interrupted timeseries analysis."
+        ],
+        "discovery_confidence": 0.9
+      },
+      {
+        "id": "MIXED_METHODS_APPROACHES",
+        "name": "Mixed Methods Approaches",
+        "description": "The practice of combining both qualitative and quantitative research methods within a single study to gain a more comprehensive understanding.",
+        "semantic_definition": "Descriptions of research designs that integrate both qualitative and quantitative data collection and analysis.",
+        "parent_id": "TRADITIONAL_RESEARCH_METHODS_AND_CHALLENGES",
+        "level": 1,
+        "example_quotes": [
+          "I actually do quantitative and qualitative analysis.",
+          "often it ran. That might mean mixed mixed methods. I heard a lot of people talk about that. They've, you know, we're using both qualitative and quantitative work"
+        ],
+        "discovery_confidence": 0.9
+      },
+      {
+        "id": "CHALLENGES_IN_TRADITIONAL_DATA_COLLECTION",
+        "name": "Challenges in Traditional Data Collection",
+        "description": "Difficulties encountered in the process of gathering data using conventional methods, such as designing effective instruments, obtaining permissions, and identifying appropriate participants.",
+        "semantic_definition": "Descriptions of the time-consuming, complex, or problematic aspects of collecting primary data, including survey design, ethical approvals (IRB, OMB), and recruiting specific subject matter experts or populations.",
+        "parent_id": "TRADITIONAL_RESEARCH_METHODS_AND_CHALLENGES",
+        "level": 1,
+        "example_quotes": [
+          "Well, I think that it's not the most consuming, but definitely the hardest is to find the right questions, as if have the designed the right protocol.",
+          "the biggest investments in time and energy are when new data collection is involved and you know beyond. Interviews where you might be talking to you know, tens, 20 subjects, you know, we're talking about thousands of cases, hundreds of cases. So designing the data collection instrument in many cases we have to get very. Kinds of permissions to collect the data.",
+          "in thinking about interviewing one of the most one of the challenging parts that I've run into is like finding the right stakeholders."
+        ],
+        "discovery_confidence": 0.9
+      },
+      {
+        "id": "RAND_COMPETITIVE_POSITION_AND_EXTERNAL_RELATIONS",
+        "name": "RAND's Competitive Position and External Relations",
+        "description": "This code addresses RAND's standing in the broader research and policy landscape, particularly concerning its competitive advantage, relationships with external entities (e.g., government, private companies), and internal organizational structures that influence AI adoption.",
+        "semantic_definition": "Statements reflecting RAND's market position, comparisons to competitors (e.g., Palantir), interactions with clients or government agencies, and internal organizational dynamics relevant to AI strategy.",
+        "parent_id": null,
+        "level": 0,
+        "example_quotes": [],
+        "discovery_confidence": 0.9
+      },
+      {
+        "id": "RAND_COMPETITIVE_ADVANTAGE",
+        "name": "RAND's Competitive Advantage",
+        "description": "Discussions about RAND's unique strengths, reputation, and strategies for maintaining its leadership position in the research and policy analysis domain, especially in the context of emerging AI technologies.",
+        "semantic_definition": "Statements regarding RAND's distinct capabilities, areas of recognized expertise (e.g., wargaming, thought leadership), or efforts to differentiate itself from competitors.",
+        "parent_id": "RAND_COMPETITIVE_POSITION_AND_EXTERNAL_RELATIONS",
+        "level": 1,
+        "example_quotes": [
+          "How do we make sure we don’t get put out of business in that environment. How do we maintain a competitive edge.",
+          "wargaming is a method. That brand is very well known for and so I think that there are occasional examples of high impact methods, although I would. Generally agree with everything else that has been said here already.",
+          "Some stuff on homeland defense is almost all classified that is a place where rand is seen as a thought leader."
+        ],
+        "discovery_confidence": 0.9
+      },
+      {
+        "id": "EXTERNAL_ENTITY_INTERACTIONS",
+        "name": "External Entity Interactions",
+        "description": "The relationships and interactions between RAND and external organizations, including government sponsors, private companies, and other research institutions, particularly concerning AI adoption and project collaboration.",
+        "semantic_definition": "Mentions of RAND's engagement with clients (e.g., Army, federal agencies), comparisons to private sector competitors (e.g., Palantir), or the influence of external demands on RAND's research practices.",
+        "parent_id": "RAND_COMPETITIVE_POSITION_AND_EXTERNAL_RELATIONS",
+        "level": 1,
+        "example_quotes": [
+          "My sense is the Army thinks our competitors are integrating AI wholistically. Secretary of the Army wants Palantir and not RAND.",
+          "client a federal agency wanted us to do this massive literature review in one month.",
+          "We're doing a data collection now of similar staff in the military. Childcare system and we're having to go through review by OMB to get a clearance that's required by the government."
+        ],
+        "discovery_confidence": 0.9
+      }
+    ],
+    "total_codes": 24,
+    "hierarchy_depth": 2,
+    "discovery_method": "Qualitative content analysis",
+    "analytic_question": "What are the key themes, speaker roles, and entity relationships in AI implementation interviews?",
+    "extraction_confidence": 0.9
+  },
+  "speaker_schema": {
+    "properties": [
+      {
+        "name": "speaker_role",
+        "description": "The professional role or title of the speaker within their organization.",
+        "property_type": "string",
+        "frequency": 11,
+        "example_values": [
+          "Arroyo SDR",
+          "Associate operations researcher",
+          "Senior economist",
+          "Clinician",
+          "Director Methods Center for Causal Inference"
+        ],
+        "is_categorical": false,
+        "possible_values": null,
+        "confidence": 1.0
+      },
+      {
+        "name": "organization_affiliation",
+        "description": "The primary organization the speaker is affiliated with.",
+        "property_type": "categorical",
+        "frequency": 11,
+        "example_values": [
+          "RAND Corporation",
+          "Rand"
+        ],
+        "is_categorical": true,
+        "possible_values": [
+          "RAND"
+        ],
+        "confidence": 1.0
+      },
+      {
+        "name": "department_or_center",
+        "description": "The specific department, center, or division the speaker belongs to within RAND.",
+        "property_type": "string",
+        "frequency": 7,
+        "example_values": [
+          "Arroyo SDR",
+          "Defense of Political Sciences Department",
+          "Methods Center for Causal Inference",
+          "GER"
+        ],
+        "is_categorical": false,
+        "possible_values": null,
+        "confidence": 0.95
+      },
+      {
+        "name": "tenure_at_rand",
+        "description": "The duration of the speaker's employment or affiliation with RAND.",
+        "property_type": "string",
+        "frequency": 4,
+        "example_values": [
+          "about two or three months ago",
+          "second year PhD",
+          "since 1988",
+          "relatively new in role"
+        ],
+        "is_categorical": false,
+        "possible_values": null,
+        "confidence": 0.9
+      },
+      {
+        "name": "research_area",
+        "description": "The main topical subjects or domains the speaker addresses in their work.",
+        "property_type": "string",
+        "frequency": 11,
+        "example_values": [
+          "national security",
+          "public health",
+          "AI, unmanned systems, robotics",
+          "healthcare and mental health",
+          "Interstate conflict and competition",
+          "causal inference techniques"
+        ],
+        "is_categorical": false,
+        "possible_values": null,
+        "confidence": 1.0
+      },
+      {
+        "name": "research_methods_used",
+        "description": "The research methodologies the speaker commonly applies or is familiar with.",
+        "property_type": "string",
+        "frequency": 11,
+        "example_values": [
+          "Qualitative and quantitative",
+          "wargaming",
+          "statistical analysis",
+          "interviews",
+          "modeling and simulation",
+          "cost analysis",
+          "social media analytics",
+          "optimization",
+          "case studies",
+          "causal inference techniques"
+        ],
+        "is_categorical": false,
+        "possible_values": null,
+        "confidence": 1.0
+      },
+      {
+        "name": "ai_tool_experience",
+        "description": "Specific AI tools or types of AI the speaker has used or is familiar with.",
+        "property_type": "string",
+        "frequency": 6,
+        "example_values": [
+          "ChatGPT",
+          "RANDCHAT",
+          "Claude",
+          "LLMs",
+          "Otter"
+        ],
+        "is_categorical": false,
+        "possible_values": null,
+        "confidence": 0.95
+      },
+      {
+        "name": "ai_application_area",
+        "description": "Specific tasks or applications for which the speaker uses or envisions using AI.",
+        "property_type": "string",
+        "frequency": 7,
+        "example_values": [
+          "literature review",
+          "interview coding",
+          "graphics generation",
+          "fixing code",
+          "proposal writing",
+          "summaries",
+          "meeting minutes",
+          "data cleaning and preparation"
+        ],
+        "is_categorical": false,
+        "possible_values": null,
+        "confidence": 0.95
+      },
+      {
+        "name": "ai_tool_quality_assessment",
+        "description": "The speaker's assessment of the quality or effectiveness of different AI tools, particularly RANDCHAT compared to external LLMs.",
+        "property_type": "categorical",
+        "frequency": 5,
+        "example_values": [
+          "RANDCHAT is not as good as ChatGPT",
+          "Claude is good at writing things",
+          "RANDCHAT gave fake citations"
+        ],
+        "is_categorical": true,
+        "possible_values": [
+          "prefers external LLMs over RANDCHAT",
+          "finds RANDCHAT quality insufficient",
+          "finds RANDCHAT generates fake information",
+          "finds external LLMs good for specific tasks"
+        ],
+        "confidence": 0.9
+      },
+      {
+        "name": "ai_adoption_stance",
+        "description": "The speaker's general perspective, concerns, or recommendations regarding AI adoption at RAND or in research.",
+        "property_type": "string",
+        "frequency": 7,
+        "example_values": [
+          "worried about AI replacing junior staff",
+          "risk to RAND's business",
+          "need for company-wide AI initiatives",
+          "concerned about data mining/overfitting",
+          "concerned about intellectual property",
+          "RAND is slower in AI adoption",
+          "sees AI as beneficial for efficiency",
+          "advocates for use case guides and training"
+        ],
+        "is_categorical": false,
+        "possible_values": null,
+        "confidence": 0.95
+      },
+      {
+        "name": "research_process_challenge",
+        "description": "Specific difficulties or time-consuming aspects of the research process identified by the speaker, often where AI could potentially help.",
+        "property_type": "string",
+        "frequency": 8,
+        "example_values": [
+          "uneven interview coding quality",
+          "difficulty making accurate graphics",
+          "designing interview protocols and questions",
+          "new data collection (permissions, instrument design, OMB review)",
+          "project management (critical paths, coordination)",
+          "analyzing qualitative data (pulling out themes)",
+          "finding the right stakeholders for interviews",
+          "tracing citations",
+          "data cleaning and preparation"
+        ],
+        "is_categorical": false,
+        "possible_values": null,
+        "confidence": 0.95
+      }
+    ],
+    "discovery_method": "qualitative research analysis",
+    "extraction_confidence": 0.95
+  },
+  "entity_relationship_schema": {
+    "entity_types": [
+      {
+        "id": "ORGANIZATION",
+        "name": "Organization",
+        "description": "An institution, company, or department mentioned in the interviews, often a research organization, government agency, or AI company.",
+        "frequency": 25,
+        "example_entities": [
+          "RAND Corporation",
+          "Army",
+          "Palantir",
+          "federal agency",
+          "healthcare systems",
+          "Arroyo SDR",
+          "ARDD",
+          "G 3/5/7",
+          "GER",
+          "DPS",
+          "Center for Causal Inference",
+          "HSPC"
+        ],
+        "common_contexts": [
+          "RAND Corporation",
+          "Army thinks our competitors are integrating AI",
+          "Secretary of the Army wants Palantir",
+          "multiple healthcare systems",
+          "Arroyo SDR",
+          "Center for Causal Inference"
+        ],
+        "confidence": 0.95
+      },
+      {
+        "id": "PERSON_ROLE",
+        "name": "Person/Role",
+        "description": "A specific individual or a general role/title held by a person within a research or organizational context.",
+        "frequency": 30,
+        "example_entities": [
+          "Molly Dunnigan",
+          "Todd Helmus",
+          "senior economist",
+          "policy researcher",
+          "RA",
+          "clinician",
+          "subject matter expert",
+          "junior folks",
+          "PhD level ppl",
+          "Henry Harper",
+          "Lauren Mayer",
+          "Angel O’Mahony",
+          "Katharina Best",
+          "Craig Bond",
+          "Alex Evans",
+          "Evonne Crane",
+          "Tony Vossalo",
+          "Lynn Karoly",
+          "Caroline Johnston",
+          "Shannon Walsh",
+          "Emily Lathrop",
+          "Khrystyna Holynska",
+          "Katherine Watkins",
+          "Bryan Frederick",
+          "Brian Mills",
+          "Kandice Kapinos",
+          "Dave Byoke"
+        ],
+        "common_contexts": [
+          "Interview with Molly Dunnigan",
+          "Todd Helmus, I do work on mostly national security",
+          "junior folks used to do",
+          "PhD level ppl are less great about management"
+        ],
+        "confidence": 0.95
+      },
+      {
+        "id": "RESEARCH_METHOD",
+        "name": "Research Method",
+        "description": "A systematic approach or technique used to conduct research, collect data, or analyze information.",
+        "frequency": 50,
+        "example_entities": [
+          "Qualitative interviewing",
+          "statistical analysis",
+          "wargaming",
+          "scenario analysis",
+          "historical analysis",
+          "case studies",
+          "surveys",
+          "modeling and simulation",
+          "risk analysis",
+          "cost analysis",
+          "literature review",
+          "interview coding",
+          "difference-in-difference",
+          "synthetic control methods",
+          "propensity score match",
+          "social network analysis",
+          "expert elicitations",
+          "focus groups",
+          "optimization",
+          "math modeling",
+          "cost benefit analysis",
+          "multi-agent system models",
+          "game theory models",
+          "instrumental variables approach",
+          "interrupted timeseries analysis",
+          "regression based analysis",
+          "descriptive analysis",
+          "causal estimation",
+          "experimental design",
+          "quasi experimental design",
+          "sensitivity analysis"
+        ],
+        "common_contexts": [
+          "commonly used research methods",
+          "quiver of methods",
+          "primary methods are quantitative",
+          "most common methodology is qualitative interviewing",
+          "bread and butter techniques",
+          "sophisticated statistical methods"
+        ],
+        "confidence": 0.98
+      },
+      {
+        "id": "AI_TOOL",
+        "name": "AI Tool",
+        "description": "A specific software, platform, or technology that utilizes artificial intelligence, often mentioned in the context of research or organizational tasks.",
+        "frequency": 40,
+        "example_entities": [
+          "LLM",
+          "RANDCHAT",
+          "ChatGPT",
+          "Claude",
+          "Otter",
+          "Python (for AI/ML)",
+          "R (for AI/ML)",
+          "Stata (for AI/ML)",
+          "Palantir (as a tool provider)"
+        ],
+        "common_contexts": [
+          "utilizing AI for stuff",
+          "implementing AI",
+          "AI tools to help with my code",
+          "used the RAND Chat and I’ve used Claude",
+          "Otter? That tool is used for research",
+          "write a code, a specific LLM for your project",
+          "Palantir and not RAND"
+        ],
+        "confidence": 0.98
+      },
+      {
+        "id": "RESEARCH_PROCESS",
+        "name": "Research Process",
+        "description": "A distinct stage or activity within the overall research lifecycle, often involving multiple steps or requiring specific management.",
+        "frequency": 35,
+        "example_entities": [
+          "Data collection",
+          "data cleaning",
+          "data analysis",
+          "proposal writing",
+          "literature review (activity)",
+          "interview coding (activity)",
+          "project management",
+          "IRB review",
+          "OMB clearance",
+          "post-process (editing/proofreading)",
+          "survey programming",
+          "cognitive testing",
+          "building the frame",
+          "variable naming",
+          "data dictionary creation",
+          "descriptive statistics",
+          "missing data handling"
+        ],
+        "common_contexts": [
+          "designing the data collection instrument",
+          "data cleaning, whatever you have it piece",
+          "data analysis piece",
+          "proposal writing and taken my idea",
+          "post process of the editing, the proofreading",
+          "IRB review",
+          "OMB review",
+          "project management"
+        ],
+        "confidence": 0.95
+      },
+      {
+        "id": "RESEARCH_OUTPUT",
+        "name": "Research Output",
+        "description": "A tangible product or deliverable resulting from research activities.",
+        "frequency": 15,
+        "example_entities": [
+          "Report",
+          "article",
+          "infographic",
+          "proposal",
+          "executive summary",
+          "code (deliverable)",
+          "meeting minutes",
+          "graphics",
+          "citations"
+        ],
+        "common_contexts": [
+          "Wrote a report for G 3/5/7",
+          "most read article",
+          "make graphics",
+          "write an executive summary",
+          "meeting minutes",
+          "citations for you"
+        ],
+        "confidence": 0.9
+      },
+      {
+        "id": "AI_RISK",
+        "name": "AI Risk",
+        "description": "A potential negative consequence or challenge associated with the adoption or use of AI.",
+        "frequency": 20,
+        "example_entities": [
+          "Career development concerns",
+          "skillset development concerns",
+          "competitive edge loss",
+          "data mining",
+          "overfitting",
+          "hallucinations",
+          "intellectual property infringement",
+          "distrust of results",
+          "quality issues (with RANDCHAT)",
+          "citations that were not real"
+        ],
+        "common_contexts": [
+          "The risk is that we will end up utilizing AI for stuff our junior folks used to do",
+          "worry about career development and skillset development",
+          "risk to our research being utilized opportunistically by AI company",
+          "data mining",
+          "overfitting",
+          "hallucinations",
+          "inadvertently take someone else’s intellectual property",
+          "make people distrustful of of the results",
+          "RAND CHAT one is not as good",
+          "citations that were not real"
+        ],
+        "confidence": 0.95
+      },
+      {
+        "id": "CONCEPT_THEME",
+        "name": "Concept/Theme",
+        "description": "An abstract idea, topic, or area of discussion that is central to the interviews, often related to research focus, policy, or organizational strategy.",
+        "frequency": 30,
+        "example_entities": [
+          "AI Needs",
+          "AI Implementation",
+          "AI Adoption",
+          "AI Risks",
+          "Competitive Edge",
+          "Responsible Adoption",
+          "Policy Impact",
+          "Causal Inference",
+          "National Security",
+          "Public Health",
+          "Healthcare Quality",
+          "Interstate Conflict",
+          "Deterrence",
+          "Escalation Management",
+          "DEI",
+          "Funding"
+        ],
+        "common_contexts": [
+          "Assessment of AI Needs",
+          "AI implementation interviews",
+          "maintain a competitive edge",
+          "promote responsible adoption",
+          "Center for Causal Inference",
+          "national security",
+          "public health",
+          "quality of our Healthcare is terrible",
+          "Interstate conflict and competition",
+          "opposed to DEI"
+        ],
+        "confidence": 0.95
+      }
+    ],
+    "relationship_types": [
+      {
+        "id": "USES",
+        "name": "Uses",
+        "description": "A Person/Role or Organization employs or applies a Research Method or AI Tool.",
+        "frequency": 35,
+        "common_source_types": [
+          "PERSON_ROLE",
+          "ORGANIZATION"
+        ],
+        "common_target_types": [
+          "RESEARCH_METHOD",
+          "AI_TOOL"
+        ],
+        "directional": true,
+        "example_relationships": [
+          {
+            "source": "Molly Dunnigan",
+            "target": "Qualitative and quantitative",
+            "context": "describes methods commonly used within her methods center"
+          },
+          {
+            "source": "Kandice Kapinos",
+            "target": "AI tools",
+            "context": "has used AI tools to help with code"
+          },
+          {
+            "source": "RAND Corporation",
+            "target": "JICM",
+            "context": "used to maintain a modeling and simulation tool"
+          }
+        ],
+        "confidence": 0.98
+      },
+      {
+        "id": "PERFORMS",
+        "name": "Performs",
+        "description": "A Person/Role or Organization carries out a Research Process.",
+        "frequency": 25,
+        "common_source_types": [
+          "PERSON_ROLE",
+          "ORGANIZATION"
+        ],
+        "common_target_types": [
+          "RESEARCH_PROCESS"
+        ],
+        "directional": true,
+        "example_relationships": [
+          {
+            "source": "RA",
+            "target": "literature review",
+            "context": "AI can do a literature review that would have taken a RA 20 days"
+          },
+          {
+            "source": "researchers",
+            "target": "interview coding",
+            "context": "We do a lot of interviews and the coding is uneven"
+          },
+          {
+            "source": "teams",
+            "target": "data collection",
+            "context": "we're collecting data from preschool teachers"
+          }
+        ],
+        "confidence": 0.95
+      },
+      {
+        "id": "GENERATES",
+        "name": "Generates",
+        "description": "An AI Tool or Research Method produces a Research Output.",
+        "frequency": 10,
+        "common_source_types": [
+          "AI_TOOL",
+          "RESEARCH_METHOD"
+        ],
+        "common_target_types": [
+          "RESEARCH_OUTPUT"
+        ],
+        "directional": true,
+        "example_relationships": [
+          {
+            "source": "AI",
+            "target": "literature review",
+            "context": "AI for a literature review"
+          },
+          {
+            "source": "chatgpt",
+            "target": "graphics",
+            "context": "I am trying to make one in chatgpt and it makes people without arms"
+          },
+          {
+            "source": "LLM",
+            "target": "executive summary",
+            "context": "take the whole proposal and say write an executive summary"
+          }
+        ],
+        "confidence": 0.9
+      },
+      {
+        "id": "ADDRESSES",
+        "name": "Addresses",
+        "description": "A Research Method or Research Process is applied to or aims to solve a specific Concept/Theme.",
+        "frequency": 15,
+        "common_source_types": [
+          "RESEARCH_METHOD",
+          "RESEARCH_PROCESS"
+        ],
+        "common_target_types": [
+          "CONCEPT_THEME"
+        ],
+        "directional": true,
+        "example_relationships": [
+          {
+            "source": "cost per effect analysis",
+            "target": "weapon system cost",
+            "context": "looking at a weapon system, what is not the cost per missile but cost per effect"
+          },
+          {
+            "source": "optimization methods",
+            "target": "people's preferences for policies in public health",
+            "context": "design optimization methods to figure out people's preferences for policies in public health"
+          },
+          {
+            "source": "research",
+            "target": "Interstate conflict and competition",
+            "context": "My research is mostly on Interstate conflict and competition"
+          }
+        ],
+        "confidence": 0.9
+      },
+      {
+        "id": "POSES_RISK_TO",
+        "name": "Poses Risk To",
+        "description": "An AI Tool or AI Risk creates a threat or negative impact on a Person/Role, Organization, Research Process, or Concept/Theme.",
+        "frequency": 12,
+        "common_source_types": [
+          "AI_TOOL",
+          "AI_RISK"
+        ],
+        "common_target_types": [
+          "PERSON_ROLE",
+          "ORGANIZATION",
+          "RESEARCH_PROCESS",
+          "CONCEPT_THEME"
+        ],
+        "directional": true,
+        "example_relationships": [
+          {
+            "source": "AI",
+            "target": "career development",
+            "context": "The risk is that we will end up utilizing AI for stuff our junior folks used to do... worry about career development"
+          },
+          {
+            "source": "AI company",
+            "target": "RAND research",
+            "context": "risk to our research being utilized opportunistically by AI company to get ahead and to put us out of business"
+          },
+          {
+            "source": "data mining",
+            "target": "distrust of results",
+            "context": "make people distrustful of of the results"
+          }
+        ],
+        "confidence": 0.95
+      },
+      {
+        "id": "ENHANCES",
+        "name": "Enhances",
+        "description": "An AI Tool or Research Method improves a Research Process or Research Output.",
+        "frequency": 8,
+        "common_source_types": [
+          "AI_TOOL",
+          "RESEARCH_METHOD"
+        ],
+        "common_target_types": [
+          "RESEARCH_PROCESS",
+          "RESEARCH_OUTPUT"
+        ],
+        "directional": true,
+        "example_relationships": [
+          {
+            "source": "AI",
+            "target": "RAND Research Methods",
+            "context": "Assessment of AI Needs to Enhance RAND Research Methods"
+          },
+          {
+            "source": "AI tools",
+            "target": "code writing",
+            "context": "AI has been really helpful with writing like any type of code"
+          },
+          {
+            "source": "AI",
+            "target": "summaries",
+            "context": "Summaries I found AI super helpful"
+          }
+        ],
+        "confidence": 0.9
+      },
+      {
+        "id": "REQUIRES",
+        "name": "Requires",
+        "description": "A Research Process or Research Method necessitates a specific resource, approval, or other Research Process.",
+        "frequency": 7,
+        "common_source_types": [
+          "RESEARCH_PROCESS",
+          "RESEARCH_METHOD"
+        ],
+        "common_target_types": [
+          "PERSON_ROLE",
+          "ORGANIZATION",
+          "RESEARCH_PROCESS",
+          "CONCEPT_THEME"
+        ],
+        "directional": true,
+        "example_relationships": [
+          {
+            "source": "data collection",
+            "target": "permissions",
+            "context": "we have to get very kinds of permissions to collect the data"
+          },
+          {
+            "source": "survey",
+            "target": "OMB review",
+            "context": "we're having to go through review by OMB to get a clearance"
+          },
+          {
+            "source": "interviewing",
+            "target": "right stakeholders",
+            "context": "finding the right stakeholders... is often difficult"
+          }
+        ],
+        "confidence": 0.85
+      }
+    ],
+    "total_entities_found": 245,
+    "total_relationships_found": 112,
+    "discovery_method": "open",
+    "extraction_confidence": 0.95
+  },
+  "coded_interviews": [],
+  "global_entities": [],
+  "global_relationships": [],
+  "total_interviews_processed": 0,
+  "total_quotes_extracted": 0,
+  "total_unique_speakers": 0,
+  "total_unique_entities": 0,
+  "total_unique_relationships": 0,
+  "extraction_timestamp": "2025-09-05T11:10:42.298349",
+  "total_processing_time_seconds": 1286.862194,
+  "llm_tokens_used": 57402,
+  "overall_confidence": 0.9333333333333332
+}

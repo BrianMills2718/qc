@@ -1,0 +1,27 @@
+You are analyzing {num_interviews} interviews to discover thematic codes.
+
+ANALYTIC QUESTION: {analytic_question}
+
+PROVIDED CODES TO USE (MANDATORY):
+{provided_codes}
+
+INSTRUCTIONS:
+1. YOU MUST use ALL the provided codes above as the foundation
+2. You may discover ADDITIONAL codes from the interviews
+3. Organize all codes (provided + discovered) into a hierarchical structure
+4. Each code should have:
+   - Unique ID in CAPS_WITH_UNDERSCORES format (e.g., AI_CHALLENGES)
+   - Clear name (human-readable version)
+   - Detailed description (2-3 sentences)
+   - Semantic definition of what qualifies for this code
+   - 1-3 example quotes from the interviews
+
+5. Structure:
+   - Create up to {code_hierarchy_depth} levels of hierarchy
+   - Provided codes can be placed at any appropriate level
+   - Add sub-codes or parent codes as needed
+
+INTERVIEW CONTENT:
+{combined_text}
+
+Generate a complete hierarchical taxonomy incorporating all provided codes.

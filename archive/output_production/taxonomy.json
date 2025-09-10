@@ -1,0 +1,279 @@
+{
+  "codes": [
+    {
+      "id": "A1",
+      "name": "AI Applications in Qualitative Research",
+      "description": "This code captures discussions about the various ways Artificial Intelligence (AI) tools are currently being used or could potentially be used to support different stages and aspects of qualitative research, from data collection to analysis and reporting.",
+      "semantic_definition": "The practical and potential utility of AI technologies to enhance, automate, or assist in tasks traditionally performed by human researchers within qualitative methodologies.",
+      "parent_id": null,
+      "level": 1,
+      "example_quotes": [
+        "I've been using some of the LLM's for. And kind of more exploring some of their. Thematic coding and kind of ability to kind of group documents then generate text for me",
+        "I have used AI tools to help with my code. I know in general how to execute one of these methods but sometime there are new packages written but my code is having errors so I can take the code and put it in an LLM; can you fix this error or can you write this more concisely?",
+        "I've also done things for proposal writing and taken my idea where I want to use a particular design and poke holes in this; What are the problems with this; how can I strengthen this?",
+        "Can you imagine? A world where, like AI could feed in information about the kind of participants you're looking for. And AI could crawl the Internet to find them. Invite them to participate and then find a time on your calendar for the interview."
+      ],
+      "discovery_confidence": 0.95
+    },
+    {
+      "id": "A1.1",
+      "name": "Data Collection & Recruitment Support",
+      "description": "Focuses on the use of AI to assist with identifying, recruiting, and scheduling research participants, as well as finding relevant organizations or partners for research projects.",
+      "semantic_definition": "The application of AI to streamline and enhance the process of acquiring data sources and research subjects, particularly in qualitative studies.",
+      "parent_id": "A1",
+      "level": 2,
+      "example_quotes": [
+        "Can you imagine? A world where, like AI could feed in information about the kind of participants you're looking for. And AI could crawl the Internet to find them. Invite them to participate and then find a time on your calendar for the interview.",
+        "I was gonna say even that like, the way that I kind of you know start some projects now or just trying to identify you know who the best partners are (for a grant submission) or the best organizations for inroads into a population that you want to reach.",
+        "I feel like there's a lot of good leads that like across Rand. You have to send out an e-mail to like some listserv to be like. Does anyone know a partner that blah blah, blah?"
+      ],
+      "discovery_confidence": 0.9
+    },
+    {
+      "id": "A1.2",
+      "name": "Data Analysis & Coding Support",
+      "description": "Describes the use of AI tools for tasks related to analyzing qualitative data, including thematic coding, summarization of content, and quantitative analysis of coded themes.",
+      "semantic_definition": "The utilization of AI to process, categorize, and interpret qualitative data, often aiming to automate or accelerate the identification of patterns and themes.",
+      "parent_id": "A1",
+      "level": 2,
+      "example_quotes": [
+        "I've been using some of the LLM's for. And kind of more exploring some of their. Thematic coding and kind of ability to kind of group documents then generate text for me",
+        "I particularly did a bunch of that around like. Like traditional theme coding. So like where you're coding themes and documents and then you just make a machine that is like a virtual coder that uses training data from a person to just hit those structured codes the same way.",
+        "expert lenses, integrating AI now to kind of go through and give a synopsis of what everybody says for the different questions or topics that you're asking about.",
+        "thinking about the frequency of the post and of the themes (so analyzing statistics around coded content), Like these are the most mentioned themes. Is like this concept mentioned four of the 10 interviews."
+      ],
+      "discovery_confidence": 0.95
+    },
+    {
+      "id": "A1.3",
+      "name": "Literature Review & Information Synthesis",
+      "description": "Encompasses the application of AI to streamline and enhance the process of conducting literature reviews, including search strategy optimization, filtering irrelevant results, and summarizing research papers.",
+      "semantic_definition": "The deployment of AI to efficiently identify, organize, and synthesize existing scholarly or published information, moving beyond simple keyword searches to uncover deeper connections.",
+      "parent_id": "A1",
+      "level": 2,
+      "example_quotes": [
+        "I always have to rely on the librarian for. It's like all of the search strategy stuff like 'cause like they know all of the typologies of how language works in all of the different databases, and so what are the right search terms depending on what you're looking for and when to use the “and” and “or” and like. All of that, the search architecture. Feels like there's, like, you know, probably an AI solution to that",
+        "it would be really great to be Able to iterate like interactively to strip those out or to like be able to feed some of the those kind of considerations.",
+        "we did write a python script to use the RAND CHAT to review a bunch of papers. So we did the literature review and had it spit out in a spreadsheet a once sentence summary of the paper or we asked it questions, is this paper based in the US?"
+      ],
+      "discovery_confidence": 0.9
+    },
+    {
+      "id": "A1.4",
+      "name": "Research Design & Proposal Development",
+      "description": "Covers the use of AI to assist in the conceptualization and articulation of research projects, including refining study designs, identifying potential weaknesses, and drafting sections of proposals like executive summaries.",
+      "semantic_definition": "The leveraging of AI to enhance the ideation, structuring, and written presentation of research plans and funding applications.",
+      "parent_id": "A1",
+      "level": 2,
+      "example_quotes": [
+        "I’ve also done things for proposal writing and taken my idea where I want to use a particular design and poke holes in this; What are the problems with this; how can I strengthen this?",
+        "I take the whole proposal and say write an executive summary; it is great at doing that",
+        "I’ve taken text and said which of the sentences in here will upset some opposed to DEI and it will flag sentences and makes me look at it again."
+      ],
+      "discovery_confidence": 0.85
+    },
+    {
+      "id": "A1.5",
+      "name": "Code Development & Debugging",
+      "description": "Refers to the use of AI tools, particularly LLMs, to assist with writing, converting, annotating, and debugging programming code used in research.",
+      "semantic_definition": "The application of AI as a programming assistant to improve efficiency and accuracy in computational tasks related to data analysis and research execution.",
+      "parent_id": "A1",
+      "level": 2,
+      "example_quotes": [
+        "I have used AI tools to help with my code. I know in general how to execute one of these methods but sometime there are new packages written but my code is having errors so I can take the code and put it in an LLM; can you fix this error or can you write this more concisely?",
+        "I used it to do tedious things and playing with code and I found someone else’s code and asked can you convert this R code to Stata code and kept playing with it and learned what is good and not good.",
+        "The time-consuming process of pulling data down, checking code. So one thing when I feed it in and there is an error, but then you can use the ai tools to check the code, annotate the code, replicability those are time consuming and for AI."
+      ],
+      "discovery_confidence": 0.9
+    },
+    {
+      "id": "A1.6",
+      "name": "Internal Knowledge Management",
+      "description": "Explores the potential of AI to leverage an organization's vast internal repository of past research, recommendations, and project data to inform new work, identify patterns, and improve strategic decision-making.",
+      "semantic_definition": "The use of AI to systematically access, analyze, and apply an organization's accumulated institutional knowledge to enhance efficiency, avoid redundancy, and improve the relevance of current and future research.",
+      "parent_id": "A1",
+      "level": 2,
+      "example_quotes": [
+        "If there's some way for AI to like, take all of our reports and our recommendations. And Help us to become more situationally aware of things that we've already recommended that might have come out as not being implemented because there's a barrier that prevents that",
+        "I don't want to come out and say, oh, what you should do to fix the prevention problem is hire a bunch of people. When you got a workforce report over here. That said that they have to shrink the force because of XY and Z",
+        "people sometimes ask me \"What does RAND think about X\" and after i explain RAND isn't a monolith and has no actual opinions and doesnt advocate anyway, i still dont know what we may have previously recommended about something"
+      ],
+      "discovery_confidence": 0.85
+    },
+    {
+      "id": "A1.7",
+      "name": "Virtual Simulation & Testing",
+      "description": "Discusses the innovative concept of using AI to create virtual populations or simulated environments (e.g., virtual DoD) for testing research tools, survey instruments, or policy recommendations before real-world deployment.",
+      "semantic_definition": "The creation of AI-driven synthetic environments or agents to serve as a \"sandbox\" for pre-testing research methodologies and policy interventions, thereby reducing real-world resource expenditure and risk.",
+      "parent_id": "A1",
+      "level": 2,
+      "example_quotes": [
+        "if we could take those panels and almost for like each person develop an AI agent of that person program it with like personality traits, you know, or maybe even just make it like if we could just basically create virtual populations in essence.",
+        "if there was something like something virtual like that, it's feel like as researchers would be like this, you know, kind of like a place like a sandbox to play in before we go out and and maybe test tools in the real world.",
+        "setting up like a a virtual like DoD where you got different you got your different departments and you've got our wealth of knowledge about each of those departments and. You can say, OK, if I said to do this, How likely is that to work?"
+      ],
+      "discovery_confidence": 0.8
+    },
+    {
+      "id": "C1",
+      "name": "Challenges and Limitations of AI in Qualitative Research",
+      "description": "This code encompasses the difficulties, drawbacks, and inherent limitations encountered when applying AI tools to qualitative research tasks, including issues with accuracy, context, and the need for human oversight.",
+      "semantic_definition": "The inherent obstacles and deficiencies of current AI technologies that impede their effective or reliable application within the nuanced and context-dependent domain of qualitative inquiry.",
+      "parent_id": null,
+      "level": 1,
+      "example_quotes": [
+        "it was difficult for me to like a just inherently trust what it was spitting out in a way that maybe you want to just like take it and use it to draw further conclusions.",
+        "there were definitely, like, nuances that were missed and things that, you know were not picked up that were relevant to our project.",
+        "AI can't replace us in reading transcripts and understanding the context behind the interview in understanding the conversation.",
+        "I don’t want to inadvertently take someone else’s intellectual property."
+      ],
+      "discovery_confidence": 0.95
+    },
+    {
+      "id": "C1.1",
+      "name": "Accuracy and Trustworthiness",
+      "description": "Addresses concerns about the reliability and factual correctness of AI-generated outputs, including the phenomenon of \"hallucinations\" (making up information) and general inconsistencies.",
+      "semantic_definition": "The degree to which AI outputs are perceived as factually correct and dependable, and the challenges posed by AI's tendency to generate plausible but false information.",
+      "parent_id": "C1",
+      "level": 2,
+      "example_quotes": [
+        "it was difficult for me to like a just inherently trust what it was spitting out",
+        "it missed anything that was nuanced. It sort of wasn't picking up on things.",
+        "I asked an LLM for something and explicitly asked to NOT make up references, and it still made up a reference. so i need to really see good evidence that i can trust it before using for lit reviews",
+        "I would ask RAND CHAT, are there systematic studies on blah or what do you know about x and y and it would give me papers/citations that were not real. So I always check."
+      ],
+      "discovery_confidence": 0.95
+    },
+    {
+      "id": "C1.2",
+      "name": "Contextual Understanding",
+      "description": "Highlights AI's limitations in grasping the subtle, implicit, and culturally or politically sensitive contexts inherent in qualitative data, which can lead to misinterpretations or inappropriate outputs.",
+      "semantic_definition": "The challenge for AI to interpret and generate content that fully accounts for the complex social, emotional, and situational nuances that are critical to accurate qualitative analysis.",
+      "parent_id": "C1",
+      "level": 2,
+      "example_quotes": [
+        "there were definitely, like, nuances that were missed and things that, you know were not picked up that were relevant to our project. Especially because this project is like really politically sensitive",
+        "AI can't replace us in reading transcripts and understanding the context behind the interview in understanding the conversation.",
+        "I feel like sometimes like that's like a very human thing to do is say there's like a parallel study area that is this, that you're not gonna get by searching, like what you would normally put in your search terms."
+      ],
+      "discovery_confidence": 0.9
+    },
+    {
+      "id": "C1.3",
+      "name": "Human Oversight & Validation Needs",
+      "description": "Emphasizes the ongoing necessity for human researchers to review, validate, and verify AI outputs, often requiring additional sub-studies or inter-rater reliability checks to ensure quality and confidence.",
+      "semantic_definition": "The indispensable role of human intelligence in scrutinizing, correcting, and confirming the results produced by AI, underscoring that AI serves as a tool rather than a replacement for human judgment.",
+      "parent_id": "C1",
+      "level": 2,
+      "example_quotes": [
+        "I feel like you'd have to do a sub-study just like you do with any sensitivity analysis, like to look at, you know, whether it was accurate up, you know, like do some inter-rater reliability test.",
+        "if you're trusting some, the coding of it for parcels of the data, then you really have to trust it or Take your chances with it, I guess.",
+        "the expectation is like a very high level of rigor, you know, so it's like you get that list like Doug and Joy are talking about, but then the reviewers or the editors expect that. You have a human look at each one of those and exclude them"
+      ],
+      "discovery_confidence": 0.9
+    },
+    {
+      "id": "C1.4",
+      "name": "Technical & Usability Barriers",
+      "description": "Refers to the practical difficulties researchers face in effectively using and programming AI tools, including challenges with prompting, integrating different systems, or understanding how to achieve desired outputs.",
+      "semantic_definition": "The operational and interface-related obstacles that hinder researchers from fully leveraging AI capabilities, often stemming from a lack of intuitive design or specialized technical knowledge.",
+      "parent_id": "C1",
+      "level": 2,
+      "example_quotes": [
+        "I'm sure I could have programmed it better or given it better prompts. Or asked in different ways, but at that point I feel like it's faster to just do it myself, so I just feel like it's not quite doing what I want it to do and I don't know how to get it to do what I want it to.",
+        "The RAND CHAT one is not as good, a couple of times I would ask RAND CHAT, are there systematic studies on blah or what do you know about x and y and it would give me papers/citations that were not real."
+      ],
+      "discovery_confidence": 0.8
+    },
+    {
+      "id": "C1.5",
+      "name": "Data Handling & Preparation",
+      "description": "Addresses the challenges associated with preparing and managing diverse datasets for AI processing, including issues with data cleaning, standardization, and accessing large or varied data sources.",
+      "semantic_definition": "The practical difficulties in transforming raw, heterogeneous data into a structured and consistent format suitable for AI ingestion and analysis.",
+      "parent_id": "C1",
+      "level": 2,
+      "example_quotes": [
+        "Even if you are collecting the data yourself and I was a study that was a trial and we were using survey. We had to go and get it and clean and prepare it for use and check that there are not errors.",
+        "The thing is, not all data is saved the same way, some use SQL, a lot of public use data like claims, those are massive datasets so you don’t want to pull down the entire dataset."
+      ],
+      "discovery_confidence": 0.8
+    },
+    {
+      "id": "I1",
+      "name": "Impacts and Broader Implications of AI Adoption",
+      "description": "This code covers the wider consequences and considerations surrounding the increasing integration of AI into research and society, including ethical dilemmas, organizational dynamics, and potential societal shifts.",
+      "semantic_definition": "The macro-level effects, both positive and negative, that the widespread adoption of AI technologies has on professional practices, organizational structures, and broader societal norms.",
+      "parent_id": null,
+      "level": 1,
+      "example_quotes": [
+        "I don’t want to inadvertently take someone else’s intellectual property. Saw a thing on john Oliver, ppl making images, based on what is in the public and making something new so it is kind of stealing.",
+        "I feel like every suggestion I'm making is like putting someone out of a job.",
+        "I think somebody actually people aren't anticipating about AI development is some of this technology will be like a red Queen scenario. So you're just running faster and faster. So in the red Queen's running faster and faster to stay in the same place like on a treadmill.",
+        "as AI continues to create more content. And it like feeds itself and and it's basing that content on some right stuff and some wrong stuff. So it's perpetuating some wrong stuff and it just keeps getting bigger and bigger like it gets it just. It's like feeding itself."
+      ],
+      "discovery_confidence": 0.95
+    },
+    {
+      "id": "I1.1",
+      "name": "Ethical & IP Concerns",
+      "description": "Addresses the moral and legal issues arising from AI's use, particularly concerning intellectual property rights, potential plagiarism, and the responsible handling of sensitive information.",
+      "semantic_definition": "The moral and legal challenges, including questions of ownership and attribution, that emerge when AI processes or generates content based on existing human-created works.",
+      "parent_id": "I1",
+      "level": 2,
+      "example_quotes": [
+        "I don’t want to inadvertently take someone else’s intellectual property. Saw a thing on john Oliver, ppl making images, based on what is in the public and making something new so it is kind of stealing.",
+        "But if I were to take my proposal and say write this, is it going to take texts from others?",
+        "i just have lots of opinions about its potential negative impacts on humans and society"
+      ],
+      "discovery_confidence": 0.9
+    },
+    {
+      "id": "I1.2",
+      "name": "Organizational Adoption & Training",
+      "description": "Examines the rate at which AI tools are being integrated into organizational workflows, the factors influencing this adoption (e.g., internal policies, perceived need), and the importance of training and knowledge sharing.",
+      "semantic_definition": "The process and challenges of integrating AI technologies into an organization's operational practices, including the cultural, policy, and educational aspects influencing its acceptance and effective use.",
+      "parent_id": "I1",
+      "level": 2,
+      "example_quotes": [
+        "Most ppl I ask, at RAND there are not as many ppl using it; the few that have say they use it to do what I am doing to help fix code or wordsmith text.",
+        "I think we might be a little bit slower [level of adoption], whether that is right I don’t know. I personally feel others are using this and I should… it is speeding things up for ppl in a way that makes me feel I don’t want to be left behind",
+        "I don’t know if ppl feel like they are not supposed to use these bc I know RAND has its own specific rand chat and rand came out and said don’t use something, so part of me wonders if ppl are hesitant for that reason.",
+        "There could be more along those lines, showcasing how ppl use it successfully. A little bit but not a ton and someone super savvy and using it a lot could give a rundown of how they use it day to day."
+      ],
+      "discovery_confidence": 0.9
+    },
+    {
+      "id": "I1.3",
+      "name": "Societal & Professional Impacts",
+      "description": "Explores the broader societal and professional consequences of AI adoption, including concerns about job displacement, the \"Red Queen\" effect (running faster to stay in place), and the changing nature of work.",
+      "semantic_definition": "The macro-level effects of AI integration on human labor, competitive dynamics, and the fundamental structure of professional fields.",
+      "parent_id": "I1",
+      "level": 2,
+      "example_quotes": [
+        "I feel like every suggestion I'm making is like putting someone out of a job.",
+        "I think somebody actually people aren't anticipating about AI development is some of this technology will be like a red Queen scenario. So you're just running faster and faster. So in the red Queen's running faster and faster to stay in the same place like on a treadmill.",
+        "Maybe we're in a very maybe our concerns about losing our jobs are not, so maybe it'll just corrupt itself so quickly that we come back in vogue."
+      ],
+      "discovery_confidence": 0.85
+    },
+    {
+      "id": "I1.4",
+      "name": "Data Quality & Autophagy",
+      "description": "Addresses the long-term risk of AI models degrading in quality as they increasingly train on AI-generated content, leading to a self-referential loop that perpetuates errors and reduces originality.",
+      "semantic_definition": "The potential for AI systems to experience a decline in performance and reliability due to being trained on data that is itself increasingly composed of AI-generated, potentially flawed, content.",
+      "parent_id": "I1",
+      "level": 2,
+      "example_quotes": [
+        "as AI continues to create more content. And it like feeds itself and and it's basing that content on some right stuff and some wrong stuff. So it's perpetuating some wrong stuff and it just keeps getting bigger and bigger like it gets it just. It's like feeding itself.",
+        "I think isn't the theory like one theory of consciousness is that consciousness arises from like self referential loops. And so I feel like we have a lot more to worry about joy than just losing our jobs.",
+        "It's related to Doug's point about hallucinations. I suspect the hallucinations and related problem of autophagy/model collapse are more fundamental than the AI makers are admitting."
+      ],
+      "discovery_confidence": 0.85
+    }
+  ],
+  "total_codes": 18,
+  "hierarchy_depth": 2,
+  "discovery_method": "Thematic analysis of interview transcripts",
+  "analytic_question": "What are the key themes and challenges in using AI for qualitative research?",
+  "extraction_confidence": 0.9
+}

@@ -1,0 +1,109 @@
+okYou are extracting quotes and speakers from an interview.
+
+INTERVIEW: {interview_id}
+ANALYTIC QUESTION: {analytic_question}
+
+AVAILABLE CODES (from Phase 1):
+{formatted_codes}
+
+SPEAKER PROPERTIES TO EXTRACT (from Phase 2):
+{formatted_speaker_schema}
+
+CRITICAL INSTRUCTIONS FOR QUOTE EXTRACTION:
+1. SELECTIVE EXTRACTION:
+   - ONLY extract quotes that clearly relate to one or more of the codes above
+   - A quote should map to at least one code from the taxonomy
+   - Skip small talk, procedural discussions, or off-topic statements
+   - Focus on statements that address the analytic question
+   - Quality over quantity - better to have 10 relevant coded quotes than 30 uncoded ones
+
+2. CODE APPLICATION:
+   - CRITICAL: Use the EXACT CODE IDs shown in brackets [CODE_ID] above
+   - Each quote MUST have at least one code_id from the taxonomy
+   - Many quotes will relate to MULTIPLE codes - apply all that fit
+   - Analyze how each quote relates to the available codes
+   - Return the code_ids field with exact IDs from the taxonomy
+   - If a statement doesn't map to any code, don't extract it as a quote
+   
+   CORRECT EXAMPLES using actual codes from above:
+   {code_examples}
+   
+   WRONG: Do NOT make up new IDs like "accuracy_concerns" or "ai_challenges"
+
+3. QUOTE BOUNDARIES:
+   - Capture complete thoughts (minimum ~10 words unless exceptionally relevant)
+   - Include enough context for standalone understanding
+   - Use natural semantic boundaries (complete sentences/thoughts)
+   - Record location based on markers in the text:
+     * If you see [Line N] markers: set location_start/end to line numbers, location_type="line"
+     * If you see [Paragraph N] markers: set location_start to paragraph number, location_type="paragraph"
+     * If no markers visible: leave location fields as null
+
+4. SPEAKER IDENTIFICATION:
+   - Identify speaker from available cues (labels, names, context)
+   - For each speaker property from the schema:
+     * Extract the value if clearly stated in the interview
+     * Use null if the property is not mentioned for this speaker
+     * Use "Unknown" only if the property is mentioned but unclear
+   - Speaker name: Use the most specific identifier available
+
+5. THEMATIC CONNECTION ANALYSIS (FOR FOCUS GROUPS ONLY):
+
+   THEMATIC CONNECTION GUIDELINES:
+   - Be conservative - only identify clear, obvious thematic relationships
+   - Most quotes (40-70%) should have "none" connections - this is normal and expected
+   - Thematic connections are for significant relationships between coded content
+   - Better to miss a subtle connection than create a false one
+   - Look for relationships between themes/codes, not just conversational sequence
+
+   EXPECTED CONNECTION RATES:
+   - Typical focus groups: 30-60% of quotes have thematic connections
+   - 40-70% should have "none" connections
+   - If assigning connections to >80% of quotes, you are likely over-connecting
+
+   CONNECTION TYPES:
+     * "builds_on": extends or develops a previous speaker's idea
+     * "challenges": disagrees with or questions a previous point  
+     * "clarifies": explains or provides detail on a previous statement
+     * "supports": agrees with or reinforces a previous speaker
+     * "responds_to": directly addresses a previous speaker's point
+     * "contradicts": directly opposes a previous speaker's viewpoint
+     * "none": no clear thematic connection to previous speakers
+
+   WHEN TO USE "NONE":
+   - Quote doesn't clearly relate to previous coded themes
+   - Stands alone as independent observation
+   - Uncertain or weak thematic relationship
+   - Better to be conservative than over-connect
+
+   - Look for explicit connecting language: "Yes, but...", "Building on that...", "Actually, I disagree...", "To clarify what Sarah said..."
+   - Confidence scoring: 0.9+ for explicit references, 0.7+ for clear thematic continuation, 0.5+ for subtle connections
+
+INTERVIEW CONTENT:
+{interview_text}
+
+Return a JSON object with:
+- quotes: array of quote objects
+- speakers: array of speaker objects  
+- total_quotes: integer count
+- total_codes_applied: integer count
+
+Each quote object MUST have these exact fields:
+- text: the exact quote text (string)
+- speaker_name: name of the speaker (string)
+- code_ids: array of code IDs from the taxonomy
+- location_start: line/paragraph number or null
+- location_end: line/paragraph end number or null
+- location_type: "line" or "paragraph" or null
+
+FOR FOCUS GROUP INTERVIEWS ONLY - Add these additional fields:
+- thematic_connection: connection type or "none" (string)
+- connection_target: speaker name being connected to, or null (string or null)
+- connection_confidence: 0.0-1.0 confidence score, or null (float or null)
+- connection_evidence: brief phrase showing connection, or null (string or null)
+
+Each speaker object MUST have these exact fields:
+- name: speaker's name or identifier (string)
+- confidence: float between 0.0 and 1.0
+- identification_method: how speaker was identified (string)
+- quotes_count: number of quotes from this speaker (integer)

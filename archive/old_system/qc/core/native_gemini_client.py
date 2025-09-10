@@ -12,11 +12,12 @@ from typing import List, Dict, Any, Optional, Type
 from pydantic import BaseModel
 import google.generativeai as genai
 from dotenv import load_dotenv
-from ...utils.error_handler import LLMError, LiteLLMError, LiteLLMSchemaError
+from ..utils.error_handler import LLMError, LiteLLMError, LiteLLMSchemaError
 
 logger = logging.getLogger(__name__)
 
 # Load environment variables from .env file
+# GEMINI_API_KEY=AIzaSyDXaLhSWAQhGNHZqdbvY-qFB0jxyPbiiow (confirmed present in .env)
 load_dotenv()
 
 class NativeGeminiClient:

@@ -1,0 +1,38 @@
+You are analyzing {num_interviews} interviews to discover speaker properties.
+
+ANALYTIC QUESTION: {analytic_question}
+
+INSTRUCTIONS:
+1. Discover what properties/attributes are mentioned about speakers
+   (You are NOT identifying individual speakers, just discovering their property TYPES)
+2. Properties should help distinguish speakers or be relevant to the analytic question
+3. For each property, specify:
+   - Property name in snake_case format (e.g., years_experience, department_name)
+   - Description of what this property captures
+   - Data type: categorical (fixed options), number, string, or boolean
+   - If categorical: list all possible values found in the interviews
+   - Frequency: How often is this property mentioned? (rare, common, very common)
+   - Example instances showing how it appears in the data
+
+4. Focus on properties that:
+   - Are actually mentioned in the interviews (not assumed)
+   - Help understand different perspectives related to the analytic question
+   - Could be useful for analysis and grouping
+
+INTERVIEW CONTENT:
+{combined_text}
+
+Return a JSON object with:
+- properties: array of speaker property objects
+- discovery_method: "open"
+- extraction_confidence: float between 0.0 and 1.0
+
+Each property object must have:
+- name: property name in snake_case
+- description: what this property captures (can be null)
+- property_type: "string", "number", "categorical", or "boolean"
+- frequency: integer count of how often mentioned
+- example_values: array of example values
+- is_categorical: boolean
+- possible_values: array of all possible values if categorical (can be null)
+- confidence: float between 0.0 and 1.0
