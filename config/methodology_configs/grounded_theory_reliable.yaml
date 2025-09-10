@@ -1,0 +1,31 @@
+methodology: "grounded_theory"
+theoretical_sensitivity: "medium"
+coding_depth: "focused"
+memo_generation_frequency: "each_phase"
+report_formats: ["executive_summary"]
+include_audit_trail: true
+require_supporting_quotes: true
+validation_level: "standard"
+
+# EMPIRICALLY VALIDATED PARAMETERS
+minimum_code_frequency: 1
+relationship_confidence_threshold: 0.5
+max_codes_per_phase: 15
+max_relationships_per_phase: 10
+
+# LLM Parameters optimized for reliability
+temperature: 0.1
+# max_tokens removed - use full context window
+model_preference: "gemini/gemini-2.5-flash"
+
+# RETRY AND RELIABILITY SETTINGS
+max_llm_retries: 4
+base_retry_delay: 1.0
+circuit_breaker_threshold: 5
+# Timeouts removed - no limits
+# circuit_breaker_timeout: 300
+# request_timeout: 60
+
+# Quality control parameters
+enable_filtering: true
+minimum_confidence: 0.7

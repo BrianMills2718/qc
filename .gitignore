@@ -1,0 +1,78 @@
+# API Keys and secrets - CRITICAL SECURITY
+*.env
+.env*
+**/.env*
+*.key
+*.pem
+secrets/
+credentials/
+**/secrets/
+**/credentials/
+
+# Sensitive data directories - NO PERSONAL DATA
+data/interviews/
+data/memos/
+data/exports/
+data/databases/
+**/interviews/
+**/memos/
+**/exports/
+**/databases/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Cache and temporary files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Log files - may contain sensitive info
+*.log
+logs/
+provenance_logs/
+**/logs/
+
+# Output directories - may contain sensitive analysis
+output/
+*_output/
+test_output*/
+*analysis.md
+integration_test_report.json
+reports/
+**/reports/
+
+# Test artifacts and temporary files
+temp*
+test_*/
+debug_*
+investigation_*
+*_test.py
+simple_integration_test.py
+test_core_functionality.py
+test_extractors_info.py
+cli_integration_test.py
+
+# Temporary files from our work
+ENHANCED_SPEAKER_DETECTION_IMPLEMENTATION_COMPLETE.md
+temp12txt
+
+# Submodules and external repos
+gemini-cli/

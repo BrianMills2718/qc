@@ -1,0 +1,30 @@
+# Grounded Theory Analysis Configuration - Empirically Validated Realistic Parameters
+# Based on evidence: 71,834 char prompt fails with 2000 max_tokens
+methodology: "grounded_theory"
+analysis_parameters:
+  theoretical_sensitivity: "medium"      # high, medium, low
+  coding_depth: "focused"                # comprehensive, focused, minimal
+  memo_generation_frequency: "final_only" # each_phase, final_only, none
+  
+output_configuration:
+  report_formats: ["executive_summary"]  # academic_report, executive_summary, raw_data
+  include_audit_trail: false             # full reasoning chain in output
+  include_supporting_quotes: false       # embed quotes in final report
+  
+quality_settings:
+  # CRITICAL FIX: Realistic thresholds based on actual LLM behavior
+  minimum_code_frequency: 1              # Start with 1, not 3 (evidence from diagnostic)
+  relationship_confidence_threshold: 0.5  # Lower threshold, not 0.8 
+  validation_level: "minimal"            # standard, rigorous, minimal
+
+llm_parameters:
+  # CRITICAL FIX: Adequate token budget for 71K character prompts
+  temperature: 0.1                       # Low for consistency
+  max_tokens: 8000                       # Increased from 2000 to handle large prompts
+  model_preference: "gemini/gemini-2.5-flash" # Fast, reliable model
+
+# Evidence basis:
+# - Diagnostic shows 71,834 character prompts with current data
+# - 2000 max_tokens causes NULL LLM responses
+# - Configuration threshold of 3 eliminates all codes with frequency <3
+# - Relationship threshold of 0.8 may be too strict for initial validation

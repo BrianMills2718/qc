@@ -1,0 +1,21 @@
+# Minimal Grounded Theory Configuration for Testing
+methodology: "grounded_theory"
+analysis_parameters:
+  theoretical_sensitivity: "medium"
+  coding_depth: "focused"
+  memo_generation_frequency: "none"
+  
+output_configuration:
+  report_formats: ["executive_summary"]
+  include_audit_trail: false
+  include_supporting_quotes: true
+  
+quality_settings:
+  minimum_code_frequency: 2
+  relationship_confidence_threshold: 0.5
+  validation_level: "minimal"
+
+llm_parameters:
+  temperature: 0.1
+  max_tokens: null
+  model_preference: "gemini/gemini-2.5-flash"

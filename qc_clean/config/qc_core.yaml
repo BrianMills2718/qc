@@ -1,0 +1,45 @@
+# QC Clean Architecture - Core Configuration
+system:
+  methodology: "grounded_theory"
+  database:
+    neo4j_uri: "bolt://localhost:7687"
+    database_name: "qc_analysis"
+  plugins:
+    enable_auto_discovery: true
+    plugin_directory: "plugins"
+    auto_activate: true
+  
+llm:
+  provider: "gemini"
+  model: "gemini-2.0-flash-exp"
+  # REMOVED: api_timeout: 30  # No timeout limits
+  
+gt_workflow:
+  theoretical_sensitivity: "medium"  
+  coding_depth: "focused"
+  enable_hierarchy: true
+  enable_memos: false
+
+# Plugin System Configuration
+plugins:
+  enabled_plugins:
+    - qca_analysis
+    - api_server  
+    - ai_taxonomy
+
+  plugin_configs:
+    qca_analysis:
+      auto_load: false
+      enable_qca_conversion: true
+      default_analysis_method: "crisp_set"
+      
+    api_server:
+      auto_start: false
+      host: "localhost"
+      port: 8000
+      enable_background_processing: true
+      
+    ai_taxonomy:
+      auto_enhance: false
+      taxonomy_file: "config/taxonomy/ai_taxonomy.yaml"
+      enhancement_threshold: 0.7
