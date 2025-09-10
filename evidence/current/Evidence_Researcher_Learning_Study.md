@@ -1,13 +1,13 @@
 # Evidence: Researcher Learning Capability Study
 
-**Study Date**: 2025-09-10 05:49:27
+**Study Date**: 2025-09-10 06:15:45
 **Total Participants**: 15
-**Successful Participants**: 9
-**Overall Success Rate**: 60.0%
+**Successful Participants**: 10
+**Overall Success Rate**: 66.7%
 
 ## Executive Summary
 
-PROCEED - 60.0% of researchers can learn Cypher with scaffolding (avg adoption: 5.7/10)
+PROCEED - 66.7% of researchers can learn Cypher with scaffolding (avg adoption: 5.9/10)
 
 ## Key Findings
 
@@ -15,14 +15,14 @@ PROCEED - 60.0% of researchers can learn Cypher with scaffolding (avg adoption: 
 ```json
 {
   "novice": {
-    "mean": 43.8,
+    "mean": 39.4,
     "count": 5,
     "success_rate": 0.0
   },
   "intermediate": {
-    "mean": 82,
+    "mean": 90.2,
     "count": 5,
-    "success_rate": 0.8
+    "success_rate": 1.0
   },
   "expert": {
     "mean": 100,
@@ -36,17 +36,17 @@ PROCEED - 60.0% of researchers can learn Cypher with scaffolding (avg adoption: 
 ```json
 {
   "low": {
-    "mean": 46.333333333333336,
+    "mean": 32.333333333333336,
     "count": 3,
     "success_rate": 0.0
   },
   "medium": {
-    "mean": 67.66666666666667,
+    "mean": 77,
     "count": 6,
-    "success_rate": 0.5
+    "success_rate": 0.6666666666666666
   },
   "high": {
-    "mean": 97.33333333333333,
+    "mean": 98.16666666666667,
     "count": 6,
     "success_rate": 1.0
   }
@@ -54,9 +54,9 @@ PROCEED - 60.0% of researchers can learn Cypher with scaffolding (avg adoption: 
 ```
 
 ### Adoption Metrics
-- **Time to Proficiency**: 43.1 minutes (tutorial phase)
-- **Retention Prediction**: 60.0%
-- **Adoption Likelihood**: 5.7/10
+- **Time to Proficiency**: 43.0 minutes (tutorial phase)
+- **Retention Prediction**: 61.3%
+- **Adoption Likelihood**: 5.9/10
 
 ### Common Failure Patterns
 ```json
@@ -68,27 +68,27 @@ PROCEED - 60.0% of researchers can learn Cypher with scaffolding (avg adoption: 
   },
   {
     "participant": "N02",
-    "errors": 18,
+    "errors": 20,
     "pattern": "High error rate suggests syntax confusion"
   },
   {
     "participant": "N03",
-    "errors": 11,
+    "errors": 16,
     "pattern": "High error rate suggests syntax confusion"
   },
   {
     "participant": "N04",
-    "errors": 12,
-    "pattern": "High error rate suggests syntax confusion"
-  },
-  {
-    "participant": "N05",
     "errors": 14,
     "pattern": "High error rate suggests syntax confusion"
   },
   {
+    "participant": "N05",
+    "errors": 11,
+    "pattern": "High error rate suggests syntax confusion"
+  },
+  {
     "participant": "I01",
-    "errors": 9,
+    "errors": 13,
     "pattern": "High error rate suggests syntax confusion"
   },
   {
@@ -98,12 +98,22 @@ PROCEED - 60.0% of researchers can learn Cypher with scaffolding (avg adoption: 
   },
   {
     "participant": "I03",
-    "errors": 10,
+    "errors": 7,
     "pattern": "High error rate suggests syntax confusion"
   },
   {
-    "participant": "E04",
-    "errors": 6,
+    "participant": "I04",
+    "errors": 9,
+    "pattern": "High error rate suggests syntax confusion"
+  },
+  {
+    "participant": "I05",
+    "errors": 8,
+    "pattern": "High error rate suggests syntax confusion"
+  },
+  {
+    "participant": "E03",
+    "errors": 7,
     "pattern": "High error rate suggests syntax confusion"
   }
 ]
@@ -286,37 +296,37 @@ PROCEED - 60.0% of researchers can learn Cypher with scaffolding (avg adoption: 
 [
   {
     "participant_id": "N01",
-    "pre_assessment_score": 29,
-    "tutorial_completion_time": 68,
+    "pre_assessment_score": 41,
+    "tutorial_completion_time": 65,
     "task_completion_rates": {
       "task_01": true,
       "task_02": false,
-      "task_03": true,
+      "task_03": false,
       "task_04": false,
       "task_05": false,
       "task_06": false,
-      "task_07": false,
+      "task_07": true,
       "task_08": false,
       "task_09": false,
       "task_10": false
     },
     "error_count": 19,
-    "error_recovery_success": 1,
-    "post_assessment_score": 50,
+    "error_recovery_success": 0,
+    "post_assessment_score": 45,
     "confidence_rating": 3,
     "satisfaction_rating": 5,
     "adoption_likelihood": 3,
-    "qualitative_feedback": "Steeper learning curve than expected but shows promise",
+    "qualitative_feedback": "Would need more practice to feel comfortable",
     "session_duration_minutes": 120
   },
   {
     "participant_id": "N02",
-    "pre_assessment_score": 16,
-    "tutorial_completion_time": 66,
+    "pre_assessment_score": 25,
+    "tutorial_completion_time": 72,
     "task_completion_rates": {
       "task_01": false,
-      "task_02": true,
-      "task_03": false,
+      "task_02": false,
+      "task_03": true,
       "task_04": false,
       "task_05": true,
       "task_06": false,
@@ -325,9 +335,9 @@ PROCEED - 60.0% of researchers can learn Cypher with scaffolding (avg adoption: 
       "task_09": false,
       "task_10": false
     },
-    "error_count": 18,
-    "error_recovery_success": 0,
-    "post_assessment_score": 39,
+    "error_count": 20,
+    "error_recovery_success": 2,
+    "post_assessment_score": 20,
     "confidence_rating": 3,
     "satisfaction_rating": 5,
     "adoption_likelihood": 3,
@@ -336,108 +346,83 @@ PROCEED - 60.0% of researchers can learn Cypher with scaffolding (avg adoption: 
   },
   {
     "participant_id": "N03",
+    "pre_assessment_score": 32,
+    "tutorial_completion_time": 57,
+    "task_completion_rates": {
+      "task_01": true,
+      "task_02": false,
+      "task_03": true,
+      "task_04": true,
+      "task_05": false,
+      "task_06": true,
+      "task_07": false,
+      "task_08": false,
+      "task_09": false,
+      "task_10": false
+    },
+    "error_count": 16,
+    "error_recovery_success": 0,
+    "post_assessment_score": 41,
+    "confidence_rating": 5,
+    "satisfaction_rating": 6,
+    "adoption_likelihood": 4,
+    "qualitative_feedback": "Need better error messages and debugging tools",
+    "session_duration_minutes": 120
+  },
+  {
+    "participant_id": "N04",
     "pre_assessment_score": 28,
-    "tutorial_completion_time": 55,
+    "tutorial_completion_time": 61,
+    "task_completion_rates": {
+      "task_01": false,
+      "task_02": false,
+      "task_03": true,
+      "task_04": false,
+      "task_05": false,
+      "task_06": false,
+      "task_07": false,
+      "task_08": false,
+      "task_09": false,
+      "task_10": false
+    },
+    "error_count": 14,
+    "error_recovery_success": 1,
+    "post_assessment_score": 32,
+    "confidence_rating": 3,
+    "satisfaction_rating": 5,
+    "adoption_likelihood": 3,
+    "qualitative_feedback": "The relationship patterns are powerful once you understand them",
+    "session_duration_minutes": 120
+  },
+  {
+    "participant_id": "N05",
+    "pre_assessment_score": 27,
+    "tutorial_completion_time": 56,
     "task_completion_rates": {
       "task_01": true,
       "task_02": true,
       "task_03": true,
-      "task_04": false,
-      "task_05": false,
-      "task_06": true,
+      "task_04": true,
+      "task_05": true,
+      "task_06": false,
       "task_07": false,
       "task_08": false,
       "task_09": false,
       "task_10": false
     },
     "error_count": 11,
-    "error_recovery_success": 0,
-    "post_assessment_score": 48,
-    "confidence_rating": 5,
+    "error_recovery_success": 2,
+    "post_assessment_score": 59,
+    "confidence_rating": 6,
     "satisfaction_rating": 6,
-    "adoption_likelihood": 4,
-    "qualitative_feedback": "Steeper learning curve than expected but shows promise",
-    "session_duration_minutes": 120
-  },
-  {
-    "participant_id": "N04",
-    "pre_assessment_score": 25,
-    "tutorial_completion_time": 74,
-    "task_completion_rates": {
-      "task_01": false,
-      "task_02": false,
-      "task_03": false,
-      "task_04": true,
-      "task_05": false,
-      "task_06": false,
-      "task_07": false,
-      "task_08": false,
-      "task_09": true,
-      "task_10": false
-    },
-    "error_count": 12,
-    "error_recovery_success": 0,
-    "post_assessment_score": 50,
-    "confidence_rating": 3,
-    "satisfaction_rating": 5,
-    "adoption_likelihood": 3,
-    "qualitative_feedback": "Integration with existing workflow is key concern",
-    "session_duration_minutes": 120
-  },
-  {
-    "participant_id": "N05",
-    "pre_assessment_score": 33,
-    "tutorial_completion_time": 60,
-    "task_completion_rates": {
-      "task_01": true,
-      "task_02": false,
-      "task_03": false,
-      "task_04": false,
-      "task_05": false,
-      "task_06": false,
-      "task_07": false,
-      "task_08": false,
-      "task_09": true,
-      "task_10": false
-    },
-    "error_count": 14,
-    "error_recovery_success": 0,
-    "post_assessment_score": 32,
-    "confidence_rating": 4,
-    "satisfaction_rating": 5,
-    "adoption_likelihood": 3,
-    "qualitative_feedback": "The relationship patterns are powerful once you understand them",
+    "adoption_likelihood": 5,
+    "qualitative_feedback": "Would need more practice to feel comfortable",
     "session_duration_minutes": 120
   },
   {
     "participant_id": "I01",
-    "pre_assessment_score": 60,
-    "tutorial_completion_time": 41,
-    "task_completion_rates": {
-      "task_01": true,
-      "task_02": true,
-      "task_03": false,
-      "task_04": false,
-      "task_05": true,
-      "task_06": true,
-      "task_07": false,
-      "task_08": false,
-      "task_09": true,
-      "task_10": false
-    },
-    "error_count": 9,
-    "error_recovery_success": 1,
-    "post_assessment_score": 89,
-    "confidence_rating": 6,
-    "satisfaction_rating": 5,
-    "adoption_likelihood": 5,
-    "qualitative_feedback": "Need better error messages and debugging tools",
-    "session_duration_minutes": 120
-  },
-  {
-    "participant_id": "I02",
-    "pre_assessment_score": 61,
-    "tutorial_completion_time": 32,
+    "pre_assessment_score": 63,
+    "tutorial_completion_time": 49,
     "task_completion_rates": {
       "task_01": true,
       "task_02": true,
@@ -450,144 +435,119 @@ PROCEED - 60.0% of researchers can learn Cypher with scaffolding (avg adoption: 
       "task_09": true,
       "task_10": false
     },
+    "error_count": 13,
+    "error_recovery_success": 5,
+    "post_assessment_score": 92,
+    "confidence_rating": 6,
+    "satisfaction_rating": 6,
+    "adoption_likelihood": 6,
+    "qualitative_feedback": "Cypher syntax is challenging but the logic makes sense",
+    "session_duration_minutes": 120
+  },
+  {
+    "participant_id": "I02",
+    "pre_assessment_score": 59,
+    "tutorial_completion_time": 36,
+    "task_completion_rates": {
+      "task_01": true,
+      "task_02": true,
+      "task_03": true,
+      "task_04": true,
+      "task_05": true,
+      "task_06": true,
+      "task_07": false,
+      "task_08": false,
+      "task_09": true,
+      "task_10": false
+    },
     "error_count": 7,
-    "error_recovery_success": 2,
-    "post_assessment_score": 84,
+    "error_recovery_success": 1,
+    "post_assessment_score": 89,
     "confidence_rating": 7,
     "satisfaction_rating": 6,
     "adoption_likelihood": 7,
-    "qualitative_feedback": "Template library would be very helpful",
+    "qualitative_feedback": "Steeper learning curve than expected but shows promise",
     "session_duration_minutes": 120
   },
   {
     "participant_id": "I03",
-    "pre_assessment_score": 38,
+    "pre_assessment_score": 53,
     "tutorial_completion_time": 39,
     "task_completion_rates": {
       "task_01": true,
       "task_02": true,
       "task_03": true,
       "task_04": true,
-      "task_05": false,
-      "task_06": false,
-      "task_07": false,
-      "task_08": true,
+      "task_05": true,
+      "task_06": true,
+      "task_07": true,
+      "task_08": false,
       "task_09": false,
-      "task_10": false
+      "task_10": true
     },
-    "error_count": 10,
-    "error_recovery_success": 1,
-    "post_assessment_score": 60,
-    "confidence_rating": 6,
-    "satisfaction_rating": 5,
-    "adoption_likelihood": 5,
-    "qualitative_feedback": "Would need more practice to feel comfortable",
+    "error_count": 7,
+    "error_recovery_success": 3,
+    "post_assessment_score": 89,
+    "confidence_rating": 7,
+    "satisfaction_rating": 6,
+    "adoption_likelihood": 7,
+    "qualitative_feedback": "The relationship patterns are powerful once you understand them",
     "session_duration_minutes": 120
   },
   {
     "participant_id": "I04",
-    "pre_assessment_score": 40,
-    "tutorial_completion_time": 45,
+    "pre_assessment_score": 44,
+    "tutorial_completion_time": 41,
     "task_completion_rates": {
       "task_01": true,
       "task_02": true,
       "task_03": true,
       "task_04": true,
-      "task_05": true,
+      "task_05": false,
       "task_06": true,
       "task_07": false,
-      "task_08": true,
-      "task_09": true,
-      "task_10": false
-    },
-    "error_count": 5,
-    "error_recovery_success": 1,
-    "post_assessment_score": 77,
-    "confidence_rating": 7,
-    "satisfaction_rating": 6,
-    "adoption_likelihood": 7,
-    "qualitative_feedback": "The relationship patterns are powerful once you understand them",
-    "session_duration_minutes": 120
-  },
-  {
-    "participant_id": "I05",
-    "pre_assessment_score": 80,
-    "tutorial_completion_time": 37,
-    "task_completion_rates": {
-      "task_01": true,
-      "task_02": true,
-      "task_03": true,
-      "task_04": true,
-      "task_05": true,
-      "task_06": true,
-      "task_07": false,
-      "task_08": true,
-      "task_09": true,
-      "task_10": false
-    },
-    "error_count": 4,
-    "error_recovery_success": 1,
-    "post_assessment_score": 100,
-    "confidence_rating": 7,
-    "satisfaction_rating": 6,
-    "adoption_likelihood": 7,
-    "qualitative_feedback": "The relationship patterns are powerful once you understand them",
-    "session_duration_minutes": 120
-  },
-  {
-    "participant_id": "E01",
-    "pre_assessment_score": 78,
-    "tutorial_completion_time": 28,
-    "task_completion_rates": {
-      "task_01": true,
-      "task_02": true,
-      "task_03": true,
-      "task_04": true,
-      "task_05": true,
-      "task_06": true,
-      "task_07": true,
-      "task_08": true,
-      "task_09": true,
-      "task_10": false
-    },
-    "error_count": 1,
-    "error_recovery_success": 0,
-    "post_assessment_score": 100,
-    "confidence_rating": 8,
-    "satisfaction_rating": 6,
-    "adoption_likelihood": 8,
-    "qualitative_feedback": "Graph thinking is different from my usual analysis approach",
-    "session_duration_minutes": 120
-  },
-  {
-    "participant_id": "E02",
-    "pre_assessment_score": 94,
-    "tutorial_completion_time": 25,
-    "task_completion_rates": {
-      "task_01": true,
-      "task_02": true,
-      "task_03": true,
-      "task_04": true,
-      "task_05": true,
-      "task_06": true,
-      "task_07": true,
-      "task_08": true,
-      "task_09": true,
+      "task_08": false,
+      "task_09": false,
       "task_10": true
     },
-    "error_count": 2,
-    "error_recovery_success": 2,
-    "post_assessment_score": 100,
-    "confidence_rating": 8,
-    "satisfaction_rating": 6,
-    "adoption_likelihood": 8,
+    "error_count": 9,
+    "error_recovery_success": 3,
+    "post_assessment_score": 81,
+    "confidence_rating": 6,
+    "satisfaction_rating": 5,
+    "adoption_likelihood": 5,
     "qualitative_feedback": "Steeper learning curve than expected but shows promise",
     "session_duration_minutes": 120
   },
   {
-    "participant_id": "E03",
-    "pre_assessment_score": 81,
-    "tutorial_completion_time": 27,
+    "participant_id": "I05",
+    "pre_assessment_score": 68,
+    "tutorial_completion_time": 39,
+    "task_completion_rates": {
+      "task_01": true,
+      "task_02": true,
+      "task_03": true,
+      "task_04": true,
+      "task_05": true,
+      "task_06": true,
+      "task_07": true,
+      "task_08": false,
+      "task_09": false,
+      "task_10": false
+    },
+    "error_count": 8,
+    "error_recovery_success": 2,
+    "post_assessment_score": 100,
+    "confidence_rating": 7,
+    "satisfaction_rating": 6,
+    "adoption_likelihood": 7,
+    "qualitative_feedback": "Steeper learning curve than expected but shows promise",
+    "session_duration_minutes": 120
+  },
+  {
+    "participant_id": "E01",
+    "pre_assessment_score": 90,
+    "tutorial_completion_time": 25,
     "task_completion_rates": {
       "task_01": true,
       "task_02": true,
@@ -610,8 +570,8 @@ PROCEED - 60.0% of researchers can learn Cypher with scaffolding (avg adoption: 
     "session_duration_minutes": 120
   },
   {
-    "participant_id": "E04",
-    "pre_assessment_score": 75,
+    "participant_id": "E02",
+    "pre_assessment_score": 92,
     "tutorial_completion_time": 25,
     "task_completion_rates": {
       "task_01": true,
@@ -621,33 +581,8 @@ PROCEED - 60.0% of researchers can learn Cypher with scaffolding (avg adoption: 
       "task_05": true,
       "task_06": true,
       "task_07": true,
-      "task_08": false,
-      "task_09": true,
-      "task_10": false
-    },
-    "error_count": 6,
-    "error_recovery_success": 1,
-    "post_assessment_score": 100,
-    "confidence_rating": 7,
-    "satisfaction_rating": 5,
-    "adoption_likelihood": 7,
-    "qualitative_feedback": "Need better error messages and debugging tools",
-    "session_duration_minutes": 120
-  },
-  {
-    "participant_id": "E05",
-    "pre_assessment_score": 91,
-    "tutorial_completion_time": 25,
-    "task_completion_rates": {
-      "task_01": true,
-      "task_02": true,
-      "task_03": true,
-      "task_04": true,
-      "task_05": true,
-      "task_06": true,
-      "task_07": true,
-      "task_08": false,
-      "task_09": true,
+      "task_08": true,
+      "task_09": false,
       "task_10": true
     },
     "error_count": 4,
@@ -656,7 +591,82 @@ PROCEED - 60.0% of researchers can learn Cypher with scaffolding (avg adoption: 
     "confidence_rating": 8,
     "satisfaction_rating": 6,
     "adoption_likelihood": 8,
-    "qualitative_feedback": "Need better error messages and debugging tools",
+    "qualitative_feedback": "Integration with existing workflow is key concern",
+    "session_duration_minutes": 120
+  },
+  {
+    "participant_id": "E03",
+    "pre_assessment_score": 81,
+    "tutorial_completion_time": 29,
+    "task_completion_rates": {
+      "task_01": true,
+      "task_02": true,
+      "task_03": true,
+      "task_04": true,
+      "task_05": false,
+      "task_06": true,
+      "task_07": true,
+      "task_08": true,
+      "task_09": true,
+      "task_10": false
+    },
+    "error_count": 7,
+    "error_recovery_success": 2,
+    "post_assessment_score": 100,
+    "confidence_rating": 7,
+    "satisfaction_rating": 5,
+    "adoption_likelihood": 7,
+    "qualitative_feedback": "Steeper learning curve than expected but shows promise",
+    "session_duration_minutes": 120
+  },
+  {
+    "participant_id": "E04",
+    "pre_assessment_score": 78,
+    "tutorial_completion_time": 26,
+    "task_completion_rates": {
+      "task_01": true,
+      "task_02": true,
+      "task_03": true,
+      "task_04": false,
+      "task_05": true,
+      "task_06": true,
+      "task_07": true,
+      "task_08": true,
+      "task_09": true,
+      "task_10": true
+    },
+    "error_count": 3,
+    "error_recovery_success": 0,
+    "post_assessment_score": 100,
+    "confidence_rating": 8,
+    "satisfaction_rating": 6,
+    "adoption_likelihood": 8,
+    "qualitative_feedback": "Steeper learning curve than expected but shows promise",
+    "session_duration_minutes": 120
+  },
+  {
+    "participant_id": "E05",
+    "pre_assessment_score": 94,
+    "tutorial_completion_time": 25,
+    "task_completion_rates": {
+      "task_01": true,
+      "task_02": true,
+      "task_03": true,
+      "task_04": true,
+      "task_05": true,
+      "task_06": true,
+      "task_07": true,
+      "task_08": true,
+      "task_09": true,
+      "task_10": true
+    },
+    "error_count": 4,
+    "error_recovery_success": 4,
+    "post_assessment_score": 100,
+    "confidence_rating": 8,
+    "satisfaction_rating": 6,
+    "adoption_likelihood": 8,
+    "qualitative_feedback": "Steeper learning curve than expected but shows promise",
     "session_duration_minutes": 120
   }
 ]
@@ -671,10 +681,10 @@ PROCEED - 60.0% of researchers can learn Cypher with scaffolding (avg adoption: 
 4. **Expert (Tasks 9-10)**: Cross-pattern analysis, advanced aggregation
 
 ### Success Rates by Task Difficulty
-- **Beginner Tasks**: Average 80.0% completion
-- **Intermediate Tasks**: Average 64.4% completion
-- **Advanced Tasks**: Average 40.0% completion
-- **Expert Tasks**: Average 46.7% completion
+- **Beginner Tasks**: Average 84.4% completion
+- **Intermediate Tasks**: Average 68.9% completion
+- **Advanced Tasks**: Average 46.7% completion
+- **Expert Tasks**: Average 40.0% completion
 
 ## Methodology
 

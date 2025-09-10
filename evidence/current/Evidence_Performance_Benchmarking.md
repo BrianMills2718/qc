@@ -1,13 +1,13 @@
 # Evidence: Performance Benchmarking
 
-**Benchmark Date**: 2025-09-10 05:48:53
+**Benchmark Date**: 2025-09-10 06:15:45
 **Total Queries**: 40
-**Successful Queries**: 37
-**Overall Success Rate**: 92.5%
+**Successful Queries**: 38
+**Overall Success Rate**: 95.0%
 
 ## Executive Summary
 
-DO NOT PROCEED - Performance inadequate for interactive use (62.2% queries <2s)
+DO NOT PROCEED - Performance inadequate for interactive use (60.5% queries <2s)
 
 ## Performance Analysis
 
@@ -16,68 +16,69 @@ DO NOT PROCEED - Performance inadequate for interactive use (62.2% queries <2s)
 {
   "simple": {
     "times": [
-      48.59410154644001,
-      64.97415948016005,
-      55.87523431710277,
-      113.98970147920504,
-      110.02162419103215,
-      141.03252648738695,
-      279.10815453810613,
-      279.2665933593996,
-      220.43974407264824,
-      897.9038333787894,
-      593.8414509326673,
-      801.3309927655854
+      40.74288120001851,
+      35.934398099518226,
+      67.9570054247227,
+      96.5806267458967,
+      90.64216038599962,
+      133.3824047877372,
+      285.5500644641093,
+      345.57665709690565,
+      403.68977656057916,
+      723.526707226912,
+      880.116356393874,
+      655.7839022744889
     ],
-    "mean": 300.53150971237693,
-    "median": 180.7361352800176,
-    "max": 897.9038333787894
+    "mean": 313.2902450550635,
+    "median": 209.46623462592325,
+    "max": 880.116356393874
   },
   "moderate": {
     "times": [
-      268.47002766884583,
-      274.41397453428397,
-      278.14994733897214,
-      519.3052852711991,
-      628.167491916981,
-      599.7253260699672,
-      850.4628701879801,
-      1222.9110334067677,
-      1097.293340338212,
-      3384.7095913749254,
-      2586.426959209523,
-      4043.9778355231842
+      179.41910067302385,
+      249.10316939658196,
+      201.68293552983104,
+      563.4181848061407,
+      356.521450638751,
+      600.3117617966767,
+      1481.5004571571637,
+      1360.2056625929697,
+      1021.7540276421653,
+      4192.9013724330935,
+      2897.22540441489,
+      2945.7337518236827
     ],
-    "mean": 1312.83447357007,
-    "median": 739.3151810524805,
-    "max": 4043.9778355231842
+    "mean": 1337.4814399087475,
+    "median": 811.0328947194209,
+    "max": 4192.9013724330935
   },
   "complex": {
     "times": [
-      697.1286987925654,
-      1057.90031367064,
-      2795.179626477439,
-      2272.762750035767,
-      4593.258429048772,
-      3807.8331363466473,
-      15293.06357966006,
-      15630.709286319387
+      850.0754858249783,
+      1001.960306869335,
+      2749.513297461452,
+      2795.5865250927127,
+      4684.436344224213,
+      5293.831668874306,
+      10177.021284819974,
+      16150.430450435731
     ],
-    "mean": 5768.4794775439095,
-    "median": 3301.506381412043,
-    "max": 15630.709286319387
+    "mean": 5462.856920450337,
+    "median": 3740.011434658463,
+    "max": 16150.430450435731
   },
   "pathological": {
     "times": [
-      6301.9040975142,
-      5451.820300552766,
-      14971.288644020933,
-      39848.78947175278,
-      39970.50298249102
+      4837.759100022669,
+      10746.961829598662,
+      9598.011918466984,
+      29338.513068427204,
+      57384.957097490296,
+      85349.59067732461
     ],
-    "mean": 21308.86109926634,
-    "median": 14971.288644020933,
-    "max": 39970.50298249102
+    "mean": 32875.965615221736,
+    "median": 20042.737449012933,
+    "max": 85349.59067732461
   }
 }
 ```
@@ -85,10 +86,10 @@ DO NOT PROCEED - Performance inadequate for interactive use (62.2% queries <2s)
 ### User Experience Impact
 ```json
 {
-  "excellent": 6,
-  "acceptable": 17,
+  "excellent": 7,
+  "acceptable": 16,
   "problematic": 9,
-  "unacceptable": 5
+  "unacceptable": 6
 }
 ```
 
@@ -98,169 +99,173 @@ DO NOT PROCEED - Performance inadequate for interactive use (62.2% queries <2s)
   "find_people": [
     [
       "small",
-      48.59410154644001
+      40.74288120001851
     ],
     [
       "medium",
-      113.98970147920504
+      96.5806267458967
     ],
     [
       "large",
-      279.10815453810613
+      285.5500644641093
     ],
     [
       "xl",
-      897.9038333787894
+      723.526707226912
     ]
   ],
   "find_senior_people": [
     [
       "small",
-      64.97415948016005
+      35.934398099518226
     ],
     [
       "medium",
-      110.02162419103215
+      90.64216038599962
     ],
     [
       "large",
-      279.2665933593996
+      345.57665709690565
     ],
     [
       "xl",
-      593.8414509326673
+      880.116356393874
     ]
   ],
   "organization_list": [
     [
       "small",
-      55.87523431710277
+      67.9570054247227
     ],
     [
       "medium",
-      141.03252648738695
+      133.3824047877372
     ],
     [
       "large",
-      220.43974407264824
+      403.68977656057916
     ],
     [
       "xl",
-      801.3309927655854
+      655.7839022744889
     ]
   ],
   "people_topics": [
     [
       "small",
-      268.47002766884583
+      179.41910067302385
     ],
     [
       "medium",
-      519.3052852711991
+      563.4181848061407
     ],
     [
       "large",
-      850.4628701879801
+      1481.5004571571637
     ],
     [
       "xl",
-      3384.7095913749254
+      4192.9013724330935
     ]
   ],
   "org_people_count": [
     [
       "small",
-      274.41397453428397
+      249.10316939658196
     ],
     [
       "medium",
-      628.167491916981
+      356.521450638751
     ],
     [
       "large",
-      1222.9110334067677
+      1360.2056625929697
     ],
     [
       "xl",
-      2586.426959209523
+      2897.22540441489
     ]
   ],
   "cross_division_themes": [
     [
       "small",
-      278.14994733897214
+      201.68293552983104
     ],
     [
       "medium",
-      599.7253260699672
+      600.3117617966767
     ],
     [
       "large",
-      1097.293340338212
+      1021.7540276421653
     ],
     [
       "xl",
-      4043.9778355231842
+      2945.7337518236827
     ]
   ],
   "conceptual_bridges": [
     [
       "small",
-      697.1286987925654
+      850.0754858249783
     ],
     [
       "medium",
-      2795.179626477439
+      2749.513297461452
     ],
     [
       "large",
-      4593.258429048772
+      4684.436344224213
     ],
     [
       "xl",
-      15293.06357966006
+      10177.021284819974
     ]
   ],
   "influence_networks": [
     [
       "small",
-      1057.90031367064
+      1001.960306869335
     ],
     [
       "medium",
-      2272.762750035767
+      2795.5865250927127
     ],
     [
       "large",
-      3807.8331363466473
+      5293.831668874306
     ],
     [
       "xl",
-      15630.709286319387
-    ]
-  ],
-  "unbounded_traversal": [
-    [
-      "small",
-      6301.9040975142
-    ],
-    [
-      "large",
-      39848.78947175278
+      16150.430450435731
     ]
   ],
   "cartesian_product": [
     [
       "small",
-      5451.820300552766
+      4837.759100022669
     ],
     [
       "medium",
-      14971.288644020933
+      9598.011918466984
+    ],
+    [
+      "xl",
+      85349.59067732461
+    ]
+  ],
+  "unbounded_traversal": [
+    [
+      "medium",
+      10746.961829598662
     ],
     [
       "large",
-      39970.50298249102
+      29338.513068427204
+    ],
+    [
+      "xl",
+      57384.957097490296
     ]
   ]
 }
@@ -270,17 +275,12 @@ DO NOT PROCEED - Performance inadequate for interactive use (62.2% queries <2s)
 ```json
 [
   [
-    "medium",
+    "small",
     "unbounded_traversal",
     "Query timeout or memory limit exceeded"
   ],
   [
-    "xl",
-    "unbounded_traversal",
-    "Query timeout or memory limit exceeded"
-  ],
-  [
-    "xl",
+    "large",
     "cartesian_product",
     "Query timeout or memory limit exceeded"
   ]
@@ -406,8 +406,8 @@ DO NOT PROCEED - Performance inadequate for interactive use (62.2% queries <2s)
     {
       "dataset": "small",
       "query": "find_people",
-      "execution_time_ms": 48.59410154644001,
-      "memory_usage_mb": 81.94040930790257,
+      "execution_time_ms": 40.74288120001851,
+      "memory_usage_mb": 31.39237139246126,
       "result_count": 10,
       "success": true,
       "error_message": null
@@ -415,8 +415,8 @@ DO NOT PROCEED - Performance inadequate for interactive use (62.2% queries <2s)
     {
       "dataset": "small",
       "query": "find_senior_people",
-      "execution_time_ms": 64.97415948016005,
-      "memory_usage_mb": 53.74762089548403,
+      "execution_time_ms": 35.934398099518226,
+      "memory_usage_mb": 99.06992682451941,
       "result_count": 10,
       "success": true,
       "error_message": null
@@ -424,8 +424,8 @@ DO NOT PROCEED - Performance inadequate for interactive use (62.2% queries <2s)
     {
       "dataset": "small",
       "query": "organization_list",
-      "execution_time_ms": 55.87523431710277,
-      "memory_usage_mb": 32.95496405677909,
+      "execution_time_ms": 67.9570054247227,
+      "memory_usage_mb": 81.86755095708985,
       "result_count": 20,
       "success": true,
       "error_message": null
@@ -433,8 +433,8 @@ DO NOT PROCEED - Performance inadequate for interactive use (62.2% queries <2s)
     {
       "dataset": "small",
       "query": "people_topics",
-      "execution_time_ms": 268.47002766884583,
-      "memory_usage_mb": 64.11084208496938,
+      "execution_time_ms": 179.41910067302385,
+      "memory_usage_mb": 22.394694518983513,
       "result_count": 10,
       "success": true,
       "error_message": null
@@ -442,8 +442,8 @@ DO NOT PROCEED - Performance inadequate for interactive use (62.2% queries <2s)
     {
       "dataset": "small",
       "query": "org_people_count",
-      "execution_time_ms": 274.41397453428397,
-      "memory_usage_mb": 22.299668844967677,
+      "execution_time_ms": 249.10316939658196,
+      "memory_usage_mb": 50.77778750681383,
       "result_count": 0,
       "success": true,
       "error_message": null
@@ -451,8 +451,8 @@ DO NOT PROCEED - Performance inadequate for interactive use (62.2% queries <2s)
     {
       "dataset": "small",
       "query": "cross_division_themes",
-      "execution_time_ms": 278.14994733897214,
-      "memory_usage_mb": 65.8733005502326,
+      "execution_time_ms": 201.68293552983104,
+      "memory_usage_mb": 63.37510713487515,
       "result_count": 15,
       "success": true,
       "error_message": null
@@ -460,8 +460,8 @@ DO NOT PROCEED - Performance inadequate for interactive use (62.2% queries <2s)
     {
       "dataset": "small",
       "query": "conceptual_bridges",
-      "execution_time_ms": 697.1286987925654,
-      "memory_usage_mb": 95.98138142084957,
+      "execution_time_ms": 850.0754858249783,
+      "memory_usage_mb": 82.2904967268968,
       "result_count": 10,
       "success": true,
       "error_message": null
@@ -469,8 +469,8 @@ DO NOT PROCEED - Performance inadequate for interactive use (62.2% queries <2s)
     {
       "dataset": "small",
       "query": "influence_networks",
-      "execution_time_ms": 1057.90031367064,
-      "memory_usage_mb": 33.999191818308354,
+      "execution_time_ms": 1001.960306869335,
+      "memory_usage_mb": 36.20875837851273,
       "result_count": 10,
       "success": true,
       "error_message": null
@@ -478,17 +478,17 @@ DO NOT PROCEED - Performance inadequate for interactive use (62.2% queries <2s)
     {
       "dataset": "small",
       "query": "unbounded_traversal",
-      "execution_time_ms": 6301.9040975142,
-      "memory_usage_mb": 27.51078663474021,
-      "result_count": 1,
-      "success": true,
-      "error_message": null
+      "execution_time_ms": 30000,
+      "memory_usage_mb": 13.17953832054839,
+      "result_count": 0,
+      "success": false,
+      "error_message": "Query timeout or memory limit exceeded"
     },
     {
       "dataset": "small",
       "query": "cartesian_product",
-      "execution_time_ms": 5451.820300552766,
-      "memory_usage_mb": 55.46617193388448,
+      "execution_time_ms": 4837.759100022669,
+      "memory_usage_mb": 63.65522117531458,
       "result_count": 1,
       "success": true,
       "error_message": null
@@ -498,8 +498,8 @@ DO NOT PROCEED - Performance inadequate for interactive use (62.2% queries <2s)
     {
       "dataset": "medium",
       "query": "find_people",
-      "execution_time_ms": 113.98970147920504,
-      "memory_usage_mb": 71.70376296671094,
+      "execution_time_ms": 96.5806267458967,
+      "memory_usage_mb": 88.52979128648444,
       "result_count": 10,
       "success": true,
       "error_message": null
@@ -507,8 +507,8 @@ DO NOT PROCEED - Performance inadequate for interactive use (62.2% queries <2s)
     {
       "dataset": "medium",
       "query": "find_senior_people",
-      "execution_time_ms": 110.02162419103215,
-      "memory_usage_mb": 80.44526852341765,
+      "execution_time_ms": 90.64216038599962,
+      "memory_usage_mb": 76.34359555327255,
       "result_count": 10,
       "success": true,
       "error_message": null
@@ -516,8 +516,8 @@ DO NOT PROCEED - Performance inadequate for interactive use (62.2% queries <2s)
     {
       "dataset": "medium",
       "query": "organization_list",
-      "execution_time_ms": 141.03252648738695,
-      "memory_usage_mb": 59.90407584940316,
+      "execution_time_ms": 133.3824047877372,
+      "memory_usage_mb": 82.37775218085189,
       "result_count": 20,
       "success": true,
       "error_message": null
@@ -525,8 +525,8 @@ DO NOT PROCEED - Performance inadequate for interactive use (62.2% queries <2s)
     {
       "dataset": "medium",
       "query": "people_topics",
-      "execution_time_ms": 519.3052852711991,
-      "memory_usage_mb": 58.56557671968857,
+      "execution_time_ms": 563.4181848061407,
+      "memory_usage_mb": 49.466756465001325,
       "result_count": 10,
       "success": true,
       "error_message": null
@@ -534,8 +534,8 @@ DO NOT PROCEED - Performance inadequate for interactive use (62.2% queries <2s)
     {
       "dataset": "medium",
       "query": "org_people_count",
-      "execution_time_ms": 628.167491916981,
-      "memory_usage_mb": 51.77907160468352,
+      "execution_time_ms": 356.521450638751,
+      "memory_usage_mb": 56.3708742348937,
       "result_count": 0,
       "success": true,
       "error_message": null
@@ -543,8 +543,8 @@ DO NOT PROCEED - Performance inadequate for interactive use (62.2% queries <2s)
     {
       "dataset": "medium",
       "query": "cross_division_themes",
-      "execution_time_ms": 599.7253260699672,
-      "memory_usage_mb": 91.76685563491324,
+      "execution_time_ms": 600.3117617966767,
+      "memory_usage_mb": 42.76063828407876,
       "result_count": 15,
       "success": true,
       "error_message": null
@@ -552,8 +552,8 @@ DO NOT PROCEED - Performance inadequate for interactive use (62.2% queries <2s)
     {
       "dataset": "medium",
       "query": "conceptual_bridges",
-      "execution_time_ms": 2795.179626477439,
-      "memory_usage_mb": 48.73213274326602,
+      "execution_time_ms": 2749.513297461452,
+      "memory_usage_mb": 94.77601810534372,
       "result_count": 10,
       "success": true,
       "error_message": null
@@ -561,8 +561,8 @@ DO NOT PROCEED - Performance inadequate for interactive use (62.2% queries <2s)
     {
       "dataset": "medium",
       "query": "influence_networks",
-      "execution_time_ms": 2272.762750035767,
-      "memory_usage_mb": 66.6793680012865,
+      "execution_time_ms": 2795.5865250927127,
+      "memory_usage_mb": 13.968153572837952,
       "result_count": 10,
       "success": true,
       "error_message": null
@@ -570,17 +570,17 @@ DO NOT PROCEED - Performance inadequate for interactive use (62.2% queries <2s)
     {
       "dataset": "medium",
       "query": "unbounded_traversal",
-      "execution_time_ms": 30000,
-      "memory_usage_mb": 52.52846044297806,
-      "result_count": 0,
-      "success": false,
-      "error_message": "Query timeout or memory limit exceeded"
+      "execution_time_ms": 10746.961829598662,
+      "memory_usage_mb": 31.79017759499739,
+      "result_count": 1,
+      "success": true,
+      "error_message": null
     },
     {
       "dataset": "medium",
       "query": "cartesian_product",
-      "execution_time_ms": 14971.288644020933,
-      "memory_usage_mb": 98.91760635986405,
+      "execution_time_ms": 9598.011918466984,
+      "memory_usage_mb": 51.80752054836856,
       "result_count": 1,
       "success": true,
       "error_message": null
@@ -590,8 +590,8 @@ DO NOT PROCEED - Performance inadequate for interactive use (62.2% queries <2s)
     {
       "dataset": "large",
       "query": "find_people",
-      "execution_time_ms": 279.10815453810613,
-      "memory_usage_mb": 40.91884401696757,
+      "execution_time_ms": 285.5500644641093,
+      "memory_usage_mb": 88.6378258510831,
       "result_count": 10,
       "success": true,
       "error_message": null
@@ -599,8 +599,8 @@ DO NOT PROCEED - Performance inadequate for interactive use (62.2% queries <2s)
     {
       "dataset": "large",
       "query": "find_senior_people",
-      "execution_time_ms": 279.2665933593996,
-      "memory_usage_mb": 64.18443528849237,
+      "execution_time_ms": 345.57665709690565,
+      "memory_usage_mb": 32.6162478450327,
       "result_count": 10,
       "success": true,
       "error_message": null
@@ -608,8 +608,8 @@ DO NOT PROCEED - Performance inadequate for interactive use (62.2% queries <2s)
     {
       "dataset": "large",
       "query": "organization_list",
-      "execution_time_ms": 220.43974407264824,
-      "memory_usage_mb": 76.76896885572097,
+      "execution_time_ms": 403.68977656057916,
+      "memory_usage_mb": 95.64963385198035,
       "result_count": 20,
       "success": true,
       "error_message": null
@@ -617,8 +617,8 @@ DO NOT PROCEED - Performance inadequate for interactive use (62.2% queries <2s)
     {
       "dataset": "large",
       "query": "people_topics",
-      "execution_time_ms": 850.4628701879801,
-      "memory_usage_mb": 32.54533479706744,
+      "execution_time_ms": 1481.5004571571637,
+      "memory_usage_mb": 82.17978604086254,
       "result_count": 10,
       "success": true,
       "error_message": null
@@ -626,8 +626,8 @@ DO NOT PROCEED - Performance inadequate for interactive use (62.2% queries <2s)
     {
       "dataset": "large",
       "query": "org_people_count",
-      "execution_time_ms": 1222.9110334067677,
-      "memory_usage_mb": 75.47638374073864,
+      "execution_time_ms": 1360.2056625929697,
+      "memory_usage_mb": 71.89506843389687,
       "result_count": 0,
       "success": true,
       "error_message": null
@@ -635,8 +635,8 @@ DO NOT PROCEED - Performance inadequate for interactive use (62.2% queries <2s)
     {
       "dataset": "large",
       "query": "cross_division_themes",
-      "execution_time_ms": 1097.293340338212,
-      "memory_usage_mb": 41.571174949531965,
+      "execution_time_ms": 1021.7540276421653,
+      "memory_usage_mb": 83.15230923783984,
       "result_count": 15,
       "success": true,
       "error_message": null
@@ -644,8 +644,8 @@ DO NOT PROCEED - Performance inadequate for interactive use (62.2% queries <2s)
     {
       "dataset": "large",
       "query": "conceptual_bridges",
-      "execution_time_ms": 4593.258429048772,
-      "memory_usage_mb": 27.541874511407517,
+      "execution_time_ms": 4684.436344224213,
+      "memory_usage_mb": 35.024329953344825,
       "result_count": 10,
       "success": true,
       "error_message": null
@@ -653,8 +653,8 @@ DO NOT PROCEED - Performance inadequate for interactive use (62.2% queries <2s)
     {
       "dataset": "large",
       "query": "influence_networks",
-      "execution_time_ms": 3807.8331363466473,
-      "memory_usage_mb": 86.40648842974625,
+      "execution_time_ms": 5293.831668874306,
+      "memory_usage_mb": 58.41291075359589,
       "result_count": 10,
       "success": true,
       "error_message": null
@@ -662,8 +662,8 @@ DO NOT PROCEED - Performance inadequate for interactive use (62.2% queries <2s)
     {
       "dataset": "large",
       "query": "unbounded_traversal",
-      "execution_time_ms": 39848.78947175278,
-      "memory_usage_mb": 56.332872762225094,
+      "execution_time_ms": 29338.513068427204,
+      "memory_usage_mb": 11.808678685687834,
       "result_count": 1,
       "success": true,
       "error_message": null
@@ -671,19 +671,19 @@ DO NOT PROCEED - Performance inadequate for interactive use (62.2% queries <2s)
     {
       "dataset": "large",
       "query": "cartesian_product",
-      "execution_time_ms": 39970.50298249102,
-      "memory_usage_mb": 96.47094598645091,
-      "result_count": 1,
-      "success": true,
-      "error_message": null
+      "execution_time_ms": 30000,
+      "memory_usage_mb": 91.75069942333062,
+      "result_count": 0,
+      "success": false,
+      "error_message": "Query timeout or memory limit exceeded"
     }
   ],
   "xl": [
     {
       "dataset": "xl",
       "query": "find_people",
-      "execution_time_ms": 897.9038333787894,
-      "memory_usage_mb": 91.40072150840919,
+      "execution_time_ms": 723.526707226912,
+      "memory_usage_mb": 69.72951875376387,
       "result_count": 10,
       "success": true,
       "error_message": null
@@ -691,8 +691,8 @@ DO NOT PROCEED - Performance inadequate for interactive use (62.2% queries <2s)
     {
       "dataset": "xl",
       "query": "find_senior_people",
-      "execution_time_ms": 593.8414509326673,
-      "memory_usage_mb": 99.7714501390548,
+      "execution_time_ms": 880.116356393874,
+      "memory_usage_mb": 46.18152818048404,
       "result_count": 10,
       "success": true,
       "error_message": null
@@ -700,8 +700,8 @@ DO NOT PROCEED - Performance inadequate for interactive use (62.2% queries <2s)
     {
       "dataset": "xl",
       "query": "organization_list",
-      "execution_time_ms": 801.3309927655854,
-      "memory_usage_mb": 56.37290975583307,
+      "execution_time_ms": 655.7839022744889,
+      "memory_usage_mb": 53.50139629572537,
       "result_count": 20,
       "success": true,
       "error_message": null
@@ -709,8 +709,8 @@ DO NOT PROCEED - Performance inadequate for interactive use (62.2% queries <2s)
     {
       "dataset": "xl",
       "query": "people_topics",
-      "execution_time_ms": 3384.7095913749254,
-      "memory_usage_mb": 45.42356502367728,
+      "execution_time_ms": 4192.9013724330935,
+      "memory_usage_mb": 46.653612861883786,
       "result_count": 10,
       "success": true,
       "error_message": null
@@ -718,8 +718,8 @@ DO NOT PROCEED - Performance inadequate for interactive use (62.2% queries <2s)
     {
       "dataset": "xl",
       "query": "org_people_count",
-      "execution_time_ms": 2586.426959209523,
-      "memory_usage_mb": 92.44375195229,
+      "execution_time_ms": 2897.22540441489,
+      "memory_usage_mb": 90.3411172674008,
       "result_count": 0,
       "success": true,
       "error_message": null
@@ -727,8 +727,8 @@ DO NOT PROCEED - Performance inadequate for interactive use (62.2% queries <2s)
     {
       "dataset": "xl",
       "query": "cross_division_themes",
-      "execution_time_ms": 4043.9778355231842,
-      "memory_usage_mb": 83.99421785770713,
+      "execution_time_ms": 2945.7337518236827,
+      "memory_usage_mb": 72.29289267057727,
       "result_count": 15,
       "success": true,
       "error_message": null
@@ -736,8 +736,8 @@ DO NOT PROCEED - Performance inadequate for interactive use (62.2% queries <2s)
     {
       "dataset": "xl",
       "query": "conceptual_bridges",
-      "execution_time_ms": 15293.06357966006,
-      "memory_usage_mb": 75.21037840112011,
+      "execution_time_ms": 10177.021284819974,
+      "memory_usage_mb": 77.36082145186744,
       "result_count": 10,
       "success": true,
       "error_message": null
@@ -745,8 +745,8 @@ DO NOT PROCEED - Performance inadequate for interactive use (62.2% queries <2s)
     {
       "dataset": "xl",
       "query": "influence_networks",
-      "execution_time_ms": 15630.709286319387,
-      "memory_usage_mb": 56.387663363161586,
+      "execution_time_ms": 16150.430450435731,
+      "memory_usage_mb": 70.3068163227052,
       "result_count": 10,
       "success": true,
       "error_message": null
@@ -754,20 +754,20 @@ DO NOT PROCEED - Performance inadequate for interactive use (62.2% queries <2s)
     {
       "dataset": "xl",
       "query": "unbounded_traversal",
-      "execution_time_ms": 30000,
-      "memory_usage_mb": 20.018537325483322,
-      "result_count": 0,
-      "success": false,
-      "error_message": "Query timeout or memory limit exceeded"
+      "execution_time_ms": 57384.957097490296,
+      "memory_usage_mb": 84.77236302441872,
+      "result_count": 1,
+      "success": true,
+      "error_message": null
     },
     {
       "dataset": "xl",
       "query": "cartesian_product",
-      "execution_time_ms": 30000,
-      "memory_usage_mb": 55.29404295979285,
-      "result_count": 0,
-      "success": false,
-      "error_message": "Query timeout or memory limit exceeded"
+      "execution_time_ms": 85349.59067732461,
+      "memory_usage_mb": 16.604704920282266,
+      "result_count": 1,
+      "success": true,
+      "error_message": null
     }
   ]
 }
@@ -783,7 +783,7 @@ DO NOT PROCEED - Performance inadequate for interactive use (62.2% queries <2s)
 
 ### Success Criteria
 - **Target**: >90% of queries complete in <2 seconds on medium dataset
-- **Actual**: 23/37 = 62.2% good performance
+- **Actual**: 23/38 = 60.5% good performance
 
 ## Methodology
 
