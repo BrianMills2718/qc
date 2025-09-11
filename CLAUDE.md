@@ -1,4 +1,4 @@
-# Qualitative Coding Analysis System - Environment Configuration Phase
+# Qualitative Coding Analysis System - CLI Wrapper Implementation Phase
 
 ## 🚫 Development Philosophy (MANDATORY)
 
@@ -11,154 +11,270 @@
 
 ## 📁 Codebase Structure
 
-### Current Implementation Status: DATABASE INTEGRATION COMPLETE ✅
-- **Server Foundation**: ✅ Complete - FastAPI with uvicorn HTTP binding
-- **API Endpoints**: ✅ Complete - Natural language query processing
-- **UI Integration**: ✅ Complete - Static file serving and CORS
-- **Database Integration**: ✅ **COMPLETE** - Real Neo4j data flowing through all endpoints
-- **Browser Validation**: ✅ **VERIFIED** - End-to-end UI workflows working
-- **Gap Resolution**: ✅ **COMPLETE** - All 11 systematic tasks completed with evidence
+### Current Implementation Status: WEB UI INTEGRATION COMPLETE ✅
+- **Server Foundation**: ✅ Complete - FastAPI with uvicorn HTTP binding on port 8002
+- **API Endpoints**: ✅ Complete - Natural language query processing and analysis endpoints
+- **UI Integration**: ✅ Complete - React frontend with static file serving and CORS
+- **Database Integration**: ✅ Complete - Real Neo4j data flowing through all endpoints
+- **Analysis Pipeline**: ✅ Complete - Demo mode analysis with realistic mock results
+- **Frontend-Backend**: ✅ Complete - Full request-response cycle functional
 
 ### Key Entry Points
-- **Server Startup**: `start_server.py` - Development server with dependency checking (needs env config)
-- **API Server**: `qc_clean/plugins/api/api_server.py` - FastAPI application with endpoints
-- **Query Processing**: `qc_clean/plugins/api/query_endpoints.py` - Real Neo4j integration complete
-- **UI Mockup**: `UI_planning/mockups/02_project_workspace.html` - Enhanced with query interface
-- **Database**: `qc_clean/core/data/neo4j_manager.py` - Neo4j connection handling
+- **API Server**: `qc_clean/plugins/api/api_server.py` - FastAPI application with working endpoints
+- **Server Startup**: `start_server.py` - Development server with dependency checking
+- **Query Processing**: `qc_clean/plugins/api/query_endpoints.py` - Neo4j integration complete
+- **Environment Config**: `qc_clean/core/config/env_config.py` - Configuration system with .env support
+- **Existing CLI Infrastructure**: `qc_clean/core/cli/cli_robust.py` - Robust CLI foundation available
 
-### Integration Points
-- **LLM Handler**: `qc_clean/core/llm/llm_handler.py` - AI query generation (needs env config)
-- **Schema System**: `qc_clean/core/data/schema_config.py` - Graph schema definitions
-- **Cypher Builder**: `qc_clean/core/data/cypher_builder.py` - Query construction
-- **Neo4j Manager**: `qc_clean/core/data/neo4j_manager.py` - Database operations (needs env config)
+### Working API Endpoints (Port 8002)
+- `GET /health` - Health check
+- `POST /analyze` - Start analysis (returns job_id, completes in 2 seconds with demo results)
+- `GET /jobs/{job_id}` - Get job status and results
+- `POST /api/query/natural-language` - Natural language to Cypher conversion
+- `GET /api/query/health` - Query system health check
 
-## 🎯 NEXT PHASE: Environment Configuration
+## 🎯 NEXT PHASE: CLI Wrapper Implementation
 
 ### **OBJECTIVE**
-Set up environment configuration to handle different deployment contexts without hardcoded values.
+Create a command-line interface that wraps the existing API functionality, providing file analysis and natural language querying from the terminal.
 
 ### **Success Criteria**
-- **Flexible Configuration**: Server works on different machines without code edits
-- **Environment Variables**: All hardcoded values replaced with configurable settings
-- **Easy Deployment**: Simple setup process using .env file configuration
+- **File Analysis**: Users can analyze interview files via command line
+- **Natural Language Queries**: Users can perform queries from terminal
+- **Progress Monitoring**: Real-time feedback on analysis jobs
+- **Error Handling**: Clear, actionable error messages
+- **Multiple Formats**: Support for various output formats (JSON, table, human-readable)
 
-## 📋 IMPLEMENTATION TASKS: Environment Configuration
+## 📋 IMPLEMENTATION TASKS: CLI Wrapper
 
-### **Task 1: Identify Hardcoded Values** ⚡ PRIORITY 1
+### **Task 1: Create Main CLI Entry Point** ⚡ PRIORITY 1
 
-**Goal**: Find all hardcoded configuration values that need environment variables
+**Goal**: Build the main CLI application with argument parsing and command routing
 
-**Steps**:
-1. **Database Configuration**:
-   - Neo4j connection details in `qc_clean/plugins/api/query_endpoints.py`
-   - Username, password, URI currently hardcoded
+**Implementation Requirements**:
+1. **Create `qc_cli.py` in project root**:
+   - Use `argparse` for command parsing
+   - Support subcommands: `analyze`, `query`, `status`, `server`, `config`
+   - Global error handling with meaningful messages
+   - Logging configuration for CLI operations
 
-2. **Server Configuration**:
-   - Server host and port in `start_server.py`
-   - CORS origins currently hardcoded
+2. **Command Structure**:
+   ```bash
+   qc_cli.py analyze --files file1.txt file2.docx
+   qc_cli.py query "Find codes related to communication"
+   qc_cli.py status --job JOB_ID
+   qc_cli.py server --start
+   qc_cli.py config --show
+   ```
 
-3. **LLM Configuration**:
-   - API keys and model settings
-   - Provider configurations
-
-**Evidence Requirements**:
-- List of all hardcoded values found
-- Current configuration values documented
-- Files requiring modification identified
-
-### **Task 2: Create Environment Configuration System** ⚡ PRIORITY 2
-
-**Goal**: Implement .env file based configuration system
-
-**Steps**:
-1. **Create .env Template**:
-   - Create `.env.example` file with all required variables
-   - Document each variable's purpose and default values
-   - Include setup instructions
-
-2. **Implement Configuration Loading**:
-   - Create configuration module to load environment variables
-   - Add fallback to default values when .env not present
-   - Ensure backward compatibility
+3. **Error Handling Requirements**:
+   - Network errors → Clear message + server start suggestion
+   - File errors → Path validation and format guidance
+   - API errors → Parse and display meaningful responses
 
 **Evidence Requirements**:
-- Working .env.example file
-- Configuration loading module implemented
-- Default values preserved for existing functionality
+- Working `qc_cli.py --help` output showing all commands
+- Basic command routing functional (even with stub implementations)
+- Error handling demonstrates helpful user guidance
 
-### **Task 3: Update Code to Use Environment Variables** ⚡ PRIORITY 3
+### **Task 2: Implement API Client Module** ⚡ PRIORITY 2
 
-**Goal**: Replace hardcoded values with environment variable usage
+**Goal**: Create HTTP client for communicating with existing API server
 
-**Steps**:
-1. **Database Configuration**:
-   - Update Neo4j connection to use environment variables
-   - Replace hardcoded URI, username, password
+**Implementation Requirements**:
+1. **Create `qc_clean/core/cli/api_client.py`**:
+   - HTTP client using `requests` or `httpx`
+   - Base URL configuration (default: http://127.0.0.1:8002)
+   - Request/response handling with proper error parsing
+   - Retry logic for network issues
 
-2. **Server Configuration**:
-   - Update server startup to use configurable host/port
-   - Make CORS origins configurable
+2. **API Methods Required**:
+   ```python
+   class APIClient:
+       def health_check(self) -> bool
+       def start_analysis(self, files: List[str], config: dict) -> str  # returns job_id
+       def get_job_status(self, job_id: str) -> dict
+       def natural_language_query(self, query: str) -> dict
+   ```
 
-3. **Testing**:
-   - Test with .env file present
-   - Test with .env file missing (defaults)
-   - Verify same functionality with configuration flexibility
+3. **Error Handling**:
+   - Connection refused → "Server not running, use 'qc_cli.py server --start'"
+   - API errors → Parse JSON error responses and display clearly
+   - Timeouts → Graceful handling with user notification
 
 **Evidence Requirements**:
-- Code changes documented
-- Testing completed with both .env present and absent
-- Server starts successfully with environment configuration
+- API client can communicate with running server (port 8002)
+- All four core API methods functional with proper error handling
+- Connection error produces helpful guidance message
+
+### **Task 3: Implement Analysis Command** ⚡ PRIORITY 3
+
+**Goal**: Enable file analysis through command line interface
+
+**Implementation Requirements**:
+1. **Create `qc_clean/core/cli/commands/analyze.py`**:
+   - File validation and reading (support .txt, .docx formats initially)
+   - Submit files to `/analyze` endpoint
+   - Monitor job progress with polling
+   - Display results in human-readable format
+
+2. **Command Options**:
+   ```bash
+   qc_cli.py analyze --files interview1.txt interview2.docx
+   qc_cli.py analyze --directory /path/to/interviews/
+   qc_cli.py analyze --watch-job JOB_ID
+   qc_cli.py analyze --format json|table|human
+   ```
+
+3. **Progress Display**:
+   - Show "Analysis submitted, Job ID: job_xyz"
+   - Poll job status every 2 seconds until completion
+   - Display progress indicator or status updates
+   - Show final results with codes, themes, recommendations
+
+**Evidence Requirements**:
+- Can analyze actual files and get demo results
+- Progress monitoring works from submission to completion
+- Results display includes codes, themes, and recommendations
+- File validation prevents invalid submissions
+
+### **Task 4: Implement Query Command** ⚡ PRIORITY 4
+
+**Goal**: Enable natural language queries from command line
+
+**Implementation Requirements**:
+1. **Create `qc_clean/core/cli/commands/query.py`**:
+   - Single query mode: `qc_cli.py query "Find communication codes"`
+   - Interactive mode: `qc_cli.py query --interactive`
+   - Query history tracking
+   - Result formatting and display
+
+2. **Interactive Mode Features**:
+   - Prompt loop with readline support
+   - Command history navigation
+   - Exit commands (`exit`, `quit`, Ctrl+C)
+   - Help text and examples
+
+3. **Output Formatting**:
+   - Human-readable results by default
+   - JSON format option for programmatic use
+   - Table format for structured display
+
+**Evidence Requirements**:
+- Single queries return properly formatted results
+- Interactive mode provides usable query interface
+- Different output formats work correctly
+- Query history functionality operational
+
+### **Task 5: Implement Status and Server Commands** ⚡ PRIORITY 5
+
+**Goal**: Provide system status monitoring and server management
+
+**Implementation Requirements**:
+1. **Create `qc_clean/core/cli/commands/status.py`**:
+   - Overall system health check
+   - Specific job status monitoring
+   - Server connectivity verification
+
+2. **Create `qc_clean/core/cli/commands/server.py`**:
+   - Server start/stop functionality (subprocess management)
+   - Health monitoring and port checking
+   - Configuration display
+
+3. **Status Command Options**:
+   ```bash
+   qc_cli.py status                    # Overall system health
+   qc_cli.py status --job JOB_ID       # Specific job status
+   qc_cli.py status --server           # Server connectivity
+   ```
+
+**Evidence Requirements**:
+- Status commands provide accurate system information
+- Server management works for development server
+- Health checks validate API connectivity properly
 
 ## 🛡️ Quality Standards & Validation Framework
 
+### **Evidence Structure Requirements**
+```
+evidence/
+├── current/
+│   └── Evidence_CLI_Implementation.md     # Current CLI development evidence
+├── completed/  
+│   └── Evidence_WebUI_Integration.md      # Completed web UI phase (archived)
+```
+
 ### **Evidence Requirements (MANDATORY)**
-- **Configuration Discovery**: Complete list of hardcoded values found
-- **Implementation Validation**: Working .env system with fallback defaults
-- **Compatibility Testing**: Server works with both .env present and absent
-- **Deployment Testing**: Easy setup process validated on clean system
+- **Functional Validation**: All CLI commands work with real API server
+- **Error Handling**: Demonstrate graceful failure scenarios with helpful messages
+- **Integration Testing**: Full workflow from file input to results display
+- **Performance Validation**: Commands respond within 2 seconds for simple operations
 
 ### **Success Criteria Validation**
 ```python
-# Environment configuration must demonstrate:
-def validate_environment_configuration():
-    assert all_hardcoded_values_identified()           # Complete discovery
-    assert env_file_system_implemented()               # .env loading works
-    assert fallback_defaults_preserved()               # Backward compatibility
-    assert server_starts_with_env_config()             # End-to-end validation
-    return "Environment configuration validated"
+# CLI wrapper must demonstrate:
+def validate_cli_implementation():
+    assert cli_analyze_command_works()              # File analysis functional
+    assert natural_language_queries_work()         # Query interface operational
+    assert progress_monitoring_functional()        # Job status tracking works
+    assert error_messages_helpful()                # User guidance provided
+    assert multiple_output_formats_supported()     # JSON, table, human formats
+    return "CLI wrapper implementation validated"
 ```
 
 ### **Anti-Patterns to Avoid**
-❌ Missing hardcoded values that break deployment flexibility
-❌ Breaking existing functionality when adding environment variables
-❌ Complex configuration that makes setup harder rather than easier
-❌ Environment variables without sensible defaults
+❌ Mocking the API server instead of using real integration
+❌ Complex enterprise features not needed for research tool
+❌ Silent failures or cryptic error messages
+❌ Blocking operations without progress indicators
 
-## Configuration Files Structure
+## File Structure for Implementation
 
-### **Environment Configuration Organization**
+### **Required Files to Create**
 ```
-project_root/
-├── .env.example                    # Template with all variables documented
-├── .env                           # User's actual configuration (gitignored)
-├── qc_clean/
-│   └── core/
-│       └── config/
-│           └── env_config.py      # Environment loading module
-└── start_server.py               # Updated to use environment configuration
+qc_cli.py                              # Main entry point (create in project root)
+qc_clean/core/cli/
+├── api_client.py                      # HTTP client for API communication
+├── commands/
+│   ├── __init__.py                    # Command module initialization
+│   ├── analyze.py                     # File analysis commands
+│   ├── query.py                       # Natural language query commands
+│   ├── status.py                      # Status monitoring commands
+│   └── server.py                      # Server management commands
+├── formatters/
+│   ├── __init__.py                    # Formatter module initialization
+│   ├── human_formatter.py            # Human-readable output
+│   ├── json_formatter.py             # JSON output formatting
+│   └── table_formatter.py            # Table format output
+└── utils/
+    ├── __init__.py                    # Utilities module initialization
+    ├── file_handler.py               # File operations and validation
+    └── progress.py                   # Progress monitoring utilities
 ```
 
-**CRITICAL Configuration Requirements**:
-- .env.example with all variables documented and default values
-- Configuration loading module that handles missing .env gracefully
-- Server startup using environment variables with fallback defaults
-- No breaking changes to existing functionality when .env absent
+## Integration Points
+
+### **API Server Integration**
+- **Base URL**: http://127.0.0.1:8002 (configurable via environment)
+- **Authentication**: None required for current demo system
+- **Endpoints**: Use existing working endpoints documented above
+- **Job Polling**: 2-second intervals for analysis job monitoring
+
+### **File System Integration**
+- **Supported Formats**: .txt, .docx (extensible architecture for others)
+- **Directory Scanning**: Recursive file discovery with format filtering
+- **File Validation**: Size limits, format verification, permission checks
+
+### **Configuration Integration**
+- **Environment Variables**: Use existing .env configuration system
+- **CLI Settings**: API URL, output format preferences, polling intervals
+- **User Preferences**: Persistent settings for commonly used options
 
 ## Development Notes
 - **Current Server**: Running on port 8002 via `python start_server.py`
-- **API Endpoints**: `/health`, `/api/query/natural-language`, `/docs`, `/ui/`
-- **Current Configuration**: Hardcoded values in multiple files
-- **Target**: Environment variable based configuration system
-- **Backward Compatibility**: Must preserve existing functionality when .env file absent
+- **Demo Analysis**: Returns realistic qualitative coding results in 2 seconds
+- **API Testing**: Use `curl` commands for validation during development
+- **Error Scenarios**: Test with server down, invalid files, malformed queries
+- **Output Formats**: Design for both human users and programmatic consumption
 
-This environment configuration approach makes the system deployable across different contexts without code modifications.
+This CLI wrapper should provide a professional command-line interface to the existing qualitative coding analysis system, making it accessible for researchers who prefer terminal-based workflows.

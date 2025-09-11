@@ -1,0 +1,239 @@
+#!/usr/bin/env python3
+"""
+Qualitative Coding CLI - Command Line Interface
+Main entry point for command-line access to qualitative coding analysis system
+"""
+
+import argparse
+import sys
+import logging
+import os
+from pathlib import Path
+from typing import List, Optional
+
+# Configure console encoding for Windows compatibility
+if os.name == 'nt' and hasattr(sys.stdout, 'reconfigure'):
+    try:
+        sys.stdout.reconfigure(encoding='utf-8')
+        sys.stderr.reconfigure(encoding='utf-8')
+    except:
+        pass
+
+# Add project root to path for imports
+project_root = Path(__file__).parent
+sys.path.insert(0, str(project_root))
+
+def setup_logging(verbose: bool = False) -> None:
+    """Configure logging for CLI operations"""
+    log_level = logging.DEBUG if verbose else logging.INFO
+    logging.basicConfig(
+        level=log_level,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    )
+
+def create_parser() -> argparse.ArgumentParser:
+    """Create the main argument parser with all subcommands"""
+    parser = argparse.ArgumentParser(
+        prog='qc_cli',
+        description='Command-line interface for qualitative coding analysis system',
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  qc_cli analyze --files interview1.txt interview2.docx
+  qc_cli query "Find codes related to communication"
+  qc_cli query --interactive
+  qc_cli status
+  qc_cli server --start
+  qc_cli config --show
+        """
+    )
+    
+    # Global options
+    parser.add_argument(
+        '-v', '--verbose',
+        action='store_true',
+        help='Enable verbose logging'
+    )
+    
+    parser.add_argument(
+        '--api-url',
+        default='http://127.0.0.1:8002',
+        help='API server URL (default: http://127.0.0.1:8002)'
+    )
+    
+    # Create subparsers
+    subparsers = parser.add_subparsers(
+        dest='command',
+        help='Available commands',
+        metavar='COMMAND'
+    )
+    
+    # Analyze command
+    analyze_parser = subparsers.add_parser(
+        'analyze',
+        help='Analyze interview files',
+        description='Submit interview files for qualitative coding analysis'
+    )
+    file_group = analyze_parser.add_mutually_exclusive_group(required=True)
+    file_group.add_argument(
+        '--files', 
+        nargs='+',
+        help='List of files to analyze'
+    )
+    file_group.add_argument(
+        '--directory',
+        help='Directory containing interview files to analyze'
+    )
+    file_group.add_argument(
+        '--watch-job',
+        help='Monitor progress of existing analysis job by ID'
+    )
+    analyze_parser.add_argument(
+        '--format',
+        choices=['json', 'table', 'human'],
+        default='human',
+        help='Output format (default: human)'
+    )
+    
+    # Query command  
+    query_parser = subparsers.add_parser(
+        'query',
+        help='Execute natural language queries',
+        description='Query the analysis database using natural language'
+    )
+    query_group = query_parser.add_mutually_exclusive_group(required=True)
+    query_group.add_argument(
+        'query_text',
+        nargs='?',
+        help='Natural language query to execute'
+    )
+    query_group.add_argument(
+        '--interactive',
+        action='store_true',
+        help='Start interactive query mode'
+    )
+    query_parser.add_argument(
+        '--format',
+        choices=['json', 'table', 'human'],
+        default='human',
+        help='Output format (default: human)'
+    )
+    
+    # Status command
+    status_parser = subparsers.add_parser(
+        'status',
+        help='Show system status',
+        description='Check system health and job status'
+    )
+    status_parser.add_argument(
+        '--job',
+        help='Check status of specific job by ID'
+    )
+    status_parser.add_argument(
+        '--server',
+        action='store_true',
+        help='Check server connectivity only'
+    )
+    
+    # Server command
+    server_parser = subparsers.add_parser(
+        'server',
+        help='Manage server instance',
+        description='Start, stop, or check server status'
+    )
+    server_group = server_parser.add_mutually_exclusive_group(required=True)
+    server_group.add_argument(
+        '--start',
+        action='store_true',
+        help='Start the API server'
+    )
+    server_group.add_argument(
+        '--stop',
+        action='store_true',
+        help='Stop the API server'
+    )
+    server_group.add_argument(
+        '--status',
+        action='store_true',
+        help='Check server status'
+    )
+    
+    # Config command
+    config_parser = subparsers.add_parser(
+        'config',
+        help='Configuration management',
+        description='Show or modify configuration settings'
+    )
+    config_parser.add_argument(
+        '--show',
+        action='store_true',
+        help='Show current configuration'
+    )
+    
+    return parser
+
+def main() -> int:
+    """Main CLI entry point"""
+    parser = create_parser()
+    args = parser.parse_args()
+    
+    # Handle no command
+    if args.command is None:
+        parser.print_help()
+        return 1
+    
+    # Setup logging
+    setup_logging(args.verbose)
+    logger = logging.getLogger(__name__)
+    
+    try:
+        # Import commands here to avoid circular imports
+        from qc_clean.core.cli.commands.analyze import handle_analyze_command
+        from qc_clean.core.cli.commands.query import handle_query_command
+        from qc_clean.core.cli.commands.status import handle_status_command
+        from qc_clean.core.cli.commands.server import handle_server_command
+        
+        # Route to appropriate command handler
+        if args.command == 'analyze':
+            return handle_analyze_command(args)
+        elif args.command == 'query':
+            return handle_query_command(args)
+        elif args.command == 'status':
+            return handle_status_command(args)
+        elif args.command == 'server':
+            return handle_server_command(args)
+        elif args.command == 'config':
+            return handle_config_command(args)
+        else:
+            logger.error(f"Unknown command: {args.command}")
+            return 1
+            
+    except ImportError as e:
+        logger.error(f"Failed to import command handler: {e}")
+        logger.error("This indicates missing CLI command modules. Please check installation.")
+        return 1
+    except KeyboardInterrupt:
+        logger.info("Operation cancelled by user")
+        return 130  # Standard exit code for Ctrl+C
+    except Exception as e:
+        logger.error(f"Unexpected error: {e}")
+        if args.verbose:
+            import traceback
+            logger.error("Full traceback:")
+            logger.error(traceback.format_exc())
+        return 1
+
+def handle_config_command(args) -> int:
+    """Handle config command (simple implementation)"""
+    if args.show:
+        print("Current Configuration:")
+        print(f"  API URL: {args.api_url}")
+        print(f"  Log Level: {'DEBUG' if args.verbose else 'INFO'}")
+        return 0
+    else:
+        print("Config management not yet implemented")
+        return 1
+
+if __name__ == "__main__":
+    exit_code = main()
+    sys.exit(exit_code)
