@@ -1,0 +1,47 @@
+{
+  "timestamp": "2025-08-27T14:17:23.940818",
+  "configuration": {
+    "methodology": "grounded_theory",
+    "analysis_parameters": {
+      "theoretical_sensitivity": "medium",
+      "coding_depth": "focused",
+      "memo_generation_frequency": "final_only"
+    },
+    "output_configuration": {
+      "report_formats": [
+        "executive_summary"
+      ],
+      "include_audit_trail": false,
+      "include_supporting_quotes": false
+    },
+    "quality_settings": {
+      "minimum_code_frequency": 3,
+      "relationship_confidence_threshold": 0.8,
+      "validation_level": "minimal"
+    },
+    "llm_parameters": {
+      "temperature": 0.1,
+      "max_tokens": 2000,
+      "model_preference": "gemini/gemini-2.5-flash"
+    }
+  },
+  "validation_status": "PASS",
+  "phases_tested": {
+    "open_coding": {
+      "status": "WARNING",
+      "codes_generated": 0
+    },
+    "axial_coding": {
+      "status": "WARNING",
+      "relationships_generated": 0
+    },
+    "selective_coding": {
+      "status": "WARNING",
+      "core_category_generated": false
+    }
+  },
+  "filtering_validation": {
+    "code_frequency_filtering": "PASS",
+    "relationship_confidence_filtering": "PASS"
+  }
+}

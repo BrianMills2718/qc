@@ -1,0 +1,19 @@
+{
+  "timestamp": "2025-08-30T12:04:55.932530",
+  "report_file": "reports\\hierarchy_test_20250830_120455\\hierarchical_codes_report.md",
+  "json_file": "reports\\hierarchy_test_20250830_120455\\hierarchical_codes.json",
+  "checks": {
+    "Has parent codes": true,
+    "Has child codes": true,
+    "Shows levels": true,
+    "Has visual tree": true,
+    "Has statistics": true
+  },
+  "all_passed": true,
+  "hierarchy_stats": {
+    "total_codes": 14,
+    "parent_codes": 5,
+    "child_codes": 9,
+    "max_level": 1
+  }
+}
