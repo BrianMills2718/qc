@@ -1,4 +1,4 @@
-# Qualitative Coding Analysis System - CLI Wrapper Implementation Phase
+# Qualitative Coding Analysis System - WSL Migration and Web UI Completion
 
 ## 🚫 Development Philosophy (MANDATORY)
 
@@ -11,187 +11,200 @@
 
 ## 📁 Codebase Structure
 
-### Current Implementation Status: WEB UI INTEGRATION COMPLETE ✅
+### Current Implementation Status: CLI + API Complete, Web UI Issues on Windows ✅
 - **Server Foundation**: ✅ Complete - FastAPI with uvicorn HTTP binding on port 8002
-- **API Endpoints**: ✅ Complete - Natural language query processing and analysis endpoints
-- **UI Integration**: ✅ Complete - React frontend with static file serving and CORS
-- **Database Integration**: ✅ Complete - Real Neo4j data flowing through all endpoints
-- **Analysis Pipeline**: ✅ Complete - Demo mode analysis with realistic mock results
-- **Frontend-Backend**: ✅ Complete - Full request-response cycle functional
+- **API Endpoints**: ✅ Complete - Real LLM analysis (no demo mode), document processing
+- **CLI System**: ✅ Complete - Full CLI with analyze, query, status, server commands
+- **Document Processing**: ✅ Complete - .txt, .docx, .pdf, .rtf support with proper text extraction
+- **Web UI Foundation**: ✅ Complete - Direct API integration (no subprocess complexity)
+- **Windows Issues**: 🚨 **IDENTIFIED** - Unicode encoding, file paths, process permissions
 
 ### Key Entry Points
-- **API Server**: `qc_clean/plugins/api/api_server.py` - FastAPI application with working endpoints
-- **Server Startup**: `start_server.py` - Development server with dependency checking
-- **Query Processing**: `qc_clean/plugins/api/query_endpoints.py` - Neo4j integration complete
-- **Environment Config**: `qc_clean/core/config/env_config.py` - Configuration system with .env support
-- **Existing CLI Infrastructure**: `qc_clean/core/cli/cli_robust.py` - Robust CLI foundation available
+- **API Server**: `qc_clean/plugins/api/api_server.py` - Real qualitative coding analysis (fail-fast LLM calls)
+- **CLI Interface**: `qc_cli.py` - Comprehensive command-line interface
+- **Web UI**: `direct_ui.py` - Direct API integration (Flask app on port 5002)
+- **API Client**: `qc_clean/core/cli/api_client.py` - HTTP client with document format support
+- **LLM Handler**: `qc_clean/core/llm/llm_handler.py` - Real analysis using complete_raw() method
 
-### Working API Endpoints (Port 8002)
-- `GET /health` - Health check
-- `POST /analyze` - Start analysis (returns job_id, completes in 2 seconds with demo results)
-- `GET /jobs/{job_id}` - Get job status and results
-- `POST /api/query/natural-language` - Natural language to Cypher conversion
-- `GET /api/query/health` - Query system health check
+### Working Components
+- **API Server** (port 8002): Real LLM analysis, job tracking, document processing
+- **CLI Commands**: analyze, query, status, server with proper error handling
+- **Document Support**: Text extraction from .txt, .docx, .pdf, .rtf files
+- **Web Interface** (port 5002): Upload files → API analysis → display results
 
-## 🎯 NEXT PHASE: CLI Wrapper Implementation
+### Windows Compatibility Issues Identified
+1. **Unicode/Encoding**: Subprocess calls fail with emoji/Unicode CLI output
+2. **File Path Spaces**: Windows paths with spaces break command parsing
+3. **Process Permissions**: Windows process spawning restrictions cause failures
+
+## 🎯 NEXT PHASE: WSL Migration and Web UI Completion
 
 ### **OBJECTIVE**
-Create a command-line interface that wraps the existing API functionality, providing file analysis and natural language querying from the terminal.
+Migrate to WSL to resolve Windows compatibility issues and complete the web UI implementation using the CLI-to-Web subprocess pattern that should work seamlessly on Linux.
 
 ### **Success Criteria**
-- **File Analysis**: Users can analyze interview files via command line
-- **Natural Language Queries**: Users can perform queries from terminal
-- **Progress Monitoring**: Real-time feedback on analysis jobs
-- **Error Handling**: Clear, actionable error messages
-- **Multiple Formats**: Support for various output formats (JSON, table, human-readable)
+- **CLI-Web Integration**: Web UI successfully calls CLI commands via subprocess
+- **File Upload Pipeline**: Upload → Save → CLI Analysis → Results Display
+- **Cross-Format Support**: Handle .txt, .docx, .pdf, .rtf uploads seamlessly
+- **Error Handling**: Clear, actionable error messages for users
+- **Performance**: Analysis completes with real results, not demo data
 
-## 📋 IMPLEMENTATION TASKS: CLI Wrapper
+## 📋 IMPLEMENTATION TASKS: WSL Migration
 
-### **Task 1: Create Main CLI Entry Point** ⚡ PRIORITY 1
+### **Task 1: Environment Migration** ⚡ PRIORITY 1
 
-**Goal**: Build the main CLI application with argument parsing and command routing
+**Goal**: Set up complete development environment in WSL
 
 **Implementation Requirements**:
-1. **Create `qc_cli.py` in project root**:
-   - Use `argparse` for command parsing
-   - Support subcommands: `analyze`, `query`, `status`, `server`, `config`
-   - Global error handling with meaningful messages
-   - Logging configuration for CLI operations
+1. **WSL Setup and Project Migration**:
+   - Install Ubuntu WSL2
+   - Clone repository to WSL filesystem
+   - Install Python 3.11+ and required packages
+   - Set up .env file with API keys
 
-2. **Command Structure**:
+2. **Dependency Installation**:
    ```bash
-   qc_cli.py analyze --files file1.txt file2.docx
-   qc_cli.py query "Find codes related to communication"
-   qc_cli.py status --job JOB_ID
-   qc_cli.py server --start
-   qc_cli.py config --show
+   pip install fastapi uvicorn python-docx PyPDF2 striprtf requests flask
+   pip install litellm neo4j pydantic python-dotenv
    ```
 
-3. **Error Handling Requirements**:
-   - Network errors → Clear message + server start suggestion
-   - File errors → Path validation and format guidance
-   - API errors → Parse and display meaningful responses
+3. **Verification Steps**:
+   ```bash
+   python start_server.py  # API server on port 8002
+   python qc_cli.py --help  # CLI interface working
+   python direct_ui.py     # Web UI on port 5002
+   ```
 
 **Evidence Requirements**:
-- Working `qc_cli.py --help` output showing all commands
-- Basic command routing functional (even with stub implementations)
-- Error handling demonstrates helpful user guidance
+- All three components start without errors in WSL
+- API health check returns successful response
+- CLI commands execute and return proper help output
+- Document test files (.docx samples) upload successfully
 
-### **Task 2: Implement API Client Module** ⚡ PRIORITY 2
+### **Task 2: CLI-Web Integration** ⚡ PRIORITY 2
 
-**Goal**: Create HTTP client for communicating with existing API server
+**Goal**: Implement subprocess-based web UI that calls CLI commands
 
 **Implementation Requirements**:
-1. **Create `qc_clean/core/cli/api_client.py`**:
-   - HTTP client using `requests` or `httpx`
-   - Base URL configuration (default: http://127.0.0.1:8002)
-   - Request/response handling with proper error parsing
-   - Retry logic for network issues
+1. **Create `simple_cli_web.py`**:
+   - Flask app that saves uploaded files to WSL filesystem
+   - Execute CLI commands via subprocess with proper encoding
+   - Parse CLI output and display formatted results
+   - Handle file paths without Windows space issues
 
-2. **API Methods Required**:
+2. **Subprocess Integration**:
    ```python
-   class APIClient:
-       def health_check(self) -> bool
-       def start_analysis(self, files: List[str], config: dict) -> str  # returns job_id
-       def get_job_status(self, job_id: str) -> dict
-       def natural_language_query(self, query: str) -> dict
+   # This should work seamlessly in WSL/Linux:
+   result = subprocess.run([
+       "python", "qc_cli.py", "analyze", "--files", file_path, "--format", "json"
+   ], capture_output=True, text=True, encoding='utf-8')
    ```
 
-3. **Error Handling**:
-   - Connection refused → "Server not running, use 'qc_cli.py server --start'"
-   - API errors → Parse JSON error responses and display clearly
-   - Timeouts → Graceful handling with user notification
+3. **File Upload Workflow**:
+   ```
+   User uploads files → Save to /tmp/uploads/ → 
+   Execute: python qc_cli.py analyze --files /tmp/uploads/file.docx →
+   Parse JSON output → Display results in web interface
+   ```
 
 **Evidence Requirements**:
-- API client can communicate with running server (port 8002)
-- All four core API methods functional with proper error handling
-- Connection error produces helpful guidance message
+- File uploads save correctly to WSL filesystem
+- CLI commands execute without encoding errors
+- JSON output parses and displays properly in web interface
+- Error messages from CLI surface clearly in web UI
 
-### **Task 3: Implement Analysis Command** ⚡ PRIORITY 3
+### **Task 3: Real Analysis Integration** ⚡ PRIORITY 3
 
-**Goal**: Enable file analysis through command line interface
+**Goal**: Ensure real LLM analysis works through the CLI-web pipeline
 
 **Implementation Requirements**:
-1. **Create `qc_clean/core/cli/commands/analyze.py`**:
-   - File validation and reading (support .txt, .docx formats initially)
-   - Submit files to `/analyze` endpoint
-   - Monitor job progress with polling
-   - Display results in human-readable format
+1. **Environment Configuration**:
+   - Set up API keys in WSL .env file
+   - Verify LLM handler can connect to OpenAI/Anthropic APIs
+   - Test real analysis with sample documents
 
-2. **Command Options**:
+2. **Analysis Pipeline Testing**:
    ```bash
-   qc_cli.py analyze --files interview1.txt interview2.docx
-   qc_cli.py analyze --directory /path/to/interviews/
-   qc_cli.py analyze --watch-job JOB_ID
-   qc_cli.py analyze --format json|table|human
+   # Test CLI analysis works:
+   python qc_cli.py analyze --files test_interview.txt --format json
+   
+   # Should return real analysis with:
+   # - "demo_mode": false
+   # - Actual themes from document content
+   # - Processing time >5 seconds for real LLM calls
    ```
 
-3. **Progress Display**:
-   - Show "Analysis submitted, Job ID: job_xyz"
-   - Poll job status every 2 seconds until completion
-   - Display progress indicator or status updates
-   - Show final results with codes, themes, recommendations
+3. **Web Integration Validation**:
+   - Upload same test file via web UI
+   - Verify results match CLI output
+   - Confirm no "fallback_mode" or demo results
 
 **Evidence Requirements**:
-- Can analyze actual files and get demo results
-- Progress monitoring works from submission to completion
-- Results display includes codes, themes, and recommendations
-- File validation prevents invalid submissions
+- Real LLM analysis produces content-specific themes and codes
+- Processing time reflects actual LLM API calls (5-30 seconds)
+- Results show "demo_mode": false and include "model_used" field
+- CLI and web interfaces return identical analysis results
 
-### **Task 4: Implement Query Command** ⚡ PRIORITY 4
+### **Task 4: Document Format Support** ⚡ PRIORITY 4
 
-**Goal**: Enable natural language queries from command line
-
-**Implementation Requirements**:
-1. **Create `qc_clean/core/cli/commands/query.py`**:
-   - Single query mode: `qc_cli.py query "Find communication codes"`
-   - Interactive mode: `qc_cli.py query --interactive`
-   - Query history tracking
-   - Result formatting and display
-
-2. **Interactive Mode Features**:
-   - Prompt loop with readline support
-   - Command history navigation
-   - Exit commands (`exit`, `quit`, Ctrl+C)
-   - Help text and examples
-
-3. **Output Formatting**:
-   - Human-readable results by default
-   - JSON format option for programmatic use
-   - Table format for structured display
-
-**Evidence Requirements**:
-- Single queries return properly formatted results
-- Interactive mode provides usable query interface
-- Different output formats work correctly
-- Query history functionality operational
-
-### **Task 5: Implement Status and Server Commands** ⚡ PRIORITY 5
-
-**Goal**: Provide system status monitoring and server management
+**Goal**: Verify all document formats work through WSL CLI-web pipeline
 
 **Implementation Requirements**:
-1. **Create `qc_clean/core/cli/commands/status.py`**:
-   - Overall system health check
-   - Specific job status monitoring
-   - Server connectivity verification
+1. **Format Testing**:
+   - Test .docx upload and text extraction
+   - Test .pdf upload and text extraction  
+   - Test .rtf upload and text extraction
+   - Test .txt direct processing
 
-2. **Create `qc_clean/core/cli/commands/server.py`**:
-   - Server start/stop functionality (subprocess management)
-   - Health monitoring and port checking
-   - Configuration display
+2. **Error Handling**:
+   - Unsupported formats show clear error messages
+   - Corrupted files handled gracefully
+   - Large files processed or rejected appropriately
 
-3. **Status Command Options**:
+3. **Integration Validation**:
    ```bash
-   qc_cli.py status                    # Overall system health
-   qc_cli.py status --job JOB_ID       # Specific job status
-   qc_cli.py status --server           # Server connectivity
+   # Test each format via CLI:
+   python qc_cli.py analyze --files sample.docx --format json
+   python qc_cli.py analyze --files sample.pdf --format json
+   python qc_cli.py analyze --files sample.txt --format json
    ```
 
 **Evidence Requirements**:
-- Status commands provide accurate system information
-- Server management works for development server
-- Health checks validate API connectivity properly
+- Each format extracts text content successfully
+- Analysis results reflect actual document content
+- Error messages provide actionable guidance for users
+- Web interface handles all formats seamlessly
+
+### **Task 5: Performance and Error Handling** ⚡ PRIORITY 5
+
+**Goal**: Optimize performance and implement comprehensive error handling
+
+**Implementation Requirements**:
+1. **Performance Optimization**:
+   - Add progress indicators for long-running analysis
+   - Implement timeout handling for LLM API calls
+   - Cache results for identical file uploads
+
+2. **Error Scenarios**:
+   - Server not running → Clear guidance to start API server
+   - API key missing → Specific configuration instructions
+   - Network issues → Retry logic with user feedback
+   - File processing errors → Format-specific guidance
+
+3. **User Experience**:
+   ```python
+   # Web interface should show:
+   # - "Analysis starting..." 
+   # - Progress updates during processing
+   # - Clear success/error states
+   # - Actionable error messages
+   ```
+
+**Evidence Requirements**:
+- Long-running analysis shows progress to users
+- All error scenarios provide clear next steps
+- Performance meets expectations (real analysis in 10-60 seconds)
+- User experience flows smoothly from upload to results
 
 ## 🛡️ Quality Standards & Validation Framework
 
@@ -199,82 +212,55 @@ Create a command-line interface that wraps the existing API functionality, provi
 ```
 evidence/
 ├── current/
-│   └── Evidence_CLI_Implementation.md     # Current CLI development evidence
+│   └── Evidence_WSL_Migration.md         # Current WSL migration evidence
 ├── completed/  
-│   └── Evidence_WebUI_Integration.md      # Completed web UI phase (archived)
+│   └── Evidence_CLI_Implementation.md    # Completed CLI phase (archived)
 ```
 
 ### **Evidence Requirements (MANDATORY)**
-- **Functional Validation**: All CLI commands work with real API server
-- **Error Handling**: Demonstrate graceful failure scenarios with helpful messages
-- **Integration Testing**: Full workflow from file input to results display
-- **Performance Validation**: Commands respond within 2 seconds for simple operations
+- **Environment Migration**: All components working in WSL environment
+- **CLI-Web Integration**: Subprocess calls working without Windows issues
+- **Real Analysis**: LLM analysis producing content-specific results
+- **Document Processing**: All formats extracting text correctly
 
 ### **Success Criteria Validation**
 ```python
-# CLI wrapper must demonstrate:
-def validate_cli_implementation():
-    assert cli_analyze_command_works()              # File analysis functional
-    assert natural_language_queries_work()         # Query interface operational
-    assert progress_monitoring_functional()        # Job status tracking works
-    assert error_messages_helpful()                # User guidance provided
-    assert multiple_output_formats_supported()     # JSON, table, human formats
-    return "CLI wrapper implementation validated"
+# WSL migration must demonstrate:
+def validate_wsl_migration():
+    assert api_server_starts_in_wsl()           # Port 8002 accessible
+    assert cli_commands_work_in_wsl()           # All qc_cli.py commands functional
+    assert web_ui_calls_cli_successfully()     # Subprocess integration working
+    assert real_llm_analysis_produces_results() # No demo mode, real content analysis
+    assert document_formats_process_correctly() # .txt, .docx, .pdf, .rtf working
+    return "WSL migration and CLI-web integration validated"
 ```
 
 ### **Anti-Patterns to Avoid**
-❌ Mocking the API server instead of using real integration
-❌ Complex enterprise features not needed for research tool
-❌ Silent failures or cryptic error messages
-❌ Blocking operations without progress indicators
-
-## File Structure for Implementation
-
-### **Required Files to Create**
-```
-qc_cli.py                              # Main entry point (create in project root)
-qc_clean/core/cli/
-├── api_client.py                      # HTTP client for API communication
-├── commands/
-│   ├── __init__.py                    # Command module initialization
-│   ├── analyze.py                     # File analysis commands
-│   ├── query.py                       # Natural language query commands
-│   ├── status.py                      # Status monitoring commands
-│   └── server.py                      # Server management commands
-├── formatters/
-│   ├── __init__.py                    # Formatter module initialization
-│   ├── human_formatter.py            # Human-readable output
-│   ├── json_formatter.py             # JSON output formatting
-│   └── table_formatter.py            # Table format output
-└── utils/
-    ├── __init__.py                    # Utilities module initialization
-    ├── file_handler.py               # File operations and validation
-    └── progress.py                   # Progress monitoring utilities
-```
+❌ Continuing to develop on Windows with compatibility workarounds
+❌ Reverting to demo mode or fallback implementations
+❌ Complex subprocess alternatives instead of simple Linux/WSL solutions
+❌ Ignoring document format edge cases
 
 ## Integration Points
 
-### **API Server Integration**
-- **Base URL**: http://127.0.0.1:8002 (configurable via environment)
-- **Authentication**: None required for current demo system
-- **Endpoints**: Use existing working endpoints documented above
-- **Job Polling**: 2-second intervals for analysis job monitoring
+### **WSL Environment Setup**
+- **File System**: Use Linux paths (/home/user/project/), no Windows drive mapping
+- **Process Model**: Standard Linux subprocess.run() without encoding issues
+- **Text Encoding**: UTF-8 throughout the pipeline
+- **File Permissions**: Standard Unix permissions, no Windows restrictions
 
-### **File System Integration**
-- **Supported Formats**: .txt, .docx (extensible architecture for others)
-- **Directory Scanning**: Recursive file discovery with format filtering
-- **File Validation**: Size limits, format verification, permission checks
+### **CLI-Web Integration**
+- **Upload Directory**: `/tmp/uploads/` for temporary file storage
+- **Command Execution**: Direct Python subprocess calls to qc_cli.py
+- **Output Parsing**: JSON parsing of CLI command output
+- **Error Handling**: CLI stderr captured and displayed in web interface
 
-### **Configuration Integration**
-- **Environment Variables**: Use existing .env configuration system
-- **CLI Settings**: API URL, output format preferences, polling intervals
-- **User Preferences**: Persistent settings for commonly used options
+## Development Notes for New LLM Context
+- **Current Status**: CLI and API components are complete and functional
+- **Windows Issues**: Unicode subprocess encoding, file path spaces, process permissions
+- **WSL Solution**: Should resolve all Windows compatibility issues
+- **Architecture**: CLI-web subprocess pattern is architecturally sound, just needs Linux environment
+- **Real Analysis**: LLM integration is working, removed demo mode, using complete_raw() method
+- **Document Support**: Text extraction implemented for all major formats
 
-## Development Notes
-- **Current Server**: Running on port 8002 via `python start_server.py`
-- **Demo Analysis**: Returns realistic qualitative coding results in 2 seconds
-- **API Testing**: Use `curl` commands for validation during development
-- **Error Scenarios**: Test with server down, invalid files, malformed queries
-- **Output Formats**: Design for both human users and programmatic consumption
-
-This CLI wrapper should provide a professional command-line interface to the existing qualitative coding analysis system, making it accessible for researchers who prefer terminal-based workflows.
+The WSL migration should resolve the Windows-specific issues and allow the CLI-web integration pattern to work as originally intended.
