@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1><i class="bi bi-graph-up"></i> QC Analysis Dashboard</h1>
+        <p class="lead">Welcome to the Qualitative Coding Analysis System</p>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <i class="bi bi-file-earmark-text display-4 text-primary"></i>
+                <h5 class="card-title mt-2">Analyze Files</h5>
+                <p class="card-text">Upload interview files for qualitative coding analysis</p>
+                <a href="{{ url_for('analyze') }}" class="btn btn-primary">Start Analysis</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <i class="bi bi-search display-4 text-success"></i>
+                <h5 class="card-title mt-2">Query Data</h5>
+                <p class="card-text">Search and explore your analysis results</p>
+                <a href="{{ url_for('query') }}" class="btn btn-success">Run Query</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <i class="bi bi-gear display-4 text-info"></i>
+                <h5 class="card-title mt-2">System Status</h5>
+                <p class="card-text">Check system health and connectivity</p>
+                <a href="{{ url_for('status') }}" class="btn btn-info">View Status</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="bi bi-activity"></i> System Status</h5>
+            </div>
+            <div class="card-body">
+                {% if system_status.success %}
+                    <div class="status-success">
+                        <i class="bi bi-check-circle"></i> System is operational
+                    </div>
+                    <div class="cli-output mt-3">{{ system_status.stdout }}</div>
+                {% else %}
+                    <div class="status-error">
+                        <i class="bi bi-exclamation-triangle"></i> System issues detected
+                    </div>
+                    <div class="cli-output mt-3">{{ system_status.stderr or system_status.stdout }}</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="bi bi-info-circle"></i> Getting Started</h5>
+            </div>
+            <div class="card-body">
+                <ol>
+                    <li><strong>Upload Files:</strong> Go to <a href="{{ url_for('analyze') }}">Analyze Files</a> and upload your interview transcripts (.txt, .docx, .pdf files)</li>
+                    <li><strong>Run Analysis:</strong> The system will process your files and identify codes, themes, and provide recommendations</li>
+                    <li><strong>Query Results:</strong> Use <a href="{{ url_for('query') }}">Query Data</a> to search through your analysis with natural language</li>
+                    <li><strong>Monitor System:</strong> Check <a href="{{ url_for('status') }}">System Status</a> to ensure all components are working properly</li>
+                </ol>
+                
+                <h6 class="mt-4">Supported File Types:</h6>
+                <ul class="list-inline">
+                    <li class="list-inline-item"><span class="badge bg-secondary">.txt</span></li>
+                    <li class="list-inline-item"><span class="badge bg-secondary">.docx</span></li>
+                    <li class="list-inline-item"><span class="badge bg-secondary">.doc</span></li>
+                    <li class="list-inline-item"><span class="badge bg-secondary">.pdf</span></li>
+                    <li class="list-inline-item"><span class="badge bg-secondary">.rtf</span></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

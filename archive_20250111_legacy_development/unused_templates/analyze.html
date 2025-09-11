@@ -1,0 +1,207 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1><i class="bi bi-file-earmark-text"></i> File Analysis</h1>
+        <p class="lead">Upload interview files for qualitative coding analysis</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="bi bi-upload"></i> Upload Files</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data" id="analysisForm">
+                    <div class="mb-3">
+                        <label for="files" class="form-label">Select Files:</label>
+                        <div class="upload-area" id="uploadArea">
+                            <i class="bi bi-cloud-upload display-4 text-muted"></i>
+                            <p class="mt-2">Drag and drop files here or click to select</p>
+                            <input type="file" class="form-control" id="files" name="files" multiple accept=".txt,.docx,.doc,.pdf,.rtf" style="display: none;">
+                            <button type="button" class="btn btn-outline-primary" onclick="document.getElementById('files').click();">
+                                <i class="bi bi-folder2-open"></i> Choose Files
+                            </button>
+                        </div>
+                        <div class="form-text">
+                            Supported formats: .txt, .docx, .doc, .pdf, .rtf (Max 50MB per file)
+                        </div>
+                    </div>
+
+                    <div id="fileList" class="mb-3" style="display: none;">
+                        <label class="form-label">Selected Files:</label>
+                        <ul class="list-group" id="fileListItems"></ul>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="format" class="form-label">Output Format:</label>
+                        <select class="form-select" id="format" name="format">
+                            <option value="human">Human Readable</option>
+                            <option value="json">JSON</option>
+                            <option value="table">Table</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" id="submitBtn">
+                        <i class="bi bi-play-circle"></i> Start Analysis
+                    </button>
+                    <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left"></i> Back to Dashboard
+                    </a>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="bi bi-info-circle"></i> Analysis Information</h5>
+            </div>
+            <div class="card-body">
+                <h6>What happens during analysis:</h6>
+                <ul>
+                    <li><strong>Code Identification:</strong> Automatic detection of themes and patterns</li>
+                    <li><strong>Theme Extraction:</strong> Emergent themes from interview content</li>
+                    <li><strong>Recommendations:</strong> Analysis insights and suggestions</li>
+                    <li><strong>Summary Statistics:</strong> Overview of findings</li>
+                </ul>
+
+                <h6 class="mt-3">File Requirements:</h6>
+                <ul>
+                    <li>Text-based interview transcripts</li>
+                    <li>Clear structure with participant responses</li>
+                    <li>File size under 50MB each</li>
+                    <li>Readable text content</li>
+                </ul>
+
+                <div class="alert alert-info mt-3">
+                    <i class="bi bi-clock"></i> <strong>Processing Time:</strong><br>
+                    Analysis typically completes in 2-10 seconds depending on file size.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// File upload handling
+const fileInput = document.getElementById('files');
+const uploadArea = document.getElementById('uploadArea');
+const fileList = document.getElementById('fileList');
+const fileListItems = document.getElementById('fileListItems');
+const submitBtn = document.getElementById('submitBtn');
+
+// Handle file selection
+fileInput.addEventListener('change', handleFileSelect);
+
+function handleFileSelect(event) {
+    const files = Array.from(event.target.files);
+    updateFileList(files);
+}
+
+function updateFileList(files) {
+    fileListItems.innerHTML = '';
+    
+    if (files.length === 0) {
+        fileList.style.display = 'none';
+        submitBtn.disabled = true;
+        return;
+    }
+
+    fileList.style.display = 'block';
+    submitBtn.disabled = false;
+
+    files.forEach((file, index) => {
+        const listItem = document.createElement('li');
+        listItem.className = 'list-group-item d-flex justify-content-between align-items-center';
+        
+        const fileSize = (file.size / 1024 / 1024).toFixed(2);
+        const sizeClass = file.size > 50 * 1024 * 1024 ? 'text-danger' : 'text-muted';
+        
+        listItem.innerHTML = `
+            <div>
+                <i class="bi bi-file-earmark-text"></i> ${file.name}
+                <small class="${sizeClass}"> (${fileSize} MB)</small>
+            </div>
+            <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeFile(${index})">
+                <i class="bi bi-x"></i>
+            </button>
+        `;
+        
+        fileListItems.appendChild(listItem);
+    });
+}
+
+function removeFile(index) {
+    const dt = new DataTransfer();
+    const files = Array.from(fileInput.files);
+    
+    files.forEach((file, i) => {
+        if (i !== index) {
+            dt.items.add(file);
+        }
+    });
+    
+    fileInput.files = dt.files;
+    updateFileList(Array.from(dt.files));
+}
+
+// Drag and drop handling
+uploadArea.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    uploadArea.classList.add('drag-over');
+});
+
+uploadArea.addEventListener('dragleave', () => {
+    uploadArea.classList.remove('drag-over');
+});
+
+uploadArea.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadArea.classList.remove('drag-over');
+    
+    const dt = new DataTransfer();
+    Array.from(e.dataTransfer.files).forEach(file => {
+        dt.items.add(file);
+    });
+    
+    fileInput.files = dt.files;
+    updateFileList(Array.from(dt.files));
+});
+
+// Form submission handling
+document.getElementById('analysisForm').addEventListener('submit', function(e) {
+    const files = fileInput.files;
+    if (files.length === 0) {
+        e.preventDefault();
+        alert('Please select at least one file to analyze.');
+        return;
+    }
+    
+    // Show loading state
+    submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Analyzing...';
+    submitBtn.disabled = true;
+    
+    // Check file sizes
+    let oversizedFiles = [];
+    for (let file of files) {
+        if (file.size > 50 * 1024 * 1024) {
+            oversizedFiles.push(file.name);
+        }
+    }
+    
+    if (oversizedFiles.length > 0) {
+        e.preventDefault();
+        alert('The following files are too large (>50MB):\n' + oversizedFiles.join('\n'));
+        submitBtn.innerHTML = '<i class="bi bi-play-circle"></i> Start Analysis';
+        submitBtn.disabled = false;
+    }
+});
+</script>
+{% endblock %}

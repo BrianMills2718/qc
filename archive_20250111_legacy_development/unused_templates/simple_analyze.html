@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Upload Files - Simple QC UI</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-4">
+        <h1>Upload Files for Analysis</h1>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-body">
+                        <form method="POST" enctype="multipart/form-data">
+                            <div class="mb-3">
+                                <label for="files" class="form-label">Select Files:</label>
+                                <input type="file" class="form-control" name="files" multiple 
+                                       accept=".txt,.docx,.doc,.pdf,.rtf" required>
+                                <div class="form-text">Supported: .txt, .docx, .doc, .pdf, .rtf</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="format" class="form-label">Output Format:</label>
+                                <select class="form-select" name="format">
+                                    <option value="human">Human Readable</option>
+                                    <option value="json">JSON</option>
+                                    <option value="table">Table</option>
+                                </select>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary">Upload & Get Command</button>
+                            <a href="/" class="btn btn-outline-secondary">Back</a>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5>What This Does</h5>
+                        <ul>
+                            <li>Uploads your files safely</li>
+                            <li>Shows you the CLI command to run</li>
+                            <li>You copy and run it in terminal</li>
+                            <li>Get results directly - no web complications!</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
