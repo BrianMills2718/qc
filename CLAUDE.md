@@ -429,11 +429,12 @@ python -m qc_clean.main  # or uvicorn command
 - ✅ Query processing performance <3 seconds
 
 ### **Failure Indicators (STOP IMPLEMENTATION IF)**
-- API endpoint returns 500 errors consistently
-- AI query generation stops working (regression)
-- Cytoscape graph fails to render or update
-- Query processing takes >10 seconds
-- UI becomes unresponsive during query processing
+- Server fails to bind to port 8000 (address already in use, permission denied)
+- Browser shows CORS policy errors that can't be resolved
+- HTTP requests consistently timeout or return network errors
+- Server crashes or becomes unresponsive during query processing
+- Memory usage grows unbounded during server operation
+- Component regression: Previously working AI system or endpoints stop functioning
 
 ## Development Notes
 

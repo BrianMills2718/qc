@@ -57,17 +57,49 @@ class QCAPIServer:
                 allow_headers=["*"],
             )
             
+            # Add static file serving
+            from fastapi.staticfiles import StaticFiles
+            import os
+            ui_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))), "UI_planning", "mockups")
+            if os.path.exists(ui_path):
+                self._app.mount("/ui", StaticFiles(directory=ui_path), name="ui")
+                self._logger.info(f"Static files mounted at /ui from {ui_path}")
+            else:
+                self._logger.warning(f"UI path not found: {ui_path}")
+            
             # Register default endpoints
             self._register_default_endpoints()
             
             # Start server
             self._logger.info(f"Starting FastAPI server on {host}:{port}")
             
-            # Note: In a real implementation, we would use uvicorn.run()
-            # For plugin testing, we'll mark as running
-            self.is_running = True
-            
-            return True
+            try:
+                # Create uvicorn server configuration
+                config = uvicorn.Config(
+                    app=self._app,
+                    host=host,
+                    port=port,
+                    log_level="info",
+                    access_log=True
+                )
+                server = uvicorn.Server(config)
+                
+                # Store server reference for shutdown
+                self._server = server
+                self.is_running = True
+                
+                # Start server (this will block until server stops)
+                self._logger.info("HTTP server starting...")
+                await server.serve()
+                
+                return True
+                
+            except ImportError:
+                self._logger.error("uvicorn not available. Install with: pip install uvicorn")
+                return False
+            except Exception as e:
+                self._logger.error(f"Failed to start HTTP server: {e}")
+                return False
             
         except Exception as e:
             self._logger.error(f"Failed to start server: {e}")
@@ -95,7 +127,9 @@ class QCAPIServer:
             
             if self._server:
                 # Stop the actual server if running
-                pass
+                self._server.should_exit = True
+                if hasattr(self._server, 'force_exit'):
+                    self._server.force_exit = True
             
             self.is_running = False
             self._logger.info("API server stopped")
