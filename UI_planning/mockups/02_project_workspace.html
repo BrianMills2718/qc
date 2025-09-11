@@ -569,8 +569,8 @@
             statusEl.style.color = '#ff9800';
             
             try {
-                // Call backend API (to be implemented)
-                const response = await fetch('/api/query/natural-language', {
+                // Call backend API pointing to port 8003 fresh server
+                const response = await fetch('http://127.0.0.1:8003/api/query/natural-language', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({query: queryInput})

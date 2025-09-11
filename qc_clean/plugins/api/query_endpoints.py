@@ -8,6 +8,9 @@ import logging
 from typing import List, Dict, Any, Optional
 from pydantic import BaseModel, Field
 
+# Import Neo4j manager for real database execution
+from ...core.data.neo4j_manager import EnhancedNeo4jManager
+
 logger = logging.getLogger(__name__)
 
 
@@ -30,6 +33,13 @@ class QueryEndpoints:
     
     def __init__(self):
         self.logger = logging.getLogger(f"{__name__}.QueryEndpoints")
+        # Initialize Neo4j manager with environment configuration
+        from ...core.config import config
+        self.neo4j_manager = EnhancedNeo4jManager(
+            uri=config.neo4j_uri,
+            username=config.neo4j_username, 
+            password=config.neo4j_password
+        )
     
     def register_endpoints(self, app):
         """Register query endpoints with FastAPI app"""
@@ -46,7 +56,8 @@ class QueryEndpoints:
                 
                 # Initialize AI query generation system (proven working)
                 assessment = AIQueryGenerationAssessment()
-                llm = LLMHandler(model_name='gpt-4o-mini')
+                from ...core.config import config
+                llm = LLMHandler(model_name=config.llm_model_name)
                 
                 # Generate Cypher query using working system
                 cypher_query = await assessment.generate_cypher_query(
@@ -62,15 +73,29 @@ class QueryEndpoints:
                 
                 self.logger.info(f"Generated Cypher: {cypher_query}")
                 
-                # For now, return mock data since we don't have Neo4j connection in this phase
-                # In a real implementation, this would execute against Neo4j
-                mock_results = self._generate_mock_results(request.query, cypher_query)
-                
-                return QueryResponse(
-                    success=True,
-                    cypher=cypher_query,
-                    data=mock_results
-                )
+                # Execute Cypher query against real Neo4j database
+                try:
+                    neo4j_results = await self.neo4j_manager.execute_cypher(cypher_query)
+                    
+                    # Transform Neo4j results to API response format
+                    formatted_results = self._format_neo4j_results(neo4j_results)
+                    
+                    return QueryResponse(
+                        success=True,
+                        cypher=cypher_query,
+                        data=formatted_results
+                    )
+                except Exception as db_error:
+                    self.logger.error(f"Neo4j execution error: {db_error}")
+                    # Fallback to mock data if database fails
+                    mock_results = self._generate_mock_results(request.query, cypher_query)
+                    
+                    return QueryResponse(
+                        success=True,
+                        cypher=cypher_query,
+                        data=mock_results,
+                        error=f"Database unavailable, using mock data: {str(db_error)}"
+                    )
                 
             except Exception as e:
                 self.logger.error(f"Query processing error: {e}")
@@ -99,7 +124,8 @@ class QueryEndpoints:
             try:
                 # Test basic AI system availability
                 from qc_clean.core.llm.llm_handler import LLMHandler
-                llm = LLMHandler(model_name='gpt-4o-mini')
+                from ...core.config import config
+                llm = LLMHandler(model_name=config.llm_model_name)
                 
                 return {
                     "status": "healthy",
@@ -112,6 +138,49 @@ class QueryEndpoints:
                     "ai_system": "unavailable",
                     "error": str(e)
                 }
+    
+    def _format_neo4j_results(self, neo4j_results: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """Transform Neo4j query results to API response format"""
+        formatted_results = []
+        
+        for record in neo4j_results:
+            # Create standardized result format
+            result_item = {
+                "id": None,
+                "name": None,
+                "label": None,
+                "properties": {}
+            }
+            
+            # Extract node information from Neo4j record
+            for key, value in record.items():
+                if hasattr(value, 'labels') and hasattr(value, 'id'):
+                    # Neo4j node object
+                    result_item["id"] = str(value.id)
+                    result_item["name"] = value.get('name', str(value.id))
+                    result_item["label"] = value.get('name', list(value.labels)[0] if value.labels else 'Unknown')
+                    result_item["properties"] = dict(value)
+                elif isinstance(value, dict):
+                    # Dictionary properties
+                    result_item["properties"].update(value)
+                else:
+                    # Simple value
+                    if key in ['name', 'label']:
+                        result_item[key] = str(value)
+                    else:
+                        result_item["properties"][key] = value
+            
+            # Ensure required fields have values
+            if not result_item["id"]:
+                result_item["id"] = f"result_{len(formatted_results) + 1}"
+            if not result_item["name"]:
+                result_item["name"] = result_item["label"] or "Unknown"
+            if not result_item["label"]:
+                result_item["label"] = result_item["name"] or "Unknown"
+                
+            formatted_results.append(result_item)
+        
+        return formatted_results
     
     def _generate_mock_results(self, natural_query: str, cypher_query: str) -> List[Dict[str, Any]]:
         """Generate mock results for testing UI integration"""

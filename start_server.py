@@ -15,6 +15,7 @@ project_root = Path(__file__).parent
 sys.path.insert(0, str(project_root))
 
 from qc_clean.plugins.api.api_server import QCAPIServer
+from qc_clean.core.config import config
 
 # Configure logging
 logging.basicConfig(
@@ -29,44 +30,36 @@ async def start_development_server():
     logger.info("Starting Qualitative Coding Server for UI Integration")
     logger.info("=" * 60)
     
-    config = {
-        'enable_docs': True,
-        'cors_origins': [
-            "http://localhost:8002",
-            "http://127.0.0.1:8002",
-            "http://localhost:8001",
-            "http://127.0.0.1:8001",
-            "http://localhost:8000", 
-            "http://127.0.0.1:8000",
-            "file://",  # Allow file:// protocol for direct HTML opening
-            "null"      # Allow null origin for local file testing
-        ],
-        'background_processing_enabled': False  # Not needed for query testing
+    server_config = {
+        'enable_docs': config.enable_docs,
+        'cors_origins': config.cors_origins,
+        'background_processing_enabled': config.background_processing_enabled
     }
     
-    server = QCAPIServer(config)
+    server = QCAPIServer(server_config)
     
     logger.info("Server configuration:")
-    logger.info(f"  CORS Origins: {config['cors_origins']}")
-    logger.info(f"  API Docs: {'Enabled' if config['enable_docs'] else 'Disabled'}")
-    logger.info(f"  Background Processing: {'Enabled' if config['background_processing_enabled'] else 'Disabled'}")
+    logger.info(f"  CORS Origins: {server_config['cors_origins']}")
+    logger.info(f"  API Docs: {'Enabled' if server_config['enable_docs'] else 'Disabled'}")
+    logger.info(f"  Background Processing: {'Enabled' if server_config['background_processing_enabled'] else 'Disabled'}")
     
     # Start server with HTTP binding
-    logger.info("Attempting to start HTTP server on 127.0.0.1:8002...")
+    logger.info(f"Attempting to start HTTP server on {config.server_host}:{config.server_port}...")
     
     try:
-        success = await server.start_server(host="127.0.0.1", port=8002)
+        success = await server.start_server(host=config.server_host, port=config.server_port)
         
         if success:
+            base_url = f"http://{config.server_host}:{config.server_port}"
             logger.info("✅ Server started successfully!")
             logger.info("📡 Server endpoints:")
-            logger.info("  Health Check: http://127.0.0.1:8002/health")
-            logger.info("  Query Endpoint: http://127.0.0.1:8002/api/query/natural-language")
-            logger.info("  API Documentation: http://127.0.0.1:8002/docs")
+            logger.info(f"  Health Check: {base_url}/health")
+            logger.info(f"  Query Endpoint: {base_url}/api/query/natural-language")
+            logger.info(f"  API Documentation: {base_url}/docs")
             logger.info("")
             logger.info("🌐 UI Access:")
             logger.info("  Direct File: Open UI_planning/mockups/02_project_workspace.html")
-            logger.info("  Server Served: http://127.0.0.1:8002/ui/02_project_workspace.html (if static files enabled)")
+            logger.info(f"  Server Served: {base_url}/ui/02_project_workspace.html (if static files enabled)")
             logger.info("")
             logger.info("Press Ctrl+C to stop the server")
             
