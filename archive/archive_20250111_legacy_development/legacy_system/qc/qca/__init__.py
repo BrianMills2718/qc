@@ -1,1 +1,0 @@
-# QCA (Qualitative Comparative Analysis) Package
