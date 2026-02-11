@@ -68,10 +68,17 @@ class AnalysisRecommendation(BaseModel):
     supporting_themes: List[str] = Field(..., description="Themes supporting this recommendation")
 
 
+class ConfidenceEntry(BaseModel):
+    """Confidence assessment for a theme"""
+    level: str = Field(..., description="Confidence level: high, medium, low")
+    score: float = Field(..., ge=0.0, le=1.0, description="Numeric confidence score")
+    evidence: str = Field("", description="Supporting evidence for this confidence level")
+
+
 class AnalysisSynthesis(BaseModel):
     """Final synthesis and recommendations from Phase 4"""
     executive_summary: str = Field(..., description="Comprehensive summary")
     key_findings: List[str] = Field(..., description="Major findings with evidence")
     cross_cutting_patterns: List[str] = Field(..., description="Patterns across themes")
     actionable_recommendations: List[AnalysisRecommendation] = Field(..., description="Specific recommendations")
-    confidence_assessment: Dict[str, float] = Field(..., description="Confidence levels by theme")
+    confidence_assessment: Dict[str, Any] = Field(..., description="Confidence levels by theme, each with level/score/evidence")

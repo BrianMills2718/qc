@@ -87,7 +87,7 @@ def handle_analyze_command(args) -> int:
             progress.start()
         
         try:
-            result = api_client.wait_for_job_completion(job_id, max_wait_time=300)
+            result = api_client.wait_for_job_completion(job_id, max_wait_time=600)
             if not quiet_mode:
                 progress.stop()
             
@@ -209,7 +209,7 @@ def handle_watch_job(api_client: APIClient, job_id: str, output_format: str, arg
                 progress.start()
             
             try:
-                result = api_client.wait_for_job_completion(job_id, max_wait_time=300)
+                result = api_client.wait_for_job_completion(job_id, max_wait_time=600)
                 if not quiet_mode:
                     progress.stop()
                 
