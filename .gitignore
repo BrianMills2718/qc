@@ -24,6 +24,9 @@ data/databases/
 *.sqlite
 *.sqlite3
 
+# Virtual environment
+qc_env/
+
 # Cache and temporary files
 __pycache__/
 *.pyc
