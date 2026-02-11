@@ -228,76 +228,86 @@ class QCAPIServer:
             # Update job status
             self.active_jobs[job_id]["status"] = "processing"
             self.active_jobs[job_id]["started_at"] = datetime.now().isoformat()
-            
+
             self._logger.info(f"Starting qualitative coding analysis for job {job_id} with {len(interviews)} interviews")
-            
-            # REAL ANALYSIS: Use LLM-based qualitative coding analysis
-            self._logger.info("Running real qualitative coding analysis")
-            
+
             import time
             import asyncio
             start_time = time.time()
-            
+
             # Initialize LLM handler for analysis
             from qc_clean.core.llm.llm_handler import LLMHandler
             llm_handler = LLMHandler(model_name="gpt-5-mini")
-            
-            # Combine all interview content
+
+            # Combine all interview content and detect issues
             combined_text = ""
+            data_warnings = []
             for interview in interviews:
+                content = interview.get('content', '')
                 combined_text += f"--- Interview: {interview.get('name', 'Unknown')} ---\n"
-                combined_text += interview.get('content', '') + "\n\n"
-            
+                combined_text += content + "\n\n"
+                # Detect truncated interviews
+                stripped = content.rstrip()
+                if stripped and not stripped[-1] in '.!?"\')':
+                    data_warnings.append(f"Interview '{interview.get('name', 'Unknown')}' appears truncated (ends mid-sentence)")
+
+            num_interviews = len(interviews)
+            is_single_speaker = num_interviews == 1
+
             # COMPREHENSIVE MULTI-PHASE QUALITATIVE CODING ANALYSIS
             self._logger.info("Phase 1: Open Code Discovery - analyzing hierarchical themes")
-            
+
             # Phase 1: Open Code Discovery
-            phase1_prompt = f"""You are analyzing {len(interviews)} interviews to discover thematic codes.
+            phase1_prompt = f"""You are a qualitative researcher analyzing {num_interviews} interview(s) to discover thematic codes.
 
 ANALYTIC QUESTION: What are the key themes, patterns, and insights in these interviews?
 
-INSTRUCTIONS:
-1. Read through ALL interviews comprehensively
-2. Identify major themes and sub-themes
+CRITICAL INSTRUCTIONS:
+1. Read through ALL interview content comprehensively
+2. Distinguish between INTERVIEWER QUESTIONS and INTERVIEWEE RESPONSES — only code the interviewee's statements, not the interviewer's framing questions
 3. Create a hierarchical code structure with up to 3 levels
-4. Each code MUST have these fields:
-   - id: Unique ID in CAPS_WITH_UNDERSCORES format (e.g., "AI_CHALLENGES", "DATA_QUALITY_ISSUES")
-   - name: Clear name (human-readable version, e.g., "AI Challenges", "Data Quality Issues")
-   - description: Detailed description (2-3 sentences explaining the code)
+4. Target 10-15 total codes (5-7 top-level themes with selective sub-codes). Merge overlapping themes rather than creating near-duplicates
+5. Each code MUST have these fields:
+   - id: Unique ID in CAPS_WITH_UNDERSCORES format
+   - name: Clear human-readable name
+   - description: 2-3 sentences explaining the code
    - semantic_definition: Clear definition of what qualifies for this code
    - parent_id: ID of parent code (null for top-level codes)
-   - level: Hierarchy level (0 for top-level, 1 for second level, etc.)
-   - example_quotes: List of 1-3 quotes that best illustrate this code
-   - discovery_confidence: Float between 0.0 and 1.0
+   - level: Hierarchy level (0=top, 1=sub, 2=detailed)
+   - example_quotes: 1-3 VERBATIM quotes from the INTERVIEWEE (not the interviewer)
+   - mention_count: Count how many distinct times this theme is mentioned or referenced across the interview(s). Be precise — count actual mentions, not estimates
+   - discovery_confidence: Float 0.0-1.0 using the FULL range:
+     * 0.0-0.3: Weakly supported (mentioned once, tangentially)
+     * 0.3-0.6: Moderately supported (mentioned a few times, some detail)
+     * 0.6-0.8: Strongly supported (discussed substantively, with examples)
+     * 0.8-1.0: Very strongly supported (major theme with extensive discussion)
 
-5. Hierarchy structure:
-   - Level 0: Main themes (no parent_id)
-   - Level 1: Sub-themes (parent_id points to level 0 code)
-   - Level 2: Detailed codes (parent_id points to level 1 code)
-
-6. Codes should be:
-   - Mutually distinct (minimize overlap between codes)
-   - Grounded in actual interview content (not theoretical)
-   - Comprehensive and exhaustive
+6. Hierarchy: Level 0 = main themes, Level 1 = sub-themes, Level 2 = detailed codes
+7. Codes must be mutually distinct — if two codes would share >50% of their supporting quotes, merge them
 
 INTERVIEW CONTENT:
 {combined_text}
 
-Generate a complete hierarchical taxonomy of codes in JSON format."""
+Generate a complete hierarchical taxonomy of codes."""
 
             phase1_response = await llm_handler.extract_structured(phase1_prompt, CodeHierarchy)
             phase1_text = str(phase1_response.model_dump_json(indent=2))
-            
+
             self._logger.info("Phase 2: Speaker/Participant Analysis - identifying perspectives")
-            
-            # Phase 2: Speaker Analysis
-            phase2_prompt = f"""Based on the interviews, identify and analyze different participant perspectives and voices.
+
+            # Phase 2: Speaker Analysis — adapted for single vs multi speaker
+            if is_single_speaker:
+                phase2_prompt = f"""Analyze the single interview participant's perspective in depth.
+
+CRITICAL: This is a SINGLE-SPEAKER interview. Do NOT fabricate consensus or disagreement between multiple people.
 
 INSTRUCTIONS:
-1. Identify distinct speakers/participants and their characteristics
-2. Analyze how different perspectives relate to the themes discovered
-3. Map participant views to the hierarchical codes
-4. Identify consensus and divergent viewpoints
+1. Identify the speaker by name and role from the interview content
+2. Analyze their perspective in relation to the discovered codes
+3. For "codes_emphasized": list ONLY the top 5-7 code IDs this speaker discusses MOST, not every code
+4. For "consensus_themes": list the speaker's strongest, most consistent positions (things they state firmly and repeatedly)
+5. For "divergent_viewpoints": identify any INTERNAL tensions, ambivalences, or contradictions within the speaker's OWN views (e.g., "sees AI as useful but worries about IP"). If there are none, return an empty list — do NOT fabricate tensions
+6. For "perspective_mapping": map the speaker's name to their top 5-7 most emphasized code IDs
 
 PHASE 1 CODES (for reference):
 {phase1_text}
@@ -305,21 +315,40 @@ PHASE 1 CODES (for reference):
 INTERVIEW CONTENT:
 {combined_text}
 
-Provide detailed speaker analysis including demographics, perspectives, and thematic alignments."""
+Provide detailed single-speaker analysis."""
+            else:
+                phase2_prompt = f"""Analyze the different participant perspectives across {num_interviews} interviews.
+
+INSTRUCTIONS:
+1. Identify each distinct speaker by name and role
+2. Analyze how different perspectives relate to the discovered codes
+3. For "codes_emphasized": list ONLY the top 5-7 code IDs each speaker discusses MOST
+4. For "consensus_themes": identify genuine areas where multiple speakers AGREE
+5. For "divergent_viewpoints": identify genuine areas where speakers DISAGREE or hold different positions
+6. For "perspective_mapping": map each speaker's name to their top 5-7 most emphasized code IDs
+
+PHASE 1 CODES (for reference):
+{phase1_text}
+
+INTERVIEW CONTENT:
+{combined_text}
+
+Provide detailed multi-speaker analysis."""
 
             phase2_response = await llm_handler.extract_structured(phase2_prompt, SpeakerAnalysis)
             phase2_text = str(phase2_response.model_dump_json(indent=2))
-            
+
             self._logger.info("Phase 3: Entity and Concept Analysis - mapping relationships")
-            
-            # Phase 3: Entity Analysis  
+
+            # Phase 3: Entity Analysis
             phase3_prompt = f"""Identify key entities, concepts, and their relationships in the interview data.
 
 INSTRUCTIONS:
-1. Extract important entities (organizations, concepts, processes, etc.)
-2. Map relationships between entities and themes
-3. Identify cause-effect relationships and dependencies
-4. Create conceptual connections across interviews
+1. Extract important entities (organizations, tools, concepts, methods, people)
+2. Map meaningful relationships — only include relationships that have clear evidence in the text
+3. Identify cause-effect chains grounded in what the interviewee(s) actually said
+4. Limit to 10-15 most important relationships, not an exhaustive list
+5. Relationship types should be specific verbs (e.g., "leads", "uses", "constrains") not vague labels
 
 PREVIOUS ANALYSIS:
 Phase 1 Codes: {phase1_text}
@@ -328,49 +357,49 @@ Phase 2 Speakers: {phase2_text}
 INTERVIEW CONTENT:
 {combined_text}
 
-Provide comprehensive entity relationship mapping and conceptual analysis."""
+Provide focused entity relationship mapping."""
 
             phase3_response = await llm_handler.extract_structured(phase3_prompt, EntityMapping)
             phase3_text = str(phase3_response.model_dump_json(indent=2))
-            
-            self._logger.info("Phase 4: Synthesis and Recommendations - final qualitative analysis")
-            
-            # Phase 4: Final Synthesis
-            phase4_prompt = f"""Synthesize all analysis phases into comprehensive qualitative coding results.
 
-INSTRUCTIONS:
-1. Integrate findings from all phases
-2. Identify overarching patterns and themes
-3. Provide actionable recommendations
-4. Create frequency estimates for major themes
-5. Highlight key insights and implications
+            self._logger.info("Phase 4: Synthesis and Recommendations - final qualitative analysis")
+
+            # Phase 4: Final Synthesis
+            phase4_prompt = f"""Synthesize all analysis phases into a final qualitative coding report.
+
+CRITICAL RULES:
+- Do NOT invent statistics, percentages, or numeric estimates that are not directly stated in the interviews
+- Do NOT use language like "~70% prevalence" or "estimated frequency: 80%" — these are fabricated
+- Instead, use qualitative descriptors: "frequently discussed", "mentioned once", "a major theme", "briefly touched on"
+- The executive_summary should be 2-4 sentences, not a full paragraph
+- Key findings should cite specific evidence from interviews
+- Recommendations should be specific to the interview content, not generic consulting advice
 
 COMPREHENSIVE ANALYSIS FROM PREVIOUS PHASES:
 Phase 1 - Hierarchical Codes: {phase1_text}
-Phase 2 - Speaker Analysis: {phase2_text}  
+Phase 2 - Speaker Analysis: {phase2_text}
 Phase 3 - Entity Relationships: {phase3_text}
 
 ORIGINAL INTERVIEW CONTENT:
 {combined_text}
 
-Provide final comprehensive qualitative coding analysis with:
-- Executive summary
-- Key findings with evidence
-- Thematic hierarchy with frequencies
+Provide final qualitative coding analysis with:
+- Executive summary (2-4 sentences)
+- Key findings with VERBATIM evidence (no fabricated statistics)
 - Cross-cutting patterns
-- Specific actionable recommendations
-- Methodological notes on confidence levels"""
+- Specific, actionable recommendations grounded in interview content
+- Honest confidence assessments using the full 0.0-1.0 range"""
 
             phase4_response = await llm_handler.extract_structured(phase4_prompt, AnalysisSynthesis)
             analysis_text = str(phase4_response.model_dump_json(indent=2))
-            
+
             # Combine all phases for complete analysis
             full_analysis = f"""=== COMPREHENSIVE QUALITATIVE CODING ANALYSIS ===
 
 PHASE 1: HIERARCHICAL CODE DISCOVERY
 {phase1_text}
 
-PHASE 2: PARTICIPANT PERSPECTIVE ANALYSIS  
+PHASE 2: {"SINGLE-SPEAKER" if is_single_speaker else "MULTI-SPEAKER"} PERSPECTIVE ANALYSIS
 {phase2_text}
 
 PHASE 3: ENTITY AND RELATIONSHIP MAPPING
@@ -380,16 +409,19 @@ PHASE 4: SYNTHESIS AND FINAL ANALYSIS
 {analysis_text}
 
 === END OF ANALYSIS ==="""
-            
-            # Create structured results directly from schema objects
+
+            # Create structured results from schema objects
+            # Use actual code count, not model's self-reported total_codes
+            actual_code_count = len(phase1_response.codes)
+
             codes_identified = [
                 {
                     "code": code.name,
-                    "frequency": len(code.example_quotes) * 2,  # Estimate based on quotes
+                    "mention_count": code.mention_count,
                     "confidence": code.discovery_confidence
                 } for code in phase1_response.codes
             ]
-            
+
             speakers_identified = [
                 {
                     "name": participant.name,
@@ -397,7 +429,7 @@ PHASE 4: SYNTHESIS AND FINAL ANALYSIS
                     "perspective": participant.perspective_summary
                 } for participant in phase2_response.participants
             ]
-            
+
             key_relationships = [
                 {
                     "entities": f"{rel.entity_1} -> {rel.entity_2}",
@@ -405,7 +437,7 @@ PHASE 4: SYNTHESIS AND FINAL ANALYSIS
                     "strength": rel.strength
                 } for rel in phase3_response.relationships
             ]
-            
+
             recommendations = [
                 {
                     "title": rec.title,
@@ -413,15 +445,17 @@ PHASE 4: SYNTHESIS AND FINAL ANALYSIS
                     "priority": rec.priority
                 } for rec in phase4_response.actionable_recommendations
             ]
-            
+
             key_themes = phase4_response.key_findings
-            
+
             processing_time = time.time() - start_time
-            
+
             # Create structured analysis results
             structured_results = {
-                "analysis_summary": f"Analyzed {len(interviews)} interviews using structured qualitative coding",
-                "total_interviews": len(interviews),
+                "analysis_summary": f"Analyzed {num_interviews} interview(s) using structured qualitative coding",
+                "total_interviews": num_interviews,
+                "total_codes": actual_code_count,
+                "single_speaker_mode": is_single_speaker,
                 "codes_identified": codes_identified,
                 "speakers_identified": speakers_identified,
                 "key_relationships": key_relationships,
@@ -429,17 +463,19 @@ PHASE 4: SYNTHESIS AND FINAL ANALYSIS
                 "recommendations": recommendations,
                 "full_analysis": full_analysis,
                 "processing_time_seconds": round(processing_time, 2),
-                "demo_mode": False,
-                "model_used": llm_handler.model_name
+                "model_used": llm_handler.model_name,
             }
-            
+
+            if data_warnings:
+                structured_results["data_warnings"] = data_warnings
+
             # Update job with success
             self.active_jobs[job_id]["status"] = "completed"
             self.active_jobs[job_id]["results"] = structured_results
             self.active_jobs[job_id]["completed_at"] = datetime.now().isoformat()
-            
+
             self._logger.info(f"Comprehensive 4-phase qualitative coding analysis completed successfully for job {job_id}")
-            
+
         except Exception as e:
             # Update job with error
             self.active_jobs[job_id]["status"] = "failed"

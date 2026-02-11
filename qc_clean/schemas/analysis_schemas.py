@@ -16,7 +16,8 @@ class ThematicCode(BaseModel):
     parent_id: Optional[str] = Field(None, description="ID of parent code, null for top-level")
     level: int = Field(..., description="Hierarchy level (0=top, 1=sub, 2=detailed)")
     example_quotes: List[str] = Field(..., description="1-3 illustrative quotes")
-    discovery_confidence: float = Field(..., ge=0.0, le=1.0, description="Confidence score")
+    mention_count: int = Field(..., description="Approximate number of times this theme is mentioned or referenced in the interviews")
+    discovery_confidence: float = Field(..., ge=0.0, le=1.0, description="Confidence score from 0.0 to 1.0 using the FULL range: 0.0-0.3 weak, 0.3-0.6 moderate, 0.6-0.8 strong, 0.8-1.0 very strong")
 
 
 class CodeHierarchy(BaseModel):
@@ -32,15 +33,15 @@ class ParticipantProfile(BaseModel):
     role: str = Field(..., description="Professional role or position")
     characteristics: List[str] = Field(..., description="Key characteristics noted")
     perspective_summary: str = Field(..., description="Summary of their viewpoint")
-    codes_emphasized: List[str] = Field(..., description="Codes this participant emphasized")
+    codes_emphasized: List[str] = Field(..., description="Top 5-7 code IDs this participant emphasized MOST (not all codes, only the strongest)")
 
 
 class SpeakerAnalysis(BaseModel):
     """Speaker and participant analysis from Phase 2"""
     participants: List[ParticipantProfile] = Field(..., description="Identified participants")
-    consensus_themes: List[str] = Field(..., description="Areas of agreement")
-    divergent_viewpoints: List[str] = Field(..., description="Areas of disagreement")
-    perspective_mapping: Dict[str, List[str]] = Field(..., description="Participant to codes mapping")
+    consensus_themes: List[str] = Field(..., description="For multiple speakers: areas of agreement. For single speaker: the speaker's strongest/most consistent positions")
+    divergent_viewpoints: List[str] = Field(..., description="For multiple speakers: areas of disagreement. For single speaker: internal tensions, ambivalences, or contradictions in the speaker's views")
+    perspective_mapping: Dict[str, List[str]] = Field(..., description="Participant name to their top 5-7 most emphasized code IDs")
 
 
 class EntityRelationship(BaseModel):
