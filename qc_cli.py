@@ -178,7 +178,55 @@ Examples:
         action='store_true',
         help='Show current configuration'
     )
-    
+
+    # Project command
+    project_parser = subparsers.add_parser(
+        'project',
+        help='Project management',
+        description='Create, list, and manage analysis projects'
+    )
+    project_subparsers = project_parser.add_subparsers(
+        dest='project_action',
+        help='Project actions',
+        metavar='ACTION'
+    )
+
+    proj_create = project_subparsers.add_parser('create', help='Create a new project')
+    proj_create.add_argument('--name', required=True, help='Project name')
+    proj_create.add_argument(
+        '--methodology',
+        choices=['default', 'thematic_analysis', 'grounded_theory'],
+        default='default',
+        help='Analysis methodology (default: default)'
+    )
+
+    proj_list = project_subparsers.add_parser('list', help='List all projects')
+
+    proj_show = project_subparsers.add_parser('show', help='Show project details')
+    proj_show.add_argument('project_id', help='Project ID')
+
+    proj_add = project_subparsers.add_parser('add-docs', help='Add documents to project')
+    proj_add.add_argument('project_id', help='Project ID')
+    proj_add.add_argument('--files', nargs='+', help='Files to add')
+    proj_add.add_argument('--directory', help='Directory of files to add')
+
+    # Review command
+    review_parser = subparsers.add_parser(
+        'review',
+        help='Review analysis results',
+        description='Review and approve/reject codes and code applications'
+    )
+    review_parser.add_argument('project_id', help='Project ID')
+    review_parser.add_argument(
+        '--approve-all',
+        action='store_true',
+        help='Approve all pending codes'
+    )
+    review_parser.add_argument(
+        '--file',
+        help='JSON file with review decisions'
+    )
+
     return parser
 
 def main() -> int:
@@ -213,6 +261,12 @@ def main() -> int:
             return handle_server_command(args)
         elif args.command == 'config':
             return handle_config_command(args)
+        elif args.command == 'project':
+            from qc_clean.core.cli.commands.project import handle_project_command
+            return handle_project_command(args)
+        elif args.command == 'review':
+            from qc_clean.core.cli.commands.review import handle_review_command
+            return handle_review_command(args)
         else:
             logger.error(f"Unknown command: {args.command}")
             return 1
