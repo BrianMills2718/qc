@@ -65,11 +65,6 @@ temp*
 test_*/
 debug_*
 investigation_*
-*_test.py
-simple_integration_test.py
-test_core_functionality.py
-test_extractors_info.py
-cli_integration_test.py
 
 # Temporary files from our work
 ENHANCED_SPEAKER_DETECTION_IMPLEMENTATION_COMPLETE.md
@@ -77,7 +72,6 @@ temp12txt
 
 # Legacy code (superseded by qc_clean/)
 src/
-tests/
 
 # Submodules and external repos
 gemini-cli/
