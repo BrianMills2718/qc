@@ -94,6 +94,15 @@ Examples:
         default='human',
         help='Output format (default: human)'
     )
+    analyze_parser.add_argument(
+        '--quiet',
+        action='store_true',
+        help='Suppress progress indicators (useful for JSON output)'
+    )
+    analyze_parser.add_argument(
+        '--output-file',
+        help='Save results to specific file'
+    )
     
     # Query command  
     query_parser = subparsers.add_parser(

@@ -11,6 +11,11 @@ from typing import Dict, Any, List, Optional
 from datetime import datetime
 import json
 
+# Import schemas for structured output
+from qc_clean.schemas.analysis_schemas import (
+    CodeHierarchy, SpeakerAnalysis, EntityMapping, AnalysisSynthesis
+)
+
 logger = logging.getLogger(__name__)
 
 
@@ -280,7 +285,7 @@ class QCAPIServer:
             
             # Initialize LLM handler for analysis
             from qc_clean.core.llm.llm_handler import LLMHandler
-            llm_handler = LLMHandler(model_name="gpt-4o-mini", temperature=0.1)
+            llm_handler = LLMHandler(model_name="gpt-5-mini", temperature=1.0)
             
             # Combine all interview content
             combined_text = ""
@@ -325,8 +330,8 @@ INTERVIEW CONTENT:
 
 Generate a complete hierarchical taxonomy of codes in JSON format."""
 
-            phase1_response = await llm_handler.complete_raw(phase1_prompt)
-            phase1_text = phase1_response.get('content', '') if isinstance(phase1_response, dict) else str(phase1_response)
+            phase1_response = await llm_handler.extract_structured(phase1_prompt, CodeHierarchy)
+            phase1_text = str(phase1_response.model_dump_json(indent=2))
             
             self._logger.info("Phase 2: Speaker/Participant Analysis - identifying perspectives")
             
@@ -347,8 +352,8 @@ INTERVIEW CONTENT:
 
 Provide detailed speaker analysis including demographics, perspectives, and thematic alignments."""
 
-            phase2_response = await llm_handler.complete_raw(phase2_prompt)
-            phase2_text = phase2_response.get('content', '') if isinstance(phase2_response, dict) else str(phase2_response)
+            phase2_response = await llm_handler.extract_structured(phase2_prompt, SpeakerAnalysis)
+            phase2_text = str(phase2_response.model_dump_json(indent=2))
             
             self._logger.info("Phase 3: Entity and Concept Analysis - mapping relationships")
             
@@ -370,8 +375,8 @@ INTERVIEW CONTENT:
 
 Provide comprehensive entity relationship mapping and conceptual analysis."""
 
-            phase3_response = await llm_handler.complete_raw(phase3_prompt)
-            phase3_text = phase3_response.get('content', '') if isinstance(phase3_response, dict) else str(phase3_response)
+            phase3_response = await llm_handler.extract_structured(phase3_prompt, EntityMapping)
+            phase3_text = str(phase3_response.model_dump_json(indent=2))
             
             self._logger.info("Phase 4: Synthesis and Recommendations - final qualitative analysis")
             
@@ -401,8 +406,8 @@ Provide final comprehensive qualitative coding analysis with:
 - Specific actionable recommendations
 - Methodological notes on confidence levels"""
 
-            phase4_response = await llm_handler.complete_raw(phase4_prompt)
-            analysis_text = phase4_response.get('content', '') if isinstance(phase4_response, dict) else str(phase4_response)
+            phase4_response = await llm_handler.extract_structured(phase4_prompt, AnalysisSynthesis)
+            analysis_text = str(phase4_response.model_dump_json(indent=2))
             
             # Combine all phases for complete analysis
             full_analysis = f"""=== COMPREHENSIVE QUALITATIVE CODING ANALYSIS ===
@@ -421,87 +426,61 @@ PHASE 4: SYNTHESIS AND FINAL ANALYSIS
 
 === END OF ANALYSIS ==="""
             
-            # Parse the analysis into structured results (simple keyword extraction)
-            codes_identified = []
-            key_themes = []
-            recommendations = []
+            # Create structured results directly from schema objects
+            codes_identified = [
+                {
+                    "code": code.name,
+                    "frequency": len(code.example_quotes) * 2,  # Estimate based on quotes
+                    "confidence": code.discovery_confidence
+                } for code in phase1_response.codes
+            ]
             
-            # Extract themes and patterns from comprehensive analysis
-            lines = full_analysis.split('\n')
-            current_section = None
+            speakers_identified = [
+                {
+                    "name": participant.name,
+                    "role": participant.role,
+                    "perspective": participant.perspective_summary
+                } for participant in phase2_response.participants
+            ]
             
-            for line in lines:
-                line = line.strip()
-                if not line:
-                    continue
-                
-                # Detect sections
-                if 'code' in line.lower() or 'theme' in line.lower():
-                    current_section = 'codes'
-                elif 'recommendation' in line.lower():
-                    current_section = 'recommendations'
-                elif line.startswith('-') or line.startswith('*') or line.startswith('•'):
-                    if current_section == 'codes':
-                        key_themes.append(line.lstrip('-*• '))
-                    elif current_section == 'recommendations':
-                        recommendations.append(line.lstrip('-*• '))
+            key_relationships = [
+                {
+                    "entities": f"{rel.entity_1} -> {rel.entity_2}",
+                    "type": rel.relationship_type,
+                    "strength": rel.strength
+                } for rel in phase3_response.relationships
+            ]
             
-            # If parsing didn't work well, extract from full text
-            if not key_themes and not recommendations:
-                # Simple fallback - split into sentences and extract meaningful ones
-                sentences = analysis_text.split('.')
-                for sentence in sentences:
-                    sentence = sentence.strip()
-                    if len(sentence) > 20 and any(word in sentence.lower() for word in ['theme', 'pattern', 'finding']):
-                        key_themes.append(sentence)
-                    elif len(sentence) > 20 and any(word in sentence.lower() for word in ['recommend', 'suggest', 'should']):
-                        recommendations.append(sentence)
+            recommendations = [
+                {
+                    "title": rec.title,
+                    "description": rec.description,
+                    "priority": rec.priority
+                } for rec in phase4_response.actionable_recommendations
+            ]
             
-            # Extract actual codes from the comprehensive analysis
-            if not codes_identified and 'codes' in full_analysis:
-                # Try to parse JSON codes from Phase 1 analysis
-                import re
-                json_match = re.search(r'"codes":\s*\[(.*?)\]', full_analysis, re.DOTALL)
-                if json_match:
-                    try:
-                        import json
-                        codes_text = '{"codes":[' + json_match.group(1) + ']}'
-                        codes_data = json.loads(codes_text)
-                        for code_item in codes_data.get('codes', [])[:10]:  # Limit to top 10
-                            codes_identified.append({
-                                "code": code_item.get('name', code_item.get('id', 'Unknown')),
-                                "frequency": len(code_item.get('example_quotes', [])) * 3,  # Estimate based on quotes
-                                "confidence": code_item.get('discovery_confidence', 0.8)
-                            })
-                    except:
-                        pass
-            
-            # Fallback if parsing failed
-            if not codes_identified:
-                codes_identified = [
-                    {"code": "RESEARCH_METHODS", "frequency": 8, "confidence": 0.9},
-                    {"code": "AI_IN_RESEARCH", "frequency": 7, "confidence": 0.85},
-                    {"code": "DATA_COLLECTION_CHALLENGES", "frequency": 5, "confidence": 0.8}
-                ]
+            key_themes = phase4_response.key_findings
             
             processing_time = time.time() - start_time
             
-            # Create real analysis results
-            mock_results = {
-                "analysis_summary": f"Analyzed {len(interviews)} interview files using LLM-based qualitative coding",
+            # Create structured analysis results
+            structured_results = {
+                "analysis_summary": f"Analyzed {len(interviews)} interviews using structured qualitative coding",
                 "total_interviews": len(interviews),
                 "codes_identified": codes_identified,
-                "key_themes": key_themes[:6] if key_themes else ["Analysis completed - see full analysis below"],
-                "recommendations": recommendations[:5] if recommendations else ["See detailed analysis for insights"],
+                "speakers_identified": speakers_identified,
+                "key_relationships": key_relationships,
+                "key_themes": key_themes,
+                "recommendations": recommendations,
                 "full_analysis": full_analysis,
                 "processing_time_seconds": round(processing_time, 2),
                 "demo_mode": False,
-                "model_used": "gpt-4o-mini"
+                "model_used": llm_handler.model_name
             }
             
             # Update job with success
             self.active_jobs[job_id]["status"] = "completed"
-            self.active_jobs[job_id]["results"] = mock_results
+            self.active_jobs[job_id]["results"] = structured_results
             self.active_jobs[job_id]["completed_at"] = datetime.now().isoformat()
             
             self._logger.info(f"Comprehensive 4-phase qualitative coding analysis completed successfully for job {job_id}")

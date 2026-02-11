@@ -43,8 +43,8 @@ class LLMHandler:
     """
     
     def __init__(self, 
-                 model_name: str = "gpt-4o-mini", 
-                 temperature: float = 0.1,
+                 model_name: str = "gpt-5-mini", 
+                 temperature: float = 1.0,
                  config = None,  # Can be UnifiedConfig or GroundedTheoryConfig
                  max_retries: int = 4,
                  base_delay: float = 1.0):

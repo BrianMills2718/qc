@@ -20,12 +20,22 @@ logger = logging.getLogger(__name__)
 def handle_analyze_command(args) -> int:
     """Handle the analyze command"""
     
+    # Determine if we should suppress progress output for clean JSON
+    quiet_mode = args.format == 'json' or hasattr(args, 'quiet') and args.quiet
+    
+    def output(msg, force_stderr=False):
+        """Output message to stdout unless in quiet mode, or force to stderr"""
+        if quiet_mode or force_stderr:
+            print(msg, file=sys.stderr)
+        else:
+            print(msg)
+    
     try:
         # Initialize API client
         api_client = APIClient(base_url=args.api_url)
         
         if args.watch_job:
-            return handle_watch_job(api_client, args.watch_job, args.format)
+            return handle_watch_job(api_client, args.watch_job, args.format, args)
         
         # Discover files to analyze
         if args.files:
@@ -33,7 +43,7 @@ def handle_analyze_command(args) -> int:
         elif args.directory:
             files_to_analyze = discover_files(args.directory)
             if not files_to_analyze:
-                print(f"No supported files found in directory: {args.directory}")
+                output(f"No supported files found in directory: {args.directory}", True)
                 return 1
         else:
             logger.error("No files or directory specified")
@@ -42,65 +52,81 @@ def handle_analyze_command(args) -> int:
         # Validate files
         try:
             validated_files = validate_file_formats(files_to_analyze)
-            print(f"Found {len(validated_files)} files to analyze:")
+            output(f"Found {len(validated_files)} files to analyze:")
             for file_path in validated_files:
-                print(f"  - {file_path}")
-            print()
+                output(f"  - {file_path}")
+            output("")
         except Exception as e:
-            print(f"File validation error: {e}")
+            output(f"File validation error: {e}", True)
             return 1
         
         # Check server connectivity
         if not api_client.health_check():
-            print("❌ Cannot connect to API server.")
-            print("Please start the server with: python start_server.py")
+            output("❌ Cannot connect to API server.", True)
+            output("Please start the server with: python start_server.py", True)
             return 1
         
-        print("✅ Connected to API server")
+        output("✅ Connected to API server")
         
         # Submit analysis
-        print("📤 Submitting files for analysis...")
+        output("📤 Submitting files for analysis...")
         try:
             job_id = api_client.start_analysis(validated_files)
-            print(f"✅ Analysis submitted successfully")
-            print(f"🆔 Job ID: {job_id}")
-            print()
+            output(f"✅ Analysis submitted successfully")
+            output(f"🆔 Job ID: {job_id}")
+            output("")
             
         except APIClientError as e:
-            print(f"❌ Analysis submission failed: {e}")
+            output(f"❌ Analysis submission failed: {e}", True)
             return 1
         
         # Monitor progress
-        print("⏳ Monitoring analysis progress...")
+        output("⏳ Monitoring analysis progress...")
         progress = ProgressIndicator("Analyzing")
-        progress.start()
+        if not quiet_mode:
+            progress.start()
         
         try:
             result = api_client.wait_for_job_completion(job_id, max_wait_time=300)
-            progress.stop()
+            if not quiet_mode:
+                progress.stop()
             
-            print("✅ Analysis completed!")
-            print()
+            output("✅ Analysis completed!")
+            output("")
             
             # Format and display results
             if args.format == 'json':
-                output = format_json_output(result)
+                # For JSON format, output ONLY the JSON to stdout
+                formatted_output = format_json_output(result)
             elif args.format == 'table':
-                output = format_table_output(result)
+                formatted_output = format_table_output(result)
             else:  # human format
-                output = format_analysis_results(result)
+                formatted_output = format_analysis_results(result)
             
-            print(output)
+            # Handle output file or stdout
+            if hasattr(args, 'output_file') and args.output_file:
+                try:
+                    with open(args.output_file, 'w', encoding='utf-8') as f:
+                        f.write(formatted_output)
+                    output(f"✅ Results saved to: {args.output_file}")
+                except Exception as e:
+                    output(f"❌ Failed to save to file: {e}", True)
+                    return 1
+            else:
+                print(formatted_output)  # Always to stdout
+            
             return 0
             
         except APIClientError as e:
-            progress.stop()
-            print(f"\n❌ Analysis failed: {e}")
+            if not quiet_mode:
+                progress.stop()
+            output(f"\n❌ Analysis failed: {e}", True)
             return 1
         except KeyboardInterrupt:
-            progress.stop()
-            print(f"\n⚠️  Analysis interrupted. Job ID: {job_id}")
-            print("You can resume monitoring with: qc_cli analyze --watch-job", job_id)
+            if not quiet_mode:
+                progress.stop()
+            output(f"\n⚠️  Analysis interrupted. Job ID: {job_id}", True)
+            output("You can resume monitoring with: qc_cli analyze --watch-job " + job_id, True)
             return 130
             
     except Exception as e:
@@ -112,80 +138,119 @@ def handle_analyze_command(args) -> int:
         return 1
 
 
-def handle_watch_job(api_client: APIClient, job_id: str, output_format: str) -> int:
+def handle_watch_job(api_client: APIClient, job_id: str, output_format: str, args=None) -> int:
     """Handle watching an existing job"""
     
-    print(f"🔍 Checking job status: {job_id}")
+    # Determine if we should suppress progress output for clean JSON
+    quiet_mode = output_format == 'json' or (args and hasattr(args, 'quiet') and args.quiet)
+    
+    def output(msg, force_stderr=False):
+        """Output message to stdout unless in quiet mode, or force to stderr"""
+        if quiet_mode or force_stderr:
+            print(msg, file=sys.stderr)
+        else:
+            print(msg)
+    
+    output(f"🔍 Checking job status: {job_id}")
     
     # Check server connectivity
     if not api_client.health_check():
-        print("❌ Cannot connect to API server.")
-        print("Please start the server with: python start_server.py")
+        output("❌ Cannot connect to API server.", True)
+        output("Please start the server with: python start_server.py", True)
         return 1
     
-    print("✅ Connected to API server")
+    output("✅ Connected to API server")
     
     try:
         # Get current status
         status_data = api_client.get_job_status(job_id)
         current_status = status_data.get('status', 'unknown')
         
-        print(f"📊 Current status: {current_status}")
+        output(f"📊 Current status: {current_status}")
         
         if current_status in ['completed', 'success']:
-            print("✅ Job already completed!")
+            output("✅ Job already completed!")
             
             # Format and display results
             if output_format == 'json':
-                output = format_json_output(status_data)
+                # For JSON format, output ONLY the JSON to stdout
+                formatted_output = format_json_output(status_data)
             elif output_format == 'table':
-                output = format_table_output(status_data)
+                formatted_output = format_table_output(status_data)
             else:  # human format
-                output = format_analysis_results(status_data)
+                formatted_output = format_analysis_results(status_data)
             
-            print()
-            print(output)
+            # Handle output file or stdout
+            if args and hasattr(args, 'output_file') and args.output_file:
+                try:
+                    with open(args.output_file, 'w', encoding='utf-8') as f:
+                        f.write(formatted_output)
+                    output(f"✅ Results saved to: {args.output_file}")
+                except Exception as e:
+                    output(f"❌ Failed to save to file: {e}", True)
+                    return 1
+            else:
+                if output_format != 'json':
+                    output("")  # Add spacing for non-JSON formats
+                print(formatted_output)
+            
             return 0
             
         elif current_status in ['failed', 'error']:
             error_msg = status_data.get('error', 'Job failed without error message')
-            print(f"❌ Job failed: {error_msg}")
+            output(f"❌ Job failed: {error_msg}", True)
             return 1
             
         else:
             # Job still running, monitor progress
-            print("⏳ Job still running, monitoring progress...")
+            output("⏳ Job still running, monitoring progress...")
             progress = ProgressIndicator("Processing")
-            progress.start()
+            if not quiet_mode:
+                progress.start()
             
             try:
                 result = api_client.wait_for_job_completion(job_id, max_wait_time=300)
-                progress.stop()
+                if not quiet_mode:
+                    progress.stop()
                 
-                print("✅ Job completed!")
-                print()
+                output("✅ Job completed!")
+                output("")
                 
                 # Format and display results
                 if output_format == 'json':
-                    output = format_json_output(result)
+                    # For JSON format, output ONLY the JSON to stdout
+                    formatted_output = format_json_output(result)
                 elif output_format == 'table':
-                    output = format_table_output(result)
+                    formatted_output = format_table_output(result)
                 else:  # human format
-                    output = format_analysis_results(result)
+                    formatted_output = format_analysis_results(result)
                 
-                print(output)
+                # Handle output file or stdout
+                if args and hasattr(args, 'output_file') and args.output_file:
+                    try:
+                        with open(args.output_file, 'w', encoding='utf-8') as f:
+                            f.write(formatted_output)
+                        output(f"✅ Results saved to: {args.output_file}")
+                    except Exception as e:
+                        output(f"❌ Failed to save to file: {e}", True)
+                        return 1
+                else:
+                    print(formatted_output)
+                
                 return 0
                 
             except APIClientError as e:
-                progress.stop()
-                print(f"\n❌ Job monitoring failed: {e}")
+                if not quiet_mode:
+                    progress.stop()
+                output(f"\n❌ Job monitoring failed: {e}", True)
                 return 1
             except KeyboardInterrupt:
-                progress.stop()
-                print(f"\n⚠️  Monitoring interrupted. Job ID: {job_id}")
-                print("You can resume monitoring later with the same command")
+                if not quiet_mode:
+                    progress.stop()
+                output(f"\n⚠️  Monitoring interrupted. Job ID: {job_id}", True)
+                output("You can resume monitoring later with the same command", True)
                 return 130
                 
     except APIClientError as e:
-        print(f"❌ Error accessing job: {e}")
+        output(f"❌ Error accessing job: {e}", True)
         return 1
