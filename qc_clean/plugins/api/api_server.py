@@ -24,7 +24,6 @@ class QCAPIServer:
     
     def __init__(self, config: Dict[str, Any]):
         self.config = config
-        self.gt_workflow = None
         self.is_running = False
         self.background_processing_enabled = config.get('background_processing_enabled', False)
         self.active_jobs: Dict[str, Dict[str, Any]] = {}
@@ -37,13 +36,9 @@ class QCAPIServer:
         """Start the API server"""
         try:
             # Check if FastAPI is available
-            try:
-                from fastapi import FastAPI, HTTPException, BackgroundTasks
-                from fastapi.middleware.cors import CORSMiddleware
-                import uvicorn
-            except ImportError:
-                self._logger.warning("FastAPI not available, using mock server")
-                return self._start_mock_server(host, port)
+            from fastapi import FastAPI, HTTPException, BackgroundTasks
+            from fastapi.middleware.cors import CORSMiddleware
+            import uvicorn
             
             # Create FastAPI app
             self._app = FastAPI(
@@ -110,21 +105,6 @@ class QCAPIServer:
             self._logger.error(f"Failed to start server: {e}")
             return False
     
-    def _start_mock_server(self, host: str, port: int) -> bool:
-        """Start a mock server when FastAPI is not available"""
-        self._logger.info(f"Starting mock server on {host}:{port}")
-        self.is_running = True
-        
-        # Register mock endpoints
-        self.endpoints = [
-            {"method": "GET", "path": "/health", "description": "Health check"},
-            {"method": "POST", "path": "/analyze", "description": "Start GT analysis"},
-            {"method": "GET", "path": "/jobs/{job_id}", "description": "Get job status"},
-            {"method": "GET", "path": "/results/{job_id}", "description": "Get analysis results"}
-        ]
-        
-        return True
-    
     def stop_server(self) -> bool:
         """Stop the API server"""
         try:
@@ -144,31 +124,6 @@ class QCAPIServer:
             self._logger.error(f"Error stopping server: {e}")
             return False
     
-    def register_gt_workflow(self, gt_workflow) -> None:
-        """Register GT workflow for API endpoints"""
-        self.gt_workflow = gt_workflow
-        self._logger.info("GT workflow registered with API server")
-        
-        # Add GT-specific endpoints
-        gt_endpoints = [
-            {"method": "POST", "path": "/gt/analyze", "description": "Run GT analysis"},
-            {"method": "GET", "path": "/gt/codes", "description": "Get extracted codes"},
-            {"method": "GET", "path": "/gt/hierarchy", "description": "Get code hierarchy"},
-            {"method": "POST", "path": "/gt/export", "description": "Export results"}
-        ]
-        
-        self.endpoints.extend(gt_endpoints)
-    
-    def enable_background_processing(self) -> bool:
-        """Enable background task processing"""
-        try:
-            self.background_processing_enabled = True
-            self._logger.info("Background processing enabled")
-            return True
-            
-        except Exception as e:
-            self._logger.error(f"Failed to enable background processing: {e}")
-            return False
     
     def _register_default_endpoints(self) -> None:
         """Register default API endpoints"""
@@ -285,7 +240,7 @@ class QCAPIServer:
             
             # Initialize LLM handler for analysis
             from qc_clean.core.llm.llm_handler import LLMHandler
-            llm_handler = LLMHandler(model_name="gpt-5-mini", temperature=1.0)
+            llm_handler = LLMHandler(model_name="gpt-4o-mini", temperature=1.0)
             
             # Combine all interview content
             combined_text = ""
@@ -517,7 +472,5 @@ PHASE 4: SYNTHESIS AND FINAL ANALYSIS
         # Clear endpoints
         self.endpoints.clear()
         
-        # Clear references
-        self.gt_workflow = None
         self._app = None
         self._server = None

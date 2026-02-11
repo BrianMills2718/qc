@@ -8,8 +8,7 @@ import logging
 import os
 import asyncio
 import random
-import time
-from typing import Dict, List, Optional, Any, Type
+from typing import Dict, Optional, Any, Type
 from pydantic import BaseModel
 import litellm
 from dotenv import load_dotenv
@@ -42,8 +41,8 @@ class LLMHandler:
     Does NOT set max_tokens by default - uses full context window.
     """
     
-    def __init__(self, 
-                 model_name: str = "gpt-5-mini", 
+    def __init__(self,
+                 model_name: str = "gpt-4o-mini",
                  temperature: float = 1.0,
                  config = None,  # Can be UnifiedConfig or GroundedTheoryConfig
                  max_retries: int = 4,
@@ -109,12 +108,7 @@ class LLMHandler:
         # Store config for access to other parameters
         self.config = config
         
-        # Initialize retry and circuit breaker state
         self.logger = logging.getLogger(__name__)
-        self.failure_count = 0
-        self.last_failure_time = None
-        self.circuit_breaker_threshold = getattr(config, 'circuit_breaker_threshold', 5) if config else 5
-        self.circuit_breaker_timeout = None  # No timeout limits
     
     def _calculate_backoff_delay(self, attempt: int) -> float:
         """Calculate exponential backoff delay with jitter"""
@@ -149,69 +143,30 @@ class LLMHandler:
         ]
         return any(pattern in error_str for pattern in retryable_patterns)
     
-    def _should_circuit_break(self) -> bool:
-        """Check if circuit breaker should be triggered"""
-        if self.failure_count < self.circuit_breaker_threshold:
-            return False
-            
-        if self.last_failure_time is None:
-            return False
-            
-        time_since_failure = time.time() - self.last_failure_time
-        # No timeout limits - circuit breaker disabled
-        return False
-    
-    def _record_success(self):
-        """Record successful API call"""
-        self.failure_count = 0
-        self.last_failure_time = None
-    
-    def _record_failure(self):
-        """Record failed API call"""
-        self.failure_count += 1
-        self.last_failure_time = time.time()
-    
     async def _retry_with_backoff(self, operation, operation_name: str, *args, **kwargs):
-        """Generic retry wrapper with exponential backoff"""
-        
-        if self._should_circuit_break():
-            raise Exception(f"Circuit breaker open for {operation_name}. Too many recent failures.")
-        
+        """Retry with exponential backoff"""
         last_error = None
-        
+
         for attempt in range(self.max_retries + 1):
             try:
-                self.logger.debug(f"{operation_name} attempt {attempt + 1}/{self.max_retries + 1}")
-                
                 result = await operation(*args, **kwargs)
-                self._record_success()
-                
                 if attempt > 0:
                     self.logger.info(f"{operation_name} succeeded after {attempt} retries")
-                    
                 return result
-                
+
             except Exception as e:
                 last_error = e
-                self._record_failure()
-                
                 self.logger.warning(f"{operation_name} attempt {attempt + 1} failed: {e}")
-                
-                # Don't retry on non-retryable errors
+
                 if not self._is_retryable_error(e):
-                    self.logger.error(f"{operation_name} failed with non-retryable error: {e}")
-                    raise e
-                
-                # Don't delay after last attempt
+                    raise
+
                 if attempt < self.max_retries:
                     delay = self._calculate_backoff_delay(attempt)
-                    self.logger.info(f"Retrying {operation_name} in {delay:.1f} seconds...")
+                    self.logger.info(f"Retrying {operation_name} in {delay:.1f}s...")
                     await asyncio.sleep(delay)
-        
-        # All retries exhausted
-        error_msg = f"{operation_name} failed after {self.max_retries + 1} attempts. Last error: {last_error}"
-        self.logger.error(error_msg)
-        raise Exception(error_msg) from last_error
+
+        raise Exception(f"{operation_name} failed after {self.max_retries + 1} attempts: {last_error}") from last_error
     
     async def extract_structured(
         self,
@@ -283,15 +238,7 @@ class LLMHandler:
             if isinstance(response_content, dict):
                 response_data = response_content
             elif isinstance(response_content, str):
-                try:
-                    response_data = json.loads(response_content)
-                except json.JSONDecodeError as e:
-                    logger.warning(f"Failed to parse JSON directly ({e}), attempting extraction with fixing")
-                    response_data = self._extract_and_fix_json_from_text(response_content)
-            elif response_content is None:
-                # Handle None response by retrying without JSON mode
-                logger.warning("Received None response with JSON mode, retrying with text mode")
-                return await self._retry_without_json_mode(prompt, schema, instructions, max_tokens)
+                response_data = json.loads(response_content)
             else:
                 raise ValueError(f"Unexpected response content type: {type(response_content)}")
             
@@ -386,323 +333,4 @@ class LLMHandler:
         
         return "\n".join(lines)
     
-    def _get_schema_dict(self, schema: Type[BaseModel]) -> Dict[str, Any]:
-        """Get schema as dictionary for validation"""
-        return schema.model_json_schema()
     
-    def _extract_and_fix_json_from_text(self, text: str) -> Dict[str, Any]:
-        """
-        Extract JSON from text with aggressive fixing and partial parsing
-        """
-        # First try the original method
-        try:
-            return self._extract_json_from_text(text)
-        except (json.JSONDecodeError, ValueError) as original_error:
-            logger.info(f"Standard JSON extraction failed ({original_error}), trying aggressive fixes")
-            
-            # Try more aggressive JSON extraction and fixing
-            import re
-            
-            # Find JSON patterns with more flexibility
-            patterns = [
-                r'```(?:json)?\s*(\{.*?\})\s*```',  # Code blocks
-                r'(\{[^{}]*"open_codes"[^{}]*\[.*?\][^{}]*\})',  # Look for open_codes specifically
-                r'(\{.*\})',  # Any object
-            ]
-            
-            for pattern in patterns:
-                matches = re.findall(pattern, text, re.DOTALL)
-                for match in matches:
-                    # Try to fix and parse each match
-                    for attempt in range(3):  # Multiple fixing attempts
-                        try:
-                            if attempt == 0:
-                                # First attempt: basic fixing
-                                fixed_json = self._fix_json_string(match)
-                            elif attempt == 1:
-                                # Second attempt: more aggressive fixing
-                                fixed_json = self._aggressive_json_fix(match)
-                            else:
-                                # Third attempt: partial extraction
-                                fixed_json = self._extract_partial_json(match)
-                            
-                            parsed = json.loads(fixed_json)
-                            if isinstance(parsed, dict):
-                                logger.info(f"Successfully parsed JSON on attempt {attempt + 1}")
-                                return parsed
-                                
-                        except json.JSONDecodeError as e:
-                            logger.debug(f"Attempt {attempt + 1} failed: {e}")
-                            continue
-            
-            # If all attempts failed, raise the original error
-            raise original_error
-
-    def _aggressive_json_fix(self, json_str: str) -> str:
-        """
-        More aggressive JSON fixing for malformed LLM output
-        """
-        import re
-        
-        # Start with basic fixing
-        json_str = self._fix_json_string(json_str)
-        
-        # Fix unquoted keys (common LLM error)
-        json_str = re.sub(r'([{,]\s*)([a-zA-Z_][a-zA-Z0-9_]*)\s*:', r'\1"\2":', json_str)
-        
-        # Fix single quotes around strings
-        json_str = re.sub(r"'([^']*)'", r'"\1"', json_str)
-        
-        # Fix missing quotes around string values
-        json_str = re.sub(r':\s*([a-zA-Z_][a-zA-Z0-9_\s]*)\s*([,}])', r': "\1"\2', json_str)
-        
-        # Fix boolean values to lowercase
-        json_str = re.sub(r'\bTrue\b', 'true', json_str)
-        json_str = re.sub(r'\bFalse\b', 'false', json_str)
-        json_str = re.sub(r'\bNone\b', 'null', json_str)
-        
-        return json_str
-
-    def _extract_partial_json(self, text: str) -> str:
-        """
-        Extract partial valid JSON by finding key structures
-        """
-        import re
-        
-        # Look for the open_codes array specifically
-        open_codes_match = re.search(r'"open_codes"\s*:\s*\[(.*?)\]', text, re.DOTALL)
-        if open_codes_match:
-            codes_content = open_codes_match.group(1)
-            
-            # Try to build a minimal valid structure
-            return f'{{"open_codes": [{codes_content}]}}'
-        
-        # Fallback: return minimal valid structure
-        return '{"open_codes": []}'
-
-    def _extract_json_from_text(self, text: str) -> Dict[str, Any]:
-        """
-        Extract JSON from text that might contain other content
-        
-        Looks for JSON blocks in various formats:
-        - ```json ... ```
-        - { ... }
-        - [ ... ]
-        """
-        import re
-        
-        # Try to find JSON in code blocks
-        json_pattern = r'```(?:json)?\s*(\{.*?\}|\[.*?\])\s*```'
-        match = re.search(json_pattern, text, re.DOTALL)
-        if match:
-            json_str = match.group(1)
-        else:
-            # Try to find raw JSON object or array
-            json_pattern = r'(\{.*\}|\[.*\])'
-            match = re.search(json_pattern, text, re.DOTALL)
-            if match:
-                json_str = match.group(1)
-            else:
-                raise ValueError("No JSON found in response")
-        
-        # Parse the extracted JSON
-        try:
-            return json.loads(json_str)
-        except json.JSONDecodeError as e:
-            if "Extra data" in str(e):
-                # Try to extract only the valid JSON portion when there's extra data
-                try:
-                    # Find the first complete JSON object
-                    decoder = json.JSONDecoder()
-                    obj, idx = decoder.raw_decode(json_str)
-                    return obj
-                except (json.JSONDecodeError, ValueError):
-                    pass
-            
-            # Try to fix common JSON issues
-            json_str = self._fix_json_string(json_str)
-            try:
-                return json.loads(json_str)
-            except json.JSONDecodeError as e2:
-                if "Extra data" in str(e2):
-                    # Try raw decode again after fixing
-                    try:
-                        decoder = json.JSONDecoder()
-                        obj, idx = decoder.raw_decode(json_str)
-                        return obj
-                    except (json.JSONDecodeError, ValueError):
-                        pass
-                raise e2
-    
-    async def _retry_without_json_mode(
-        self,
-        prompt: str,
-        schema: Type[BaseModel],
-        instructions: Optional[str] = None,
-        max_tokens: Optional[int] = None
-    ) -> BaseModel:
-        """
-        Retry structured extraction without JSON mode when JSON mode fails
-        
-        This is a fallback for cases where JSON mode returns None responses
-        (common with very large prompts or certain prompt formats)
-        """
-        # Build the full prompt with explicit JSON request
-        full_prompt = self._build_extraction_prompt(prompt, schema, instructions)
-        full_prompt += "\n\nIMPORTANT: Return ONLY a valid JSON object, nothing else."
-        
-        # Prepare messages for LLM without JSON mode
-        messages = [
-            {
-                "role": "system", 
-                "content": "You are an expert at extracting structured information from text. "
-                          "Return your response as valid JSON that matches the provided schema. "
-                          "Do not include any text before or after the JSON object."
-            },
-            {
-                "role": "user",
-                "content": full_prompt
-            }
-        ]
-        
-        try:
-            # Build kwargs without JSON mode
-            kwargs = {
-                "model": self.model_name,
-                "messages": messages,
-                "temperature": self.temperature
-            }
-            
-            # Add max_tokens if available
-            if max_tokens is not None:
-                kwargs["max_tokens"] = max_tokens
-            elif self.default_max_tokens is not None:
-                kwargs["max_tokens"] = self.default_max_tokens
-            
-            logger.info(f"Retrying without JSON mode, max_tokens: {kwargs.get('max_tokens', 'unlimited')}")
-            
-            # Call LiteLLM without JSON mode
-            response = await litellm.acompletion(**kwargs)
-            
-            # Extract content
-            if hasattr(response, 'choices') and response.choices:
-                response_content = response.choices[0].message.content
-                
-                if response_content is None:
-                    raise ValueError("Still received None response even without JSON mode")
-                
-                if isinstance(response_content, str):
-                    # Extract JSON from text response
-                    try:
-                        response_data = json.loads(response_content)
-                    except json.JSONDecodeError:
-                        logger.info("Direct JSON parsing failed, attempting pattern extraction with fixing")
-                        response_data = self._extract_and_fix_json_from_text(response_content)
-                    
-                    # Create and validate model instance
-                    model_instance = schema(**response_data)
-                    logger.info(f"Successfully extracted {schema.__name__} using fallback mode")
-                    return model_instance
-                else:
-                    raise ValueError(f"Unexpected response content type in fallback: {type(response_content)}")
-            else:
-                raise ValueError("No valid response content found in fallback mode")
-                
-        except Exception as e:
-            logger.error(f"Fallback mode also failed: {e}")
-            raise LLMError(f"Failed to extract {schema.__name__} even with fallback: {e}") from e
-
-    def _fix_json_string(self, json_str: str) -> str:
-        """
-        Attempt to fix common JSON formatting issues
-        """
-        import re
-        
-        # Remove trailing commas before closing brackets
-        json_str = re.sub(r',\s*}', '}', json_str)
-        json_str = re.sub(r',\s*]', ']', json_str)
-        
-        # Fix missing commas between objects (common LLM error)
-        # Look for patterns like "}  {" and replace with "}, {"
-        json_str = re.sub(r'}\s*{', '}, {', json_str)
-        
-        # Fix missing commas between array elements
-        # Look for patterns like "]  [" and replace with "], ["  
-        json_str = re.sub(r']\s*\[', '], [', json_str)
-        
-        # Fix missing commas after values before new keys
-        # Look for patterns like '"value"  "key"' and replace with '"value", "key"'
-        json_str = re.sub(r'"\s*"([^"]*)":', '", "$1":', json_str)
-        
-        # Remove comments (if any)
-        json_str = re.sub(r'//.*?\n', '', json_str)
-        json_str = re.sub(r'/\*.*?\*/', '', json_str, flags=re.DOTALL)
-        
-        # Remove any markdown code block markers that might have been included
-        json_str = re.sub(r'```(?:json)?\s*', '', json_str)
-        json_str = re.sub(r'```\s*$', '', json_str)
-        
-        return json_str
-    
-    async def complete_raw(
-        self,
-        prompt: str,
-        max_tokens: Optional[int] = None,
-        temperature: Optional[float] = None
-    ) -> str:
-        """
-        Raw completion without structured extraction with retry logic
-        
-        Args:
-            prompt: The prompt to complete
-            max_tokens: Maximum tokens (None = use maximum available)
-            temperature: Temperature override
-        
-        Returns:
-            Raw text response
-        """
-        
-        async def _complete_operation():
-            messages = [
-                {
-                    "role": "user",
-                    "content": prompt
-                }
-            ]
-            
-            kwargs = {
-                "model": self.model_name,
-                "messages": messages,
-                "temperature": temperature or self.temperature,
-                # Remove timeout limit
-            }
-            
-            # Only add max_tokens if explicitly provided or configured
-            if max_tokens is not None:
-                kwargs["max_tokens"] = max_tokens
-            elif self.default_max_tokens is not None:
-                kwargs["max_tokens"] = self.default_max_tokens
-            
-            response = await litellm.acompletion(**kwargs)
-            
-            if not response or not response.choices:
-                raise Exception("Empty response from LLM API")
-                
-            content = response.choices[0].message.content
-            if not content:
-                raise Exception("Empty content in LLM response")
-                
-            return content.strip()
-        
-        try:
-            return await self._retry_with_backoff(
-                _complete_operation,
-                "complete_raw"
-            )
-        except Exception as e:
-            logger.error(f"Raw completion failed: {e}")
-            raise LLMError(f"Raw completion failed: {e}") from e
-
-
-# Import for compatibility
-import re

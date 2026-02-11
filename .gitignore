@@ -43,6 +43,7 @@ htmlcov/
 # OS files
 .DS_Store
 Thumbs.db
+*:Zone.Identifier
 
 # Log files - may contain sensitive info
 *.log
@@ -73,6 +74,10 @@ cli_integration_test.py
 # Temporary files from our work
 ENHANCED_SPEAKER_DETECTION_IMPLEMENTATION_COMPLETE.md
 temp12txt
+
+# Legacy code (superseded by qc_clean/)
+src/
+tests/
 
 # Submodules and external repos
 gemini-cli/

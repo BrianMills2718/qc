@@ -1,5 +1,0 @@
-Mark Johnson works at Google as a Software Engineer. He uses Kubernetes for container orchestration and employs Docker for containerization. Mark advocates for microservices architecture and is skeptical of monolithic systems.
-
-Sarah Wilson is a Product Manager at Microsoft. She relies on Azure for cloud services and utilizes Terraform for infrastructure management. Sarah collaborates with John Smith on various projects and manages a team of developers.
-
-The API Gateway handles incoming requests and routes them to appropriate microservices. The Load Balancer distributes traffic across multiple instances. These infrastructure components are essential for scalable systems.
