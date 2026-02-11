@@ -32,10 +32,10 @@ def suggest_next_documents(
     - reason: why this document is suggested
     - gap_codes: codes not yet represented
     """
-    coded_doc_ids = {a.doc_id for a in state.code_applications}
+    coded_doc_refs = {a.doc_id for a in state.code_applications}
     uncoded = [
         d for d in state.corpus.documents
-        if d.id not in coded_doc_ids
+        if d.id not in coded_doc_refs and d.name not in coded_doc_refs
         and (candidate_names is None or d.name in candidate_names)
     ]
 

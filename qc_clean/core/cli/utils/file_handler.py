@@ -136,6 +136,67 @@ def validate_file_formats(file_paths: List[str]) -> List[str]:
     return validated_files
 
 
+def read_file_content(file_path: str) -> str:
+    """
+    Read the text content of a supported file.
+
+    Handles .txt files directly and .docx/.pdf/.rtf via
+    optional libraries (python-docx, PyPDF2, striprtf).
+    Falls back to plain text reading for unsupported binary formats.
+
+    Args:
+        file_path: Path to the file
+
+    Returns:
+        The text content of the file
+
+    Raises:
+        Exception: If the file cannot be read
+    """
+    path = Path(file_path)
+    ext = path.suffix.lower()
+
+    if ext == '.txt':
+        for encoding in ('utf-8', 'latin-1'):
+            try:
+                return path.read_text(encoding=encoding)
+            except UnicodeDecodeError:
+                continue
+        raise Exception(f"Cannot decode text file: {file_path}")
+
+    if ext in ('.docx', '.doc'):
+        try:
+            import docx
+            doc = docx.Document(str(path))
+            return '\n\n'.join(p.text for p in doc.paragraphs if p.text.strip())
+        except ImportError:
+            logger.warning("python-docx not installed; falling back to raw text read")
+            return path.read_text(errors='replace')
+
+    if ext == '.pdf':
+        try:
+            from PyPDF2 import PdfReader
+            reader = PdfReader(str(path))
+            return '\n\n'.join(
+                page.extract_text() or '' for page in reader.pages
+            )
+        except ImportError:
+            logger.warning("PyPDF2 not installed; falling back to raw text read")
+            return path.read_text(errors='replace')
+
+    if ext == '.rtf':
+        try:
+            from striprtf.striprtf import rtf_to_text
+            raw = path.read_bytes().decode('utf-8', errors='replace')
+            return rtf_to_text(raw)
+        except ImportError:
+            logger.warning("striprtf not installed; falling back to raw text read")
+            return path.read_text(errors='replace')
+
+    # Fallback for any other extension
+    return path.read_text(errors='replace')
+
+
 def get_file_info(file_path: str) -> dict:
     """
     Get detailed information about a file
