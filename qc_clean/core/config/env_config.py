@@ -71,7 +71,7 @@ class EnvironmentConfig:
     @property
     def llm_model_name(self) -> str:
         """LLM model name"""
-        return os.getenv('LLM_MODEL_NAME', 'gpt-4o-mini')
+        return os.getenv('LLM_MODEL_NAME', 'gpt-5-mini')
     
     @property
     def enable_docs(self) -> bool:

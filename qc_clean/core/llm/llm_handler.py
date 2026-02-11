@@ -42,7 +42,7 @@ class LLMHandler:
     """
     
     def __init__(self,
-                 model_name: str = "gpt-4o-mini",
+                 model_name: str = "gpt-5-mini",
                  temperature: float = 1.0,
                  config = None,  # Can be UnifiedConfig or GroundedTheoryConfig
                  max_retries: int = 4,
@@ -95,8 +95,11 @@ class LLMHandler:
             self.max_retries = max_retries
             self.base_delay = base_delay
             
-            # Default to Gemini API key for backward compatibility
-            self.api_key = os.getenv("GEMINI_API_KEY")
+            # Infer API key from model name
+            if self.model_name.startswith("gpt-"):
+                self.api_key = os.getenv("OPENAI_API_KEY")
+            else:
+                self.api_key = os.getenv("GEMINI_API_KEY")
             
             logger.info(f"LLM Handler initialized with defaults: {self.model_name}, temp={temperature}, retries={max_retries}")
         
@@ -209,10 +212,12 @@ class LLMHandler:
             kwargs = {
                 "model": self.model_name,
                 "messages": messages,
-                "temperature": self.temperature,
-                "response_format": {"type": "json_object"},  # Use JSON mode for Gemini
-                # Remove timeout limit
+                "response_format": {"type": "json_object"},
             }
+
+            # GPT-5 models don't support the temperature parameter
+            if not self.model_name.startswith("gpt-5"):
+                kwargs["temperature"] = self.temperature
             
             # Only add max_tokens if explicitly provided or configured
             if max_tokens is not None:

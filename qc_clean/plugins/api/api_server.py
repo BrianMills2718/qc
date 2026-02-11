@@ -240,7 +240,7 @@ class QCAPIServer:
             
             # Initialize LLM handler for analysis
             from qc_clean.core.llm.llm_handler import LLMHandler
-            llm_handler = LLMHandler(model_name="gpt-4o-mini", temperature=1.0)
+            llm_handler = LLMHandler(model_name="gpt-5-mini")
             
             # Combine all interview content
             combined_text = ""

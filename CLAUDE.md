@@ -34,7 +34,7 @@ simple_cli_web.py                   # Flask web UI (port 5003, subprocess-based)
 - API server uses `LLMHandler.extract_structured()` with Pydantic schemas for each phase
 - LLM calls go through LiteLLM with `response_format: {"type": "json_object"}`
 - Each phase feeds its structured output into the next phase's prompt
-- Default model: gpt-4o-mini via OpenAI API
+- Default model: gpt-5-mini via OpenAI API (note: gpt-5 models don't support temperature param)
 
 ## Working Commands
 
