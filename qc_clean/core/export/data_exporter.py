@@ -130,19 +130,30 @@ class ProjectExporter:
 
         # Code hierarchy (top-level with children)
         top_level = state.codebook.top_level_codes()
+        # Build a normalized lookup: parent_id values may differ in case from
+        # code.id (e.g. GT open coding uses "Code_Name" vs ID "CODE_NAME").
+        id_to_code = {c.id.upper(): c for c in state.codebook.codes}
         children_map: Dict[str, list] = {}
         for code in state.codebook.codes:
             if code.parent_id:
-                children_map.setdefault(code.parent_id, []).append(code)
+                # Normalize to match code IDs
+                norm_pid = code.parent_id.upper().replace(" ", "_")
+                children_map.setdefault(norm_pid, []).append(code)
         if children_map:
             _a("### Code Hierarchy")
             _a("")
+
+            def _render_tree(code, indent=0):
+                prefix = "  " * indent
+                if indent == 0:
+                    _a(f"{prefix}- **{code.name}**")
+                else:
+                    _a(f"{prefix}- {code.name}")
+                for child in children_map.get(code.id.upper(), []):
+                    _render_tree(child, indent + 1)
+
             for parent in top_level:
-                kids = children_map.get(parent.id, [])
-                if kids:
-                    _a(f"- **{parent.name}**")
-                    for kid in kids:
-                        _a(f"  - {kid.name}")
+                _render_tree(parent)
             _a("")
 
         # Key quotes (sample)
