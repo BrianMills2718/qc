@@ -52,10 +52,12 @@ start_server.py                              # Server startup script
 - `qc_clean/plugins/api/api_server.py` - API server (delegates to pipeline)
 - `qc_clean/core/llm/llm_handler.py` - LLM handler with `extract_structured()` method
 - `qc_cli.py` - CLI interface (analyze, project, review, query, status, server)
-- `tests/` - 116 passing tests
+- `qc_clean/core/export/data_exporter.py` - ProjectExporter (JSON/CSV/Markdown from ProjectState)
+- `tests/` - 132 passing tests
 
 ### How It Works
-- CLI is a pure HTTP client -- all analysis runs on the API server
+- `project run` runs the pipeline locally (no server needed); `analyze` uses the API server
+- CLI is a pure HTTP client for `analyze` -- all analysis runs on the API server
 - API server creates an `AnalysisPipeline` via the factory and runs it
 - Each stage reads from / writes to `ProjectState` (single Pydantic model)
 - Pipeline pauses at human review checkpoints when `enable_human_review=True`
@@ -81,6 +83,16 @@ python qc_cli.py project create --name "My Study" --methodology grounded_theory
 python qc_cli.py project list
 python qc_cli.py project show <project_id>
 python qc_cli.py project add-docs <project_id> --files interview1.docx interview2.docx
+
+# Run pipeline on a project (local, no server needed)
+python qc_cli.py project run <project_id>                          # run full pipeline
+python qc_cli.py project run <project_id> --model gpt-5-mini       # specify model
+python qc_cli.py project run <project_id> --review                  # pause for human review
+
+# Export results
+python qc_cli.py project export <project_id> --format json --output-file results.json
+python qc_cli.py project export <project_id> --format csv --output-dir ./export/
+python qc_cli.py project export <project_id> --format markdown --output-file report.md
 
 # Review codes
 python qc_cli.py review <project_id>
@@ -122,9 +134,10 @@ Environment-driven via `qc_clean/config/unified_config.py`. Key env vars:
 
 ### Short-term (v2.1)
 - **End-to-end LLM test**: Run the full pipeline against real interviews and validate output quality vs v0.1-lite
-- **Pipeline resume from API**: Wire the `/projects/{id}/resume` endpoint to actually re-run remaining stages
-- **Iterative coding CLI flow**: `project run <id>` command that runs pipeline, pauses for review, resumes
-- **Export formats**: JSON, CSV, ATLAS.ti/NVivo-compatible export from ProjectState
+- ~~**Pipeline resume from API**: Wire the `/projects/{id}/resume` endpoint to actually re-run remaining stages~~ DONE
+- ~~**Iterative coding CLI flow**: `project run <id>` command that runs pipeline, pauses for review, resumes~~ DONE
+- ~~**Export formats**: JSON, CSV, Markdown export from ProjectState~~ DONE
+- **ATLAS.ti/NVivo export**: Add QDX/QDPX export format for interoperability with other QDA tools
 
 ### Medium-term (v2.2)
 - **Web UI for review**: Replace CLI review with browser-based code review interface

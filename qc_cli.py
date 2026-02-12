@@ -210,6 +210,17 @@ Examples:
     proj_add.add_argument('--files', nargs='+', help='Files to add')
     proj_add.add_argument('--directory', help='Directory of files to add')
 
+    proj_run = project_subparsers.add_parser('run', help='Run analysis pipeline on project')
+    proj_run.add_argument('project_id', help='Project ID')
+    proj_run.add_argument('--model', default=None, help='LLM model to use (default: gpt-5-mini)')
+    proj_run.add_argument('--review', action='store_true', help='Enable human review pauses')
+
+    proj_export = project_subparsers.add_parser('export', help='Export project results')
+    proj_export.add_argument('project_id', help='Project ID')
+    proj_export.add_argument('--format', choices=['json', 'csv', 'markdown'], default='json', help='Export format (default: json)')
+    proj_export.add_argument('--output-file', help='Output file path (for json/markdown)')
+    proj_export.add_argument('--output-dir', help='Output directory (for csv)')
+
     # Review command
     review_parser = subparsers.add_parser(
         'review',

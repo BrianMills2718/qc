@@ -2,6 +2,7 @@
 Project management CLI command handlers.
 """
 
+import asyncio
 import json
 import logging
 import sys
@@ -9,7 +10,7 @@ from pathlib import Path
 from typing import List
 
 from qc_clean.core.persistence.project_store import ProjectStore
-from qc_clean.schemas.domain import Methodology, ProjectConfig, ProjectState
+from qc_clean.schemas.domain import Methodology, PipelineStatus, ProjectConfig, ProjectState
 
 logger = logging.getLogger(__name__)
 
@@ -26,6 +27,10 @@ def handle_project_command(args) -> int:
         return _show_project(store, args)
     elif args.project_action == "add-docs":
         return _add_docs(store, args)
+    elif args.project_action == "run":
+        return _run_project(store, args)
+    elif args.project_action == "export":
+        return _export_project(store, args)
     else:
         print(f"Unknown project action: {args.project_action}", file=sys.stderr)
         return 1
@@ -124,4 +129,135 @@ def _add_docs(store: ProjectStore, args) -> int:
 
     store.save(state)
     print(f"\nAdded {added} documents to project {state.name}")
+    return 0
+
+
+def _run_project(store: ProjectStore, args) -> int:
+    """Run the analysis pipeline on a saved project."""
+    project_id = args.project_id
+    try:
+        state = store.load(project_id)
+    except FileNotFoundError:
+        print(f"Project not found: {project_id}", file=sys.stderr)
+        return 1
+
+    if state.corpus.num_documents == 0:
+        print("No documents in project. Add documents first with 'project add-docs'.", file=sys.stderr)
+        return 1
+
+    if state.pipeline_status == PipelineStatus.COMPLETED:
+        print("Pipeline already completed for this project.", file=sys.stderr)
+        print("  To re-run, create a new project or reset the pipeline status.")
+        return 1
+
+    # Determine resume point
+    resume_from = None
+    if state.pipeline_status == PipelineStatus.PAUSED_FOR_REVIEW:
+        from qc_clean.core.pipeline.review import ReviewManager
+        rm = ReviewManager(state)
+        if rm.can_resume():
+            resume_from = rm.prepare_for_resume()
+            print(f"Resuming pipeline from: {resume_from}")
+        else:
+            print("Pipeline is paused but cannot resume. Check review status.", file=sys.stderr)
+            return 1
+
+    # Build pipeline with save-after-each-stage callback
+    from qc_clean.core.pipeline.pipeline_factory import create_pipeline
+
+    async def save_callback(s):
+        store.save(s)
+
+    enable_review = getattr(args, "review", False)
+    pipeline = create_pipeline(
+        methodology=state.config.methodology.value,
+        on_stage_complete=save_callback,
+        enable_human_review=enable_review,
+    )
+
+    model_name = getattr(args, "model", None) or state.config.model_name
+    config = {"model_name": model_name}
+
+    print(f"Running pipeline on project: {state.name}")
+    print(f"  Methodology: {state.config.methodology.value}")
+    print(f"  Documents: {state.corpus.num_documents}")
+    print(f"  Model: {model_name}")
+    if enable_review:
+        print("  Human review: enabled")
+    print()
+
+    try:
+        state = asyncio.run(pipeline.run(state, config, resume_from=resume_from))
+    except Exception as e:
+        store.save(state)
+        print(f"\nPipeline failed: {e}", file=sys.stderr)
+        return 1
+
+    store.save(state)
+
+    # Print summary
+    if state.pipeline_status == PipelineStatus.PAUSED_FOR_REVIEW:
+        print(f"\nPipeline paused for human review after: {state.current_phase}")
+        print(f"  Codes discovered: {len(state.codebook.codes)}")
+        print(f"  Review with: qc_cli review {project_id}")
+        print(f"  Then resume: qc_cli project run {project_id}")
+    elif state.pipeline_status == PipelineStatus.COMPLETED:
+        print("\nPipeline completed successfully.")
+        print(f"  Codes: {len(state.codebook.codes)}")
+        print(f"  Applications: {len(state.code_applications)}")
+        print(f"  Entities: {len(state.entities)}")
+        if state.synthesis:
+            print(f"  Key findings: {len(state.synthesis.key_findings)}")
+            print(f"  Recommendations: {len(state.synthesis.recommendations)}")
+        if state.core_categories:
+            print(f"  Core categories: {len(state.core_categories)}")
+        if state.theoretical_model:
+            print(f"  Theoretical model: {state.theoretical_model.model_name}")
+        print(f"\n  Export with: qc_cli project export {project_id} --format json")
+    else:
+        print(f"\nPipeline ended with status: {state.pipeline_status.value}")
+
+    return 0
+
+
+def _export_project(store: ProjectStore, args) -> int:
+    """Export project results to a file."""
+    project_id = args.project_id
+    try:
+        state = store.load(project_id)
+    except FileNotFoundError:
+        print(f"Project not found: {project_id}", file=sys.stderr)
+        return 1
+
+    if len(state.codebook.codes) == 0 and state.pipeline_status == PipelineStatus.PENDING:
+        print("No analysis results to export. Run the pipeline first.", file=sys.stderr)
+        return 1
+
+    from qc_clean.core.export.data_exporter import ProjectExporter
+
+    fmt = getattr(args, "format", "json")
+    output_file = getattr(args, "output_file", None)
+    output_dir = getattr(args, "output_dir", None)
+
+    try:
+        exporter = ProjectExporter()
+
+        if fmt == "json":
+            path = exporter.export_json(state, output_file)
+            print(f"Exported JSON to: {path}")
+        elif fmt == "csv":
+            paths = exporter.export_csv(state, output_dir)
+            print("Exported CSV files:")
+            for p in paths:
+                print(f"  {p}")
+        elif fmt == "markdown":
+            path = exporter.export_markdown(state, output_file)
+            print(f"Exported Markdown to: {path}")
+        else:
+            print(f"Unsupported format: {fmt}", file=sys.stderr)
+            return 1
+    except Exception as e:
+        print(f"Export failed: {e}", file=sys.stderr)
+        return 1
+
     return 0

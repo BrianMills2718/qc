@@ -250,7 +250,7 @@ class QCAPIServer:
             return result
 
         @self._app.post("/projects/{project_id}/resume")
-        async def resume_pipeline(project_id: str):
+        async def resume_pipeline(project_id: str, background_tasks: BackgroundTasks):
             """Resume pipeline after human review."""
             from qc_clean.core.persistence.project_store import ProjectStore
             from qc_clean.core.pipeline.review import ReviewManager
@@ -258,13 +258,45 @@ class QCAPIServer:
             try:
                 state = store.load(project_id)
             except FileNotFoundError:
-                return {"error": f"Project not found: {project_id}"}
+                raise HTTPException(status_code=404, detail=f"Project not found: {project_id}")
             rm = ReviewManager(state)
             if not rm.can_resume():
-                return {"error": "Pipeline is not paused for review"}
+                raise HTTPException(status_code=400, detail="Pipeline is not paused for review")
             resume_from = rm.prepare_for_resume()
             store.save(state)
-            return {"resumed_from": resume_from, "status": "running"}
+
+            # Run remaining pipeline stages as a background task
+            background_tasks.add_task(
+                self._process_project_pipeline,
+                project_id,
+                resume_from,
+            )
+            return {"resumed_from": resume_from, "status": "running", "project_id": project_id}
+
+        @self._app.get("/projects/{project_id}")
+        async def get_project(project_id: str):
+            """Get project status and summary."""
+            from qc_clean.core.persistence.project_store import ProjectStore
+            store = ProjectStore()
+            try:
+                state = store.load(project_id)
+            except FileNotFoundError:
+                raise HTTPException(status_code=404, detail=f"Project not found: {project_id}")
+            return {
+                "id": state.id,
+                "name": state.name,
+                "methodology": state.config.methodology.value,
+                "pipeline_status": state.pipeline_status.value,
+                "current_phase": state.current_phase,
+                "documents": state.corpus.num_documents,
+                "codes": len(state.codebook.codes),
+                "applications": len(state.code_applications),
+                "phases": [
+                    {"phase": pr.phase_name, "status": pr.status.value}
+                    for pr in state.phase_results
+                ],
+                "updated_at": state.updated_at,
+            }
 
         self.endpoints = [
             {"method": "GET", "path": "/health", "description": "Health check"},
@@ -275,8 +307,43 @@ class QCAPIServer:
             {"method": "GET", "path": "/projects/{project_id}/review", "description": "Get review items"},
             {"method": "POST", "path": "/projects/{project_id}/review", "description": "Submit review decisions"},
             {"method": "POST", "path": "/projects/{project_id}/resume", "description": "Resume pipeline after review"},
+            {"method": "GET", "path": "/projects/{project_id}", "description": "Get project status"},
         ]
     
+    async def _process_project_pipeline(self, project_id: str, resume_from: str):
+        """Run (or resume) the pipeline on a saved project as a background task."""
+        try:
+            from qc_clean.core.persistence.project_store import ProjectStore
+            from qc_clean.core.pipeline.pipeline_factory import create_pipeline
+
+            store = ProjectStore()
+            state = store.load(project_id)
+
+            async def save_callback(s):
+                store.save(s)
+
+            pipeline = create_pipeline(
+                methodology=state.config.methodology.value,
+                on_stage_complete=save_callback,
+            )
+
+            config = {"model_name": state.config.model_name}
+            state = await pipeline.run(state, config, resume_from=resume_from)
+            store.save(state)
+            self._logger.info("Project pipeline completed for %s", project_id)
+
+        except Exception as e:
+            self._logger.error("Project pipeline failed for %s: %s", project_id, e)
+            # Try to save failed state
+            try:
+                store = ProjectStore()
+                state = store.load(project_id)
+                from qc_clean.schemas.domain import PipelineStatus
+                state.pipeline_status = PipelineStatus.FAILED
+                store.save(state)
+            except Exception:
+                pass
+
     async def _process_analysis(self, job_id: str, interviews: List[Dict[str, Any]], config: Dict[str, Any]):
         """Process qualitative coding analysis via the stage-based pipeline."""
         try:
