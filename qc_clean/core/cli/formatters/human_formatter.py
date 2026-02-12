@@ -113,49 +113,6 @@ def format_analysis_results(result_data: Dict[str, Any]) -> str:
     return "\n".join(output)
 
 
-def format_query_results(result_data: Dict[str, Any]) -> str:
-    """Format query results in human-readable format"""
-    
-    if not result_data:
-        return "No query results to display"
-    
-    output = []
-    
-    # Header
-    output.append("=" * 50)
-    output.append("QUERY RESULTS")
-    output.append("=" * 50)
-    output.append("")
-    
-    # Query information
-    if 'cypher' in result_data:
-        output.append("Generated Cypher Query:")
-        output.append(f"  {result_data['cypher']}")
-        output.append("")
-    
-    # Results
-    data = result_data.get('data', [])
-    if not data:
-        output.append("No data returned from query")
-        return "\n".join(output)
-    
-    output.append(f"Found {len(data)} results:")
-    output.append("-" * 30)
-    
-    for i, record in enumerate(data, 1):
-        output.append(f"Result {i}:")
-        if isinstance(record, dict):
-            for key, value in record.items():
-                output.append(f"  {key}: {value}")
-        else:
-            output.append(f"  {record}")
-        output.append("")
-    
-    output.append("=" * 50)
-    
-    return "\n".join(output)
-
-
 def format_status_info(status_data: Dict[str, Any]) -> str:
     """Format status information in human-readable format"""
     

@@ -55,7 +55,7 @@ start_server.py                              # Server startup script
 - `qc_clean/plugins/api/api_server.py` - API server (delegates to pipeline)
 - `qc_clean/core/llm/llm_handler.py` - LLM handler with `extract_structured()` method
 - `qc_clean/core/export/data_exporter.py` - ProjectExporter (JSON/CSV/Markdown from ProjectState)
-- `qc_cli.py` - CLI interface (analyze, project, review, query, status, server)
+- `qc_cli.py` - CLI interface (analyze, project, review, status, server)
 - `tests/` - 135 passing tests
 
 ### How It Works
@@ -123,8 +123,21 @@ Key env vars:
 
 - This is a research tool, not a production system
 - Interview data files are gitignored (sensitive content)
-- Output quality validated: real mention counts, calibrated confidence (0.65-0.90), no fabricated %s
 - `src/` directory is legacy code (gitignored)
+
+## E2E Validation (completed 2026-02-12)
+
+Pipeline validated end-to-end against real interview transcripts using gpt-5-mini:
+
+- **Default methodology, 1 document**: 12 codes, 29 applications, 8 speakers detected (focus group), perspective/relationship/synthesis all working
+- **Default methodology, 3 documents**: 12 codes, 36 properly-attributed applications, cross-interview analysis with 6 shared/6 consensus/6 divergent themes
+- **Grounded theory, 1 document**: 25 open codes, 14 axial relationships, 3 core categories, theoretical model generated
+
+Bugs found and fixed during E2E testing:
+- Speaker detection: added timestamp format ("Name   0:03") alongside colon format; runs on pre-loaded docs
+- Quote attribution: replaced blind duplication with substring matching to correctly attribute quotes to source documents
+- Perspective stage: uses detected speaker count (not document count) to determine single vs multi-speaker mode
+- Export hierarchy: case-insensitive parent_id matching + recursive tree rendering for arbitrary depth
 
 ## Known Technical Debt
 
@@ -135,7 +148,6 @@ Key env vars:
 ## Next Steps
 
 ### Short-term
-- **End-to-end LLM test**: Run the full pipeline against real interviews and validate output quality
 - **LLM handler tests**: Unit tests with mocked LiteLLM calls
 - **ATLAS.ti/NVivo export**: Add QDX/QDPX export format for interoperability with other QDA tools
 

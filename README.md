@@ -88,27 +88,10 @@ JSON output includes:
 - **pipeline_phases** -- Status of each pipeline stage
 - **data_warnings** -- Flags for truncated or incomplete input documents
 
-## CLI Reference
-
-```bash
-# Analyze specific files
-python qc_cli.py analyze --files file1.docx file2.docx --format json
-
-# Analyze a directory
-python qc_cli.py analyze --directory /path/to/interviews/ --format json
-
-# Save to file
-python qc_cli.py analyze --files file.docx --format json --output-file results.json
-
-# Check server/job status
-python qc_cli.py status --server
-python qc_cli.py status --job <job_id>
-```
-
 ## Development
 
 ```bash
-# Run tests (132 passing)
+# Run tests (135 passing)
 python -m pytest tests/ -v
 
 # Start web UI (optional, port 5003)

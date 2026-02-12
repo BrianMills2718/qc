@@ -243,55 +243,6 @@ class APIClient:
         except Exception as e:
             raise APIClientError(f"Unexpected error checking job status: {e}")
     
-    def natural_language_query(self, query: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        """
-        Execute natural language query
-        
-        Args:
-            query: Natural language query string
-            context: Optional context for query processing
-            
-        Returns:
-            Dictionary with query results
-            
-        Raises:
-            APIClientError: If query fails
-        """
-        if not query or not query.strip():
-            raise APIClientError("No query provided")
-        
-        payload = {
-            'query': query.strip(),
-            'context': context or {}
-        }
-        
-        try:
-            response = self.session.post(
-                f"{self.base_url}/api/query/natural-language",
-                json=payload,
-                timeout=self.timeout
-            )
-            response.raise_for_status()
-            
-            return response.json()
-            
-        except requests.exceptions.ConnectionError:
-            raise APIClientError(
-                "Cannot connect to server. "
-                "Please start the server with: python start_server.py"
-            )
-        except requests.exceptions.Timeout:
-            raise APIClientError("Query request timed out")
-        except requests.exceptions.HTTPError as e:
-            try:
-                error_data = e.response.json()
-                error_msg = error_data.get('detail', str(e))
-            except (ValueError, AttributeError):
-                error_msg = str(e)
-            raise APIClientError(f"Query failed: {error_msg}")
-        except Exception as e:
-            raise APIClientError(f"Unexpected error during query: {e}")
-    
     def wait_for_job_completion(self, job_id: str, max_wait_time: int = 300, poll_interval: int = 2) -> Dict[str, Any]:
         """
         Poll job status until completion or timeout
@@ -340,7 +291,7 @@ class APIClient:
                     'status': 'running',
                     'base_url': self.base_url,
                     'available_endpoints': [
-                        '/health', '/analyze', '/jobs/{id}', '/api/query/natural-language'
+                        '/health', '/analyze', '/jobs/{id}'
                     ]
                 }
             else:

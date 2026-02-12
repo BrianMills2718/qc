@@ -40,11 +40,10 @@ def create_parser() -> argparse.ArgumentParser:
         epilog="""
 Examples:
   qc_cli analyze --files interview1.txt interview2.docx
-  qc_cli query "Find codes related to communication"
-  qc_cli query --interactive
-  qc_cli status
-  qc_cli server --start
-  qc_cli config --show
+  qc_cli project create --name "My Study" --methodology grounded_theory
+  qc_cli project run <project_id>
+  qc_cli project export <project_id> --format markdown --output-file report.md
+  qc_cli status --server
         """
     )
     
@@ -104,30 +103,6 @@ Examples:
         help='Save results to specific file'
     )
     
-    # Query command  
-    query_parser = subparsers.add_parser(
-        'query',
-        help='Execute natural language queries',
-        description='Query the analysis database using natural language'
-    )
-    query_group = query_parser.add_mutually_exclusive_group(required=True)
-    query_group.add_argument(
-        'query_text',
-        nargs='?',
-        help='Natural language query to execute'
-    )
-    query_group.add_argument(
-        '--interactive',
-        action='store_true',
-        help='Start interactive query mode'
-    )
-    query_parser.add_argument(
-        '--format',
-        choices=['json', 'table', 'human'],
-        default='human',
-        help='Output format (default: human)'
-    )
-    
     # Status command
     status_parser = subparsers.add_parser(
         'status',
@@ -167,18 +142,6 @@ Examples:
         help='Check server status'
     )
     
-    # Config command
-    config_parser = subparsers.add_parser(
-        'config',
-        help='Configuration management',
-        description='Show or modify configuration settings'
-    )
-    config_parser.add_argument(
-        '--show',
-        action='store_true',
-        help='Show current configuration'
-    )
-
     # Project command
     project_parser = subparsers.add_parser(
         'project',
@@ -257,21 +220,16 @@ def main() -> int:
     try:
         # Import commands here to avoid circular imports
         from qc_clean.core.cli.commands.analyze import handle_analyze_command
-        from qc_clean.core.cli.commands.query import handle_query_command
         from qc_clean.core.cli.commands.status import handle_status_command
         from qc_clean.core.cli.commands.server import handle_server_command
-        
+
         # Route to appropriate command handler
         if args.command == 'analyze':
             return handle_analyze_command(args)
-        elif args.command == 'query':
-            return handle_query_command(args)
         elif args.command == 'status':
             return handle_status_command(args)
         elif args.command == 'server':
             return handle_server_command(args)
-        elif args.command == 'config':
-            return handle_config_command(args)
         elif args.command == 'project':
             from qc_clean.core.cli.commands.project import handle_project_command
             return handle_project_command(args)
@@ -295,17 +253,6 @@ def main() -> int:
             import traceback
             logger.error("Full traceback:")
             logger.error(traceback.format_exc())
-        return 1
-
-def handle_config_command(args) -> int:
-    """Handle config command (simple implementation)"""
-    if args.show:
-        print("Current Configuration:")
-        print(f"  API URL: {args.api_url}")
-        print(f"  Log Level: {'DEBUG' if args.verbose else 'INFO'}")
-        return 0
-    else:
-        print("Config management not yet implemented")
         return 1
 
 if __name__ == "__main__":
