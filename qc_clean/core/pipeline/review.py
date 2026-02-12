@@ -164,6 +164,10 @@ class ReviewManager:
             # new_value should contain {"merge_into": "target_code_id"}
             if decision.new_value and "merge_into" in decision.new_value:
                 merge_target = decision.new_value["merge_into"]
+                # Validate merge target exists
+                if not self.state.codebook.get_code(merge_target):
+                    logger.error("Merge target code %s does not exist", merge_target)
+                    return
                 # Re-assign applications from source to target
                 for app in self.state.code_applications:
                     if app.code_id == decision.target_id:
@@ -177,12 +181,22 @@ class ReviewManager:
         elif action == ReviewAction.SPLIT:
             # new_value should contain {"new_codes": [{"id": ..., "name": ..., ...}]}
             if decision.new_value and "new_codes" in decision.new_value:
+                new_code_ids = []
                 for new_code_data in decision.new_value["new_codes"]:
+                    if "name" not in new_code_data:
+                        logger.error("Split code missing required 'name' field")
+                        continue
                     new_code = Code(
                         provenance=Provenance.HUMAN,
                         **new_code_data,
                     )
                     self.state.codebook.codes.append(new_code)
+                    new_code_ids.append(new_code.id)
+                # Reassign applications: assign to first new code by default
+                if new_code_ids:
+                    for app in self.state.code_applications:
+                        if app.code_id == decision.target_id:
+                            app.code_id = new_code_ids[0]
                 # Remove the original code
                 self.state.codebook.codes = [
                     c for c in self.state.codebook.codes if c.id != decision.target_id
@@ -200,10 +214,31 @@ class ReviewManager:
                 if app.id == decision.target_id:
                     app.applied_by = Provenance.HUMAN
             logger.info("Approved application: %s", decision.target_id)
+        elif decision.action == ReviewAction.MODIFY:
+            if decision.new_value:
+                for app in self.state.code_applications:
+                    if app.id == decision.target_id:
+                        for key, value in decision.new_value.items():
+                            if hasattr(app, key):
+                                setattr(app, key, value)
+                        app.applied_by = Provenance.HUMAN
+            logger.info("Modified application: %s", decision.target_id)
+        else:
+            logger.warning(
+                "Action %s not supported for code_application targets",
+                decision.action.value,
+            )
 
     def _apply_codebook_decision(self, decision: HumanReviewDecision) -> None:
         if decision.action == ReviewAction.APPROVE:
-            logger.info("Codebook approved")
+            for code in self.state.codebook.codes:
+                code.provenance = Provenance.HUMAN
+            logger.info("Codebook approved (all codes marked human-reviewed)")
+        else:
+            logger.warning(
+                "Action %s not supported for codebook targets",
+                decision.action.value,
+            )
 
     def _bump_codebook_version(self) -> None:
         """Save current codebook to history and create new version."""

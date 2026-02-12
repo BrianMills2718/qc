@@ -350,8 +350,17 @@ class QCAPIServer:
 
             processing_time = time.time() - start_time
 
+            memos = [
+                {
+                    "type": m.memo_type,
+                    "title": m.title,
+                    "content": m.content,
+                } for m in state.memos
+            ]
+
             structured_results = {
                 "analysis_summary": f"Analyzed {num_interviews} interview(s) using structured qualitative coding",
+                "methodology": methodology,
                 "total_interviews": num_interviews,
                 "total_codes": len(state.codebook.codes),
                 "single_speaker_mode": is_single_speaker,
@@ -360,12 +369,29 @@ class QCAPIServer:
                 "key_relationships": key_relationships,
                 "key_themes": key_themes,
                 "recommendations": recommendations,
+                "memos": memos,
                 "processing_time_seconds": round(processing_time, 2),
                 "model_used": model_name,
+                "pipeline_phases": [
+                    {"phase": pr.phase_name, "status": pr.status.value}
+                    for pr in state.phase_results
+                ],
             }
 
             if state.data_warnings:
                 structured_results["data_warnings"] = state.data_warnings
+
+            # Include GT-specific results when applicable
+            if state.core_categories:
+                structured_results["core_categories"] = [
+                    {"name": cc.name, "description": cc.description}
+                    for cc in state.core_categories
+                ]
+            if state.theoretical_model:
+                structured_results["theoretical_model"] = {
+                    "model_name": state.theoretical_model.model_name,
+                    "narrative": state.theoretical_model.narrative,
+                }
 
             # Update job with success
             self.active_jobs[job_id]["status"] = "completed"

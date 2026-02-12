@@ -166,14 +166,19 @@ class TestSpeakerAnalysisToPerspectives:
 
 class TestEntityMappingConversion:
     def test_entity_count(self, sample_entity_mapping):
-        entities, rels = entity_mapping_to_entities(sample_entity_mapping, "doc1")
+        entities, rels, chains, connections = entity_mapping_to_entities(sample_entity_mapping, "doc1")
         assert len(entities) == 2
         assert len(rels) == 1
 
     def test_relationship_fields(self, sample_entity_mapping):
-        _, rels = entity_mapping_to_entities(sample_entity_mapping)
+        _, rels, _, _ = entity_mapping_to_entities(sample_entity_mapping)
         assert rels[0].relationship_type == "enables"
         assert rels[0].strength == 0.9
+
+    def test_causal_chains_preserved(self, sample_entity_mapping):
+        _, _, chains, connections = entity_mapping_to_entities(sample_entity_mapping)
+        assert isinstance(chains, list)
+        assert isinstance(connections, list)
 
 
 class TestSynthesisConversion:

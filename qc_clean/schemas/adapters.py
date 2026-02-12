@@ -13,6 +13,7 @@ from .analysis_schemas import (
     SpeakerAnalysis,
 )
 from .domain import (
+    AnalysisMemo,
     Code,
     CodeApplication,
     Codebook,
@@ -120,16 +121,26 @@ def speaker_analysis_to_perspectives(
 
 def entity_mapping_to_entities(
     em: EntityMapping,
-    doc_id: Optional[str] = None,
+    doc_ids: Optional[list[str] | str] = None,
 ) -> tuple[list[Entity], list[DomainEntityRelationship]]:
-    """Convert Phase 3 EntityMapping to domain Entities and relationships."""
+    """Convert Phase 3 EntityMapping to domain Entities and relationships.
+
+    *doc_ids* can be a single string or a list of document IDs.
+    """
+    if isinstance(doc_ids, str):
+        resolved_ids = [doc_ids]
+    elif doc_ids:
+        resolved_ids = list(doc_ids)
+    else:
+        resolved_ids = []
+
     # Build entity objects from the flat entity name list
     entity_map: dict[str, Entity] = {}
     for name in em.entities:
         ent = Entity(
             name=name,
             entity_type="concept",
-            doc_ids=[doc_id] if doc_id else [],
+            doc_ids=resolved_ids,
         )
         entity_map[name] = ent
 
@@ -140,7 +151,7 @@ def entity_mapping_to_entities(
                 ent = Entity(
                     name=name,
                     entity_type="concept",
-                    doc_ids=[doc_id] if doc_id else [],
+                    doc_ids=resolved_ids,
                 )
                 entity_map[name] = ent
 
@@ -159,7 +170,11 @@ def entity_mapping_to_entities(
             )
             relationships.append(dr)
 
-    return list(entity_map.values()), relationships
+    # Preserve cause-effect chains and conceptual connections
+    causal_chains = getattr(em, "cause_effect_chains", []) or []
+    connections = getattr(em, "conceptual_connections", []) or []
+
+    return list(entity_map.values()), relationships, causal_chains, connections
 
 
 # ---------------------------------------------------------------------------
@@ -333,9 +348,20 @@ def build_project_state_from_phases(
     state.perspective_analysis = speaker_analysis_to_perspectives(phase2)
 
     # Entities
-    entities, entity_rels = entity_mapping_to_entities(phase3, doc_id)
+    entities, entity_rels, causal_chains, connections = entity_mapping_to_entities(phase3, doc_id)
     state.entities = entities
     state.entity_relationships = entity_rels
+    if causal_chains or connections:
+        memo_parts = []
+        if causal_chains:
+            memo_parts.append("## Cause-Effect Chains\n" + "\n".join(f"- {c}" for c in causal_chains))
+        if connections:
+            memo_parts.append("## Conceptual Connections\n" + "\n".join(f"- {c}" for c in connections))
+        state.memos.append(AnalysisMemo(
+            memo_type="relationship",
+            title="Causal Chains & Conceptual Connections",
+            content="\n\n".join(memo_parts),
+        ))
 
     # Synthesis
     state.synthesis = analysis_synthesis_to_synthesis(phase4)

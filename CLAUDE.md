@@ -18,7 +18,7 @@ qc_cli.py                                    # CLI entry point (thin HTTP client
      -> qc_clean/core/pipeline/              # Stage-based pipeline engine
         -> pipeline_engine.py                # PipelineStage ABC + AnalysisPipeline orchestrator
         -> pipeline_factory.py               # create_pipeline(methodology) factory
-        -> review.py                         # Human review loop (approve/reject/modify codes)
+        -> review.py                         # Human review loop (approve/reject/modify/merge/split)
         -> saturation.py                     # Coding saturation detection
         -> theoretical_sampling.py           # Suggest next documents to code
         -> stages/                           # One file per pipeline stage
@@ -34,9 +34,9 @@ qc_cli.py                                    # CLI entry point (thin HTTP client
            -> gt_theory_integration.py       # GT: Theoretical model building
      -> qc_clean/core/llm/                   # LiteLLM integration with structured extraction
      -> qc_clean/schemas/                    # Pydantic schemas
-        -> analysis_schemas.py               # Legacy phase schemas (CodeHierarchy, SpeakerAnalysis, etc.)
+        -> analysis_schemas.py               # LLM output schemas (CodeHierarchy, SpeakerAnalysis, etc.)
         -> domain.py                         # Unified domain model (ProjectState, Code, Codebook, etc.)
-        -> adapters.py                       # Convert between legacy schemas and domain model
+        -> adapters.py                       # Convert LLM output schemas to domain model
      -> qc_clean/core/persistence/           # JSON file-based project storage
         -> project_store.py                  # Save/load ProjectState as JSON files
 simple_cli_web.py                            # Flask web UI (port 5003, subprocess-based)
@@ -48,11 +48,11 @@ start_server.py                              # Server startup script
 - `qc_clean/core/pipeline/pipeline_engine.py` - PipelineStage ABC and AnalysisPipeline orchestrator
 - `qc_clean/core/pipeline/review.py` - ReviewManager for human-in-the-loop code review
 - `qc_clean/core/persistence/project_store.py` - JSON persistence for ProjectState
-- `qc_clean/schemas/adapters.py` - Convert between legacy and domain schemas
+- `qc_clean/schemas/adapters.py` - Convert LLM output schemas to domain model
 - `qc_clean/plugins/api/api_server.py` - API server (delegates to pipeline)
 - `qc_clean/core/llm/llm_handler.py` - LLM handler with `extract_structured()` method
 - `qc_cli.py` - CLI interface (analyze, project, review, query, status, server)
-- `tests/` - 115 passing tests
+- `tests/` - 116 passing tests
 
 ### How It Works
 - CLI is a pure HTTP client -- all analysis runs on the API server
@@ -64,6 +64,7 @@ start_server.py                              # Server startup script
 - Cross-interview analysis runs automatically for multi-document corpora
 - Saturation detection compares codebooks across iterations
 - Default model: gpt-5-mini via OpenAI API (note: gpt-5 models don't support temperature param)
+- `analysis_schemas.py` defines LLM output shapes; `adapters.py` converts them to domain objects
 
 ## Working Commands
 
@@ -107,4 +108,32 @@ Environment-driven via `qc_clean/config/unified_config.py`. Key env vars:
 - Interview data files are gitignored (sensitive content)
 - Output quality validated: real mention counts, calibrated confidence (0.65-0.90), no fabricated %s
 - `src/` directory is legacy code (gitignored)
-- Existing analysis modules in `qc_clean/core/analysis/` (cross_interview_analyzer, analytical_memos, etc.) are legacy Neo4j-dependent; the pipeline stages supersede them
+- `qc_clean/core/analysis/` has been cleaned -- legacy Neo4j-dependent modules removed
+- Legacy code in `qc_clean/core/cli/robust_cli_operations.py`, `qc_clean/core/cli/cli_robust.py`, and some plugin files still uses old `from core.` import paths; these are not on the active code path but could be cleaned up
+
+## Known Technical Debt
+
+1. **Legacy import paths**: Some plugin/CLI files use `from core.` instead of `from qc_clean.core.` -- these are not reachable from the active pipeline but should be fixed if those modules are revived
+2. **Multiple config managers**: 5 config modules exist (`config_manager.py`, `enhanced_config_manager.py`, `unified_config.py`, `methodology_config.py`, `core/config/env_config.py`); should consolidate
+3. **Schema duplication**: `analysis_schemas.py` (LLM output shapes) and `domain.py` (internal model) overlap; this is intentional -- adapters bridge them
+4. **`grounded_theory.py` workflow**: Large file (73KB) in `core/workflow/` with GT base classes; GT pipeline stages import from it but it contains unused Neo4j storage code
+
+## Next Steps
+
+### Short-term (v2.1)
+- **End-to-end LLM test**: Run the full pipeline against real interviews and validate output quality vs v0.1-lite
+- **Pipeline resume from API**: Wire the `/projects/{id}/resume` endpoint to actually re-run remaining stages
+- **Iterative coding CLI flow**: `project run <id>` command that runs pipeline, pauses for review, resumes
+- **Export formats**: JSON, CSV, ATLAS.ti/NVivo-compatible export from ProjectState
+
+### Medium-term (v2.2)
+- **Web UI for review**: Replace CLI review with browser-based code review interface
+- **Incremental coding**: Add new documents to an existing project and re-code without starting over
+- **Inter-rater reliability**: Run multiple LLM passes and compute agreement metrics
+- **Prompt optimization**: A/B test different prompts for code discovery quality
+
+### Long-term (v3.0)
+- **Multi-model consensus**: Run analysis across GPT/Claude/Gemini and merge codebooks
+- **Active learning**: Use human review decisions to fine-tune prompting for the project
+- **Graph visualization**: Interactive code relationship graphs (replace Neo4j with lightweight in-memory graph)
+- **Collaborative coding**: Multiple human reviewers with conflict resolution

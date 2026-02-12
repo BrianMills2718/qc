@@ -33,11 +33,27 @@ class RelationshipStage(PipelineStage):
 
         phase3_response = await llm.extract_structured(prompt, EntityMapping)
 
-        # Convert to domain entities
-        doc_id = state.corpus.documents[0].id if state.corpus.documents else None
-        entities, entity_rels = entity_mapping_to_entities(phase3_response, doc_id)
+        # Convert to domain entities — pass all doc IDs since entities span documents
+        all_doc_ids = [d.id for d in state.corpus.documents]
+        entities, entity_rels, causal_chains, connections = entity_mapping_to_entities(
+            phase3_response, all_doc_ids
+        )
         state.entities = entities
         state.entity_relationships = entity_rels
+
+        # Store causal chains and connections as a memo
+        if causal_chains or connections:
+            from qc_clean.schemas.domain import AnalysisMemo
+            memo_parts = []
+            if causal_chains:
+                memo_parts.append("## Cause-Effect Chains\n" + "\n".join(f"- {c}" for c in causal_chains))
+            if connections:
+                memo_parts.append("## Conceptual Connections\n" + "\n".join(f"- {c}" for c in connections))
+            state.memos.append(AnalysisMemo(
+                memo_type="relationship",
+                title="Causal Chains & Conceptual Connections",
+                content="\n\n".join(memo_parts),
+            ))
 
         # Stash for downstream
         config["_phase3_json"] = phase3_response.model_dump_json(indent=2)

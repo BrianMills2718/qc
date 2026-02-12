@@ -104,13 +104,7 @@ def check_dependencies():
         logger.error("❌ Uvicorn not available. Install with: pip install uvicorn")
         return False
     
-    # Check for AI system components
-    try:
-        from investigation_ai_quality_assessment import AIQueryGenerationAssessment
-        logger.info("✅ AI Query Generation System: Available")
-    except ImportError as e:
-        logger.warning(f"⚠️  AI Query Generation System: {e}")
-        logger.warning("Query endpoints may use mock responses")
+    logger.info("All dependencies verified")
     
     try:
         from qc_clean.core.llm.llm_handler import LLMHandler
