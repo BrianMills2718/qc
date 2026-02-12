@@ -199,8 +199,9 @@ def _run_project(store: ProjectStore, args) -> int:
     if state.pipeline_status == PipelineStatus.PAUSED_FOR_REVIEW:
         print(f"\nPipeline paused for human review after: {state.current_phase}")
         print(f"  Codes discovered: {len(state.codebook.codes)}")
-        print(f"  Review with: qc_cli review {project_id}")
-        print(f"  Then resume: qc_cli project run {project_id}")
+        print(f"  Review in browser: http://localhost:8002/review/{project_id}")
+        print(f"  Review with CLI:   qc_cli review {project_id}")
+        print(f"  Then resume:       qc_cli project run {project_id}")
     elif state.pipeline_status == PipelineStatus.COMPLETED:
         print("\nPipeline completed successfully.")
         print(f"  Codes: {len(state.codebook.codes)}")

@@ -15,6 +15,7 @@ All stages use structured LLM output via Pydantic schemas + JSON mode. State is 
 qc_cli.py                                    # CLI entry point
   -> qc_clean/core/cli/commands/             # CLI command handlers (analyze, project, review)
   -> qc_clean/plugins/api/                   # FastAPI server (port 8002)
+     -> review_ui.py                         # Browser-based code review UI (self-contained HTML)
      -> qc_clean/core/pipeline/              # Stage-based pipeline engine
         -> pipeline_engine.py                # PipelineStage ABC + AnalysisPipeline orchestrator
         -> pipeline_factory.py               # create_pipeline(methodology) factory
@@ -53,10 +54,11 @@ start_server.py                              # Server startup script
 - `qc_clean/core/persistence/project_store.py` - JSON persistence for ProjectState
 - `qc_clean/schemas/adapters.py` - Convert LLM output schemas to domain model
 - `qc_clean/plugins/api/api_server.py` - API server (delegates to pipeline)
+- `qc_clean/plugins/api/review_ui.py` - Self-contained HTML review UI (string.Template)
 - `qc_clean/core/llm/llm_handler.py` - LLM handler with `extract_structured()` method
 - `qc_clean/core/export/data_exporter.py` - ProjectExporter (JSON/CSV/Markdown from ProjectState)
 - `qc_cli.py` - CLI interface (analyze, project, review, status, server)
-- `tests/` - 147 passing tests
+- `tests/` - 161 passing tests
 
 ### How It Works
 - `project run` runs the pipeline locally (no server needed); `analyze` uses the API server
@@ -97,10 +99,13 @@ python qc_cli.py project export <project_id> --format json --output-file results
 python qc_cli.py project export <project_id> --format csv --output-dir ./export/
 python qc_cli.py project export <project_id> --format markdown --output-file report.md
 
-# Review codes
+# Review codes (CLI)
 python qc_cli.py review <project_id>
 python qc_cli.py review <project_id> --approve-all
 python qc_cli.py review <project_id> --file decisions.json
+
+# Review codes (browser - requires server running)
+# Open http://localhost:8002/review/<project_id>
 
 # Check status
 python qc_cli.py status --server
@@ -152,7 +157,6 @@ Bugs found and fixed during E2E testing:
 - **ATLAS.ti/NVivo export**: Add QDX/QDPX export format for interoperability with other QDA tools
 
 ### Medium-term
-- **Web UI for review**: Replace CLI review with browser-based code review interface
 - **Incremental coding**: Add new documents to an existing project and re-code without starting over
 - **Inter-rater reliability**: Run multiple LLM passes and compute agreement metrics
 - **Prompt optimization**: A/B test different prompts for code discovery quality

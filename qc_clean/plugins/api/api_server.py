@@ -203,7 +203,69 @@ class QCAPIServer:
                 "results": job.get("results", {})
             }
         
-        # ----- Review endpoints -----
+        # ----- Review UI -----
+        @self._app.get("/review/{project_id}")
+        async def review_ui_page(project_id: str):
+            """Serve the browser-based code review UI."""
+            from fastapi.responses import HTMLResponse
+            from qc_clean.plugins.api.review_ui import render_review_page
+            # Validate project exists
+            from qc_clean.core.persistence.project_store import ProjectStore
+            store = ProjectStore()
+            if not store.exists(project_id):
+                raise HTTPException(status_code=404, detail=f"Project not found: {project_id}")
+            return HTMLResponse(render_review_page(project_id))
+
+        # ----- Review API endpoints -----
+        @self._app.get("/projects/{project_id}/review/codes")
+        async def get_review_codes(project_id: str):
+            """Get codes with grouped applications for the review UI."""
+            from qc_clean.core.persistence.project_store import ProjectStore
+            from qc_clean.core.pipeline.review import ReviewManager
+            store = ProjectStore()
+            try:
+                state = store.load(project_id)
+            except FileNotFoundError:
+                raise HTTPException(status_code=404, detail=f"Project not found: {project_id}")
+
+            # Build doc_id -> doc_name lookup
+            doc_names = {doc.id: doc.name for doc in state.corpus.documents}
+
+            # Group applications by code_id
+            apps_by_code: Dict[str, list] = {}
+            for app in state.code_applications:
+                apps_by_code.setdefault(app.code_id, []).append({
+                    "id": app.id,
+                    "doc_name": doc_names.get(app.doc_id, app.doc_id),
+                    "quote_text": app.quote_text,
+                    "speaker": app.speaker,
+                    "confidence": app.confidence,
+                })
+
+            codes = []
+            for code in state.codebook.codes:
+                codes.append({
+                    "id": code.id,
+                    "name": code.name,
+                    "description": code.description,
+                    "mention_count": code.mention_count,
+                    "confidence": code.confidence,
+                    "provenance": code.provenance.value,
+                    "example_quotes": code.example_quotes,
+                    "applications": apps_by_code.get(code.id, []),
+                })
+
+            return {
+                "project_id": state.id,
+                "project_name": state.name,
+                "pipeline_status": state.pipeline_status.value,
+                "codes": codes,
+                "summary": {
+                    "codes_count": len(state.codebook.codes),
+                    "applications_count": len(state.code_applications),
+                },
+            }
+
         @self._app.get("/projects/{project_id}/review")
         async def get_review_items(project_id: str):
             """Get pending review items for a project."""
@@ -217,9 +279,56 @@ class QCAPIServer:
             rm = ReviewManager(state)
             return rm.get_review_summary()
 
-        @self._app.post("/projects/{project_id}/review")
+        @self._app.post("/projects/{project_id}/review/decisions")
         async def submit_review_decisions(project_id: str, body: Dict):
-            """Submit review decisions for a project."""
+            """Submit review decisions for a project (used by review UI)."""
+            from qc_clean.core.persistence.project_store import ProjectStore
+            from qc_clean.core.pipeline.review import ReviewManager
+            from qc_clean.schemas.domain import HumanReviewDecision, ReviewAction
+            store = ProjectStore()
+            try:
+                state = store.load(project_id)
+            except FileNotFoundError:
+                raise HTTPException(status_code=404, detail=f"Project not found: {project_id}")
+            rm = ReviewManager(state)
+            decisions = []
+            for d in body.get("decisions", []):
+                decisions.append(HumanReviewDecision(
+                    target_type=d["target_type"],
+                    target_id=d["target_id"],
+                    action=ReviewAction(d["action"]),
+                    rationale=d.get("rationale", ""),
+                    new_value=d.get("new_value"),
+                ))
+            result = rm.apply_decisions(decisions)
+            store.save(state)
+            return {
+                "applied": result["applied"],
+                "codes_remaining": len(state.codebook.codes),
+                "can_resume": rm.can_resume(),
+            }
+
+        @self._app.post("/projects/{project_id}/review/approve-all")
+        async def approve_all_codes(project_id: str):
+            """Bulk approve all codes in the codebook."""
+            from qc_clean.core.persistence.project_store import ProjectStore
+            from qc_clean.core.pipeline.review import ReviewManager
+            store = ProjectStore()
+            try:
+                state = store.load(project_id)
+            except FileNotFoundError:
+                raise HTTPException(status_code=404, detail=f"Project not found: {project_id}")
+            rm = ReviewManager(state)
+            result = rm.approve_all_codes()
+            store.save(state)
+            return {
+                "applied": result["applied"],
+                "can_resume": rm.can_resume(),
+            }
+
+        @self._app.post("/projects/{project_id}/review")
+        async def submit_review_legacy(project_id: str, body: Dict):
+            """Legacy review endpoint (kept for backward compat)."""
             from qc_clean.core.persistence.project_store import ProjectStore
             from qc_clean.core.pipeline.review import ReviewManager
             from qc_clean.schemas.domain import HumanReviewDecision, ReviewAction
@@ -296,8 +405,12 @@ class QCAPIServer:
             {"method": "POST", "path": "/analyze", "description": "Start analysis"},
             {"method": "GET", "path": "/jobs/{job_id}", "description": "Get job status"},
             {"method": "GET", "path": "/projects/{project_id}", "description": "Get project status"},
-            {"method": "GET", "path": "/projects/{project_id}/review", "description": "Get review items"},
-            {"method": "POST", "path": "/projects/{project_id}/review", "description": "Submit review decisions"},
+            {"method": "GET", "path": "/review/{project_id}", "description": "Review UI page"},
+            {"method": "GET", "path": "/projects/{project_id}/review/codes", "description": "Get codes for review UI"},
+            {"method": "GET", "path": "/projects/{project_id}/review", "description": "Get review summary"},
+            {"method": "POST", "path": "/projects/{project_id}/review/decisions", "description": "Submit review decisions"},
+            {"method": "POST", "path": "/projects/{project_id}/review/approve-all", "description": "Approve all codes"},
+            {"method": "POST", "path": "/projects/{project_id}/review", "description": "Submit review (legacy)"},
             {"method": "POST", "path": "/projects/{project_id}/resume", "description": "Resume pipeline after review"},
         ]
     
