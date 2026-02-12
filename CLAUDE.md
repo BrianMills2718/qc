@@ -42,7 +42,7 @@ qc_cli.py                                    # CLI entry point
      -> qc_clean/core/persistence/           # JSON file-based project storage
         -> project_store.py                  # Save/load ProjectState as JSON files
      -> qc_clean/core/export/               # Export from ProjectState
-        -> data_exporter.py                  # ProjectExporter (JSON/CSV/Markdown)
+        -> data_exporter.py                  # ProjectExporter (JSON/CSV/Markdown/QDPX)
 simple_cli_web.py                            # Flask web UI (port 5003, subprocess-based)
 start_server.py                              # Server startup script
 ```
@@ -56,7 +56,7 @@ start_server.py                              # Server startup script
 - `qc_clean/plugins/api/api_server.py` - API server (delegates to pipeline)
 - `qc_clean/plugins/api/review_ui.py` - Self-contained HTML review UI (string.Template)
 - `qc_clean/core/llm/llm_handler.py` - LLM handler with `extract_structured()` method
-- `qc_clean/core/export/data_exporter.py` - ProjectExporter (JSON/CSV/Markdown from ProjectState)
+- `qc_clean/core/export/data_exporter.py` - ProjectExporter (JSON/CSV/Markdown/QDPX from ProjectState)
 - `qc_cli.py` - CLI interface (analyze, project, review, status, server)
 - `tests/` - 201 passing tests
 
@@ -154,14 +154,15 @@ Bugs found and fixed during E2E testing:
 
 ### Short-term
 - **Pipeline stage tests**: Unit tests for individual stages with mocked LLM handler
+- **Unused import cleanup**: ~52 unused imports scattered across files (cosmetic)
 
 ### Medium-term
+- **Inter-rater reliability**: Run multiple LLM passes and compute Cohen's kappa / Krippendorff's alpha agreement metrics. Unique differentiator — only LLMCode (Jupyter-based) is exploring this.
 - **Incremental coding**: Add new documents to an existing project and re-code without starting over
-- **Inter-rater reliability**: Run multiple LLM passes and compute agreement metrics
+- **Graph visualization**: Use NetworkX to generate code relationship graphs, render with D3.js or Cytoscape.js in the browser review UI. No graph database needed — data scale is too small for Neo4j.
 - **Prompt optimization**: A/B test different prompts for code discovery quality
 
 ### Long-term
 - **Multi-model consensus**: Run analysis across GPT/Claude/Gemini and merge codebooks
 - **Active learning**: Use human review decisions to fine-tune prompting for the project
-- **Graph visualization**: Interactive code relationship graphs
 - **Collaborative coding**: Multiple human reviewers with conflict resolution
