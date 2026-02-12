@@ -222,18 +222,38 @@ class TestTruncationDetection:
 
 class TestSpeakerModeDetection:
 
-    def test_single_interview_is_single_speaker(self):
-        interviews = [{"name": "test.docx", "content": "Some text."}]
-        is_single = len(interviews) == 1
-        assert is_single is True
+    def test_single_speaker_when_no_speakers_detected(self):
+        """A single doc with no detected speakers is treated as single-speaker."""
+        from qc_clean.schemas.domain import Document, Corpus
+        corpus = Corpus(documents=[
+            Document(name="test.txt", content="Some text.", detected_speakers=[]),
+        ])
+        all_speakers = [s for doc in corpus.documents for s in doc.detected_speakers]
+        assert len(all_speakers) <= 1
 
-    def test_multiple_interviews_is_multi_speaker(self):
-        interviews = [
-            {"name": "a.docx", "content": "Text A."},
-            {"name": "b.docx", "content": "Text B."},
-        ]
-        is_single = len(interviews) == 1
-        assert is_single is False
+    def test_multi_speaker_focus_group(self):
+        """A single doc with multiple detected speakers is treated as multi-speaker."""
+        from qc_clean.schemas.domain import Document, Corpus
+        corpus = Corpus(documents=[
+            Document(name="focus_group.txt", content="text",
+                     detected_speakers=["Alice", "Bob", "Carol"]),
+        ])
+        all_speakers = [s for doc in corpus.documents for s in doc.detected_speakers]
+        assert len(all_speakers) > 1
+
+    def test_multiple_docs_multi_speaker(self):
+        """Multiple docs with distinct speakers are multi-speaker."""
+        from qc_clean.schemas.domain import Document, Corpus
+        corpus = Corpus(documents=[
+            Document(name="a.txt", content="A", detected_speakers=["Alice"]),
+            Document(name="b.txt", content="B", detected_speakers=["Bob"]),
+        ])
+        all_speakers = []
+        for doc in corpus.documents:
+            for s in doc.detected_speakers:
+                if s not in all_speakers:
+                    all_speakers.append(s)
+        assert len(all_speakers) > 1
 
 
 # ---------------------------------------------------------------------------

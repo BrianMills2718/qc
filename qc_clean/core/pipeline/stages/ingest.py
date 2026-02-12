@@ -33,7 +33,12 @@ class IngestStage(PipelineStage):
         interviews = config.get("interviews", [])
 
         if state.corpus.num_documents > 0 and not interviews:
-            logger.info("Corpus already populated (%d docs), skipping ingest",
+            # Corpus already populated (e.g. via add-docs).
+            # Run speaker detection on any docs that are missing it.
+            for doc in state.corpus.documents:
+                if not doc.detected_speakers and doc.content:
+                    doc.detected_speakers = _detect_speakers(doc.content)
+            logger.info("Corpus already populated (%d docs), ran speaker detection",
                         state.corpus.num_documents)
             return state
 
@@ -81,14 +86,31 @@ class IngestStage(PipelineStage):
 
 
 def _detect_speakers(text: str) -> list[str]:
-    """Simple heuristic speaker detection from transcript text."""
+    """Simple heuristic speaker detection from transcript text.
+
+    Matches two common transcript formats:
+      - ``Speaker Name:  text``   (colon-delimited)
+      - ``Speaker Name   0:03``   (name + timestamp, e.g. auto-transcription tools)
+    """
     import re
 
     speakers: list[str] = []
-    # Match lines like "Speaker Name:" at the start of a line
-    pattern = re.compile(r"^([A-Z][A-Za-z\s.'-]{1,40}):\s", re.MULTILINE)
-    for match in pattern.finditer(text):
+
+    # Pattern 1: "Name:" at start of line
+    colon_pattern = re.compile(r"^([A-Z][A-Za-z\s.'-]{1,40}):\s", re.MULTILINE)
+    for match in colon_pattern.finditer(text):
         name = match.group(1).strip()
         if name and name not in speakers:
             speakers.append(name)
+
+    # Pattern 2: "Name   0:03" (name followed by whitespace + timestamp)
+    # Use [^\S\n] to match horizontal whitespace only (not newlines)
+    timestamp_pattern = re.compile(
+        r"^([A-Z][A-Za-z .'-]{1,40})[^\S\n]{2,}\d+:\d{2}\b", re.MULTILINE
+    )
+    for match in timestamp_pattern.finditer(text):
+        name = match.group(1).strip()
+        if name and name not in speakers:
+            speakers.append(name)
+
     return speakers

@@ -301,3 +301,47 @@ class TestIngestStage:
         doc = result.corpus.documents[0]
         assert "Interviewer" in doc.detected_speakers
         assert "Jane Smith" in doc.detected_speakers
+
+    def test_speaker_detection_timestamp_format(self):
+        from qc_clean.core.pipeline.stages.ingest import IngestStage
+
+        stage = IngestStage()
+        state = ProjectState()
+        config = {
+            "interviews": [{
+                "name": "focus_group.txt",
+                "content": "Todd Helmus   0:03\nSome dialog here.\n\nJane Doe   1:45\nMore dialog.\n\nTodd Helmus   3:22\nBack again.",
+            }]
+        }
+
+        result = asyncio.get_event_loop().run_until_complete(
+            stage.execute(state, config)
+        )
+
+        doc = result.corpus.documents[0]
+        assert "Todd Helmus" in doc.detected_speakers
+        assert "Jane Doe" in doc.detected_speakers
+        assert len(doc.detected_speakers) == 2
+
+    def test_speaker_detection_on_preloaded_docs(self):
+        from qc_clean.core.pipeline.stages.ingest import IngestStage
+
+        stage = IngestStage()
+        # Simulate add-docs: corpus already populated, no speakers detected
+        state = ProjectState(
+            corpus=Corpus(documents=[
+                Document(
+                    name="interview.txt",
+                    content="Alice Smith   0:01\nHello.\n\nBob Jones   0:05\nHi.",
+                    detected_speakers=[],
+                )
+            ])
+        )
+
+        result = asyncio.get_event_loop().run_until_complete(
+            stage.execute(state, {})
+        )
+
+        doc = result.corpus.documents[0]
+        assert "Alice Smith" in doc.detected_speakers
+        assert "Bob Jones" in doc.detected_speakers

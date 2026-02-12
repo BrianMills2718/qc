@@ -28,7 +28,15 @@ class PerspectiveStage(PipelineStage):
         combined_text = _build_combined_text(state)
         phase1_text = config.get("_phase1_json", "{}")
         num_interviews = state.corpus.num_documents
-        is_single_speaker = num_interviews == 1
+
+        # Determine single vs multi-speaker from detected speakers, not doc count.
+        # A single document can be a multi-speaker focus group.
+        all_speakers = []
+        for doc in state.corpus.documents:
+            for s in doc.detected_speakers:
+                if s not in all_speakers:
+                    all_speakers.append(s)
+        is_single_speaker = len(all_speakers) <= 1
 
         prompt = _build_phase2_prompt(
             combined_text, phase1_text, num_interviews, is_single_speaker
