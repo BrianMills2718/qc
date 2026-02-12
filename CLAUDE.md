@@ -58,7 +58,7 @@ start_server.py                              # Server startup script
 - `qc_clean/core/llm/llm_handler.py` - LLM handler with `extract_structured()` method
 - `qc_clean/core/export/data_exporter.py` - ProjectExporter (JSON/CSV/Markdown from ProjectState)
 - `qc_cli.py` - CLI interface (analyze, project, review, status, server)
-- `tests/` - 161 passing tests
+- `tests/` - 201 passing tests
 
 ### How It Works
 - `project run` runs the pipeline locally (no server needed); `analyze` uses the API server
@@ -98,6 +98,7 @@ python qc_cli.py project run <project_id> --review                  # pause for 
 python qc_cli.py project export <project_id> --format json --output-file results.json
 python qc_cli.py project export <project_id> --format csv --output-dir ./export/
 python qc_cli.py project export <project_id> --format markdown --output-file report.md
+python qc_cli.py project export <project_id> --format qdpx --output-file export.qdpx  # ATLAS.ti/NVivo
 
 # Review codes (CLI)
 python qc_cli.py review <project_id>
@@ -147,14 +148,12 @@ Bugs found and fixed during E2E testing:
 ## Known Technical Debt
 
 1. **Schema duplication**: `analysis_schemas.py` / `gt_schemas.py` (LLM output shapes) and `domain.py` (internal model) overlap; this is intentional -- adapters bridge them
-2. **Config duplication**: `unified_config.py` and `methodology_config.py` in `qc_clean/config/` are used by `llm_handler.py`; `env_config.py` in `qc_clean/core/config/` is used by the server. Should consolidate.
-3. **Test gaps**: No unit tests for LLM handler, real pipeline stages (require mocked LLM), API HTTP handlers, or most CLI commands
+2. **Test gaps**: No unit tests for real pipeline stages (require mocked LLM) or most CLI commands
 
 ## Next Steps
 
 ### Short-term
-- **LLM handler tests**: Unit tests with mocked LiteLLM calls
-- **ATLAS.ti/NVivo export**: Add QDX/QDPX export format for interoperability with other QDA tools
+- **Pipeline stage tests**: Unit tests for individual stages with mocked LLM handler
 
 ### Medium-term
 - **Incremental coding**: Add new documents to an existing project and re-code without starting over

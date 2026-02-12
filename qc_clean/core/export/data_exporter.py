@@ -7,11 +7,15 @@ DataExporter: legacy dict-based exporter (kept for backward compatibility).
 """
 
 import csv
+import io
 import json
 import logging
-from datetime import datetime
+import uuid
+import zipfile
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+from xml.etree.ElementTree import Element, SubElement, ElementTree
 
 from qc_clean.schemas.domain import ProjectState
 
@@ -239,6 +243,148 @@ class ProjectExporter:
 
         path.write_text("\n".join(lines), encoding="utf-8")
         logger.info("Exported Markdown to %s", path)
+        return str(path)
+
+    def export_qdpx(self, state: ProjectState, output_file: Optional[str] = None) -> str:
+        """
+        Export as REFI-QDA QDPX file (ZIP containing project.qde XML + source texts).
+
+        Compatible with ATLAS.ti, NVivo, MAXQDA, and other REFI-QDA tools.
+        Returns the output path.
+        """
+        path = Path(output_file) if output_file else Path(f"{state.name}.qdpx")
+        path.parent.mkdir(parents=True, exist_ok=True)
+
+        NS = "urn:QDA-XML:project:1.0"
+        user_guid = str(uuid.uuid4())
+        timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+        # -- Root --
+        root = Element(f"{{{NS}}}Project")
+        root.set("name", state.name)
+        root.set("basePath", "")
+        root.set("creatingUserGUID", user_guid)
+        root.set("creationDateTime", timestamp)
+        root.set("modifyingUserGUID", user_guid)
+        root.set("modifiedDateTime", timestamp)
+
+        desc = SubElement(root, f"{{{NS}}}Description")
+        desc.text = f"{state.config.methodology.value} analysis — {state.corpus.num_documents} document(s)"
+
+        # -- Users --
+        users_el = SubElement(root, f"{{{NS}}}Users")
+        user_el = SubElement(users_el, f"{{{NS}}}User")
+        user_el.set("guid", user_guid)
+        user_el.set("name", "QC Researcher")
+
+        # -- CodeBook --
+        codebook_el = SubElement(root, f"{{{NS}}}CodeBook")
+        codes_el = SubElement(codebook_el, f"{{{NS}}}Codes")
+
+        # Build children map for hierarchy
+        children_map: Dict[str, list] = {}
+        for code in state.codebook.codes:
+            pid = code.parent_id or "__root__"
+            children_map.setdefault(pid, []).append(code)
+
+        # Assign stable colours based on code index
+        palette = [
+            "#E63946", "#457B9D", "#2A9D8F", "#E9C46A",
+            "#F4A261", "#264653", "#6A4C93", "#1982C4",
+            "#8AC926", "#FF595E", "#6D6875", "#B5838D",
+        ]
+
+        def _add_code(parent_el, code, depth=0):
+            code_el = SubElement(parent_el, f"{{{NS}}}Code")
+            code_el.set("guid", code.id)
+            code_el.set("name", code.name)
+            code_el.set("isCodable", "true")
+            code_el.set("color", palette[depth % len(palette)])
+            if code.description:
+                d = SubElement(code_el, f"{{{NS}}}Description")
+                d.text = code.description
+            for child in children_map.get(code.id, []):
+                _add_code(code_el, child, depth + 1)
+
+        for code in children_map.get("__root__", []):
+            _add_code(codes_el, code)
+
+        # Also add codes that have a parent_id but whose parent doesn't exist
+        # (orphans — put them at top level)
+        all_ids = {c.id for c in state.codebook.codes}
+        for code in state.codebook.codes:
+            if code.parent_id and code.parent_id not in all_ids and code.parent_id != "__root__":
+                _add_code(codes_el, code)
+
+        # -- Sources + Code Applications --
+        sources_el = SubElement(root, f"{{{NS}}}Sources")
+        source_files: Dict[str, str] = {}
+
+        # Group applications by doc_id
+        apps_by_doc: Dict[str, list] = {}
+        for app in state.code_applications:
+            apps_by_doc.setdefault(app.doc_id, []).append(app)
+
+        for doc in state.corpus.documents:
+            source_el = SubElement(sources_el, f"{{{NS}}}TextSource")
+            source_el.set("guid", doc.id)
+            source_el.set("name", doc.name)
+            txt_filename = f"{doc.id}.txt"
+            source_el.set("plainTextPath", f"internal://{txt_filename}")
+            source_el.set("creatingUser", user_guid)
+            source_el.set("creationDateTime", timestamp)
+            source_el.set("modifyingUser", user_guid)
+            source_el.set("modifiedDateTime", timestamp)
+
+            source_files[txt_filename] = doc.content
+
+            for app in apps_by_doc.get(doc.id, []):
+                # Find quote position in document text
+                start_pos = doc.content.find(app.quote_text) if doc.content else -1
+                if start_pos == -1:
+                    # If exact match fails, skip (quote may have been truncated)
+                    continue
+                end_pos = start_pos + len(app.quote_text)
+
+                sel_el = SubElement(source_el, f"{{{NS}}}PlainTextSelection")
+                sel_el.set("guid", app.id)
+                sel_el.set("startPosition", str(start_pos))
+                sel_el.set("endPosition", str(end_pos))
+                sel_el.set("creatingUser", user_guid)
+                sel_el.set("creationDateTime", timestamp)
+                sel_el.set("modifyingUser", user_guid)
+                sel_el.set("modifiedDateTime", timestamp)
+
+                coding_el = SubElement(sel_el, f"{{{NS}}}Coding")
+                coding_el.set("guid", str(uuid.uuid4()))
+                coding_el.set("creatingUser", user_guid)
+                coding_el.set("creationDateTime", timestamp)
+
+                ref_el = SubElement(coding_el, f"{{{NS}}}CodeRef")
+                ref_el.set("targetGUID", app.code_id)
+
+        # -- Notes (memos) --
+        if state.memos:
+            notes_el = SubElement(root, f"{{{NS}}}Notes")
+            for memo in state.memos:
+                note_el = SubElement(notes_el, f"{{{NS}}}Note")
+                note_el.set("guid", memo.id)
+                note_el.set("name", memo.title or memo.memo_type)
+                note_el.set("creatingUser", user_guid)
+                note_el.set("creationDateTime", timestamp)
+                note_desc = SubElement(note_el, f"{{{NS}}}Description")
+                note_desc.text = memo.content
+
+        # -- Write ZIP --
+        tree = ElementTree(root)
+        with zipfile.ZipFile(path, "w", zipfile.ZIP_DEFLATED) as zf:
+            xml_buf = io.BytesIO()
+            tree.write(xml_buf, encoding="utf-8", xml_declaration=True)
+            zf.writestr("project.qde", xml_buf.getvalue())
+            for filename, content in source_files.items():
+                zf.writestr(f"sources/{filename}", content.encode("utf-8"))
+
+        logger.info("Exported QDPX to %s", path)
         return str(path)
 
 

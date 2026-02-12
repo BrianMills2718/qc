@@ -14,12 +14,7 @@ import litellm
 from dotenv import load_dotenv
 from qc_clean.core.utils.error_handler import LLMError
 from qc_clean.config.methodology_config import GroundedTheoryConfig
-
-try:
-    from qc_clean.config.unified_config import UnifiedConfig
-    ConfigType = UnifiedConfig
-except ImportError:
-    ConfigType = GroundedTheoryConfig
+from qc_clean.config.unified_config import UnifiedConfig
 
 logger = logging.getLogger(__name__)
 

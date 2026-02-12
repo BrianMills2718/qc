@@ -254,6 +254,10 @@ def _export_project(store: ProjectStore, args) -> int:
         elif fmt == "markdown":
             path = exporter.export_markdown(state, output_file)
             print(f"Exported Markdown to: {path}")
+        elif fmt == "qdpx":
+            path = exporter.export_qdpx(state, output_file)
+            print(f"Exported QDPX to: {path}")
+            print("  Compatible with ATLAS.ti, NVivo, MAXQDA")
         else:
             print(f"Unsupported format: {fmt}", file=sys.stderr)
             return 1
