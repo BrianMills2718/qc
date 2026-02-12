@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Development Server Startup
-Starts FastAPI server with query endpoints for UI integration testing
+Starts FastAPI server for qualitative coding analysis
 """
 
 import asyncio
@@ -52,14 +52,10 @@ async def start_development_server():
         if success:
             base_url = f"http://{config.server_host}:{config.server_port}"
             logger.info("✅ Server started successfully!")
-            logger.info("📡 Server endpoints:")
+            logger.info("Server endpoints:")
             logger.info(f"  Health Check: {base_url}/health")
-            logger.info(f"  Query Endpoint: {base_url}/api/query/natural-language")
-            logger.info(f"  API Documentation: {base_url}/docs")
-            logger.info("")
-            logger.info("🌐 UI Access:")
-            logger.info("  Direct File: Open UI_planning/mockups/02_project_workspace.html")
-            logger.info(f"  Server Served: {base_url}/ui/02_project_workspace.html (if static files enabled)")
+            logger.info(f"  Analyze:      {base_url}/analyze")
+            logger.info(f"  API Docs:     {base_url}/docs")
             logger.info("")
             logger.info("Press Ctrl+C to stop the server")
             
@@ -106,13 +102,6 @@ def check_dependencies():
     
     logger.info("All dependencies verified")
     
-    try:
-        from qc_clean.core.llm.llm_handler import LLMHandler
-        logger.info("✅ LLM Handler: Available")
-    except ImportError as e:
-        logger.warning(f"⚠️  LLM Handler: {e}")
-        logger.warning("Query processing may not work correctly")
-        
     return True
 
 if __name__ == "__main__":

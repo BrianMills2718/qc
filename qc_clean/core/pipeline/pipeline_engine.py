@@ -92,6 +92,15 @@ class AnalysisPipeline:
         state.pipeline_status = PipelineStatus.RUNNING
         skipping = resume_from is not None
 
+        # Validate resume_from matches a known stage
+        if resume_from is not None:
+            known_stages = {s.name() for s in self.stages}
+            if resume_from not in known_stages:
+                raise ValueError(
+                    f"Invalid resume_from '{resume_from}'. "
+                    f"Known stages: {', '.join(sorted(known_stages))}"
+                )
+
         for stage in self.stages:
             # Handle resume: skip stages already completed
             if skipping:

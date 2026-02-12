@@ -123,7 +123,6 @@ def handle_server_status(api_client: APIClient) -> int:
         
         endpoints_to_test = [
             ('/health', 'Health check'),
-            ('/api/query/health', 'Query health check')
         ]
         
         for endpoint, description in endpoints_to_test:
@@ -189,12 +188,12 @@ def handle_job_status(api_client: APIClient, job_id: str) -> int:
                 print("📋 RESULTS SUMMARY:")
                 print("-" * 20)
                 
-                if 'codes' in results:
-                    print(f"Codes identified: {len(results['codes'])}")
-                
-                if 'themes' in results:
-                    print(f"Themes found: {len(results['themes'])}")
-                
+                if 'codes_identified' in results:
+                    print(f"Codes identified: {len(results['codes_identified'])}")
+
+                if 'key_themes' in results:
+                    print(f"Themes found: {len(results['key_themes'])}")
+
                 if 'recommendations' in results:
                     print(f"Recommendations: {len(results['recommendations'])}")
         

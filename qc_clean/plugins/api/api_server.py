@@ -150,7 +150,8 @@ class QCAPIServer:
                 raise HTTPException(status_code=503, detail="Background processing not enabled")
             
             # Create job ID
-            job_id = f"job_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+            import uuid
+            job_id = f"job_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:6]}"
             
             # Store job info
             self.active_jobs[job_id] = {
@@ -441,13 +442,13 @@ class QCAPIServer:
             # Include GT-specific results when applicable
             if state.core_categories:
                 structured_results["core_categories"] = [
-                    {"name": cc.name, "description": cc.description}
+                    {"name": cc.category_name, "definition": cc.definition}
                     for cc in state.core_categories
                 ]
             if state.theoretical_model:
                 structured_results["theoretical_model"] = {
                     "model_name": state.theoretical_model.model_name,
-                    "narrative": state.theoretical_model.narrative,
+                    "theoretical_framework": state.theoretical_model.theoretical_framework,
                 }
 
             # Update job with success
@@ -469,7 +470,7 @@ class QCAPIServer:
             "initialized": True,
             "running": self.is_running,
             "host": self.config.get('host', 'localhost'),
-            "port": self.config.get('port', 8000),
+            "port": self.config.get('port', 8002),
             "background_processing": self.background_processing_enabled,
             "active_jobs": len(self.active_jobs),
             "endpoints_registered": len(self.endpoints)

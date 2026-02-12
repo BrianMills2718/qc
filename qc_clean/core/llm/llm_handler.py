@@ -91,23 +91,39 @@ class LLMHandler:
             self.base_delay = base_delay
             
             # Infer API key from model name
-            if self.model_name.startswith("gpt-"):
-                self.api_key = os.getenv("OPENAI_API_KEY")
-            else:
-                self.api_key = os.getenv("GEMINI_API_KEY")
-            
+            self.api_key = self._infer_api_key(self.model_name)
+
             logger.info(f"LLM Handler initialized with defaults: {self.model_name}, temp={temperature}, retries={max_retries}")
-        
+
         # Validate API key is available
         if not self.api_key:
-            provider = getattr(config, 'api_provider', 'google') if config else 'google'
-            raise ValueError(f"No API key found for provider '{provider}'. Please set the appropriate API key in environment variables.")
+            raise ValueError(
+                f"No API key found for model '{self.model_name}'. "
+                f"Set OPENAI_API_KEY, ANTHROPIC_API_KEY, or GEMINI_API_KEY."
+            )
         
         # Store config for access to other parameters
         self.config = config
         
         self.logger = logging.getLogger(__name__)
     
+    @staticmethod
+    def _infer_api_key(model_name: str) -> Optional[str]:
+        """Infer the correct API key from model name prefix."""
+        name = model_name.lower()
+        if name.startswith("gpt-") or name.startswith("o1") or name.startswith("o3"):
+            return os.getenv("OPENAI_API_KEY")
+        if name.startswith("claude"):
+            return os.getenv("ANTHROPIC_API_KEY")
+        if name.startswith("gemini") or name.startswith("models/gemini"):
+            return os.getenv("GEMINI_API_KEY")
+        # Fallback: try each provider in order
+        return (
+            os.getenv("OPENAI_API_KEY")
+            or os.getenv("ANTHROPIC_API_KEY")
+            or os.getenv("GEMINI_API_KEY")
+        )
+
     def _calculate_backoff_delay(self, attempt: int) -> float:
         """Calculate exponential backoff delay with jitter"""
         delay = self.base_delay * (2 ** attempt)

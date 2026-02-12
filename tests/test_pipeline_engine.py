@@ -345,3 +345,37 @@ class TestIngestStage:
         doc = result.corpus.documents[0]
         assert "Alice Smith" in doc.detected_speakers
         assert "Bob Jones" in doc.detected_speakers
+
+
+class TestResumeValidation:
+    """Regression tests for resume_from validation."""
+
+    def test_invalid_resume_from_raises(self):
+        """Invalid resume_from should raise ValueError, not silently skip."""
+        pipeline = AnalysisPipeline(stages=[
+            PassthroughStage("stage1"),
+            PassthroughStage("stage2"),
+        ])
+        state = ProjectState(name="test")
+
+        with pytest.raises(ValueError, match="Invalid resume_from"):
+            asyncio.get_event_loop().run_until_complete(
+                pipeline.run(state, {}, resume_from="nonexistent_stage")
+            )
+
+    def test_valid_resume_from_works(self):
+        """Valid resume_from should skip prior stages and run the rest."""
+        pipeline = AnalysisPipeline(stages=[
+            PassthroughStage("stage1"),
+            PassthroughStage("stage2"),
+            PassthroughStage("stage3"),
+        ])
+        state = ProjectState(name="test")
+
+        result = asyncio.get_event_loop().run_until_complete(
+            pipeline.run(state, {}, resume_from="stage1")
+        )
+        # stage1 skipped, stage2+3 run => 2 phase results
+        assert len(result.phase_results) == 2
+        assert result.phase_results[0].phase_name == "stage2"
+        assert result.phase_results[1].phase_name == "stage3"
