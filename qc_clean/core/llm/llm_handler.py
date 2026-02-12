@@ -12,16 +12,11 @@ from typing import Dict, Optional, Any, Type
 from pydantic import BaseModel
 import litellm
 from dotenv import load_dotenv
-import sys
-from pathlib import Path
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+from qc_clean.core.utils.error_handler import LLMError
+from qc_clean.config.methodology_config import GroundedTheoryConfig
 
-from core.utils.error_handler import LLMError
-from config.methodology_config import GroundedTheoryConfig
-
-# Support for new UnifiedConfig - try import, fall back to old config for compatibility
 try:
-    from config.unified_config import UnifiedConfig
+    from qc_clean.config.unified_config import UnifiedConfig
     ConfigType = UnifiedConfig
 except ImportError:
     ConfigType = GroundedTheoryConfig

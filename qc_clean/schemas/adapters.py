@@ -240,7 +240,7 @@ def open_codes_to_codebook(
 
 def codebook_to_open_codes(codebook: Codebook) -> list:
     """Convert domain Codebook back to GT OpenCode list (lazy import to avoid circular)."""
-    from qc_clean.core.workflow.grounded_theory import OpenCode
+    from qc_clean.schemas.gt_schemas import OpenCode
 
     open_codes = []
     for code in codebook.codes:

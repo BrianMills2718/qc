@@ -51,6 +51,15 @@ python qc_cli.py project create --name "My Study" --methodology grounded_theory
 # Add documents
 python qc_cli.py project add-docs <project_id> --files interview1.docx interview2.docx
 
+# Run the pipeline (local, no server needed)
+python qc_cli.py project run <project_id>
+python qc_cli.py project run <project_id> --review    # pause for human review
+
+# Export results
+python qc_cli.py project export <project_id> --format json --output-file results.json
+python qc_cli.py project export <project_id> --format csv --output-dir ./export/
+python qc_cli.py project export <project_id> --format markdown --output-file report.md
+
 # List projects
 python qc_cli.py project list
 
@@ -99,7 +108,7 @@ python qc_cli.py status --job <job_id>
 ## Development
 
 ```bash
-# Run tests (116 passing)
+# Run tests (132 passing)
 python -m pytest tests/ -v
 
 # Start web UI (optional, port 5003)

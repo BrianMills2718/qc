@@ -8,7 +8,7 @@ import logging
 from pydantic import BaseModel, Field
 from typing import List
 
-from qc_clean.core.workflow.grounded_theory import AxialRelationship
+from qc_clean.schemas.gt_schemas import AxialRelationship
 from qc_clean.schemas.adapters import axial_relationships_to_code_relationships
 from qc_clean.schemas.domain import ProjectState
 from ..pipeline_engine import PipelineStage

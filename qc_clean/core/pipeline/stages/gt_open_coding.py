@@ -8,7 +8,7 @@ import logging
 from pydantic import BaseModel, Field
 from typing import List
 
-from qc_clean.core.workflow.grounded_theory import OpenCode
+from qc_clean.schemas.gt_schemas import OpenCode
 from qc_clean.schemas.adapters import open_codes_to_codebook
 from qc_clean.schemas.domain import CodeApplication, ProjectState, Provenance
 from ..pipeline_engine import PipelineStage

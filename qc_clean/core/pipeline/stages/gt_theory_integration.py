@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import logging
 
-from qc_clean.core.workflow.grounded_theory import TheoreticalModel
+from qc_clean.schemas.gt_schemas import TheoreticalModel
 from qc_clean.schemas.adapters import theoretical_model_to_domain
 from qc_clean.schemas.domain import ProjectState
 from ..pipeline_engine import PipelineStage

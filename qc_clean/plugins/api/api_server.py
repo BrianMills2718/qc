@@ -202,14 +202,6 @@ class QCAPIServer:
                 "results": job.get("results", {})
             }
         
-        # Register natural language query endpoints
-        try:
-            from .query_endpoints import query_endpoints
-            query_endpoints.register_endpoints(self._app)
-            self._logger.info("Natural language query endpoints registered successfully")
-        except Exception as e:
-            self._logger.error(f"Failed to register query endpoints: {e}")
-        
         # ----- Review endpoints -----
         @self._app.get("/projects/{project_id}/review")
         async def get_review_items(project_id: str):
@@ -220,7 +212,7 @@ class QCAPIServer:
             try:
                 state = store.load(project_id)
             except FileNotFoundError:
-                return {"error": f"Project not found: {project_id}"}
+                raise HTTPException(status_code=404, detail=f"Project not found: {project_id}")
             rm = ReviewManager(state)
             return rm.get_review_summary()
 
@@ -234,7 +226,7 @@ class QCAPIServer:
             try:
                 state = store.load(project_id)
             except FileNotFoundError:
-                return {"error": f"Project not found: {project_id}"}
+                raise HTTPException(status_code=404, detail=f"Project not found: {project_id}")
             rm = ReviewManager(state)
             decisions = []
             for d in body.get("decisions", []):
@@ -301,13 +293,11 @@ class QCAPIServer:
         self.endpoints = [
             {"method": "GET", "path": "/health", "description": "Health check"},
             {"method": "POST", "path": "/analyze", "description": "Start analysis"},
-            {"method": "POST", "path": "/api/query/natural-language", "description": "Natural language to Cypher query"},
-            {"method": "GET", "path": "/api/query/health", "description": "Query system health check"},
             {"method": "GET", "path": "/jobs/{job_id}", "description": "Get job status"},
+            {"method": "GET", "path": "/projects/{project_id}", "description": "Get project status"},
             {"method": "GET", "path": "/projects/{project_id}/review", "description": "Get review items"},
             {"method": "POST", "path": "/projects/{project_id}/review", "description": "Submit review decisions"},
             {"method": "POST", "path": "/projects/{project_id}/resume", "description": "Resume pipeline after review"},
-            {"method": "GET", "path": "/projects/{project_id}", "description": "Get project status"},
         ]
     
     async def _process_project_pipeline(self, project_id: str, resume_from: str):

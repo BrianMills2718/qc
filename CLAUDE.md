@@ -1,4 +1,4 @@
-# Qualitative Coding Analysis System (v2.0)
+# Qualitative Coding Analysis System (v2.1)
 
 ## What This Project Does
 
@@ -12,7 +12,7 @@ All stages use structured LLM output via Pydantic schemas + JSON mode. State is 
 ## Architecture
 
 ```
-qc_cli.py                                    # CLI entry point (thin HTTP client)
+qc_cli.py                                    # CLI entry point
   -> qc_clean/core/cli/commands/             # CLI command handlers (analyze, project, review)
   -> qc_clean/plugins/api/                   # FastAPI server (port 8002)
      -> qc_clean/core/pipeline/              # Stage-based pipeline engine
@@ -23,22 +23,25 @@ qc_cli.py                                    # CLI entry point (thin HTTP client
         -> theoretical_sampling.py           # Suggest next documents to code
         -> stages/                           # One file per pipeline stage
            -> ingest.py                      # Document ingestion + speaker detection
-           -> thematic_coding.py             # Phase 1: Hierarchical code discovery
-           -> perspective.py                 # Phase 2: Speaker/participant analysis
-           -> relationship.py                # Phase 3: Entity & relationship mapping
-           -> synthesis.py                   # Phase 4: Synthesis & recommendations
+           -> thematic_coding.py             # Hierarchical code discovery
+           -> perspective.py                 # Speaker/participant analysis
+           -> relationship.py                # Entity & relationship mapping
+           -> synthesis.py                   # Synthesis & recommendations
            -> cross_interview.py             # Cross-document pattern analysis
            -> gt_open_coding.py              # GT: Open coding
            -> gt_axial_coding.py             # GT: Axial coding (relationships)
            -> gt_selective_coding.py         # GT: Core category identification
            -> gt_theory_integration.py       # GT: Theoretical model building
-     -> qc_clean/core/llm/                   # LiteLLM integration with structured extraction
+     -> qc_clean/core/llm/llm_handler.py    # LiteLLM with extract_structured()
      -> qc_clean/schemas/                    # Pydantic schemas
-        -> analysis_schemas.py               # LLM output schemas (CodeHierarchy, SpeakerAnalysis, etc.)
         -> domain.py                         # Unified domain model (ProjectState, Code, Codebook, etc.)
+        -> analysis_schemas.py               # LLM output schemas (CodeHierarchy, SpeakerAnalysis, etc.)
+        -> gt_schemas.py                     # GT LLM output schemas (OpenCode, CoreCategory, etc.)
         -> adapters.py                       # Convert LLM output schemas to domain model
      -> qc_clean/core/persistence/           # JSON file-based project storage
         -> project_store.py                  # Save/load ProjectState as JSON files
+     -> qc_clean/core/export/               # Export from ProjectState
+        -> data_exporter.py                  # ProjectExporter (JSON/CSV/Markdown)
 simple_cli_web.py                            # Flask web UI (port 5003, subprocess-based)
 start_server.py                              # Server startup script
 ```
@@ -51,8 +54,8 @@ start_server.py                              # Server startup script
 - `qc_clean/schemas/adapters.py` - Convert LLM output schemas to domain model
 - `qc_clean/plugins/api/api_server.py` - API server (delegates to pipeline)
 - `qc_clean/core/llm/llm_handler.py` - LLM handler with `extract_structured()` method
-- `qc_cli.py` - CLI interface (analyze, project, review, query, status, server)
 - `qc_clean/core/export/data_exporter.py` - ProjectExporter (JSON/CSV/Markdown from ProjectState)
+- `qc_cli.py` - CLI interface (analyze, project, review, query, status, server)
 - `tests/` - 132 passing tests
 
 ### How It Works
@@ -71,10 +74,10 @@ start_server.py                              # Server startup script
 ## Working Commands
 
 ```bash
-# Start server first
+# Start server first (only needed for `analyze` command)
 python start_server.py
 
-# Run analysis (via API)
+# Run analysis via API
 python qc_cli.py analyze --files file1.docx file2.docx --format json
 python qc_cli.py analyze --directory /path/to/interviews/ --format json --output-file results.json
 
@@ -109,10 +112,12 @@ python -m pytest tests/ -v
 
 ## Configuration
 
-Environment-driven via `qc_clean/config/unified_config.py`. Key env vars:
-- `API_PROVIDER` (openai/google/anthropic), `MODEL`, `OPENAI_API_KEY`/`GEMINI_API_KEY`/`ANTHROPIC_API_KEY`
-- `METHODOLOGY` (grounded_theory/thematic_analysis), `CODING_APPROACH`, `VALIDATION_LEVEL`
-- `THEORETICAL_SENSITIVITY`, `CODING_DEPTH`, `TEMPERATURE`
+The LLM handler reads API keys from environment variables. Default model: `gpt-5-mini`.
+
+Key env vars:
+- `OPENAI_API_KEY` / `GEMINI_API_KEY` / `ANTHROPIC_API_KEY` -- API key for the model provider
+- `qc_clean/config/unified_config.py` -- `UnifiedConfig` dataclass reads env vars: `API_PROVIDER`, `MODEL`, `METHODOLOGY`, `CODING_APPROACH`, `VALIDATION_LEVEL`, `TEMPERATURE`
+- `qc_clean/core/config/env_config.py` -- Active server config (used by `start_server.py`)
 
 ## Development Notes
 
@@ -120,33 +125,28 @@ Environment-driven via `qc_clean/config/unified_config.py`. Key env vars:
 - Interview data files are gitignored (sensitive content)
 - Output quality validated: real mention counts, calibrated confidence (0.65-0.90), no fabricated %s
 - `src/` directory is legacy code (gitignored)
-- `qc_clean/core/analysis/` has been cleaned -- legacy Neo4j-dependent modules removed
-- Legacy code in `qc_clean/core/cli/robust_cli_operations.py`, `qc_clean/core/cli/cli_robust.py`, and some plugin files still uses old `from core.` import paths; these are not on the active code path but could be cleaned up
 
 ## Known Technical Debt
 
-1. **Legacy import paths**: Some plugin/CLI files use `from core.` instead of `from qc_clean.core.` -- these are not reachable from the active pipeline but should be fixed if those modules are revived
-2. **Multiple config managers**: 5 config modules exist (`config_manager.py`, `enhanced_config_manager.py`, `unified_config.py`, `methodology_config.py`, `core/config/env_config.py`); should consolidate
-3. **Schema duplication**: `analysis_schemas.py` (LLM output shapes) and `domain.py` (internal model) overlap; this is intentional -- adapters bridge them
-4. **`grounded_theory.py` workflow**: Large file (73KB) in `core/workflow/` with GT base classes; GT pipeline stages import from it but it contains unused Neo4j storage code
+1. **Schema duplication**: `analysis_schemas.py` / `gt_schemas.py` (LLM output shapes) and `domain.py` (internal model) overlap; this is intentional -- adapters bridge them
+2. **Config duplication**: `unified_config.py` and `methodology_config.py` in `qc_clean/config/` are used by `llm_handler.py`; `env_config.py` in `qc_clean/core/config/` is used by the server. Should consolidate.
+3. **Test gaps**: No unit tests for LLM handler, real pipeline stages (require mocked LLM), API HTTP handlers, or most CLI commands
 
 ## Next Steps
 
-### Short-term (v2.1)
-- **End-to-end LLM test**: Run the full pipeline against real interviews and validate output quality vs v0.1-lite
-- ~~**Pipeline resume from API**: Wire the `/projects/{id}/resume` endpoint to actually re-run remaining stages~~ DONE
-- ~~**Iterative coding CLI flow**: `project run <id>` command that runs pipeline, pauses for review, resumes~~ DONE
-- ~~**Export formats**: JSON, CSV, Markdown export from ProjectState~~ DONE
+### Short-term
+- **End-to-end LLM test**: Run the full pipeline against real interviews and validate output quality
+- **LLM handler tests**: Unit tests with mocked LiteLLM calls
 - **ATLAS.ti/NVivo export**: Add QDX/QDPX export format for interoperability with other QDA tools
 
-### Medium-term (v2.2)
+### Medium-term
 - **Web UI for review**: Replace CLI review with browser-based code review interface
 - **Incremental coding**: Add new documents to an existing project and re-code without starting over
 - **Inter-rater reliability**: Run multiple LLM passes and compute agreement metrics
 - **Prompt optimization**: A/B test different prompts for code discovery quality
 
-### Long-term (v3.0)
+### Long-term
 - **Multi-model consensus**: Run analysis across GPT/Claude/Gemini and merge codebooks
 - **Active learning**: Use human review decisions to fine-tune prompting for the project
-- **Graph visualization**: Interactive code relationship graphs (replace Neo4j with lightweight in-memory graph)
+- **Graph visualization**: Interactive code relationship graphs
 - **Collaborative coding**: Multiple human reviewers with conflict resolution

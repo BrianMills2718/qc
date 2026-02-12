@@ -8,7 +8,7 @@ import logging
 from pydantic import BaseModel, Field
 from typing import List
 
-from qc_clean.core.workflow.grounded_theory import CoreCategory
+from qc_clean.schemas.gt_schemas import CoreCategory
 from qc_clean.schemas.adapters import core_category_to_domain
 from qc_clean.schemas.domain import ProjectState
 from ..pipeline_engine import PipelineStage
