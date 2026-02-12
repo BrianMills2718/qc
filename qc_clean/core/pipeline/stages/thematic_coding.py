@@ -7,12 +7,11 @@ from __future__ import annotations
 
 import logging
 
+from typing import List
+
 from qc_clean.schemas.analysis_schemas import CodeHierarchy
-from qc_clean.schemas.adapters import (
-    code_hierarchy_to_applications,
-    code_hierarchy_to_codebook,
-)
-from qc_clean.schemas.domain import ProjectState
+from qc_clean.schemas.adapters import code_hierarchy_to_codebook
+from qc_clean.schemas.domain import CodeApplication, Document, ProjectState, Provenance
 from ..pipeline_engine import PipelineStage
 
 logger = logging.getLogger(__name__)
@@ -46,13 +45,26 @@ class ThematicCodingStage(PipelineStage):
         codebook = code_hierarchy_to_codebook(phase1_response)
         state.codebook = codebook
 
-        # Build applications from all docs
+        # Build applications, matching quotes to source documents.
+        # The LLM produced codes from all docs combined, so we match each
+        # quote to the document(s) it actually appears in.
         all_applications = []
-        for doc in state.corpus.documents:
-            apps = code_hierarchy_to_applications(
-                phase1_response, doc.id, codebook.version
-            )
-            all_applications.extend(apps)
+        for tc in phase1_response.codes:
+            for quote in tc.example_quotes:
+                matched_docs = _match_quote_to_docs(quote, state.corpus.documents)
+                if not matched_docs:
+                    # Fallback: if no exact match, assign to first doc
+                    matched_docs = [state.corpus.documents[0].id]
+                for doc_id in matched_docs:
+                    app = CodeApplication(
+                        code_id=tc.id,
+                        doc_id=doc_id,
+                        quote_text=quote,
+                        confidence=tc.discovery_confidence,
+                        applied_by=Provenance.LLM,
+                        codebook_version=codebook.version,
+                    )
+                    all_applications.append(app)
         state.code_applications = all_applications
 
         # Stash raw response in config for downstream stages
@@ -111,3 +123,31 @@ INTERVIEW CONTENT:
 {combined_text}
 
 Generate a complete hierarchical taxonomy of codes."""
+
+
+def _match_quote_to_docs(quote: str, documents: List[Document]) -> List[str]:
+    """Match a quote to the document(s) it appears in.
+
+    Uses substring matching with a normalized version of the quote.
+    Returns a list of matching document IDs (usually 1).
+    """
+    # Normalize for fuzzy matching: lowercase, collapse whitespace
+    import re
+    norm_quote = re.sub(r"\s+", " ", quote.lower().strip())
+
+    # Use a shorter snippet for matching (LLM may paraphrase edges)
+    # Take middle 60% of the quote for more reliable matching
+    if len(norm_quote) > 40:
+        start = len(norm_quote) // 5
+        end = len(norm_quote) * 4 // 5
+        search_snippet = norm_quote[start:end]
+    else:
+        search_snippet = norm_quote
+
+    matched = []
+    for doc in documents:
+        norm_content = re.sub(r"\s+", " ", doc.content.lower())
+        if search_snippet in norm_content:
+            matched.append(doc.id)
+
+    return matched
