@@ -91,7 +91,7 @@ JSON output includes:
 ## Development
 
 ```bash
-# Run tests (143 passing)
+# Run tests (147 passing)
 python -m pytest tests/ -v
 
 # Start web UI (optional, port 5003)

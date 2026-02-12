@@ -56,7 +56,7 @@ start_server.py                              # Server startup script
 - `qc_clean/core/llm/llm_handler.py` - LLM handler with `extract_structured()` method
 - `qc_clean/core/export/data_exporter.py` - ProjectExporter (JSON/CSV/Markdown from ProjectState)
 - `qc_cli.py` - CLI interface (analyze, project, review, status, server)
-- `tests/` - 143 passing tests
+- `tests/` - 147 passing tests
 
 ### How It Works
 - `project run` runs the pipeline locally (no server needed); `analyze` uses the API server

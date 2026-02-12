@@ -109,13 +109,17 @@ class LLMHandler:
     
     @staticmethod
     def _infer_api_key(model_name: str) -> Optional[str]:
-        """Infer the correct API key from model name prefix."""
+        """Infer the correct API key from model name prefix.
+
+        Handles both bare names (``gpt-5-mini``) and LiteLLM
+        provider-prefixed names (``anthropic/claude-3-opus``).
+        """
         name = model_name.lower()
-        if name.startswith("gpt-") or name.startswith("o1") or name.startswith("o3"):
+        if name.startswith("gpt-") or name.startswith("o1") or name.startswith("o3") or name.startswith("openai/"):
             return os.getenv("OPENAI_API_KEY")
-        if name.startswith("claude"):
+        if "claude" in name or name.startswith("anthropic/"):
             return os.getenv("ANTHROPIC_API_KEY")
-        if name.startswith("gemini") or name.startswith("models/gemini"):
+        if "gemini" in name or name.startswith("vertex_ai/"):
             return os.getenv("GEMINI_API_KEY")
         # Fallback: try each provider in order
         return (
