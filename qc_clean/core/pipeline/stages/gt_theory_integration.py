@@ -8,7 +8,7 @@ import logging
 
 from qc_clean.schemas.gt_schemas import TheoreticalModel
 from qc_clean.schemas.adapters import theoretical_model_to_domain
-from qc_clean.schemas.domain import ProjectState
+from qc_clean.schemas.domain import AnalysisMemo, ProjectState
 from ..pipeline_engine import PipelineStage
 
 logger = logging.getLogger(__name__)
@@ -56,10 +56,23 @@ Create a theory that is:
 - Grounded in the data analyzed
 - Conceptually clear and well-integrated
 - Has explanatory and predictive power
-- Connects to broader theoretical understanding"""
+- Connects to broader theoretical understanding
+
+ANALYTICAL MEMO: After completing the analysis above, write a brief analytical memo (3-5 sentences) in the "analytical_memo" field recording:
+- Key analytical decisions you made and why
+- Patterns or surprises that emerged during analysis
+- Uncertainties or areas needing further investigation"""
 
         response = await llm.extract_structured(prompt, TheoreticalModel)
         state.theoretical_model = theoretical_model_to_domain(response)
+
+        # Extract analytical memo
+        if response.analytical_memo:
+            state.memos.append(AnalysisMemo(
+                memo_type="theoretical",
+                title="Theory Integration Memo",
+                content=response.analytical_memo,
+            ))
 
         logger.info(
             "GT theory integration complete: %s",

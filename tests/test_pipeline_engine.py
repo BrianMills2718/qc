@@ -214,17 +214,18 @@ class TestPipelineFactory:
     def test_create_default_pipeline(self):
         from qc_clean.core.pipeline.pipeline_factory import create_pipeline
         pipeline = create_pipeline(methodology="default")
-        assert len(pipeline.stages) == 6
+        assert len(pipeline.stages) == 7
         names = [s.name() for s in pipeline.stages]
         assert names == [
             "ingest", "thematic_coding", "perspective",
-            "relationship", "synthesis", "cross_interview",
+            "relationship", "synthesis", "negative_case_analysis",
+            "cross_interview",
         ]
 
     def test_create_gt_pipeline(self):
         from qc_clean.core.pipeline.pipeline_factory import create_pipeline
         pipeline = create_pipeline(methodology="grounded_theory")
-        assert len(pipeline.stages) == 6
+        assert len(pipeline.stages) == 7
         names = [s.name() for s in pipeline.stages]
         assert names == [
             "ingest",
@@ -232,6 +233,7 @@ class TestPipelineFactory:
             "gt_axial_coding",
             "gt_selective_coding",
             "gt_theory_integration",
+            "negative_case_analysis",
             "cross_interview",
         ]
 

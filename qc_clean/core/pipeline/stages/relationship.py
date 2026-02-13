@@ -41,6 +41,16 @@ class RelationshipStage(PipelineStage):
         state.entities = entities
         state.entity_relationships = entity_rels
 
+        # Extract analytical memo
+        if phase3_response.analytical_memo:
+            from qc_clean.schemas.domain import AnalysisMemo
+            state.memos.append(AnalysisMemo(
+                memo_type="pattern",
+                title="Relationship Mapping Memo",
+                content=phase3_response.analytical_memo,
+                code_refs=[e.id for e in entities],
+            ))
+
         # Store causal chains and connections as a memo
         if causal_chains or connections:
             from qc_clean.schemas.domain import AnalysisMemo
@@ -95,5 +105,10 @@ Phase 2 Speakers: {phase2_text}
 
 INTERVIEW CONTENT:
 {combined_text}
+
+ANALYTICAL MEMO: After completing the analysis above, write a brief analytical memo (3-5 sentences) in the "analytical_memo" field recording:
+- Key analytical decisions you made and why
+- Patterns or surprises that emerged during analysis
+- Uncertainties or areas needing further investigation
 
 Provide focused entity relationship mapping."""

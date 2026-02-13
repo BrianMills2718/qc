@@ -10,7 +10,7 @@ from typing import List
 
 from qc_clean.schemas.gt_schemas import CoreCategory
 from qc_clean.schemas.adapters import core_category_to_domain
-from qc_clean.schemas.domain import ProjectState
+from qc_clean.schemas.domain import AnalysisMemo, ProjectState
 from ..pipeline_engine import PipelineStage
 
 logger = logging.getLogger(__name__)
@@ -19,6 +19,10 @@ logger = logging.getLogger(__name__)
 class CoreCategoriesResponse(BaseModel):
     core_categories: List[CoreCategory] = Field(
         description="List of core categories identified"
+    )
+    analytical_memo: str = Field(
+        default="",
+        description="Analytical memo: record your reasoning, uncertainties, and emerging patterns",
     )
 
 
@@ -63,7 +67,12 @@ For each core category, provide:
 5. Why it has explanatory power
 6. Rationale for why this is a core integrating category
 
-The core categories should be the central organizing concepts for your emerging theory."""
+The core categories should be the central organizing concepts for your emerging theory.
+
+ANALYTICAL MEMO: After completing the analysis above, write a brief analytical memo (3-5 sentences) in the "analytical_memo" field recording:
+- Key analytical decisions you made and why
+- Patterns or surprises that emerged during analysis
+- Uncertainties or areas needing further investigation"""
 
         response = await llm.extract_structured(prompt, CoreCategoriesResponse)
 
@@ -71,6 +80,15 @@ The core categories should be the central organizing concepts for your emerging 
             core_category_to_domain(cc)
             for cc in response.core_categories
         ]
+
+        # Extract analytical memo
+        if response.analytical_memo:
+            state.memos.append(AnalysisMemo(
+                memo_type="theoretical",
+                title="Selective Coding Memo",
+                content=response.analytical_memo,
+                code_refs=[cc.category_name for cc in response.core_categories],
+            ))
 
         # Stash for downstream
         config["_gt_core_categories"] = response.core_categories

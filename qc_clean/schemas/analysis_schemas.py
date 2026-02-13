@@ -18,6 +18,10 @@ class ThematicCode(BaseModel):
     example_quotes: List[str] = Field(..., description="1-3 illustrative quotes")
     mention_count: int = Field(..., description="Approximate number of times this theme is mentioned or referenced in the interviews")
     discovery_confidence: float = Field(..., ge=0.0, le=1.0, description="Confidence score from 0.0 to 1.0 using the FULL range: 0.0-0.3 weak, 0.3-0.6 moderate, 0.6-0.8 strong, 0.8-1.0 very strong")
+    reasoning: str = Field(
+        default="",
+        description="Brief explanation of why this code was created and what analytical decision led to it",
+    )
 
 
 class CodeHierarchy(BaseModel):
@@ -25,6 +29,10 @@ class CodeHierarchy(BaseModel):
     codes: List[ThematicCode] = Field(..., description="Complete hierarchical code structure")
     total_codes: int = Field(..., description="Total number of codes identified")
     analysis_confidence: float = Field(..., description="Overall analysis confidence")
+    analytical_memo: str = Field(
+        default="",
+        description="Analytical memo: record your reasoning, uncertainties, and emerging patterns",
+    )
 
 
 class ParticipantProfile(BaseModel):
@@ -42,6 +50,10 @@ class SpeakerAnalysis(BaseModel):
     consensus_themes: List[str] = Field(..., description="For multiple speakers: areas of agreement. For single speaker: the speaker's strongest/most consistent positions")
     divergent_viewpoints: List[str] = Field(..., description="For multiple speakers: areas of disagreement. For single speaker: internal tensions, ambivalences, or contradictions in the speaker's views")
     perspective_mapping: Dict[str, List[str]] = Field(..., description="Participant name to their top 5-7 most emphasized code IDs")
+    analytical_memo: str = Field(
+        default="",
+        description="Analytical memo: record your reasoning, uncertainties, and emerging patterns",
+    )
 
 
 class EntityRelationship(BaseModel):
@@ -59,6 +71,10 @@ class EntityMapping(BaseModel):
     relationships: List[EntityRelationship] = Field(..., description="Entity relationships")
     cause_effect_chains: List[str] = Field(..., description="Identified causal relationships")
     conceptual_connections: List[str] = Field(..., description="Cross-cutting connections")
+    analytical_memo: str = Field(
+        default="",
+        description="Analytical memo: record your reasoning, uncertainties, and emerging patterns",
+    )
 
 
 class AnalysisRecommendation(BaseModel):
@@ -83,3 +99,7 @@ class AnalysisSynthesis(BaseModel):
     cross_cutting_patterns: List[str] = Field(..., description="Patterns across themes")
     actionable_recommendations: List[AnalysisRecommendation] = Field(..., description="Specific recommendations")
     confidence_assessment: Dict[str, Any] = Field(..., description="Confidence levels by theme, each with level/score/evidence")
+    analytical_memo: str = Field(
+        default="",
+        description="Analytical memo: record your reasoning, uncertainties, and emerging patterns",
+    )

@@ -10,7 +10,7 @@ from typing import List
 
 from qc_clean.schemas.gt_schemas import OpenCode
 from qc_clean.schemas.adapters import open_codes_to_codebook
-from qc_clean.schemas.domain import CodeApplication, ProjectState, Provenance
+from qc_clean.schemas.domain import AnalysisMemo, CodeApplication, ProjectState, Provenance
 from ..pipeline_engine import PipelineStage
 
 logger = logging.getLogger(__name__)
@@ -18,6 +18,10 @@ logger = logging.getLogger(__name__)
 
 class OpenCodesResponse(BaseModel):
     open_codes: List[OpenCode] = Field(description="List of open codes identified")
+    analytical_memo: str = Field(
+        default="",
+        description="Analytical memo: record your reasoning, uncertainties, and emerging patterns",
+    )
 
 
 class GTOpenCodingStage(PipelineStage):
@@ -48,7 +52,8 @@ Analyze the following interview data and identify key concepts and categories. F
 4. Note dimensional variations (different ways this concept appears)
 5. Provide supporting quotes that demonstrate this concept
 6. Assess frequency and confidence
-7. ORGANIZE HIERARCHICALLY:
+7. For each code, include a "reasoning" field: 1-2 sentences explaining WHY you created this code — what analytical decision led to it, what data pattern you noticed
+8. ORGANIZE HIERARCHICALLY:
    - Level 0: Top-level parent codes (3-5 major themes)
    - Level 1: Child codes under each parent (2-4 per parent)
    - Level 2+: Further sub-codes if the data supports it
@@ -62,7 +67,12 @@ Follow open coding principles:
 Interview Data:
 {combined_text}
 
-Generate comprehensive open codes that capture the key concepts in this data."""
+Generate comprehensive open codes that capture the key concepts in this data.
+
+ANALYTICAL MEMO: After completing the analysis above, write a brief analytical memo (3-5 sentences) in the "analytical_memo" field recording:
+- Key analytical decisions you made and why
+- Patterns or surprises that emerged during analysis
+- Uncertainties or areas needing further investigation"""
 
         irr_suffix = config.get("irr_prompt_suffix", "")
         if irr_suffix:
@@ -104,6 +114,15 @@ Generate comprehensive open codes that capture the key concepts in this data."""
                             codebook_version=codebook.version,
                         ))
         state.code_applications = all_apps
+
+        # Extract analytical memo
+        if response.analytical_memo:
+            state.memos.append(AnalysisMemo(
+                memo_type="coding",
+                title="Open Coding Memo",
+                content=response.analytical_memo,
+                code_refs=[c.id for c in state.codebook.codes],
+            ))
 
         # Stash raw open codes for downstream GT stages
         config["_gt_open_codes"] = open_codes

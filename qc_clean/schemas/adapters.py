@@ -55,6 +55,7 @@ def code_hierarchy_to_codebook(
             example_quotes=tc.example_quotes,
             mention_count=tc.mention_count,
             confidence=tc.discovery_confidence,
+            reasoning=tc.reasoning,
         )
         codes.append(code)
 
@@ -226,6 +227,7 @@ def open_codes_to_codebook(
             example_quotes=oc.supporting_quotes,
             mention_count=oc.frequency,
             confidence=oc.confidence,
+            reasoning=oc.reasoning,
         )
         codes.append(code)
 

@@ -8,7 +8,7 @@ import logging
 
 from qc_clean.schemas.analysis_schemas import SpeakerAnalysis
 from qc_clean.schemas.adapters import speaker_analysis_to_perspectives
-from qc_clean.schemas.domain import ProjectState
+from qc_clean.schemas.domain import AnalysisMemo, ProjectState
 from ..pipeline_engine import PipelineStage
 
 logger = logging.getLogger(__name__)
@@ -44,6 +44,15 @@ class PerspectiveStage(PipelineStage):
 
         phase2_response = await llm.extract_structured(prompt, SpeakerAnalysis)
         state.perspective_analysis = speaker_analysis_to_perspectives(phase2_response)
+
+        # Extract analytical memo
+        if phase2_response.analytical_memo:
+            state.memos.append(AnalysisMemo(
+                memo_type="pattern",
+                title="Perspective Analysis Memo",
+                content=phase2_response.analytical_memo,
+                doc_refs=[d.id for d in state.corpus.documents],
+            ))
 
         # Stash for downstream
         config["_phase2_json"] = phase2_response.model_dump_json(indent=2)
@@ -89,6 +98,11 @@ PHASE 1 CODES (for reference):
 INTERVIEW CONTENT:
 {combined_text}
 
+ANALYTICAL MEMO: After completing the analysis above, write a brief analytical memo (3-5 sentences) in the "analytical_memo" field recording:
+- Key analytical decisions you made and why
+- Patterns or surprises that emerged during analysis
+- Uncertainties or areas needing further investigation
+
 Provide detailed single-speaker analysis."""
     else:
         return f"""Analyze the different participant perspectives across {num_interviews} interviews.
@@ -106,5 +120,10 @@ PHASE 1 CODES (for reference):
 
 INTERVIEW CONTENT:
 {combined_text}
+
+ANALYTICAL MEMO: After completing the analysis above, write a brief analytical memo (3-5 sentences) in the "analytical_memo" field recording:
+- Key analytical decisions you made and why
+- Patterns or surprises that emerged during analysis
+- Uncertainties or areas needing further investigation
 
 Provide detailed multi-speaker analysis."""

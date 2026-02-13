@@ -36,6 +36,7 @@ def create_pipeline(
     from .stages.synthesis import SynthesisStage
 
     from .stages.cross_interview import CrossInterviewStage
+    from .stages.negative_case import NegativeCaseStage
 
     if methodology == Methodology.GROUNDED_THEORY.value or methodology == "grounded_theory":
         from .stages.gt_open_coding import GTOpenCodingStage
@@ -49,6 +50,7 @@ def create_pipeline(
             GTAxialCodingStage(pause_for_review=enable_human_review),
             GTSelectiveCodingStage(),
             GTTheoryIntegrationStage(),
+            NegativeCaseStage(),
             CrossInterviewStage(),  # only runs if corpus > 1 doc
         ]
     else:
@@ -59,6 +61,7 @@ def create_pipeline(
             PerspectiveStage(),
             RelationshipStage(),
             SynthesisStage(),
+            NegativeCaseStage(),
             CrossInterviewStage(),  # only runs if corpus > 1 doc
         ]
 

@@ -20,6 +20,10 @@ class OpenCode(BaseModel):
     supporting_quotes: List[str] = Field(description="Quotes that support this code")
     frequency: int = Field(description="Number of occurrences")
     confidence: float = Field(description="Confidence in this code 0-1")
+    reasoning: str = Field(
+        default="",
+        description="Brief explanation of why this code was created and what analytical decision led to it",
+    )
 
     # Hierarchical structure fields
     parent_id: Optional[str] = Field(default=None, description="ID of parent code if this is a sub-code")
@@ -74,6 +78,10 @@ class TheoreticalModel(BaseModel):
     scope_conditions: List[str] = Field(description="Conditions under which theory applies")
     implications: List[str] = Field(description="Implications of the theory")
     future_research: List[str] = Field(description="Suggested future research directions")
+    analytical_memo: str = Field(
+        default="",
+        description="Analytical memo: record your reasoning, uncertainties, and emerging patterns",
+    )
 
     @property
     def core_category(self) -> str:

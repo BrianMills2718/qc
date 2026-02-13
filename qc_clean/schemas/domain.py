@@ -103,6 +103,7 @@ class Code(BaseModel):
     example_quotes: List[str] = Field(default_factory=list)
     mention_count: int = 0
     confidence: float = 0.0
+    reasoning: str = ""
 
 
 class Codebook(BaseModel):

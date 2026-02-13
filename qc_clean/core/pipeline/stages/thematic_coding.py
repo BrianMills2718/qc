@@ -11,7 +11,7 @@ from typing import List
 
 from qc_clean.schemas.analysis_schemas import CodeHierarchy
 from qc_clean.schemas.adapters import code_hierarchy_to_codebook
-from qc_clean.schemas.domain import CodeApplication, Document, ProjectState, Provenance
+from qc_clean.schemas.domain import AnalysisMemo, CodeApplication, Document, ProjectState, Provenance
 from ..pipeline_engine import PipelineStage
 
 logger = logging.getLogger(__name__)
@@ -71,6 +71,15 @@ class ThematicCodingStage(PipelineStage):
                     all_applications.append(app)
         state.code_applications = all_applications
 
+        # Extract analytical memo
+        if phase1_response.analytical_memo:
+            state.memos.append(AnalysisMemo(
+                memo_type="coding",
+                title="Thematic Coding Analysis Memo",
+                content=phase1_response.analytical_memo,
+                code_refs=[c.id for c in state.codebook.codes],
+            ))
+
         # Stash raw response in config for downstream stages
         config["_phase1_json"] = phase1_response.model_dump_json(indent=2)
 
@@ -119,6 +128,7 @@ CRITICAL INSTRUCTIONS:
      * 0.3-0.6: Moderately supported (mentioned a few times, some detail)
      * 0.6-0.8: Strongly supported (discussed substantively, with examples)
      * 0.8-1.0: Very strongly supported (major theme with extensive discussion)
+   - reasoning: 1-2 sentences explaining WHY you created this code — what analytical decision led to it, what data pattern you noticed
 
 6. Hierarchy: Level 0 = main themes, Level 1 = sub-themes, Level 2 = detailed codes
 7. Codes must be mutually distinct — if two codes would share >50% of their supporting quotes, merge them
@@ -126,7 +136,12 @@ CRITICAL INSTRUCTIONS:
 INTERVIEW CONTENT:
 {combined_text}
 
-Generate a complete hierarchical taxonomy of codes."""
+Generate a complete hierarchical taxonomy of codes.
+
+ANALYTICAL MEMO: After completing the analysis above, write a brief analytical memo (3-5 sentences) in the "analytical_memo" field recording:
+- Key analytical decisions you made and why
+- Patterns or surprises that emerged during analysis
+- Uncertainties or areas needing further investigation"""
 
 
 def _match_quote_to_docs(quote: str, documents: List[Document]) -> List[str]:

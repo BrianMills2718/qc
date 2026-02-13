@@ -53,13 +53,13 @@ class ProjectExporter:
             writer = csv.writer(f)
             writer.writerow([
                 "code_id", "name", "description", "parent_id",
-                "level", "mention_count", "confidence", "provenance",
+                "level", "mention_count", "confidence", "provenance", "reasoning",
             ])
             for code in state.codebook.codes:
                 writer.writerow([
                     code.id, code.name, code.description, code.parent_id or "",
                     code.level, code.mention_count, f"{code.confidence:.2f}",
-                    code.provenance.value,
+                    code.provenance.value, code.reasoning,
                 ])
         paths.append(str(codes_path))
 
@@ -86,6 +86,28 @@ class ProjectExporter:
                     f"{app.confidence:.2f}",
                 ])
         paths.append(str(apps_path))
+
+        # -- memos.csv (only if memos exist) --
+        if state.memos:
+            memos_path = out / "memos.csv"
+            with open(memos_path, "w", newline="", encoding="utf-8") as f:
+                writer = csv.writer(f)
+                writer.writerow([
+                    "memo_id", "memo_type", "title", "content",
+                    "code_refs", "doc_refs", "created_by", "created_at",
+                ])
+                for memo in state.memos:
+                    writer.writerow([
+                        memo.id,
+                        memo.memo_type,
+                        memo.title,
+                        memo.content,
+                        ";".join(memo.code_refs),
+                        ";".join(memo.doc_refs),
+                        memo.created_by.value,
+                        memo.created_at,
+                    ])
+            paths.append(str(memos_path))
 
         # -- irr_matrix.csv (only if IRR has been run) --
         if state.irr_result and state.irr_result.coding_matrix:
@@ -173,6 +195,17 @@ class ProjectExporter:
                 _render_tree(parent)
             _a("")
 
+        # Audit trail (per-code reasoning)
+        codes_with_reasoning = [c for c in state.codebook.codes if c.reasoning]
+        if codes_with_reasoning:
+            _a("## Audit Trail")
+            _a("")
+            _a("*Per-code reasoning explaining why each code was created.*")
+            _a("")
+            for code in codes_with_reasoning:
+                _a(f"- **{code.name}**: {code.reasoning}")
+            _a("")
+
         # Key quotes (sample)
         if state.code_applications:
             _a("## Key Quotes")
@@ -190,6 +223,17 @@ class ProjectExporter:
                 _a(f"> -- **{code_name}**{speaker}")
                 _a("")
                 shown += 1
+
+        # Analytical Memos
+        if state.memos:
+            _a("## Analytical Memos")
+            _a("")
+            for memo in state.memos:
+                _a(f"### {memo.title or memo.memo_type}")
+                _a(f"*Type: {memo.memo_type} | Generated: {memo.created_at[:10]}*")
+                _a("")
+                _a(memo.content)
+                _a("")
 
         # Perspectives
         if state.perspective_analysis and state.perspective_analysis.participants:
