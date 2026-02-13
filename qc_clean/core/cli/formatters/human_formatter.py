@@ -2,8 +2,7 @@
 Human-Readable Formatter - Format output for human consumption
 """
 
-from typing import Dict, Any, List
-from datetime import datetime
+from typing import Dict, Any
 
 
 def format_analysis_results(result_data: Dict[str, Any]) -> str:

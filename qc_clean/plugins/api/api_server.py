@@ -6,10 +6,8 @@ Provides REST API and WebSocket functionality for the API plugin.
 """
 
 import logging
-import asyncio
 from typing import Dict, Any, List, Optional
 from datetime import datetime
-import json
 
 
 logger = logging.getLogger(__name__)
@@ -221,7 +219,6 @@ class QCAPIServer:
         async def get_review_codes(project_id: str):
             """Get codes with grouped applications for the review UI."""
             from qc_clean.core.persistence.project_store import ProjectStore
-            from qc_clean.core.pipeline.review import ReviewManager
             store = ProjectStore()
             try:
                 state = store.load(project_id)

@@ -21,7 +21,6 @@ from .domain import (
     CoreCategoryResult,
     DomainEntityRelationship,
     Entity,
-    Methodology,
     ParticipantPerspective,
     PerspectiveAnalysis,
     ProjectState,
@@ -332,7 +331,7 @@ def build_project_state_from_phases(
     project_name: str = "Untitled Project",
 ) -> ProjectState:
     """Build a complete ProjectState from the four analysis phases."""
-    from .domain import Corpus, Document, ProjectConfig
+    from .domain import Corpus, Document
 
     state = ProjectState(name=project_name)
 

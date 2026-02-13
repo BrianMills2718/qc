@@ -5,7 +5,6 @@ Pipeline factory: create an AnalysisPipeline from configuration.
 from __future__ import annotations
 
 import logging
-from typing import Optional
 
 from qc_clean.schemas.domain import Methodology
 from .pipeline_engine import AnalysisPipeline

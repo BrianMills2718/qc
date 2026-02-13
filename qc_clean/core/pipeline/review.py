@@ -13,7 +13,6 @@ from typing import Dict, List, Optional
 
 from qc_clean.schemas.domain import (
     Code,
-    Codebook,
     CodeApplication,
     HumanReviewDecision,
     PipelineStatus,

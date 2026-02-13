@@ -6,10 +6,9 @@ import logging
 import subprocess
 import sys
 import time
-import signal
 import os
 from pathlib import Path
-from typing import Optional, Dict, Any
+from typing import Optional
 from ..api_client import APIClient, APIClientError
 
 logger = logging.getLogger(__name__)

@@ -4,9 +4,6 @@ Analyze Command Handler - File analysis through CLI
 
 import logging
 import sys
-import time
-from pathlib import Path
-from typing import List, Dict, Any
 from ..api_client import APIClient, APIClientError
 from ..formatters.human_formatter import format_analysis_results
 from ..formatters.json_formatter import format_json_output

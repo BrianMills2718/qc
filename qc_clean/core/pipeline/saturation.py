@@ -6,7 +6,7 @@ to determine when coding has stabilized.
 from __future__ import annotations
 
 import logging
-from typing import Dict, List, Optional
+from typing import Dict
 
 from qc_clean.schemas.domain import Codebook, ProjectState
 

@@ -9,7 +9,6 @@ import sys
 import logging
 import os
 from pathlib import Path
-from typing import List, Optional
 
 # Configure console encoding for Windows compatibility
 if os.name == 'nt' and hasattr(sys.stdout, 'reconfigure'):

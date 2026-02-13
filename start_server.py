@@ -7,7 +7,6 @@ Starts FastAPI server for qualitative coding analysis
 import asyncio
 import logging
 import sys
-import os
 from pathlib import Path
 
 # Add project root to path for imports

@@ -8,8 +8,7 @@ This resolves Windows compatibility issues by using WSL/Linux subprocess model
 import os
 import json
 import subprocess
-import tempfile
-from flask import Flask, request, render_template, jsonify, flash, redirect, url_for
+from flask import Flask, request, jsonify
 from werkzeug.utils import secure_filename
 import requests
 

@@ -3,11 +3,9 @@ Project management CLI command handlers.
 """
 
 import asyncio
-import json
 import logging
 import sys
 from pathlib import Path
-from typing import List
 
 from qc_clean.core.persistence.project_store import ProjectStore
 from qc_clean.schemas.domain import Methodology, PipelineStatus, ProjectConfig, ProjectState

@@ -3,9 +3,8 @@ API Client for CLI - HTTP client for communicating with QC API server
 """
 
 import logging
-import json
 import time
-from typing import Dict, Any, List, Optional, Union
+from typing import Dict, Any, List, Optional
 from pathlib import Path
 import requests
 from requests.adapters import HTTPAdapter

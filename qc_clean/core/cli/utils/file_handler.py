@@ -5,7 +5,7 @@ File Handler Utilities - File operations and validation for CLI
 import logging
 import os
 from pathlib import Path
-from typing import List, Set
+from typing import List
 
 logger = logging.getLogger(__name__)
 

@@ -9,7 +9,6 @@ import logging
 from qc_clean.schemas.domain import (
     Corpus,
     Document,
-    PipelineStatus,
     ProjectState,
 )
 from ..pipeline_engine import PipelineStage

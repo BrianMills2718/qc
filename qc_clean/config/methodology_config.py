@@ -10,9 +10,8 @@ and other qualitative research methodologies.
 import logging
 import yaml
 from pathlib import Path
-from typing import Dict, Any, Optional, List, Union
-from dataclasses import dataclass, field
-from pydantic import BaseModel, Field, validator
+from typing import Dict, Any, Optional, List
+from dataclasses import dataclass
 
 logger = logging.getLogger(__name__)
 

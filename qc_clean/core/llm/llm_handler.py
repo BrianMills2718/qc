@@ -8,13 +8,11 @@ import logging
 import os
 import asyncio
 import random
-from typing import Dict, Optional, Any, Type
+from typing import Optional, Type
 from pydantic import BaseModel
 import litellm
 from dotenv import load_dotenv
 from qc_clean.core.utils.error_handler import LLMError
-from qc_clean.config.methodology_config import GroundedTheoryConfig
-from qc_clean.config.unified_config import UnifiedConfig
 
 logger = logging.getLogger(__name__)
 

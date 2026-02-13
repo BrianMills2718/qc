@@ -8,7 +8,7 @@ All values loaded from environment variables via .env file.
 
 import logging
 import os
-from typing import Any, Dict, List, Optional
+from typing import List, Optional
 from dataclasses import dataclass, field
 from enum import Enum
 from dotenv import load_dotenv

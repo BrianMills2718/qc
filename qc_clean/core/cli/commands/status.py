@@ -3,10 +3,7 @@ Status Command Handler - System status monitoring
 """
 
 import logging
-from typing import Dict, Any
 from ..api_client import APIClient, APIClientError
-from ..formatters.human_formatter import format_status_info
-from ..formatters.json_formatter import format_json_output
 
 logger = logging.getLogger(__name__)
 
