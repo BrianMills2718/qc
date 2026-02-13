@@ -20,7 +20,7 @@ qc_cli.py                                    # CLI entry point
         -> pipeline_engine.py                # PipelineStage ABC + AnalysisPipeline orchestrator
         -> pipeline_factory.py               # create_pipeline(methodology) factory
         -> review.py                         # Human review loop (approve/reject/modify/merge/split)
-        -> irr.py                            # Inter-rater reliability (multi-pass + metrics)
+        -> irr.py                            # Inter-rater reliability + multi-run stability
         -> saturation.py                     # Coding saturation detection
         -> theoretical_sampling.py           # Suggest next documents to code
         -> stages/                           # One file per pipeline stage
@@ -52,7 +52,7 @@ start_server.py                              # Server startup script
 ### Key Files
 - `qc_clean/schemas/domain.py` - Unified data model: ProjectState, Document, Corpus, Code, Codebook, CodeApplication, etc.
 - `qc_clean/core/pipeline/pipeline_engine.py` - PipelineStage ABC and AnalysisPipeline orchestrator
-- `qc_clean/core/pipeline/irr.py` - Inter-rater reliability: multi-pass coding + Cohen's/Fleiss' kappa
+- `qc_clean/core/pipeline/irr.py` - Inter-rater reliability + multi-run stability analysis
 - `qc_clean/core/pipeline/review.py` - ReviewManager for human-in-the-loop code review
 - `qc_clean/core/persistence/project_store.py` - JSON persistence for ProjectState
 - `qc_clean/schemas/adapters.py` - Convert LLM output schemas to domain model
