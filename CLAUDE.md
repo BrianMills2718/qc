@@ -248,26 +248,30 @@ Evaluated against Strauss & Corbin GT, Charmaz constructivist GT, COREQ/SRQR rep
 
 ## Next Steps
 
-### Short-term
-- **Pipeline stage tests**: Expand mocked-LLM stage tests beyond memo extraction to validate full codebook/application output
+### In Progress
+- **Pipeline stage unit tests**: Full mocked-LLM tests for all 8 stages validating codebook output, code applications, state mutations, and error handling
+- **Multi-run stability analysis**: Show code consistency across multiple LLM runs. Builds on IRR module — run N passes, compute per-code stability metrics, flag unstable codes. Last remaining Tier 2 academic gap.
 
-### Medium-term (Academic Credibility)
-- ~~**Inter-rater reliability**: Run multiple LLM passes, compute Cohen's kappa / Krippendorff's alpha.~~ **Done** — `project irr` CLI command.
-- ~~**Memo generation in pipeline**: LLM produces analytical memos alongside codes at each stage. Connect memo schema to actual output.~~ **Done** — all 8 stages produce analytical memos.
-- ~~**Audit trail enhancement**: Log LLM reasoning for each code creation/categorization. Export in project artifacts.~~ **Done** — per-code `reasoning` field + Audit Trail section in markdown.
-- ~~**Negative case analysis**: Pipeline sub-step asking "what contradicts the emerging categories?"~~ **Done** — `NegativeCaseStage` in both pipelines.
+### Completed (v2.1)
+- ~~**Inter-rater reliability**~~ — `project irr` CLI command (multi-pass, Cohen's/Fleiss' kappa)
+- ~~**Memo generation**~~ — all 8 stages produce analytical memos
+- ~~**Audit trail**~~ — per-code `reasoning` field + Audit Trail export
+- ~~**Negative case analysis**~~ — `NegativeCaseStage` in both pipelines
 
-### Medium-term (Feature)
+### Future — Features
 - **Incremental coding**: Add new documents to an existing project and re-code without starting over
 - **Graph visualization**: NetworkX for code relationship graphs, D3.js/Cytoscape.js in browser review UI
 - **Prompt optimization**: A/B test different prompts for code discovery quality
 
-### Long-term (GT Fidelity)
-- **Constant comparison loop**: Refactor open coding from single-batch to iterative segment-by-segment with codebook revision
-- **Iterative re-coding**: Re-run coding stages with evolved codebook, track iterations
-- **True theoretical sampling**: Identify under-developed categories, suggest data sources to develop them
+### Future — GT Fidelity (Tier 3)
+These are required for GT-specific publications. Each is a significant architectural change.
+- **Constant comparison loop** (Critical): Refactor open coding from single-batch to iterative segment-by-segment with continuous code-to-code comparison and codebook revision
+- **Iterative re-coding** (High): Re-run coding stages with evolved codebook, track iterations, compare across rounds
+- **True theoretical sampling** (Moderate): Identify under-developed categories, suggest specific data sources to develop them
+- **Per-category saturation** (Moderate): Track property/dimension saturation per category, not just codebook-level stability
+- **Full axial paradigm** (Low): Decompose Strauss & Corbin paradigm fully (context vs intervening conditions vs causal conditions)
 
-### Long-term (Platform)
+### Future — Platform
 - **Multi-model consensus**: Run analysis across GPT/Claude/Gemini and merge codebooks
 - **Active learning**: Use human review decisions to fine-tune prompting for the project
 - **Collaborative coding**: Multiple human reviewers with conflict resolution
