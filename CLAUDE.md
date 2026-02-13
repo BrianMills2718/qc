@@ -131,6 +131,39 @@ Key env vars:
 - Interview data files are gitignored (sensitive content)
 - `src/` directory is legacy code (gitignored)
 
+## Competitive Landscape (assessed 2026-02-12)
+
+### Our Unique Position
+Only open-source tool combining: full GT pipeline (open -> axial -> selective -> theory integration), methodology-aware multi-stage pipeline engine, structured LLM output via Pydantic schemas, human review loop (approve/reject/modify/merge/split), cross-interview analysis, speaker detection, saturation detection, and theoretical sampling.
+
+### Open-Source Competitors
+| Tool | Stars | Approach | Key Difference from Us |
+|------|-------|----------|----------------------|
+| **QualCoder** | 560 | Desktop QDA (PyQt6/SQLite), AI bolted on via RAG+LangChain | Manual-first; AI is assistive chat, not automated pipeline. Has IRR (Cohen's kappa). No GT pipeline. |
+| **LLMCode** | 69 | Jupyter notebooks for thematic analysis | Academic (CHI paper). Can compare LLM vs human codes. No pipeline orchestration, no GT. |
+| **qc (Proctor)** | 23 | CLI QDA tool, YAML codebook, JOSS published | Manual coding with Unix composability. No LLM pipeline. Multi-coder support. |
+| **iQual** (World Bank) | 25 | Scale human codes via ML classifiers | No LLMs. Train-on-human-examples approach. Has formal bias/reliability testing. |
+| **Yale LLM-TA Tool** | 2 | Multi-model thematic analysis with IRR | Runs same analysis across 6+ models, computes Cohen's kappa + cosine similarity. No GT. |
+| **CRISP-T** | 8 | GT-focused NLP/ML toolkit, adding Claude agent | Successor to QRMine. GT mentions but no formal pipeline. Transitioning to LLM. |
+
+### Commercial Competitors (AI Features)
+| Tool | AI Approach | Weakness |
+|------|-----------|----------|
+| **ATLAS.ti** ($750-1840/yr) | AI open coding (GPT), Intentional AI Coding | Produces 450+ irrelevant codes; no methodology awareness; locked to OpenAI |
+| **NVivo** ($849-2500/yr) | Subcode suggestions, summarization, autocoding | Conservative AI; no pipeline; expensive collaboration ($499 add-on) |
+| **MAXQDA** ($253-1499/yr) | AI code/subcode suggestions, summarization, chat | AI Assist is add-on; no cross-document intelligence; no GT pipeline |
+| **Dedoose** ($15/mo) | Keyword-based auto-coding only | Minimal AI; traditional NLP not LLM-powered |
+
+### Strategic Insight
+Commercial tools treat AI as a **feature bolted onto manual coding**. We treat AI as the **core engine of a methodology-aware pipeline**. No commercial or open-source tool offers: (1) automated GT pipeline, (2) cross-interview analysis, (3) structured LLM output with schema validation, (4) integrated human review checkpoints. The market gap is "academic-grade, LLM-native, methodology-aware QDA tool."
+
+### What Competitors Have That We Don't
+- **Inter-rater reliability**: QualCoder, iQual, Yale tool all compute IRR metrics
+- **Desktop GUI**: QualCoder has full PyQt6 desktop app with audio/video/image coding
+- **Academic publications**: LLMCode (CHI), qc (JOSS), iQual (World Bank paper), DeTAILS (ACM CUI)
+- **Local model support** (documented): QualCoder supports Ollama; our LiteLLM can route to local models but this isn't documented
+- **RAG/vector search**: QualCoder uses FAISS + embeddings for semantic search across corpus
+
 ## E2E Validation (completed 2026-02-12)
 
 Pipeline validated end-to-end against real interview transcripts using gpt-5-mini:
@@ -150,18 +183,70 @@ Bugs found and fixed during E2E testing:
 1. **Schema duplication**: `analysis_schemas.py` / `gt_schemas.py` (LLM output shapes) and `domain.py` (internal model) overlap; this is intentional -- adapters bridge them
 2. **Test gaps**: No unit tests for real pipeline stages (require mocked LLM) or most CLI commands
 
+## Academic Standards Gap Analysis (assessed 2026-02-12)
+
+Evaluated against Strauss & Corbin GT, Charmaz constructivist GT, COREQ/SRQR reporting standards, Lincoln & Guba trustworthiness criteria, and emerging LLM-assisted QC validation requirements.
+
+### What We Have (Tier 1 — Publishable Basics)
+- Human-in-the-loop code review with approve/reject/modify/merge/split
+- Hierarchical codebook with definitions, confidence, provenance (LLM vs human)
+- Quote-to-code attribution with source documents and speaker detection
+- Multi-format export (JSON/CSV/Markdown/QDPX for ATLAS.ti/NVivo)
+- Methodology declaration in ProjectConfig
+- Codebook versioning via ReviewManager
+
+### Critical Gaps (Tier 2 — Expected by Reviewers)
+
+| Gap | Severity | Description |
+|-----|----------|-------------|
+| **Inter-rater reliability** | High | No multi-pass coding or kappa/alpha computation. Reviewers expect IRR >= 0.70. |
+| **Memo generation** | High | AnalysisMemo schema exists but pipeline never generates memos. GT requires continuous memo-writing. |
+| **Audit trail for LLM decisions** | High | Phase timing logged but not *why* each code was created. Lincoln & Guba dependability criterion. |
+| **Negative case analysis** | High | No mechanism to seek/flag data contradicting emerging categories. |
+| **Multi-run stability** | Moderate | LLMs are non-deterministic. No way to show consistent results across runs. |
+
+### GT-Specific Gaps (Tier 3 — Required for GT Publications)
+
+| Gap | Severity | Description |
+|-----|----------|-------------|
+| **Constant comparison** | Critical | Open coding runs as single LLM batch. True GT requires iterative segment-by-segment coding with continuous code-to-code comparison. |
+| **Iterative re-coding** | High | Pipeline runs each stage once. GT requires re-examining earlier data as categories evolve. |
+| **Theoretical sampling** | Moderate | Current heuristic uses speaker count + uncoded status. Should identify under-developed categories and seek data to develop them. |
+| **Per-category saturation** | Moderate | `saturation.py` checks codebook-level stability. GT requires per-category property/dimension tracking. |
+| **Full axial paradigm** | Low | Partially covers Strauss & Corbin paradigm (conditions, consequences) but not full decomposition (context vs intervening conditions). |
+
+### Key Academic References
+- Strauss & Corbin (2008) *Basics of Qualitative Research* 3rd ed — canonical Straussian GT
+- Charmaz (2014) *Constructing Grounded Theory* 2nd ed — constructivist GT criteria: credibility, originality, resonance, usefulness
+- Lincoln & Guba (1985) — trustworthiness: credibility, transferability, dependability, confirmability
+- COREQ (Tong et al. 2007) — 32-item reporting checklist for interview/focus group research
+- SRQR (O'Brien et al. 2014) — 21-item reporting standard for all qualitative approaches
+- Ashwin, Chhabra & Rao (2025) — LLM coding errors may be systematically biased, not random
+- O'Connor & Joffe (2020) — IRR thresholds depend on manifest vs latent content
+- Krippendorff (2004) — alpha >= 0.80 for reliable conclusions, >= 0.67 for tentative
+
 ## Next Steps
 
 ### Short-term
 - **Pipeline stage tests**: Unit tests for individual stages with mocked LLM handler
 
-### Medium-term
-- **Inter-rater reliability**: Run multiple LLM passes and compute Cohen's kappa / Krippendorff's alpha agreement metrics. Unique differentiator — only LLMCode (Jupyter-based) is exploring this.
+### Medium-term (Academic Credibility)
+- **Inter-rater reliability**: Run multiple LLM passes, compute Cohen's kappa / Krippendorff's alpha. Every major CAQDAS has this.
+- **Memo generation in pipeline**: LLM produces analytical memos alongside codes at each stage. Connect memo schema to actual output.
+- **Audit trail enhancement**: Log LLM reasoning for each code creation/categorization. Export in project artifacts.
+- **Negative case analysis**: Pipeline sub-step asking "what contradicts the emerging categories?"
+
+### Medium-term (Feature)
 - **Incremental coding**: Add new documents to an existing project and re-code without starting over
-- **Graph visualization**: Use NetworkX to generate code relationship graphs, render with D3.js or Cytoscape.js in the browser review UI. No graph database needed — data scale is too small for Neo4j.
+- **Graph visualization**: NetworkX for code relationship graphs, D3.js/Cytoscape.js in browser review UI
 - **Prompt optimization**: A/B test different prompts for code discovery quality
 
-### Long-term
+### Long-term (GT Fidelity)
+- **Constant comparison loop**: Refactor open coding from single-batch to iterative segment-by-segment with codebook revision
+- **Iterative re-coding**: Re-run coding stages with evolved codebook, track iterations
+- **True theoretical sampling**: Identify under-developed categories, suggest data sources to develop them
+
+### Long-term (Platform)
 - **Multi-model consensus**: Run analysis across GPT/Claude/Gemini and merge codebooks
 - **Active learning**: Use human review decisions to fine-tune prompting for the project
 - **Collaborative coding**: Multiple human reviewers with conflict resolution
