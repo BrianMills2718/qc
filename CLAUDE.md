@@ -154,7 +154,6 @@ Bugs found and fixed during E2E testing:
 
 ### Short-term
 - **Pipeline stage tests**: Unit tests for individual stages with mocked LLM handler
-- **Unused import cleanup**: ~52 unused imports scattered across files (cosmetic)
 
 ### Medium-term
 - **Inter-rater reliability**: Run multiple LLM passes and compute Cohen's kappa / Krippendorff's alpha agreement metrics. Unique differentiator — only LLMCode (Jupyter-based) is exploring this.
