@@ -189,6 +189,11 @@ Examples:
     proj_irr.add_argument('--model', default=None, help='LLM model to use (default: gpt-5-mini)')
     proj_irr.add_argument('--models', nargs='+', help='Multiple models to rotate across passes')
 
+    proj_stability = project_subparsers.add_parser('stability', help='Run multi-run stability analysis')
+    proj_stability.add_argument('project_id', help='Project ID')
+    proj_stability.add_argument('--runs', type=int, default=5, help='Number of identical runs (default: 5)')
+    proj_stability.add_argument('--model', default=None, help='LLM model to use (default: gpt-5-mini)')
+
     # Review command
     review_parser = subparsers.add_parser(
         'review',

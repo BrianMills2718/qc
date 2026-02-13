@@ -304,6 +304,36 @@ class IRRResult(BaseModel):
     timestamp: str = ""
 
 
+class StabilityResult(BaseModel):
+    """Multi-run stability analysis results.
+
+    Shows how consistently the LLM produces codes across identical runs,
+    addressing non-determinism concerns for academic reviewers.
+    """
+    num_runs: int
+    code_stability: Dict[str, float] = Field(
+        default_factory=dict,
+        description="Per-code stability score: fraction of runs the code appeared in",
+    )
+    stable_codes: List[str] = Field(
+        default_factory=list,
+        description="Codes appearing in >= 80% of runs",
+    )
+    moderate_codes: List[str] = Field(
+        default_factory=list,
+        description="Codes appearing in 50-79% of runs",
+    )
+    unstable_codes: List[str] = Field(
+        default_factory=list,
+        description="Codes appearing in < 50% of runs",
+    )
+    overall_stability: float = 0.0
+    coding_matrix: Dict[str, List[int]] = Field(default_factory=dict)
+    run_details: List[Dict[str, Any]] = Field(default_factory=list)
+    model_name: str = ""
+    timestamp: str = ""
+
+
 class CoreCategoryResult(BaseModel):
     """Core category from grounded theory selective coding."""
     category_name: str
@@ -377,6 +407,7 @@ class ProjectState(BaseModel):
 
     # Inter-rater reliability
     irr_result: Optional[IRRResult] = None
+    stability_result: Optional[StabilityResult] = None
 
     # Analytical artifacts
     memos: List[AnalysisMemo] = Field(default_factory=list)

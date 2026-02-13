@@ -122,6 +122,25 @@ class ProjectExporter:
                     writer.writerow([code_name] + row + [agree])
             paths.append(str(irr_path))
 
+        # -- stability.csv (only if stability has been run) --
+        if state.stability_result and state.stability_result.code_stability:
+            sr = state.stability_result
+            stab_path = out / "stability.csv"
+            with open(stab_path, "w", newline="", encoding="utf-8") as f:
+                writer = csv.writer(f)
+                writer.writerow(["code_name", "stability_score", "classification",
+                                 "num_runs", "model"])
+                for code_name, score in sorted(sr.code_stability.items(), key=lambda x: -x[1]):
+                    if score >= 0.8:
+                        classification = "stable"
+                    elif score >= 0.5:
+                        classification = "moderate"
+                    else:
+                        classification = "unstable"
+                    writer.writerow([code_name, f"{score:.2f}", classification,
+                                     sr.num_runs, sr.model_name])
+            paths.append(str(stab_path))
+
         logger.info("Exported CSV to %s", out)
         return paths
 
@@ -316,6 +335,30 @@ class ProjectExporter:
                     agree = "Yes" if all(v == row[0] for v in row) else "No"
                     cells = [code_name] + [str(v) for v in row] + [agree]
                     _a("| " + " | ".join(cells) + " |")
+                _a("")
+
+        # Multi-Run Stability
+        if state.stability_result:
+            sr = state.stability_result
+            _a("## Multi-Run Stability Analysis")
+            _a("")
+            _a(f"**Runs**: {sr.num_runs} | **Model**: {sr.model_name} | **Overall stability**: {sr.overall_stability:.1%}")
+            _a("")
+            _a(f"- Stable codes (>= 80%): {len(sr.stable_codes)}")
+            _a(f"- Moderate codes (50-79%): {len(sr.moderate_codes)}")
+            _a(f"- Unstable codes (< 50%): {len(sr.unstable_codes)}")
+            _a("")
+            if sr.code_stability:
+                _a("| Code | Stability | Classification |")
+                _a("|------|-----------|----------------|")
+                for code_name, score in sorted(sr.code_stability.items(), key=lambda x: -x[1]):
+                    if score >= 0.8:
+                        classification = "Stable"
+                    elif score >= 0.5:
+                        classification = "Moderate"
+                    else:
+                        classification = "Unstable"
+                    _a(f"| {code_name} | {score:.0%} | {classification} |")
                 _a("")
 
         # Pipeline phases

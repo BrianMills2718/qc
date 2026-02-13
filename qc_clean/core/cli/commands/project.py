@@ -31,6 +31,8 @@ def handle_project_command(args) -> int:
         return _export_project(store, args)
     elif args.project_action == "irr":
         return _run_irr(store, args)
+    elif args.project_action == "stability":
+        return _run_stability(store, args)
     else:
         print(f"Unknown project action: {args.project_action}", file=sys.stderr)
         return 1
@@ -320,5 +322,66 @@ def _run_irr(store: ProjectStore, args) -> int:
     if result.fleiss_kappa is not None:
         print(f"  Fleiss' kappa: {result.fleiss_kappa:.3f}")
     print(f"  Interpretation: {result.interpretation}")
+
+    return 0
+
+
+def _run_stability(store: ProjectStore, args) -> int:
+    """Run multi-run stability analysis on a project."""
+    project_id = args.project_id
+    try:
+        state = store.load(project_id)
+    except FileNotFoundError:
+        print(f"Project not found: {project_id}", file=sys.stderr)
+        return 1
+
+    if state.corpus.num_documents == 0:
+        print("No documents in project. Add documents first.", file=sys.stderr)
+        return 1
+
+    from qc_clean.core.pipeline.irr import run_stability_analysis
+
+    num_runs = getattr(args, "runs", 5)
+    model_name = getattr(args, "model", None) or state.config.model_name
+
+    print(f"Running stability analysis on project: {state.name}")
+    print(f"  Methodology: {state.config.methodology.value}")
+    print(f"  Runs: {num_runs}")
+    print(f"  Model: {model_name}")
+    print()
+
+    try:
+        result = asyncio.run(run_stability_analysis(
+            state,
+            num_runs=num_runs,
+            model_name=model_name,
+        ))
+    except Exception as e:
+        print(f"\nStability analysis failed: {e}", file=sys.stderr)
+        return 1
+
+    state.stability_result = result
+    store.save(state)
+
+    # Print summary
+    print("\nStability Analysis Complete")
+    print(f"  Runs: {result.num_runs}")
+    print(f"  Model: {result.model_name}")
+    print(f"  Overall stability: {result.overall_stability:.1%}")
+    print(f"  Stable codes (>= 80%): {len(result.stable_codes)}")
+    print(f"  Moderate codes (50-79%): {len(result.moderate_codes)}")
+    print(f"  Unstable codes (< 50%): {len(result.unstable_codes)}")
+
+    if result.stable_codes:
+        print("\n  Stable codes:")
+        for code in result.stable_codes:
+            score = result.code_stability.get(code, 0)
+            print(f"    - {code}: {score:.0%}")
+
+    if result.unstable_codes:
+        print("\n  Unstable codes (may not be reliable):")
+        for code in result.unstable_codes:
+            score = result.code_stability.get(code, 0)
+            print(f"    - {code}: {score:.0%}")
 
     return 0

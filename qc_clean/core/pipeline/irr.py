@@ -24,6 +24,7 @@ from qc_clean.schemas.domain import (
     IRRResult,
     Methodology,
     ProjectState,
+    StabilityResult,
 )
 
 logger = logging.getLogger(__name__)
@@ -316,6 +317,134 @@ async def run_irr_analysis(
         "agreement=%.2f, kappa=%.3f (%s)",
         num_passes, len(aligned), len(unmatched),
         pct, best_kappa or 0.0, interp,
+    )
+
+    return result
+
+
+# ---------------------------------------------------------------------------
+# Multi-run stability analysis
+# ---------------------------------------------------------------------------
+
+def compute_code_stability(
+    coding_matrix: Dict[str, List[int]],
+) -> Dict[str, float]:
+    """Compute per-code stability: fraction of runs each code appeared in."""
+    result = {}
+    for code, runs in coding_matrix.items():
+        if runs:
+            result[code] = sum(runs) / len(runs)
+        else:
+            result[code] = 0.0
+    return result
+
+
+def classify_stability(
+    code_stability: Dict[str, float],
+    stable_threshold: float = 0.8,
+    moderate_threshold: float = 0.5,
+) -> tuple[list[str], list[str], list[str]]:
+    """Classify codes into stable/moderate/unstable based on stability scores."""
+    stable = sorted(k for k, v in code_stability.items() if v >= stable_threshold)
+    moderate = sorted(
+        k for k, v in code_stability.items()
+        if moderate_threshold <= v < stable_threshold
+    )
+    unstable = sorted(k for k, v in code_stability.items() if v < moderate_threshold)
+    return stable, moderate, unstable
+
+
+async def run_stability_analysis(
+    state: ProjectState,
+    num_runs: int = 5,
+    model_name: str = "gpt-5-mini",
+) -> StabilityResult:
+    """
+    Run identical coding passes to measure LLM output stability.
+
+    Unlike IRR (which uses prompt variation), stability analysis uses
+    the SAME prompt every time to quantify non-determinism.
+
+    Parameters
+    ----------
+    state : ProjectState
+        Project with corpus loaded (not modified).
+    num_runs : int
+        Number of identical runs (default 5).
+    model_name : str
+        Model to use for all runs.
+
+    Returns
+    -------
+    StabilityResult
+        Per-code stability scores and classification.
+    """
+    is_gt = state.config.methodology == Methodology.GROUNDED_THEORY
+
+    run_details = []
+    all_run_codes: List[List[str]] = []
+
+    for i in range(num_runs):
+        # Fresh state copy: keep corpus, reset codes
+        run_state = state.model_copy(deep=True)
+        run_state.codebook.codes = []
+        run_state.code_applications = []
+
+        config = {
+            "model_name": model_name,
+            "irr_prompt_suffix": "",  # no variation — same prompt every time
+        }
+
+        if is_gt:
+            from qc_clean.core.pipeline.stages.gt_open_coding import GTOpenCodingStage
+            stage = GTOpenCodingStage()
+        else:
+            from qc_clean.core.pipeline.stages.thematic_coding import ThematicCodingStage
+            stage = ThematicCodingStage()
+
+        logger.info("Stability run %d/%d (model=%s)", i + 1, num_runs, model_name)
+        run_state = await stage.execute(run_state, config)
+
+        code_names = [c.name for c in run_state.codebook.codes]
+        all_run_codes.append(code_names)
+        run_details.append({
+            "run_index": i,
+            "model_name": model_name,
+            "num_codes": len(code_names),
+            "codes": code_names,
+            "timestamp": datetime.now().isoformat(),
+        })
+
+    # Build presence matrix over ALL unique codes across all runs
+    all_unique_norm = set()
+    for run_codes in all_run_codes:
+        for code in run_codes:
+            all_unique_norm.add(normalize_code_name(code))
+    all_unique = sorted(all_unique_norm)
+
+    matrix = build_coding_matrix(all_run_codes, all_unique)
+    code_stability = compute_code_stability(matrix)
+    stable, moderate, unstable = classify_stability(code_stability)
+
+    overall = sum(code_stability.values()) / max(len(code_stability), 1)
+
+    result = StabilityResult(
+        num_runs=num_runs,
+        code_stability=code_stability,
+        stable_codes=stable,
+        moderate_codes=moderate,
+        unstable_codes=unstable,
+        overall_stability=overall,
+        coding_matrix=matrix,
+        run_details=run_details,
+        model_name=model_name,
+        timestamp=datetime.now().isoformat(),
+    )
+
+    logger.info(
+        "Stability analysis complete: %d runs, %d stable, %d moderate, %d unstable, "
+        "overall=%.2f",
+        num_runs, len(stable), len(moderate), len(unstable), overall,
     )
 
     return result

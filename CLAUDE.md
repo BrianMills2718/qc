@@ -61,7 +61,7 @@ start_server.py                              # Server startup script
 - `qc_clean/core/llm/llm_handler.py` - LLM handler with `extract_structured()` method
 - `qc_clean/core/export/data_exporter.py` - ProjectExporter (JSON/CSV/Markdown/QDPX from ProjectState)
 - `qc_cli.py` - CLI interface (analyze, project, review, status, server)
-- `tests/` - 287 passing tests (14 test files)
+- `tests/` - 335 passing tests (16 test files)
 
 ### How It Works
 - `project run` runs the pipeline locally (no server needed); `analyze` uses the API server
@@ -108,6 +108,11 @@ python qc_cli.py project export <project_id> --format qdpx --output-file export.
 python qc_cli.py project irr <project_id>                                     # 3 passes, default model
 python qc_cli.py project irr <project_id> --passes 5                          # 5 passes
 python qc_cli.py project irr <project_id> --models gpt-5-mini claude-sonnet-4-5-20250929  # multi-model
+
+# Multi-run stability (same prompt N times, measures LLM non-determinism)
+python qc_cli.py project stability <project_id>                               # 5 runs, default model
+python qc_cli.py project stability <project_id> --runs 10                     # 10 runs
+python qc_cli.py project stability <project_id> --model gpt-5-mini            # specify model
 
 # Review codes (CLI)
 python qc_cli.py review <project_id>
@@ -198,7 +203,7 @@ Bugs found and fixed during E2E testing:
 ## Known Technical Debt
 
 1. **Schema duplication**: `analysis_schemas.py` / `gt_schemas.py` (LLM output shapes) and `domain.py` (internal model) overlap; this is intentional -- adapters bridge them
-2. **Test gaps**: Pipeline stages have mocked-LLM tests for memos, reasoning, and negative case analysis, but no full end-to-end stage tests validating codebook/application output. Most CLI commands untested.
+2. **Test gaps**: All pipeline stages have mocked-LLM unit tests (state mutations, codebook output, edge cases). CLI commands are untested.
 
 ## Academic Standards Gap Analysis (assessed 2026-02-12)
 
@@ -215,6 +220,7 @@ Evaluated against Strauss & Corbin GT, Charmaz constructivist GT, COREQ/SRQR rep
 - Analytical memo generation: all pipeline stages produce LLM-generated memos with reasoning, uncertainties, and emerging patterns
 - Per-code audit trail: each code includes LLM reasoning for why it was created (Lincoln & Guba dependability)
 - Negative case analysis: automated search for disconfirming evidence after coding (Lincoln & Guba credibility)
+- Multi-run stability analysis: run identical coding N times, per-code stability scores, stable/moderate/unstable classification
 
 ### Critical Gaps (Tier 2 — Expected by Reviewers)
 
@@ -224,7 +230,7 @@ Evaluated against Strauss & Corbin GT, Charmaz constructivist GT, COREQ/SRQR rep
 | **Memo generation** | ~~High~~ **Done** | All 8 pipeline stages generate analytical memos via LLM `analytical_memo` field. Exported in Markdown, CSV (`memos.csv`), and QDPX (`<Notes>`). |
 | **Audit trail for LLM decisions** | ~~High~~ **Done** | Per-code `reasoning` field explains why each code was created. Exported in CSV (`reasoning` column) and Markdown (Audit Trail section). |
 | **Negative case analysis** | ~~High~~ **Done** | `NegativeCaseStage` runs after coding in both pipelines. LLM searches for disconfirming evidence and produces structured negative case memos. |
-| **Multi-run stability** | Moderate | LLMs are non-deterministic. No way to show consistent results across runs. |
+| **Multi-run stability** | ~~Moderate~~ **Done** | `project stability` runs N identical passes, computes per-code stability scores, classifies as stable/moderate/unstable. Exported in Markdown and CSV. |
 
 ### GT-Specific Gaps (Tier 3 — Required for GT Publications)
 
@@ -248,15 +254,13 @@ Evaluated against Strauss & Corbin GT, Charmaz constructivist GT, COREQ/SRQR rep
 
 ## Next Steps
 
-### In Progress
-- **Pipeline stage unit tests**: Full mocked-LLM tests for all 8 stages validating codebook output, code applications, state mutations, and error handling
-- **Multi-run stability analysis**: Show code consistency across multiple LLM runs. Builds on IRR module — run N passes, compute per-code stability metrics, flag unstable codes. Last remaining Tier 2 academic gap.
-
 ### Completed (v2.1)
 - ~~**Inter-rater reliability**~~ — `project irr` CLI command (multi-pass, Cohen's/Fleiss' kappa)
 - ~~**Memo generation**~~ — all 8 stages produce analytical memos
 - ~~**Audit trail**~~ — per-code `reasoning` field + Audit Trail export
 - ~~**Negative case analysis**~~ — `NegativeCaseStage` in both pipelines
+- ~~**Pipeline stage tests**~~ — 28 mocked-LLM tests covering all 8 stages + cross-interview + edge cases
+- ~~**Multi-run stability**~~ — `project stability` CLI command, per-code stability scores, Markdown/CSV export
 
 ### Future — Features
 - **Incremental coding**: Add new documents to an existing project and re-code without starting over
