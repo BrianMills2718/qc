@@ -87,6 +87,19 @@ class ProjectExporter:
                 ])
         paths.append(str(apps_path))
 
+        # -- irr_matrix.csv (only if IRR has been run) --
+        if state.irr_result and state.irr_result.coding_matrix:
+            irr = state.irr_result
+            irr_path = out / "irr_matrix.csv"
+            with open(irr_path, "w", newline="", encoding="utf-8") as f:
+                writer = csv.writer(f)
+                header = ["code_name"] + [f"pass_{i+1}" for i in range(irr.num_passes)] + ["agreement"]
+                writer.writerow(header)
+                for code_name, row in sorted(irr.coding_matrix.items()):
+                    agree = "yes" if all(v == row[0] for v in row) else "no"
+                    writer.writerow([code_name] + row + [agree])
+            paths.append(str(irr_path))
+
         logger.info("Exported CSV to %s", out)
         return paths
 
@@ -230,6 +243,36 @@ class ProjectExporter:
             if state.theoretical_model.theoretical_framework:
                 _a(f"\n{state.theoretical_model.theoretical_framework}")
             _a("")
+
+        # Inter-Rater Reliability
+        if state.irr_result:
+            irr = state.irr_result
+            _a("## Inter-Rater Reliability")
+            _a("")
+            _a(f"**Passes**: {irr.num_passes}")
+            _a(f"**Aligned codes**: {len(irr.aligned_codes)}")
+            _a(f"**Unmatched codes**: {len(irr.unmatched_codes)}")
+            _a("")
+            _a("| Metric | Value | Interpretation |")
+            _a("|--------|-------|----------------|")
+            _a(f"| Percent agreement | {irr.percent_agreement:.1%} | |")
+            if irr.cohens_kappa is not None:
+                _a(f"| Cohen's kappa | {irr.cohens_kappa:.3f} | {irr.interpretation} |")
+            if irr.fleiss_kappa is not None:
+                label = irr.interpretation if irr.cohens_kappa is None else ""
+                _a(f"| Fleiss' kappa | {irr.fleiss_kappa:.3f} | {label} |")
+            _a("")
+            if irr.coding_matrix:
+                _a("### Coding Matrix")
+                _a("")
+                headers = ["Code"] + [f"Pass {i+1}" for i in range(irr.num_passes)] + ["Agreement"]
+                _a("| " + " | ".join(headers) + " |")
+                _a("|" + "|".join(["---"] * len(headers)) + "|")
+                for code_name, row in sorted(irr.coding_matrix.items()):
+                    agree = "Yes" if all(v == row[0] for v in row) else "No"
+                    cells = [code_name] + [str(v) for v in row] + [agree]
+                    _a("| " + " | ".join(cells) + " |")
+                _a("")
 
         # Pipeline phases
         if state.phase_results:

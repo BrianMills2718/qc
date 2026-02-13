@@ -20,6 +20,7 @@ qc_cli.py                                    # CLI entry point
         -> pipeline_engine.py                # PipelineStage ABC + AnalysisPipeline orchestrator
         -> pipeline_factory.py               # create_pipeline(methodology) factory
         -> review.py                         # Human review loop (approve/reject/modify/merge/split)
+        -> irr.py                            # Inter-rater reliability (multi-pass + metrics)
         -> saturation.py                     # Coding saturation detection
         -> theoretical_sampling.py           # Suggest next documents to code
         -> stages/                           # One file per pipeline stage
@@ -50,6 +51,7 @@ start_server.py                              # Server startup script
 ### Key Files
 - `qc_clean/schemas/domain.py` - Unified data model: ProjectState, Document, Corpus, Code, Codebook, CodeApplication, etc.
 - `qc_clean/core/pipeline/pipeline_engine.py` - PipelineStage ABC and AnalysisPipeline orchestrator
+- `qc_clean/core/pipeline/irr.py` - Inter-rater reliability: multi-pass coding + Cohen's/Fleiss' kappa
 - `qc_clean/core/pipeline/review.py` - ReviewManager for human-in-the-loop code review
 - `qc_clean/core/persistence/project_store.py` - JSON persistence for ProjectState
 - `qc_clean/schemas/adapters.py` - Convert LLM output schemas to domain model
@@ -58,7 +60,7 @@ start_server.py                              # Server startup script
 - `qc_clean/core/llm/llm_handler.py` - LLM handler with `extract_structured()` method
 - `qc_clean/core/export/data_exporter.py` - ProjectExporter (JSON/CSV/Markdown/QDPX from ProjectState)
 - `qc_cli.py` - CLI interface (analyze, project, review, status, server)
-- `tests/` - 201 passing tests
+- `tests/` - 245 passing tests (12 test files)
 
 ### How It Works
 - `project run` runs the pipeline locally (no server needed); `analyze` uses the API server
@@ -100,6 +102,11 @@ python qc_cli.py project export <project_id> --format csv --output-dir ./export/
 python qc_cli.py project export <project_id> --format markdown --output-file report.md
 python qc_cli.py project export <project_id> --format qdpx --output-file export.qdpx  # ATLAS.ti/NVivo
 
+# Inter-rater reliability (runs coding N times with prompt variation)
+python qc_cli.py project irr <project_id>                                     # 3 passes, default model
+python qc_cli.py project irr <project_id> --passes 5                          # 5 passes
+python qc_cli.py project irr <project_id> --models gpt-5-mini claude-sonnet-4-5-20250929  # multi-model
+
 # Review codes (CLI)
 python qc_cli.py review <project_id>
 python qc_cli.py review <project_id> --approve-all
@@ -124,6 +131,14 @@ Key env vars:
 - `OPENAI_API_KEY` / `GEMINI_API_KEY` / `ANTHROPIC_API_KEY` -- API key for the model provider
 - `qc_clean/config/unified_config.py` -- `UnifiedConfig` dataclass reads env vars: `API_PROVIDER`, `MODEL`, `METHODOLOGY`, `CODING_APPROACH`, `VALIDATION_LEVEL`, `TEMPERATURE`
 - `qc_clean/core/config/env_config.py` -- Active server config (used by `start_server.py`)
+
+## Model Selection Notes
+
+Default model is `gpt-5-mini` (cheap, adequate for most stages). Can switch per-run with `--model`. Places where a stronger model (e.g. Claude Sonnet/Opus, GPT-5) could matter:
+
+- **IRR results** — if kappa scores come back low, a better model might produce more consistent/accurate codes
+- **GT axial/selective coding** — requires sophisticated reasoning about relationships between categories; if output quality is shallow, upgrading the model could help
+- **Negative case analysis** (if we build it) — asking "what contradicts these findings?" is a harder reasoning task
 
 ## Development Notes
 
@@ -158,7 +173,7 @@ Only open-source tool combining: full GT pipeline (open -> axial -> selective ->
 Commercial tools treat AI as a **feature bolted onto manual coding**. We treat AI as the **core engine of a methodology-aware pipeline**. No commercial or open-source tool offers: (1) automated GT pipeline, (2) cross-interview analysis, (3) structured LLM output with schema validation, (4) integrated human review checkpoints. The market gap is "academic-grade, LLM-native, methodology-aware QDA tool."
 
 ### What Competitors Have That We Don't
-- **Inter-rater reliability**: QualCoder, iQual, Yale tool all compute IRR metrics
+- ~~**Inter-rater reliability**: QualCoder, iQual, Yale tool all compute IRR metrics~~ (Now implemented)
 - **Desktop GUI**: QualCoder has full PyQt6 desktop app with audio/video/image coding
 - **Academic publications**: LLMCode (CHI), qc (JOSS), iQual (World Bank paper), DeTAILS (ACM CUI)
 - **Local model support** (documented): QualCoder supports Ollama; our LiteLLM can route to local models but this isn't documented
@@ -188,6 +203,7 @@ Bugs found and fixed during E2E testing:
 Evaluated against Strauss & Corbin GT, Charmaz constructivist GT, COREQ/SRQR reporting standards, Lincoln & Guba trustworthiness criteria, and emerging LLM-assisted QC validation requirements.
 
 ### What We Have (Tier 1 — Publishable Basics)
+- Inter-rater reliability: multi-pass LLM coding with prompt variation, Cohen's kappa / Fleiss' kappa / percent agreement
 - Human-in-the-loop code review with approve/reject/modify/merge/split
 - Hierarchical codebook with definitions, confidence, provenance (LLM vs human)
 - Quote-to-code attribution with source documents and speaker detection
@@ -199,7 +215,7 @@ Evaluated against Strauss & Corbin GT, Charmaz constructivist GT, COREQ/SRQR rep
 
 | Gap | Severity | Description |
 |-----|----------|-------------|
-| **Inter-rater reliability** | High | No multi-pass coding or kappa/alpha computation. Reviewers expect IRR >= 0.70. |
+| **Inter-rater reliability** | ~~High~~ **Done** | Implemented: multi-pass coding with prompt variation, Cohen's/Fleiss' kappa, Landis & Koch interpretation. CLI: `project irr`. |
 | **Memo generation** | High | AnalysisMemo schema exists but pipeline never generates memos. GT requires continuous memo-writing. |
 | **Audit trail for LLM decisions** | High | Phase timing logged but not *why* each code was created. Lincoln & Guba dependability criterion. |
 | **Negative case analysis** | High | No mechanism to seek/flag data contradicting emerging categories. |
@@ -231,7 +247,7 @@ Evaluated against Strauss & Corbin GT, Charmaz constructivist GT, COREQ/SRQR rep
 - **Pipeline stage tests**: Unit tests for individual stages with mocked LLM handler
 
 ### Medium-term (Academic Credibility)
-- **Inter-rater reliability**: Run multiple LLM passes, compute Cohen's kappa / Krippendorff's alpha. Every major CAQDAS has this.
+- ~~**Inter-rater reliability**: Run multiple LLM passes, compute Cohen's kappa / Krippendorff's alpha.~~ **Done** — `project irr` CLI command.
 - **Memo generation in pipeline**: LLM produces analytical memos alongside codes at each stage. Connect memo schema to actual output.
 - **Audit trail enhancement**: Log LLM reasoning for each code creation/categorization. Export in project artifacts.
 - **Negative case analysis**: Pipeline sub-step asking "what contradicts the emerging categories?"

@@ -142,7 +142,7 @@ class TestProjectRun:
         pipeline = AnalysisPipeline(stages=stages)
 
         loaded = tmp_store.load("run-test")
-        result = asyncio.get_event_loop().run_until_complete(
+        result = asyncio.run(
             pipeline.run(loaded, {"model_name": "gpt-5-mini"})
         )
         tmp_store.save(result)
@@ -169,7 +169,7 @@ class TestProjectRun:
 
         # First run: should pause
         loaded = tmp_store.load("review-test")
-        result = asyncio.get_event_loop().run_until_complete(
+        result = asyncio.run(
             pipeline.run(loaded, {})
         )
         assert result.pipeline_status == PipelineStatus.PAUSED_FOR_REVIEW
@@ -178,7 +178,7 @@ class TestProjectRun:
 
         # Resume
         loaded2 = tmp_store.load("review-test")
-        result2 = asyncio.get_event_loop().run_until_complete(
+        result2 = asyncio.run(
             pipeline.run(loaded2, {}, resume_from="mock_review_stage")
         )
         assert result2.pipeline_status == PipelineStatus.COMPLETED
@@ -212,7 +212,7 @@ class TestProjectRun:
         pipeline = AnalysisPipeline(stages=stages, on_stage_complete=save_cb)
 
         loaded = tmp_store.load("callback-test")
-        asyncio.get_event_loop().run_until_complete(
+        asyncio.run(
             pipeline.run(loaded, {})
         )
 

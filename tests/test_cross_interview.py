@@ -107,7 +107,7 @@ class TestCrossInterviewAnalysis:
 
     def test_stage_creates_memo(self, multi_doc_state):
         stage = CrossInterviewStage()
-        result = asyncio.get_event_loop().run_until_complete(
+        result = asyncio.run(
             stage.execute(multi_doc_state, {})
         )
         assert len(result.memos) == 1

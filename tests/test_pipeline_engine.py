@@ -80,7 +80,7 @@ class TestAnalysisPipeline:
     def test_empty_pipeline(self):
         pipeline = AnalysisPipeline(stages=[])
         state = ProjectState()
-        result = asyncio.get_event_loop().run_until_complete(
+        result = asyncio.run(
             pipeline.run(state, {})
         )
         assert result.pipeline_status == PipelineStatus.COMPLETED
@@ -90,7 +90,7 @@ class TestAnalysisPipeline:
         pipeline = AnalysisPipeline(stages=stages)
         state = ProjectState()
 
-        result = asyncio.get_event_loop().run_until_complete(
+        result = asyncio.run(
             pipeline.run(state, {})
         )
 
@@ -104,7 +104,7 @@ class TestAnalysisPipeline:
         pipeline = AnalysisPipeline(stages=stages)
         state = ProjectState()
 
-        result = asyncio.get_event_loop().run_until_complete(
+        result = asyncio.run(
             pipeline.run(state, {})
         )
 
@@ -121,13 +121,13 @@ class TestAnalysisPipeline:
         state = ProjectState()
 
         # First run - pauses at review
-        state = asyncio.get_event_loop().run_until_complete(
+        state = asyncio.run(
             pipeline.run(state, {})
         )
         assert state.pipeline_status == PipelineStatus.PAUSED_FOR_REVIEW
 
         # Resume from review
-        state = asyncio.get_event_loop().run_until_complete(
+        state = asyncio.run(
             pipeline.run(state, {}, resume_from="review")
         )
         assert state.pipeline_status == PipelineStatus.COMPLETED
@@ -138,7 +138,7 @@ class TestAnalysisPipeline:
         pipeline = AnalysisPipeline(stages=stages)
         state = ProjectState()  # empty codebook
 
-        result = asyncio.get_event_loop().run_until_complete(
+        result = asyncio.run(
             pipeline.run(state, {})
         )
 
@@ -153,7 +153,7 @@ class TestAnalysisPipeline:
             codebook=Codebook(codes=[Code(id="C1", name="Theme")])
         )
 
-        result = asyncio.get_event_loop().run_until_complete(
+        result = asyncio.run(
             pipeline.run(state, {})
         )
 
@@ -166,7 +166,7 @@ class TestAnalysisPipeline:
         state = ProjectState()
 
         with pytest.raises(RuntimeError, match="Stage failed!"):
-            asyncio.get_event_loop().run_until_complete(
+            asyncio.run(
                 pipeline.run(state, {})
             )
 
@@ -183,7 +183,7 @@ class TestAnalysisPipeline:
         pipeline = AnalysisPipeline(stages=stages)
         state = ProjectState()
 
-        result = asyncio.get_event_loop().run_until_complete(
+        result = asyncio.run(
             pipeline.run(state, {})
         )
 
@@ -203,7 +203,7 @@ class TestAnalysisPipeline:
         pipeline = AnalysisPipeline(stages=stages, on_stage_complete=on_complete)
         state = ProjectState()
 
-        asyncio.get_event_loop().run_until_complete(
+        asyncio.run(
             pipeline.run(state, {})
         )
 
@@ -255,7 +255,7 @@ class TestIngestStage:
             ]
         }
 
-        result = asyncio.get_event_loop().run_until_complete(
+        result = asyncio.run(
             stage.execute(state, config)
         )
 
@@ -274,7 +274,7 @@ class TestIngestStage:
             corpus=Corpus(documents=[Document(name="existing.txt", content="data")])
         )
 
-        result = asyncio.get_event_loop().run_until_complete(
+        result = asyncio.run(
             stage.execute(state, {})
         )
 
@@ -294,7 +294,7 @@ class TestIngestStage:
             }]
         }
 
-        result = asyncio.get_event_loop().run_until_complete(
+        result = asyncio.run(
             stage.execute(state, config)
         )
 
@@ -314,7 +314,7 @@ class TestIngestStage:
             }]
         }
 
-        result = asyncio.get_event_loop().run_until_complete(
+        result = asyncio.run(
             stage.execute(state, config)
         )
 
@@ -338,7 +338,7 @@ class TestIngestStage:
             ])
         )
 
-        result = asyncio.get_event_loop().run_until_complete(
+        result = asyncio.run(
             stage.execute(state, {})
         )
 
@@ -359,7 +359,7 @@ class TestResumeValidation:
         state = ProjectState(name="test")
 
         with pytest.raises(ValueError, match="Invalid resume_from"):
-            asyncio.get_event_loop().run_until_complete(
+            asyncio.run(
                 pipeline.run(state, {}, resume_from="nonexistent_stage")
             )
 
@@ -372,7 +372,7 @@ class TestResumeValidation:
         ])
         state = ProjectState(name="test")
 
-        result = asyncio.get_event_loop().run_until_complete(
+        result = asyncio.run(
             pipeline.run(state, {}, resume_from="stage1")
         )
         # stage1 skipped, stage2+3 run => 2 phase results

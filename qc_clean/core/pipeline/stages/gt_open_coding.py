@@ -64,6 +64,10 @@ Interview Data:
 
 Generate comprehensive open codes that capture the key concepts in this data."""
 
+        irr_suffix = config.get("irr_prompt_suffix", "")
+        if irr_suffix:
+            prompt = prompt + "\n\n" + irr_suffix
+
         response = await llm.extract_structured(prompt, OpenCodesResponse)
         open_codes = response.open_codes
 

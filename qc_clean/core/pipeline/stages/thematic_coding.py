@@ -39,6 +39,10 @@ class ThematicCodingStage(PipelineStage):
 
         prompt = _build_phase1_prompt(combined_text, num_interviews)
 
+        irr_suffix = config.get("irr_prompt_suffix", "")
+        if irr_suffix:
+            prompt = prompt + "\n\n" + irr_suffix
+
         phase1_response = await llm.extract_structured(prompt, CodeHierarchy)
 
         # Convert to domain model

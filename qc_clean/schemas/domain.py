@@ -279,6 +279,30 @@ class Synthesis(BaseModel):
 # Grounded Theory specific
 # ---------------------------------------------------------------------------
 
+class IRRCodingPass(BaseModel):
+    """Record of a single coding pass for inter-rater reliability."""
+    pass_index: int
+    prompt_suffix: str
+    model_name: str
+    codes_discovered: List[str] = Field(default_factory=list)
+    code_details: List[Dict[str, Any]] = Field(default_factory=list)
+    timestamp: str = ""
+
+
+class IRRResult(BaseModel):
+    """Inter-rater reliability analysis results."""
+    num_passes: int
+    passes: List[IRRCodingPass] = Field(default_factory=list)
+    aligned_codes: List[str] = Field(default_factory=list)
+    unmatched_codes: List[str] = Field(default_factory=list)
+    coding_matrix: Dict[str, List[int]] = Field(default_factory=dict)
+    percent_agreement: float = 0.0
+    cohens_kappa: Optional[float] = None
+    fleiss_kappa: Optional[float] = None
+    interpretation: str = ""
+    timestamp: str = ""
+
+
 class CoreCategoryResult(BaseModel):
     """Core category from grounded theory selective coding."""
     category_name: str
@@ -349,6 +373,9 @@ class ProjectState(BaseModel):
     # Grounded theory specifics (populated only for GT methodology)
     core_categories: List[CoreCategoryResult] = Field(default_factory=list)
     theoretical_model: Optional[TheoreticalModelResult] = None
+
+    # Inter-rater reliability
+    irr_result: Optional[IRRResult] = None
 
     # Analytical artifacts
     memos: List[AnalysisMemo] = Field(default_factory=list)

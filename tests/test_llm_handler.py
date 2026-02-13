@@ -190,7 +190,7 @@ class TestExtractStructured:
         mock_resp = _make_response({"name": "Test", "count": 42})
 
         with patch("litellm.acompletion", new_callable=AsyncMock, return_value=mock_resp):
-            result = asyncio.get_event_loop().run_until_complete(
+            result = asyncio.run(
                 handler.extract_structured("Some text", SimpleSchema)
             )
 
@@ -204,7 +204,7 @@ class TestExtractStructured:
         mock_resp = _make_response(data)
 
         with patch("litellm.acompletion", new_callable=AsyncMock, return_value=mock_resp):
-            result = asyncio.get_event_loop().run_until_complete(
+            result = asyncio.run(
                 handler.extract_structured("Some text", NestedSchema)
             )
 
@@ -218,7 +218,7 @@ class TestExtractStructured:
         mock_resp = _make_response(json.dumps({"name": "FromStr", "count": 7}))
 
         with patch("litellm.acompletion", new_callable=AsyncMock, return_value=mock_resp):
-            result = asyncio.get_event_loop().run_until_complete(
+            result = asyncio.run(
                 handler.extract_structured("text", SimpleSchema)
             )
 
@@ -235,7 +235,7 @@ class TestExtractStructured:
         resp.choices = [choice]
 
         with patch("litellm.acompletion", new_callable=AsyncMock, return_value=resp):
-            result = asyncio.get_event_loop().run_until_complete(
+            result = asyncio.run(
                 handler.extract_structured("text", SimpleSchema)
             )
 
@@ -249,7 +249,7 @@ class TestExtractStructured:
         mock_acomp = AsyncMock(return_value=mock_resp)
 
         with patch("litellm.acompletion", mock_acomp):
-            asyncio.get_event_loop().run_until_complete(
+            asyncio.run(
                 handler.extract_structured("text", SimpleSchema)
             )
 
@@ -266,7 +266,7 @@ class TestExtractStructured:
         mock_acomp = AsyncMock(return_value=mock_resp)
 
         with patch("litellm.acompletion", mock_acomp):
-            asyncio.get_event_loop().run_until_complete(
+            asyncio.run(
                 handler.extract_structured("text", SimpleSchema)
             )
 
@@ -279,7 +279,7 @@ class TestExtractStructured:
         mock_acomp = AsyncMock(return_value=mock_resp)
 
         with patch("litellm.acompletion", mock_acomp):
-            asyncio.get_event_loop().run_until_complete(
+            asyncio.run(
                 handler.extract_structured("text", SimpleSchema, max_tokens=500)
             )
 
@@ -291,7 +291,7 @@ class TestExtractStructured:
         mock_acomp = AsyncMock(return_value=mock_resp)
 
         with patch("litellm.acompletion", mock_acomp):
-            asyncio.get_event_loop().run_until_complete(
+            asyncio.run(
                 handler.extract_structured("text", SimpleSchema)
             )
 
@@ -303,7 +303,7 @@ class TestExtractStructured:
         mock_acomp = AsyncMock(return_value=mock_resp)
 
         with patch("litellm.acompletion", mock_acomp):
-            asyncio.get_event_loop().run_until_complete(
+            asyncio.run(
                 handler.extract_structured("text", SimpleSchema)
             )
 
@@ -315,7 +315,7 @@ class TestExtractStructured:
         mock_acomp = AsyncMock(return_value=mock_resp)
 
         with patch("litellm.acompletion", mock_acomp):
-            asyncio.get_event_loop().run_until_complete(
+            asyncio.run(
                 handler.extract_structured("text", SimpleSchema, instructions="Be precise")
             )
 
@@ -330,7 +330,7 @@ class TestExtractStructured:
 
         with patch("litellm.acompletion", new_callable=AsyncMock, return_value=resp):
             with pytest.raises(LLMError, match="Failed to extract"):
-                asyncio.get_event_loop().run_until_complete(
+                asyncio.run(
                     handler.extract_structured("text", SimpleSchema)
                 )
 
@@ -345,7 +345,7 @@ class TestExtractStructured:
 
         with patch("litellm.acompletion", new_callable=AsyncMock, return_value=resp):
             with pytest.raises(LLMError, match="Failed to extract"):
-                asyncio.get_event_loop().run_until_complete(
+                asyncio.run(
                     handler.extract_structured("text", SimpleSchema)
                 )
 
@@ -360,7 +360,7 @@ class TestExtractStructured:
 
         with patch("litellm.acompletion", new_callable=AsyncMock, return_value=resp):
             with pytest.raises(LLMError):
-                asyncio.get_event_loop().run_until_complete(
+                asyncio.run(
                     handler.extract_structured("text", SimpleSchema)
                 )
 
@@ -384,7 +384,7 @@ class TestRetryLogic:
             return good_resp
 
         with patch("litellm.acompletion", side_effect=flaky_call):
-            result = asyncio.get_event_loop().run_until_complete(
+            result = asyncio.run(
                 handler.extract_structured("text", SimpleSchema)
             )
 
@@ -402,7 +402,7 @@ class TestRetryLogic:
 
         with patch("litellm.acompletion", side_effect=fatal_call):
             with pytest.raises(LLMError):
-                asyncio.get_event_loop().run_until_complete(
+                asyncio.run(
                     handler.extract_structured("text", SimpleSchema)
                 )
 
@@ -419,7 +419,7 @@ class TestRetryLogic:
 
         with patch("litellm.acompletion", side_effect=always_fail):
             with pytest.raises(LLMError, match="Failed to extract"):
-                asyncio.get_event_loop().run_until_complete(
+                asyncio.run(
                     handler.extract_structured("text", SimpleSchema)
                 )
 
