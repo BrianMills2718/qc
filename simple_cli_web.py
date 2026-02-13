@@ -10,7 +10,6 @@ import json
 import subprocess
 from flask import Flask, request, jsonify
 from werkzeug.utils import secure_filename
-import requests
 
 app = Flask(__name__)
 app.secret_key = 'qualitative-coding-cli-web'
