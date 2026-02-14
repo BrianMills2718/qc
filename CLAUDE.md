@@ -320,7 +320,7 @@ Evaluated against Strauss & Corbin GT, Charmaz constructivist GT, COREQ/SRQR rep
 - **Full axial paradigm** (Low): Decompose Strauss & Corbin paradigm fully (context vs intervening conditions vs causal conditions)
 
 ### Future — Features
-- **Prompt optimization**: A/B test different prompts for code discovery quality. Use `prompt_eval` library (`~/projects/prompt_eval/`) with IRR kappa as evaluator function
+- **Prompt optimization**: A/B test coding prompts via `prompt_eval`. Use `llm_judge_evaluator(rubric)` to score code quality against research criteria, or `kappa_evaluator` against gold-standard codes. Three search strategies available: grid search, few-shot selection, instruction search.
 - **Multi-model consensus**: Run analysis across GPT/Claude/Gemini and merge codebooks. Can use `prompt_eval` to compare model performance on same inputs
 - **Active learning**: Use human review decisions to fine-tune prompting for the project
 - **Collaborative coding**: Multiple human reviewers with conflict resolution
@@ -330,4 +330,4 @@ Evaluated against Strauss & Corbin GT, Charmaz constructivist GT, COREQ/SRQR rep
 | Project | Path | Relationship |
 |---------|------|-------------|
 | **llm_client** | `~/projects/llm_client/` | Shared LLM calling library. QC's `LLMHandler` is a thin adapter over `acall_llm_structured` |
-| **prompt_eval** | `~/projects/prompt_eval/` | A/B prompt testing (v0.2.0): persistence, kappa/exact_match/contains evaluators, grid search optimization, MCP server. Ready to use `kappa_evaluator` with QC coding tasks |
+| **prompt_eval** | `~/projects/prompt_eval/` | General-purpose prompt improvement system (v0.2.0). 4 evaluators (llm_judge, kappa, exact_match, contains), 3 optimization strategies (grid search, few-shot selection, instruction search), persistence, MCP server. 101 tests. |
