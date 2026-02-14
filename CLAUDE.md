@@ -48,6 +48,7 @@ qc_cli.py                                    # CLI entry point
         -> project_store.py                  # Save/load ProjectState as JSON files
      -> qc_clean/core/export/               # Export from ProjectState
         -> data_exporter.py                  # ProjectExporter (JSON/CSV/Markdown/QDPX)
+qc_mcp_server.py                             # MCP server (19 tools for agent access)
 simple_cli_web.py                            # Flask web UI (port 5003, subprocess-based)
 start_server.py                              # Server startup script
 ```
@@ -67,7 +68,8 @@ start_server.py                              # Server startup script
 - `qc_clean/core/llm/llm_handler.py` - Thin adapter over `llm_client.acall_llm_structured` (QC config wiring, LLMError wrapping, system prompt)
 - `qc_clean/core/export/data_exporter.py` - ProjectExporter (JSON/CSV/Markdown/QDPX from ProjectState)
 - `qc_cli.py` - CLI interface (analyze, project, review, status, server)
-- `tests/` - 439 unit tests + 6 E2E tests (22 test files)
+- `qc_mcp_server.py` - MCP server: 19 tools for project management, pipeline execution, codebook inspection, review, IRR/stability, export
+- `tests/` - 483 unit tests + 6 E2E tests (23 test files)
 
 ### How It Works
 - `project run` runs the pipeline locally (no server needed); `analyze` uses the API server
@@ -144,6 +146,14 @@ python qc_cli.py review <project_id> --file decisions.json
 # Check status
 python qc_cli.py status --server
 python qc_cli.py status --job <job_id>
+
+# MCP server (for agent access - 19 tools)
+python qc_mcp_server.py                                                   # run via stdio
+# Tools: qc_list_projects, qc_create_project, qc_show_project, qc_delete_project,
+#   qc_add_documents, qc_run_pipeline, qc_run_stage, qc_recode,
+#   qc_run_irr, qc_run_stability, qc_get_codebook, qc_get_applications,
+#   qc_get_memos, qc_get_synthesis, qc_review_summary, qc_approve_all_codes,
+#   qc_review_codes, qc_export_markdown, qc_export_json
 
 # Run tests
 python -m pytest tests/ -v
