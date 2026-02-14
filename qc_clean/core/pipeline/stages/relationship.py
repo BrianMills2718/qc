@@ -9,7 +9,7 @@ import logging
 from qc_clean.schemas.analysis_schemas import EntityMapping
 from qc_clean.schemas.adapters import entity_mapping_to_entities
 from qc_clean.schemas.domain import ProjectState
-from ..pipeline_engine import PipelineStage
+from ..pipeline_engine import PipelineStage, require_config
 
 logger = logging.getLogger(__name__)
 
@@ -23,11 +23,15 @@ class RelationshipStage(PipelineStage):
         from qc_clean.core.llm.llm_handler import LLMHandler
 
         model_name = config.get("model_name", "gpt-5-mini")
+        logger.info(
+            "Starting relationship: docs=%d, codes=%d, model=%s",
+            state.corpus.num_documents, len(state.codebook.codes), model_name,
+        )
         llm = LLMHandler(model_name=model_name)
 
         combined_text = _build_combined_text(state)
-        phase1_text = config.get("_phase1_json", "{}")
-        phase2_text = config.get("_phase2_json", "{}")
+        phase1_text = require_config(config, "_phase1_json", self.name())
+        phase2_text = require_config(config, "_phase2_json", self.name())
 
         prompt = _build_phase3_prompt(combined_text, phase1_text, phase2_text)
 

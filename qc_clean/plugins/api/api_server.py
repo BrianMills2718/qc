@@ -541,8 +541,10 @@ class QCAPIServer:
                 from qc_clean.schemas.domain import PipelineStatus
                 state.pipeline_status = PipelineStatus.FAILED
                 store.save(state)
-            except Exception:
-                pass
+            except Exception as save_err:
+                self._logger.error(
+                    "Failed to save failed state for %s: %s", project_id, save_err
+                )
 
     async def _process_analysis(self, job_id: str, interviews: List[Dict[str, Any]], config: Dict[str, Any]):
         """Process qualitative coding analysis via the stage-based pipeline."""

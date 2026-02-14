@@ -41,15 +41,21 @@ class IncrementalCodingStage(PipelineStage):
         from qc_clean.core.llm.llm_handler import LLMHandler
 
         model_name = config.get("model_name", "gpt-5-mini")
-        llm = LLMHandler(model_name=model_name)
 
         # Identify uncoded documents
         uncoded_ids = set(state.get_uncoded_doc_ids())
         new_docs = [d for d in state.corpus.documents if d.id in uncoded_ids]
 
+        logger.info(
+            "Starting incremental_coding: new_docs=%d, existing_codes=%d, model=%s",
+            len(new_docs), len(state.codebook.codes), model_name,
+        )
+
         if not new_docs:
             logger.info("No uncoded documents found, skipping incremental coding")
             return state
+
+        llm = LLMHandler(model_name=model_name)
 
         # Save current codebook to history
         old_codebook = state.codebook.model_copy(deep=True)

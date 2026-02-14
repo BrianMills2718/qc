@@ -69,7 +69,10 @@ class ReviewManager:
         elif decision.target_type == "codebook":
             self._apply_codebook_decision(decision)
         else:
-            logger.warning("Unknown target_type: %s", decision.target_type)
+            raise ValueError(
+                f"Unknown target_type: '{decision.target_type}'. "
+                f"Must be 'code', 'code_application', or 'codebook'."
+            )
 
         self.state.touch()
 
@@ -223,9 +226,9 @@ class ReviewManager:
                         app.applied_by = Provenance.HUMAN
             logger.info("Modified application: %s", decision.target_id)
         else:
-            logger.warning(
-                "Action %s not supported for code_application targets",
-                decision.action.value,
+            raise ValueError(
+                f"Action '{decision.action.value}' not supported for code_application targets. "
+                f"Supported: approve, reject, modify."
             )
 
     def _apply_codebook_decision(self, decision: HumanReviewDecision) -> None:
@@ -234,9 +237,9 @@ class ReviewManager:
                 code.provenance = Provenance.HUMAN
             logger.info("Codebook approved (all codes marked human-reviewed)")
         else:
-            logger.warning(
-                "Action %s not supported for codebook targets",
-                decision.action.value,
+            raise ValueError(
+                f"Action '{decision.action.value}' not supported for codebook targets. "
+                f"Supported: approve."
             )
 
     def _bump_codebook_version(self) -> None:

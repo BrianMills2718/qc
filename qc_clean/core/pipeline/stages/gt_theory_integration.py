@@ -9,7 +9,7 @@ import logging
 from qc_clean.schemas.gt_schemas import TheoreticalModel
 from qc_clean.schemas.adapters import theoretical_model_to_domain
 from qc_clean.schemas.domain import AnalysisMemo, ProjectState
-from ..pipeline_engine import PipelineStage
+from ..pipeline_engine import PipelineStage, require_config
 
 logger = logging.getLogger(__name__)
 
@@ -26,11 +26,15 @@ class GTTheoryIntegrationStage(PipelineStage):
         from qc_clean.core.llm.llm_handler import LLMHandler
 
         model_name = config.get("model_name", "gpt-5-mini")
+        logger.info(
+            "Starting gt_theory_integration: codes=%d, core_categories=%d, model=%s",
+            len(state.codebook.codes), len(state.core_categories), model_name,
+        )
         llm = LLMHandler(model_name=model_name)
 
-        codes_text = config.get("_gt_open_codes_text", "")
-        axial_text = config.get("_gt_axial_text", "")
-        core_text = config.get("_gt_core_text", "")
+        codes_text = require_config(config, "_gt_open_codes_text", self.name())
+        axial_text = require_config(config, "_gt_axial_text", self.name())
+        core_text = require_config(config, "_gt_core_text", self.name())
 
         prompt = f"""You are completing grounded theory analysis by integrating all phases into a coherent theoretical model.
 

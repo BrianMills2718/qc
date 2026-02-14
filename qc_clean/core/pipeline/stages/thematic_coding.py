@@ -32,6 +32,10 @@ class ThematicCodingStage(PipelineStage):
         from qc_clean.core.llm.llm_handler import LLMHandler
 
         model_name = config.get("model_name", "gpt-5-mini")
+        logger.info(
+            "Starting thematic_coding: docs=%d, model=%s",
+            state.corpus.num_documents, model_name,
+        )
         llm = LLMHandler(model_name=model_name)
 
         combined_text = _build_combined_text(state)

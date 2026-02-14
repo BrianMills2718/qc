@@ -211,12 +211,18 @@ class GTConstantComparisonStage(PipelineStage):
         from qc_clean.core.llm.llm_handler import LLMHandler
 
         model_name = config.get("model_name", "gpt-5-mini")
+        logger.info(
+            "Starting gt_constant_comparison: docs=%d, max_iterations=%d, model=%s",
+            state.corpus.num_documents, self._max_iterations, model_name,
+        )
         llm = LLMHandler(model_name=model_name)
 
         segments = segment_documents(state.corpus.documents)
         if not segments:
-            logger.warning("No segments found in documents")
-            return state
+            raise RuntimeError(
+                "No segments found in documents — cannot perform constant comparison. "
+                f"Corpus has {state.corpus.num_documents} documents."
+            )
 
         codebook = Codebook(methodology="grounded_theory", created_by=Provenance.LLM)
         all_applications: List[CodeApplication] = []

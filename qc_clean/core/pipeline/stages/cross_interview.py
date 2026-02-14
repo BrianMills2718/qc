@@ -31,6 +31,11 @@ class CrossInterviewStage(PipelineStage):
 
     async def execute(self, state: ProjectState, config: dict) -> ProjectState:
         """Run cross-interview analysis using in-memory ProjectState data."""
+        logger.info(
+            "Starting cross_interview: docs=%d, codes=%d, applications=%d",
+            state.corpus.num_documents, len(state.codebook.codes),
+            len(state.code_applications),
+        )
         results = analyze_cross_interview_patterns(state)
 
         # Store results as an analytical memo

@@ -8,6 +8,7 @@ import logging
 import os
 import asyncio
 import random
+import time
 from typing import Optional, Type
 from pydantic import BaseModel
 import litellm
@@ -202,7 +203,12 @@ class LLMHandler:
         async def _extract_operation():
             # Build the full prompt
             full_prompt = self._build_extraction_prompt(prompt, schema, instructions)
-            
+
+            logger.info(
+                "LLM call: model=%s, schema=%s, prompt_len=%d",
+                self.model_name, schema.__name__, len(full_prompt),
+            )
+
             # Prepare messages for LLM
             messages = [
                 {
@@ -215,7 +221,7 @@ class LLMHandler:
                     "content": full_prompt
                 }
             ]
-            
+
             # Build kwargs for LiteLLM with JSON mode
             kwargs = {
                 "model": self.model_name,
@@ -226,27 +232,38 @@ class LLMHandler:
             # GPT-5 models don't support the temperature parameter
             if not self.model_name.startswith("gpt-5"):
                 kwargs["temperature"] = self.temperature
-            
+
             # Only add max_tokens if explicitly provided or configured
             if max_tokens is not None:
                 kwargs["max_tokens"] = max_tokens
-                logger.info(f"Using explicit max_tokens: {max_tokens}")
             elif self.default_max_tokens is not None:
                 kwargs["max_tokens"] = self.default_max_tokens
-                logger.info(f"Using configured max_tokens: {self.default_max_tokens}")
-            else:
-                logger.info("Using maximum available context window (no max_tokens limit)")
-            
+
             # Call LiteLLM with JSON mode (async)
+            call_start = time.monotonic()
             response = await litellm.acompletion(**kwargs)
-            
+            call_duration = time.monotonic() - call_start
+
             if not response or not response.choices:
                 raise Exception("Empty structured response from LLM API")
-            
+
             response_content = response.choices[0].message.content
             if not response_content:
                 raise Exception("Empty content in structured LLM response")
-            
+
+            # Log response metadata
+            usage = getattr(response, "usage", None)
+            tokens_info = ""
+            if usage:
+                tokens_info = (
+                    f", prompt_tokens={usage.prompt_tokens}"
+                    f", completion_tokens={usage.completion_tokens}"
+                )
+            logger.info(
+                "LLM response: model=%s, schema=%s, duration=%.1fs%s",
+                self.model_name, schema.__name__, call_duration, tokens_info,
+            )
+
             # Parse JSON response
             if isinstance(response_content, dict):
                 response_data = response_content
@@ -254,10 +271,9 @@ class LLMHandler:
                 response_data = json.loads(response_content)
             else:
                 raise ValueError(f"Unexpected response content type: {type(response_content)}")
-            
+
             # Create and validate model instance
             model_instance = schema(**response_data)
-            logger.info(f"Successfully extracted {schema.__name__}")
             return model_instance
         
         try:
@@ -266,7 +282,10 @@ class LLMHandler:
                 f"extract_structured[{schema.__name__}]"
             )
         except Exception as e:
-            logger.error(f"Structured extraction failed: {e}")
+            logger.error(
+                "Structured extraction failed: model=%s, schema=%s, prompt_len=%d, error=%s",
+                self.model_name, schema.__name__, len(prompt), e,
+            )
             raise LLMError(f"Failed to extract {schema.__name__}: {e}") from e
     
     def _build_extraction_prompt(

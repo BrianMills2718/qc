@@ -22,6 +22,21 @@ from qc_clean.schemas.domain import (
 logger = logging.getLogger(__name__)
 
 
+def require_config(config: dict, key: str, stage_name: str) -> str:
+    """Get a required config value, raising if the upstream stage didn't provide it.
+
+    This prevents downstream stages from silently running with empty data
+    when an upstream stage was skipped or failed.
+    """
+    value = config.get(key)
+    if not value:
+        raise RuntimeError(
+            f"Stage '{stage_name}' requires config key '{key}' but it is missing. "
+            f"The upstream stage that produces this value may have been skipped or failed."
+        )
+    return value
+
+
 class PipelineStage(ABC):
     """Abstract base class for a single analysis stage."""
 
@@ -141,7 +156,11 @@ class AnalysisPipeline:
                 phase_result.completed_at = datetime.now().isoformat()
                 state.add_phase_result(phase_result)
                 state.pipeline_status = PipelineStatus.FAILED
-                logger.error("Stage %s failed: %s", stage.name(), exc)
+                logger.error(
+                    "Stage %s failed: %s (docs=%d, codes=%d, applications=%d)",
+                    stage.name(), exc, state.corpus.num_documents,
+                    len(state.codebook.codes), len(state.code_applications),
+                )
                 raise
 
             # Post-stage callback (e.g. save state)
