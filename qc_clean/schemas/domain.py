@@ -443,3 +443,12 @@ class ProjectState(BaseModel):
                 self.phase_results[i] = result
                 return
         self.phase_results.append(result)
+
+    def get_coded_doc_ids(self) -> set:
+        """Return set of document IDs that have at least one code application."""
+        return {app.doc_id for app in self.code_applications}
+
+    def get_uncoded_doc_ids(self) -> list:
+        """Return list of document IDs with no code applications."""
+        coded = self.get_coded_doc_ids()
+        return [d.id for d in self.corpus.documents if d.id not in coded]

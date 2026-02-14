@@ -33,6 +33,8 @@ def handle_project_command(args) -> int:
         return _run_irr(store, args)
     elif args.project_action == "stability":
         return _run_stability(store, args)
+    elif args.project_action == "recode":
+        return _recode_project(store, args)
     else:
         print(f"Unknown project action: {args.project_action}", file=sys.stderr)
         return 1
@@ -383,5 +385,64 @@ def _run_stability(store: ProjectStore, args) -> int:
         for code in result.unstable_codes:
             score = result.code_stability.get(code, 0)
             print(f"    - {code}: {score:.0%}")
+
+    return 0
+
+
+def _recode_project(store: ProjectStore, args) -> int:
+    """Incrementally code new documents added to a completed project."""
+    project_id = args.project_id
+    try:
+        state = store.load(project_id)
+    except FileNotFoundError:
+        print(f"Project not found: {project_id}", file=sys.stderr)
+        return 1
+
+    if len(state.codebook.codes) == 0:
+        print("No existing codebook. Run the pipeline first with 'project run'.", file=sys.stderr)
+        return 1
+
+    uncoded = state.get_uncoded_doc_ids()
+    if not uncoded:
+        print("All documents are already coded. Add new documents first with 'project add-docs'.", file=sys.stderr)
+        return 1
+
+    from qc_clean.core.pipeline.pipeline_factory import create_incremental_pipeline
+
+    async def save_callback(s):
+        store.save(s)
+
+    pipeline = create_incremental_pipeline(
+        methodology=state.config.methodology.value,
+        on_stage_complete=save_callback,
+    )
+
+    model_name = getattr(args, "model", None) or state.config.model_name
+    config = {"model_name": model_name}
+
+    print(f"Incremental re-coding on project: {state.name}")
+    print(f"  Methodology: {state.config.methodology.value}")
+    print(f"  Existing codes: {len(state.codebook.codes)}")
+    print(f"  Total documents: {state.corpus.num_documents}")
+    print(f"  Uncoded documents: {len(uncoded)}")
+    print(f"  Model: {model_name}")
+    print()
+
+    # Reset pipeline status for the incremental run
+    state.pipeline_status = PipelineStatus.PENDING
+
+    try:
+        state = asyncio.run(pipeline.run(state, config))
+    except Exception as e:
+        store.save(state)
+        print(f"\nIncremental coding failed: {e}", file=sys.stderr)
+        return 1
+
+    store.save(state)
+
+    print("\nIncremental coding complete.")
+    print(f"  Codes: {len(state.codebook.codes)}")
+    print(f"  Applications: {len(state.code_applications)}")
+    print(f"  Iteration: {state.iteration}")
 
     return 0

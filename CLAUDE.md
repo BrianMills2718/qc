@@ -5,7 +5,7 @@
 LLM-powered qualitative coding analysis for interview transcripts. Accepts .txt, .docx, .pdf, .rtf files. Supports two methodologies:
 
 - **Default/Thematic Analysis** - 7-stage pipeline: Ingest -> Thematic Coding -> Perspective Analysis -> Relationship Mapping -> Synthesis -> Negative Case Analysis -> Cross-Interview Analysis
-- **Grounded Theory** - 7-stage pipeline: Ingest -> Open Coding -> Axial Coding -> Selective Coding -> Theory Integration -> Negative Case Analysis -> Cross-Interview Analysis
+- **Grounded Theory** - 7-stage pipeline: Ingest -> Constant Comparison Coding -> Axial Coding -> Selective Coding -> Theory Integration -> Negative Case Analysis -> Cross-Interview Analysis
 
 All stages use structured LLM output via Pydantic schemas + JSON mode. State is held in a single `ProjectState` Pydantic model that can be saved/loaded as JSON.
 
@@ -16,6 +16,7 @@ qc_cli.py                                    # CLI entry point
   -> qc_clean/core/cli/commands/             # CLI command handlers (analyze, project, review)
   -> qc_clean/plugins/api/                   # FastAPI server (port 8002)
      -> review_ui.py                         # Browser-based code review UI (self-contained HTML)
+     -> graph_ui.py                          # Interactive graph visualization (Cytoscape.js)
      -> qc_clean/core/pipeline/              # Stage-based pipeline engine
         -> pipeline_engine.py                # PipelineStage ABC + AnalysisPipeline orchestrator
         -> pipeline_factory.py               # create_pipeline(methodology) factory
@@ -31,7 +32,9 @@ qc_cli.py                                    # CLI entry point
            -> synthesis.py                   # Synthesis & recommendations
            -> negative_case.py               # Negative case analysis (disconfirming evidence)
            -> cross_interview.py             # Cross-document pattern analysis
-           -> gt_open_coding.py              # GT: Open coding
+           -> incremental_coding.py           # Incremental re-coding of new documents
+           -> gt_constant_comparison.py      # GT: Iterative constant comparison coding
+           -> gt_open_coding.py              # GT: Open coding (legacy, replaced by constant comparison)
            -> gt_axial_coding.py             # GT: Axial coding (relationships)
            -> gt_selective_coding.py         # GT: Core category identification
            -> gt_theory_integration.py       # GT: Theoretical model building
@@ -58,10 +61,13 @@ start_server.py                              # Server startup script
 - `qc_clean/schemas/adapters.py` - Convert LLM output schemas to domain model
 - `qc_clean/plugins/api/api_server.py` - API server (delegates to pipeline)
 - `qc_clean/plugins/api/review_ui.py` - Self-contained HTML review UI (string.Template)
+- `qc_clean/plugins/api/graph_ui.py` - Interactive graph visualization with Cytoscape.js (string.Template)
+- `qc_clean/core/pipeline/stages/gt_constant_comparison.py` - Iterative segment-by-segment GT coding with saturation detection
+- `qc_clean/core/pipeline/stages/incremental_coding.py` - Code new documents against existing codebook
 - `qc_clean/core/llm/llm_handler.py` - LLM handler with `extract_structured()` method
 - `qc_clean/core/export/data_exporter.py` - ProjectExporter (JSON/CSV/Markdown/QDPX from ProjectState)
 - `qc_cli.py` - CLI interface (analyze, project, review, status, server)
-- `tests/` - 335 passing tests (16 test files)
+- `tests/` - 387 passing tests (19 test files)
 
 ### How It Works
 - `project run` runs the pipeline locally (no server needed); `analyze` uses the API server
@@ -76,6 +82,9 @@ start_server.py                              # Server startup script
 - Default model: gpt-5-mini via OpenAI API (note: gpt-5 models don't support temperature param)
 - `analysis_schemas.py` defines LLM output shapes; `adapters.py` converts them to domain objects
 - Every stage produces an analytical memo (LLM reasoning trail) saved to `state.memos`
+- GT constant comparison: segments documents by speaker turns or paragraph chunks, iteratively codes each segment against an evolving codebook, stops when saturation reached
+- Incremental coding: `project recode` codes only uncoded documents against the existing codebook, then re-runs downstream stages
+- Graph visualization: `/graph/{project_id}` serves interactive Cytoscape.js graphs (code hierarchy, relationships, entity map)
 
 ## Working Commands
 
@@ -114,6 +123,10 @@ python qc_cli.py project stability <project_id>                               # 
 python qc_cli.py project stability <project_id> --runs 10                     # 10 runs
 python qc_cli.py project stability <project_id> --model gpt-5-mini            # specify model
 
+# Incremental coding (add new docs then re-code without starting over)
+python qc_cli.py project recode <project_id>                                  # recode with defaults
+python qc_cli.py project recode <project_id> --model gpt-5                    # specify model
+
 # Review codes (CLI)
 python qc_cli.py review <project_id>
 python qc_cli.py review <project_id> --approve-all
@@ -121,6 +134,10 @@ python qc_cli.py review <project_id> --file decisions.json
 
 # Review codes (browser - requires server running)
 # Open http://localhost:8002/review/<project_id>
+
+# Graph visualization (browser - requires server running)
+# Open http://localhost:8002/graph/<project_id>
+# Three views: Code Hierarchy, Code Relationships, Entity Map
 
 # Check status
 python qc_cli.py status --server
@@ -156,7 +173,7 @@ Default model is `gpt-5-mini` (cheap, adequate for most stages). Can switch per-
 ## Competitive Landscape (assessed 2026-02-12)
 
 ### Our Unique Position
-Only open-source tool combining: full GT pipeline (open -> axial -> selective -> theory integration), methodology-aware multi-stage pipeline engine, structured LLM output via Pydantic schemas, human review loop (approve/reject/modify/merge/split), cross-interview analysis, speaker detection, saturation detection, and theoretical sampling.
+Only open-source tool combining: full GT pipeline (constant comparison -> axial -> selective -> theory integration), methodology-aware multi-stage pipeline engine, structured LLM output via Pydantic schemas, human review loop (approve/reject/modify/merge/split), cross-interview analysis, speaker detection, saturation detection, theoretical sampling, incremental re-coding, and interactive graph visualization.
 
 ### Open-Source Competitors
 | Tool | Stars | Approach | Key Difference from Us |
@@ -236,8 +253,8 @@ Evaluated against Strauss & Corbin GT, Charmaz constructivist GT, COREQ/SRQR rep
 
 | Gap | Severity | Description |
 |-----|----------|-------------|
-| **Constant comparison** | Critical | Open coding runs as single LLM batch. True GT requires iterative segment-by-segment coding with continuous code-to-code comparison. |
-| **Iterative re-coding** | High | Pipeline runs each stage once. GT requires re-examining earlier data as categories evolve. |
+| **Constant comparison** | ~~Critical~~ **Done** | `GTConstantComparisonStage` replaces batch open coding. Segments documents by speaker turns or paragraph chunks, iteratively codes each segment against evolving codebook, checks saturation after each pass. |
+| **Iterative re-coding** | ~~High~~ **Done** | `project recode` command: codes only new/uncoded documents against existing codebook, merges results, re-runs downstream stages. |
 | **Theoretical sampling** | Moderate | Current heuristic uses speaker count + uncoded status. Should identify under-developed categories and seek data to develop them. |
 | **Per-category saturation** | Moderate | `saturation.py` checks codebook-level stability. GT requires per-category property/dimension tracking. |
 | **Full axial paradigm** | Low | Partially covers Strauss & Corbin paradigm (conditions, consequences) but not full decomposition (context vs intervening conditions). |
@@ -261,16 +278,14 @@ Evaluated against Strauss & Corbin GT, Charmaz constructivist GT, COREQ/SRQR rep
 - ~~**Negative case analysis**~~ — `NegativeCaseStage` in both pipelines
 - ~~**Pipeline stage tests**~~ — 28 mocked-LLM tests covering all 8 stages + cross-interview + edge cases
 - ~~**Multi-run stability**~~ — `project stability` CLI command, per-code stability scores, Markdown/CSV export
+- ~~**Incremental coding**~~ — `project recode` codes new documents against existing codebook, merges results, re-runs downstream stages
+- ~~**Graph visualization**~~ — `/graph/{project_id}` interactive Cytoscape.js graphs (code hierarchy, relationships, entity map) with search, PNG export
+- ~~**Constant comparison**~~ — `GTConstantComparisonStage` replaces batch open coding: segment-by-segment iterative coding with saturation detection
 
 ### Future — Features
-- **Incremental coding**: Add new documents to an existing project and re-code without starting over
-- **Graph visualization**: NetworkX for code relationship graphs, D3.js/Cytoscape.js in browser review UI
 - **Prompt optimization**: A/B test different prompts for code discovery quality
 
 ### Future — GT Fidelity (Tier 3)
-These are required for GT-specific publications. Each is a significant architectural change.
-- **Constant comparison loop** (Critical): Refactor open coding from single-batch to iterative segment-by-segment with continuous code-to-code comparison and codebook revision
-- **Iterative re-coding** (High): Re-run coding stages with evolved codebook, track iterations, compare across rounds
 - **True theoretical sampling** (Moderate): Identify under-developed categories, suggest specific data sources to develop them
 - **Per-category saturation** (Moderate): Track property/dimension saturation per category, not just codebook-level stability
 - **Full axial paradigm** (Low): Decompose Strauss & Corbin paradigm fully (context vs intervening conditions vs causal conditions)

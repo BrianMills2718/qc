@@ -229,7 +229,7 @@ class TestPipelineFactory:
         names = [s.name() for s in pipeline.stages]
         assert names == [
             "ingest",
-            "gt_open_coding",
+            "gt_constant_comparison",
             "gt_axial_coding",
             "gt_selective_coding",
             "gt_theory_integration",

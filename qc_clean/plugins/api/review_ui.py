@@ -123,6 +123,7 @@ a { color: #2563eb; }
   <h1 id="projectName">Loading...</h1>
   <span class="badge badge-pending" id="statusBadge">...</span>
   <div class="stats" id="stats"></div>
+  <a href="/graph/$project_id" style="font-size:13px;margin-left:8px;">View Graph</a>
 </div>
 
 <div class="action-bar">

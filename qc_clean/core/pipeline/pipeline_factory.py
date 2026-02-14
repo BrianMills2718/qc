@@ -39,14 +39,14 @@ def create_pipeline(
     from .stages.negative_case import NegativeCaseStage
 
     if methodology == Methodology.GROUNDED_THEORY.value or methodology == "grounded_theory":
-        from .stages.gt_open_coding import GTOpenCodingStage
+        from .stages.gt_constant_comparison import GTConstantComparisonStage
         from .stages.gt_axial_coding import GTAxialCodingStage
         from .stages.gt_selective_coding import GTSelectiveCodingStage
         from .stages.gt_theory_integration import GTTheoryIntegrationStage
 
         stages = [
             IngestStage(),
-            GTOpenCodingStage(pause_for_review=enable_human_review),
+            GTConstantComparisonStage(pause_for_review=enable_human_review),
             GTAxialCodingStage(pause_for_review=enable_human_review),
             GTSelectiveCodingStage(),
             GTTheoryIntegrationStage(),
@@ -68,5 +68,52 @@ def create_pipeline(
     logger.info(
         "Created %s pipeline with %d stages (human_review=%s)",
         methodology, len(stages), enable_human_review,
+    )
+    return AnalysisPipeline(stages=stages, on_stage_complete=on_stage_complete)
+
+
+def create_incremental_pipeline(
+    methodology: str = "default",
+    on_stage_complete=None,
+) -> AnalysisPipeline:
+    """
+    Build a pipeline for incremental re-coding after new documents are added.
+
+    Skips ingest (docs already loaded), runs incremental coding with existing
+    codebook as context, then re-runs downstream stages.
+    """
+    from .stages.incremental_coding import IncrementalCodingStage
+    from .stages.perspective import PerspectiveStage
+    from .stages.relationship import RelationshipStage
+    from .stages.synthesis import SynthesisStage
+    from .stages.cross_interview import CrossInterviewStage
+    from .stages.negative_case import NegativeCaseStage
+
+    if methodology == Methodology.GROUNDED_THEORY.value or methodology == "grounded_theory":
+        from .stages.gt_axial_coding import GTAxialCodingStage
+        from .stages.gt_selective_coding import GTSelectiveCodingStage
+        from .stages.gt_theory_integration import GTTheoryIntegrationStage
+
+        stages = [
+            IncrementalCodingStage(),
+            GTAxialCodingStage(),
+            GTSelectiveCodingStage(),
+            GTTheoryIntegrationStage(),
+            NegativeCaseStage(),
+            CrossInterviewStage(),
+        ]
+    else:
+        stages = [
+            IncrementalCodingStage(),
+            PerspectiveStage(),
+            RelationshipStage(),
+            SynthesisStage(),
+            NegativeCaseStage(),
+            CrossInterviewStage(),
+        ]
+
+    logger.info(
+        "Created incremental %s pipeline with %d stages",
+        methodology, len(stages),
     )
     return AnalysisPipeline(stages=stages, on_stage_complete=on_stage_complete)

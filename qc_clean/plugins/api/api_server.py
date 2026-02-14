@@ -201,6 +201,102 @@ class QCAPIServer:
                 "results": job.get("results", {})
             }
         
+        # ----- Graph Visualization UI -----
+        @self._app.get("/graph/{project_id}")
+        async def graph_ui_page(project_id: str):
+            """Serve the browser-based graph visualization UI."""
+            from fastapi.responses import HTMLResponse
+            from qc_clean.plugins.api.graph_ui import render_graph_page
+            from qc_clean.core.persistence.project_store import ProjectStore
+            store = ProjectStore()
+            if not store.exists(project_id):
+                raise HTTPException(status_code=404, detail=f"Project not found: {project_id}")
+            return HTMLResponse(render_graph_page(project_id))
+
+        @self._app.get("/projects/{project_id}/graph/codes")
+        async def get_graph_codes(project_id: str):
+            """Get code nodes and edges for graph visualization."""
+            from qc_clean.core.persistence.project_store import ProjectStore
+            store = ProjectStore()
+            try:
+                state = store.load(project_id)
+            except FileNotFoundError:
+                raise HTTPException(status_code=404, detail=f"Project not found: {project_id}")
+
+            nodes = []
+            for code in state.codebook.codes:
+                nodes.append({
+                    "id": code.id,
+                    "name": code.name,
+                    "description": code.description,
+                    "level": code.level,
+                    "mention_count": code.mention_count,
+                    "confidence": code.confidence,
+                    "example_quotes": code.example_quotes[:3],
+                    "parent_id": code.parent_id,
+                })
+
+            # Hierarchy edges from parent-child relationships
+            hierarchy_edges = []
+            code_ids = {c.id for c in state.codebook.codes}
+            for code in state.codebook.codes:
+                if code.parent_id and code.parent_id in code_ids:
+                    hierarchy_edges.append({
+                        "source": code.parent_id,
+                        "target": code.id,
+                    })
+
+            # Relationship edges from code_relationships
+            relationship_edges = []
+            for rel in state.code_relationships:
+                relationship_edges.append({
+                    "source": rel.source_code_id,
+                    "target": rel.target_code_id,
+                    "type": rel.relationship_type,
+                    "strength": rel.strength,
+                })
+
+            return {
+                "project_name": state.name,
+                "nodes": nodes,
+                "hierarchy_edges": hierarchy_edges,
+                "relationship_edges": relationship_edges,
+            }
+
+        @self._app.get("/projects/{project_id}/graph/entities")
+        async def get_graph_entities(project_id: str):
+            """Get entity nodes and edges for graph visualization."""
+            from qc_clean.core.persistence.project_store import ProjectStore
+            store = ProjectStore()
+            try:
+                state = store.load(project_id)
+            except FileNotFoundError:
+                raise HTTPException(status_code=404, detail=f"Project not found: {project_id}")
+
+            nodes = []
+            for ent in state.entities:
+                nodes.append({
+                    "id": ent.id,
+                    "name": ent.name,
+                    "type": ent.entity_type,
+                    "description": ent.description,
+                })
+
+            edges = []
+            for rel in state.entity_relationships:
+                edges.append({
+                    "source": rel.entity_1_id,
+                    "target": rel.entity_2_id,
+                    "type": rel.relationship_type,
+                    "strength": rel.strength,
+                })
+
+            return {
+                "project_name": state.name,
+                "nodes": nodes,
+                "edges": edges,
+            }
+
         # ----- Review UI -----
         @self._app.get("/review/{project_id}")
         async def review_ui_page(project_id: str):
@@ -402,6 +498,9 @@ class QCAPIServer:
             {"method": "POST", "path": "/analyze", "description": "Start analysis"},
             {"method": "GET", "path": "/jobs/{job_id}", "description": "Get job status"},
             {"method": "GET", "path": "/projects/{project_id}", "description": "Get project status"},
+            {"method": "GET", "path": "/graph/{project_id}", "description": "Graph visualization UI"},
+            {"method": "GET", "path": "/projects/{project_id}/graph/codes", "description": "Code graph data"},
+            {"method": "GET", "path": "/projects/{project_id}/graph/entities", "description": "Entity graph data"},
             {"method": "GET", "path": "/review/{project_id}", "description": "Review UI page"},
             {"method": "GET", "path": "/projects/{project_id}/review/codes", "description": "Get codes for review UI"},
             {"method": "GET", "path": "/projects/{project_id}/review", "description": "Get review summary"},
