@@ -413,6 +413,7 @@ async def qc_run_pipeline(
     project_id: str,
     model: str | None = None,
     enable_review: bool = False,
+    prompt_overrides: Dict[str, str] | None = None,
 ) -> str:
     """Run the full analysis pipeline on a project.
 
@@ -425,6 +426,9 @@ async def qc_run_pipeline(
         project_id: The project ID
         model: LLM model name (default: gpt-5-mini)
         enable_review: If True, pause after coding for human review
+        prompt_overrides: Optional dict mapping stage names to custom prompts.
+            Supported stages: "thematic_coding", "gt_constant_comparison".
+            Use {combined_text} and {num_interviews} placeholders for thematic_coding.
     """
     try:
         state = store.load(project_id)
@@ -456,7 +460,11 @@ async def qc_run_pipeline(
         {"name": d.name, "content": d.content}
         for d in state.corpus.documents
     ]
-    ctx = PipelineContext(model_name=model_name, interviews=interviews)
+    ctx = PipelineContext(
+        model_name=model_name,
+        interviews=interviews,
+        prompt_overrides=prompt_overrides or {},
+    )
 
     state = await pipeline.run(state, ctx, resume_from=resume_from)
     store.save(state)

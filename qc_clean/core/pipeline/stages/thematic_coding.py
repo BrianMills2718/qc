@@ -40,7 +40,14 @@ class ThematicCodingStage(PipelineStage):
         combined_text = _build_combined_text(state)
         num_interviews = state.corpus.num_documents
 
-        prompt = _build_phase1_prompt(combined_text, num_interviews)
+        if ctx.prompt_overrides.get("thematic_coding"):
+            # Use the override prompt, substituting {combined_text} and {num_interviews}
+            prompt = ctx.prompt_overrides["thematic_coding"].format(
+                combined_text=combined_text, num_interviews=num_interviews,
+            )
+            logger.info("Using prompt override for thematic_coding (%d chars)", len(prompt))
+        else:
+            prompt = _build_phase1_prompt(combined_text, num_interviews)
 
         if ctx.irr_prompt_suffix:
             prompt = prompt + "\n\n" + ctx.irr_prompt_suffix

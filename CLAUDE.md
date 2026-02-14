@@ -348,10 +348,78 @@ Evaluated against Strauss & Corbin GT, Charmaz constructivist GT, COREQ/SRQR rep
 - **Full axial paradigm** (Low): Decompose Strauss & Corbin paradigm fully (context vs intervening conditions vs causal conditions)
 
 ### Future — Features
-- **Prompt optimization**: A/B test coding prompts via `prompt_eval`. Use `llm_judge_evaluator(rubric)` to score code quality against research criteria, or `kappa_evaluator` against gold-standard codes. Three search strategies available: grid search, few-shot selection, instruction search.
+- **Prompt optimization**: Infrastructure in place (see below). Next: run actual optimization experiments, bake best prompts into stages
 - **Multi-model consensus**: Run analysis across GPT/Claude/Gemini and merge codebooks. Can use `prompt_eval` to compare model performance on same inputs
 - **Active learning**: Use human review decisions to fine-tune prompting for the project
 - **Collaborative coding**: Multiple human reviewers with conflict resolution
+
+## prompt_eval Integration (Prompt Optimization)
+
+### Infrastructure
+
+`PipelineContext.prompt_overrides` allows passing custom prompts to stages without editing source code. Supported stages: `thematic_coding`, `gt_constant_comparison`. The `qc_run_pipeline` MCP tool accepts `prompt_overrides` dict.
+
+Both MCP servers (QC + prompt_eval) are configured in `~/projects/.mcp.json`. An agent with access to both can orchestrate the full optimization loop.
+
+### Rubric for Codebook Quality (llm_judge)
+
+```
+Score the qualitative codebook on a scale of 0.0 to 1.0.
+
+1. CODE CLARITY (0-0.25): Are code names specific and descriptive?
+   Do descriptions clearly define what data belongs under each code?
+   Are codes mutually exclusive (minimal overlap)?
+
+2. GROUNDING (0-0.25): Is each code supported by verbatim quotes
+   from the data? Are the quotes relevant and illustrative?
+   Do mention_counts reflect actual data frequency?
+
+3. COVERAGE (0-0.25): Do the codes capture the major themes in the
+   data? Are important patterns missing? Is there appropriate balance
+   between breadth and depth? Is the hierarchy meaningful?
+
+4. ANALYTICAL DEPTH (0-0.25): Do codes reveal latent patterns (not
+   just surface content)? Is there evidence of interpretive work beyond
+   manifest content? Are the analytical memos insightful?
+```
+
+### Agent Workflow (using both MCP servers)
+
+**Workflow 1: Score existing results** (no code changes needed)
+1. `qc_get_codebook(project_id)` → codebook JSON
+2. `evaluate_output(output=codebook_json, evaluator_name="llm_judge", rubric=RUBRIC)` → score 0.0-1.0
+3. Report score to user
+
+**Workflow 2: A/B test coding prompts** (uses prompt_overrides)
+1. `qc_run_pipeline(project_id, prompt_overrides={"thematic_coding": variant_a_prompt})` → result A
+2. `evaluate_output(output=codebook_a, evaluator_name="llm_judge", rubric=RUBRIC)` → score A
+3. Create new project, run with variant B prompt → score B
+4. `compare(path, variant_a, variant_b)` → statistical comparison
+
+**Workflow 3: Automated prompt optimization** (uses instruction_search)
+1. Extract current thematic_coding prompt from `stages/thematic_coding.py`
+2. Build prompt_eval experiment with interview text as input, CodeHierarchy as response_model
+3. `run_experiment_tool(experiment_json=..., evaluator_name="llm_judge", rubric=RUBRIC)` → baseline
+4. Use `instruction_search` to hill-climb from baseline prompt
+5. Apply best prompt via `qc_run_pipeline(prompt_overrides={"thematic_coding": best_prompt})`
+
+### Target Prompts (by impact)
+
+| Stage | Prompt Location | Placeholders | Impact |
+|-------|----------------|--------------|--------|
+| `thematic_coding` | `stages/thematic_coding.py:_build_phase1_prompt()` | `{combined_text}`, `{num_interviews}` | Highest — determines all downstream quality |
+| `gt_constant_comparison` | `stages/gt_constant_comparison.py:_build_comparison_prompt()` | `{codebook_context}`, `{segment_text}`, `{seg_idx}`, `{total_segments}`, `{doc_name}` | Highest for GT |
+| `perspective` | `stages/perspective.py:_build_phase2_prompt()` | Not yet overridable | Medium |
+| `negative_case` | `stages/negative_case.py` inline | Not yet overridable | Medium |
+| `synthesis` | `stages/synthesis.py:_build_phase4_prompt()` | Not yet overridable | Low (downstream) |
+
+### Evaluator Options
+
+| Evaluator | Use Case | Notes |
+|-----------|----------|-------|
+| `llm_judge` + rubric | General quality scoring | Best for open-ended quality assessment. Use gpt-5 or claude as judge for reliability |
+| `kappa` | Agreement with gold standard | Requires human-coded gold standard. Extract code names from CodeHierarchy |
+| Custom function | Domain-specific metrics | e.g., code count in range, hierarchy depth, quote coverage ratio |
 
 ## Related Projects
 

@@ -233,7 +233,16 @@ class GTConstantComparisonStage(PipelineStage):
             old_codebook = codebook.model_copy(deep=True)
 
             for seg_idx, segment in enumerate(segments):
-                prompt = _build_comparison_prompt(codebook, segment, seg_idx, len(segments))
+                if ctx.prompt_overrides.get("gt_constant_comparison"):
+                    prompt = ctx.prompt_overrides["gt_constant_comparison"].format(
+                        codebook_context=_format_codebook_context(codebook),
+                        segment_text=segment["text"],
+                        seg_idx=seg_idx,
+                        total_segments=len(segments),
+                        doc_name=segment["doc_name"],
+                    )
+                else:
+                    prompt = _build_comparison_prompt(codebook, segment, seg_idx, len(segments))
 
                 if ctx.irr_prompt_suffix:
                     prompt = prompt + "\n\n" + ctx.irr_prompt_suffix

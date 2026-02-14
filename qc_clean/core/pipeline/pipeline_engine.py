@@ -40,6 +40,10 @@ class PipelineContext(BaseModel):
     model_name: str = "gpt-5-mini"
     interviews: List[Dict[str, Any]] = Field(default_factory=list)
     irr_prompt_suffix: str = ""
+    prompt_overrides: Dict[str, str] = Field(
+        default_factory=dict,
+        description="Stage-name -> prompt text. Overrides the default prompt for that stage.",
+    )
 
     # --- Inter-stage: thematic pipeline ---
     phase1_json: Optional[str] = None
