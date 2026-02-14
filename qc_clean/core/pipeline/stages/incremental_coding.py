@@ -13,7 +13,6 @@ from typing import List
 from qc_clean.core.pipeline.irr import normalize_code_name
 from qc_clean.core.pipeline.saturation import calculate_codebook_change
 from qc_clean.schemas.analysis_schemas import CodeHierarchy
-from qc_clean.schemas.adapters import code_hierarchy_to_codebook
 from qc_clean.schemas.domain import (
     AnalysisMemo,
     Code,
