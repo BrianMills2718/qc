@@ -330,4 +330,4 @@ Evaluated against Strauss & Corbin GT, Charmaz constructivist GT, COREQ/SRQR rep
 | Project | Path | Relationship |
 |---------|------|-------------|
 | **llm_client** | `~/projects/llm_client/` | Shared LLM calling library. QC's `LLMHandler` is a thin adapter over `acall_llm_structured` |
-| **prompt_eval** | `~/projects/prompt_eval/` | A/B prompt testing with statistical comparison. Future: use IRR metrics as evaluators for prompt experiments |
+| **prompt_eval** | `~/projects/prompt_eval/` | A/B prompt testing (v0.2.0): persistence, kappa/exact_match/contains evaluators, grid search optimization, MCP server. Ready to use `kappa_evaluator` with QC coding tasks |
