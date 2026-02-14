@@ -79,7 +79,7 @@ start_server.py                              # Server startup script
 - `ProjectStore` saves/loads entire ProjectState as JSON (no database needed)
 - Cross-interview analysis runs automatically for multi-document corpora
 - Saturation detection compares codebooks across iterations
-- Default model: gpt-5-mini via OpenAI API. LLMHandler is a thin adapter over shared `llm_client` library (retry, backoff, instructor-based structured extraction, GPT-5 temperature stripping)
+- Default model: gpt-5-mini via OpenAI API. LLMHandler is a thin adapter over shared `llm_client` library (retry, backoff, structured extraction via `acall_llm_structured` / `acall_llm_structured_batch`)
 - `analysis_schemas.py` defines LLM output shapes; `adapters.py` converts them to domain objects
 - Every stage produces an analytical memo (LLM reasoning trail) saved to `state.memos`
 - GT constant comparison: segments documents by speaker turns or paragraph chunks, iteratively codes each segment against an evolving codebook, stops when saturation reached

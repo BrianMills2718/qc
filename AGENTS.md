@@ -35,7 +35,7 @@ qc_cli.py                                    # CLI entry point
            -> gt_axial_coding.py             # GT: Axial coding (relationships)
            -> gt_selective_coding.py         # GT: Core category identification
            -> gt_theory_integration.py       # GT: Theoretical model building
-     -> qc_clean/core/llm/llm_handler.py    # LiteLLM with extract_structured()
+     -> qc_clean/core/llm/llm_handler.py    # Thin adapter over llm_client (extract_structured + batch)
      -> qc_clean/schemas/                    # Pydantic schemas
         -> domain.py                         # Unified domain model (ProjectState, Code, Codebook, etc.)
         -> analysis_schemas.py               # LLM output schemas (CodeHierarchy, SpeakerAnalysis, etc.)
@@ -52,16 +52,16 @@ start_server.py                              # Server startup script
 ### Key Files
 - `qc_clean/schemas/domain.py` - Unified data model: ProjectState, Document, Corpus, Code, Codebook, CodeApplication, etc.
 - `qc_clean/core/pipeline/pipeline_engine.py` - PipelineStage ABC and AnalysisPipeline orchestrator
-- `qc_clean/core/pipeline/irr.py` - Inter-rater reliability: multi-pass coding + Cohen's/Fleiss' kappa
+- `qc_clean/core/pipeline/irr.py` - Inter-rater reliability (concurrent passes via asyncio.gather) + stability analysis
 - `qc_clean/core/pipeline/review.py` - ReviewManager for human-in-the-loop code review
 - `qc_clean/core/persistence/project_store.py` - JSON persistence for ProjectState
 - `qc_clean/schemas/adapters.py` - Convert LLM output schemas to domain model
 - `qc_clean/plugins/api/api_server.py` - API server (delegates to pipeline)
 - `qc_clean/plugins/api/review_ui.py` - Self-contained HTML review UI (string.Template)
-- `qc_clean/core/llm/llm_handler.py` - LLM handler with `extract_structured()` method
+- `qc_clean/core/llm/llm_handler.py` - Thin adapter over `llm_client` with `extract_structured()` and `extract_structured_batch()`
 - `qc_clean/core/export/data_exporter.py` - ProjectExporter (JSON/CSV/Markdown/QDPX from ProjectState)
 - `qc_cli.py` - CLI interface (analyze, project, review, status, server)
-- `tests/` - 287 passing tests (14 test files)
+- `tests/` - 439 unit tests + 6 E2E tests (22 test files)
 
 ### How It Works
 - `project run` runs the pipeline locally (no server needed); `analyze` uses the API server
@@ -73,7 +73,7 @@ start_server.py                              # Server startup script
 - `ProjectStore` saves/loads entire ProjectState as JSON (no database needed)
 - Cross-interview analysis runs automatically for multi-document corpora
 - Saturation detection compares codebooks across iterations
-- Default model: gpt-5-mini via OpenAI API (note: gpt-5 models don't support temperature param)
+- Default model: gpt-5-mini via OpenAI API. LLMHandler delegates to shared `llm_client` library
 - `analysis_schemas.py` defines LLM output shapes; `adapters.py` converts them to domain objects
 - Every stage produces an analytical memo (LLM reasoning trail) saved to `state.memos`
 
@@ -224,14 +224,14 @@ Evaluated against Strauss & Corbin GT, Charmaz constructivist GT, COREQ/SRQR rep
 | **Memo generation** | ~~High~~ **Done** | All 8 pipeline stages generate analytical memos via LLM `analytical_memo` field. Exported in Markdown, CSV (`memos.csv`), and QDPX (`<Notes>`). |
 | **Audit trail for LLM decisions** | ~~High~~ **Done** | Per-code `reasoning` field explains why each code was created. Exported in CSV (`reasoning` column) and Markdown (Audit Trail section). |
 | **Negative case analysis** | ~~High~~ **Done** | `NegativeCaseStage` runs after coding in both pipelines. LLM searches for disconfirming evidence and produces structured negative case memos. |
-| **Multi-run stability** | Moderate | LLMs are non-deterministic. No way to show consistent results across runs. |
+| **Multi-run stability** | ~~Moderate~~ **Done** | `project stability` runs N identical passes, computes per-code stability scores. Passes run concurrently via `asyncio.gather`. |
 
 ### GT-Specific Gaps (Tier 3 — Required for GT Publications)
 
 | Gap | Severity | Description |
 |-----|----------|-------------|
-| **Constant comparison** | Critical | Open coding runs as single LLM batch. True GT requires iterative segment-by-segment coding with continuous code-to-code comparison. |
-| **Iterative re-coding** | High | Pipeline runs each stage once. GT requires re-examining earlier data as categories evolve. |
+| **Constant comparison** | ~~Critical~~ **Done** | `GTConstantComparisonStage` iteratively codes segment-by-segment with saturation detection. |
+| **Iterative re-coding** | ~~High~~ **Done** | `project recode` codes new documents against existing codebook. |
 | **Theoretical sampling** | Moderate | Current heuristic uses speaker count + uncoded status. Should identify under-developed categories and seek data to develop them. |
 | **Per-category saturation** | Moderate | `saturation.py` checks codebook-level stability. GT requires per-category property/dimension tracking. |
 | **Full axial paradigm** | Low | Partially covers Strauss & Corbin paradigm (conditions, consequences) but not full decomposition (context vs intervening conditions). |
@@ -258,13 +258,13 @@ Evaluated against Strauss & Corbin GT, Charmaz constructivist GT, COREQ/SRQR rep
 - ~~**Negative case analysis**: Pipeline sub-step asking "what contradicts the emerging categories?"~~ **Done** — `NegativeCaseStage` in both pipelines.
 
 ### Medium-term (Feature)
-- **Incremental coding**: Add new documents to an existing project and re-code without starting over
-- **Graph visualization**: NetworkX for code relationship graphs, D3.js/Cytoscape.js in browser review UI
+- ~~**Incremental coding**~~ **Done** — `project recode` codes new documents against existing codebook
+- ~~**Graph visualization**~~ **Done** — `/graph/{project_id}` interactive Cytoscape.js graphs
 - **Prompt optimization**: A/B test different prompts for code discovery quality
 
 ### Long-term (GT Fidelity)
-- **Constant comparison loop**: Refactor open coding from single-batch to iterative segment-by-segment with codebook revision
-- **Iterative re-coding**: Re-run coding stages with evolved codebook, track iterations
+- ~~**Constant comparison loop**~~ **Done** — `GTConstantComparisonStage` with saturation detection
+- ~~**Iterative re-coding**~~ **Done** — `project recode` re-runs downstream stages
 - **True theoretical sampling**: Identify under-developed categories, suggest data sources to develop them
 
 ### Long-term (Platform)
