@@ -229,12 +229,27 @@ Bugs found and fixed during E2E testing:
 - NegativeCase.implication: made optional (LLM sometimes omits it, causing validation failure)
 - Incremental pipeline: removed ctx-dependent stages (Perspective/Relationship/Synthesis) that require data from ThematicCodingStage
 
+## Design Lessons (from E2E testing)
+
+1. **LLMs don't reliably fill every schema field.** Even with JSON mode, gpt-5-mini sometimes omits fields. All LLM-facing Pydantic schema fields should have defaults unless you truly want the pipeline to crash on omission. Currently fixed: `NegativeCase.implication`. Still vulnerable: several fields in `TheoreticalModel`, `OpenCode`, `AxialRelationship` — see schema robustness audit below.
+
+2. **Unit tests with mocks don't catch integration bugs.** 461 unit tests passed, but two real bugs hid in the seams between stages: (a) `NegativeCase.implication` required but LLM omits it, (b) incremental pipeline included stages that depend on data from a stage that doesn't run. Only E2E with real LLM calls found these.
+
+3. **Fail-loud makes integration bugs easy to diagnose.** The `ctx.require()` pattern immediately told us which field was missing and which stage needed it. Without it, the bug would have produced silent garbage output.
+
+4. **LLM output is non-deterministic.** Same input produces 8-14 codes across runs. E2E assertions must be loose (`>= 3` not `== 12`). This is inherent to LLM-powered systems.
+
+5. **Schema robustness priority list** (fields that could fail if LLM omits them):
+   - `TheoreticalModel.core_categories` — empty list crashes the `.core_category` property accessor
+   - `OpenCode.supporting_quotes` — used for code application matching
+   - `AxialRelationship.conditions/consequences` — required lists with no defaults
+   - `EntityRelationship.supporting_evidence` — required list with no default
+
 ## Known Technical Debt
 
-1. **Schema duplication**: `analysis_schemas.py` / `gt_schemas.py` (LLM output shapes) and `domain.py` (internal model) overlap; this is intentional -- adapters bridge them
-2. ~~**Untyped config dict**~~ **Resolved**: Pipeline stages now use `PipelineContext` Pydantic model (`extra="forbid"` catches typos at construction). `ctx.require()` validates upstream data.
-3. ~~**Untyped return dicts**~~ **Resolved**: `calculate_codebook_change()`, `check_saturation()`, `analyze_cross_interview_patterns()`, `get_review_summary()`, `suggest_next_documents()` all return typed Pydantic models.
-4. ~~**No E2E tests**~~ **Resolved**: 6 E2E tests with real LLM calls in `tests/test_e2e.py` (auto-skipped without `OPENAI_API_KEY`).
+1. **Schema duplication**: `analysis_schemas.py` / `gt_schemas.py` (LLM output shapes) and `domain.py` (internal model) overlap; this is intentional — adapters bridge them
+2. **LLM schema fragility**: Several LLM-facing schemas have required fields with no defaults. The LLM can omit these, causing `ValidationError`. See "Design Lessons" above for the priority list.
+3. **`methodology_config.py`**: Only imported by tests now (not production code); could be removed if tests are refactored
 
 ## Academic Standards Gap Analysis (assessed 2026-02-12)
 
@@ -302,7 +317,8 @@ Evaluated against Strauss & Corbin GT, Charmaz constructivist GT, COREQ/SRQR rep
 - ~~**Typed PipelineContext**~~ — `PipelineContext` Pydantic model replaces `config: dict` across all 14 stages (`extra="forbid"` catches typos)
 - ~~**Typed return values**~~ — `CodebookChangeResult`, `SaturationCheckResult`, `CrossInterviewResult`, `ReviewSummary`, `SamplingSuggestion` replace plain dicts
 - ~~**CLI utility tests**~~ — 57 tests for file_handler, formatters (json/table/human), progress utilities
-- **E2E validation of new features**: Test incremental coding, constant comparison, graph viz with real LLM against real data
+- ~~**E2E validation**~~ — 6 E2E tests with real LLM calls: default/GT/incremental pipelines, graph data, export. Caught 2 bugs unit tests missed.
+- **LLM schema robustness audit**: Several LLM-facing schemas have required fields the LLM may omit (see Design Lessons below). Add defaults to remaining vulnerable fields.
 
 ### Future — GT Fidelity (Tier 3)
 - **True theoretical sampling** (Moderate): Identify under-developed categories, suggest specific data sources to develop them
