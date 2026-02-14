@@ -85,6 +85,8 @@ start_server.py                              # Server startup script
 - GT constant comparison: segments documents by speaker turns or paragraph chunks, iteratively codes each segment against an evolving codebook, stops when saturation reached
 - Incremental coding: `project recode` codes only uncoded documents against the existing codebook, then re-runs downstream stages
 - Graph visualization: `/graph/{project_id}` serves interactive Cytoscape.js graphs (code hierarchy, relationships, entity map)
+- Fail-loud: downstream stages raise `RuntimeError` if upstream config keys are missing (no silent empty-data fallbacks). Review raises `ValueError` on unknown target types.
+- Observability: LLMHandler logs model/schema/prompt_len/duration/tokens on every call. All stages log entry context (doc/code counts, model). Pipeline engine logs state context on failure.
 
 ## Working Commands
 
@@ -220,7 +222,9 @@ Bugs found and fixed during E2E testing:
 ## Known Technical Debt
 
 1. **Schema duplication**: `analysis_schemas.py` / `gt_schemas.py` (LLM output shapes) and `domain.py` (internal model) overlap; this is intentional -- adapters bridge them
-2. **Test gaps**: All pipeline stages have mocked-LLM unit tests (state mutations, codebook output, edge cases). CLI commands are untested.
+2. **Untyped config dict**: Pipeline stages pass `config: dict` with string keys like `"_phase1_json"`. Should be a `PipelineContext` TypedDict or Pydantic model for static checking. `require_config()` catches missing keys at runtime but not typos.
+3. **Untyped return dicts**: `calculate_codebook_change()`, `check_saturation()`, `analyze_cross_interview_patterns()`, `get_review_summary()` return plain dicts. Should be Pydantic models.
+4. **Test gaps**: All pipeline stages have mocked-LLM unit tests + fail-loud tests. CLI formatters, api_client.py, and file_handler.py are untested.
 
 ## Academic Standards Gap Analysis (assessed 2026-02-12)
 
@@ -281,16 +285,22 @@ Evaluated against Strauss & Corbin GT, Charmaz constructivist GT, COREQ/SRQR rep
 - ~~**Incremental coding**~~ — `project recode` codes new documents against existing codebook, merges results, re-runs downstream stages
 - ~~**Graph visualization**~~ — `/graph/{project_id}` interactive Cytoscape.js graphs (code hierarchy, relationships, entity map) with search, PNG export
 - ~~**Constant comparison**~~ — `GTConstantComparisonStage` replaces batch open coding: segment-by-segment iterative coding with saturation detection
+- ~~**Fail-loud enforcement**~~ — `require_config()` for config dependencies, `ValueError` on bad review decisions, no silent fallbacks
+- ~~**Observability**~~ — LLM call instrumentation (model/schema/duration/tokens), stage entry context logging, failure state logging
 
-### Future — Features
-- **Prompt optimization**: A/B test different prompts for code discovery quality
+### Short-term — Code Quality
+- **Typed PipelineContext**: Replace `config: dict` with a Pydantic model for static type checking of inter-stage data flow
+- **Typed return values**: Replace `Dict` returns in saturation/cross_interview/review with Pydantic models
+- **CLI utility tests**: Tests for formatters, file_handler, api_client (~30 tests)
+- **E2E validation of new features**: Test incremental coding, constant comparison, graph viz with real LLM against real data
 
 ### Future — GT Fidelity (Tier 3)
 - **True theoretical sampling** (Moderate): Identify under-developed categories, suggest specific data sources to develop them
 - **Per-category saturation** (Moderate): Track property/dimension saturation per category, not just codebook-level stability
 - **Full axial paradigm** (Low): Decompose Strauss & Corbin paradigm fully (context vs intervening conditions vs causal conditions)
 
-### Future — Platform
+### Future — Features
+- **Prompt optimization**: A/B test different prompts for code discovery quality
 - **Multi-model consensus**: Run analysis across GPT/Claude/Gemini and merge codebooks
 - **Active learning**: Use human review decisions to fine-tune prompting for the project
 - **Collaborative coding**: Multiple human reviewers with conflict resolution
