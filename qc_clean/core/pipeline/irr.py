@@ -13,6 +13,7 @@ References:
 
 from __future__ import annotations
 
+import asyncio
 import copy
 import logging
 import re
@@ -231,27 +232,23 @@ async def run_irr_analysis(
         Populated with passes, aligned codes, matrix, and metrics.
     """
     is_gt = state.config.methodology == Methodology.GROUNDED_THEORY
+    from qc_clean.core.pipeline.pipeline_engine import PipelineContext
 
-    passes: List[IRRCodingPass] = []
-
-    for i in range(num_passes):
+    async def _run_one_pass(i: int) -> IRRCodingPass:
         suffix = PROMPT_SUFFIXES[i % len(PROMPT_SUFFIXES)]
         pass_model = model_name
         if models:
             pass_model = models[i % len(models)]
 
-        # Fresh state copy: keep corpus, reset codes
         pass_state = state.model_copy(deep=True)
         pass_state.codebook.codes = []
         pass_state.code_applications = []
 
-        from qc_clean.core.pipeline.pipeline_engine import PipelineContext
         ctx = PipelineContext(
             model_name=pass_model,
             irr_prompt_suffix=suffix,
         )
 
-        # Run the appropriate coding stage
         if is_gt:
             from qc_clean.core.pipeline.stages.gt_open_coding import GTOpenCodingStage
             stage = GTOpenCodingStage()
@@ -272,14 +269,16 @@ async def run_irr_analysis(
             for c in pass_state.codebook.codes
         ]
 
-        passes.append(IRRCodingPass(
+        return IRRCodingPass(
             pass_index=i,
             prompt_suffix=suffix,
             model_name=pass_model,
             codes_discovered=code_names,
             code_details=code_details,
             timestamp=datetime.now().isoformat(),
-        ))
+        )
+
+    passes = list(await asyncio.gather(*[_run_one_pass(i) for i in range(num_passes)]))
 
     # Compute metrics
     all_pass_codes = [p.codes_discovered for p in passes]
@@ -381,17 +380,13 @@ async def run_stability_analysis(
         Per-code stability scores and classification.
     """
     is_gt = state.config.methodology == Methodology.GROUNDED_THEORY
+    from qc_clean.core.pipeline.pipeline_engine import PipelineContext
 
-    run_details = []
-    all_run_codes: List[List[str]] = []
-
-    for i in range(num_runs):
-        # Fresh state copy: keep corpus, reset codes
+    async def _run_one(i: int) -> tuple[list[str], dict]:
         run_state = state.model_copy(deep=True)
         run_state.codebook.codes = []
         run_state.code_applications = []
 
-        from qc_clean.core.pipeline.pipeline_engine import PipelineContext
         ctx = PipelineContext(model_name=model_name)
 
         if is_gt:
@@ -405,14 +400,18 @@ async def run_stability_analysis(
         run_state = await stage.execute(run_state, ctx)
 
         code_names = [c.name for c in run_state.codebook.codes]
-        all_run_codes.append(code_names)
-        run_details.append({
+        details = {
             "run_index": i,
             "model_name": model_name,
             "num_codes": len(code_names),
             "codes": code_names,
             "timestamp": datetime.now().isoformat(),
-        })
+        }
+        return code_names, details
+
+    results = list(await asyncio.gather(*[_run_one(i) for i in range(num_runs)]))
+    all_run_codes = [codes for codes, _ in results]
+    run_details = [details for _, details in results]
 
     # Build presence matrix over ALL unique codes across all runs
     all_unique_norm = set()

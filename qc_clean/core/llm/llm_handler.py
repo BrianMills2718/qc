@@ -5,7 +5,7 @@ from typing import Optional, Type
 
 from pydantic import BaseModel
 
-from llm_client import acall_llm_structured
+from llm_client import acall_llm_structured, acall_llm_structured_batch
 from qc_clean.core.utils.error_handler import LLMError
 
 logger = logging.getLogger(__name__)
@@ -110,3 +110,74 @@ class LLMHandler:
                 e,
             )
             raise LLMError(f"Failed to extract {schema.__name__}: {e}") from e
+
+    async def extract_structured_batch(
+        self,
+        prompts: list[str],
+        schema: Type[BaseModel],
+        instructions: Optional[str] = None,
+        max_tokens: Optional[int] = None,
+        max_concurrent: int = 5,
+    ) -> list[BaseModel]:
+        """Extract structured data from multiple prompts concurrently.
+
+        Args:
+            prompts: List of prompts to process
+            schema: Pydantic model class for the expected output
+            instructions: Additional instructions (applied to all prompts)
+            max_tokens: Maximum tokens per call
+            max_concurrent: Max concurrent LLM calls
+
+        Returns:
+            List of validated schema instances (same order as prompts)
+        """
+        if not prompts:
+            return []
+
+        messages_list = []
+        for prompt in prompts:
+            user_content = prompt
+            if instructions:
+                user_content += f"\n\nADDITIONAL INSTRUCTIONS:\n{instructions}"
+            messages_list.append([
+                {
+                    "role": "system",
+                    "content": (
+                        "You are an expert at extracting structured information from text. "
+                        "Return your response as valid JSON that matches the provided schema."
+                    ),
+                },
+                {"role": "user", "content": user_content},
+            ])
+
+        kwargs = {"temperature": self.temperature}
+        effective_max_tokens = max_tokens or self.default_max_tokens
+        if effective_max_tokens:
+            kwargs["max_tokens"] = effective_max_tokens
+
+        logger.info(
+            "LLM batch call: model=%s, schema=%s, items=%d, max_concurrent=%d",
+            self.model_name, schema.__name__, len(prompts), max_concurrent,
+        )
+        try:
+            results = await acall_llm_structured_batch(
+                self.model_name,
+                messages_list,
+                response_model=schema,
+                max_concurrent=max_concurrent,
+                num_retries=self.max_retries,
+                base_delay=self.base_delay,
+                **kwargs,
+            )
+            total_cost = sum(meta.cost for _, meta in results)
+            logger.info(
+                "LLM batch response: model=%s, schema=%s, items=%d, total_cost=$%.6f",
+                self.model_name, schema.__name__, len(results), total_cost,
+            )
+            return [parsed for parsed, _meta in results]
+        except Exception as e:
+            logger.error(
+                "Structured batch extraction failed: model=%s, schema=%s, error=%s",
+                self.model_name, schema.__name__, e,
+            )
+            raise LLMError(f"Failed to batch extract {schema.__name__}: {e}") from e
