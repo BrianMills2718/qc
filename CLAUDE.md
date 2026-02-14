@@ -320,7 +320,14 @@ Evaluated against Strauss & Corbin GT, Charmaz constructivist GT, COREQ/SRQR rep
 - **Full axial paradigm** (Low): Decompose Strauss & Corbin paradigm fully (context vs intervening conditions vs causal conditions)
 
 ### Future — Features
-- **Prompt optimization**: A/B test different prompts for code discovery quality
-- **Multi-model consensus**: Run analysis across GPT/Claude/Gemini and merge codebooks
+- **Prompt optimization**: A/B test different prompts for code discovery quality. Use `prompt_eval` library (`~/projects/prompt_eval/`) with IRR kappa as evaluator function
+- **Multi-model consensus**: Run analysis across GPT/Claude/Gemini and merge codebooks. Can use `prompt_eval` to compare model performance on same inputs
 - **Active learning**: Use human review decisions to fine-tune prompting for the project
 - **Collaborative coding**: Multiple human reviewers with conflict resolution
+
+## Related Projects
+
+| Project | Path | Relationship |
+|---------|------|-------------|
+| **llm_client** | `~/projects/llm_client/` | Shared LLM calling library. QC's `LLMHandler` is a thin adapter over `acall_llm_structured` |
+| **prompt_eval** | `~/projects/prompt_eval/` | A/B prompt testing with statistical comparison. Future: use IRR metrics as evaluators for prompt experiments |
