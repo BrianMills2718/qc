@@ -1,4 +1,4 @@
-# Qualitative Coding Analysis System (v2.1)
+# Qualitative Coding Analysis System (v2.2)
 
 ## What This Project Does
 
@@ -67,7 +67,7 @@ start_server.py                              # Server startup script
 - `qc_clean/core/llm/llm_handler.py` - Thin adapter over `llm_client.acall_llm_structured` (QC config wiring, LLMError wrapping, system prompt)
 - `qc_clean/core/export/data_exporter.py` - ProjectExporter (JSON/CSV/Markdown/QDPX from ProjectState)
 - `qc_cli.py` - CLI interface (analyze, project, review, status, server)
-- `tests/` - 439 unit tests + 6 E2E tests (21 test files)
+- `tests/` - 439 unit tests + 6 E2E tests (22 test files)
 
 ### How It Works
 - `project run` runs the pipeline locally (no server needed); `analyze` uses the API server
@@ -86,7 +86,7 @@ start_server.py                              # Server startup script
 - Incremental coding: `project recode` codes only uncoded documents against the existing codebook, then re-runs downstream stages
 - Graph visualization: `/graph/{project_id}` serves interactive Cytoscape.js graphs (code hierarchy, relationships, entity map)
 - Fail-loud: downstream stages raise `RuntimeError` via `ctx.require()` if upstream data is missing (no silent empty-data fallbacks). Review raises `ValueError` on unknown target types.
-- Observability: LLMHandler logs model/schema/prompt_len/duration/tokens on every call. All stages log entry context (doc/code counts, model). Pipeline engine logs state context on failure.
+- Observability: LLMHandler logs model/schema/prompt_len on call, cost/usage on response. All stages log entry context (doc/code counts, model). Pipeline engine logs state context on failure.
 
 ## Working Commands
 
@@ -151,7 +151,7 @@ python -m pytest tests/ -v
 
 ## Configuration
 
-The LLM handler reads API keys from environment variables. Default model: `gpt-5-mini`.
+API keys are read from environment variables by `llm_client` (via litellm). Default model: `gpt-5-mini`.
 
 Key env vars:
 - `OPENAI_API_KEY` / `GEMINI_API_KEY` / `ANTHROPIC_API_KEY` -- API key for the model provider
@@ -233,7 +233,7 @@ Bugs found and fixed during E2E testing:
 
 1. **LLMs don't reliably fill every schema field.** Even with JSON mode, gpt-5-mini sometimes omits fields. All LLM-facing Pydantic schema fields should have defaults unless you truly want the pipeline to crash on omission. Fixed: all 30 `List` fields and 2 `Dict` fields across `analysis_schemas.py`, `gt_schemas.py`, and `negative_case.py` now have `default_factory`.
 
-2. **Unit tests with mocks don't catch integration bugs.** 461 unit tests passed, but two real bugs hid in the seams between stages: (a) `NegativeCase.implication` required but LLM omits it, (b) incremental pipeline included stages that depend on data from a stage that doesn't run. Only E2E with real LLM calls found these.
+2. **Unit tests with mocks don't catch integration bugs.** Hundreds of unit tests passed, but two real bugs hid in the seams between stages: (a) `NegativeCase.implication` required but LLM omits it, (b) incremental pipeline included stages that depend on data from a stage that doesn't run. Only E2E with real LLM calls found these.
 
 3. **Fail-loud makes integration bugs easy to diagnose.** The `ctx.require()` pattern immediately told us which field was missing and which stage needed it. Without it, the bug would have produced silent garbage output.
 
@@ -295,26 +295,24 @@ Evaluated against Strauss & Corbin GT, Charmaz constructivist GT, COREQ/SRQR rep
 
 ## Next Steps
 
-### Completed (v2.1)
-- ~~**Inter-rater reliability**~~ — `project irr` CLI command (multi-pass, Cohen's/Fleiss' kappa)
-- ~~**Memo generation**~~ — all 8 stages produce analytical memos
-- ~~**Audit trail**~~ — per-code `reasoning` field + Audit Trail export
-- ~~**Negative case analysis**~~ — `NegativeCaseStage` in both pipelines
-- ~~**Pipeline stage tests**~~ — 28 mocked-LLM tests covering all 8 stages + cross-interview + edge cases
-- ~~**Multi-run stability**~~ — `project stability` CLI command, per-code stability scores, Markdown/CSV export
-- ~~**Incremental coding**~~ — `project recode` codes new documents against existing codebook, merges results, re-runs downstream stages
-- ~~**Graph visualization**~~ — `/graph/{project_id}` interactive Cytoscape.js graphs (code hierarchy, relationships, entity map) with search, PNG export
-- ~~**Constant comparison**~~ — `GTConstantComparisonStage` replaces batch open coding: segment-by-segment iterative coding with saturation detection
-- ~~**Fail-loud enforcement**~~ — `PipelineContext.require()` for inter-stage data dependencies, `ValueError` on bad review decisions, no silent fallbacks
-- ~~**Observability**~~ — LLM call instrumentation (model/schema/duration/tokens), stage entry context logging, failure state logging
-
-### Short-term — Code Quality
-- ~~**Typed PipelineContext**~~ — `PipelineContext` Pydantic model replaces `config: dict` across all 14 stages (`extra="forbid"` catches typos)
-- ~~**Typed return values**~~ — `CodebookChangeResult`, `SaturationCheckResult`, `CrossInterviewResult`, `ReviewSummary`, `SamplingSuggestion` replace plain dicts
-- ~~**CLI utility tests**~~ — 57 tests for file_handler, formatters (json/table/human), progress utilities
-- ~~**E2E validation**~~ — 6 E2E tests with real LLM calls: default/GT/incremental pipelines, graph data, export. Caught 2 bugs unit tests missed.
-- ~~**LLM handler migration**~~ — `LLMHandler` rewritten as thin adapter over shared `llm_client` library (369→112 lines). Retry, backoff, schema-in-prompt, API key inference, GPT-5 temperature handling all moved to `llm_client` v0.3.0. Zero caller changes.
-- ~~**LLM schema robustness audit**~~ — All 30 `List` fields and 2 `Dict` fields across LLM-facing schemas (`analysis_schemas.py`, `gt_schemas.py`, `negative_case.py`) now have `default_factory=list`/`default_factory=dict`. LLM omitting any field no longer causes `ValidationError`.
+### Completed (v2.2)
+- ~~Inter-rater reliability~~ — `project irr` CLI command (multi-pass, Cohen's/Fleiss' kappa)
+- ~~Memo generation~~ — all 8 stages produce analytical memos
+- ~~Audit trail~~ — per-code `reasoning` field + Audit Trail export
+- ~~Negative case analysis~~ — `NegativeCaseStage` in both pipelines
+- ~~Pipeline stage tests~~ — 28 mocked-LLM tests covering all 8 stages + cross-interview + edge cases
+- ~~Multi-run stability~~ — `project stability` CLI command, per-code stability scores, Markdown/CSV export
+- ~~Incremental coding~~ — `project recode` codes new documents against existing codebook, merges results, re-runs downstream stages
+- ~~Graph visualization~~ — `/graph/{project_id}` interactive Cytoscape.js graphs (code hierarchy, relationships, entity map) with search, PNG export
+- ~~Constant comparison~~ — `GTConstantComparisonStage` replaces batch open coding: segment-by-segment iterative coding with saturation detection
+- ~~Fail-loud enforcement~~ — `PipelineContext.require()` for inter-stage data dependencies, `ValueError` on bad review decisions, no silent fallbacks
+- ~~Observability~~ — LLM call instrumentation (model/schema/cost/tokens), stage entry context logging, failure state logging
+- ~~Typed PipelineContext~~ — `PipelineContext` Pydantic model replaces `config: dict` across all 14 stages (`extra="forbid"` catches typos)
+- ~~Typed return values~~ — `CodebookChangeResult`, `SaturationCheckResult`, `CrossInterviewResult`, `ReviewSummary`, `SamplingSuggestion` replace plain dicts
+- ~~CLI utility tests~~ — 57 tests for file_handler, formatters (json/table/human), progress utilities
+- ~~E2E validation~~ — 6 E2E tests with real LLM calls: default/GT/incremental pipelines, graph data, export
+- ~~LLM handler migration~~ — `LLMHandler` rewritten as thin adapter over shared `llm_client` library (369→112 lines). Retry, backoff, schema-in-prompt, API key inference, GPT-5 temperature handling moved to `llm_client` v0.3.0
+- ~~LLM schema robustness~~ — All 30 `List` fields and 2 `Dict` fields across LLM-facing schemas now have `default_factory`. LLM omitting any field no longer causes `ValidationError`
 
 ### Future — GT Fidelity (Tier 3)
 - **True theoretical sampling** (Moderate): Identify under-developed categories, suggest specific data sources to develop them
