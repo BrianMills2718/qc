@@ -54,7 +54,7 @@ start_server.py                              # Server startup script
 
 ### Key Files
 - `qc_clean/schemas/domain.py` - Unified data model: ProjectState, Document, Corpus, Code, Codebook, CodeApplication, etc.
-- `qc_clean/core/pipeline/pipeline_engine.py` - PipelineStage ABC and AnalysisPipeline orchestrator
+- `qc_clean/core/pipeline/pipeline_engine.py` - PipelineStage ABC, PipelineContext (typed config), AnalysisPipeline orchestrator
 - `qc_clean/core/pipeline/irr.py` - Inter-rater reliability + multi-run stability analysis
 - `qc_clean/core/pipeline/review.py` - ReviewManager for human-in-the-loop code review
 - `qc_clean/core/persistence/project_store.py` - JSON persistence for ProjectState
@@ -67,13 +67,13 @@ start_server.py                              # Server startup script
 - `qc_clean/core/llm/llm_handler.py` - LLM handler with `extract_structured()` method
 - `qc_clean/core/export/data_exporter.py` - ProjectExporter (JSON/CSV/Markdown/QDPX from ProjectState)
 - `qc_cli.py` - CLI interface (analyze, project, review, status, server)
-- `tests/` - 403 passing tests (20 test files)
+- `tests/` - 461 passing tests (21 test files)
 
 ### How It Works
 - `project run` runs the pipeline locally (no server needed); `analyze` uses the API server
 - CLI is a pure HTTP client for `analyze` -- all analysis runs on the API server
 - API server creates an `AnalysisPipeline` via the factory and runs it
-- Each stage reads from / writes to `ProjectState` (single Pydantic model)
+- Each stage reads from / writes to `ProjectState` (single Pydantic model) via typed `PipelineContext`
 - Pipeline pauses at human review checkpoints when `enable_human_review=True`
 - `ReviewManager` handles approve/reject/modify/merge/split of codes
 - `ProjectStore` saves/loads entire ProjectState as JSON (no database needed)
@@ -222,9 +222,9 @@ Bugs found and fixed during E2E testing:
 ## Known Technical Debt
 
 1. **Schema duplication**: `analysis_schemas.py` / `gt_schemas.py` (LLM output shapes) and `domain.py` (internal model) overlap; this is intentional -- adapters bridge them
-2. **Untyped config dict**: Pipeline stages pass `config: dict` with string keys like `"_phase1_json"`. Should be a `PipelineContext` TypedDict or Pydantic model for static checking. `require_config()` catches missing keys at runtime but not typos.
-3. **Untyped return dicts**: `calculate_codebook_change()`, `check_saturation()`, `analyze_cross_interview_patterns()`, `get_review_summary()` return plain dicts. Should be Pydantic models.
-4. **Test gaps**: All pipeline stages have mocked-LLM unit tests + fail-loud tests. CLI formatters, api_client.py, and file_handler.py are untested.
+2. ~~**Untyped config dict**~~ **Resolved**: Pipeline stages now use `PipelineContext` Pydantic model (`extra="forbid"` catches typos at construction). `ctx.require()` validates upstream data.
+3. ~~**Untyped return dicts**~~ **Resolved**: `calculate_codebook_change()`, `check_saturation()`, `analyze_cross_interview_patterns()`, `get_review_summary()`, `suggest_next_documents()` all return typed Pydantic models.
+4. **Test gaps**: All pipeline stages have mocked-LLM unit tests + fail-loud tests. CLI utilities (file_handler, formatters, progress) have 57 tests. No E2E tests with real LLM calls.
 
 ## Academic Standards Gap Analysis (assessed 2026-02-12)
 
@@ -289,9 +289,9 @@ Evaluated against Strauss & Corbin GT, Charmaz constructivist GT, COREQ/SRQR rep
 - ~~**Observability**~~ — LLM call instrumentation (model/schema/duration/tokens), stage entry context logging, failure state logging
 
 ### Short-term — Code Quality
-- **Typed PipelineContext**: Replace `config: dict` with a Pydantic model for static type checking of inter-stage data flow
-- **Typed return values**: Replace `Dict` returns in saturation/cross_interview/review with Pydantic models
-- **CLI utility tests**: Tests for formatters, file_handler, api_client (~30 tests)
+- ~~**Typed PipelineContext**~~ — `PipelineContext` Pydantic model replaces `config: dict` across all 14 stages (`extra="forbid"` catches typos)
+- ~~**Typed return values**~~ — `CodebookChangeResult`, `SaturationCheckResult`, `CrossInterviewResult`, `ReviewSummary`, `SamplingSuggestion` replace plain dicts
+- ~~**CLI utility tests**~~ — 57 tests for file_handler, formatters (json/table/human), progress utilities
 - **E2E validation of new features**: Test incremental coding, constant comparison, graph viz with real LLM against real data
 
 ### Future — GT Fidelity (Tier 3)
