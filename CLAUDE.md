@@ -330,4 +330,4 @@ Evaluated against Strauss & Corbin GT, Charmaz constructivist GT, COREQ/SRQR rep
 | Project | Path | Relationship |
 |---------|------|-------------|
 | **llm_client** | `~/projects/llm_client/` | Shared LLM calling library. QC's `LLMHandler` is a thin adapter over `acall_llm_structured` |
-| **prompt_eval** | `~/projects/prompt_eval/` | General-purpose prompt improvement system (v0.2.0). 4 evaluators (llm_judge, kappa, exact_match, contains), 3 optimization strategies (grid search, few-shot selection, instruction search), persistence, MCP server. 101 tests. |
+| **prompt_eval** | `~/projects/prompt_eval/` | General-purpose prompt improvement system (v0.2.0). 4 evaluators (llm_judge, kappa, exact_match, contains), 3 optimization strategies (grid search, few-shot selection, instruction search), persistence, MCP server with all 4 evaluators as built-ins. 104 tests. |
