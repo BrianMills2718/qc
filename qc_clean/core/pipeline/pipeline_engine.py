@@ -11,7 +11,9 @@ from __future__ import annotations
 import logging
 from abc import ABC, abstractmethod
 from datetime import datetime
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
+
+from pydantic import BaseModel, ConfigDict, Field
 
 from qc_clean.schemas.domain import (
     AnalysisPhaseResult,
@@ -22,19 +24,49 @@ from qc_clean.schemas.domain import (
 logger = logging.getLogger(__name__)
 
 
-def require_config(config: dict, key: str, stage_name: str) -> str:
-    """Get a required config value, raising if the upstream stage didn't provide it.
+class PipelineContext(BaseModel):
+    """Typed configuration for pipeline execution.
 
-    This prevents downstream stages from silently running with empty data
-    when an upstream stage was skipped or failed.
+    Input fields are set by the caller. Inter-stage fields are populated
+    by upstream stages and consumed by downstream stages.
+
+    ``model_config`` uses ``extra="forbid"`` so that constructing with a
+    misspelled field name raises immediately.
     """
-    value = config.get(key)
-    if not value:
-        raise RuntimeError(
-            f"Stage '{stage_name}' requires config key '{key}' but it is missing. "
-            f"The upstream stage that produces this value may have been skipped or failed."
-        )
-    return value
+
+    model_config = ConfigDict(extra="forbid")
+
+    # --- Input fields (set by caller) ---
+    model_name: str = "gpt-5-mini"
+    interviews: List[Dict[str, Any]] = Field(default_factory=list)
+    irr_prompt_suffix: str = ""
+
+    # --- Inter-stage: thematic pipeline ---
+    phase1_json: Optional[str] = None
+    phase2_json: Optional[str] = None
+    phase3_json: Optional[str] = None
+
+    # --- Inter-stage: GT pipeline ---
+    gt_open_codes: Optional[List[Any]] = None
+    gt_open_codes_text: Optional[str] = None
+    gt_axial_relationships: Optional[List[Any]] = None
+    gt_axial_text: Optional[str] = None
+    gt_core_categories: Optional[List[Any]] = None
+    gt_core_text: Optional[str] = None
+
+    def require(self, field: str, stage_name: str) -> str:
+        """Get a required field value, raising if the upstream stage didn't populate it.
+
+        This prevents downstream stages from silently running with empty data
+        when an upstream stage was skipped or failed.
+        """
+        value = getattr(self, field, None)
+        if not value:
+            raise RuntimeError(
+                f"Stage '{stage_name}' requires '{field}' but it is missing. "
+                f"The upstream stage that produces this value may have been skipped or failed."
+            )
+        return value
 
 
 class PipelineStage(ABC):
@@ -46,7 +78,7 @@ class PipelineStage(ABC):
         ...
 
     @abstractmethod
-    async def execute(self, state: ProjectState, config: dict) -> ProjectState:
+    async def execute(self, state: ProjectState, ctx: PipelineContext) -> ProjectState:
         """
         Run this stage, mutating and returning *state*.
 
@@ -86,7 +118,7 @@ class AnalysisPipeline:
     async def run(
         self,
         state: ProjectState,
-        config: dict,
+        ctx: PipelineContext,
         resume_from: Optional[str] = None,
     ) -> ProjectState:
         """
@@ -145,7 +177,7 @@ class AnalysisPipeline:
             logger.info("Starting stage: %s", stage.name())
 
             try:
-                state = await stage.execute(state, config)
+                state = await stage.execute(state, ctx)
                 phase_result.status = PipelineStatus.COMPLETED
                 phase_result.completed_at = datetime.now().isoformat()
                 state.add_phase_result(phase_result)

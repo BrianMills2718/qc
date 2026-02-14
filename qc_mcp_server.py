@@ -302,8 +302,9 @@ def qc_review_summary(project_id: str) -> str:
 
     rm = ReviewManager(state)
     summary = rm.get_review_summary()
-    summary["can_resume"] = rm.can_resume()
-    return json.dumps(summary, indent=2)
+    result = summary.model_dump()
+    result["can_resume"] = rm.can_resume()
+    return json.dumps(result, indent=2)
 
 
 @mcp.tool()

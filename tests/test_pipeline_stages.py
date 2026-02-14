@@ -14,6 +14,7 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
+from qc_clean.core.pipeline.pipeline_engine import PipelineContext
 from qc_clean.schemas.analysis_schemas import (
     AnalysisRecommendation,
     AnalysisSynthesis,
@@ -190,13 +191,13 @@ class TestThematicCodingStage:
         from qc_clean.core.pipeline.stages.thematic_coding import ThematicCodingStage
 
         state = _make_state()
-        config = {}
+        ctx = PipelineContext()
         mock_response = _sample_code_hierarchy()
 
         with patch("qc_clean.core.llm.llm_handler.LLMHandler") as MockLLM:
             instance = MockLLM.return_value
             instance.extract_structured = AsyncMock(return_value=mock_response)
-            result = asyncio.run(ThematicCodingStage().execute(state, config))
+            result = asyncio.run(ThematicCodingStage().execute(state, ctx))
 
         # Codebook populated
         assert len(result.codebook.codes) == 2
@@ -210,14 +211,14 @@ class TestThematicCodingStage:
         assert all(a.applied_by == Provenance.LLM for a in result.code_applications)
 
         # Config stashed for downstream
-        assert "_phase1_json" in config
+        assert ctx.phase1_json is not None
 
     def test_quote_matching_to_correct_doc(self):
         """Quotes should be attributed to the document they appear in."""
         from qc_clean.core.pipeline.stages.thematic_coding import ThematicCodingStage
 
         state = _make_multi_doc_state()
-        config = {}
+        ctx = PipelineContext()
         mock_response = _sample_code_hierarchy(
             codes=[
                 ThematicCode(
@@ -237,7 +238,7 @@ class TestThematicCodingStage:
         with patch("qc_clean.core.llm.llm_handler.LLMHandler") as MockLLM:
             instance = MockLLM.return_value
             instance.extract_structured = AsyncMock(return_value=mock_response)
-            result = asyncio.run(ThematicCodingStage().execute(state, config))
+            result = asyncio.run(ThematicCodingStage().execute(state, ctx))
 
         # Quote "concerns about data privacy" appears in interview2, not interview1
         assert len(result.code_applications) == 1
@@ -249,7 +250,7 @@ class TestThematicCodingStage:
         from qc_clean.core.pipeline.stages.thematic_coding import ThematicCodingStage
 
         state = _make_state()
-        config = {"irr_prompt_suffix": "Focus on frequency of themes."}
+        ctx = PipelineContext(irr_prompt_suffix="Focus on frequency of themes.")
         mock_response = _sample_code_hierarchy()
         captured_prompt = None
 
@@ -261,7 +262,7 @@ class TestThematicCodingStage:
         with patch("qc_clean.core.llm.llm_handler.LLMHandler") as MockLLM:
             instance = MockLLM.return_value
             instance.extract_structured = AsyncMock(side_effect=capture_prompt)
-            asyncio.run(ThematicCodingStage().execute(state, config))
+            asyncio.run(ThematicCodingStage().execute(state, ctx))
 
         assert "Focus on frequency of themes." in captured_prompt
 
@@ -283,26 +284,26 @@ class TestPerspectiveStage:
         from qc_clean.core.pipeline.stages.perspective import PerspectiveStage
 
         state = _make_state()
-        config = {"_phase1_json": "{}"}
+        ctx = PipelineContext(phase1_json="{}")
         mock_response = _sample_speaker_analysis()
 
         with patch("qc_clean.core.llm.llm_handler.LLMHandler") as MockLLM:
             instance = MockLLM.return_value
             instance.extract_structured = AsyncMock(return_value=mock_response)
-            result = asyncio.run(PerspectiveStage().execute(state, config))
+            result = asyncio.run(PerspectiveStage().execute(state, ctx))
 
         assert len(result.perspective_analysis.participants) == 1
         assert result.perspective_analysis.participants[0].name == "Jane"
         assert result.perspective_analysis.consensus_themes == ["AI is beneficial"]
         assert result.perspective_analysis.perspective_mapping == {"Jane": ["AI_ADOPTION", "WORKFLOW_CHANGE"]}
-        assert "_phase2_json" in config
+        assert ctx.phase2_json is not None
 
     def test_single_speaker_detection(self):
         """Single speaker should trigger single-speaker prompt."""
         from qc_clean.core.pipeline.stages.perspective import PerspectiveStage
 
         state = _make_state()  # 1 speaker: Jane
-        config = {"_phase1_json": "{}"}
+        ctx = PipelineContext(phase1_json="{}")
         captured_prompt = None
 
         async def capture_prompt(prompt, schema):
@@ -313,7 +314,7 @@ class TestPerspectiveStage:
         with patch("qc_clean.core.llm.llm_handler.LLMHandler") as MockLLM:
             instance = MockLLM.return_value
             instance.extract_structured = AsyncMock(side_effect=capture_prompt)
-            asyncio.run(PerspectiveStage().execute(state, config))
+            asyncio.run(PerspectiveStage().execute(state, ctx))
 
         assert "SINGLE-SPEAKER" in captured_prompt
 
@@ -330,7 +331,7 @@ class TestPerspectiveStage:
                 ),
             ])
         )
-        config = {"_phase1_json": "{}"}
+        ctx = PipelineContext(phase1_json="{}")
         captured_prompt = None
 
         async def capture_prompt(prompt, schema):
@@ -341,7 +342,7 @@ class TestPerspectiveStage:
         with patch("qc_clean.core.llm.llm_handler.LLMHandler") as MockLLM:
             instance = MockLLM.return_value
             instance.extract_structured = AsyncMock(side_effect=capture_prompt)
-            asyncio.run(PerspectiveStage().execute(state, config))
+            asyncio.run(PerspectiveStage().execute(state, ctx))
 
         assert "SINGLE-SPEAKER" not in captured_prompt
         assert "multi-speaker" in captured_prompt.lower() or "different participant" in captured_prompt.lower()
@@ -357,13 +358,13 @@ class TestRelationshipStage:
         from qc_clean.core.pipeline.stages.relationship import RelationshipStage
 
         state = _make_state()
-        config = {"_phase1_json": "{}", "_phase2_json": "{}"}
+        ctx = PipelineContext(phase1_json="{}", phase2_json="{}")
         mock_response = _sample_entity_mapping()
 
         with patch("qc_clean.core.llm.llm_handler.LLMHandler") as MockLLM:
             instance = MockLLM.return_value
             instance.extract_structured = AsyncMock(return_value=mock_response)
-            result = asyncio.run(RelationshipStage().execute(state, config))
+            result = asyncio.run(RelationshipStage().execute(state, ctx))
 
         # Entities
         assert len(result.entities) == 2
@@ -378,19 +379,19 @@ class TestRelationshipStage:
         assert rel.strength == 0.9
 
         # Config stashed
-        assert "_phase3_json" in config
+        assert ctx.phase3_json is not None
 
     def test_causal_chains_create_memo(self):
         from qc_clean.core.pipeline.stages.relationship import RelationshipStage
 
         state = _make_state()
-        config = {"_phase1_json": "{}", "_phase2_json": "{}"}
+        ctx = PipelineContext(phase1_json="{}", phase2_json="{}")
         mock_response = _sample_entity_mapping()
 
         with patch("qc_clean.core.llm.llm_handler.LLMHandler") as MockLLM:
             instance = MockLLM.return_value
             instance.extract_structured = AsyncMock(return_value=mock_response)
-            result = asyncio.run(RelationshipStage().execute(state, config))
+            result = asyncio.run(RelationshipStage().execute(state, ctx))
 
         # Should have causal chains memo + analytical memo
         causal_memos = [m for m in result.memos if m.memo_type == "relationship"]
@@ -401,7 +402,7 @@ class TestRelationshipStage:
         from qc_clean.core.pipeline.stages.relationship import RelationshipStage
 
         state = _make_state()
-        config = {"_phase1_json": "{}", "_phase2_json": "{}"}
+        ctx = PipelineContext(phase1_json="{}", phase2_json="{}")
         mock_response = _sample_entity_mapping(
             cause_effect_chains=[],
             conceptual_connections=[],
@@ -411,7 +412,7 @@ class TestRelationshipStage:
         with patch("qc_clean.core.llm.llm_handler.LLMHandler") as MockLLM:
             instance = MockLLM.return_value
             instance.extract_structured = AsyncMock(return_value=mock_response)
-            result = asyncio.run(RelationshipStage().execute(state, config))
+            result = asyncio.run(RelationshipStage().execute(state, ctx))
 
         assert len(result.memos) == 0
 
@@ -430,13 +431,13 @@ class TestSynthesisStage:
                 Code(id="AI_ADOPTION", name="AI Adoption", description="test"),
             ])
         )
-        config = {"_phase1_json": "{}", "_phase2_json": "{}", "_phase3_json": "{}"}
+        ctx = PipelineContext(phase1_json="{}", phase2_json="{}", phase3_json="{}")
         mock_response = _sample_synthesis()
 
         with patch("qc_clean.core.llm.llm_handler.LLMHandler") as MockLLM:
             instance = MockLLM.return_value
             instance.extract_structured = AsyncMock(return_value=mock_response)
-            result = asyncio.run(SynthesisStage().execute(state, config))
+            result = asyncio.run(SynthesisStage().execute(state, ctx))
 
         assert result.synthesis.executive_summary == "AI adoption transforms organizational workflows."
         assert len(result.synthesis.key_findings) == 2
@@ -489,13 +490,13 @@ class TestGTOpenCodingStage:
         from qc_clean.core.pipeline.stages.gt_open_coding import GTOpenCodingStage
 
         state = _make_state()
-        config = {}
+        ctx = PipelineContext()
         mock_response = self._sample_open_codes_response()
 
         with patch("qc_clean.core.llm.llm_handler.LLMHandler") as MockLLM:
             instance = MockLLM.return_value
             instance.extract_structured = AsyncMock(return_value=mock_response)
-            result = asyncio.run(GTOpenCodingStage().execute(state, config))
+            result = asyncio.run(GTOpenCodingStage().execute(state, ctx))
 
         # Codebook
         assert len(result.codebook.codes) == 2
@@ -507,15 +508,15 @@ class TestGTOpenCodingStage:
         assert len(result.code_applications) >= 2
 
         # Config stashed for downstream GT stages
-        assert "_gt_open_codes" in config
-        assert "_gt_open_codes_text" in config
+        assert ctx.gt_open_codes is not None
+        assert ctx.gt_open_codes_text is not None
 
     def test_quote_matching_to_docs(self):
         """Quotes should be matched to the correct document."""
         from qc_clean.core.pipeline.stages.gt_open_coding import GTOpenCodingStage
 
         state = _make_multi_doc_state()
-        config = {}
+        ctx = PipelineContext()
         from qc_clean.core.pipeline.stages.gt_open_coding import OpenCodesResponse
         mock_response = OpenCodesResponse(
             open_codes=[
@@ -534,7 +535,7 @@ class TestGTOpenCodingStage:
         with patch("qc_clean.core.llm.llm_handler.LLMHandler") as MockLLM:
             instance = MockLLM.return_value
             instance.extract_structured = AsyncMock(return_value=mock_response)
-            result = asyncio.run(GTOpenCodingStage().execute(state, config))
+            result = asyncio.run(GTOpenCodingStage().execute(state, ctx))
 
         # "concerns about data privacy" is in interview2
         assert len(result.code_applications) == 1
@@ -581,13 +582,13 @@ class TestGTAxialCodingStage:
                 Code(id="WORKFLOW_IMPACT", name="Workflow Impact", description="test"),
             ])
         )
-        config = {"_gt_open_codes_text": "- AI Integration\n- Workflow Impact"}
+        ctx = PipelineContext(gt_open_codes_text="- AI Integration\n- Workflow Impact")
         mock_response = self._sample_axial_response()
 
         with patch("qc_clean.core.llm.llm_handler.LLMHandler") as MockLLM:
             instance = MockLLM.return_value
             instance.extract_structured = AsyncMock(return_value=mock_response)
-            result = asyncio.run(GTAxialCodingStage().execute(state, config))
+            result = asyncio.run(GTAxialCodingStage().execute(state, ctx))
 
         assert len(result.code_relationships) == 1
         rel = result.code_relationships[0]
@@ -599,8 +600,8 @@ class TestGTAxialCodingStage:
         assert rel.consequences == ["Increased efficiency"]
 
         # Config stashed
-        assert "_gt_axial_relationships" in config
-        assert "_gt_axial_text" in config
+        assert ctx.gt_axial_relationships is not None
+        assert ctx.gt_axial_text is not None
 
     def test_can_execute_requires_codes(self):
         from qc_clean.core.pipeline.stages.gt_axial_coding import GTAxialCodingStage
@@ -646,13 +647,13 @@ class TestGTSelectiveCodingStage:
         state = _make_state(
             codebook=Codebook(codes=[Code(id="X", name="X", description="x")])
         )
-        config = {"_gt_open_codes_text": "codes", "_gt_axial_text": "rels"}
+        ctx = PipelineContext(gt_open_codes_text="codes", gt_axial_text="rels")
         mock_response = self._sample_selective_response()
 
         with patch("qc_clean.core.llm.llm_handler.LLMHandler") as MockLLM:
             instance = MockLLM.return_value
             instance.extract_structured = AsyncMock(return_value=mock_response)
-            result = asyncio.run(GTSelectiveCodingStage().execute(state, config))
+            result = asyncio.run(GTSelectiveCodingStage().execute(state, ctx))
 
         assert len(result.core_categories) == 1
         cc = result.core_categories[0]
@@ -662,8 +663,8 @@ class TestGTSelectiveCodingStage:
         assert cc.integration_rationale == "Subsumes both AI adoption and workflow changes"
 
         # Config stashed
-        assert "_gt_core_categories" in config
-        assert "_gt_core_text" in config
+        assert ctx.gt_core_categories is not None
+        assert ctx.gt_core_text is not None
 
     def test_can_execute_requires_codes(self):
         from qc_clean.core.pipeline.stages.gt_selective_coding import GTSelectiveCodingStage
@@ -708,17 +709,17 @@ class TestGTTheoryIntegrationStage:
                 )
             ]
         )
-        config = {
-            "_gt_open_codes_text": "codes",
-            "_gt_axial_text": "rels",
-            "_gt_core_text": "- Digital Transformation: test",
-        }
+        ctx = PipelineContext(
+            gt_open_codes_text="codes",
+            gt_axial_text="rels",
+            gt_core_text="- Digital Transformation: test",
+        )
         mock_response = self._sample_theoretical_model()
 
         with patch("qc_clean.core.llm.llm_handler.LLMHandler") as MockLLM:
             instance = MockLLM.return_value
             instance.extract_structured = AsyncMock(return_value=mock_response)
-            result = asyncio.run(GTTheoryIntegrationStage().execute(state, config))
+            result = asyncio.run(GTTheoryIntegrationStage().execute(state, ctx))
 
         tm = result.theoretical_model
         assert tm.model_name == "Digital Transformation Theory"
@@ -779,7 +780,8 @@ class TestCrossInterviewStage:
             CodeApplication(code_id="UNIQUE1", doc_id=doc1_id, quote_text="q3"),
         ]
 
-        result = asyncio.run(CrossInterviewStage().execute(state, {}))
+        ctx = PipelineContext()
+        result = asyncio.run(CrossInterviewStage().execute(state, ctx))
 
         # Should produce a cross-interview memo
         cross_memos = [m for m in result.memos if m.memo_type == "cross_case"]
@@ -814,8 +816,8 @@ class TestCrossInterviewStage:
         ]
 
         results = analyze_cross_interview_patterns(state)
-        consensus_ids = [c["code_id"] for c in results["consensus_themes"]]
-        divergent_ids = [d["code_id"] for d in results["divergent_themes"]]
+        consensus_ids = [c["code_id"] for c in results.consensus_themes]
+        divergent_ids = [d["code_id"] for d in results.divergent_themes]
 
         assert "CONSENSUS" in consensus_ids
         assert "DIVERGENT" in divergent_ids
@@ -832,7 +834,7 @@ class TestStageEdgeCases:
         from qc_clean.core.pipeline.stages.thematic_coding import ThematicCodingStage
 
         state = _make_state()
-        config = {}
+        ctx = PipelineContext()
         mock_response = _sample_code_hierarchy(
             codes=[
                 ThematicCode(
@@ -852,7 +854,7 @@ class TestStageEdgeCases:
         with patch("qc_clean.core.llm.llm_handler.LLMHandler") as MockLLM:
             instance = MockLLM.return_value
             instance.extract_structured = AsyncMock(return_value=mock_response)
-            result = asyncio.run(ThematicCodingStage().execute(state, config))
+            result = asyncio.run(ThematicCodingStage().execute(state, ctx))
 
         assert len(result.codebook.codes) == 1
         assert len(result.code_applications) == 0
@@ -862,7 +864,7 @@ class TestStageEdgeCases:
         from qc_clean.core.pipeline.stages.relationship import RelationshipStage
 
         state = _make_state()
-        config = {"_phase1_json": "{}", "_phase2_json": "{}"}
+        ctx = PipelineContext(phase1_json="{}", phase2_json="{}")
         mock_response = _sample_entity_mapping(
             cause_effect_chains=[],
             conceptual_connections=[],
@@ -872,7 +874,7 @@ class TestStageEdgeCases:
         with patch("qc_clean.core.llm.llm_handler.LLMHandler") as MockLLM:
             instance = MockLLM.return_value
             instance.extract_structured = AsyncMock(return_value=mock_response)
-            result = asyncio.run(RelationshipStage().execute(state, config))
+            result = asyncio.run(RelationshipStage().execute(state, ctx))
 
         # No memos when no causal chains and no analytical memo
         assert len(result.memos) == 0
@@ -882,7 +884,7 @@ class TestStageEdgeCases:
         from qc_clean.core.pipeline.stages.gt_open_coding import GTOpenCodingStage, OpenCodesResponse
 
         state = _make_state()
-        config = {}
+        ctx = PipelineContext()
         mock_response = OpenCodesResponse(
             open_codes=[
                 OpenCode(
@@ -900,7 +902,7 @@ class TestStageEdgeCases:
         with patch("qc_clean.core.llm.llm_handler.LLMHandler") as MockLLM:
             instance = MockLLM.return_value
             instance.extract_structured = AsyncMock(return_value=mock_response)
-            result = asyncio.run(GTOpenCodingStage().execute(state, config))
+            result = asyncio.run(GTOpenCodingStage().execute(state, ctx))
 
         # Should fall back to first document
         assert len(result.code_applications) == 1
@@ -915,7 +917,7 @@ class TestStageEdgeCases:
                 Code(id="KNOWN", name="Known Code", description="test"),
             ])
         )
-        config = {"_gt_open_codes_text": "codes"}
+        ctx = PipelineContext(gt_open_codes_text="codes")
         mock_response = AxialRelationshipsResponse(
             axial_relationships=[
                 AxialRelationship(
@@ -933,7 +935,7 @@ class TestStageEdgeCases:
         with patch("qc_clean.core.llm.llm_handler.LLMHandler") as MockLLM:
             instance = MockLLM.return_value
             instance.extract_structured = AsyncMock(return_value=mock_response)
-            result = asyncio.run(GTAxialCodingStage().execute(state, config))
+            result = asyncio.run(GTAxialCodingStage().execute(state, ctx))
 
         rel = result.code_relationships[0]
         assert rel.source_code_id == "KNOWN"

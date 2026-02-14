@@ -9,7 +9,7 @@ import logging
 from qc_clean.schemas.analysis_schemas import SpeakerAnalysis
 from qc_clean.schemas.adapters import speaker_analysis_to_perspectives
 from qc_clean.schemas.domain import AnalysisMemo, ProjectState
-from ..pipeline_engine import PipelineStage, require_config
+from ..pipeline_engine import PipelineContext, PipelineStage
 
 logger = logging.getLogger(__name__)
 
@@ -19,18 +19,17 @@ class PerspectiveStage(PipelineStage):
     def name(self) -> str:
         return "perspective"
 
-    async def execute(self, state: ProjectState, config: dict) -> ProjectState:
+    async def execute(self, state: ProjectState, ctx: PipelineContext) -> ProjectState:
         from qc_clean.core.llm.llm_handler import LLMHandler
 
-        model_name = config.get("model_name", "gpt-5-mini")
         logger.info(
             "Starting perspective: docs=%d, codes=%d, model=%s",
-            state.corpus.num_documents, len(state.codebook.codes), model_name,
+            state.corpus.num_documents, len(state.codebook.codes), ctx.model_name,
         )
-        llm = LLMHandler(model_name=model_name)
+        llm = LLMHandler(model_name=ctx.model_name)
 
         combined_text = _build_combined_text(state)
-        phase1_text = require_config(config, "_phase1_json", self.name())
+        phase1_text = ctx.require("phase1_json", self.name())
         num_interviews = state.corpus.num_documents
 
         # Determine single vs multi-speaker from detected speakers, not doc count.
@@ -59,7 +58,7 @@ class PerspectiveStage(PipelineStage):
             ))
 
         # Stash for downstream
-        config["_phase2_json"] = phase2_response.model_dump_json(indent=2)
+        ctx.phase2_json = phase2_response.model_dump_json(indent=2)
 
         logger.info(
             "Perspective analysis complete: %d participants",

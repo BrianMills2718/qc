@@ -19,6 +19,7 @@ from qc_clean.schemas.domain import (
     ProjectState,
     Provenance,
     ReviewAction,
+    ReviewSummary,
 )
 
 logger = logging.getLogger(__name__)
@@ -44,15 +45,15 @@ class ReviewManager:
             return [a for a in self.state.code_applications if a.code_id == code_id]
         return list(self.state.code_applications)
 
-    def get_review_summary(self) -> Dict:
+    def get_review_summary(self) -> ReviewSummary:
         """Summary of what's available for review."""
-        return {
-            "codes_count": len(self.state.codebook.codes),
-            "applications_count": len(self.state.code_applications),
-            "existing_decisions": len(self.state.review_decisions),
-            "pipeline_status": self.state.pipeline_status.value,
-            "current_phase": self.state.current_phase,
-        }
+        return ReviewSummary(
+            codes_count=len(self.state.codebook.codes),
+            applications_count=len(self.state.code_applications),
+            existing_decisions=len(self.state.review_decisions),
+            pipeline_status=self.state.pipeline_status.value,
+            current_phase=self.state.current_phase,
+        )
 
     # ------------------------------------------------------------------
     # Apply decisions

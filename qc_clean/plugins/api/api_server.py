@@ -568,12 +568,13 @@ class QCAPIServer:
             pipeline = create_pipeline(methodology=methodology)
             state = ProjectState(name=f"job_{job_id}")
 
-            pipeline_config = {
-                "interviews": interviews,
-                "model_name": model_name,
-            }
+            from qc_clean.core.pipeline.pipeline_engine import PipelineContext
+            ctx = PipelineContext(
+                interviews=interviews,
+                model_name=model_name,
+            )
 
-            state = await pipeline.run(state, pipeline_config)
+            state = await pipeline.run(state, ctx)
 
             # Build structured results from ProjectState (backward-compatible format)
             num_interviews = state.corpus.num_documents

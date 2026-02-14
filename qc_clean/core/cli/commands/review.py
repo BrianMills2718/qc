@@ -43,13 +43,13 @@ def _show_review_summary(rm: ReviewManager, state) -> int:
     summary = rm.get_review_summary()
 
     print(f"Review Summary for project: {state.name}")
-    print(f"  Pipeline status: {summary['pipeline_status']}")
-    print(f"  Current phase: {summary['current_phase'] or 'N/A'}")
-    print(f"  Codes to review: {summary['codes_count']}")
-    print(f"  Applications to review: {summary['applications_count']}")
-    print(f"  Decisions already made: {summary['existing_decisions']}")
+    print(f"  Pipeline status: {summary.pipeline_status}")
+    print(f"  Current phase: {summary.current_phase or 'N/A'}")
+    print(f"  Codes to review: {summary.codes_count}")
+    print(f"  Applications to review: {summary.applications_count}")
+    print(f"  Decisions already made: {summary.existing_decisions}")
 
-    if summary["codes_count"] > 0:
+    if summary.codes_count > 0:
         print("\nCodes:")
         for code in rm.get_pending_codes():
             print(f"  [{code.id}] {code.name} (mentions={code.mention_count}, conf={code.confidence:.2f})")

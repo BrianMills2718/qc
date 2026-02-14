@@ -13,10 +13,11 @@ from typing import Dict, List
 
 from qc_clean.schemas.domain import (
     AnalysisMemo,
+    CrossInterviewResult,
     ProjectState,
     Provenance,
 )
-from ..pipeline_engine import PipelineStage
+from ..pipeline_engine import PipelineContext, PipelineStage
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +30,7 @@ class CrossInterviewStage(PipelineStage):
     def can_execute(self, state: ProjectState) -> bool:
         return state.corpus.num_documents > 1
 
-    async def execute(self, state: ProjectState, config: dict) -> ProjectState:
+    async def execute(self, state: ProjectState, ctx: PipelineContext) -> ProjectState:
         """Run cross-interview analysis using in-memory ProjectState data."""
         logger.info(
             "Starting cross_interview: docs=%d, codes=%d, applications=%d",
@@ -43,7 +44,7 @@ class CrossInterviewStage(PipelineStage):
             memo_type="cross_case",
             title="Cross-Interview Pattern Analysis",
             content=_format_cross_results(results),
-            code_refs=list(results.get("shared_codes", {}).keys()),
+            code_refs=list(results.shared_codes.keys()),
             doc_refs=[d.id for d in state.corpus.documents],
             created_by=Provenance.SYSTEM,
         )
@@ -51,9 +52,9 @@ class CrossInterviewStage(PipelineStage):
 
         logger.info(
             "Cross-interview analysis: %d shared codes, %d consensus, %d divergent",
-            len(results.get("shared_codes", {})),
-            len(results.get("consensus_themes", [])),
-            len(results.get("divergent_themes", [])),
+            len(results.shared_codes),
+            len(results.consensus_themes),
+            len(results.divergent_themes),
         )
         return state
 
@@ -62,17 +63,12 @@ class CrossInterviewStage(PipelineStage):
 # Pure-function cross-interview analysis (no Neo4j)
 # ---------------------------------------------------------------------------
 
-def analyze_cross_interview_patterns(state: ProjectState) -> Dict:
+def analyze_cross_interview_patterns(state: ProjectState) -> CrossInterviewResult:
     """
     Analyze patterns across documents using codebook and applications.
 
-    Returns a dict with:
-    - shared_codes: codes appearing in >1 document
-    - unique_codes: codes appearing in only 1 document
-    - consensus_themes: codes with high overlap
-    - divergent_themes: codes appearing in some docs but not others
-    - code_doc_matrix: {code_id: [doc_ids]}
-    - doc_code_matrix: {doc_id: [code_ids]}
+    Returns a CrossInterviewResult with shared/unique codes, consensus/divergent
+    themes, co-occurrences, and code-doc matrices.
     """
     # Build doc -> codes and code -> docs mappings
     doc_codes: Dict[str, set] = defaultdict(set)
@@ -85,7 +81,6 @@ def analyze_cross_interview_patterns(state: ProjectState) -> Dict:
         code_quotes[app.code_id].append(app.quote_text)
 
     num_docs = state.corpus.num_documents
-    doc_ids = [d.id for d in state.corpus.documents]
 
     # Shared vs unique codes
     shared_codes = {
@@ -139,15 +134,15 @@ def analyze_cross_interview_patterns(state: ProjectState) -> Dict:
         if count > 1
     ]
 
-    return {
-        "shared_codes": shared_codes,
-        "unique_codes": unique_codes,
-        "consensus_themes": consensus_themes,
-        "divergent_themes": divergent_themes,
-        "co_occurrences": top_co_occurrences,
-        "code_doc_matrix": {cid: list(dids) for cid, dids in code_docs.items()},
-        "doc_code_matrix": {did: list(cids) for did, cids in doc_codes.items()},
-    }
+    return CrossInterviewResult(
+        shared_codes=shared_codes,
+        unique_codes=unique_codes,
+        consensus_themes=consensus_themes,
+        divergent_themes=divergent_themes,
+        co_occurrences=top_co_occurrences,
+        code_doc_matrix={cid: list(dids) for cid, dids in code_docs.items()},
+        doc_code_matrix={did: list(cids) for did, cids in doc_codes.items()},
+    )
 
 
 def _code_name(state: ProjectState, code_id: str) -> str:
@@ -155,30 +150,30 @@ def _code_name(state: ProjectState, code_id: str) -> str:
     return code.name if code else code_id
 
 
-def _format_cross_results(results: Dict) -> str:
+def _format_cross_results(results: CrossInterviewResult) -> str:
     """Format cross-interview results as readable text for a memo."""
     lines = ["## Cross-Interview Pattern Analysis\n"]
 
-    if results["consensus_themes"]:
+    if results.consensus_themes:
         lines.append("### Consensus Themes (shared across majority of interviews)")
-        for ct in results["consensus_themes"]:
+        for ct in results.consensus_themes:
             lines.append(
                 f"- **{ct['code_name']}**: present in {ct['doc_count']}/{ct['total_docs']} "
                 f"documents (strength={ct['strength']:.2f})"
             )
         lines.append("")
 
-    if results["divergent_themes"]:
+    if results.divergent_themes:
         lines.append("### Divergent Themes (present in only some interviews)")
-        for dt in results["divergent_themes"]:
+        for dt in results.divergent_themes:
             lines.append(
                 f"- **{dt['code_name']}**: present in {dt['doc_count']}/{dt['total_docs']} documents"
             )
         lines.append("")
 
-    if results["co_occurrences"]:
+    if results.co_occurrences:
         lines.append("### Top Code Co-occurrences")
-        for co in results["co_occurrences"]:
+        for co in results.co_occurrences:
             lines.append(
                 f"- {co['code_1']} + {co['code_2']}: co-occur in {co['co_occurrence_count']} documents"
             )

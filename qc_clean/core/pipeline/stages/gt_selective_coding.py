@@ -11,7 +11,7 @@ from typing import List
 from qc_clean.schemas.gt_schemas import CoreCategory
 from qc_clean.schemas.adapters import core_category_to_domain
 from qc_clean.schemas.domain import AnalysisMemo, ProjectState
-from ..pipeline_engine import PipelineStage, require_config
+from ..pipeline_engine import PipelineContext, PipelineStage
 
 logger = logging.getLogger(__name__)
 
@@ -34,18 +34,17 @@ class GTSelectiveCodingStage(PipelineStage):
     def can_execute(self, state: ProjectState) -> bool:
         return len(state.codebook.codes) > 0
 
-    async def execute(self, state: ProjectState, config: dict) -> ProjectState:
+    async def execute(self, state: ProjectState, ctx: PipelineContext) -> ProjectState:
         from qc_clean.core.llm.llm_handler import LLMHandler
 
-        model_name = config.get("model_name", "gpt-5-mini")
         logger.info(
             "Starting gt_selective_coding: codes=%d, relationships=%d, model=%s",
-            len(state.codebook.codes), len(state.code_relationships), model_name,
+            len(state.codebook.codes), len(state.code_relationships), ctx.model_name,
         )
-        llm = LLMHandler(model_name=model_name)
+        llm = LLMHandler(model_name=ctx.model_name)
 
-        codes_text = require_config(config, "_gt_open_codes_text", self.name())
-        axial_text = require_config(config, "_gt_axial_text", self.name())
+        codes_text = ctx.require("gt_open_codes_text", self.name())
+        axial_text = ctx.require("gt_axial_text", self.name())
 
         prompt = f"""You are conducting selective coding in grounded theory methodology to identify the core categories.
 
@@ -95,8 +94,8 @@ ANALYTICAL MEMO: After completing the analysis above, write a brief analytical m
             ))
 
         # Stash for downstream
-        config["_gt_core_categories"] = response.core_categories
-        config["_gt_core_text"] = "\n".join(
+        ctx.gt_core_categories = response.core_categories
+        ctx.gt_core_text = "\n".join(
             f"- {cc.category_name}: {cc.definition}"
             for cc in response.core_categories
         )

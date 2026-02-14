@@ -11,7 +11,7 @@ from typing import List
 from qc_clean.schemas.gt_schemas import AxialRelationship
 from qc_clean.schemas.adapters import axial_relationships_to_code_relationships
 from qc_clean.schemas.domain import AnalysisMemo, ProjectState
-from ..pipeline_engine import PipelineStage, require_config
+from ..pipeline_engine import PipelineContext, PipelineStage
 
 logger = logging.getLogger(__name__)
 
@@ -40,17 +40,16 @@ class GTAxialCodingStage(PipelineStage):
     def can_execute(self, state: ProjectState) -> bool:
         return len(state.codebook.codes) > 0
 
-    async def execute(self, state: ProjectState, config: dict) -> ProjectState:
+    async def execute(self, state: ProjectState, ctx: PipelineContext) -> ProjectState:
         from qc_clean.core.llm.llm_handler import LLMHandler
 
-        model_name = config.get("model_name", "gpt-5-mini")
         logger.info(
             "Starting gt_axial_coding: codes=%d, model=%s",
-            len(state.codebook.codes), model_name,
+            len(state.codebook.codes), ctx.model_name,
         )
-        llm = LLMHandler(model_name=model_name)
+        llm = LLMHandler(model_name=ctx.model_name)
 
-        codes_text = require_config(config, "_gt_open_codes_text", self.name())
+        codes_text = ctx.require("gt_open_codes_text", self.name())
         combined_text = _build_combined_text(state)
 
         prompt = f"""You are conducting axial coding analysis in grounded theory methodology.
@@ -103,8 +102,8 @@ ANALYTICAL MEMO: After completing the analysis above, write a brief analytical m
             ))
 
         # Stash for downstream
-        config["_gt_axial_relationships"] = axial_rels
-        config["_gt_axial_text"] = _format_relationships(axial_rels)
+        ctx.gt_axial_relationships = axial_rels
+        ctx.gt_axial_text = _format_relationships(axial_rels)
 
         logger.info("GT axial coding complete: %d relationships", len(axial_rels))
         return state

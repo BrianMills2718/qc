@@ -14,7 +14,7 @@ from typing import List
 from pydantic import BaseModel, Field
 
 from qc_clean.schemas.domain import AnalysisMemo, ProjectState, Provenance
-from ..pipeline_engine import PipelineStage
+from ..pipeline_engine import PipelineContext, PipelineStage
 
 logger = logging.getLogger(__name__)
 
@@ -49,15 +49,14 @@ class NegativeCaseStage(PipelineStage):
     def can_execute(self, state: ProjectState) -> bool:
         return len(state.codebook.codes) > 0
 
-    async def execute(self, state: ProjectState, config: dict) -> ProjectState:
+    async def execute(self, state: ProjectState, ctx: PipelineContext) -> ProjectState:
         from qc_clean.core.llm.llm_handler import LLMHandler
 
-        model_name = config.get("model_name", "gpt-5-mini")
         logger.info(
             "Starting negative_case_analysis: codes=%d, docs=%d, model=%s",
-            len(state.codebook.codes), state.corpus.num_documents, model_name,
+            len(state.codebook.codes), state.corpus.num_documents, ctx.model_name,
         )
-        llm = LLMHandler(model_name=model_name)
+        llm = LLMHandler(model_name=ctx.model_name)
 
         combined_text = _build_combined_text(state)
         codes_text = _format_codebook(state)

@@ -12,7 +12,7 @@ from typing import List
 from qc_clean.schemas.analysis_schemas import CodeHierarchy
 from qc_clean.schemas.adapters import code_hierarchy_to_codebook
 from qc_clean.schemas.domain import AnalysisMemo, CodeApplication, Document, ProjectState, Provenance
-from ..pipeline_engine import PipelineStage
+from ..pipeline_engine import PipelineContext, PipelineStage
 
 logger = logging.getLogger(__name__)
 
@@ -28,24 +28,22 @@ class ThematicCodingStage(PipelineStage):
     def requires_human_review(self) -> bool:
         return self._pause_for_review
 
-    async def execute(self, state: ProjectState, config: dict) -> ProjectState:
+    async def execute(self, state: ProjectState, ctx: PipelineContext) -> ProjectState:
         from qc_clean.core.llm.llm_handler import LLMHandler
 
-        model_name = config.get("model_name", "gpt-5-mini")
         logger.info(
             "Starting thematic_coding: docs=%d, model=%s",
-            state.corpus.num_documents, model_name,
+            state.corpus.num_documents, ctx.model_name,
         )
-        llm = LLMHandler(model_name=model_name)
+        llm = LLMHandler(model_name=ctx.model_name)
 
         combined_text = _build_combined_text(state)
         num_interviews = state.corpus.num_documents
 
         prompt = _build_phase1_prompt(combined_text, num_interviews)
 
-        irr_suffix = config.get("irr_prompt_suffix", "")
-        if irr_suffix:
-            prompt = prompt + "\n\n" + irr_suffix
+        if ctx.irr_prompt_suffix:
+            prompt = prompt + "\n\n" + ctx.irr_prompt_suffix
 
         phase1_response = await llm.extract_structured(prompt, CodeHierarchy)
 
@@ -84,8 +82,8 @@ class ThematicCodingStage(PipelineStage):
                 code_refs=[c.id for c in state.codebook.codes],
             ))
 
-        # Stash raw response in config for downstream stages
-        config["_phase1_json"] = phase1_response.model_dump_json(indent=2)
+        # Stash raw response for downstream stages
+        ctx.phase1_json = phase1_response.model_dump_json(indent=2)
 
         logger.info(
             "Thematic coding complete: %d codes, %d applications",

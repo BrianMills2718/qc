@@ -12,6 +12,7 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
+from qc_clean.core.pipeline.pipeline_engine import PipelineContext
 from qc_clean.core.pipeline.stages.incremental_coding import (
     IncrementalCodingStage,
     _format_codebook_for_prompt,
@@ -194,7 +195,7 @@ class TestIncrementalCodingStage:
             instance = MockLLM.return_value
             instance.extract_structured = AsyncMock(return_value=response)
             result = asyncio.run(
-                IncrementalCodingStage().execute(state, {"model_name": "gpt-5-mini"})
+                IncrementalCodingStage().execute(state, PipelineContext())
             )
 
         # Should have original 2 + 1 new application
@@ -231,7 +232,7 @@ class TestIncrementalCodingStage:
             instance = MockLLM.return_value
             instance.extract_structured = AsyncMock(return_value=response)
             result = asyncio.run(
-                IncrementalCodingStage().execute(state, {"model_name": "gpt-5-mini"})
+                IncrementalCodingStage().execute(state, PipelineContext())
             )
 
         # Codebook should now have 3 codes
@@ -256,7 +257,7 @@ class TestIncrementalCodingStage:
             instance = MockLLM.return_value
             instance.extract_structured = AsyncMock(return_value=response)
             result = asyncio.run(
-                IncrementalCodingStage().execute(state, {"model_name": "gpt-5-mini"})
+                IncrementalCodingStage().execute(state, PipelineContext())
             )
 
         # Must have at least the original applications
@@ -291,7 +292,7 @@ class TestIncrementalCodingStage:
             instance = MockLLM.return_value
             instance.extract_structured = AsyncMock(return_value=response)
             result = asyncio.run(
-                IncrementalCodingStage().execute(state, {"model_name": "gpt-5-mini"})
+                IncrementalCodingStage().execute(state, PipelineContext())
             )
 
         # Should work without error

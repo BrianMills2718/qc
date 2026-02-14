@@ -24,6 +24,7 @@ from qc_clean.schemas.gt_schemas import TheoreticalModel
 from qc_clean.core.pipeline.stages.gt_open_coding import OpenCodesResponse
 from qc_clean.core.pipeline.stages.gt_axial_coding import AxialRelationshipsResponse
 from qc_clean.core.pipeline.stages.gt_selective_coding import CoreCategoriesResponse
+from qc_clean.core.pipeline.pipeline_engine import PipelineContext
 from qc_clean.core.export.data_exporter import ProjectExporter
 from qc_clean.schemas.domain import (
     AnalysisMemo,
@@ -160,13 +161,13 @@ class TestThematicCodingStageMemo:
         )
 
         state = _make_state()
-        config = {}
+        ctx = PipelineContext()
 
         with patch("qc_clean.core.llm.llm_handler.LLMHandler") as MockLLM:
             instance = MockLLM.return_value
             instance.extract_structured = AsyncMock(return_value=mock_response)
             result = asyncio.run(
-                ThematicCodingStage().execute(state, config)
+                ThematicCodingStage().execute(state, ctx)
             )
 
         assert len(result.memos) == 1
@@ -183,13 +184,13 @@ class TestThematicCodingStageMemo:
         )
 
         state = _make_state()
-        config = {}
+        ctx = PipelineContext()
 
         with patch("qc_clean.core.llm.llm_handler.LLMHandler") as MockLLM:
             instance = MockLLM.return_value
             instance.extract_structured = AsyncMock(return_value=mock_response)
             result = asyncio.run(
-                ThematicCodingStage().execute(state, config)
+                ThematicCodingStage().execute(state, ctx)
             )
 
         assert len(result.memos) == 0
@@ -206,13 +207,13 @@ class TestPerspectiveStageMemo:
         )
 
         state = _make_state()
-        config = {"_phase1_json": "{}"}
+        ctx = PipelineContext(phase1_json="{}")
 
         with patch("qc_clean.core.llm.llm_handler.LLMHandler") as MockLLM:
             instance = MockLLM.return_value
             instance.extract_structured = AsyncMock(return_value=mock_response)
             result = asyncio.run(
-                PerspectiveStage().execute(state, config)
+                PerspectiveStage().execute(state, ctx)
             )
 
         assert len(result.memos) == 1
@@ -233,13 +234,13 @@ class TestRelationshipStageMemo:
         )
 
         state = _make_state()
-        config = {"_phase1_json": "{}", "_phase2_json": "{}"}
+        ctx = PipelineContext(phase1_json="{}", phase2_json="{}")
 
         with patch("qc_clean.core.llm.llm_handler.LLMHandler") as MockLLM:
             instance = MockLLM.return_value
             instance.extract_structured = AsyncMock(return_value=mock_response)
             result = asyncio.run(
-                RelationshipStage().execute(state, config)
+                RelationshipStage().execute(state, ctx)
             )
 
         # Should have LLM analytical memo + causal chains memo
@@ -262,13 +263,13 @@ class TestSynthesisStageMemo:
         )
 
         state = _make_state()
-        config = {"_phase1_json": "{}", "_phase2_json": "{}", "_phase3_json": "{}"}
+        ctx = PipelineContext(phase1_json="{}", phase2_json="{}", phase3_json="{}")
 
         with patch("qc_clean.core.llm.llm_handler.LLMHandler") as MockLLM:
             instance = MockLLM.return_value
             instance.extract_structured = AsyncMock(return_value=mock_response)
             result = asyncio.run(
-                SynthesisStage().execute(state, config)
+                SynthesisStage().execute(state, ctx)
             )
 
         assert len(result.memos) == 1
@@ -286,13 +287,13 @@ class TestGTOpenCodingStageMemo:
         )
 
         state = _make_gt_state()
-        config = {}
+        ctx = PipelineContext()
 
         with patch("qc_clean.core.llm.llm_handler.LLMHandler") as MockLLM:
             instance = MockLLM.return_value
             instance.extract_structured = AsyncMock(return_value=mock_response)
             result = asyncio.run(
-                GTOpenCodingStage().execute(state, config)
+                GTOpenCodingStage().execute(state, ctx)
             )
 
         assert len(result.memos) == 1
@@ -314,13 +315,13 @@ class TestGTAxialCodingStageMemo:
                 Code(name="test_code", description="test"),
             ]),
         )
-        config = {"_gt_open_codes_text": "test codes"}
+        ctx = PipelineContext(gt_open_codes_text="test codes")
 
         with patch("qc_clean.core.llm.llm_handler.LLMHandler") as MockLLM:
             instance = MockLLM.return_value
             instance.extract_structured = AsyncMock(return_value=mock_response)
             result = asyncio.run(
-                GTAxialCodingStage().execute(state, config)
+                GTAxialCodingStage().execute(state, ctx)
             )
 
         assert len(result.memos) == 1
@@ -353,13 +354,13 @@ class TestGTSelectiveCodingStageMemo:
                 Code(name="test_code", description="test"),
             ]),
         )
-        config = {"_gt_open_codes_text": "codes", "_gt_axial_text": "axial"}
+        ctx = PipelineContext(gt_open_codes_text="codes", gt_axial_text="axial")
 
         with patch("qc_clean.core.llm.llm_handler.LLMHandler") as MockLLM:
             instance = MockLLM.return_value
             instance.extract_structured = AsyncMock(return_value=mock_response)
             result = asyncio.run(
-                GTSelectiveCodingStage().execute(state, config)
+                GTSelectiveCodingStage().execute(state, ctx)
             )
 
         assert len(result.memos) == 1
@@ -397,17 +398,17 @@ class TestGTTheoryIntegrationStageMemo:
                 ),
             ],
         )
-        config = {
-            "_gt_open_codes_text": "codes",
-            "_gt_axial_text": "axial",
-            "_gt_core_text": "core",
-        }
+        ctx = PipelineContext(
+            gt_open_codes_text="codes",
+            gt_axial_text="axial",
+            gt_core_text="core",
+        )
 
         with patch("qc_clean.core.llm.llm_handler.LLMHandler") as MockLLM:
             instance = MockLLM.return_value
             instance.extract_structured = AsyncMock(return_value=mock_response)
             result = asyncio.run(
-                GTTheoryIntegrationStage().execute(state, config)
+                GTTheoryIntegrationStage().execute(state, ctx)
             )
 
         assert len(result.memos) == 1

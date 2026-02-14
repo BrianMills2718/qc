@@ -30,7 +30,7 @@ from qc_clean.schemas.domain import (
     Provenance,
 )
 from qc_clean.schemas.gt_schemas import OpenCode
-from ..pipeline_engine import PipelineStage
+from ..pipeline_engine import PipelineContext, PipelineStage
 
 logger = logging.getLogger(__name__)
 
@@ -207,15 +207,14 @@ class GTConstantComparisonStage(PipelineStage):
     def requires_human_review(self) -> bool:
         return self._pause_for_review
 
-    async def execute(self, state: ProjectState, config: dict) -> ProjectState:
+    async def execute(self, state: ProjectState, ctx: PipelineContext) -> ProjectState:
         from qc_clean.core.llm.llm_handler import LLMHandler
 
-        model_name = config.get("model_name", "gpt-5-mini")
         logger.info(
             "Starting gt_constant_comparison: docs=%d, max_iterations=%d, model=%s",
-            state.corpus.num_documents, self._max_iterations, model_name,
+            state.corpus.num_documents, self._max_iterations, ctx.model_name,
         )
-        llm = LLMHandler(model_name=model_name)
+        llm = LLMHandler(model_name=ctx.model_name)
 
         segments = segment_documents(state.corpus.documents)
         if not segments:
@@ -236,9 +235,8 @@ class GTConstantComparisonStage(PipelineStage):
             for seg_idx, segment in enumerate(segments):
                 prompt = _build_comparison_prompt(codebook, segment, seg_idx, len(segments))
 
-                irr_suffix = config.get("irr_prompt_suffix", "")
-                if irr_suffix:
-                    prompt = prompt + "\n\n" + irr_suffix
+                if ctx.irr_prompt_suffix:
+                    prompt = prompt + "\n\n" + ctx.irr_prompt_suffix
 
                 response = await llm.extract_structured(prompt, SegmentCodingResponse)
                 _merge_segment_results(codebook, all_applications, response, segment)
@@ -252,9 +250,9 @@ class GTConstantComparisonStage(PipelineStage):
                 logger.info(
                     "Constant comparison iteration %d: %d codes, %.1f%% change",
                     iteration + 1, len(codebook.codes),
-                    change["pct_change"] * 100,
+                    change.pct_change * 100,
                 )
-                if change["pct_change"] < self._saturation_threshold:
+                if change.pct_change < self._saturation_threshold:
                     logger.info("Saturation reached at iteration %d", iteration + 1)
                     break
             else:
@@ -284,8 +282,8 @@ class GTConstantComparisonStage(PipelineStage):
         # Stash open codes for downstream GT stages
         from qc_clean.schemas.adapters import codebook_to_open_codes
         open_codes = codebook_to_open_codes(codebook)
-        config["_gt_open_codes"] = open_codes
-        config["_gt_open_codes_text"] = _format_codes_for_analysis(open_codes)
+        ctx.gt_open_codes = open_codes
+        ctx.gt_open_codes_text = _format_codes_for_analysis(open_codes)
 
         logger.info(
             "Constant comparison complete: %d iterations, %d codes, %d applications",

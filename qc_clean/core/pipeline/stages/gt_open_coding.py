@@ -11,7 +11,7 @@ from typing import List
 from qc_clean.schemas.gt_schemas import OpenCode
 from qc_clean.schemas.adapters import open_codes_to_codebook
 from qc_clean.schemas.domain import AnalysisMemo, CodeApplication, ProjectState, Provenance
-from ..pipeline_engine import PipelineStage
+from ..pipeline_engine import PipelineContext, PipelineStage
 
 logger = logging.getLogger(__name__)
 
@@ -35,11 +35,10 @@ class GTOpenCodingStage(PipelineStage):
     def requires_human_review(self) -> bool:
         return self._pause_for_review
 
-    async def execute(self, state: ProjectState, config: dict) -> ProjectState:
+    async def execute(self, state: ProjectState, ctx: PipelineContext) -> ProjectState:
         from qc_clean.core.llm.llm_handler import LLMHandler
 
-        model_name = config.get("model_name", "gpt-5-mini")
-        llm = LLMHandler(model_name=model_name)
+        llm = LLMHandler(model_name=ctx.model_name)
 
         combined_text = _build_combined_text(state)
 
@@ -74,9 +73,8 @@ ANALYTICAL MEMO: After completing the analysis above, write a brief analytical m
 - Patterns or surprises that emerged during analysis
 - Uncertainties or areas needing further investigation"""
 
-        irr_suffix = config.get("irr_prompt_suffix", "")
-        if irr_suffix:
-            prompt = prompt + "\n\n" + irr_suffix
+        if ctx.irr_prompt_suffix:
+            prompt = prompt + "\n\n" + ctx.irr_prompt_suffix
 
         response = await llm.extract_structured(prompt, OpenCodesResponse)
         open_codes = response.open_codes
@@ -125,8 +123,8 @@ ANALYTICAL MEMO: After completing the analysis above, write a brief analytical m
             ))
 
         # Stash raw open codes for downstream GT stages
-        config["_gt_open_codes"] = open_codes
-        config["_gt_open_codes_text"] = _format_codes_for_analysis(open_codes)
+        ctx.gt_open_codes = open_codes
+        ctx.gt_open_codes_text = _format_codes_for_analysis(open_codes)
 
         logger.info("GT open coding complete: %d codes", len(open_codes))
         return state

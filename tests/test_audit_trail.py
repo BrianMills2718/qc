@@ -32,6 +32,7 @@ from qc_clean.schemas.domain import (
 )
 from qc_clean.schemas.adapters import code_hierarchy_to_codebook, open_codes_to_codebook
 from qc_clean.core.export.data_exporter import ProjectExporter
+from qc_clean.core.pipeline.pipeline_engine import PipelineContext
 from qc_clean.core.pipeline.stages.negative_case import (
     NegativeCase,
     NegativeCaseResponse,
@@ -224,13 +225,13 @@ class TestNegativeCaseStage:
                 Code(name="AI Adoption", description="test"),
             ]),
         )
-        config = {}
+        ctx = PipelineContext()
 
         with patch("qc_clean.core.llm.llm_handler.LLMHandler") as MockLLM:
             instance = MockLLM.return_value
             instance.extract_structured = AsyncMock(return_value=mock_response)
             result = asyncio.run(
-                NegativeCaseStage().execute(state, config)
+                NegativeCaseStage().execute(state, ctx)
             )
 
         # Should have negative case memo + analytical memo
@@ -269,13 +270,13 @@ class TestNegativeCaseStage:
                 Code(name="test", description="test"),
             ]),
         )
-        config = {}
+        ctx = PipelineContext()
 
         with patch("qc_clean.core.llm.llm_handler.LLMHandler") as MockLLM:
             instance = MockLLM.return_value
             instance.extract_structured = AsyncMock(return_value=mock_response)
             result = asyncio.run(
-                NegativeCaseStage().execute(state, config)
+                NegativeCaseStage().execute(state, ctx)
             )
 
         # Should have negative case memo only (no analytical memo)

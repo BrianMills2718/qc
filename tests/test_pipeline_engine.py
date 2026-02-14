@@ -15,7 +15,7 @@ from qc_clean.schemas.domain import (
     PipelineStatus,
     ProjectState,
 )
-from qc_clean.core.pipeline.pipeline_engine import AnalysisPipeline, PipelineStage
+from qc_clean.core.pipeline.pipeline_engine import AnalysisPipeline, PipelineContext, PipelineStage
 
 
 # ---------------------------------------------------------------------------
@@ -29,7 +29,7 @@ class PassthroughStage(PipelineStage):
     def name(self) -> str:
         return self._name
 
-    async def execute(self, state: ProjectState, config: dict) -> ProjectState:
+    async def execute(self, state: ProjectState, ctx: PipelineContext) -> ProjectState:
         state.data_warnings.append(f"executed:{self._name}")
         return state
 
@@ -45,7 +45,7 @@ class ReviewStage(PipelineStage):
     def requires_human_review(self) -> bool:
         return True
 
-    async def execute(self, state: ProjectState, config: dict) -> ProjectState:
+    async def execute(self, state: ProjectState, ctx: PipelineContext) -> ProjectState:
         state.data_warnings.append(f"executed:{self._name}")
         return state
 
@@ -58,7 +58,7 @@ class ConditionalStage(PipelineStage):
     def can_execute(self, state: ProjectState) -> bool:
         return len(state.codebook.codes) > 0
 
-    async def execute(self, state: ProjectState, config: dict) -> ProjectState:
+    async def execute(self, state: ProjectState, ctx: PipelineContext) -> ProjectState:
         state.data_warnings.append("executed:conditional")
         return state
 
@@ -67,7 +67,7 @@ class FailingStage(PipelineStage):
     def name(self) -> str:
         return "failing"
 
-    async def execute(self, state: ProjectState, config: dict) -> ProjectState:
+    async def execute(self, state: ProjectState, ctx: PipelineContext) -> ProjectState:
         raise RuntimeError("Stage failed!")
 
 
@@ -81,7 +81,7 @@ class TestAnalysisPipeline:
         pipeline = AnalysisPipeline(stages=[])
         state = ProjectState()
         result = asyncio.run(
-            pipeline.run(state, {})
+            pipeline.run(state, PipelineContext())
         )
         assert result.pipeline_status == PipelineStatus.COMPLETED
 
@@ -91,7 +91,7 @@ class TestAnalysisPipeline:
         state = ProjectState()
 
         result = asyncio.run(
-            pipeline.run(state, {})
+            pipeline.run(state, PipelineContext())
         )
 
         assert result.pipeline_status == PipelineStatus.COMPLETED
@@ -105,7 +105,7 @@ class TestAnalysisPipeline:
         state = ProjectState()
 
         result = asyncio.run(
-            pipeline.run(state, {})
+            pipeline.run(state, PipelineContext())
         )
 
         # Should pause after the review stage
@@ -122,13 +122,13 @@ class TestAnalysisPipeline:
 
         # First run - pauses at review
         state = asyncio.run(
-            pipeline.run(state, {})
+            pipeline.run(state, PipelineContext())
         )
         assert state.pipeline_status == PipelineStatus.PAUSED_FOR_REVIEW
 
         # Resume from review
         state = asyncio.run(
-            pipeline.run(state, {}, resume_from="review")
+            pipeline.run(state, PipelineContext(), resume_from="review")
         )
         assert state.pipeline_status == PipelineStatus.COMPLETED
         assert "executed:after" in state.data_warnings
@@ -139,7 +139,7 @@ class TestAnalysisPipeline:
         state = ProjectState()  # empty codebook
 
         result = asyncio.run(
-            pipeline.run(state, {})
+            pipeline.run(state, PipelineContext())
         )
 
         assert result.pipeline_status == PipelineStatus.COMPLETED
@@ -154,7 +154,7 @@ class TestAnalysisPipeline:
         )
 
         result = asyncio.run(
-            pipeline.run(state, {})
+            pipeline.run(state, PipelineContext())
         )
 
         assert result.pipeline_status == PipelineStatus.COMPLETED
@@ -167,7 +167,7 @@ class TestAnalysisPipeline:
 
         with pytest.raises(RuntimeError, match="Stage failed!"):
             asyncio.run(
-                pipeline.run(state, {})
+                pipeline.run(state, PipelineContext())
             )
 
         # The good stage should have completed, failing stage should be failed
@@ -184,7 +184,7 @@ class TestAnalysisPipeline:
         state = ProjectState()
 
         result = asyncio.run(
-            pipeline.run(state, {})
+            pipeline.run(state, PipelineContext())
         )
 
         pr = result.get_phase_result("stage1")
@@ -204,7 +204,7 @@ class TestAnalysisPipeline:
         state = ProjectState()
 
         asyncio.run(
-            pipeline.run(state, {})
+            pipeline.run(state, PipelineContext())
         )
 
         assert callback_log == ["a", "b"]
@@ -250,15 +250,13 @@ class TestIngestStage:
 
         stage = IngestStage()
         state = ProjectState()
-        config = {
-            "interviews": [
-                {"name": "test.txt", "content": "Hello world."},
-                {"name": "truncated.txt", "content": "This ends mid-sentence with"},
-            ]
-        }
+        ctx = PipelineContext(interviews=[
+            {"name": "test.txt", "content": "Hello world."},
+            {"name": "truncated.txt", "content": "This ends mid-sentence with"},
+        ])
 
         result = asyncio.run(
-            stage.execute(state, config)
+            stage.execute(state, ctx)
         )
 
         assert result.corpus.num_documents == 2
@@ -277,7 +275,7 @@ class TestIngestStage:
         )
 
         result = asyncio.run(
-            stage.execute(state, {})
+            stage.execute(state, PipelineContext())
         )
 
         # Should not overwrite existing corpus
@@ -289,15 +287,13 @@ class TestIngestStage:
 
         stage = IngestStage()
         state = ProjectState()
-        config = {
-            "interviews": [{
-                "name": "interview.txt",
-                "content": "Interviewer: How are you?\nJane Smith: I'm doing great.\nInterviewer: Tell me more.\nJane Smith: Sure thing.",
-            }]
-        }
+        ctx = PipelineContext(interviews=[{
+            "name": "interview.txt",
+            "content": "Interviewer: How are you?\nJane Smith: I'm doing great.\nInterviewer: Tell me more.\nJane Smith: Sure thing.",
+        }])
 
         result = asyncio.run(
-            stage.execute(state, config)
+            stage.execute(state, ctx)
         )
 
         doc = result.corpus.documents[0]
@@ -309,15 +305,13 @@ class TestIngestStage:
 
         stage = IngestStage()
         state = ProjectState()
-        config = {
-            "interviews": [{
-                "name": "focus_group.txt",
-                "content": "Todd Helmus   0:03\nSome dialog here.\n\nJane Doe   1:45\nMore dialog.\n\nTodd Helmus   3:22\nBack again.",
-            }]
-        }
+        ctx = PipelineContext(interviews=[{
+            "name": "focus_group.txt",
+            "content": "Todd Helmus   0:03\nSome dialog here.\n\nJane Doe   1:45\nMore dialog.\n\nTodd Helmus   3:22\nBack again.",
+        }])
 
         result = asyncio.run(
-            stage.execute(state, config)
+            stage.execute(state, ctx)
         )
 
         doc = result.corpus.documents[0]
@@ -341,7 +335,7 @@ class TestIngestStage:
         )
 
         result = asyncio.run(
-            stage.execute(state, {})
+            stage.execute(state, PipelineContext())
         )
 
         doc = result.corpus.documents[0]
@@ -362,7 +356,7 @@ class TestResumeValidation:
 
         with pytest.raises(ValueError, match="Invalid resume_from"):
             asyncio.run(
-                pipeline.run(state, {}, resume_from="nonexistent_stage")
+                pipeline.run(state, PipelineContext(), resume_from="nonexistent_stage")
             )
 
     def test_valid_resume_from_works(self):
@@ -375,7 +369,7 @@ class TestResumeValidation:
         state = ProjectState(name="test")
 
         result = asyncio.run(
-            pipeline.run(state, {}, resume_from="stage1")
+            pipeline.run(state, PipelineContext(), resume_from="stage1")
         )
         # stage1 skipped, stage2+3 run => 2 phase results
         assert len(result.phase_results) == 2

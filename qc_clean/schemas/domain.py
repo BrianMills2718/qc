@@ -334,6 +334,58 @@ class StabilityResult(BaseModel):
     timestamp: str = ""
 
 
+# ---------------------------------------------------------------------------
+# Typed return models for pure functions
+# ---------------------------------------------------------------------------
+
+class CodebookChangeResult(BaseModel):
+    """Result of comparing two codebooks."""
+    pct_change: float = 0.0
+    added_codes: List[str] = Field(default_factory=list)
+    removed_codes: List[str] = Field(default_factory=list)
+    modified_codes: List[str] = Field(default_factory=list)
+    stable_codes: List[str] = Field(default_factory=list)
+    old_code_count: int = 0
+    new_code_count: int = 0
+
+
+class SaturationCheckResult(BaseModel):
+    """Result of a saturation check."""
+    saturated: bool = False
+    change_metrics: Optional[CodebookChangeResult] = None
+    iteration: int = 1
+    message: str = ""
+
+
+class CrossInterviewResult(BaseModel):
+    """Result of cross-interview pattern analysis."""
+    shared_codes: Dict[str, List[str]] = Field(default_factory=dict)
+    unique_codes: Dict[str, List[str]] = Field(default_factory=dict)
+    consensus_themes: List[Dict[str, Any]] = Field(default_factory=list)
+    divergent_themes: List[Dict[str, Any]] = Field(default_factory=list)
+    co_occurrences: List[Dict[str, Any]] = Field(default_factory=list)
+    code_doc_matrix: Dict[str, List[str]] = Field(default_factory=dict)
+    doc_code_matrix: Dict[str, List[str]] = Field(default_factory=dict)
+
+
+class ReviewSummary(BaseModel):
+    """Summary of review state."""
+    codes_count: int = 0
+    applications_count: int = 0
+    existing_decisions: int = 0
+    pipeline_status: str = ""
+    current_phase: Optional[str] = None
+
+
+class SamplingSuggestion(BaseModel):
+    """A suggestion for which document to code next."""
+    doc_id: str
+    doc_name: str
+    reason: str = ""
+    gap_codes: List[str] = Field(default_factory=list)
+    priority_score: float = 0.0
+
+
 class CoreCategoryResult(BaseModel):
     """Core category from grounded theory selective coding."""
     category_name: str

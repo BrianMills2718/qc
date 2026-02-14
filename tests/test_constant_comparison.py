@@ -23,6 +23,7 @@ from qc_clean.core.pipeline.stages.gt_constant_comparison import (
     split_by_speaker_turns,
     _merge_segment_results,
 )
+from qc_clean.core.pipeline.pipeline_engine import PipelineContext
 from qc_clean.core.pipeline.pipeline_factory import create_pipeline
 from qc_clean.schemas.domain import (
     Code,
@@ -314,9 +315,10 @@ class TestGTConstantComparisonStage:
         with patch("qc_clean.core.llm.llm_handler.LLMHandler") as MockLLM:
             instance = MockLLM.return_value
             instance.extract_structured = AsyncMock(side_effect=make_response)
+            ctx = PipelineContext()
             result = asyncio.run(
                 GTConstantComparisonStage(max_iterations=1).execute(
-                    state, {"model_name": "gpt-5-mini"}
+                    state, ctx
                 )
             )
 
@@ -347,9 +349,10 @@ class TestGTConstantComparisonStage:
         with patch("qc_clean.core.llm.llm_handler.LLMHandler") as MockLLM:
             instance = MockLLM.return_value
             instance.extract_structured = AsyncMock(return_value=stable_response)
+            ctx = PipelineContext()
             result = asyncio.run(
                 GTConstantComparisonStage(max_iterations=5).execute(
-                    state, {"model_name": "gpt-5-mini"}
+                    state, ctx
                 )
             )
 
@@ -374,9 +377,10 @@ class TestGTConstantComparisonStage:
         with patch("qc_clean.core.llm.llm_handler.LLMHandler") as MockLLM:
             instance = MockLLM.return_value
             instance.extract_structured = AsyncMock(return_value=response)
+            ctx = PipelineContext()
             result = asyncio.run(
                 GTConstantComparisonStage(max_iterations=1).execute(
-                    state, {"model_name": "gpt-5-mini"}
+                    state, ctx
                 )
             )
 
@@ -396,16 +400,16 @@ class TestGTConstantComparisonStage:
             ],
         )
 
-        config = {"model_name": "gpt-5-mini"}
+        ctx = PipelineContext()
         with patch("qc_clean.core.llm.llm_handler.LLMHandler") as MockLLM:
             instance = MockLLM.return_value
             instance.extract_structured = AsyncMock(return_value=response)
             asyncio.run(
-                GTConstantComparisonStage(max_iterations=1).execute(state, config)
+                GTConstantComparisonStage(max_iterations=1).execute(state, ctx)
             )
 
-        assert "_gt_open_codes" in config
-        assert "_gt_open_codes_text" in config
+        assert ctx.gt_open_codes is not None
+        assert ctx.gt_open_codes_text is not None
 
     def test_stage_name(self):
         assert GTConstantComparisonStage().name() == "gt_constant_comparison"

@@ -11,7 +11,7 @@ from qc_clean.schemas.domain import (
     Document,
     ProjectState,
 )
-from ..pipeline_engine import PipelineStage
+from ..pipeline_engine import PipelineContext, PipelineStage
 
 logger = logging.getLogger(__name__)
 
@@ -21,15 +21,15 @@ class IngestStage(PipelineStage):
     def name(self) -> str:
         return "ingest"
 
-    async def execute(self, state: ProjectState, config: dict) -> ProjectState:
+    async def execute(self, state: ProjectState, ctx: PipelineContext) -> ProjectState:
         """
         Build the Corpus from raw interview data.
 
-        Expects ``config["interviews"]`` -- a list of dicts with keys
+        Expects ``ctx.interviews`` -- a list of dicts with keys
         ``name`` and ``content``.  If the corpus is already populated
         (e.g. loaded from a saved project), this stage is a no-op.
         """
-        interviews = config.get("interviews", [])
+        interviews = ctx.interviews
 
         if state.corpus.num_documents > 0 and not interviews:
             # Corpus already populated (e.g. via add-docs).

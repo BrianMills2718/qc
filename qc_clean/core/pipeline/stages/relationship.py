@@ -9,7 +9,7 @@ import logging
 from qc_clean.schemas.analysis_schemas import EntityMapping
 from qc_clean.schemas.adapters import entity_mapping_to_entities
 from qc_clean.schemas.domain import ProjectState
-from ..pipeline_engine import PipelineStage, require_config
+from ..pipeline_engine import PipelineContext, PipelineStage
 
 logger = logging.getLogger(__name__)
 
@@ -19,19 +19,18 @@ class RelationshipStage(PipelineStage):
     def name(self) -> str:
         return "relationship"
 
-    async def execute(self, state: ProjectState, config: dict) -> ProjectState:
+    async def execute(self, state: ProjectState, ctx: PipelineContext) -> ProjectState:
         from qc_clean.core.llm.llm_handler import LLMHandler
 
-        model_name = config.get("model_name", "gpt-5-mini")
         logger.info(
             "Starting relationship: docs=%d, codes=%d, model=%s",
-            state.corpus.num_documents, len(state.codebook.codes), model_name,
+            state.corpus.num_documents, len(state.codebook.codes), ctx.model_name,
         )
-        llm = LLMHandler(model_name=model_name)
+        llm = LLMHandler(model_name=ctx.model_name)
 
         combined_text = _build_combined_text(state)
-        phase1_text = require_config(config, "_phase1_json", self.name())
-        phase2_text = require_config(config, "_phase2_json", self.name())
+        phase1_text = ctx.require("phase1_json", self.name())
+        phase2_text = ctx.require("phase2_json", self.name())
 
         prompt = _build_phase3_prompt(combined_text, phase1_text, phase2_text)
 
@@ -70,7 +69,7 @@ class RelationshipStage(PipelineStage):
             ))
 
         # Stash for downstream
-        config["_phase3_json"] = phase3_response.model_dump_json(indent=2)
+        ctx.phase3_json = phase3_response.model_dump_json(indent=2)
 
         logger.info(
             "Relationship mapping complete: %d entities, %d relationships",

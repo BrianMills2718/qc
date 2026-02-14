@@ -13,6 +13,7 @@ from qc_clean.schemas.domain import (
     Document,
     ProjectState,
 )
+from qc_clean.core.pipeline.pipeline_engine import PipelineContext
 from qc_clean.core.pipeline.stages.cross_interview import (
     CrossInterviewStage,
     analyze_cross_interview_patterns,
@@ -71,27 +72,27 @@ class TestCrossInterviewAnalysis:
     def test_shared_codes(self, multi_doc_state):
         results = analyze_cross_interview_patterns(multi_doc_state)
         # C1 is in d1, d2, d3 -> shared
-        assert "C1" in results["shared_codes"]
+        assert "C1" in results.shared_codes
         # C2, C3, C4 are in 1 doc each -> unique
-        assert "C2" in results["unique_codes"]
-        assert "C3" in results["unique_codes"]
+        assert "C2" in results.unique_codes
+        assert "C3" in results.unique_codes
 
     def test_consensus_themes(self, multi_doc_state):
         results = analyze_cross_interview_patterns(multi_doc_state)
         # C1 is in 3/3 docs = 100% -> consensus
-        consensus_ids = [ct["code_id"] for ct in results["consensus_themes"]]
+        consensus_ids = [ct["code_id"] for ct in results.consensus_themes]
         assert "C1" in consensus_ids
 
     def test_divergent_themes(self, multi_doc_state):
         results = analyze_cross_interview_patterns(multi_doc_state)
-        divergent_ids = [dt["code_id"] for dt in results["divergent_themes"]]
+        divergent_ids = [dt["code_id"] for dt in results.divergent_themes]
         # C2, C3, C4 are in only 1 doc
         assert "C2" in divergent_ids or "C3" in divergent_ids
 
     def test_co_occurrences(self, multi_doc_state):
         results = analyze_cross_interview_patterns(multi_doc_state)
         # C1 and C4 co-occur in d1, C1 and C2 co-occur in d2, C1 and C3 co-occur in d3
-        assert len(results["co_occurrences"]) >= 0  # at least some
+        assert len(results.co_occurrences) >= 0  # at least some
 
     def test_single_doc_skips(self):
         """CrossInterviewStage should not execute on single-doc corpus."""
@@ -108,7 +109,7 @@ class TestCrossInterviewAnalysis:
     def test_stage_creates_memo(self, multi_doc_state):
         stage = CrossInterviewStage()
         result = asyncio.run(
-            stage.execute(multi_doc_state, {})
+            stage.execute(multi_doc_state, PipelineContext())
         )
         assert len(result.memos) == 1
         assert result.memos[0].memo_type == "cross_case"
@@ -123,8 +124,8 @@ class TestSaturation:
     def test_no_history(self):
         state = ProjectState(codebook=Codebook(codes=[Code(id="C1", name="A")]))
         result = check_saturation(state)
-        assert result["saturated"] is False
-        assert "First iteration" in result["message"]
+        assert result.saturated is False
+        assert "First iteration" in result.message
 
     def test_saturated(self):
         old = Codebook(codes=[
@@ -141,7 +142,7 @@ class TestSaturation:
             iteration=2,
         )
         result = check_saturation(state, threshold=0.15)
-        assert result["saturated"] is True
+        assert result.saturated is True
 
     def test_not_saturated(self):
         old = Codebook(codes=[
@@ -159,7 +160,7 @@ class TestSaturation:
             iteration=2,
         )
         result = check_saturation(state, threshold=0.15)
-        assert result["saturated"] is False
+        assert result.saturated is False
 
     def test_codebook_change_metrics(self):
         old = Codebook(codes=[
@@ -173,11 +174,11 @@ class TestSaturation:
             Code(id="C4", name="D"),
         ])
         metrics = calculate_codebook_change(old, new)
-        assert "C" in metrics["removed_codes"]
-        assert "D" in metrics["added_codes"]
-        assert "B" in metrics["modified_codes"]
-        assert "A" in metrics["stable_codes"]
-        assert metrics["pct_change"] > 0
+        assert "C" in metrics.removed_codes
+        assert "D" in metrics.added_codes
+        assert "B" in metrics.modified_codes
+        assert "A" in metrics.stable_codes
+        assert metrics.pct_change > 0
 
 
 # ---------------------------------------------------------------------------
@@ -193,7 +194,7 @@ class TestTheoreticalSampling:
         )
         suggestions = suggest_next_documents(multi_doc_state)
         assert len(suggestions) >= 1
-        assert suggestions[0]["doc_id"] == "d4"
+        assert suggestions[0].doc_id == "d4"
 
     def test_no_uncoded(self, multi_doc_state):
         # All documents are already coded

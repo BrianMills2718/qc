@@ -10,7 +10,7 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from qc_clean.core.pipeline.pipeline_engine import require_config
+from qc_clean.core.pipeline.pipeline_engine import PipelineContext
 from qc_clean.core.pipeline.review import ReviewManager
 from qc_clean.schemas.domain import (
     Code,
@@ -24,35 +24,39 @@ from qc_clean.schemas.domain import (
 
 
 # ---------------------------------------------------------------------------
-# require_config
+# PipelineContext.require
 # ---------------------------------------------------------------------------
 
-class TestRequireConfig:
+class TestPipelineContextRequire:
 
     def test_returns_value_when_present(self):
-        config = {"_phase1_json": '{"codes": []}'}
-        result = require_config(config, "_phase1_json", "perspective")
+        ctx = PipelineContext(phase1_json='{"codes": []}')
+        result = ctx.require("phase1_json", "perspective")
         assert result == '{"codes": []}'
 
-    def test_raises_on_missing_key(self):
-        config = {"model_name": "gpt-5-mini"}
-        with pytest.raises(RuntimeError, match="requires config key '_phase1_json'"):
-            require_config(config, "_phase1_json", "perspective")
+    def test_raises_on_missing_field(self):
+        ctx = PipelineContext()
+        with pytest.raises(RuntimeError, match="requires 'phase1_json'"):
+            ctx.require("phase1_json", "perspective")
 
     def test_raises_on_empty_string(self):
-        config = {"_phase1_json": ""}
-        with pytest.raises(RuntimeError, match="requires config key '_phase1_json'"):
-            require_config(config, "_phase1_json", "perspective")
-
-    def test_raises_on_none_value(self):
-        config = {"_phase1_json": None}
-        with pytest.raises(RuntimeError, match="requires config key '_phase1_json'"):
-            require_config(config, "_phase1_json", "perspective")
+        ctx = PipelineContext(phase1_json="")
+        with pytest.raises(RuntimeError, match="requires 'phase1_json'"):
+            ctx.require("phase1_json", "perspective")
 
     def test_error_message_includes_stage_name(self):
-        config = {}
+        ctx = PipelineContext()
         with pytest.raises(RuntimeError, match="Stage 'synthesis'"):
-            require_config(config, "_phase3_json", "synthesis")
+            ctx.require("phase3_json", "synthesis")
+
+    def test_extra_fields_rejected(self):
+        """Misspelled field names raise immediately on construction."""
+        with pytest.raises(Exception):
+            PipelineContext(phase1_josn="typo")
+
+    def test_model_name_default(self):
+        ctx = PipelineContext()
+        assert ctx.model_name == "gpt-5-mini"
 
 
 # ---------------------------------------------------------------------------
@@ -76,51 +80,51 @@ class TestStageConfigDependencies:
         from qc_clean.core.pipeline.stages.perspective import PerspectiveStage
 
         state = self._make_state()
-        config = {"model_name": "gpt-5-mini"}  # missing _phase1_json
+        ctx = PipelineContext()  # missing phase1_json
 
         with patch("qc_clean.core.llm.llm_handler.LLMHandler"):
-            with pytest.raises(RuntimeError, match="_phase1_json"):
-                asyncio.run(PerspectiveStage().execute(state, config))
+            with pytest.raises(RuntimeError, match="phase1_json"):
+                asyncio.run(PerspectiveStage().execute(state, ctx))
 
     def test_relationship_requires_phase1_and_phase2(self):
         from qc_clean.core.pipeline.stages.relationship import RelationshipStage
 
         state = self._make_state()
-        config = {"model_name": "gpt-5-mini"}  # missing both
+        ctx = PipelineContext()  # missing both
 
         with patch("qc_clean.core.llm.llm_handler.LLMHandler"):
-            with pytest.raises(RuntimeError, match="_phase1_json"):
-                asyncio.run(RelationshipStage().execute(state, config))
+            with pytest.raises(RuntimeError, match="phase1_json"):
+                asyncio.run(RelationshipStage().execute(state, ctx))
 
     def test_synthesis_requires_all_phases(self):
         from qc_clean.core.pipeline.stages.synthesis import SynthesisStage
 
         state = self._make_state()
-        config = {"model_name": "gpt-5-mini"}
+        ctx = PipelineContext()
 
         with patch("qc_clean.core.llm.llm_handler.LLMHandler"):
-            with pytest.raises(RuntimeError, match="_phase1_json"):
-                asyncio.run(SynthesisStage().execute(state, config))
+            with pytest.raises(RuntimeError, match="phase1_json"):
+                asyncio.run(SynthesisStage().execute(state, ctx))
 
     def test_gt_axial_requires_open_codes(self):
         from qc_clean.core.pipeline.stages.gt_axial_coding import GTAxialCodingStage
 
         state = self._make_state()
-        config = {"model_name": "gpt-5-mini"}  # missing _gt_open_codes_text
+        ctx = PipelineContext()  # missing gt_open_codes_text
 
         with patch("qc_clean.core.llm.llm_handler.LLMHandler"):
-            with pytest.raises(RuntimeError, match="_gt_open_codes_text"):
-                asyncio.run(GTAxialCodingStage().execute(state, config))
+            with pytest.raises(RuntimeError, match="gt_open_codes_text"):
+                asyncio.run(GTAxialCodingStage().execute(state, ctx))
 
     def test_gt_selective_requires_open_codes_and_axial(self):
         from qc_clean.core.pipeline.stages.gt_selective_coding import GTSelectiveCodingStage
 
         state = self._make_state()
-        config = {"model_name": "gpt-5-mini"}
+        ctx = PipelineContext()
 
         with patch("qc_clean.core.llm.llm_handler.LLMHandler"):
-            with pytest.raises(RuntimeError, match="_gt_open_codes_text"):
-                asyncio.run(GTSelectiveCodingStage().execute(state, config))
+            with pytest.raises(RuntimeError, match="gt_open_codes_text"):
+                asyncio.run(GTSelectiveCodingStage().execute(state, ctx))
 
     def test_gt_theory_requires_all_gt_phases(self):
         from qc_clean.core.pipeline.stages.gt_theory_integration import GTTheoryIntegrationStage
@@ -134,11 +138,11 @@ class TestStageConfigDependencies:
             ]),
             core_categories=[{"category_name": "CC1", "definition": "def"}],
         )
-        config = {"model_name": "gpt-5-mini"}
+        ctx = PipelineContext()
 
         with patch("qc_clean.core.llm.llm_handler.LLMHandler"):
-            with pytest.raises(RuntimeError, match="_gt_open_codes_text"):
-                asyncio.run(GTTheoryIntegrationStage().execute(state, config))
+            with pytest.raises(RuntimeError, match="gt_open_codes_text"):
+                asyncio.run(GTTheoryIntegrationStage().execute(state, ctx))
 
 
 # ---------------------------------------------------------------------------
@@ -218,10 +222,10 @@ class TestConstantComparisonFailLoud:
                 Document(id="d1", name="empty.txt", content=""),
             ]),
         )
-        config = {"model_name": "gpt-5-mini"}
+        ctx = PipelineContext()
 
         with patch("qc_clean.core.llm.llm_handler.LLMHandler"):
             with pytest.raises(RuntimeError, match="No segments found"):
                 asyncio.run(
-                    GTConstantComparisonStage(max_iterations=1).execute(state, config)
+                    GTConstantComparisonStage(max_iterations=1).execute(state, ctx)
                 )

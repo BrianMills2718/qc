@@ -245,10 +245,11 @@ async def run_irr_analysis(
         pass_state.codebook.codes = []
         pass_state.code_applications = []
 
-        config = {
-            "model_name": pass_model,
-            "irr_prompt_suffix": suffix,
-        }
+        from qc_clean.core.pipeline.pipeline_engine import PipelineContext
+        ctx = PipelineContext(
+            model_name=pass_model,
+            irr_prompt_suffix=suffix,
+        )
 
         # Run the appropriate coding stage
         if is_gt:
@@ -259,7 +260,7 @@ async def run_irr_analysis(
             stage = ThematicCodingStage()
 
         logger.info("IRR pass %d/%d (model=%s, suffix=%r)", i + 1, num_passes, pass_model, suffix[:40])
-        pass_state = await stage.execute(pass_state, config)
+        pass_state = await stage.execute(pass_state, ctx)
 
         code_names = [c.name for c in pass_state.codebook.codes]
         code_details = [
@@ -390,10 +391,8 @@ async def run_stability_analysis(
         run_state.codebook.codes = []
         run_state.code_applications = []
 
-        config = {
-            "model_name": model_name,
-            "irr_prompt_suffix": "",  # no variation — same prompt every time
-        }
+        from qc_clean.core.pipeline.pipeline_engine import PipelineContext
+        ctx = PipelineContext(model_name=model_name)
 
         if is_gt:
             from qc_clean.core.pipeline.stages.gt_open_coding import GTOpenCodingStage
@@ -403,7 +402,7 @@ async def run_stability_analysis(
             stage = ThematicCodingStage()
 
         logger.info("Stability run %d/%d (model=%s)", i + 1, num_runs, model_name)
-        run_state = await stage.execute(run_state, config)
+        run_state = await stage.execute(run_state, ctx)
 
         code_names = [c.name for c in run_state.codebook.codes]
         all_run_codes.append(code_names)

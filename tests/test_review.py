@@ -46,9 +46,9 @@ class TestReviewManager:
     def test_get_review_summary(self, review_state):
         rm = ReviewManager(review_state)
         summary = rm.get_review_summary()
-        assert summary["codes_count"] == 3
-        assert summary["applications_count"] == 4
-        assert summary["pipeline_status"] == "paused_for_review"
+        assert summary.codes_count == 3
+        assert summary.applications_count == 4
+        assert summary.pipeline_status == "paused_for_review"
 
     def test_approve_code(self, review_state):
         rm = ReviewManager(review_state)

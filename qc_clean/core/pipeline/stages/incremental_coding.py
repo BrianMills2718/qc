@@ -23,7 +23,7 @@ from qc_clean.schemas.domain import (
     ProjectState,
     Provenance,
 )
-from ..pipeline_engine import PipelineStage
+from ..pipeline_engine import PipelineContext, PipelineStage
 
 logger = logging.getLogger(__name__)
 
@@ -37,10 +37,10 @@ class IncrementalCodingStage(PipelineStage):
     def can_execute(self, state: ProjectState) -> bool:
         return len(state.get_uncoded_doc_ids()) > 0 and len(state.codebook.codes) > 0
 
-    async def execute(self, state: ProjectState, config: dict) -> ProjectState:
+    async def execute(self, state: ProjectState, ctx: PipelineContext) -> ProjectState:
         from qc_clean.core.llm.llm_handler import LLMHandler
 
-        model_name = config.get("model_name", "gpt-5-mini")
+        model_name = ctx.model_name
 
         # Identify uncoded documents
         uncoded_ids = set(state.get_uncoded_doc_ids())
@@ -93,10 +93,10 @@ class IncrementalCodingStage(PipelineStage):
             "codebook change=%.1f%% (added=%d, removed=%d, modified=%d)",
             len(new_docs),
             len(new_applications),
-            change["pct_change"] * 100,
-            len(change["added_codes"]),
-            len(change["removed_codes"]),
-            len(change["modified_codes"]),
+            change.pct_change * 100,
+            len(change.added_codes),
+            len(change.removed_codes),
+            len(change.modified_codes),
         )
 
         # Extract analytical memo if present

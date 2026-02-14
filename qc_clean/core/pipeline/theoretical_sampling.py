@@ -9,7 +9,7 @@ import logging
 from collections import defaultdict
 from typing import Dict, List
 
-from qc_clean.schemas.domain import ProjectState
+from qc_clean.schemas.domain import ProjectState, SamplingSuggestion
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +18,7 @@ def suggest_next_documents(
     state: ProjectState,
     candidate_names: List[str] | None = None,
     max_suggestions: int = 3,
-) -> List[Dict]:
+) -> List[SamplingSuggestion]:
     """
     Suggest which documents should be analyzed next to maximize
     code coverage and address gaps.
@@ -26,11 +26,6 @@ def suggest_next_documents(
     If *candidate_names* is provided, only those document names are
     considered.  Otherwise all un-coded documents in the corpus are
     candidates.
-
-    Returns a list of dicts sorted by priority:
-    - doc_id / doc_name
-    - reason: why this document is suggested
-    - gap_codes: codes not yet represented
     """
     coded_doc_refs = {a.doc_id for a in state.code_applications}
     uncoded = [
@@ -59,13 +54,13 @@ def suggest_next_documents(
         # might cover gap codes.  Since we haven't coded them yet, we
         # use a naive score based on speaker diversity.
         score = len(doc.detected_speakers) + 1  # more speakers = richer data
-        suggestions.append({
-            "doc_id": doc.id,
-            "doc_name": doc.name,
-            "reason": "Uncoded document with potential to cover under-represented codes",
-            "gap_codes": sorted(low_coverage_codes),
-            "priority_score": score,
-        })
+        suggestions.append(SamplingSuggestion(
+            doc_id=doc.id,
+            doc_name=doc.name,
+            reason="Uncoded document with potential to cover under-represented codes",
+            gap_codes=sorted(low_coverage_codes),
+            priority_score=score,
+        ))
 
-    suggestions.sort(key=lambda s: s["priority_score"], reverse=True)
+    suggestions.sort(key=lambda s: s.priority_score, reverse=True)
     return suggestions[:max_suggestions]

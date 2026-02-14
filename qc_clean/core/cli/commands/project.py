@@ -179,8 +179,9 @@ def _run_project(store: ProjectStore, args) -> int:
         enable_human_review=enable_review,
     )
 
+    from qc_clean.core.pipeline.pipeline_engine import PipelineContext
     model_name = getattr(args, "model", None) or state.config.model_name
-    config = {"model_name": model_name}
+    ctx = PipelineContext(model_name=model_name)
 
     print(f"Running pipeline on project: {state.name}")
     print(f"  Methodology: {state.config.methodology.value}")
@@ -191,7 +192,7 @@ def _run_project(store: ProjectStore, args) -> int:
     print()
 
     try:
-        state = asyncio.run(pipeline.run(state, config, resume_from=resume_from))
+        state = asyncio.run(pipeline.run(state, ctx, resume_from=resume_from))
     except Exception as e:
         store.save(state)
         print(f"\nPipeline failed: {e}", file=sys.stderr)
@@ -417,8 +418,9 @@ def _recode_project(store: ProjectStore, args) -> int:
         on_stage_complete=save_callback,
     )
 
+    from qc_clean.core.pipeline.pipeline_engine import PipelineContext
     model_name = getattr(args, "model", None) or state.config.model_name
-    config = {"model_name": model_name}
+    ctx = PipelineContext(model_name=model_name)
 
     print(f"Incremental re-coding on project: {state.name}")
     print(f"  Methodology: {state.config.methodology.value}")
@@ -432,7 +434,7 @@ def _recode_project(store: ProjectStore, args) -> int:
     state.pipeline_status = PipelineStatus.PENDING
 
     try:
-        state = asyncio.run(pipeline.run(state, config))
+        state = asyncio.run(pipeline.run(state, ctx))
     except Exception as e:
         store.save(state)
         print(f"\nIncremental coding failed: {e}", file=sys.stderr)
