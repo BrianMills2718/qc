@@ -176,6 +176,24 @@ Default model is `gpt-5-mini` (cheap, adequate for most stages). Can switch per-
 - **GT axial/selective coding** — requires sophisticated reasoning about relationships between categories; if output quality is shallow, upgrading the model could help
 - **Negative case analysis** — asking "what contradicts these findings?" is a harder reasoning task; now implemented as `NegativeCaseStage`
 
+### Local Models (Ollama, vLLM, etc.)
+
+LLMHandler uses `llm_client` which uses LiteLLM under the hood. Any LiteLLM-supported provider works:
+
+```bash
+# Ollama (install from ollama.com, then pull a model)
+ollama pull llama3.1
+python qc_cli.py project run <id> --model ollama/llama3.1
+
+# vLLM or any OpenAI-compatible server
+OPENAI_API_BASE=http://localhost:8000/v1 python qc_cli.py project run <id> --model openai/my-local-model
+
+# Via MCP
+qc_run_pipeline(project_id="...", model="ollama/llama3.1")
+```
+
+Local models work for all pipeline stages but quality varies. For GT axial/selective coding and negative case analysis, cloud models (GPT-5-mini+) tend to produce better structured output.
+
 ## Development Notes
 
 - This is a research tool, not a production system
@@ -212,7 +230,7 @@ Commercial tools treat AI as a **feature bolted onto manual coding**. We treat A
 - ~~**Inter-rater reliability**: QualCoder, iQual, Yale tool all compute IRR metrics~~ (Now implemented)
 - **Desktop GUI**: QualCoder has full PyQt6 desktop app with audio/video/image coding
 - **Academic publications**: LLMCode (CHI), qc (JOSS), iQual (World Bank paper), DeTAILS (ACM CUI)
-- **Local model support** (documented): QualCoder supports Ollama; our LiteLLM can route to local models but this isn't documented
+- ~~**Local model support** (documented): QualCoder supports Ollama; our LiteLLM can route to local models but this isn't documented~~ (Now documented)
 - **RAG/vector search**: QualCoder uses FAISS + embeddings for semantic search across corpus
 
 ## E2E Validation (updated 2026-02-13)
