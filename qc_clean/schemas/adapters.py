@@ -107,11 +107,14 @@ def speaker_analysis_to_perspectives(
         )
         participants.append(pp)
 
+    # Convert list of PerspectiveMapEntry to dict
+    mapping = {entry.participant_name: entry.code_ids for entry in sa.perspective_mapping}
+
     return PerspectiveAnalysis(
         participants=participants,
         consensus_themes=sa.consensus_themes,
         divergent_viewpoints=sa.divergent_viewpoints,
-        perspective_mapping=sa.perspective_mapping,
+        perspective_mapping=mapping,
     )
 
 
@@ -194,12 +197,18 @@ def analysis_synthesis_to_synthesis(
             supporting_themes=ar.supporting_themes,
         ))
 
+    # Convert list of ThemeConfidence to dict
+    conf = {
+        tc.theme: {"level": tc.level, "score": tc.score, "evidence": tc.evidence}
+        for tc in asyn.confidence_assessment
+    }
+
     return Synthesis(
         executive_summary=asyn.executive_summary,
         key_findings=asyn.key_findings,
         cross_cutting_patterns=asyn.cross_cutting_patterns,
         recommendations=recs,
-        confidence_assessment=asyn.confidence_assessment,
+        confidence_assessment=conf,
     )
 
 

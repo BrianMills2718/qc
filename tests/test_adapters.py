@@ -11,8 +11,10 @@ from qc_clean.schemas.analysis_schemas import (
     EntityMapping,
     EntityRelationship,
     ParticipantProfile,
+    PerspectiveMapEntry,
     SpeakerAnalysis,
     ThematicCode,
+    ThemeConfidence,
 )
 from qc_clean.schemas.adapters import (
     analysis_synthesis_to_synthesis,
@@ -73,7 +75,7 @@ def sample_speaker_analysis():
         participants=[p],
         consensus_themes=["AI saves time"],
         divergent_viewpoints=["trust issues"],
-        perspective_mapping={"Alice": ["AI_USAGE"]},
+        perspective_mapping=[PerspectiveMapEntry(participant_name="Alice", code_ids=["AI_USAGE"])],
     )
 
 
@@ -108,7 +110,7 @@ def sample_synthesis():
         key_findings=["AI helps coding"],
         cross_cutting_patterns=["efficiency vs trust"],
         actionable_recommendations=[rec],
-        confidence_assessment={"AI_USAGE": {"level": "high", "score": 0.85}},
+        confidence_assessment=[ThemeConfidence(theme="AI_USAGE", level="high", score=0.85)],
     )
 
 

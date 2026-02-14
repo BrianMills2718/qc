@@ -23,8 +23,10 @@ from qc_clean.schemas.analysis_schemas import (
     EntityMapping,
     EntityRelationship,
     ParticipantProfile,
+    PerspectiveMapEntry,
     SpeakerAnalysis,
     ThematicCode,
+    ThemeConfidence,
 )
 from qc_clean.schemas.gt_schemas import (
     AxialRelationship,
@@ -134,7 +136,7 @@ def _sample_speaker_analysis(**overrides) -> SpeakerAnalysis:
         ],
         consensus_themes=["AI is beneficial"],
         divergent_viewpoints=["Concerns about pace of change"],
-        perspective_mapping={"Jane": ["AI_ADOPTION", "WORKFLOW_CHANGE"]},
+        perspective_mapping=[PerspectiveMapEntry(participant_name="Jane", code_ids=["AI_ADOPTION", "WORKFLOW_CHANGE"])],
         analytical_memo="Single speaker interview.",
     )
     defaults.update(overrides)
@@ -174,7 +176,7 @@ def _sample_synthesis(**overrides) -> AnalysisSynthesis:
                 supporting_themes=["AI_ADOPTION"],
             ),
         ],
-        confidence_assessment={"AI_ADOPTION": {"level": "high", "score": 0.85}},
+        confidence_assessment=[ThemeConfidence(theme="AI_ADOPTION", level="high", score=0.85)],
         analytical_memo="Synthesis reflects strong convergence across themes.",
     )
     defaults.update(overrides)

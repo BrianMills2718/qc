@@ -90,7 +90,7 @@ class TestAnalyticalMemoField:
     def test_speaker_analysis_default_empty(self):
         sa = SpeakerAnalysis(
             participants=[], consensus_themes=[], divergent_viewpoints=[],
-            perspective_mapping={},
+            perspective_mapping=[],
         )
         assert sa.analytical_memo == ""
 
@@ -105,7 +105,7 @@ class TestAnalyticalMemoField:
         s = AnalysisSynthesis(
             executive_summary="test", key_findings=[],
             cross_cutting_patterns=[], actionable_recommendations=[],
-            confidence_assessment={},
+            confidence_assessment=[],
         )
         assert s.analytical_memo == ""
 
@@ -202,7 +202,7 @@ class TestPerspectiveStageMemo:
 
         mock_response = SpeakerAnalysis(
             participants=[], consensus_themes=[], divergent_viewpoints=[],
-            perspective_mapping={},
+            perspective_mapping=[],
             analytical_memo="Speaker analysis identified tensions.",
         )
 
@@ -258,7 +258,7 @@ class TestSynthesisStageMemo:
             key_findings=["finding1"],
             cross_cutting_patterns=["pattern1"],
             actionable_recommendations=[],
-            confidence_assessment={},
+            confidence_assessment=[],
             analytical_memo="Synthesis integrated all phases coherently.",
         )
 

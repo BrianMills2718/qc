@@ -4,7 +4,7 @@ These schemas define the exact structure expected from LLM-based analysis phases
 """
 
 from pydantic import BaseModel, Field
-from typing import List, Optional, Dict, Any
+from typing import List, Optional
 
 
 class ThematicCode(BaseModel):
@@ -44,12 +44,18 @@ class ParticipantProfile(BaseModel):
     codes_emphasized: List[str] = Field(default_factory=list, description="Top 5-7 code IDs this participant emphasized MOST (not all codes, only the strongest)")
 
 
+class PerspectiveMapEntry(BaseModel):
+    """Maps a participant to their most emphasized codes."""
+    participant_name: str = Field(..., description="Name of the participant")
+    code_ids: List[str] = Field(default_factory=list, description="Top 5-7 most emphasized code IDs")
+
+
 class SpeakerAnalysis(BaseModel):
     """Speaker and participant analysis from Phase 2"""
     participants: List[ParticipantProfile] = Field(default_factory=list, description="Identified participants")
     consensus_themes: List[str] = Field(default_factory=list, description="For multiple speakers: areas of agreement. For single speaker: the speaker's strongest/most consistent positions")
     divergent_viewpoints: List[str] = Field(default_factory=list, description="For multiple speakers: areas of disagreement. For single speaker: internal tensions, ambivalences, or contradictions in the speaker's views")
-    perspective_mapping: Dict[str, List[str]] = Field(default_factory=dict, description="Participant name to their top 5-7 most emphasized code IDs")
+    perspective_mapping: List[PerspectiveMapEntry] = Field(default_factory=list, description="Each participant mapped to their top 5-7 most emphasized code IDs")
     analytical_memo: str = Field(
         default="",
         description="Analytical memo: record your reasoning, uncertainties, and emerging patterns",
@@ -92,13 +98,21 @@ class ConfidenceEntry(BaseModel):
     evidence: str = Field("", description="Supporting evidence for this confidence level")
 
 
+class ThemeConfidence(BaseModel):
+    """Confidence assessment for a specific theme."""
+    theme: str = Field(..., description="Theme name or code ID")
+    level: str = Field(..., description="Confidence level: high, medium, low")
+    score: float = Field(..., ge=0.0, le=1.0, description="Numeric confidence score")
+    evidence: str = Field(default="", description="Supporting evidence for this confidence level")
+
+
 class AnalysisSynthesis(BaseModel):
     """Final synthesis and recommendations from Phase 4"""
     executive_summary: str = Field(..., description="Comprehensive summary")
     key_findings: List[str] = Field(default_factory=list, description="Major findings with evidence")
     cross_cutting_patterns: List[str] = Field(default_factory=list, description="Patterns across themes")
     actionable_recommendations: List[AnalysisRecommendation] = Field(default_factory=list, description="Specific recommendations")
-    confidence_assessment: Dict[str, Any] = Field(default_factory=dict, description="Confidence levels by theme, each with level/score/evidence")
+    confidence_assessment: List[ThemeConfidence] = Field(default_factory=list, description="Confidence level for each theme")
     analytical_memo: str = Field(
         default="",
         description="Analytical memo: record your reasoning, uncertainties, and emerging patterns",

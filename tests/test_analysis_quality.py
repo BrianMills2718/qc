@@ -11,11 +11,13 @@ from qc_clean.schemas.analysis_schemas import (
     ThematicCode,
     CodeHierarchy,
     ParticipantProfile,
+    PerspectiveMapEntry,
     SpeakerAnalysis,
     EntityRelationship,
     EntityMapping,
     AnalysisRecommendation,
     AnalysisSynthesis,
+    ThemeConfidence,
 )
 
 
@@ -114,10 +116,10 @@ class TestSpeakerAnalysis:
             participants=[profile],
             consensus_themes=["AI is useful for tedious tasks"],
             divergent_viewpoints=["Enthusiasm vs caution about trust"],
-            perspective_mapping={"Jane Doe": ["AI_USAGE", "METHODS", "TRAINING"]},
+            perspective_mapping=[PerspectiveMapEntry(participant_name="Jane Doe", code_ids=["AI_USAGE", "METHODS", "TRAINING"])],
         )
         assert len(analysis.participants) == 1
-        assert len(analysis.perspective_mapping["Jane Doe"]) == 3
+        assert len(analysis.perspective_mapping[0].code_ids) == 3
 
     def test_multi_speaker(self):
         p1 = ParticipantProfile(
@@ -136,10 +138,10 @@ class TestSpeakerAnalysis:
             participants=[p1, p2],
             consensus_themes=["Both agree AI saves time"],
             divergent_viewpoints=["Alice trusts AI more than Bob"],
-            perspective_mapping={
-                "Alice": ["AI_CODE", "PRODUCTIVITY"],
-                "Bob": ["AI_LIMITS", "POLICY"],
-            },
+            perspective_mapping=[
+                PerspectiveMapEntry(participant_name="Alice", code_ids=["AI_CODE", "PRODUCTIVITY"]),
+                PerspectiveMapEntry(participant_name="Bob", code_ids=["AI_LIMITS", "POLICY"]),
+            ],
         )
         assert len(analysis.participants) == 2
 
@@ -157,24 +159,24 @@ class TestAnalysisSynthesis:
             key_findings=["AI helps with code", "Citations can be fabricated"],
             cross_cutting_patterns=["Efficiency vs trust tradeoff"],
             actionable_recommendations=[rec],
-            confidence_assessment={"AI_USAGE": {"level": "high", "score": 0.85, "evidence": "Multiple examples"}},
+            confidence_assessment=[ThemeConfidence(theme="AI_USAGE", level="high", score=0.85, evidence="Multiple examples")],
         )
         assert len(synthesis.actionable_recommendations) == 1
-        assert synthesis.confidence_assessment["AI_USAGE"]["score"] == 0.85
+        assert synthesis.confidence_assessment[0].score == 0.85
 
-    def test_confidence_as_dict_any(self):
-        """confidence_assessment accepts rich objects (Dict[str, Any])"""
+    def test_confidence_as_list_of_objects(self):
+        """confidence_assessment accepts a list of ThemeConfidence objects."""
         synthesis = AnalysisSynthesis(
             executive_summary="Summary.",
             key_findings=["Finding"],
             cross_cutting_patterns=["Pattern"],
             actionable_recommendations=[],
-            confidence_assessment={
-                "theme1": {"level": "high", "score": 0.9, "evidence": "strong"},
-                "theme2": {"level": "low", "score": 0.3, "evidence": "weak"},
-            },
+            confidence_assessment=[
+                ThemeConfidence(theme="theme1", level="high", score=0.9, evidence="strong"),
+                ThemeConfidence(theme="theme2", level="low", score=0.3, evidence="weak"),
+            ],
         )
-        assert synthesis.confidence_assessment["theme2"]["level"] == "low"
+        assert synthesis.confidence_assessment[1].level == "low"
 
 
 # ---------------------------------------------------------------------------
