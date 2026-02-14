@@ -309,15 +309,22 @@ class TestIncrementalPipeline:
         pipeline = create_incremental_pipeline("default")
         stage_names = [s.name() for s in pipeline.stages]
         assert "incremental_coding" in stage_names
+        assert "negative_case_analysis" in stage_names
+        assert "cross_interview" in stage_names
+        # Ctx-dependent stages are excluded from incremental pipeline
         assert "thematic_coding" not in stage_names
+        assert "perspective" not in stage_names
         assert "ingest" not in stage_names
 
     def test_creates_gt_pipeline(self):
         pipeline = create_incremental_pipeline("grounded_theory")
         stage_names = [s.name() for s in pipeline.stages]
         assert "incremental_coding" in stage_names
+        assert "negative_case_analysis" in stage_names
+        assert "cross_interview" in stage_names
+        # Ctx-dependent stages are excluded from incremental pipeline
         assert "gt_open_coding" not in stage_names
-        assert "gt_axial_coding" in stage_names
+        assert "gt_axial_coding" not in stage_names
 
 
 # ---------------------------------------------------------------------------

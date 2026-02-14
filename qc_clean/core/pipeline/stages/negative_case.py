@@ -24,7 +24,7 @@ class NegativeCase(BaseModel):
     code_name: str = Field(description="The code/category being challenged")
     disconfirming_evidence: str = Field(description="Quote or data that contradicts this code")
     explanation: str = Field(description="Why this evidence challenges the code")
-    implication: str = Field(description="What this means for the analysis")
+    implication: str = Field(default="", description="What this means for the analysis")
 
 
 class NegativeCaseResponse(BaseModel):

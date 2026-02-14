@@ -83,34 +83,18 @@ def create_incremental_pipeline(
     codebook as context, then re-runs downstream stages.
     """
     from .stages.incremental_coding import IncrementalCodingStage
-    from .stages.perspective import PerspectiveStage
-    from .stages.relationship import RelationshipStage
-    from .stages.synthesis import SynthesisStage
     from .stages.cross_interview import CrossInterviewStage
     from .stages.negative_case import NegativeCaseStage
 
-    if methodology == Methodology.GROUNDED_THEORY.value or methodology == "grounded_theory":
-        from .stages.gt_axial_coding import GTAxialCodingStage
-        from .stages.gt_selective_coding import GTSelectiveCodingStage
-        from .stages.gt_theory_integration import GTTheoryIntegrationStage
-
-        stages = [
-            IncrementalCodingStage(),
-            GTAxialCodingStage(),
-            GTSelectiveCodingStage(),
-            GTTheoryIntegrationStage(),
-            NegativeCaseStage(),
-            CrossInterviewStage(),
-        ]
-    else:
-        stages = [
-            IncrementalCodingStage(),
-            PerspectiveStage(),
-            RelationshipStage(),
-            SynthesisStage(),
-            NegativeCaseStage(),
-            CrossInterviewStage(),
-        ]
+    # Incremental pipeline only includes stages that work from state data.
+    # Perspective/Relationship/Synthesis (default) and Axial/Selective/Theory
+    # (GT) depend on ctx fields populated by their respective coding stages,
+    # which are not re-run during incremental coding.
+    stages = [
+        IncrementalCodingStage(),
+        NegativeCaseStage(),
+        CrossInterviewStage(),
+    ]
 
     logger.info(
         "Created incremental %s pipeline with %d stages",

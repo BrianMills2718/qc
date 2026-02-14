@@ -67,7 +67,7 @@ start_server.py                              # Server startup script
 - `qc_clean/core/llm/llm_handler.py` - LLM handler with `extract_structured()` method
 - `qc_clean/core/export/data_exporter.py` - ProjectExporter (JSON/CSV/Markdown/QDPX from ProjectState)
 - `qc_cli.py` - CLI interface (analyze, project, review, status, server)
-- `tests/` - 461 passing tests (21 test files)
+- `tests/` - 461 unit tests + 6 E2E tests (22 test files)
 
 ### How It Works
 - `project run` runs the pipeline locally (no server needed); `analyze` uses the API server
@@ -85,7 +85,7 @@ start_server.py                              # Server startup script
 - GT constant comparison: segments documents by speaker turns or paragraph chunks, iteratively codes each segment against an evolving codebook, stops when saturation reached
 - Incremental coding: `project recode` codes only uncoded documents against the existing codebook, then re-runs downstream stages
 - Graph visualization: `/graph/{project_id}` serves interactive Cytoscape.js graphs (code hierarchy, relationships, entity map)
-- Fail-loud: downstream stages raise `RuntimeError` if upstream config keys are missing (no silent empty-data fallbacks). Review raises `ValueError` on unknown target types.
+- Fail-loud: downstream stages raise `RuntimeError` via `ctx.require()` if upstream data is missing (no silent empty-data fallbacks). Review raises `ValueError` on unknown target types.
 - Observability: LLMHandler logs model/schema/prompt_len/duration/tokens on every call. All stages log entry context (doc/code counts, model). Pipeline engine logs state context on failure.
 
 ## Working Commands
@@ -205,26 +205,36 @@ Commercial tools treat AI as a **feature bolted onto manual coding**. We treat A
 - **Local model support** (documented): QualCoder supports Ollama; our LiteLLM can route to local models but this isn't documented
 - **RAG/vector search**: QualCoder uses FAISS + embeddings for semantic search across corpus
 
-## E2E Validation (completed 2026-02-12)
+## E2E Validation (updated 2026-02-13)
 
-Pipeline validated end-to-end against real interview transcripts using gpt-5-mini:
+Pipeline validated end-to-end against real interview transcripts using gpt-5-mini. Automated E2E tests in `tests/test_e2e.py` (requires `OPENAI_API_KEY`):
 
-- **Default methodology, 1 document**: 12 codes, 29 applications, 8 speakers detected (focus group), perspective/relationship/synthesis all working
-- **Default methodology, 3 documents**: 12 codes, 36 properly-attributed applications, cross-interview analysis with 6 shared/6 consensus/6 divergent themes
-- **Grounded theory, 1 document**: 25 open codes, 14 axial relationships, 3 core categories, theoretical model generated
+- **Default methodology, 1 document**: 14 codes, 17 applications, 2 speakers detected, 7 memos, negative case analysis
+- **Default methodology, 2 documents**: 14 codes, 30 applications across 2 docs, cross-interview analysis with consensus/divergent themes
+- **Grounded theory, 1 document**: 8 open codes, 40 applications, 3 core categories, theoretical model generated, 6 memos
+- **Incremental coding**: Initial pipeline (12 codes, 19 apps) + add doc + recode = 17 codes, 32 apps, iteration 2
+- **Graph data**: 13 code nodes, 25 entity nodes, 12 entity relationships from completed state
+- **Export**: JSON, Markdown, CSV all produce valid output from real pipeline results
+
+Previous manual E2E (2026-02-12):
+- Default 1-doc: 12 codes, 29 applications, 8 speakers (focus group)
+- Default 3-doc: 12 codes, 36 properly-attributed applications, cross-interview analysis
+- GT 1-doc: 25 open codes, 14 axial relationships, 3 core categories, theoretical model
 
 Bugs found and fixed during E2E testing:
 - Speaker detection: added timestamp format ("Name   0:03") alongside colon format; runs on pre-loaded docs
 - Quote attribution: replaced blind duplication with substring matching to correctly attribute quotes to source documents
 - Perspective stage: uses detected speaker count (not document count) to determine single vs multi-speaker mode
 - Export hierarchy: case-insensitive parent_id matching + recursive tree rendering for arbitrary depth
+- NegativeCase.implication: made optional (LLM sometimes omits it, causing validation failure)
+- Incremental pipeline: removed ctx-dependent stages (Perspective/Relationship/Synthesis) that require data from ThematicCodingStage
 
 ## Known Technical Debt
 
 1. **Schema duplication**: `analysis_schemas.py` / `gt_schemas.py` (LLM output shapes) and `domain.py` (internal model) overlap; this is intentional -- adapters bridge them
 2. ~~**Untyped config dict**~~ **Resolved**: Pipeline stages now use `PipelineContext` Pydantic model (`extra="forbid"` catches typos at construction). `ctx.require()` validates upstream data.
 3. ~~**Untyped return dicts**~~ **Resolved**: `calculate_codebook_change()`, `check_saturation()`, `analyze_cross_interview_patterns()`, `get_review_summary()`, `suggest_next_documents()` all return typed Pydantic models.
-4. **Test gaps**: All pipeline stages have mocked-LLM unit tests + fail-loud tests. CLI utilities (file_handler, formatters, progress) have 57 tests. No E2E tests with real LLM calls.
+4. ~~**No E2E tests**~~ **Resolved**: 6 E2E tests with real LLM calls in `tests/test_e2e.py` (auto-skipped without `OPENAI_API_KEY`).
 
 ## Academic Standards Gap Analysis (assessed 2026-02-12)
 
@@ -285,7 +295,7 @@ Evaluated against Strauss & Corbin GT, Charmaz constructivist GT, COREQ/SRQR rep
 - ~~**Incremental coding**~~ — `project recode` codes new documents against existing codebook, merges results, re-runs downstream stages
 - ~~**Graph visualization**~~ — `/graph/{project_id}` interactive Cytoscape.js graphs (code hierarchy, relationships, entity map) with search, PNG export
 - ~~**Constant comparison**~~ — `GTConstantComparisonStage` replaces batch open coding: segment-by-segment iterative coding with saturation detection
-- ~~**Fail-loud enforcement**~~ — `require_config()` for config dependencies, `ValueError` on bad review decisions, no silent fallbacks
+- ~~**Fail-loud enforcement**~~ — `PipelineContext.require()` for inter-stage data dependencies, `ValueError` on bad review decisions, no silent fallbacks
 - ~~**Observability**~~ — LLM call instrumentation (model/schema/duration/tokens), stage entry context logging, failure state logging
 
 ### Short-term — Code Quality
