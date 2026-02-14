@@ -231,7 +231,7 @@ Bugs found and fixed during E2E testing:
 
 ## Design Lessons (from E2E testing)
 
-1. **LLMs don't reliably fill every schema field.** Even with JSON mode, gpt-5-mini sometimes omits fields. All LLM-facing Pydantic schema fields should have defaults unless you truly want the pipeline to crash on omission. Currently fixed: `NegativeCase.implication`. Still vulnerable: several fields in `TheoreticalModel`, `OpenCode`, `AxialRelationship` — see schema robustness audit below.
+1. **LLMs don't reliably fill every schema field.** Even with JSON mode, gpt-5-mini sometimes omits fields. All LLM-facing Pydantic schema fields should have defaults unless you truly want the pipeline to crash on omission. Fixed: all 30 `List` fields and 2 `Dict` fields across `analysis_schemas.py`, `gt_schemas.py`, and `negative_case.py` now have `default_factory`.
 
 2. **Unit tests with mocks don't catch integration bugs.** 461 unit tests passed, but two real bugs hid in the seams between stages: (a) `NegativeCase.implication` required but LLM omits it, (b) incremental pipeline included stages that depend on data from a stage that doesn't run. Only E2E with real LLM calls found these.
 
@@ -239,17 +239,12 @@ Bugs found and fixed during E2E testing:
 
 4. **LLM output is non-deterministic.** Same input produces 8-14 codes across runs. E2E assertions must be loose (`>= 3` not `== 12`). This is inherent to LLM-powered systems.
 
-5. **Schema robustness priority list** (fields that could fail if LLM omits them):
-   - `TheoreticalModel.core_categories` — empty list crashes the `.core_category` property accessor
-   - `OpenCode.supporting_quotes` — used for code application matching
-   - `AxialRelationship.conditions/consequences` — required lists with no defaults
-   - `EntityRelationship.supporting_evidence` — required list with no default
+5. **Schema robustness** — all LLM-facing `List`/`Dict` fields now default to empty. The `TheoreticalModel.core_category` property accessor returns `""` for empty list instead of crashing.
 
 ## Known Technical Debt
 
 1. **Schema duplication**: `analysis_schemas.py` / `gt_schemas.py` (LLM output shapes) and `domain.py` (internal model) overlap; this is intentional — adapters bridge them
-2. **LLM schema fragility**: Several LLM-facing schemas have required fields with no defaults. The LLM can omit these, causing `ValidationError`. See "Design Lessons" above for the priority list.
-3. **`methodology_config.py`**: Only imported by tests now (not production code); could be removed if tests are refactored
+2. **`methodology_config.py`**: Only imported by tests now (not production code); could be removed if tests are refactored
 
 ## Academic Standards Gap Analysis (assessed 2026-02-12)
 
@@ -319,7 +314,7 @@ Evaluated against Strauss & Corbin GT, Charmaz constructivist GT, COREQ/SRQR rep
 - ~~**CLI utility tests**~~ — 57 tests for file_handler, formatters (json/table/human), progress utilities
 - ~~**E2E validation**~~ — 6 E2E tests with real LLM calls: default/GT/incremental pipelines, graph data, export. Caught 2 bugs unit tests missed.
 - ~~**LLM handler migration**~~ — `LLMHandler` rewritten as thin adapter over shared `llm_client` library (369→112 lines). Retry, backoff, schema-in-prompt, API key inference, GPT-5 temperature handling all moved to `llm_client` v0.3.0. Zero caller changes.
-- **LLM schema robustness audit**: Several LLM-facing schemas have required fields the LLM may omit (see Design Lessons below). Add defaults to remaining vulnerable fields.
+- ~~**LLM schema robustness audit**~~ — All 30 `List` fields and 2 `Dict` fields across LLM-facing schemas (`analysis_schemas.py`, `gt_schemas.py`, `negative_case.py`) now have `default_factory=list`/`default_factory=dict`. LLM omitting any field no longer causes `ValidationError`.
 
 ### Future — GT Fidelity (Tier 3)
 - **True theoretical sampling** (Moderate): Identify under-developed categories, suggest specific data sources to develop them

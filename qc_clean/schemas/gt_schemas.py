@@ -15,9 +15,9 @@ class OpenCode(BaseModel):
     """A concept identified during open coding with hierarchical structure support."""
     code_name: str = Field(description="Name of the open code")
     description: str = Field(description="Description of what this code represents")
-    properties: List[str] = Field(description="Properties of this concept")
-    dimensions: List[str] = Field(description="Dimensional variations")
-    supporting_quotes: List[str] = Field(description="Quotes that support this code")
+    properties: List[str] = Field(default_factory=list, description="Properties of this concept")
+    dimensions: List[str] = Field(default_factory=list, description="Dimensional variations")
+    supporting_quotes: List[str] = Field(default_factory=list, description="Quotes that support this code")
     frequency: int = Field(description="Number of occurrences")
     confidence: float = Field(description="Confidence in this code 0-1")
     reasoning: str = Field(
@@ -51,9 +51,9 @@ class AxialRelationship(BaseModel):
     central_category: str = Field(description="The central category")
     related_category: str = Field(description="Related category")
     relationship_type: str = Field(description="Type of relationship (causal, contextual, intervening, etc.)")
-    conditions: List[str] = Field(description="Conditions that influence this relationship")
-    consequences: List[str] = Field(description="Consequences of this relationship")
-    supporting_evidence: List[str] = Field(description="Evidence supporting this relationship")
+    conditions: List[str] = Field(default_factory=list, description="Conditions that influence this relationship")
+    consequences: List[str] = Field(default_factory=list, description="Consequences of this relationship")
+    supporting_evidence: List[str] = Field(default_factory=list, description="Evidence supporting this relationship")
     strength: float = Field(description="Strength of relationship 0-1")
 
 
@@ -62,8 +62,8 @@ class CoreCategory(BaseModel):
     category_name: str = Field(description="Name of the core category")
     definition: str = Field(description="Clear definition of the core category")
     central_phenomenon: str = Field(description="The central phenomenon this category explains")
-    related_categories: List[str] = Field(description="Categories that relate to this core category")
-    theoretical_properties: List[str] = Field(description="Theoretical properties")
+    related_categories: List[str] = Field(default_factory=list, description="Categories that relate to this core category")
+    theoretical_properties: List[str] = Field(default_factory=list, description="Theoretical properties")
     explanatory_power: str = Field(description="How this category explains the phenomenon")
     integration_rationale: str = Field(description="Why this is the core category")
 
@@ -71,13 +71,13 @@ class CoreCategory(BaseModel):
 class TheoreticalModel(BaseModel):
     """The final theoretical model from grounded theory analysis."""
     model_name: str = Field(description="Name of the theoretical model")
-    core_categories: List[str] = Field(description="The core categories that explain the phenomenon")
+    core_categories: List[str] = Field(default_factory=list, description="The core categories that explain the phenomenon")
     theoretical_framework: str = Field(description="The theoretical framework developed")
-    propositions: List[str] = Field(description="Theoretical propositions")
-    conceptual_relationships: List[str] = Field(description="Key conceptual relationships")
-    scope_conditions: List[str] = Field(description="Conditions under which theory applies")
-    implications: List[str] = Field(description="Implications of the theory")
-    future_research: List[str] = Field(description="Suggested future research directions")
+    propositions: List[str] = Field(default_factory=list, description="Theoretical propositions")
+    conceptual_relationships: List[str] = Field(default_factory=list, description="Key conceptual relationships")
+    scope_conditions: List[str] = Field(default_factory=list, description="Conditions under which theory applies")
+    implications: List[str] = Field(default_factory=list, description="Implications of the theory")
+    future_research: List[str] = Field(default_factory=list, description="Suggested future research directions")
     analytical_memo: str = Field(
         default="",
         description="Analytical memo: record your reasoning, uncertainties, and emerging patterns",

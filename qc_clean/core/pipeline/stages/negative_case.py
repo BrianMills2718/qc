@@ -30,7 +30,8 @@ class NegativeCase(BaseModel):
 class NegativeCaseResponse(BaseModel):
     """LLM response for negative case analysis."""
     negative_cases: List[NegativeCase] = Field(
-        description="Cases that contradict or don't fit the emerging categories"
+        default_factory=list,
+        description="Cases that contradict or don't fit the emerging categories",
     )
     overall_assessment: str = Field(
         description="Overall assessment of how well the codebook fits the data"
