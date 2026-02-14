@@ -302,7 +302,7 @@ DIMENSIONS = [
 # ---------------------------------------------------------------------------
 
 CODING_MODEL = "gpt-5-mini"
-JUDGE_MODEL = "gemini/gemini-2.0-flash"
+JUDGE_MODEL = "gpt-4o"
 
 
 def build_experiment() -> Experiment:
