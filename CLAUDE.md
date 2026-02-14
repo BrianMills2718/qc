@@ -38,7 +38,7 @@ qc_cli.py                                    # CLI entry point
            -> gt_axial_coding.py             # GT: Axial coding (relationships)
            -> gt_selective_coding.py         # GT: Core category identification
            -> gt_theory_integration.py       # GT: Theoretical model building
-     -> qc_clean/core/llm/llm_handler.py    # LiteLLM with extract_structured()
+     -> qc_clean/core/llm/llm_handler.py    # Thin adapter over llm_client for structured extraction
      -> qc_clean/schemas/                    # Pydantic schemas
         -> domain.py                         # Unified domain model (ProjectState, Code, Codebook, etc.)
         -> analysis_schemas.py               # LLM output schemas (CodeHierarchy, SpeakerAnalysis, etc.)
@@ -64,10 +64,10 @@ start_server.py                              # Server startup script
 - `qc_clean/plugins/api/graph_ui.py` - Interactive graph visualization with Cytoscape.js (string.Template)
 - `qc_clean/core/pipeline/stages/gt_constant_comparison.py` - Iterative segment-by-segment GT coding with saturation detection
 - `qc_clean/core/pipeline/stages/incremental_coding.py` - Code new documents against existing codebook
-- `qc_clean/core/llm/llm_handler.py` - LLM handler with `extract_structured()` method
+- `qc_clean/core/llm/llm_handler.py` - Thin adapter over `llm_client.acall_llm_structured` (QC config wiring, LLMError wrapping, system prompt)
 - `qc_clean/core/export/data_exporter.py` - ProjectExporter (JSON/CSV/Markdown/QDPX from ProjectState)
 - `qc_cli.py` - CLI interface (analyze, project, review, status, server)
-- `tests/` - 461 unit tests + 6 E2E tests (22 test files)
+- `tests/` - 439 unit tests + 6 E2E tests (21 test files)
 
 ### How It Works
 - `project run` runs the pipeline locally (no server needed); `analyze` uses the API server
@@ -79,7 +79,7 @@ start_server.py                              # Server startup script
 - `ProjectStore` saves/loads entire ProjectState as JSON (no database needed)
 - Cross-interview analysis runs automatically for multi-document corpora
 - Saturation detection compares codebooks across iterations
-- Default model: gpt-5-mini via OpenAI API (note: gpt-5 models don't support temperature param)
+- Default model: gpt-5-mini via OpenAI API. LLMHandler is a thin adapter over shared `llm_client` library (retry, backoff, instructor-based structured extraction, GPT-5 temperature stripping)
 - `analysis_schemas.py` defines LLM output shapes; `adapters.py` converts them to domain objects
 - Every stage produces an analytical memo (LLM reasoning trail) saved to `state.memos`
 - GT constant comparison: segments documents by speaker turns or paragraph chunks, iteratively codes each segment against an evolving codebook, stops when saturation reached
@@ -318,6 +318,7 @@ Evaluated against Strauss & Corbin GT, Charmaz constructivist GT, COREQ/SRQR rep
 - ~~**Typed return values**~~ — `CodebookChangeResult`, `SaturationCheckResult`, `CrossInterviewResult`, `ReviewSummary`, `SamplingSuggestion` replace plain dicts
 - ~~**CLI utility tests**~~ — 57 tests for file_handler, formatters (json/table/human), progress utilities
 - ~~**E2E validation**~~ — 6 E2E tests with real LLM calls: default/GT/incremental pipelines, graph data, export. Caught 2 bugs unit tests missed.
+- ~~**LLM handler migration**~~ — `LLMHandler` rewritten as thin adapter over shared `llm_client` library (369→112 lines). Retry, backoff, schema-in-prompt, API key inference, GPT-5 temperature handling all moved to `llm_client` v0.3.0. Zero caller changes.
 - **LLM schema robustness audit**: Several LLM-facing schemas have required fields the LLM may omit (see Design Lessons below). Add defaults to remaining vulnerable fields.
 
 ### Future — GT Fidelity (Tier 3)

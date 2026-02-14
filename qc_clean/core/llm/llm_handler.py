@@ -1,368 +1,112 @@
-"""
-LLM Handler for Code-First Extraction
-Uses LiteLLM with real structured output for gemini-2.5-flash
-"""
+"""LLM Handler — thin adapter over llm_client for QC-specific concerns."""
 
-import json
 import logging
-import os
-import asyncio
-import random
-import time
 from typing import Optional, Type
+
 from pydantic import BaseModel
-import litellm
-from dotenv import load_dotenv
+
+from llm_client import acall_llm_structured
 from qc_clean.core.utils.error_handler import LLMError
 
 logger = logging.getLogger(__name__)
 
-# Load environment variables
-load_dotenv()
-
-# Configure LiteLLM
-litellm.set_verbose = False  # Set to True for debugging
-
 
 class LLMHandler:
+    """Thin adapter over llm_client.acall_llm_structured.
+
+    Handles QC-specific concerns:
+    - UnifiedConfig / GroundedTheoryConfig → model/temperature extraction
+    - LLMError wrapping (QC error type)
+    - System prompt for structured extraction
+    - QC-specific logging format
     """
-    Handler for LLM operations with structured extraction support.
-    Does NOT set max_tokens by default - uses full context window.
-    """
-    
-    def __init__(self,
-                 model_name: str = "gpt-5-mini",
-                 temperature: float = 1.0,
-                 config = None,  # Can be UnifiedConfig or GroundedTheoryConfig
-                 max_retries: int = 4,
-                 base_delay: float = 1.0):
-        """
-        Initialize LLM handler with LiteLLM and retry logic
-        
-        Args:
-            model_name: Model to use (default: gpt-4o-mini)
-            temperature: Temperature for generation (default: 0.1 for consistency)
-            config: Configuration object for LLM parameters (UnifiedConfig or GroundedTheoryConfig)
-            max_retries: Maximum number of retry attempts (default: 4)
-            base_delay: Base delay for exponential backoff (default: 1.0 seconds)
-        """
-        
-        # Apply configuration if provided
+
+    def __init__(
+        self,
+        model_name: str = "gpt-5-mini",
+        temperature: float = 1.0,
+        config=None,
+        max_retries: int = 4,
+        base_delay: float = 1.0,
+    ):
         if config:
             self.model_name = config.model_preference
             self.temperature = config.temperature
-            self.default_max_tokens = getattr(config, 'max_tokens', None)
-            
-            # Get API key based on config type
-            if hasattr(config, 'api_key') and config.api_key:
-                # New UnifiedConfig has api_key field
-                self.api_key = config.api_key
-            else:
-                # Fall back to environment-specific key based on provider
-                api_provider = getattr(config, 'api_provider', 'google')
-                if api_provider == 'openai':
-                    self.api_key = os.getenv("OPENAI_API_KEY")
-                elif api_provider == 'anthropic':
-                    self.api_key = os.getenv("ANTHROPIC_API_KEY")
-                else:  # google/gemini default
-                    self.api_key = os.getenv("GEMINI_API_KEY")
-            
-            # Check if config has retry settings
-            if hasattr(config, 'max_llm_retries'):
-                self.max_retries = config.max_llm_retries
-                self.base_delay = getattr(config, 'base_retry_delay', base_delay)
-            else:
-                self.max_retries = max_retries
-                self.base_delay = base_delay
-            
-            logger.info(f"LLM Handler initialized from config: {config.model_preference}, temp={config.temperature}, retries={self.max_retries}")
+            self.max_retries = getattr(config, "max_llm_retries", max_retries)
+            self.base_delay = getattr(config, "base_retry_delay", base_delay)
         else:
-            # Use model name as-is - let LiteLLM handle provider-specific formatting
             self.model_name = model_name
             self.temperature = temperature
-            self.default_max_tokens = None
             self.max_retries = max_retries
             self.base_delay = base_delay
-            
-            # Infer API key from model name
-            self.api_key = self._infer_api_key(self.model_name)
+        self.default_max_tokens = getattr(config, "max_tokens", None) if config else None
 
-            logger.info(f"LLM Handler initialized with defaults: {self.model_name}, temp={temperature}, retries={max_retries}")
-
-        # Validate API key is available
-        if not self.api_key:
-            raise ValueError(
-                f"No API key found for model '{self.model_name}'. "
-                f"Set OPENAI_API_KEY, ANTHROPIC_API_KEY, or GEMINI_API_KEY."
-            )
-        
-        # Store config for access to other parameters
-        self.config = config
-        
-        self.logger = logging.getLogger(__name__)
-    
-    @staticmethod
-    def _infer_api_key(model_name: str) -> Optional[str]:
-        """Infer the correct API key from model name prefix.
-
-        Handles both bare names (``gpt-5-mini``) and LiteLLM
-        provider-prefixed names (``anthropic/claude-3-opus``).
-        """
-        name = model_name.lower()
-        if name.startswith("gpt-") or name.startswith("o1") or name.startswith("o3") or name.startswith("openai/"):
-            return os.getenv("OPENAI_API_KEY")
-        if "claude" in name or name.startswith("anthropic/"):
-            return os.getenv("ANTHROPIC_API_KEY")
-        if "gemini" in name or name.startswith("vertex_ai/"):
-            return os.getenv("GEMINI_API_KEY")
-        # Fallback: try each provider in order
-        return (
-            os.getenv("OPENAI_API_KEY")
-            or os.getenv("ANTHROPIC_API_KEY")
-            or os.getenv("GEMINI_API_KEY")
-        )
-
-    def _calculate_backoff_delay(self, attempt: int) -> float:
-        """Calculate exponential backoff delay with jitter"""
-        delay = self.base_delay * (2 ** attempt)
-        # Add jitter: 50% to 150% of calculated delay
-        jitter = random.uniform(0.5, 1.5)
-        return min(delay * jitter, 30.0)  # Cap at 30 seconds
-    
-    def _is_retryable_error(self, error: Exception) -> bool:
-        """Determine if error is worth retrying"""
-        error_str = str(error).lower()
-        retryable_patterns = [
-            "http 500",
-            "internal server error", 
-            "service unavailable",
-            "timeout",
-            "connection reset",
-            "temporary failure",
-            "rate limit",
-            "overloaded",
-            "empty content",  # Server overload can cause empty responses
-            "no content",
-            "connection error",
-            "network error",
-            "no json found",  # Server overload can cause malformed JSON responses
-            "json parse error",
-            "invalid json",
-            "unterminated string",
-            "malformed json",
-            "expecting",  # JSON syntax errors like "Expecting ',' delimiter"
-            "delimiter"
-        ]
-        return any(pattern in error_str for pattern in retryable_patterns)
-    
-    async def _retry_with_backoff(self, operation, operation_name: str, *args, **kwargs):
-        """Retry with exponential backoff"""
-        last_error = None
-
-        for attempt in range(self.max_retries + 1):
-            try:
-                result = await operation(*args, **kwargs)
-                if attempt > 0:
-                    self.logger.info(f"{operation_name} succeeded after {attempt} retries")
-                return result
-
-            except Exception as e:
-                last_error = e
-                self.logger.warning(f"{operation_name} attempt {attempt + 1} failed: {e}")
-
-                if not self._is_retryable_error(e):
-                    raise
-
-                if attempt < self.max_retries:
-                    delay = self._calculate_backoff_delay(attempt)
-                    self.logger.info(f"Retrying {operation_name} in {delay:.1f}s...")
-                    await asyncio.sleep(delay)
-
-        raise Exception(f"{operation_name} failed after {self.max_retries + 1} attempts: {last_error}") from last_error
-    
     async def extract_structured(
         self,
         prompt: str,
         schema: Type[BaseModel],
         instructions: Optional[str] = None,
-        max_tokens: Optional[int] = None  # None by default - use full context
+        max_tokens: Optional[int] = None,
     ) -> BaseModel:
-        """
-        Extract structured data from text using LLM with retry logic
-        
+        """Extract structured data from text using LLM.
+
         Args:
             prompt: The prompt/text to process
-            schema: Pydantic model class for the expected output structure
+            schema: Pydantic model class for the expected output
             instructions: Additional instructions for extraction
             max_tokens: Maximum tokens (None = use maximum available)
-        
+
         Returns:
-            Instance of the schema model with extracted data
+            Validated instance of the schema model
         """
-        
-        async def _extract_operation():
-            # Build the full prompt
-            full_prompt = self._build_extraction_prompt(prompt, schema, instructions)
+        user_content = prompt
+        if instructions:
+            user_content += f"\n\nADDITIONAL INSTRUCTIONS:\n{instructions}"
 
-            logger.info(
-                "LLM call: model=%s, schema=%s, prompt_len=%d",
-                self.model_name, schema.__name__, len(full_prompt),
-            )
+        messages = [
+            {
+                "role": "system",
+                "content": (
+                    "You are an expert at extracting structured information from text. "
+                    "Return your response as valid JSON that matches the provided schema."
+                ),
+            },
+            {"role": "user", "content": user_content},
+        ]
 
-            # Prepare messages for LLM
-            messages = [
-                {
-                    "role": "system",
-                    "content": "You are an expert at extracting structured information from text. "
-                              "Return your response as valid JSON that matches the provided schema."
-                },
-                {
-                    "role": "user",
-                    "content": full_prompt
-                }
-            ]
+        kwargs = {"temperature": self.temperature}
+        effective_max_tokens = max_tokens or self.default_max_tokens
+        if effective_max_tokens:
+            kwargs["max_tokens"] = effective_max_tokens
 
-            # Build kwargs for LiteLLM with JSON mode
-            kwargs = {
-                "model": self.model_name,
-                "messages": messages,
-                "response_format": {"type": "json_object"},
-            }
-
-            # GPT-5 models don't support the temperature parameter
-            if not self.model_name.startswith("gpt-5"):
-                kwargs["temperature"] = self.temperature
-
-            # Only add max_tokens if explicitly provided or configured
-            if max_tokens is not None:
-                kwargs["max_tokens"] = max_tokens
-            elif self.default_max_tokens is not None:
-                kwargs["max_tokens"] = self.default_max_tokens
-
-            # Call LiteLLM with JSON mode (async)
-            call_start = time.monotonic()
-            response = await litellm.acompletion(**kwargs)
-            call_duration = time.monotonic() - call_start
-
-            if not response or not response.choices:
-                raise Exception("Empty structured response from LLM API")
-
-            response_content = response.choices[0].message.content
-            if not response_content:
-                raise Exception("Empty content in structured LLM response")
-
-            # Log response metadata
-            usage = getattr(response, "usage", None)
-            tokens_info = ""
-            if usage:
-                tokens_info = (
-                    f", prompt_tokens={usage.prompt_tokens}"
-                    f", completion_tokens={usage.completion_tokens}"
-                )
-            logger.info(
-                "LLM response: model=%s, schema=%s, duration=%.1fs%s",
-                self.model_name, schema.__name__, call_duration, tokens_info,
-            )
-
-            # Parse JSON response
-            if isinstance(response_content, dict):
-                response_data = response_content
-            elif isinstance(response_content, str):
-                response_data = json.loads(response_content)
-            else:
-                raise ValueError(f"Unexpected response content type: {type(response_content)}")
-
-            # Create and validate model instance
-            model_instance = schema(**response_data)
-            return model_instance
-        
+        logger.info(
+            "LLM call: model=%s, schema=%s, prompt_len=%d",
+            self.model_name,
+            schema.__name__,
+            len(prompt),
+        )
         try:
-            return await self._retry_with_backoff(
-                _extract_operation,
-                f"extract_structured[{schema.__name__}]"
+            result, meta = await acall_llm_structured(
+                self.model_name,
+                messages,
+                response_model=schema,
+                num_retries=self.max_retries,
+                base_delay=self.base_delay,
+                **kwargs,
             )
+            logger.info(
+                "LLM response: model=%s, schema=%s, cost=$%.6f, tokens=%s",
+                self.model_name,
+                schema.__name__,
+                meta.cost,
+                meta.usage,
+            )
+            return result
         except Exception as e:
             logger.error(
-                "Structured extraction failed: model=%s, schema=%s, prompt_len=%d, error=%s",
-                self.model_name, schema.__name__, len(prompt), e,
+                "Structured extraction failed: model=%s, schema=%s, error=%s",
+                self.model_name,
+                schema.__name__,
+                e,
             )
             raise LLMError(f"Failed to extract {schema.__name__}: {e}") from e
-    
-    def _build_extraction_prompt(
-        self,
-        prompt: str,
-        schema: Type[BaseModel],
-        instructions: Optional[str] = None
-    ) -> str:
-        """Build the extraction prompt with schema information"""
-        
-        # Get schema fields and descriptions
-        schema_info = self._format_schema_for_prompt(schema)
-        
-        prompt_parts = [
-            f"Extract the following structured information:\n",
-            f"\nSCHEMA:\n{schema_info}\n"
-        ]
-        
-        if instructions:
-            prompt_parts.append(f"\nADDITIONAL INSTRUCTIONS:\n{instructions}\n")
-        
-        prompt_parts.append(f"\nTEXT TO ANALYZE:\n{prompt}\n")
-        prompt_parts.append(
-            f"\nReturn a JSON object that matches the schema exactly. "
-            f"Include all required fields and use the correct data types."
-        )
-        
-        return "\n".join(prompt_parts)
-    
-    def _format_schema_for_prompt(self, schema: Type[BaseModel]) -> str:
-        """Format Pydantic schema for inclusion in prompt with full nested structure"""
-        lines = [f"Output Type: {schema.__name__}"]
-        lines.append("Required Fields:")
-        
-        # Get full schema with definitions
-        schema_dict = schema.model_json_schema()
-        properties = schema_dict.get("properties", {})
-        required_fields = schema_dict.get("required", [])
-        definitions = schema_dict.get("$defs", {})
-        
-        for field_name, field_info in properties.items():
-            field_type = field_info.get("type", "any")
-            description = field_info.get("description", "")
-            is_required = field_name in required_fields
-            
-            # Handle array types with nested objects
-            if field_info.get("type") == "array" and "items" in field_info:
-                items_info = field_info["items"]
-                if "$ref" in items_info:
-                    # Extract the reference name and get nested structure
-                    ref_name = items_info["$ref"].split("/")[-1]
-                    if ref_name in definitions:
-                        nested_def = definitions[ref_name]
-                        field_type = f"array of {ref_name} objects"
-                        # Add nested structure details
-                        lines.append(f"  - {field_name} ({field_type}) [{('REQUIRED' if is_required else 'OPTIONAL')}]: {description}")
-                        lines.append(f"    Each {ref_name} object contains:")
-                        nested_props = nested_def.get("properties", {})
-                        nested_required = nested_def.get("required", [])
-                        for nested_field, nested_info in nested_props.items():
-                            nested_type = nested_info.get("type", "any")
-                            nested_desc = nested_info.get("description", "")
-                            nested_req = "REQUIRED" if nested_field in nested_required else "OPTIONAL"
-                            lines.append(f"      - {nested_field} ({nested_type}) [{nested_req}]: {nested_desc}")
-                        continue
-                    else:
-                        field_type = f"array of {ref_name}"
-                else:
-                    field_type = f"array of {items_info.get('type', 'items')}"
-            elif "$ref" in field_info:
-                # Reference to another model
-                ref_name = field_info["$ref"].split("/")[-1]
-                field_type = f"object ({ref_name})"
-            
-            requirement = "REQUIRED" if is_required else "OPTIONAL"
-            lines.append(f"  - {field_name} ({field_type}) [{requirement}]: {description}")
-        
-        return "\n".join(lines)
-    
-    
