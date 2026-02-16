@@ -1,7 +1,7 @@
 {
   "mcpServers": {
     "qualitative-coding": {
-      "command": "/home/brian/projects/qualitative_coding/qc_env/bin/python",
+      "command": "/home/brian/projects/qualitative_coding/.venv/bin/python",
       "args": ["/home/brian/projects/qualitative_coding/qc_mcp_server.py"],
       "cwd": "/home/brian/projects/qualitative_coding"
     }

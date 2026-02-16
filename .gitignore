@@ -25,6 +25,7 @@ data/databases/
 *.sqlite3
 
 # Virtual environment
+.venv/
 qc_env/
 
 # Cache and temporary files

@@ -28,7 +28,7 @@ def run_cli_command(command_args):
         # Activate virtual environment and run command
         cmd = [
             '/bin/bash', '-c', 
-            'source qc_env/bin/activate && python3 qc_cli.py ' + ' '.join(command_args)
+            'source .venv/bin/activate && python3 qc_cli.py ' + ' '.join(command_args)
         ]
         
         result = subprocess.run(
