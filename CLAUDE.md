@@ -1,6 +1,6 @@
 # Qualitative Coding Analysis System (v2.2)
 
-*Last Updated: 2026-04-04*
+*Last Updated: 2026-04-05*
 
 ## What This Project Does
 
@@ -11,7 +11,7 @@ LLM-powered qualitative coding analysis for interview transcripts. Accepts .txt,
 
 All stages use structured LLM output via Pydantic schemas + JSON mode. State is held in a single `ProjectState` Pydantic model that can be saved/loaded as JSON.
 
-## Current State (2026-04-04)
+## Current State (2026-04-05)
 
 The v2.2 feature set is implemented and validated. The project currently supports:
 
@@ -307,22 +307,26 @@ Evaluated against Strauss & Corbin GT, Charmaz constructivist GT, COREQ/SRQR rep
 - Negative case analysis: automated search for disconfirming evidence after coding (Lincoln & Guba credibility)
 - Multi-run stability analysis: run identical coding N times, per-code stability scores, stable/moderate/unstable classification
 
-### Critical Gaps (Tier 2 — Expected by Reviewers)
+### Completed (Tier 2 — Expected by Reviewers) ✓
 
-| Gap | Severity | Description |
-|-----|----------|-------------|
-| **Inter-rater reliability** | ~~High~~ **Done** | Implemented: multi-pass coding with prompt variation, Cohen's/Fleiss' kappa, Landis & Koch interpretation. CLI: `project irr`. |
-| **Memo generation** | ~~High~~ **Done** | All 8 pipeline stages generate analytical memos via LLM `analytical_memo` field. Exported in Markdown, CSV (`memos.csv`), and QDPX (`<Notes>`). |
-| **Audit trail for LLM decisions** | ~~High~~ **Done** | Per-code `reasoning` field explains why each code was created. Exported in CSV (`reasoning` column) and Markdown (Audit Trail section). |
-| **Negative case analysis** | ~~High~~ **Done** | `NegativeCaseStage` runs after coding in both pipelines. LLM searches for disconfirming evidence and produces structured negative case memos. |
-| **Multi-run stability** | ~~Moderate~~ **Done** | `project stability` runs N identical passes, computes per-code stability scores, classifies as stable/moderate/unstable. Exported in Markdown and CSV. |
+All Tier 2 gaps have been closed:
+
+- **Inter-rater reliability** — Multi-pass coding with prompt variation, Cohen's/Fleiss' kappa, Landis & Koch interpretation. CLI: `project irr`.
+- **Memo generation** — All pipeline stages generate analytical memos via LLM `analytical_memo` field. Exported in Markdown, CSV (`memos.csv`), and QDPX (`<Notes>`).
+- **Audit trail for LLM decisions** — Per-code `reasoning` field explains why each code was created. Exported in CSV (`reasoning` column) and Markdown (Audit Trail section).
+- **Negative case analysis** — `NegativeCaseStage` runs after coding in both pipelines. LLM searches for disconfirming evidence and produces structured negative case memos.
+- **Multi-run stability** — `project stability` runs N identical passes, computes per-code stability scores, classifies as stable/moderate/unstable. Exported in Markdown and CSV.
 
 ### GT-Specific Gaps (Tier 3 — Required for GT Publications)
 
+**Completed:**
+- **Constant comparison** — `GTConstantComparisonStage` replaces batch open coding. Segments documents by speaker turns or paragraph chunks, iteratively codes each segment against evolving codebook, checks saturation after each pass.
+- **Iterative re-coding** — `project recode` command: codes only new/uncoded documents against existing codebook, merges results, re-runs downstream stages.
+
+**Remaining (Future):**
+
 | Gap | Severity | Description |
 |-----|----------|-------------|
-| **Constant comparison** | ~~Critical~~ **Done** | `GTConstantComparisonStage` replaces batch open coding. Segments documents by speaker turns or paragraph chunks, iteratively codes each segment against evolving codebook, checks saturation after each pass. |
-| **Iterative re-coding** | ~~High~~ **Done** | `project recode` command: codes only new/uncoded documents against existing codebook, merges results, re-runs downstream stages. |
 | **Theoretical sampling** | Moderate | Current heuristic uses speaker count + uncoded status. Should identify under-developed categories and seek data to develop them. |
 | **Per-category saturation** | Moderate | `saturation.py` checks codebook-level stability. GT requires per-category property/dimension tracking. |
 | **Full axial paradigm** | Low | Partially covers Strauss & Corbin paradigm (conditions, consequences) but not full decomposition (context vs intervening conditions). |
@@ -426,3 +430,39 @@ Score the qualitative codebook on a scale of 0.0 to 1.0.
 |---------|------|-------------|
 | **llm_client** | `~/projects/llm_client/` | Shared LLM calling library. QC's `LLMHandler` is a thin adapter over `acall_llm_structured` |
 | **prompt_eval** | `~/projects/prompt_eval/` | General-purpose prompt improvement system (v0.2.0). 4 evaluators (llm_judge, kappa, exact_match, contains), 3 optimization strategies (grid search, few-shot selection, instruction search), persistence, MCP server with all 4 evaluators as built-ins. 104 tests. |
+
+## Commands
+
+```bash
+make test               # Run full test suite
+make test-quick         # Run tests, minimal output
+make check              # Run tests + type check + lint
+make status             # Show git status
+make cost               # Show LLM spend (DAYS=7)
+make errors             # Show recent error breakdown
+
+# Pipeline
+python -m qc analyze interview.txt
+python -m qc analyze --methodology grounded_theory interview.txt
+```
+
+## Principles
+
+- LLM-first: all semantic analysis uses structured LLM output via Pydantic schemas + JSON mode
+- Fail loud: inter-stage dependency checks raise on failure; never silently degrade
+- Single state model: `ProjectState` Pydantic model holds all state, saved/loaded as JSON
+- Observability: all LLM calls log model/schema/prompt/cost/token usage via llm_client
+
+## Workflow
+
+1. Feed transcript files (txt/docx/pdf/rtf) to the pipeline
+2. Default 7-stage pipeline: Ingest → Thematic Coding → Perspective Analysis → Relationship Mapping → Synthesis → Negative Case → Cross-Interview
+3. Human review via CLI or browser; IRR via `project irr`
+4. Export to JSON/CSV/Markdown/QDPX
+
+## References
+
+- `CLAUDE.md` — This file (canonical operating guidance)
+- `AGENTS.md` — Generated mirror for non-Claude agents
+- `docs/` — Design docs and plans
+- `scripts/relationships.yaml` — Doc-code coupling graph
