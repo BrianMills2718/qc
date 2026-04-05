@@ -1,5 +1,7 @@
 # Qualitative Coding Analysis System (v2.2)
 
+*Last Updated: 2026-04-04*
+
 ## What This Project Does
 
 LLM-powered qualitative coding analysis for interview transcripts. Accepts .txt, .docx, .pdf, .rtf files. Supports two methodologies:
@@ -8,6 +10,20 @@ LLM-powered qualitative coding analysis for interview transcripts. Accepts .txt,
 - **Grounded Theory** - 7-stage pipeline: Ingest -> Constant Comparison Coding -> Axial Coding -> Selective Coding -> Theory Integration -> Negative Case Analysis -> Cross-Interview Analysis
 
 All stages use structured LLM output via Pydantic schemas + JSON mode. State is held in a single `ProjectState` Pydantic model that can be saved/loaded as JSON.
+
+## Current State (2026-04-04)
+
+The v2.2 feature set is implemented and validated. The project currently supports:
+
+- Full thematic and grounded theory pipelines, including `NegativeCaseStage` in both methodologies and automatic cross-interview analysis for multi-document corpora
+- Grounded theory constant comparison in place of legacy batch open coding, iterative saturation checks, and incremental re-coding of newly added documents via `project recode`
+- Human review in both CLI and browser flows, inter-rater reliability via `project irr`, and multi-run stability analysis via `project stability`
+- Interactive graph visualization, JSON/CSV/Markdown/QDPX export, analytical memos at every stage, and per-code reasoning/audit trail output
+- Typed `PipelineContext` and typed result models, fail-loud inter-stage dependency checks, and LLM observability logging for model/schema/prompt/cost/token usage
+- `LLMHandler` migrated to shared `llm_client`, plus schema-hardening fixes so omitted LLM list/dict fields default safely instead of causing validation failures
+- Automated E2E validation for default, grounded theory, incremental, graph, and export flows alongside the broader unit test suite
+
+The remaining roadmap is no longer the original v2.2 backlog. Open work is focused on grounded theory fidelity improvements and higher-level extensions such as prompt optimization, multi-model consensus, active learning from review decisions, and collaborative review workflows.
 
 ## Architecture
 
@@ -323,24 +339,7 @@ Evaluated against Strauss & Corbin GT, Charmaz constructivist GT, COREQ/SRQR rep
 
 ## Next Steps
 
-### Completed (v2.2)
-- ~~Inter-rater reliability~~ — `project irr` CLI command (multi-pass, Cohen's/Fleiss' kappa)
-- ~~Memo generation~~ — all 8 stages produce analytical memos
-- ~~Audit trail~~ — per-code `reasoning` field + Audit Trail export
-- ~~Negative case analysis~~ — `NegativeCaseStage` in both pipelines
-- ~~Pipeline stage tests~~ — 28 mocked-LLM tests covering all 8 stages + cross-interview + edge cases
-- ~~Multi-run stability~~ — `project stability` CLI command, per-code stability scores, Markdown/CSV export
-- ~~Incremental coding~~ — `project recode` codes new documents against existing codebook, merges results, re-runs downstream stages
-- ~~Graph visualization~~ — `/graph/{project_id}` interactive Cytoscape.js graphs (code hierarchy, relationships, entity map) with search, PNG export
-- ~~Constant comparison~~ — `GTConstantComparisonStage` replaces batch open coding: segment-by-segment iterative coding with saturation detection
-- ~~Fail-loud enforcement~~ — `PipelineContext.require()` for inter-stage data dependencies, `ValueError` on bad review decisions, no silent fallbacks
-- ~~Observability~~ — LLM call instrumentation (model/schema/cost/tokens), stage entry context logging, failure state logging
-- ~~Typed PipelineContext~~ — `PipelineContext` Pydantic model replaces `config: dict` across all 14 stages (`extra="forbid"` catches typos)
-- ~~Typed return values~~ — `CodebookChangeResult`, `SaturationCheckResult`, `CrossInterviewResult`, `ReviewSummary`, `SamplingSuggestion` replace plain dicts
-- ~~CLI utility tests~~ — 57 tests for file_handler, formatters (json/table/human), progress utilities
-- ~~E2E validation~~ — 6 E2E tests with real LLM calls: default/GT/incremental pipelines, graph data, export
-- ~~LLM handler migration~~ — `LLMHandler` rewritten as thin adapter over shared `llm_client` library (369→112 lines). Retry, backoff, schema-in-prompt, API key inference, GPT-5 temperature handling moved to `llm_client` v0.3.0
-- ~~LLM schema robustness~~ — All 30 `List` fields and 2 `Dict` fields across LLM-facing schemas now have `default_factory`. LLM omitting any field no longer causes `ValidationError`
+v2.2 is complete. Remaining work is focused on deeper methodological fidelity and follow-on product capabilities rather than missing core pipeline features.
 
 ### Future — GT Fidelity (Tier 3)
 - **True theoretical sampling** (Moderate): Identify under-developed categories, suggest specific data sources to develop them
