@@ -125,7 +125,8 @@ class QCAPIServer:
             return
         
         from fastapi import HTTPException, BackgroundTasks
-        from pydantic import BaseModel
+        from pydantic import BaseModel, ConfigDict, Field
+        from qc_clean.schemas.domain import ReviewAction
         
         # Health check endpoint
         @self._app.get("/health")
@@ -140,6 +141,32 @@ class QCAPIServer:
         class AnalysisRequest(BaseModel):
             interviews: List[Dict[str, Any]]
             config: Optional[Dict[str, Any]] = {}
+
+        class ReviewDecisionRequest(BaseModel):
+            """One human review decision submitted through the API."""
+
+            model_config = ConfigDict(extra="forbid")
+
+            target_type: str = Field(
+                description="Review target type: code, code_application, or codebook."
+            )
+            target_id: str = Field(description="Identifier of the reviewed target.")
+            action: ReviewAction = Field(description="Review action to apply.")
+            rationale: str = Field(default="", description="Optional decision rationale.")
+            new_value: Optional[Dict[str, Any]] = Field(
+                default=None,
+                description="Optional replacement or merge/split payload for modifying decisions.",
+            )
+
+        class ReviewDecisionsRequest(BaseModel):
+            """Batch of human review decisions."""
+
+            model_config = ConfigDict(extra="forbid")
+
+            decisions: List[ReviewDecisionRequest] = Field(
+                default_factory=list,
+                description="Review decisions to apply in order.",
+            )
         
         # Analysis endpoint
         @self._app.post("/analyze")
@@ -373,27 +400,31 @@ class QCAPIServer:
             return rm.get_review_summary()
 
         @self._app.post("/projects/{project_id}/review/decisions")
-        async def submit_review_decisions(project_id: str, body: Dict):
+        async def submit_review_decisions(project_id: str, body: ReviewDecisionsRequest):
             """Submit review decisions for a project (used by review UI)."""
             from qc_clean.core.persistence.project_store import ProjectStore
             from qc_clean.core.pipeline.review import ReviewManager
-            from qc_clean.schemas.domain import HumanReviewDecision, ReviewAction
+            from qc_clean.schemas.domain import HumanReviewDecision
             store = ProjectStore()
             try:
                 state = store.load(project_id)
             except FileNotFoundError:
                 raise HTTPException(status_code=404, detail=f"Project not found: {project_id}")
             rm = ReviewManager(state)
-            decisions = []
-            for d in body.get("decisions", []):
-                decisions.append(HumanReviewDecision(
-                    target_type=d["target_type"],
-                    target_id=d["target_id"],
-                    action=ReviewAction(d["action"]),
-                    rationale=d.get("rationale", ""),
-                    new_value=d.get("new_value"),
-                ))
-            result = rm.apply_decisions(decisions)
+            decisions = [
+                HumanReviewDecision(
+                    target_type=d.target_type,
+                    target_id=d.target_id,
+                    action=d.action,
+                    rationale=d.rationale,
+                    new_value=d.new_value,
+                )
+                for d in body.decisions
+            ]
+            try:
+                result = rm.apply_decisions(decisions)
+            except ValueError as exc:
+                raise HTTPException(status_code=400, detail=str(exc)) from exc
             store.save(state)
             return {
                 "applied": result["applied"],
@@ -420,27 +451,31 @@ class QCAPIServer:
             }
 
         @self._app.post("/projects/{project_id}/review")
-        async def submit_review_legacy(project_id: str, body: Dict):
+        async def submit_review_legacy(project_id: str, body: ReviewDecisionsRequest):
             """Legacy review endpoint (kept for backward compat)."""
             from qc_clean.core.persistence.project_store import ProjectStore
             from qc_clean.core.pipeline.review import ReviewManager
-            from qc_clean.schemas.domain import HumanReviewDecision, ReviewAction
+            from qc_clean.schemas.domain import HumanReviewDecision
             store = ProjectStore()
             try:
                 state = store.load(project_id)
             except FileNotFoundError:
                 raise HTTPException(status_code=404, detail=f"Project not found: {project_id}")
             rm = ReviewManager(state)
-            decisions = []
-            for d in body.get("decisions", []):
-                decisions.append(HumanReviewDecision(
-                    target_type=d["target_type"],
-                    target_id=d["target_id"],
-                    action=ReviewAction(d["action"]),
-                    rationale=d.get("rationale", ""),
-                    new_value=d.get("new_value"),
-                ))
-            result = rm.apply_decisions(decisions)
+            decisions = [
+                HumanReviewDecision(
+                    target_type=d.target_type,
+                    target_id=d.target_id,
+                    action=d.action,
+                    rationale=d.rationale,
+                    new_value=d.new_value,
+                )
+                for d in body.decisions
+            ]
+            try:
+                result = rm.apply_decisions(decisions)
+            except ValueError as exc:
+                raise HTTPException(status_code=400, detail=str(exc)) from exc
             store.save(state)
             return result
 

@@ -35,10 +35,13 @@ from qc_clean.schemas.domain import (
 )
 
 # Skip all tests in this module if no API key
-pytestmark = pytest.mark.skipif(
-    not os.environ.get("OPENAI_API_KEY"),
-    reason="OPENAI_API_KEY not set",
-)
+pytestmark = [
+    pytest.mark.live_llm,
+    pytest.mark.skipif(
+        not os.environ.get("OPENAI_API_KEY"),
+        reason="OPENAI_API_KEY not set",
+    ),
+]
 
 # Sample interview text for testing
 INTERVIEW_1 = """

@@ -206,6 +206,35 @@ class TestReviewDecisionsEndpoint:
         })
         assert resp.status_code == 404
 
+    def test_rejects_missing_decision_fields(self, client):
+        resp = client.post("/projects/test-project-123/review/decisions", json={
+            "decisions": [{}]
+        })
+        assert resp.status_code == 422
+
+    def test_rejects_invalid_action(self, client):
+        resp = client.post("/projects/test-project-123/review/decisions", json={
+            "decisions": [
+                {"target_type": "code", "target_id": "C1", "action": "invalid_action"},
+            ]
+        })
+        assert resp.status_code == 422
+
+    def test_rejects_non_list_decisions(self, client):
+        resp = client.post("/projects/test-project-123/review/decisions", json={
+            "decisions": "not-list"
+        })
+        assert resp.status_code == 422
+
+    def test_rejects_unsupported_target_type(self, client):
+        resp = client.post("/projects/test-project-123/review/decisions", json={
+            "decisions": [
+                {"target_type": "not_a_target", "target_id": "C1", "action": "approve"},
+            ]
+        })
+        assert resp.status_code == 400
+        assert "Unknown target_type" in resp.json()["detail"]
+
 
 class TestApproveAllEndpoint:
     def test_approve_all(self, client, tmp_store):
@@ -235,3 +264,9 @@ class TestLegacyReviewEndpoint:
         })
         assert resp.status_code == 200
         assert resp.json()["applied"] == 1
+
+    def test_legacy_post_rejects_invalid_payload(self, client):
+        resp = client.post("/projects/test-project-123/review", json={
+            "decisions": [{}]
+        })
+        assert resp.status_code == 422

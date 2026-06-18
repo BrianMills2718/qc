@@ -175,13 +175,13 @@ def read_file_content(file_path: str) -> str:
 
     if ext == '.pdf':
         try:
-            from PyPDF2 import PdfReader
+            from pypdf import PdfReader
             reader = PdfReader(str(path))
             return '\n\n'.join(
                 page.extract_text() or '' for page in reader.pages
             )
         except ImportError:
-            logger.warning("PyPDF2 not installed; falling back to raw text read")
+            logger.warning("pypdf not installed; falling back to raw text read")
             return path.read_text(errors='replace')
 
     if ext == '.rtf':

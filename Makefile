@@ -1,20 +1,26 @@
-.PHONY: help test test-quick check status cost errors
+.PHONY: help test test-quick test-e2e test-all check status cost errors
 
 DAYS ?= 7
 PROJECT ?= qualitative_coding
 LIMIT ?= 20
 
 help:  ## Show this help
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-20s %s\n", $$1, $$2}'
+	@grep -E '^[a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-20s %s\n", $$1, $$2}'
 
-test:  ## Run full test suite
-	python -m pytest tests/ -v
+test:  ## Run deterministic test suite (excludes live LLM E2E)
+	python -m pytest tests/ -m "not live_llm" -v
 
 test-quick:  ## Run tests, minimal output
-	python -m pytest tests/ -x -q
+	python -m pytest tests/ -m "not live_llm" -x -q
+
+test-e2e:  ## Run live LLM E2E tests
+	python -m pytest tests/test_e2e.py -v
+
+test-all:  ## Run deterministic tests and live LLM E2E tests
+	python -m pytest tests/ -v
 
 check:  ## Run tests + type check + lint
-	python -m pytest tests/ -x -q 2>/dev/null || true
+	python -m pytest tests/ -m "not live_llm" -x -q
 	@echo "Type check and lint not yet configured"
 
 status:  ## Show git status

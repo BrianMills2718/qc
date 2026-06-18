@@ -12,6 +12,7 @@ requests>=2.31.0
 # Document format support
 python-docx>=0.8.11
 striprtf>=0.0.20
+pypdf>=4.0.0
 lxml>=4.9.0
 
 # CLI web UI
