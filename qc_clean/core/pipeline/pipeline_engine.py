@@ -9,6 +9,7 @@ after each stage.
 from __future__ import annotations
 
 import logging
+import uuid
 from abc import ABC, abstractmethod
 from datetime import datetime
 from typing import Any, Dict, List, Optional
@@ -40,6 +41,18 @@ class PipelineContext(BaseModel):
     model_name: str = "gpt-5-mini"
     interviews: List[Dict[str, Any]] = Field(default_factory=list)
     irr_prompt_suffix: str = ""
+    task_prefix: str = Field(
+        default="qualitative_coding",
+        description="Observability task namespace for LLM calls.",
+    )
+    trace_id: str = Field(
+        default_factory=lambda: f"qualitative_coding/{uuid.uuid4().hex[:12]}",
+        description="Trace ID shared across LLM calls for one pipeline run.",
+    )
+    max_budget: float = Field(
+        default=5.0,
+        description="Maximum allowed LLM spend in dollars for this pipeline trace.",
+    )
     prompt_overrides: Dict[str, str] = Field(
         default_factory=dict,
         description="Stage-name -> prompt text. Overrides the default prompt for that stage.",
@@ -71,6 +84,14 @@ class PipelineContext(BaseModel):
                 f"The upstream stage that produces this value may have been skipped or failed."
             )
         return value
+
+    def llm_call_options(self, stage_name: str) -> Dict[str, Any]:
+        """Build shared llm_client observability kwargs for a pipeline stage."""
+        return {
+            "task": f"{self.task_prefix}.{stage_name}",
+            "trace_id": self.trace_id,
+            "max_budget": self.max_budget,
+        }
 
 
 class PipelineStage(ABC):

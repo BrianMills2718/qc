@@ -256,7 +256,7 @@ class TestThematicCodingStage:
         mock_response = _sample_code_hierarchy()
         captured_prompt = None
 
-        async def capture_prompt(prompt, schema):
+        async def capture_prompt(prompt, schema, **kwargs):
             nonlocal captured_prompt
             captured_prompt = prompt
             return mock_response
@@ -308,7 +308,7 @@ class TestPerspectiveStage:
         ctx = PipelineContext(phase1_json="{}")
         captured_prompt = None
 
-        async def capture_prompt(prompt, schema):
+        async def capture_prompt(prompt, schema, **kwargs):
             nonlocal captured_prompt
             captured_prompt = prompt
             return _sample_speaker_analysis()
@@ -336,7 +336,7 @@ class TestPerspectiveStage:
         ctx = PipelineContext(phase1_json="{}")
         captured_prompt = None
 
-        async def capture_prompt(prompt, schema):
+        async def capture_prompt(prompt, schema, **kwargs):
             nonlocal captured_prompt
             captured_prompt = prompt
             return _sample_speaker_analysis()

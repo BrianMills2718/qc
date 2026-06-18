@@ -202,7 +202,7 @@ class TestRunStabilityAnalysis:
         ]
         call_count = 0
 
-        async def mock_extract(prompt, schema):
+        async def mock_extract(prompt, schema, **kwargs):
             nonlocal call_count
             resp = responses[call_count]
             call_count += 1
@@ -260,7 +260,7 @@ class TestRunStabilityAnalysis:
         ]
         call_count = 0
 
-        async def mock_extract(prompt, schema):
+        async def mock_extract(prompt, schema, **kwargs):
             nonlocal call_count
             resp = responses[call_count]
             call_count += 1

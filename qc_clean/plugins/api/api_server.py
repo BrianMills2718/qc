@@ -607,6 +607,7 @@ class QCAPIServer:
             ctx = PipelineContext(
                 interviews=interviews,
                 model_name=model_name,
+                trace_id=f"qualitative_coding/job/{job_id}",
             )
 
             state = await pipeline.run(state, ctx)

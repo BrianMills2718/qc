@@ -45,7 +45,9 @@ class PerspectiveStage(PipelineStage):
             combined_text, phase1_text, num_interviews, is_single_speaker
         )
 
-        phase2_response = await llm.extract_structured(prompt, SpeakerAnalysis)
+        phase2_response = await llm.extract_structured(
+            prompt, SpeakerAnalysis, **ctx.llm_call_options(self.name())
+        )
         state.perspective_analysis = speaker_analysis_to_perspectives(phase2_response)
 
         # Extract analytical memo

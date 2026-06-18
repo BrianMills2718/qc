@@ -14,3 +14,4 @@ def test_document_parser_dependencies_importable():
 def test_cli_web_dependency_importable():
     """The legacy CLI web entrypoint should be importable when dependencies are installed."""
     importlib.import_module("flask")
+    importlib.import_module("simple_cli_web")

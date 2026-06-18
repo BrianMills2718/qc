@@ -52,7 +52,9 @@ class ThematicCodingStage(PipelineStage):
         if ctx.irr_prompt_suffix:
             prompt = prompt + "\n\n" + ctx.irr_prompt_suffix
 
-        phase1_response = await llm.extract_structured(prompt, CodeHierarchy)
+        phase1_response = await llm.extract_structured(
+            prompt, CodeHierarchy, **ctx.llm_call_options(self.name())
+        )
 
         # Convert to domain model
         codebook = code_hierarchy_to_codebook(phase1_response)

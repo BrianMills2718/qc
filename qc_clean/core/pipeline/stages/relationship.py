@@ -34,7 +34,9 @@ class RelationshipStage(PipelineStage):
 
         prompt = _build_phase3_prompt(combined_text, phase1_text, phase2_text)
 
-        phase3_response = await llm.extract_structured(prompt, EntityMapping)
+        phase3_response = await llm.extract_structured(
+            prompt, EntityMapping, **ctx.llm_call_options(self.name())
+        )
 
         # Convert to domain entities — pass all doc IDs since entities span documents
         all_doc_ids = [d.id for d in state.corpus.documents]

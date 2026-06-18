@@ -36,7 +36,9 @@ class SynthesisStage(PipelineStage):
 
         prompt = _build_phase4_prompt(combined_text, phase1_text, phase2_text, phase3_text)
 
-        phase4_response = await llm.extract_structured(prompt, AnalysisSynthesis)
+        phase4_response = await llm.extract_structured(
+            prompt, AnalysisSynthesis, **ctx.llm_call_options(self.name())
+        )
         state.synthesis = analysis_synthesis_to_synthesis(phase4_response)
 
         # Extract analytical memo

@@ -284,6 +284,31 @@ class TestExtractStructured:
         assert kwargs["num_retries"] == 6
         assert kwargs["base_delay"] == 2.0
 
+    def test_observability_kwargs_passed(self):
+        handler = _make_handler()
+        parsed = SimpleSchema(name="X", count=1)
+        meta = _mock_meta()
+
+        with patch(
+            "qc_clean.core.llm.llm_handler.acall_llm_structured",
+            new_callable=AsyncMock,
+            return_value=(parsed, meta),
+        ) as mock_call:
+            asyncio.run(
+                handler.extract_structured(
+                    "text",
+                    SimpleSchema,
+                    task="qualitative_coding.test",
+                    trace_id="trace-123",
+                    max_budget=0.25,
+                )
+            )
+
+        _, kwargs = mock_call.call_args
+        assert kwargs["task"] == "qualitative_coding.test"
+        assert kwargs["trace_id"] == "trace-123"
+        assert kwargs["max_budget"] == 0.25
+
     def test_response_model_passed(self):
         handler = _make_handler()
         parsed = SimpleSchema(name="X", count=1)

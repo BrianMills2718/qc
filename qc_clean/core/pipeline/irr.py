@@ -247,6 +247,7 @@ async def run_irr_analysis(
         ctx = PipelineContext(
             model_name=pass_model,
             irr_prompt_suffix=suffix,
+            trace_id=f"qualitative_coding/irr/{state.id}/pass-{i + 1}",
         )
 
         if is_gt:
@@ -387,7 +388,10 @@ async def run_stability_analysis(
         run_state.codebook.codes = []
         run_state.code_applications = []
 
-        ctx = PipelineContext(model_name=model_name)
+        ctx = PipelineContext(
+            model_name=model_name,
+            trace_id=f"qualitative_coding/stability/{state.id}/run-{i + 1}",
+        )
 
         if is_gt:
             from qc_clean.core.pipeline.stages.gt_open_coding import GTOpenCodingStage

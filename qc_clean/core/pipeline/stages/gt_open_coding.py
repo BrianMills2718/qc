@@ -76,7 +76,9 @@ ANALYTICAL MEMO: After completing the analysis above, write a brief analytical m
         if ctx.irr_prompt_suffix:
             prompt = prompt + "\n\n" + ctx.irr_prompt_suffix
 
-        response = await llm.extract_structured(prompt, OpenCodesResponse)
+        response = await llm.extract_structured(
+            prompt, OpenCodesResponse, **ctx.llm_call_options(self.name())
+        )
         open_codes = response.open_codes
 
         # Convert to domain codebook

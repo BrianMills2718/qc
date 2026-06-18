@@ -8,11 +8,14 @@ This resolves Windows compatibility issues by using WSL/Linux subprocess model
 import os
 import json
 import subprocess
+import sys
+from pathlib import Path
 from flask import Flask, request, jsonify
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 app.secret_key = 'qualitative-coding-cli-web'
+PROJECT_ROOT = Path(__file__).resolve().parent
 
 # Configure upload settings
 UPLOAD_FOLDER = '/tmp/uploads'
@@ -25,18 +28,15 @@ def allowed_file(filename):
 def run_cli_command(command_args):
     """Execute CLI command via subprocess with proper WSL/Linux encoding"""
     try:
-        # Activate virtual environment and run command
-        cmd = [
-            '/bin/bash', '-c', 
-            'source .venv/bin/activate && python3 qc_cli.py ' + ' '.join(command_args)
-        ]
-        
+        cmd = [sys.executable, "qc_cli.py", *command_args]
+
         result = subprocess.run(
             cmd,
             capture_output=True,
             text=True,
             encoding='utf-8',
-            cwd='/home/brian/projects/qualitative_coding'
+            cwd=PROJECT_ROOT,
+            check=False,
         )
         
         return {
@@ -129,7 +129,7 @@ def index():
             
             <hr>
             <h3>Test Files Available:</h3>
-            <p>Use the africa interview corpus at: <code>/home/brian/projects/qualitative_coding/data/interviews/africa_3_interviews_for_test/</code></p>
+            <p>Use an interview corpus under: <code>data/interviews/</code></p>
             <ul>
                 <li>Chris Runyon.docx</li>
                 <li>Aristide Kanga notes.docx</li>

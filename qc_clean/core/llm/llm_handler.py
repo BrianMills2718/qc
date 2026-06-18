@@ -47,6 +47,9 @@ class LLMHandler:
         schema: Type[BaseModel],
         instructions: Optional[str] = None,
         max_tokens: Optional[int] = None,
+        task: str = "qualitative_coding.structured_extraction",
+        trace_id: str = "qualitative_coding/manual",
+        max_budget: float = 5.0,
     ) -> BaseModel:
         """Extract structured data from text using LLM.
 
@@ -55,6 +58,9 @@ class LLMHandler:
             schema: Pydantic model class for the expected output
             instructions: Additional instructions for extraction
             max_tokens: Maximum tokens (None = use maximum available)
+            task: Observability task name passed to llm_client
+            trace_id: Observability trace ID passed to llm_client
+            max_budget: Maximum allowed spend for the trace, in dollars
 
         Returns:
             Validated instance of the schema model
@@ -92,6 +98,9 @@ class LLMHandler:
                 response_model=schema,
                 num_retries=self.max_retries,
                 base_delay=self.base_delay,
+                task=task,
+                trace_id=trace_id,
+                max_budget=max_budget,
                 **kwargs,
             )
             logger.info(
@@ -118,6 +127,9 @@ class LLMHandler:
         instructions: Optional[str] = None,
         max_tokens: Optional[int] = None,
         max_concurrent: int = 5,
+        task: str = "qualitative_coding.structured_batch_extraction",
+        trace_id: str = "qualitative_coding/manual",
+        max_budget: float = 5.0,
     ) -> list[BaseModel]:
         """Extract structured data from multiple prompts concurrently.
 
@@ -127,6 +139,9 @@ class LLMHandler:
             instructions: Additional instructions (applied to all prompts)
             max_tokens: Maximum tokens per call
             max_concurrent: Max concurrent LLM calls
+            task: Observability task name passed to llm_client
+            trace_id: Observability trace ID passed to llm_client
+            max_budget: Maximum allowed spend for the trace, in dollars
 
         Returns:
             List of validated schema instances (same order as prompts)
@@ -167,6 +182,9 @@ class LLMHandler:
                 max_concurrent=max_concurrent,
                 num_retries=self.max_retries,
                 base_delay=self.base_delay,
+                task=task,
+                trace_id=trace_id,
+                max_budget=max_budget,
                 **kwargs,
             )
             total_cost = sum(meta.cost for _, meta in results)

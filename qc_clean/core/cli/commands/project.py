@@ -181,7 +181,10 @@ def _run_project(store: ProjectStore, args) -> int:
 
     from qc_clean.core.pipeline.pipeline_engine import PipelineContext
     model_name = getattr(args, "model", None) or state.config.model_name
-    ctx = PipelineContext(model_name=model_name)
+    ctx = PipelineContext(
+        model_name=model_name,
+        trace_id=f"qualitative_coding/project/{state.id}",
+    )
 
     print(f"Running pipeline on project: {state.name}")
     print(f"  Methodology: {state.config.methodology.value}")
@@ -420,7 +423,10 @@ def _recode_project(store: ProjectStore, args) -> int:
 
     from qc_clean.core.pipeline.pipeline_engine import PipelineContext
     model_name = getattr(args, "model", None) or state.config.model_name
-    ctx = PipelineContext(model_name=model_name)
+    ctx = PipelineContext(
+        model_name=model_name,
+        trace_id=f"qualitative_coding/project/{state.id}/recode/{state.iteration + 1}",
+    )
 
     print(f"Incremental re-coding on project: {state.name}")
     print(f"  Methodology: {state.config.methodology.value}")

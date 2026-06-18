@@ -68,13 +68,17 @@ class IncrementalCodingStage(PipelineStage):
         if is_gt:
             from qc_clean.core.pipeline.stages.gt_open_coding import OpenCodesResponse
             prompt = _build_incremental_gt_prompt(codebook_context, new_doc_text)
-            response = await llm.extract_structured(prompt, OpenCodesResponse)
+            response = await llm.extract_structured(
+                prompt, OpenCodesResponse, **ctx.llm_call_options(self.name())
+            )
             new_applications = _process_gt_response(
                 response, state, new_docs, uncoded_ids
             )
         else:
             prompt = _build_incremental_thematic_prompt(codebook_context, new_doc_text)
-            response = await llm.extract_structured(prompt, CodeHierarchy)
+            response = await llm.extract_structured(
+                prompt, CodeHierarchy, **ctx.llm_call_options(self.name())
+            )
             new_applications = _process_thematic_response(
                 response, state, new_docs, uncoded_ids
             )

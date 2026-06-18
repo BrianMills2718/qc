@@ -169,9 +169,11 @@ def read_file_content(file_path: str) -> str:
             import docx
             doc = docx.Document(str(path))
             return '\n\n'.join(p.text for p in doc.paragraphs if p.text.strip())
-        except ImportError:
-            logger.warning("python-docx not installed; falling back to raw text read")
-            return path.read_text(errors='replace')
+        except ImportError as exc:
+            raise Exception(
+                "Cannot read DOCX/DOC file because python-docx is not installed. "
+                "Install project dependencies with 'python -m pip install -r requirements.txt'."
+            ) from exc
 
     if ext == '.pdf':
         try:
@@ -180,18 +182,22 @@ def read_file_content(file_path: str) -> str:
             return '\n\n'.join(
                 page.extract_text() or '' for page in reader.pages
             )
-        except ImportError:
-            logger.warning("pypdf not installed; falling back to raw text read")
-            return path.read_text(errors='replace')
+        except ImportError as exc:
+            raise Exception(
+                "Cannot read PDF file because pypdf is not installed. "
+                "Install project dependencies with 'python -m pip install -r requirements.txt'."
+            ) from exc
 
     if ext == '.rtf':
         try:
             from striprtf.striprtf import rtf_to_text
             raw = path.read_bytes().decode('utf-8', errors='replace')
             return rtf_to_text(raw)
-        except ImportError:
-            logger.warning("striprtf not installed; falling back to raw text read")
-            return path.read_text(errors='replace')
+        except ImportError as exc:
+            raise Exception(
+                "Cannot read RTF file because striprtf is not installed. "
+                "Install project dependencies with 'python -m pip install -r requirements.txt'."
+            ) from exc
 
     # Fallback for any other extension
     return path.read_text(errors='replace')

@@ -66,7 +66,9 @@ ANALYTICAL MEMO: After completing the analysis above, write a brief analytical m
 - Patterns or surprises that emerged during analysis
 - Uncertainties or areas needing further investigation"""
 
-        response = await llm.extract_structured(prompt, TheoreticalModel)
+        response = await llm.extract_structured(
+            prompt, TheoreticalModel, **ctx.llm_call_options(self.name())
+        )
         state.theoretical_model = theoretical_model_to_domain(response)
 
         # Extract analytical memo

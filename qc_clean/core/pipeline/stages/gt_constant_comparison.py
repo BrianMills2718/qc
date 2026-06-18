@@ -247,7 +247,11 @@ class GTConstantComparisonStage(PipelineStage):
                 if ctx.irr_prompt_suffix:
                     prompt = prompt + "\n\n" + ctx.irr_prompt_suffix
 
-                response = await llm.extract_structured(prompt, SegmentCodingResponse)
+                response = await llm.extract_structured(
+                    prompt,
+                    SegmentCodingResponse,
+                    **ctx.llm_call_options(self.name()),
+                )
                 _merge_segment_results(codebook, all_applications, response, segment)
 
                 if response.analytical_memo:

@@ -464,6 +464,7 @@ async def qc_run_pipeline(
         model_name=model_name,
         interviews=interviews,
         prompt_overrides=prompt_overrides or {},
+        trace_id=f"qualitative_coding/mcp/{project_id}/pipeline",
     )
 
     state = await pipeline.run(state, ctx, resume_from=resume_from)
@@ -525,7 +526,11 @@ async def qc_run_stage(
         {"name": d.name, "content": d.content}
         for d in state.corpus.documents
     ]
-    ctx = PipelineContext(model_name=model_name, interviews=interviews)
+    ctx = PipelineContext(
+        model_name=model_name,
+        interviews=interviews,
+        trace_id=f"qualitative_coding/mcp/{project_id}/stage/{stage_name}",
+    )
 
     state = await target_stage.execute(state, ctx)
     store.save(state)
@@ -579,7 +584,11 @@ async def qc_recode(
         {"name": d.name, "content": d.content}
         for d in state.corpus.documents
     ]
-    ctx = PipelineContext(model_name=model_name, interviews=interviews)
+    ctx = PipelineContext(
+        model_name=model_name,
+        interviews=interviews,
+        trace_id=f"qualitative_coding/mcp/{project_id}/recode/{state.iteration + 1}",
+    )
 
     state = await pipeline.run(state, ctx)
     store.save(state)

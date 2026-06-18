@@ -375,3 +375,18 @@ class TestResumeValidation:
         assert len(result.phase_results) == 2
         assert result.phase_results[0].phase_name == "stage2"
         assert result.phase_results[1].phase_name == "stage3"
+
+
+class TestPipelineContextObservability:
+    def test_llm_call_options_include_required_observability_fields(self):
+        ctx = PipelineContext(
+            task_prefix="qualitative_coding_test",
+            trace_id="trace-abc",
+            max_budget=0.5,
+        )
+
+        assert ctx.llm_call_options("thematic_coding") == {
+            "task": "qualitative_coding_test.thematic_coding",
+            "trace_id": "trace-abc",
+            "max_budget": 0.5,
+        }
