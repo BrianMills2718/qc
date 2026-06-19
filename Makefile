@@ -1,4 +1,4 @@
-.PHONY: help test test-quick test-e2e test-all check status cost errors
+.PHONY: help test test-quick test-e2e test-all check docs-check clean status cost errors
 
 DAYS ?= 7
 PROJECT ?= qualitative_coding
@@ -19,9 +19,20 @@ test-e2e:  ## Run live LLM E2E tests
 test-all:  ## Run deterministic tests and live LLM E2E tests
 	python -m pytest tests/ -v
 
-check:  ## Run tests + type check + lint
+check:  ## Run deterministic tests + docs checks
 	python -m pytest tests/ -m "not live_llm" -x -q
+	$(MAKE) docs-check
 	@echo "Type check and lint not yet configured"
+
+docs-check:  ## Run documentation and governance checks
+	python scripts/check_markdown_links.py
+	python scripts/check_doc_coupling.py --validate-config
+	python scripts/sync_plan_status.py --check
+	python scripts/meta/check_agents_sync.py --check
+
+clean:  ## Remove local Python/test caches
+	find . -type d -name __pycache__ -prune -exec rm -rf {} +
+	rm -rf .pytest_cache .mypy_cache .ruff_cache htmlcov .coverage
 
 status:  ## Show git status
 	@git status --short --branch

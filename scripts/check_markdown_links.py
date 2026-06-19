@@ -21,7 +21,7 @@ if str(REPO_ROOT) not in sys.path:
 from enforced_planning.worktree_paths import resolve_canonical_target_path
 
 PROJECT_META_ROOT = REPO_ROOT
-DEFAULT_TARGETS = ("vision", "STATUS_LEDGER.md")
+DEFAULT_TARGETS = ("README.md", "CLAUDE.md", "AGENTS.md", "docs", "scripts")
 
 # Matches inline links and image links: [text](target) / ![alt](target)
 INLINE_LINK_RE = re.compile(r"!?\[[^\]]*]\(([^)]+)\)")
@@ -231,7 +231,7 @@ def main() -> int:
         "targets",
         nargs="*",
         default=list(DEFAULT_TARGETS),
-        help="Markdown files or directories to scan (default: vision STATUS_LEDGER.md)",
+        help="Markdown files or directories to scan (default: README.md CLAUDE.md AGENTS.md docs scripts)",
     )
     parser.add_argument(
         "--repo-root",

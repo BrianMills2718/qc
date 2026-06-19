@@ -6,7 +6,8 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Blocks |
 |---|------|----------|--------|--------|
-| 1 | [Example Plan](01_example.md) | Medium | Planned | - |
+
+No active implementation plans are currently tracked in this repo.
 
 ## Status Key
 
