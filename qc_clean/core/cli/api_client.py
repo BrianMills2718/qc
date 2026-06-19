@@ -101,49 +101,13 @@ class APIClient:
             if not path.stat().st_size > 0:
                 raise APIClientError(f"File is empty: {file_path}")
             
-            # Read file content based on file type
+            # Read file content via the single canonical reader so the CLI and
+            # server share one ingestion path (pypdf, not the unmaintained PyPDF2).
             try:
-                file_ext = path.suffix.lower()
-                
-                if file_ext == '.txt':
-                    # Plain text files
-                    with open(path, 'r', encoding='utf-8') as f:
-                        content = f.read()
-                elif file_ext in ['.docx', '.doc']:
-                    # Word documents - try to extract text
-                    try:
-                        import docx
-                        doc = docx.Document(path)
-                        content = '\n'.join([paragraph.text for paragraph in doc.paragraphs])
-                    except ImportError:
-                        raise APIClientError(f"python-docx package required for .docx files. Install with: pip install python-docx")
-                elif file_ext == '.pdf':
-                    # PDF files - try to extract text
-                    try:
-                        import PyPDF2
-                        with open(path, 'rb') as f:
-                            pdf_reader = PyPDF2.PdfReader(f)
-                            content = '\n'.join([page.extract_text() for page in pdf_reader.pages])
-                    except ImportError:
-                        raise APIClientError(f"PyPDF2 package required for .pdf files. Install with: pip install PyPDF2")
-                elif file_ext == '.rtf':
-                    # RTF files - basic text extraction
-                    try:
-                        from striprtf.striprtf import rtf_to_text
-                        with open(path, 'r', encoding='utf-8') as f:
-                            rtf_content = f.read()
-                        content = rtf_to_text(rtf_content)
-                    except ImportError:
-                        raise APIClientError(f"striprtf package required for .rtf files. Install with: pip install striprtf")
-                else:
-                    # Try as plain text with fallback encoding
-                    try:
-                        with open(path, 'r', encoding='utf-8') as f:
-                            content = f.read()
-                    except UnicodeDecodeError:
-                        with open(path, 'r', encoding='latin-1') as f:
-                            content = f.read()
-                
+                from .utils.file_handler import read_file_content
+
+                content = read_file_content(str(path))
+
                 if not content.strip():
                     raise APIClientError(f"No readable content found in file: {file_path}")
                 

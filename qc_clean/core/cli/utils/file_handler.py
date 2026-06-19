@@ -141,7 +141,7 @@ def read_file_content(file_path: str) -> str:
     Read the text content of a supported file.
 
     Handles .txt files directly and .docx/.pdf/.rtf via
-    optional libraries (python-docx, PyPDF2, striprtf).
+    optional libraries (python-docx, pypdf, striprtf).
     Falls back to plain text reading for unsupported binary formats.
 
     Args:
