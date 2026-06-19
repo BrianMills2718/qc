@@ -50,8 +50,10 @@ def create_pipeline(
             GTAxialCodingStage(pause_for_review=enable_human_review),
             GTSelectiveCodingStage(),
             GTTheoryIntegrationStage(),
-            NegativeCaseStage(),
             CrossInterviewStage(),  # only runs if corpus > 1 doc
+            # Disconfirmation runs LAST so it covers the final claim set,
+            # including cross-interview claims (INV-6).
+            NegativeCaseStage(),
         ]
     else:
         # Default / thematic analysis pipeline
@@ -61,8 +63,10 @@ def create_pipeline(
             PerspectiveStage(),
             RelationshipStage(),
             SynthesisStage(),
-            NegativeCaseStage(),
             CrossInterviewStage(),  # only runs if corpus > 1 doc
+            # Disconfirmation runs LAST so it covers the final claim set,
+            # including cross-interview claims (INV-6).
+            NegativeCaseStage(),
         ]
 
     logger.info(
@@ -92,8 +96,10 @@ def create_incremental_pipeline(
     # which are not re-run during incremental coding.
     stages = [
         IncrementalCodingStage(),
-        NegativeCaseStage(),
         CrossInterviewStage(),
+        # Disconfirmation runs LAST so it covers the final claim set,
+        # including cross-interview claims (INV-6).
+        NegativeCaseStage(),
     ]
 
     logger.info(

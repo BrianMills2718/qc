@@ -216,10 +216,11 @@ class TestPipelineFactory:
         pipeline = create_pipeline(methodology="default")
         assert len(pipeline.stages) == 7
         names = [s.name() for s in pipeline.stages]
+        # Disconfirmation runs last so it covers cross-interview claims (INV-6).
         assert names == [
             "ingest", "thematic_coding", "perspective",
-            "relationship", "synthesis", "negative_case_analysis",
-            "cross_interview",
+            "relationship", "synthesis", "cross_interview",
+            "negative_case_analysis",
         ]
 
     def test_create_gt_pipeline(self):
@@ -227,14 +228,15 @@ class TestPipelineFactory:
         pipeline = create_pipeline(methodology="grounded_theory")
         assert len(pipeline.stages) == 7
         names = [s.name() for s in pipeline.stages]
+        # Disconfirmation runs last so it covers cross-interview claims (INV-6).
         assert names == [
             "ingest",
             "gt_constant_comparison",
             "gt_axial_coding",
             "gt_selective_coding",
             "gt_theory_integration",
-            "negative_case_analysis",
             "cross_interview",
+            "negative_case_analysis",
         ]
 
     def test_human_review_stages(self):

@@ -6,8 +6,10 @@
 
 LLM-powered qualitative coding analysis for interview transcripts. Accepts .txt, .docx, .pdf, .rtf files. Supports two methodologies:
 
-- **Default/Thematic Analysis** - 7-stage pipeline: Ingest -> Thematic Coding -> Perspective Analysis -> Relationship Mapping -> Synthesis -> Negative Case Analysis -> Cross-Interview Analysis
-- **Grounded Theory** - 7-stage pipeline: Ingest -> Constant Comparison Coding -> Axial Coding -> Selective Coding -> Theory Integration -> Negative Case Analysis -> Cross-Interview Analysis
+- **Default/Thematic Analysis** - 7-stage pipeline: Ingest -> Thematic Coding -> Perspective Analysis -> Relationship Mapping -> Synthesis -> Cross-Interview Analysis -> Negative Case Analysis
+- **Grounded Theory** - 7-stage pipeline: Ingest -> Constant Comparison Coding -> Axial Coding -> Selective Coding -> Theory Integration -> Cross-Interview Analysis -> Negative Case Analysis
+
+  (Negative Case Analysis runs last so disconfirmation covers the final claim set, including cross-interview claims — see invariant INV-6 in `docs/PROJECT_THEORY_AND_GOALS.md`.)
 
 All stages use structured LLM output via Pydantic schemas + JSON mode. State is held in a single `ProjectState` Pydantic model that can be saved/loaded as JSON.
 
@@ -468,7 +470,7 @@ python -m qc analyze --methodology grounded_theory interview.txt
 ## Workflow
 
 1. Feed transcript files (txt/docx/pdf/rtf) to the pipeline
-2. Default 7-stage pipeline: Ingest → Thematic Coding → Perspective Analysis → Relationship Mapping → Synthesis → Negative Case → Cross-Interview
+2. Default 7-stage pipeline: Ingest → Thematic Coding → Perspective Analysis → Relationship Mapping → Synthesis → Cross-Interview → Negative Case (disconfirmation runs last; INV-6)
 3. Human review via CLI or browser; IRR via `project irr`
 4. Export to JSON/CSV/Markdown/QDPX
 

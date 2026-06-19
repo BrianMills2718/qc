@@ -61,17 +61,28 @@ class NegativeCaseStage(PipelineStage):
 
         combined_text = _build_combined_text(state)
         codes_text = _format_codebook(state)
+        cross_claims = _format_cross_interview_claims(state)
+
+        # When cross-interview analysis has run, disconfirmation must cover those
+        # final claims too, not only the codebook (INV-6). The section is omitted
+        # for single-document corpora where no cross-interview stage ran.
+        cross_section = (
+            f"\n\nCROSS-INTERVIEW CLAIMS TO ALSO CHALLENGE (consensus / divergent themes "
+            f"asserted across interviews — test whether the data actually supports them):\n{cross_claims}"
+            if cross_claims
+            else ""
+        )
 
         prompt = f"""You are a qualitative researcher conducting negative case analysis — a critical step for ensuring the credibility and trustworthiness of qualitative findings (Lincoln & Guba, 1985).
 
-Given the codebook developed from the interview data, your task is to ACTIVELY SEARCH FOR data that:
-1. Contradicts the emerging categories or themes
+Given the codebook AND any cross-interview claims developed from the interview data, your task is to ACTIVELY SEARCH FOR data that:
+1. Contradicts the emerging categories, themes, or cross-interview claims
 2. Doesn't fit neatly into any existing code
 3. Presents alternative explanations for the observed patterns
 4. Shows exceptions to the patterns identified
 
 CURRENT CODEBOOK:
-{codes_text}
+{codes_text}{cross_section}
 
 INTERVIEW DATA:
 {combined_text}
@@ -146,3 +157,16 @@ def _format_codebook(state: ProjectState) -> str:
         if code.reasoning:
             lines.append(f"  Reasoning: {code.reasoning}")
     return "\n".join(lines)
+
+
+def _format_cross_interview_claims(state: ProjectState) -> str:
+    """Return the most recent cross-interview claim memo, or "" if none.
+
+    Cross-interview analysis stores consensus / divergent themes as a
+    ``cross_case`` memo. Surfacing it here lets negative-case analysis challenge
+    the final cross-interview claims, not only the codebook (INV-6).
+    """
+    cross_memos = [m for m in state.memos if m.memo_type == "cross_case"]
+    if not cross_memos:
+        return ""
+    return cross_memos[-1].content
