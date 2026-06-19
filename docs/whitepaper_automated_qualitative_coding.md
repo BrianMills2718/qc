@@ -1,33 +1,43 @@
-# An Auditable Architecture for LLM-Assisted Qualitative Coding
+# An Audit-Oriented Architecture for LLM-Assisted Codebook Qualitative Coding
 
 **Design, Limits, and Evaluation Roadmap**
 
-*Version 1.2 — 2026-06-19*
+*Version 1.3 — 2026-06-19*
 
-> **Revision note (v1.2).** A reviewer graded v1.1 a credible architecture paper
-> but a premature *methods* paper: it still reached for the word "rigor" while
-> reporting no methodological results. v1.2 fixes the genre rather than faking the
-> evidence. It (a) retitles the document as an **architecture + evaluation-roadmap**
-> paper; (b) replaces "rigor" with "rigor *scaffold*" wherever results are absent;
-> (c) adds a full cross-tool feature matrix (§2); (d) states the methodological
-> family the system actually fits (§3.1); (e) demotes negative-case analysis to an
-> *experimental feature*, not credibility evidence (§6); (f) describes
-> schema enforcement accurately by provider tier (§4); (g) turns the ethics section
-> into a control matrix (§8); and (h) completes and verifies the references. No
-> empirical results are claimed; the evaluation in §7 is explicitly a plan.
+> **Revision note (v1.3).** A second review graded v1.2 a solid architecture
+> white paper (B) but not a publishable methods paper, and asked for tighter
+> wording and sourcing. v1.3 makes the requested non-empirical fixes (no results
+> are faked): (a) "auditable" → **"audit-oriented"** throughout, including the
+> title, because the audit *substrate* (append-only log, content hashes, span
+> IDs, replayable provenance) is roadmap, so the present system is *inspectable*,
+> not yet tamper-evidently auditable; (b) negative-case search removed from the
+> contribution sentence (it is experimental, §6); (c) the §2 matrix gains a
+> peer-reviewed-vs-preprint distinction, per-row source notes, and four added
+> comparators (LLMCode, PaTAT, Thematic-LM, AQDA); (d) §7 is upgraded from a
+> checklist to an **evaluation protocol** with datasets, sample-size logic, blind
+> design, frozen prompts, and an anchoring-bias study; (e) §8 adds a
+> **deployment-class** table and an artifact-evidence subsection; (f) the PLOS
+> result is interpreted more carefully (modest chance-corrected agreement).
+> (Earlier revisions: v1.1 narrowed the SOTA claim and added the prototype
+> comparison; v1.2 reframed the genre to architecture + roadmap and relabeled
+> "inter-rater reliability" as "LLM-pass agreement.")
+>
 > **What this paper is:** a description of a working system's architecture and an
 > honest ledger of what is proven (the software runs and fails safely), what is
 > merely *measured* (computational consistency, not validity), and what remains
-> (methodological evaluation, span-anchored grounding, hardened disconfirmation, GT
-> fidelity). **What it is not:** a validated qualitative-methods paper.
+> (methodological evaluation, span-anchored grounding, an immutable audit
+> substrate, hardened disconfirmation, GT fidelity). **What it is not:** a
+> validated qualitative-methods paper. The three blocking gaps for that status are
+> span-anchored grounding, an empirical evaluation, and a complete audit/security
+> substrate — all stated openly below.
 
 ---
 
 ## Abstract
 
-Qualitative coding — the systematic interpretation of unstructured text such as interview transcripts into a structured, defensible set of themes — is labor-intensive, expertise-bound, and historically resistant to automation. Most shipping AI-assisted qualitative data analysis (QDA) products treat large language models (LLMs) as an *assistive feature* beside a manual workflow, while a fast-growing body of research prototypes (AcademiaOS, LOGOS, MindCoder, TAMA, Auto-TA, HICode) automates thematic-analysis or grounded-theory workflows as research artifacts. This paper describes a system positioned deliberately between those poles: a **methodology-aware pipeline with the LLM as its engine and the human as reviewer and director**, engineered for *auditability* — structured output contracts, fail-loud inter-stage dependencies, human-in-the-loop review with provenance, consistency/stability reporting, an (experimental) disconfirmation search, multi-format QDA export, and end-to-end observability.
+Qualitative coding — the systematic interpretation of unstructured text such as interview transcripts into a structured, defensible set of themes — is labor-intensive, expertise-bound, and historically resistant to automation. Most shipping AI-assisted qualitative data analysis (QDA) products treat large language models (LLMs) as an *assistive feature* beside a manual workflow, while a fast-growing body of research prototypes (AcademiaOS, LOGOS, MindCoder, TAMA, Auto-TA, HICode) automates thematic-analysis or grounded-theory workflows as research artifacts. This paper describes a system positioned deliberately between those poles: a **methodology-aware pipeline with the LLM as its engine and the human as reviewer and director**, engineered to be *audit-oriented* — structured output contracts, fail-loud inter-stage dependencies, human-in-the-loop review with provenance, consistency/stability reporting, multi-format QDA export, and end-to-end observability. (A disconfirmation search exists but is *experimental* and is not part of the contribution claim; §6.)
 
-The contribution is an **integration and auditability claim, not a novelty-of-automation claim.** To our knowledge no *widely adopted QDA platform* (defined in §2) combines thematic-analysis (TA) and grounded-theory-*inspired* (GT-inspired) LLM pipelines with typed state, schema-constrained generation, fail-loud orchestration, human-review provenance, agreement/stability metrics, disconfirmation search, observability, and QDPX export in one inspectable system. We are explicit that what the system provides today is a **rigor *scaffold*** — the machinery rigor requires — not demonstrated rigor, which is an empirical outcome we have not yet measured. We describe the architecture as built, state honestly which methodological tradition it fits (codebook/post-positivist analysis, not reflexive TA or constructivist GT), lay out the evaluation that would establish validity, and enumerate the limits — systematic LLM bias, non-determinism, the pseudo-replication risk in treating LLM passes as raters, brittle quote attribution, and partial GT fidelity.
+The contribution is an **integration and audit-orientation claim, not a novelty-of-automation claim, and not a demonstrated-validity claim.** To our knowledge no *widely adopted QDA platform* (defined in §2) combines thematic-analysis (TA) and grounded-theory-*inspired* (GT-inspired) LLM pipelines with typed state, schema-constrained generation, fail-loud orchestration, human-review provenance, agreement/stability metrics, observability, and QDPX export in one inspectable open-source tool. We use *audit-oriented* rather than *auditable*: the system is **inspectable** (state can be examined after the fact) but not yet **tamper-evidently auditable** (no immutable event log, content hashes, or replayable provenance — these are roadmap, §10). What the system provides today is a **rigor *scaffold*** — the machinery rigor requires — not demonstrated rigor, which is an empirical outcome we have not yet measured. We describe the architecture as built, state honestly which methodological tradition it fits (codebook/post-positivist analysis, not reflexive TA or constructivist GT), lay out the evaluation that would establish validity, and enumerate the limits — systematic LLM bias, non-determinism, the pseudo-replication risk in treating LLM passes as raters, brittle quote attribution, and partial GT fidelity.
 
 ---
 
@@ -45,29 +55,36 @@ This system addresses the *engineering* preconditions of all three — and this 
 
 The honest comparison is granular and feature-by-feature, not a single "we are first" assertion. We define a **"widely adopted QDA platform"** as a tool with substantial institutional research use, a commercial or mature open-source distribution, and documented adoption in published qualitative studies — operationally, the four commercial suites below plus QualCoder. The LLM research prototypes are *not* yet widely adopted in that sense; they are the closest *methodological* comparators and we treat them as the primary related work.
 
-**Feature matrix.** Cells reflect public documentation and papers as of mid-2026; tools change frequently. ✓ = supported, ~ = partial/assistive, ✗ = not a focus, ? = not determinable from public sources. "Methodology pipeline" means an *ordered, inspectable execution of a named method*, not the mere presence of AI coding.
+**Feature matrix.** Cells reflect public documentation and papers as of mid-2026; tools change frequently and cells should be read as sourced claims (per-row sources follow the table), not settled fact. ✓ = supported, ~ = partial/assistive, ✗ = not a focus, ? = not determinable from public sources. "Methodology pipeline" means an *ordered, inspectable execution of a named method*, not the mere presence of AI coding. The final column separates **peer-reviewed (PR)** evaluation from **preprint (PP)** and reads "reported," not "published," because some comparators are arXiv/preprint.
 
-| System | Type | AI coding | Methodology pipeline | Schema-constrained output | Human-review provenance | Span-anchored grounding | Disconfirmation search | Agreement / stability | QDPX export | Published empirical eval |
+| System | Type | AI coding | Methodology pipeline | Schema-constrained output | Human-review provenance | Span-anchored grounding | Disconfirmation search | Agreement / stability | QDPX export | Reported empirical eval |
 |---|---|---|---|---|---|---|---|---|---|---|
 | ATLAS.ti | Commercial | ✓ | ~ | ? | ~ | ✓ | ✗ | ✓ (ICR) | ✓ | ✗ |
 | MAXQDA | Commercial | ✓ | ✗ | ? | ~ | ✓ | ✗ | ✓ (ICR) | ✓ | ✗ |
 | NVivo | Commercial | ~ | ✗ | ? | ~ | ✓ | ✗ | ✓ (ICR) | ✓ | ✗ |
 | Dedoose | Commercial | ~ | ✗ | ✗ | ~ | ✓ | ✗ | ✓ | ~ | ✗ |
 | QualCoder | OSS desktop | ~ | ✗ | ✗ | ~ | ✓ | ✗ | ✓ (κ) | ✓ | ✗ |
-| AcademiaOS | Research prototype | ✓ | ✓ (GT) | ~ | ✗ | ? | ✗ | ✗ | ✗ | ✓ (user study) |
-| LOGOS | Research prototype | ✓ | ✓ (GT) | ✓ (schema induction) | ✗ | ? | ✗ | ~ (5-dim metric) | ✗ | ✓ (5 corpora) |
-| MindCoder | Research prototype | ✓ | ✓ (inductive) | ~ | ✓ (interaction logs) | ? | ✗ | ✗ | ✗ | ✓ |
-| TAMA | Research prototype | ✓ | ✓ (TA) | ~ | ✓ | ? | ✗ | ✓ | ✗ | ✓ (clinical) |
-| Auto-TA | Research prototype | ✓ | ✓ (TA) | ~ | ✗ (automated) | ? | ✗ | ~ | ✗ | ✓ |
-| HICode | Research prototype | ✓ | ✓ (hierarchical) | ~ | ✗ | ? | ✗ | ✓ (human-theme alignment) | ✗ | ✓ (3 datasets) |
+| PaTAT | Research prototype | ~ (rule synthesis) | ✗ | ✗ | ✓ | ? | ✗ | ✓ | ✗ | ✓ (PR, CHI'23) |
+| LLMCode | Research prototype | ✓ | ✗ (eval tool) | ~ | ✓ | ? | ✗ | ✓ (IoU/Hausdorff) | ✗ | ✓ (PP) |
+| AcademiaOS | Research prototype | ✓ | ✓ (GT) | ~ | ✗ | ? | ✗ | ✗ | ✗ | ✓ (PP, user study) |
+| LOGOS | Research prototype | ✓ | ✓ (GT) | ✓ (schema induction) | ✗ | ? | ✗ | ~ (5-dim metric) | ✗ | ✓ (PP, 5 corpora) |
+| MindCoder | Research prototype | ✓ | ✓ (inductive) | ~ | ✓ (interaction logs) | ? | ✗ | ✗ | ✗ | ✓ (PP) |
+| TAMA | Research prototype | ✓ | ✓ (TA) | ~ | ✓ | ? | ✗ | ✓ | ✗ | ✓ (PP, clinical) |
+| Auto-TA | Research prototype | ✓ | ✓ (TA) | ~ | ✗ (automated) | ? | ✗ | ~ | ✗ | ✓ (PP) |
+| Thematic-LM | Research prototype | ✓ | ✓ (TA, multi-agent) | ~ | ✓ (reviewer agent) | ? | ✗ | ✓ | ✗ | ✓ (PR, WWW'25) |
+| HICode | Research prototype | ✓ | ✓ (hierarchical) | ~ | ✗ | ? | ✗ | ✓ (human-theme alignment) | ✗ | ✓ (PR, EMNLP'25) |
+| AQDA | OSS tool | ~ (local AI) | ✗ | ✗ | ✓ | ✓ | ✗ | ? | ✓ (REFI-QDA) | ✗ |
 | **This system** | OSS tool | ✓ | ✓ (TA + GT-inspired) | ✓ | ✓ | ✗ (roadmap) | ~ (experimental) | ✓ | ✓ | ✗ (planned) |
 
-Two honest readings of this matrix are essential and were missing from earlier drafts:
+**Per-row sources.** ATLAS.ti Intentional AI Coding manual; MAXQDA AI Assist docs; QualCoder repository; Dedoose docs; PaTAT (Gebreegziabher et al., CHI 2023); LLMCode (Oksanen et al., arXiv:2504.16671); AcademiaOS (Übellacker, arXiv:2403.08844); LOGOS (Pi et al., arXiv:2509.24294); MindCoder (Gao et al., arXiv:2501.00775); TAMA (Xu et al., arXiv:2503.20666); Auto-TA (Yi et al., arXiv:2506.23998); Thematic-LM (ACM Web Conf. 2025); HICode (Zhong et al., EMNLP 2025); AQDA (Seidl, github.com/tseidl/aqda). Full entries in References.
 
-1. **Established QDA tools beat this system on span-anchored grounding and published adoption.** ATLAS.ti, MAXQDA, NVivo, Dedoose, and QualCoder anchor coded segments to exact source offsets; this system currently does not (§5.1). That is a real deficit, not a footnote.
-2. **The research prototypes beat this system on published empirical evaluation.** AcademiaOS reports a user study; LOGOS reports ~80% alignment with an expert schema across five corpora; HICode validates against human-constructed themes; TAMA/Auto-TA report multi-agent TA results. This system reports *none* yet (§7).
+Three honest readings of this matrix are essential and were missing from earlier drafts:
 
-The defensible contribution is therefore the **specific integration**: the only column-combination this system holds that the others do not is *{schema-constrained typed output + human-review provenance + agreement/stability + QDPX export + observability + a named TA *and* GT-inspired pipeline}* in one auditable open-source tool. It does **not** lead on grounding or on evidence. Commercial AI-coding is real (ATLAS.ti's Intentional AI Coding chunks text, queries a model repeatedly, and recombines results; MAXQDA's AI Assist offers single/multi-document coding, code/subcode suggestions, chat, summaries, translation), so the claim is about *methodological orchestration and auditability*, never about whether AI coding exists. A 2026 scoping review documents how crowded and fast-moving this space is.
+1. **Established QDA tools — and AQDA — beat this system on span-anchored grounding.** ATLAS.ti, MAXQDA, NVivo, Dedoose, QualCoder, and the local-first AQDA anchor coded segments to exact source offsets; this system currently does not (§5.1). That is a real deficit, not a footnote.
+2. **The research prototypes beat this system on reported empirical evaluation.** PaTAT (CHI'23) and Thematic-LM (WWW'25) and HICode (EMNLP'25) are peer-reviewed; AcademiaOS reports a user study; LOGOS reports an **average 80.4% alignment with an expert-developed schema across five corpora** (the abstract's figure; a higher per-dataset number sometimes cited could not be confirmed from the abstract); LLMCode reports IoU/Hausdorff alignment metrics. This system reports *none* yet (§7).
+3. **AQDA is the closest open-source comparator on the "local + QDPX" axis** — local-first with Ollama and REFI-QDA/QDPX/QDC/CSV/JSON export — but is not a named-methodology pipeline. It is a useful reminder that local + export is not itself the contribution.
+
+The defensible contribution is therefore the **specific integration**: the only column-combination this system holds that the others do not is *{schema-constrained typed output + human-review provenance + agreement/stability + QDPX export + observability + a named TA *and* GT-inspired pipeline}* in one open-source tool. It does **not** lead on grounding or on evidence. Commercial AI-coding is real (ATLAS.ti's Intentional AI Coding chunks text, queries a model repeatedly, and recombines results; MAXQDA's AI Assist offers single/multi-document coding, code/subcode suggestions, chat, summaries, translation), so the claim is about *methodological orchestration and audit-orientation*, never about whether AI coding exists. A 2026 scoping review documents how crowded and fast-moving this space is.
 
 ---
 
@@ -112,7 +129,7 @@ Two methodologies are implemented as distinct pipelines. We label the grounded-t
 ### 5.1 Thematic / Default Analysis (7 stages)
 `Ingest → Thematic Coding → Perspective Analysis → Relationship Mapping → Synthesis → Negative Case → Cross-Interview`. Ingest parses `.txt/.docx/.pdf/.rtf` and segments by speaker.
 
-**Quote attribution is currently substring matching** — better than blind duplication but brittle to OCR artifacts, smart vs. straight quotes, transcript cleanup, partial quotations, and phrases repeated across interviews. This is a **first-order weakness, not a minor gap**: it undermines confirmability (tracing claims to data), disconfirmation evidence, QDPX export integrity (whether exported segments map to true source spans), and auditability by human reviewers. Until span-anchored attribution lands (doc + speaker + char/turn offsets + quote hash, with every generated quote required to resolve to an anchored span; §10), the system is honestly a *prototype with audit aspirations* on the grounding dimension, not a finished research instrument.
+**Quote attribution is currently substring matching** — better than blind duplication but brittle to OCR artifacts, smart vs. straight quotes, transcript cleanup, partial quotations, and phrases repeated across interviews. This is a **first-order weakness, not a minor gap**: it undermines confirmability (tracing claims to data), disconfirmation evidence, QDPX export integrity (whether exported segments map to true source spans), and review by human auditors. Concretely: if three participants each say *"I felt ignored,"* substring matching can prove the sentence exists *somewhere* in the corpus but not which speaker, interview, turn, or analytic context produced the cited evidence — it breaks the evidentiary chain. Until span-anchored attribution lands (doc + speaker + char/turn offsets + quote hash, with every generated quote required to resolve to an anchored span; §10), the system is honestly a *prototype with audit aspirations* on the grounding dimension, not a finished research instrument.
 
 ### 5.2 Grounded-Theory-Inspired Pipeline (7 stages)
 `Ingest → Constant Comparison Coding → Axial Coding → Selective Coding → Theory Integration → Negative Case → Cross-Interview`. Constant Comparison codes each segment against an evolving codebook with a saturation check per pass (incident-to-code comparison; incident-to-incident and category-to-category are partial). Supporting capabilities: **incremental re-coding** (`project recode`) and **codebook-level saturation detection** — neither yet implements theoretical sampling or per-category saturation.
@@ -159,11 +176,27 @@ This section describes the machinery rigor requires. We call it a **scaffold** a
 | Baselines | Generic ChatGPT prompting; ATLAS.ti/MAXQDA where feasible; LLMCode, HICode, TAMA/Auto-TA, LOGOS/AcademiaOS by task |
 | Interoperability | QDPX import success into ATLAS.ti/NVivo |
 
-A 2026 blinded mixed-methods comparison (PLOS Digital Health) found LLMs performed comparably to humans for *applying predefined deductive codes* (low hallucination) but were more variable for *inductive* theme generation (tone, nuance, conversational context). That directly shapes the plan: expect parity on deductive application; be most skeptical of inductive generation.
+A 2026 blinded mixed-methods comparison (PLOS Digital Health) found LLMs performed comparably to blinded humans for *applying predefined deductive codes* in one focus-group setting, with low hallucination — but the comparison is narrower than it first reads: chance-corrected agreement was modest for humans and LLMs alike (high raw agreement, low kappa under skewed code prevalence), and *inductive* theme generation was more variable (tone, nuance, conversational context). The correct reading is therefore "comparable on raw agreement in one deductive focus-group setting — *not* general evidence of validity for inductive qualitative interpretation." That shapes the plan: expect rough parity on deductive application; be most skeptical of inductive generation; and report kappa *with* prevalence/CIs, never raw agreement alone.
+
+### 7.1 From checklist to protocol
+
+To be a protocol rather than a wishlist, the evaluation must be operationalized before any run. The pre-registered design we commit to:
+
+- **Datasets & domains:** ≥3 corpora spanning ≥2 domains (e.g., a public focus-group set, a de-identified interview set, and a methods-paper benchmark), including at least one *messy* transcript set (disfluencies, multi-speaker overlap, timestamps).
+- **Scale & unit:** ≥20 transcripts with a reported length distribution; the **unit of analysis** fixed in advance (turn-level for deductive application; researcher-delimited segment for inductive coding) to control unitization (§6).
+- **Experts & adjudication:** ≥2 qualified coders per condition (stated qualifications), independent coding, then adjudication of disagreements by a third; report inter-human agreement as the human baseline.
+- **Blinding:** raters blind to whether codes are human- or LLM-generated.
+- **Metrics & thresholds:** code-grounding rate (exact-span resolution) and unresolvable/hallucinated-quote count; Krippendorff's α and kappa **with** confidence intervals and prevalence; expert ratings (clarity/specificity/usefulness/grounding); explicit handling of multi-label overlap and lexically-different-but-semantically-similar codes via a reconciliation rubric. **Success thresholds are pre-registered** (e.g., grounding ≥0.95; α within a stated margin of the human baseline) so results cannot be graded post hoc.
+- **Frozen prompts:** all prompts and models frozen and hashed before evaluation; no prompt tuning against the test sets.
+- **Baselines:** generic single-prompt ChatGPT; this system; and, where feasible, ATLAS.ti/MAXQDA AI coding and task-matched prototypes (HICode, TAMA/Auto-TA, LOGOS/AcademiaOS).
+
+### 7.2 Human-in-the-loop is a hypothesis, not a safeguard
+
+"Human as reviewer and director" must be *tested*, not asserted, because LLM-first review invites **automation bias** (over-trusting machine output) and **anchoring** (the first suggested code shaping later judgment). The planned study compares four conditions — human-only, LLM-only, LLM-first-then-human, and blind-human-first — and measures time-to-analysis, revision distance from the initial LLM output, and the rate of accepted hallucinated or weakly grounded codes. Until those numbers exist, "human-in-the-loop" is a governance design, not a validated epistemic safeguard.
 
 ---
 
-## 8. Ethics and Security — Control Matrix
+## 8. Ethics, Security, and Deployment Limits
 
 Qualitative transcripts frequently contain protected, confidential, or re-identifiable data, so security and ethics are first-order. The current posture suits a single-researcher local tool and is **not** a multi-tenant deployment; the table states, per risk, the current control, the missing control, how it should be tested, and deployment status.
 
@@ -180,7 +213,23 @@ Qualitative transcripts frequently contain protected, confidential, or re-identi
 | Sensitive text in logs | — | Log redaction policy | Log inspection | Missing |
 | Right-to-delete | File deletion | Cascade across state, exports, logs, observability DB | Deletion-completeness test | Missing |
 
-We will publish a full threat model before describing the system as a "trusted research instrument" in any external venue. Until then the honest label is **"auditable local research tool with a known, bounded security posture."**
+We will publish a full threat model before describing the system as a "trusted research instrument" in any external venue. Until then the honest label is **"audit-oriented local research tool with a known, bounded security posture."**
+
+### 8.1 Permitted deployment classes
+
+Readers must not infer the current system is safe for sensitive transcripts. Until local-only enforcement, de-identification, log redaction, and a published threat model exist, deployment is bounded:
+
+| Deployment class | Acceptability (as described) |
+|---|---|
+| Synthetic / demo transcripts | Acceptable |
+| Public-domain text | Acceptable |
+| De-identified low-risk interviews | Conditionally acceptable (local model; manual PII review) |
+| Clinical / educational / workplace transcripts | Not yet acceptable without local-only enforcement, redaction, and a threat model |
+| Regulated / protected data | Not acceptable as described |
+
+### 8.2 Artifact evidence
+
+For reproducibility, this paper points to concrete artifacts rather than asking for trust: the open-source repository and the exact commit; the deterministic test report (527 tests passing) and the lint/docs gates; the schema-omission and export-sandbox regression tests cited above. **Still pending** (and required before any methodological claim): a redacted end-to-end run trace, a sample QDPX export, and CI logs against a published commit. These are listed so the absence is explicit, not glossed.
 
 ---
 
@@ -192,7 +241,7 @@ We will publish a full threat model before describing the system as a "trusted r
 - **GT fidelity is partial** — hence "GT-inspired," and "procedural mimicry," not "full GT" (§5).
 - **Quote attribution is brittle** until span anchoring lands (§5.1) — the highest-priority technical gap.
 - **Disconfirmation is experimental**, not credibility evidence (§6).
-- **Auditability is partial** until an append-only log and export hashes exist.
+- **Audit-oriented, not yet auditable** — the system is *inspectable*, but tamper-evident auditability (immutable event log, content/prompt/model hashes, replayable provenance) is roadmap.
 - **Methodological validity is unmeasured** (§7).
 - **Non-determinism is inherent**; we measure and report it.
 
@@ -217,9 +266,9 @@ Each item is a stage or layer over the existing typed state, observability, and 
 
 ## 11. Conclusion
 
-Most shipping QDA products bolt AI onto a manual workflow; a wave of research prototypes automates parts of TA and GT but as artifacts rather than integrated tools. This system's contribution is an **auditable integration** — TA and GT-inspired pipelines, schema-constrained typed output, fail-loud orchestration, human-review provenance, consistency/stability reporting, multi-format export including QDPX, and observability, assembled into one inspectable open-source tool.
+This paper presents an **audit-oriented architecture for LLM-assisted codebook qualitative analysis**. The system integrates typed state, schema-constrained generation, fail-loud orchestration, human-review provenance, computational-consistency reporting, observability, and QDA export across thematic and GT-inspired workflows. We do **not** claim methodological validity, first-in-kind automation, or beyond-SOTA standing. We identify grounding (span anchoring), disconfirmation hardening, audit immutability, security hardening, and empirical evaluation as the unresolved requirements that stand between this architecture and a validated research instrument.
 
-We deliberately do **not** claim to be beyond the state of the art, first to automate, or to have demonstrated methodological rigor. The credible claim is narrower: an *auditable, methodology-aware engineering integration* that supplies the **scaffold** rigor requires, with an explicit ledger of what is proven (the software runs and fails safely), what is merely measured (computational consistency, not validity), and what remains (span-anchored grounding, hardened disconfirmation, GT fidelity, a published threat model, and — above all — the methodological evaluation in §7). On two dimensions it currently *lags* its comparators: established QDA tools beat it on span-anchored grounding, and the research prototypes beat it on published evaluation. The wager of the design is that the future of qualitative analysis is neither pure-human (slow, inconsistently documented) nor pure-LLM (fast but unfalsifiable), but a disciplined collaboration in which programmatic code guarantees coverage, the LLM supplies semantic judgment, and the human supplies direction and final authority — *once the evidence in §7 is in hand*.
+The credible claim is narrow by design: a *methodology-aware engineering integration* that supplies the **scaffold** rigor requires, with an explicit ledger of what is proven (the software runs and fails safely), what is merely measured (computational consistency, not validity), and what remains. On two dimensions it currently *lags* its comparators — established QDA tools (and AQDA) beat it on span-anchored grounding, and the research prototypes beat it on reported evaluation. The wager of the design is that the future of qualitative analysis is neither pure-human (slow, inconsistently documented) nor pure-LLM (fast but unfalsifiable), but a disciplined collaboration in which programmatic code guarantees coverage, the LLM supplies semantic judgment, and the human supplies direction and final authority — *once the evidence in §7 is in hand*.
 
 ---
 
@@ -250,3 +299,7 @@ We deliberately do **not** claim to be beyond the state of the art, first to aut
 - Xu, H., Yi, S., Lim, T., et al. (2025). TAMA: a human–AI collaborative thematic analysis framework using multi-agent LLMs for clinical interviews. arXiv:2503.20666.
 - Yi, S., Nguyen, J., Xu, H., Lim, T., Well, A., Markey, M., & Ding, Y. (2025). Auto-TA: towards scalable automated thematic analysis via multi-agent LLMs with reinforcement learning. arXiv:2506.23998.
 - Zhong, M., Wang, P., & Field, A. (2025). HICode: hierarchical inductive coding with LLMs. *Proc. EMNLP 2025* (arXiv:2509.17946).
+- Gebreegziabher, S. A., Zhang, Z., Tang, X., Meng, Y., Glassman, E. L., & Li, T. J.-J. (2023). PaTAT: human-AI collaborative qualitative coding with explainable interactive rule synthesis. *Proc. CHI 2023*. doi:10.1145/3544548.3581352.
+- Oksanen, J., Lucero, A., & Hämäläinen, P. (2025). LLMCode: evaluating and enhancing researcher-AI alignment in qualitative analysis. arXiv:2504.16671.
+- Thematic-LM: a LLM-based multi-agent system for large-scale thematic analysis (2025). *Proc. ACM Web Conference 2025*. doi:10.1145/3696410.3714595.
+- Seidl, T. (2026). AQDA: augmented qualitative data analysis — a local-first QDA tool with AI augmentation via Ollama. Software. github.com/tseidl/aqda.
