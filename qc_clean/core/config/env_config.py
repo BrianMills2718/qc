@@ -11,6 +11,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+DEFAULT_CORS_ORIGINS = ["http://127.0.0.1:8002", "http://localhost:8002"]
+
 
 class EnvironmentConfig:
     """Server environment configuration with fallback defaults."""
@@ -31,7 +33,7 @@ class EnvironmentConfig:
         env_origins = os.getenv("CORS_ORIGINS", "")
         if env_origins:
             return [o.strip() for o in env_origins.split(",") if o.strip()]
-        return ["*"]
+        return DEFAULT_CORS_ORIGINS.copy()
 
     @property
     def enable_docs(self) -> bool:

@@ -9,6 +9,8 @@ import logging
 from typing import Dict, Any, List, Optional
 from datetime import datetime
 
+from qc_clean.core.config import DEFAULT_CORS_ORIGINS
+
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +47,7 @@ class QCAPIServer:
             # Add CORS middleware
             self._app.add_middleware(
                 CORSMiddleware,
-                allow_origins=self.config.get('cors_origins', ["*"]),
+                allow_origins=self.config.get('cors_origins', DEFAULT_CORS_ORIGINS),
                 allow_credentials=True,
                 allow_methods=["*"],
                 allow_headers=["*"],

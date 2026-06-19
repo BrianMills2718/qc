@@ -30,7 +30,7 @@ cost:  ## Show LLM spend
 	@python -m llm_client cost --days $(DAYS) --project $(PROJECT) 2>/dev/null || echo "llm_client cost not available"
 
 errors:  ## Show error breakdown
-	@python -m llm_client errors --days $(DAYS) --project $(PROJECT) 2>/dev/null || echo "llm_client errors not available"
+	@python scripts/recent_errors.py --days $(DAYS) --project $(PROJECT) --limit $(LIMIT)
 
 # >>> META-PROCESS WORKTREE TARGETS >>>
 WORKTREE_CREATE_SCRIPT := scripts/meta/worktree-coordination/create_worktree.py
