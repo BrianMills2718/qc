@@ -356,6 +356,13 @@ v2.2 is complete. Remaining work is focused on deeper methodological fidelity an
 - **Active learning**: Use human review decisions to fine-tune prompting for the project
 - **Collaborative coding**: Multiple human reviewers with conflict resolution
 
+### Maintenance Follow-Ups (2026-06-19)
+- **Line endings**: Normalize mixed CRLF/LF files in one mechanical commit with no behavior changes, then run `make check`.
+- **Ruff expansion**: Add `F541` next and remove f-strings with no placeholders. Defer `F401` and `E402` until wrapper/re-export patterns are reviewed.
+- **Cost observability target**: Verify `make cost`; if `llm_client cost` is unavailable or unstable, replace the fallback with an explicit repo-local helper like `make errors`.
+- **Boundary tests**: Add API/MCP regression tests for invalid project IDs so traversal-like inputs stay mapped to explicit not-found/invalid responses.
+- **Exporter overwrite policy**: Current exporters overwrite existing output paths. Decide whether that is intended; either document/test overwrite semantics or add an explicit force/no-clobber policy later.
+
 ## prompt_eval Integration (Prompt Optimization)
 
 ### Infrastructure
