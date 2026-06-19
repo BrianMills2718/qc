@@ -23,6 +23,8 @@
 
 LLM-powered qualitative coding of interview transcripts. It treats the LLM as the **engine of a methodology-aware pipeline** — not as a chat sidebar bolted onto manual coding — with the human as reviewer and director. It runs two methodologies (thematic analysis and a grounded-theory-inspired pipeline) as ordered, inspectable stages over a single typed state object, produces structured output validated against Pydantic schemas, keeps a human-in-the-loop review loop, measures its own coding consistency, and exports to the standard QDA interchange format (QDPX). The bet is that good qualitative analysis is neither pure-human (slow, inconsistently documented) nor pure-LLM (fast but unfalsifiable), but a disciplined collaboration: **programmatic code guarantees coverage, the LLM supplies semantic judgment, the human supplies direction and final authority.**
 
+*This paragraph states intent and design, not demonstrated maturity. "Measures its own consistency" is not "is correct"; the present build does not yet meet several of its own correctness conditions. See §6 (what is proven vs. measured vs. planned) and §6.1 (the architectural invariants and where the build falls short) before describing the system as methodologically validated.*
+
 ## 2. Why it exists (the gap it targets)
 
 Three things separate "an LLM can suggest codes" from "an LLM can do defensible qualitative analysis", and the project is organized around all three:
@@ -35,9 +37,9 @@ Three things separate "an LLM can suggest codes" from "an LLM can do defensible 
 
 Two pipelines, each a fixed ordered sequence of stages over `ProjectState`.
 
-**Thematic / default (7 stages):** Ingest → Thematic Coding → Perspective Analysis → Relationship Mapping → Synthesis → Negative Case → Cross-Interview. Produces a hierarchical codebook (codes with definitions, semantic criteria, quotes, mention counts, confidence), per-speaker perspective maps, an entity/relationship graph, a synthesis, a disconfirmation pass, and automatic cross-document analysis for multi-interview corpora.
+**Thematic / default (7 stages):** Ingest → Thematic Coding → Perspective Analysis → Relationship Mapping → Synthesis → Negative Case *(experimental — see §6.1/§8)* → Cross-Interview. Produces a hierarchical codebook (codes with definitions, semantic criteria, quotes, mention counts, confidence), per-speaker perspective maps, an entity/relationship graph, a synthesis, an (experimental) disconfirmation pass, and automatic cross-document analysis for multi-interview corpora. Note: the codebook's quotes are *currently* attached by brittle substring matching (INV-1, §6.1) — treat quote-level evidence as provisional until span anchoring lands.
 
-**Grounded-theory-*inspired* (7 stages):** Ingest → Constant Comparison Coding → Axial Coding → Selective Coding → Theory Integration → Negative Case → Cross-Interview. Constant comparison codes each segment against an evolving codebook with a saturation check per pass; axial finds category relationships; selective finds the core category; integration builds a theoretical model.
+**Grounded-theory-*inspired* (7 stages):** Ingest → Constant Comparison Coding → Axial Coding → Selective Coding → Theory Integration → Negative Case *(experimental)* → Cross-Interview. Constant comparison codes each segment against an evolving codebook with a **codebook-stability** saturation check per pass — this is *codebook convergence*, **not** grounded-theory *category saturation* (per-property/dimension adequacy), which is unmet (INV-4, §6.1). Do not report codebook stability as theoretical adequacy. Axial finds category relationships; selective finds the core category; integration builds a theoretical model.
 
 **Why "GT-*inspired*", not "full GT" — agents must respect this distinction.** The pipeline performs the *visible procedural steps* of GT (procedural mimicry) but does **not** yet implement GT's core epistemic logic (methodological fidelity). Specifically missing: *theoretical sampling* (collecting new data to develop weak categories), *category-level saturation* (per-property/dimension, not just codebook stability), *analytic memoing* that builds conceptual relations (current memos lean toward summary logging), full *axial decomposition* (causal vs. context vs. intervening conditions), and *reflexivity*. **Do not describe the system as doing "full grounded theory."**
 
@@ -78,6 +80,24 @@ This is the section that keeps agents accurate. Categorize any capability before
 - **Hardened disconfirmation** (the current negative-case pass is experimental; see §8).
 - True theoretical sampling, per-category saturation, full axial decomposition, multi-model consensus, active learning, collaborative coding, retrieval grounding.
 
+### 6.1 Architectural invariants (the north-star — and where the build falls short)
+
+The §6 ledger says what *is*; this says what *must be true* for the system's outputs to be trustworthy. These are the non-negotiable correctness conditions of the target architecture — the north-star is stricter than the current build. Several are **unmet today**; that is stated loudly so agents do not mistake the build for the target. The point of listing them as invariants (not roadmap) is that until an invariant is met, the outputs it governs are *provisional*, and an agent must say so.
+
+**Met by the current build (keep them met — do not regress):**
+- **INV-A — Fail-loud inter-stage contracts.** Missing upstream data raises (`ctx.require`), never silently degrades. *Met.*
+- **INV-B — Structural schema validity.** Every LLM output validates against a typed schema (constrained decode where supported, else validate-and-retry). *Met* (structural only — not interpretive validity).
+- **INV-C — Provenance recorded.** Every code is tagged LLM- vs. human-originated. *Met.*
+
+**Target invariants the build does NOT yet satisfy (treat governed outputs as provisional):**
+- **INV-1 — Evidentiary anchoring.** Every quoted piece of evidence must resolve to a stable anchor: `{document id, speaker id, turn/char offsets, quote hash}`, and must fail loudly if it cannot. *Status: UNMET* (substring matching). **Until met, all quote-level evidence — in codebooks, negative cases, synthesis, and QDPX export — may be misattributed to the wrong speaker/interview/context and must be labeled provisional.** This is the foundational invariant; most others depend on it.
+- **INV-2 — Source-anchored, retrieval-first disconfirmation.** Negative cases must be drawn by retrieving candidate contradictory passages from the corpus *first*, then interpreting them — ideally with a different model/adversarial prompt — each anchored (INV-1) and human-adjudicated before synthesis. *Status: UNMET* (same-model, memory-first pass that can launder confirmation). Until met, disconfirmation is experimental and is **not** credibility evidence.
+- **INV-3 — Validity adjudication is separate from consistency.** Correctness must be estimated by human/expert adjudication on a sample of coding decisions, as a distinct layer from agreement/stability. Consistency metrics cannot detect stable error (same wrong code, high agreement). *Status: UNMET* (only consistency is measured).
+- **INV-4 — Stability ≠ saturation.** Codebook-stability convergence and grounded-theory category saturation (per-property/dimension adequacy) must be separate, separately-labeled outputs; codebook convergence must never be reported as theoretical adequacy. *Status: PARTIAL* (codebook stability exists; category saturation UNMET).
+- **INV-5 — Bias surfacing.** Where respondent attributes are available and ethically permissible, stratified error diagnostics must check whether coding tracks respondent identity markers rather than textual meaning. *Status: UNMET.*
+
+**Meta-invariant — INV-0:** the system and its agents must never assert an unmet invariant as met. If an output depends on an UNMET invariant, label it provisional and cite the invariant. (This is the architectural form of §7's claim discipline.)
+
 ## 7. Claim discipline — what agents may and may not assert
 
 When writing commits, memos, reports, exports, or user-facing text about this system:
@@ -108,11 +128,13 @@ The system is a **local research tool**, loopback-bound and unauthenticated; har
 
 ## 10. Roadmap (priority order)
 
-1. Span-anchored grounding (precondition for trustworthy evidence and the grounding metric).
-2. Methodological evaluation: grounding rate, blind expert ratings, gold-standard comparison, stability CIs, bias stratification, and a human-in-the-loop anchoring-bias study (LLM-first vs blind-human-first). This is what would move the system from "software works" to "analysis is trustworthy."
-3. Hardened, retrieval-first disconfirmation.
-4. True theoretical sampling + per-category saturation (GT fidelity).
-5. Multi-model consensus; active learning from review; collaborative coding; retrieval grounding.
+Ordered to close the unmet invariants in §6.1 first (an invariant outranks a feature).
+
+1. Span-anchored grounding — **closes INV-1**, the precondition for trustworthy evidence and the grounding metric.
+2. Methodological evaluation — **closes INV-3/INV-5**: grounding rate, blind expert ratings, gold-standard comparison, stability CIs, bias stratification, and a human-in-the-loop anchoring-bias study (LLM-first vs blind-human-first). Moves the system from "software works" to "analysis is trustworthy."
+3. Hardened, retrieval-first disconfirmation — **closes INV-2** (depends on INV-1).
+4. True theoretical sampling + per-category saturation — **closes INV-4** (GT fidelity).
+5. Multi-model consensus; active learning from review; collaborative coding; retrieval grounding (features, not invariants).
 6. Tamper-evident audit substrate (append-only log + export hashes + optional DB).
 
 ## 11. Prior art worth learning from
