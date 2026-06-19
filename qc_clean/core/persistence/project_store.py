@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import json
 import logging
+import re
 from pathlib import Path
 from typing import Dict, List, Optional
 
@@ -17,6 +18,11 @@ from qc_clean.schemas.domain import ProjectState
 logger = logging.getLogger(__name__)
 
 DEFAULT_PROJECTS_DIR = Path.home() / ".qc_projects"
+PROJECT_ID_RE = re.compile(r"^[A-Za-z0-9_-]+$")
+
+
+class InvalidProjectID(ValueError):
+    """Raised when a project ID cannot be mapped to one project file."""
 
 
 class ProjectStore:
@@ -43,7 +49,10 @@ class ProjectStore:
 
     def load(self, project_id: str) -> ProjectState:
         """Load a ProjectState by its id. Raises FileNotFoundError if missing."""
-        path = self._path_for(project_id)
+        try:
+            path = self._path_for(project_id)
+        except InvalidProjectID as exc:
+            raise FileNotFoundError(f"Invalid project id: {project_id!r}") from exc
         if not path.exists():
             raise FileNotFoundError(f"No project file found: {path}")
         raw = path.read_text(encoding="utf-8")
@@ -69,7 +78,10 @@ class ProjectStore:
 
     def delete(self, project_id: str) -> bool:
         """Delete a project file. Returns True if deleted, False if not found."""
-        path = self._path_for(project_id)
+        try:
+            path = self._path_for(project_id)
+        except InvalidProjectID:
+            return False
         if path.exists():
             path.unlink()
             logger.info("Deleted project %s", project_id)
@@ -78,17 +90,25 @@ class ProjectStore:
 
     def exists(self, project_id: str) -> bool:
         """Check whether a project file exists."""
-        return self._path_for(project_id).exists()
+        try:
+            return self._path_for(project_id).exists()
+        except InvalidProjectID:
+            return False
 
     # ------------------------------------------------------------------
     # Internals
     # ------------------------------------------------------------------
 
     def _path_for(self, project_id: str) -> Path:
-        # Sanitise: only allow alphanumeric, dash, underscore
-        safe_id = "".join(
-            c for c in project_id if c.isalnum() or c in "-_"
-        )
-        if not safe_id:
-            raise ValueError(f"Invalid project id: {project_id!r}")
-        return self.projects_dir / f"{safe_id}.json"
+        """Resolve a project ID to a file path without rewriting the ID."""
+        if not PROJECT_ID_RE.fullmatch(project_id):
+            raise InvalidProjectID(
+                "Project id must contain only letters, numbers, '-' and '_': "
+                f"{project_id!r}"
+            )
+
+        path = (self.projects_dir / f"{project_id}.json").resolve()
+        root = self.projects_dir.resolve()
+        if path.parent != root:
+            raise InvalidProjectID(f"Project path escapes store directory: {project_id!r}")
+        return path

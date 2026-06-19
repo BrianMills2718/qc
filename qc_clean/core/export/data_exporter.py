@@ -10,6 +10,7 @@ import csv
 import io
 import json
 import logging
+import re
 import uuid
 import zipfile
 from datetime import datetime, timezone
@@ -21,6 +22,19 @@ from qc_clean.schemas.domain import ProjectState
 
 logger = logging.getLogger(__name__)
 
+UNSAFE_FILENAME_CHARS_RE = re.compile(r"[^A-Za-z0-9 _.-]+")
+
+
+def _safe_filename_stem(value: str, fallback: str = "project") -> str:
+    """Convert a display name into one filesystem-local filename stem."""
+    safe = UNSAFE_FILENAME_CHARS_RE.sub("_", value).strip(" .")
+    return safe or fallback
+
+
+def _default_export_path(project_name: str, suffix: str) -> Path:
+    """Build a default export path without allowing project names to add dirs."""
+    return Path(f"{_safe_filename_stem(project_name)}{suffix}")
+
 
 # ---------------------------------------------------------------------------
 # ProjectExporter -- works directly with ProjectState
@@ -31,7 +45,7 @@ class ProjectExporter:
 
     def export_json(self, state: ProjectState, output_file: Optional[str] = None) -> str:
         """Export full project state as JSON. Returns the output path."""
-        path = Path(output_file) if output_file else Path(f"{state.name}.json")
+        path = Path(output_file) if output_file else _default_export_path(state.name, ".json")
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(state.model_dump_json(indent=2), encoding="utf-8")
         logger.info("Exported JSON to %s", path)
@@ -146,7 +160,10 @@ class ProjectExporter:
 
     def export_markdown(self, state: ProjectState, output_file: Optional[str] = None) -> str:
         """Export a human-readable Markdown report. Returns the output path."""
-        path = Path(output_file) if output_file else Path(f"{state.name}_report.md")
+        path = Path(output_file) if output_file else _default_export_path(
+            f"{state.name}_report",
+            ".md",
+        )
         path.parent.mkdir(parents=True, exist_ok=True)
 
         lines: List[str] = []
@@ -382,7 +399,7 @@ class ProjectExporter:
         Compatible with ATLAS.ti, NVivo, MAXQDA, and other REFI-QDA tools.
         Returns the output path.
         """
-        path = Path(output_file) if output_file else Path(f"{state.name}.qdpx")
+        path = Path(output_file) if output_file else _default_export_path(state.name, ".qdpx")
         path.parent.mkdir(parents=True, exist_ok=True)
 
         NS = "urn:QDA-XML:project:1.0"
@@ -540,13 +557,13 @@ class DataExporter:
             raise ValueError(f"Unsupported export format: {format}")
 
     def _export_json(self, results: Dict[str, Any], filename: str) -> str:
-        output_path = self.output_dir / f"{filename}.json"
+        output_path = self.output_dir / f"{_safe_filename_stem(filename, 'results')}.json"
         with open(output_path, 'w', encoding='utf-8') as f:
             json.dump(results, f, indent=2, ensure_ascii=False)
         return str(output_path)
 
     def _export_csv(self, results: Dict[str, Any], filename: str) -> str:
-        output_path = self.output_dir / f"{filename}.csv"
+        output_path = self.output_dir / f"{_safe_filename_stem(filename, 'results')}.csv"
         rows: List[Dict[str, Any]] = []
         if 'codes' in results:
             for code in results['codes']:
@@ -564,7 +581,7 @@ class DataExporter:
         return str(output_path)
 
     def _export_markdown(self, results: Dict[str, Any], filename: str) -> str:
-        output_path = self.output_dir / f"{filename}.md"
+        output_path = self.output_dir / f"{_safe_filename_stem(filename, 'results')}.md"
         with open(output_path, 'w', encoding='utf-8') as f:
             f.write("# Qualitative Coding Analysis Results\n\n")
             if 'codes' in results:

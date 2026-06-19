@@ -25,6 +25,21 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+
+def resolve_uploaded_file(filename: str) -> Path:
+    """Resolve one client-provided upload filename inside UPLOAD_FOLDER."""
+    safe_name = secure_filename(filename)
+    if not safe_name or safe_name != filename or not allowed_file(safe_name):
+        raise ValueError(f"Invalid uploaded filename: {filename!r}")
+
+    upload_root = Path(UPLOAD_FOLDER).resolve()
+    path = (upload_root / safe_name).resolve()
+    if path.parent != upload_root:
+        raise ValueError(f"Uploaded filename escapes upload directory: {filename!r}")
+    if not path.is_file():
+        raise FileNotFoundError(f"Uploaded file not found: {safe_name}")
+    return path
+
 def run_cli_command(command_args):
     """Execute CLI command via subprocess with proper WSL/Linux encoding"""
     try:
@@ -158,9 +173,11 @@ def upload_files():
         for file in files:
             if file and allowed_file(file.filename):
                 filename = secure_filename(file.filename)
-                file_path = os.path.join(UPLOAD_FOLDER, filename)
+                if not filename:
+                    continue
+                file_path = Path(UPLOAD_FOLDER) / filename
                 file.save(file_path)
-                file_paths.append(file_path)
+                file_paths.append(str(file_path))
         
         if not file_paths:
             return f'''
@@ -369,8 +386,11 @@ def start_analysis():
         format_choice = data.get('format', 'human')
         session_id = data.get('session_id', '')
         
-        # Build file paths
-        file_paths = [os.path.join(UPLOAD_FOLDER, f) for f in files]
+        # Build file paths from uploaded basenames only.
+        try:
+            file_paths = [resolve_uploaded_file(f) for f in files]
+        except (FileNotFoundError, ValueError) as exc:
+            return jsonify({'error': str(exc)})
         
         # Start analysis by calling API server directly (not CLI)
         import requests
@@ -380,11 +400,11 @@ def start_analysis():
         for file_path in file_paths:
             try:
                 # Read file content
-                if file_path.endswith('.docx'):
+                if file_path.suffix.lower() == '.docx':
                     from docx import Document
-                    doc = Document(file_path)
+                    doc = Document(str(file_path))
                     content = '\n'.join([paragraph.text for paragraph in doc.paragraphs])
-                elif file_path.endswith('.txt'):
+                elif file_path.suffix.lower() == '.txt':
                     with open(file_path, 'r', encoding='utf-8') as f:
                         content = f.read()
                 else:

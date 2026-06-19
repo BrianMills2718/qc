@@ -317,6 +317,23 @@ class TestProjectExporter:
         finally:
             os.chdir(old_cwd)
 
+    def test_default_export_filename_sanitizes_project_name(self, tmp_path):
+        """Default export filenames should not inherit directories from project names."""
+        from qc_clean.core.export.data_exporter import ProjectExporter
+        import os
+
+        state = ProjectState(id="escape", name="../outside/project")
+        old_cwd = os.getcwd()
+        os.chdir(tmp_path)
+        try:
+            path = ProjectExporter().export_json(state)
+            assert Path(path).name == "_outside_project.json"
+            assert Path(path).parent == Path(".")
+            assert (tmp_path / "_outside_project.json").exists()
+            assert not (tmp_path.parent / "outside").exists()
+        finally:
+            os.chdir(old_cwd)
+
     def test_export_csv_empty_state(self, tmp_path):
         """Export CSV with no codes/applications."""
         from qc_clean.core.export.data_exporter import ProjectExporter

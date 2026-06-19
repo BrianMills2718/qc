@@ -153,6 +153,13 @@ class TestQdpxExport:
         assert Path(path).name == "Test Export.qdpx"
         assert zipfile.is_zipfile(path)
 
+    def test_default_output_filename_sanitizes_project_name(self, tmp_path, monkeypatch):
+        monkeypatch.chdir(tmp_path)
+        state = ProjectState(name="../outside/project")
+        path = ProjectExporter().export_qdpx(state)
+        assert Path(path).name == "_outside_project.qdpx"
+        assert zipfile.is_zipfile(path)
+
     def test_multi_document(self, tmp_path):
         docs = [
             Document(id="d1", name="int1.txt", content="Alpha bravo charlie"),

@@ -95,6 +95,24 @@ class TestProjectStore:
         with pytest.raises(ValueError):
             tmp_store._path_for("")
 
+    def test_invalid_id_characters_do_not_sanitize_to_existing_project(self, tmp_store, sample_state):
+        """Invalid IDs should not be rewritten into a different valid project ID."""
+        tmp_store.save(sample_state)
+
+        with pytest.raises(FileNotFoundError):
+            tmp_store.load("../test-project-1")
+        with pytest.raises(FileNotFoundError):
+            tmp_store.load("test-project-1!")
+        assert tmp_store.exists("../test-project-1") is False
+        assert tmp_store.delete("../test-project-1") is False
+        assert tmp_store.exists("test-project-1") is True
+
+    def test_save_rejects_invalid_project_id(self, tmp_store):
+        state = ProjectState(id="../outside", name="Invalid")
+
+        with pytest.raises(ValueError):
+            tmp_store.save(state)
+
     def test_round_trip_preserves_all_fields(self, tmp_store):
         """Full round-trip with a richly populated state."""
         from qc_clean.schemas.domain import (
