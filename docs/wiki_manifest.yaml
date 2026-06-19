@@ -5,8 +5,9 @@ publish:
     type: ProjectOverview
     title: Qualitative Coding Overview
     tags: [portfolio, analysis, qualitative-coding]
-  - path: docs/whitepaper_automated_qualitative_coding.md
-    type: Whitepaper
+  - path: docs/PROJECT_THEORY_AND_GOALS.md
+    type: Reference
+    title: Project Theory & Goals (Agent Orientation)
     tags: [analysis, qualitative-coding, methodology]
 exclude:
   - docs/CLAUDE.md
