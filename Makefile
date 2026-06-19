@@ -1,4 +1,4 @@
-.PHONY: help test test-quick test-e2e test-all check docs-check clean status cost errors
+.PHONY: help test test-quick test-e2e test-all check lint docs-check clean status cost errors
 
 DAYS ?= 7
 PROJECT ?= qualitative_coding
@@ -19,10 +19,14 @@ test-e2e:  ## Run live LLM E2E tests
 test-all:  ## Run deterministic tests and live LLM E2E tests
 	python -m pytest tests/ -v
 
-check:  ## Run deterministic tests + docs checks
+check:  ## Run deterministic tests + lint + docs checks
 	python -m pytest tests/ -m "not live_llm" -x -q
+	$(MAKE) lint
 	$(MAKE) docs-check
-	@echo "Type check and lint not yet configured"
+	@echo "Type check not yet configured"
+
+lint:  ## Run the configured Ruff lint gate
+	python -m ruff check .
 
 docs-check:  ## Run documentation and governance checks
 	python scripts/check_markdown_links.py

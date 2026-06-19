@@ -85,7 +85,7 @@ start_server.py                              # Server startup script
 - `qc_clean/core/export/data_exporter.py` - ProjectExporter (JSON/CSV/Markdown/QDPX from ProjectState)
 - `qc_cli.py` - CLI interface (analyze, project, review, status, server)
 - `qc_mcp_server.py` - MCP server: 19 tools for project management, pipeline execution, codebook inspection, review, IRR/stability, export
-- `tests/` - 497 deterministic tests + 6 live LLM E2E tests (25 test files)
+- `tests/` - 499 deterministic tests + 6 live LLM E2E tests (26 test files)
 
 ### How It Works
 - `project run` runs the pipeline locally (no server needed); `analyze` uses the API server
@@ -436,7 +436,9 @@ Score the qualitative codebook on a scale of 0.0 to 1.0.
 ```bash
 make test               # Run full test suite
 make test-quick         # Run tests, minimal output
-make check              # Run tests + type check + lint
+make lint               # Run Ruff fatal-error lint gate
+make docs-check         # Run documentation and governance checks
+make check              # Run deterministic tests + lint + docs checks
 make status             # Show git status
 make cost               # Show LLM spend (DAYS=7)
 make errors             # Show recent error breakdown

@@ -23,7 +23,9 @@ Canonical governance sources:
 ```bash
 make test               # Run full test suite
 make test-quick         # Run tests, minimal output
-make check              # Run tests + type check + lint
+make lint               # Run Ruff fatal-error lint gate
+make docs-check         # Run documentation and governance checks
+make check              # Run deterministic tests + lint + docs checks
 make status             # Show git status
 make cost               # Show LLM spend (DAYS=7)
 make errors             # Show recent error breakdown
