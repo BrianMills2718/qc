@@ -85,7 +85,7 @@ start_server.py                              # Server startup script
 - `qc_clean/core/export/data_exporter.py` - ProjectExporter (JSON/CSV/Markdown/QDPX from ProjectState)
 - `qc_cli.py` - CLI interface (analyze, project, review, status, server)
 - `qc_mcp_server.py` - MCP server: 19 tools for project management, pipeline execution, codebook inspection, review, IRR/stability, export
-- `tests/` - 505 deterministic tests + 6 live LLM E2E tests (26 test files)
+- `tests/` - 527 deterministic tests + 6 live LLM E2E tests (29 test files)
 
 ### How It Works
 - `project run` runs the pipeline locally (no server needed); `analyze` uses the API server
@@ -215,6 +215,9 @@ Local models work for all pipeline stages but quality varies. For GT axial/selec
 - This is a research tool, not a production system
 - Interview data files are gitignored (sensitive content)
 - `src/` directory is legacy code (gitignored)
+- **Gates need full deps**: `make check` (test + ruff lint + docs-check) requires `pip install -r requirements.txt` in `.venv` — `pypdf` and `ruff` are gate dependencies, and `docs-check` imports `enforced_planning.worktree_paths` (vendored from `~/projects/enforced-planning`). A venv missing these makes the gates red even though the code is fine.
+- **Single ingestion path**: all file reading (CLI and API server) goes through `qc_clean/core/cli/utils/file_handler.py:read_file_content` (uses `pypdf`, not the unmaintained PyPDF2). `api_client.py` delegates to it — do not reintroduce a divergent reader.
+- **MCP export is sandboxed**: `qc_export_json/markdown` confine `output_file` to `<projects_dir>/exports/` via `_confine_export_path` (agent-driven surface, prevents arbitrary writes). The CLI exporter keeps full path freedom for the trusted local user.
 
 ## Competitive Landscape (assessed 2026-02-12)
 
