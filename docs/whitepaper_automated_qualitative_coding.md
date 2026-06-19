@@ -1,66 +1,73 @@
-# Methodology-Aware Automated Qualitative Coding with Large Language Models
+# An Auditable Architecture for LLM-Assisted Qualitative Coding
 
-**A white paper on the architecture, rigor, and roadmap of an LLM-native qualitative data analysis system**
+**Design, Limits, and Evaluation Roadmap**
 
-*Version 1.1 — 2026-06-19*
+*Version 1.2 — 2026-06-19*
 
-> **Revision note (v1.1).** This revision narrows the novelty claim, makes the
-> related-work comparison granular rather than rhetorical, relabels what we
-> previously called "inter-rater reliability" and "validation" to claims the
-> evidence actually supports, and adds an ethics/threat-model section and an
-> explicit (not-yet-executed) evaluation plan. The architecture description is
-> unchanged; the framing is corrected. Where this paper describes capabilities
-> as *implemented*, they are in the codebase and exercised by tests; where it
-> describes them as *planned*, they are roadmap.
+> **Revision note (v1.2).** A reviewer graded v1.1 a credible architecture paper
+> but a premature *methods* paper: it still reached for the word "rigor" while
+> reporting no methodological results. v1.2 fixes the genre rather than faking the
+> evidence. It (a) retitles the document as an **architecture + evaluation-roadmap**
+> paper; (b) replaces "rigor" with "rigor *scaffold*" wherever results are absent;
+> (c) adds a full cross-tool feature matrix (§2); (d) states the methodological
+> family the system actually fits (§3.1); (e) demotes negative-case analysis to an
+> *experimental feature*, not credibility evidence (§6); (f) describes
+> schema enforcement accurately by provider tier (§4); (g) turns the ethics section
+> into a control matrix (§8); and (h) completes and verifies the references. No
+> empirical results are claimed; the evaluation in §7 is explicitly a plan.
+> **What this paper is:** a description of a working system's architecture and an
+> honest ledger of what is proven (the software runs and fails safely), what is
+> merely *measured* (computational consistency, not validity), and what remains
+> (methodological evaluation, span-anchored grounding, hardened disconfirmation, GT
+> fidelity). **What it is not:** a validated qualitative-methods paper.
 
 ---
 
 ## Abstract
 
-Qualitative coding — the systematic interpretation of unstructured text such as interview transcripts into a structured, defensible set of themes — is labor-intensive, expertise-bound, and historically resistant to automation. Most shipping AI-assisted qualitative data analysis (QDA) products treat large language models (LLMs) as an *assistive feature* beside a manual workflow, while a fast-growing body of research prototypes (e.g., AcademiaOS, LOGOS, MindCoder, TAMA, Auto-TA, HICode) automate thematic-analysis or grounded-theory-style workflows but typically as research artifacts rather than auditable, integrated tools. This paper describes a system positioned deliberately between those poles: a **methodology-aware pipeline with the LLM as its engine and the human as reviewer and director**, engineered for *auditability* — structured output contracts enforced at decode time, fail-loud inter-stage dependencies, human-in-the-loop review with provenance, agreement/stability reporting, automated disconfirmation search, multi-format QDA export, and end-to-end observability.
+Qualitative coding — the systematic interpretation of unstructured text such as interview transcripts into a structured, defensible set of themes — is labor-intensive, expertise-bound, and historically resistant to automation. Most shipping AI-assisted qualitative data analysis (QDA) products treat large language models (LLMs) as an *assistive feature* beside a manual workflow, while a fast-growing body of research prototypes (AcademiaOS, LOGOS, MindCoder, TAMA, Auto-TA, HICode) automates thematic-analysis or grounded-theory workflows as research artifacts. This paper describes a system positioned deliberately between those poles: a **methodology-aware pipeline with the LLM as its engine and the human as reviewer and director**, engineered for *auditability* — structured output contracts, fail-loud inter-stage dependencies, human-in-the-loop review with provenance, consistency/stability reporting, an (experimental) disconfirmation search, multi-format QDA export, and end-to-end observability.
 
-Our contribution is not a claim to be alone in this space. It is an **integration claim**: to our knowledge no widely adopted QDA platform combines thematic-analysis (TA) and grounded-theory-*inspired* (GT-inspired) LLM pipelines with typed state, schema-constrained generation, fail-loud orchestration, human-review provenance, agreement/stability metrics, negative-case search, observability, and QDPX export in one inspectable system. We describe the system as built, separate software validation (done) from methodological validation (planned), state the limitations honestly — systematic LLM bias, non-determinism, the pseudo-replication risk in treating LLM passes as raters, and partial GT fidelity — and lay out the research agenda that would carry it beyond current prototypes.
+The contribution is an **integration and auditability claim, not a novelty-of-automation claim.** To our knowledge no *widely adopted QDA platform* (defined in §2) combines thematic-analysis (TA) and grounded-theory-*inspired* (GT-inspired) LLM pipelines with typed state, schema-constrained generation, fail-loud orchestration, human-review provenance, agreement/stability metrics, disconfirmation search, observability, and QDPX export in one inspectable system. We are explicit that what the system provides today is a **rigor *scaffold*** — the machinery rigor requires — not demonstrated rigor, which is an empirical outcome we have not yet measured. We describe the architecture as built, state honestly which methodological tradition it fits (codebook/post-positivist analysis, not reflexive TA or constructivist GT), lay out the evaluation that would establish validity, and enumerate the limits — systematic LLM bias, non-determinism, the pseudo-replication risk in treating LLM passes as raters, brittle quote attribution, and partial GT fidelity.
 
 ---
 
 ## 1. Introduction
 
-Qualitative research converts human language — what people said in an interview, a focus group, an open-ended survey — into knowledge. The central craft is *coding*: reading the data closely, attaching short interpretive labels ("codes") to spans of text, organizing those codes into a hierarchy or theory, and grounding every claim in verbatim evidence. Done well, coding is slow and demands trained judgment.
+Qualitative research converts human language into knowledge. The central craft is *coding*: reading data closely, attaching short interpretive labels to spans of text, organizing those labels into a hierarchy or theory, and grounding every claim in verbatim evidence. Done well, coding is slow and demands trained judgment.
 
-LLMs are unusually well-suited to the *recognition* half of this task. They read context, abstract latent meaning, and propose labels at a speed no human can match. But three things stand between "an LLM can suggest codes" and "an LLM can do publishable qualitative analysis":
+LLMs are well-suited to the *recognition* half of this task. But three things stand between "an LLM can suggest codes" and "an LLM can do publishable qualitative analysis": **methodology** (real methods are multi-stage processes, not single prompts), **rigor** (reviewers expect agreement evidence, audit trails, disconfirmation, and saturation; LLM output is non-deterministic and can be *systematically* biased), and **trust engineering** (a research instrument must fail loudly, log provenance, and let a human intervene).
 
-1. **Methodology.** Real qualitative methods are *processes*, not single acts. Grounded theory (GT) requires constant comparison, axial coding, selective coding, theoretical integration, *theoretical sampling*, and *saturation* judged at the category level. Thematic analysis requires hierarchy, cross-case synthesis, and disconfirmation. A one-shot "find the themes" prompt is not thematic analysis; it is autocoding.
-2. **Rigor.** Reviewers expect agreement evidence, audit trails, negative case analysis, and saturation evidence. LLM output is non-deterministic and can be *systematically* biased (not merely noisy). Without explicit machinery for consistency measurement and disconfirmation, an automated codebook is an unfalsifiable artifact.
-3. **Trust engineering.** A research instrument must fail loudly, log its provenance, and let a human intervene. A pipeline that silently emits plausible-but-wrong codes is worse than no pipeline, because its errors are camouflaged by fluency.
-
-This system was built to address all three at once, and — importantly — to be *honest about which of them it has solved and which it has only scaffolded*. The remainder of this paper describes the design principles (§3), the architecture (§4), how methodology is encoded (§5), how the rigor scaffolding is built (§6), what software validation shows and what methodological evaluation remains (§7), ethics and the threat model (§8), the honest limitations (§9), and the agenda beyond current prototypes (§10).
+This system addresses the *engineering* preconditions of all three — and this paper is careful to claim only that. Building the scaffold that rigor needs is not the same as demonstrating rigor; we mark the boundary throughout. §2 positions the work against commercial tools, open-source QDA, and the LLM research prototypes. §3–4 describe the design principles and architecture. §5 describes the encoded methodologies and which qualitative tradition they fit. §6 describes the rigor *scaffold* and its limits. §7 separates the software validation we have done from the methodological evaluation we have not. §8 gives an ethics control matrix. §9–10 give limitations and roadmap.
 
 ---
 
-## 2. Background and Related Work
+## 2. Related Work and Positioning
 
-The relevant landscape has three layers, and the honest comparison is granular, dimension-by-dimension, not a single "we are first" assertion.
+The honest comparison is granular and feature-by-feature, not a single "we are first" assertion. We define a **"widely adopted QDA platform"** as a tool with substantial institutional research use, a commercial or mature open-source distribution, and documented adoption in published qualitative studies — operationally, the four commercial suites below plus QualCoder. The LLM research prototypes are *not* yet widely adopted in that sense; they are the closest *methodological* comparators and we treat them as the primary related work.
 
-**Commercial QDA products with AI features.** ATLAS.ti, NVivo, MAXQDA, and Dedoose dominate institutional qualitative research. Their AI capabilities are real and improving: ATLAS.ti offers AI Coding using OpenAI models and an "Intentional AI Coding" mode that chunks text, queries a model repeatedly, and algorithmically combines results; MAXQDA's AI Assist supports single/multi-document coding, code and subcode suggestions, chat-with-data, summaries, and translations. These are genuine AI-coding features. What they generally are *not* is an *ordered, inspectable execution of a named methodology* with typed inter-stage contracts, agreement/stability reporting, and automated disconfirmation as first-class pipeline stages. The fair claim is about *methodological orchestration and auditability*, not about whether AI coding exists.
+**Feature matrix.** Cells reflect public documentation and papers as of mid-2026; tools change frequently. ✓ = supported, ~ = partial/assistive, ✗ = not a focus, ? = not determinable from public sources. "Methodology pipeline" means an *ordered, inspectable execution of a named method*, not the mere presence of AI coding.
 
-**Mature open-source QDA.** QualCoder is a full desktop QDA application with hierarchical coding, memos, Cohen's-kappa coder comparison, graphs, FAISS-based semantic search, and GPT-style AI exploration. It is manual-first with AI assistance — strong on human-coder reliability and corpus search (the semantic-search capability this system does *not* yet have), but not a methodology pipeline.
+| System | Type | AI coding | Methodology pipeline | Schema-constrained output | Human-review provenance | Span-anchored grounding | Disconfirmation search | Agreement / stability | QDPX export | Published empirical eval |
+|---|---|---|---|---|---|---|---|---|---|---|
+| ATLAS.ti | Commercial | ✓ | ~ | ? | ~ | ✓ | ✗ | ✓ (ICR) | ✓ | ✗ |
+| MAXQDA | Commercial | ✓ | ✗ | ? | ~ | ✓ | ✗ | ✓ (ICR) | ✓ | ✗ |
+| NVivo | Commercial | ~ | ✗ | ? | ~ | ✓ | ✗ | ✓ (ICR) | ✓ | ✗ |
+| Dedoose | Commercial | ~ | ✗ | ✗ | ~ | ✓ | ✗ | ✓ | ~ | ✗ |
+| QualCoder | OSS desktop | ~ | ✗ | ✗ | ~ | ✓ | ✗ | ✓ (κ) | ✓ | ✗ |
+| AcademiaOS | Research prototype | ✓ | ✓ (GT) | ~ | ✗ | ? | ✗ | ✗ | ✗ | ✓ (user study) |
+| LOGOS | Research prototype | ✓ | ✓ (GT) | ✓ (schema induction) | ✗ | ? | ✗ | ~ (5-dim metric) | ✗ | ✓ (5 corpora) |
+| MindCoder | Research prototype | ✓ | ✓ (inductive) | ~ | ✓ (interaction logs) | ? | ✗ | ✗ | ✗ | ✓ |
+| TAMA | Research prototype | ✓ | ✓ (TA) | ~ | ✓ | ? | ✗ | ✓ | ✗ | ✓ (clinical) |
+| Auto-TA | Research prototype | ✓ | ✓ (TA) | ~ | ✗ (automated) | ? | ✗ | ~ | ✗ | ✓ |
+| HICode | Research prototype | ✓ | ✓ (hierarchical) | ~ | ✗ | ? | ✗ | ✓ (human-theme alignment) | ✗ | ✓ (3 datasets) |
+| **This system** | OSS tool | ✓ | ✓ (TA + GT-inspired) | ✓ | ✓ | ✗ (roadmap) | ~ (experimental) | ✓ | ✓ | ✗ (planned) |
 
-**LLM research prototypes (the most important comparison).** A rapidly growing literature automates exactly the territory this system occupies, and any honest novelty claim must engage it:
+Two honest readings of this matrix are essential and were missing from earlier drafts:
 
-| System | Method focus | What it does | Closest overlap with this system |
-|---|---|---|---|
-| **AcademiaOS** (2024) | Grounded theory | Codes raw data, develops themes/dimensions into a grounded model; reports a user study; open source | GT-style automation end-to-end |
-| **LOGOS** (2025) | Grounded theory | End-to-end LLM framework: coding, semantic clustering, graph reasoning, iterative refinement into a hierarchical theory | GT pipeline + structured theory output |
-| **MindCoder** (2025) | Inductive coding | Preprocessing, automatic open coding, automatic axial coding, concept development (codes-to-theory) | Open/axial automation |
-| **TAMA** (2025) | Thematic analysis | Human-in-the-loop multi-agent TA for clinical interviews with expert-guided refinement | TA + human review |
-| **Auto-TA** (2025) | Thematic analysis | Fully automated multi-agent TA pipeline, optional RLHF | End-to-end TA automation |
-| **HICode** (2025) | Hierarchical coding | Hierarchical inductive coding with LLMs | Hierarchical codebook generation |
+1. **Established QDA tools beat this system on span-anchored grounding and published adoption.** ATLAS.ti, MAXQDA, NVivo, Dedoose, and QualCoder anchor coded segments to exact source offsets; this system currently does not (§5.1). That is a real deficit, not a footnote.
+2. **The research prototypes beat this system on published empirical evaluation.** AcademiaOS reports a user study; LOGOS reports ~80% alignment with an expert schema across five corpora; HICode validates against human-constructed themes; TAMA/Auto-TA report multi-agent TA results. This system reports *none* yet (§7).
 
-Given these, the defensible positioning is **not** "no one does this." It is:
-
-> To our knowledge, no *widely adopted QDA platform* integrates TA- and GT-inspired LLM pipelines with typed state, schema-constrained generation, fail-loud orchestration, human-review provenance, agreement/stability metrics, negative-case search, observability, and QDPX export in a single auditable system. The research prototypes above each automate part of this territory; this system's distinct emphasis is *engineering auditability and methodological scaffolding integrated into one inspectable tool with QDA-format interoperability*.
-
-A 2026 scoping review of LLMs in qualitative research catalogs use across coding, theme development, summarization, drafting, and GT workflows (open/axial/selective coding, saturation testing), and stresses that LLM-based studies must report model version, configuration, prompting, human–AI interaction, and outcomes attributable to the LLM — a reporting bar this system is designed to meet (§6, §7).
+The defensible contribution is therefore the **specific integration**: the only column-combination this system holds that the others do not is *{schema-constrained typed output + human-review provenance + agreement/stability + QDPX export + observability + a named TA *and* GT-inspired pipeline}* in one auditable open-source tool. It does **not** lead on grounding or on evidence. Commercial AI-coding is real (ATLAS.ti's Intentional AI Coding chunks text, queries a model repeatedly, and recombines results; MAXQDA's AI Assist offers single/multi-document coding, code/subcode suggestions, chat, summaries, translation), so the claim is about *methodological orchestration and auditability*, never about whether AI coding exists. A 2026 scoping review documents how crowded and fast-moving this space is.
 
 ---
 
@@ -68,195 +75,178 @@ A 2026 scoping review of LLMs in qualitative research catalogs use across coding
 
 Five principles govern every component.
 
-- **LLM-first, schema-constrained.** Every semantic step returns *structured* output: a Pydantic model with a description on every field, enforced at decode time via JSON-schema response formatting. The schema *is* the generation contract. **Important scoping of this claim:** schema enforcement is the largest lever on output *regularity, parseability, and failure detection* — it guarantees a `confidence` field exists, a `quote` field is a string, a `code_name` is present. It does **not** by itself establish that the quote appears in the transcript, that the code is analytically useful, or that a confidence score is calibrated. Those are interpretive-validity questions that structure alone cannot answer; they are the job of grounding checks, human review, and evaluation (§6, §7).
+- **LLM-first, schema-constrained.** Every semantic step returns a Pydantic model with a description on every field. **Scope of this claim:** schema constraint is the largest lever on output *regularity, parseability, and failure detection* — it guarantees a `confidence` field exists, a `quote` field is a string, a `code_name` is present. It does **not** establish that the quote appears in the transcript, that the code is analytically useful, that a category is more than a banal paraphrase, or that a confidence score is calibrated. Those are interpretive-validity questions structure cannot answer; they are the job of grounding checks, human review, and evaluation (§6–7).
+- **Fail loud, never silently degrade.** Inter-stage dependencies are explicit (`ctx.require(...)` raises, naming the missing field and the needing stage). No `except: pass` fallbacks. On failure the engine logs full state context and re-raises. This is the most genuinely valuable property of the design: silent degradation is the dominant failure mode of LLM pipelines, and this architecture forecloses it.
+- **Single portable state, with a path to stronger auditability.** All state lives in one `ProjectState` JSON model — good for local reproducibility and portability, *insufficient* as a complete audit substrate for large or collaborative projects. An append-only event log, export content hashes, and optional DB backing are roadmap (§10).
+- **Human-in-the-loop by design.** A `ReviewManager` supports approve/reject/modify/merge/split over CLI and a browser UI; every code carries provenance (LLM vs. human).
+- **Maximum observability.** Every LLM call logs model, schema, prompt length, tokens, latency, and cost; every stage logs entry context. Cost and failure profiles are queryable, not estimated.
 
-- **Fail loud, never silently degrade.** Inter-stage dependencies are explicit. A downstream stage that needs upstream data calls `ctx.require(...)`, which raises immediately — naming the missing field and the needing stage — if the data is absent. There are no `except: pass` fallbacks. On failure the engine records full state context (document, code, application counts) and re-raises. This is the most genuinely valuable property of the design: silent degradation is the dominant failure mode of LLM pipelines, and this architecture forecloses it.
+These are enforced by the codebase and by a deterministic test suite (527 tests) plus live end-to-end tests.
 
-- **Single portable state, with a path to stronger auditability.** All analysis state lives in one `ProjectState` Pydantic model, saved/loaded as JSON — elegant for local reproducibility and as a portable interchange artifact. We are explicit that a single mutable JSON file is *not* a complete audit substrate for larger or collaborative projects: an append-only event log, content hashes on exports, and optional database-backed storage are roadmap items (§10). The JSON snapshot remains the portable artifact; the event log would become the immutable record.
+### 3.1 Which qualitative tradition this fits
 
-- **Human-in-the-loop by design.** The pipeline can pause at review checkpoints. A `ReviewManager` supports approve, reject, modify, merge, and split over both a CLI and a self-contained browser UI. Every code carries provenance (LLM-discovered vs. human-modified). This approve/reject/modify/merge/split set is, we argue, the right abstraction for qualitative review.
-
-- **Maximum observability.** Every LLM call logs model, schema, prompt length, token usage, latency, and cost through the shared `llm_client` library; every stage logs its entry context. The cost and failure profile of any run is queryable, not estimated.
-
-These are enforced by the codebase and by a deterministic test suite (527 tests at the time of writing) plus live end-to-end tests against a real model.
+Treating qualitative analysis as a pipeline is an *engineering model*, not a neutral methodological stance, and different traditions hold incompatible assumptions about researcher subjectivity and what counts as a theme. The system's emphasis on agreement metrics, structured outputs, and codebook stability aligns most naturally with **codebook / post-positivist qualitative analysis** (e.g., codebook thematic analysis, framework analysis). It is **not** a good fit for **reflexive thematic analysis** (Braun & Clarke), which treats coder subjectivity as a resource rather than noise and rejects inter-coder agreement as a quality criterion, nor for **constructivist grounded theory** (Charmaz), which foregrounds the researcher's interpretive standpoint. We state this explicitly so the tool is not misapplied to traditions whose epistemology it contradicts.
 
 ---
 
 ## 4. System Architecture
 
-The system is a **stage-based pipeline over a single typed state object**.
+The system is a **stage-based pipeline over a single typed state object**: `Ingest → [methodology-specific stages] → Negative Case → Cross-Interview`.
 
-```
-Ingest → [methodology-specific coding stages] → Negative Case → Cross-Interview
-```
+- **`AnalysisPipeline`** orchestrates ordered `PipelineStage`s over `ProjectState`.
+- **`PipelineContext`** (`extra="forbid"`) threads model, budget, trace id, review flags, and optional per-stage prompt overrides; a bad config key fails at construction.
+- **`create_pipeline(methodology)`** assembles the stage sequence.
+- **`LLMHandler`** is a thin adapter over the shared `llm_client` library (retry/backoff, batching, model routing across any LiteLLM-supported provider incl. local Ollama/vLLM, observability).
+- **Schemas/adapters.** LLM-output schemas define what the model returns; the domain model defines what is stored; `adapters.py` is the single tested seam between them.
 
-- **`AnalysisPipeline`** orchestrates an ordered list of `PipelineStage`s, each implementing one `run(state, ctx)` step over `ProjectState`.
-- **`PipelineContext`** is a typed (`extra="forbid"`) config threaded through every stage: model, budget, trace id, review flags, optional per-stage prompt overrides. A typo in a config key fails at construction, not three stages later.
-- **`create_pipeline(methodology)`** assembles the correct stage sequence.
-- **`LLMHandler`** is a thin adapter over the shared `llm_client` library (retry/backoff, structured extraction, batching, model routing across any LiteLLM-supported provider including local Ollama/vLLM, observability). QC supplies configuration, the system prompt, and error wrapping; it does not reimplement LLM plumbing.
-- **Schemas and adapters.** LLM-output schemas define what the model returns; the unified domain model defines what the system stores; `adapters.py` is the single, tested seam converting one to the other — letting the generation schema be tuned for decode-time constraint while the storage model stays stable.
+**Provider-dependent schema enforcement (accurate statement).** "Schema-constrained" does *not* mean decode-time constraint everywhere. `llm_client` uses three tiers: (1) GPT-5-class models route through the provider's **Responses API** with native structured output (constrained generation); (2) models with native JSON-schema `response_format` support use it (provider-side structural enforcement at decode time); (3) all others — including many local models — fall back to **instructor**, which is **post-hoc**: it parses, validates against the Pydantic model, and re-asks on failure. Additionally `litellm.enable_json_schema_validation` performs post-generation validation. So the guarantee is "structural validity is enforced — by constrained decoding where the provider supports it, otherwise by validate-and-retry." Value-level constraints (ranges, non-empty, patterns) are never enforced at decode time by any provider and are handled by field descriptions plus post-generation validation.
 
-Surfaces include a CLI, a FastAPI server, an MCP server exposing the system as agent-callable tools, a browser review UI, and interactive Cytoscape.js graph views.
-
-A design lesson stated plainly: **mocked unit tests do not catch integration bugs.** Hundreds of passing unit tests once hid two real defects in the *seams* between stages; only end-to-end runs surfaced them, and the fail-loud `require()` pattern then localized each immediately. The current suite pairs deterministic tests (including schema-omission regression tests) with live end-to-end validation.
+**A design lesson:** mocked unit tests do not catch integration bugs. Hundreds of passing unit tests once hid two defects in the *seams* between stages; only end-to-end runs surfaced them, and `ctx.require()` then localized each immediately. The suite now pairs deterministic tests (including schema-omission regression tests) with live end-to-end runs.
 
 ---
 
 ## 5. Encoding Methodology
 
-The system implements two methodologies as distinct pipelines. We label the grounded-theory pipeline **GT-*inspired*** deliberately: it executes the visible procedural steps of GT but does not yet preserve the full methodological logic of theory generation (theoretical sampling, category-level saturation, full axial paradigm). See §9 for exactly what is missing.
+Two methodologies are implemented as distinct pipelines. We label the grounded-theory pipeline **GT-*inspired*** deliberately: it performs the *visible procedural steps* of GT (open/constant-comparison → axial → selective → integration) — **procedural mimicry** — but does not yet instantiate GT's core epistemic logic — **methodological fidelity**. Specifically, it lacks *theoretical sampling* (collecting new data to elaborate weak categories), *category-level saturation* (properties/dimensions ceasing to change), *analytic memoing* that builds conceptual relations (current memos lean toward summary logging), full *axial decomposition* (causal vs. context vs. intervening conditions), and *reflexivity* (explicit accounting for the researcher's standpoint). GT is an iterative epistemic process; this system approximates parts of it.
 
 ### 5.1 Thematic / Default Analysis (7 stages)
+`Ingest → Thematic Coding → Perspective Analysis → Relationship Mapping → Synthesis → Negative Case → Cross-Interview`. Ingest parses `.txt/.docx/.pdf/.rtf` and segments by speaker.
 
-`Ingest → Thematic Coding → Perspective Analysis → Relationship Mapping → Synthesis → Negative Case Analysis → Cross-Interview Analysis`
-
-- **Ingest** parses `.txt/.docx/.pdf/.rtf`, segments by speaker (handling `Name:` and `Name 0:03` timestamp formats), and attributes quotes to a source document. *Attribution is currently substring matching* — better than blind duplication, but brittle to OCR artifacts, smart vs. straight quotes, transcript cleanup, partial quotations, and phrases repeated across interviews. Span-anchored attribution (document id + speaker id + character/turn offsets + quote hash, with every generated quote required to resolve to an anchored span) is a roadmap item (§10) and is necessary for the grounding guarantees §6 relies on.
-- **Thematic Coding** discovers a hierarchical codebook — codes with definitions, semantic criteria, illustrative quotes, mention counts, full-range confidence.
-- **Perspective Analysis** maps participants to emphasized codes, distinguishing single-speaker introspection from multi-speaker consensus/divergence.
-- **Relationship Mapping** extracts entities and typed relationships (powering the graph views).
-- **Synthesis** produces an executive summary, cross-cutting patterns, prioritized recommendations.
-- **Negative Case Analysis** searches for *disconfirming* evidence (see §6, including its current limits).
-- **Cross-Interview Analysis** runs automatically for multi-document corpora, surfacing consensus and divergent themes.
+**Quote attribution is currently substring matching** — better than blind duplication but brittle to OCR artifacts, smart vs. straight quotes, transcript cleanup, partial quotations, and phrases repeated across interviews. This is a **first-order weakness, not a minor gap**: it undermines confirmability (tracing claims to data), disconfirmation evidence, QDPX export integrity (whether exported segments map to true source spans), and auditability by human reviewers. Until span-anchored attribution lands (doc + speaker + char/turn offsets + quote hash, with every generated quote required to resolve to an anchored span; §10), the system is honestly a *prototype with audit aspirations* on the grounding dimension, not a finished research instrument.
 
 ### 5.2 Grounded-Theory-Inspired Pipeline (7 stages)
-
-`Ingest → Constant Comparison Coding → Axial Coding → Selective Coding → Theory Integration → Negative Case Analysis → Cross-Interview Analysis`
-
-- **Constant Comparison Coding** replaces batch open coding with an iterative mechanism: the document is segmented (by speaker turn or paragraph), each segment is coded *against an evolving codebook*, with a saturation check after each pass. This implements incident-to-code comparison; *incident-to-incident and category-to-category comparison are partial*.
-- **Axial Coding** identifies relationships between categories, partially following the Strauss & Corbin paradigm (conditions, consequences) — not the full decomposition (causal vs. context vs. intervening conditions).
-- **Selective Coding** identifies the core category.
-- **Theory Integration** assembles a model: framework, propositions, conceptual relationships, scope conditions, implications.
-
-Two supporting capabilities: **incremental re-coding** (`project recode` codes only newly added documents against the existing codebook, then re-runs downstream stages) and **codebook-level saturation detection** (comparing codebooks across iterations). Both move toward GT's iterative ideal; neither yet implements *theoretical sampling* (collecting new data specifically to elaborate weak categories) or *per-category property/dimension saturation*.
+`Ingest → Constant Comparison Coding → Axial Coding → Selective Coding → Theory Integration → Negative Case → Cross-Interview`. Constant Comparison codes each segment against an evolving codebook with a saturation check per pass (incident-to-code comparison; incident-to-incident and category-to-category are partial). Supporting capabilities: **incremental re-coding** (`project recode`) and **codebook-level saturation detection** — neither yet implements theoretical sampling or per-category saturation.
 
 ---
 
-## 6. The Rigor Scaffolding (and its limits)
+## 6. The Rigor *Scaffold* (and its limits)
 
-The defining design decision is that trustworthiness machinery is *part of the pipeline*. We map to canonical criteria — while being explicit that scaffolding is not proof.
+This section describes the machinery rigor requires. We call it a **scaffold** advisedly: scaffolding is architecture, rigor is an empirical outcome (§7), and the two must not be conflated.
 
-**Lincoln & Guba (1985) trustworthiness:**
+**Lincoln & Guba (1985) trustworthiness — mapped, with limits:**
 
-- *Credibility — Negative Case Analysis.* After coding, the model is asked to find evidence that contradicts the codes it just produced and to record structured negative-case memos. **This is currently a first-pass mechanism with a known weakness:** the same model and prompt lineage searching its own output for disconfirming evidence risks *confirmation laundering* — appearing to challenge itself while remaining inside the same assumptions. A stronger design (roadmap, §10) requires: retrieval-first search over the corpus rather than model memory; a *different* model or adversarial prompt family for disconfirmation; mandatory quote-span evidence for every negative case; human review of disconfirming evidence before synthesis; and explicit "no negative case found" handling that distinguishes *absence of evidence* from *failure to search*.
-- *Dependability — memos and audit trail.* Every stage produces an analytical memo (reasoning, uncertainties, emerging patterns); every code carries per-code reasoning. We note the gap between *logging summaries* and the GT ideal of *analytic memoing that develops conceptual relations* — the current memos lean toward the former.
-- *Confirmability — provenance.* Quote-to-code attribution with source/speaker links interpretive claims to data, and provenance flags distinguish LLM from human decisions — subject to the attribution-brittleness caveat in §5.1.
+- *Dependability — memos and audit trail.* Every stage emits an analytical memo; every code carries per-code reasoning; provenance flags distinguish LLM from human. (Gap: summary logging vs. true analytic memoing.)
+- *Confirmability — provenance.* Quote-to-code attribution links claims to data — subject to the §5.1 brittleness, which currently limits this.
+- *Credibility — disconfirmation search is an **experimental feature**, not credibility evidence.* The system asks a model to find evidence contradicting the codes it just produced. Because the *same model and prompt lineage* searches its own output, this risks **confirmation laundering** — appearing to challenge itself while staying inside its own assumptions. We therefore do **not** count current negative-case search as credibility support. It is reported as experimental. The version that *would* support credibility (roadmap, §10) requires: retrieval-first search over the corpus; a *different* model or adversarial prompt family; mandatory anchored quote-span evidence; human adjudication before synthesis; and explicit "no negative case found" handling distinguishing *absence of evidence* from *failure to search*.
 
-**Consistency measurement (not "inter-rater reliability"):**
+**Consistency measurement (not "inter-rater reliability").** Running coding multiple times with prompt variation, or across a model panel, and computing percent agreement, Cohen's kappa, and Fleiss' kappa, measures **LLM-pass agreement** — *computational consistency*, not human inter-rater reliability and not validity:
 
-We have relabeled what the system computes. Running coding multiple times with prompt variation, or across a panel of models, and computing percent agreement, Cohen's kappa, and Fleiss' kappa, measures **LLM-pass agreement** — *computational consistency*, not inter-rater reliability in the human sense and not validity. The reasons matter:
+- **Pseudo-replication.** Repeated runs of one model, or multiple frontier models trained on overlapping corpora under similar prompts, are *not* independent raters; panels reduce but do not remove shared-dependency risk. We report "computational raters with shared-dependency risk."
+- **Kappa fragility.** Kappa is fragile under unitization (which span is the unit), multi-label overlap, rare codes, and lexically-different-but-semantically-similar codes. We plan to report raw agreement, confidence intervals, and prevalence effects alongside kappa, add **Krippendorff's alpha**, and treat Landis & Koch bands as a heuristic.
+- **`project stability`** runs identical coding N times to quantify the model's own non-determinism (per-code stable/moderate/unstable) — a genuine and useful consistency measure, still not validity.
 
-- **Pseudo-replication risk.** Repeated runs of one model, or even multiple frontier models trained on overlapping corpora and steered by similar prompts, are *not* independent raters. Multi-model panels reduce but do not remove this shared-dependency risk. We report these as "computational raters with shared-dependency risk," never as independent human coders.
-- **Kappa fragility.** Kappa is fragile for qualitative coding because of unitization (which span is the unit), multi-label overlap, rare codes, and semantically similar but lexically different codes. We therefore plan to report raw agreement, confidence intervals, and prevalence effects alongside kappa, to add **Krippendorff's alpha** (which handles more coding situations, including boundary and multi-label disagreement), and to interpret Landis & Koch bands as a heuristic, not a verdict.
-- **`project stability`** runs identical coding N times to quantify the model's *own* non-determinism, with per-code stability scores (stable/moderate/unstable) — separating "the method disagrees" from "the model is noisy." This is a genuine and useful distinction; it remains a consistency measure, not a validity measure.
+**Reporting/interoperability.** Memos, audit trails, agreement results, and stability scores export to Markdown, CSV, JSON, and **QDPX** (ATLAS.ti/NVivo). A planned "methods appendix" export will map run metadata to **COREQ** (32 items) and **SRQR** (21 items): data source, model and version, prompt, parameters, human review, audit trail, analytic decisions, saturation evidence, limitations.
 
-**Reporting and interoperability.** Memos, audit trails, agreement results, and stability scores export to Markdown, CSV, JSON, and **QDPX** (so results drop into ATLAS.ti/NVivo). A planned "methods appendix" export will map run metadata directly to **COREQ** (32-item) and **SRQR** (21-item) reporting standards: data source, model and version, prompt, parameters, human review, audit trail, analytic decisions, saturation evidence, and limitations.
-
-**Prompt quality as an experiment.** Coding prompts are overridable per stage (`prompt_overrides`), and the system integrates with a prompt-evaluation library so prompt/model choices can be compared on frozen case sets using an LLM-judge rubric (clarity, grounding, coverage, analytical depth) with statistical comparison — rather than spot-checked by eye.
+**Prompt quality as an experiment.** Coding prompts are overridable per stage; the system integrates with a prompt-evaluation library so prompt/model choices can be compared on frozen case sets with an LLM-judge rubric and statistical comparison rather than spot-checked.
 
 ---
 
 ## 7. Software Validation Done; Methodological Evaluation Planned
 
-We separate two claims the previous draft conflated.
+**Software / integration validation (done).** The pipeline runs end-to-end against real transcripts, with automated end-to-end tests for default, GT, incremental, graph, and export flows. These establish that the *software* behaves: stages compose, schemas validate, failures are caught and localized, exports are valid, single- and multi-document corpora work. This is integration testing, and we name it as such. It taught the lessons baked into the system: LLMs omit fields (so every LLM-facing collection field defaults to empty, locked by regression tests); output is non-deterministic (so software assertions are loose-but-meaningful); fail-loud checks localize seam bugs.
 
-**Software / integration validation (done).** The pipeline runs end-to-end against real transcripts, with automated end-to-end tests covering the default, GT, incremental, graph, and export flows. These establish that the *software* behaves: stages compose, schemas validate, failures are caught and localized by `ctx.require`, exports produce valid output, and the system handles single- and multi-document corpora. Representative runs produce a coherent hierarchical codebook with speaker detection and memos (thematic), cross-interview consensus/divergence (multi-doc), and open codes → axial relationships → core category → theoretical model (GT). This is integration testing, and we now name it as such. It also taught the engineering lessons baked into the system: LLMs do not reliably populate every schema field (so every LLM-facing collection field defaults to empty, locked by regression tests); output is non-deterministic (so software assertions are loose-but-meaningful); fail-loud checks turn integration bugs into immediate, localized errors.
-
-**Methodological evaluation (planned, not yet executed).** Software working is not the analysis being *correct*. The evaluation below is the bar we hold ourselves to before claiming methodological validity; none of it is reported here as a result.
+**Methodological evaluation (planned, not executed — no results are claimed below).** Software working is not analysis being correct. The following is the bar we hold ourselves to before claiming methodological validity:
 
 | Evaluation target | Required evidence |
 |---|---|
-| Code grounding | % of generated quotes that resolve exactly to anchored transcript spans |
+| Code grounding | % of generated quotes resolving exactly to anchored transcript spans; count of unresolvable/hallucinated quotes |
 | Code quality | Blind expert ratings: clarity, specificity, usefulness, grounding |
 | Codebook coverage | Human comparison across multiple datasets |
 | Stability | N repeated runs with confidence intervals |
 | Bias | Error stratification by respondent attributes where ethically available |
-| Negative cases | Recall/precision vs. human-identified disconfirming evidence |
+| Disconfirmation | Recall/precision vs. human-identified disconfirming evidence |
 | GT fidelity | Expert review of constant comparison, category development, memo quality, saturation claims |
 | Baselines | Generic ChatGPT prompting; ATLAS.ti/MAXQDA where feasible; LLMCode, HICode, TAMA/Auto-TA, LOGOS/AcademiaOS by task |
+| Interoperability | QDPX import success into ATLAS.ti/NVivo |
 
-A recent blinded mixed-methods comparison found LLMs performed comparably to humans for *applying predefined deductive codes* but were more variable for *inductive* theme generation (tone, nuance, conversational context). That result directly shapes the plan above: deductive application is where we expect to match humans; inductive generation is where evaluation must be most skeptical.
+A 2026 blinded mixed-methods comparison (PLOS Digital Health) found LLMs performed comparably to humans for *applying predefined deductive codes* (low hallucination) but were more variable for *inductive* theme generation (tone, nuance, conversational context). That directly shapes the plan: expect parity on deductive application; be most skeptical of inductive generation.
 
 ---
 
-## 8. Ethics and Threat Model
+## 8. Ethics and Security — Control Matrix
 
-Qualitative transcripts frequently contain protected, confidential, or re-identifiable data, so security and ethics are first-order, not deployment afterthoughts. The current operational posture (local API and MCP surfaces loopback-bound and unauthenticated; export and web surfaces hardened against arbitrary writes and stored XSS) is appropriate for a single-researcher local tool and is **not** a multi-tenant production deployment. A research deployment must additionally address:
+Qualitative transcripts frequently contain protected, confidential, or re-identifiable data, so security and ethics are first-order. The current posture suits a single-researcher local tool and is **not** a multi-tenant deployment; the table states, per risk, the current control, the missing control, how it should be tested, and deployment status.
 
-- **Data residency and provider retention** — where transcripts go when sent to a hosted model, and what the provider retains. Local models (Ollama/vLLM) are supported precisely so sensitive corpora need never leave the machine.
-- **De-identification before LLM calls** — stripping or pseudonymizing PII prior to any external call.
-- **Consent** for AI-assisted analysis of participant data.
-- **Prompt injection from transcripts** — transcripts are *untrusted input* fed to an LLM; a transcript can contain text crafted to manipulate the model. This is an under-appreciated attack surface unique to this domain and must be tested.
-- **Accidental raw-data export and cross-project leakage** — exports must be scoped and, ideally, checksummed.
-- **Audit logs containing sensitive text**, MCP tool misuse, and localhost exposure via browsers/notebooks/tunnels.
-- **Right-to-delete** handling across state, exports, and logs.
+| Risk | Current control | Missing control | Test method | Status |
+|---|---|---|---|---|
+| Transcript egress to hosted model | Local-model routing (Ollama/vLLM) supported | Enforced "local-only" mode; egress audit | Network egress test under local-mode | Partial |
+| Provider data retention | Documented model choice | Per-provider retention policy surfaced in run metadata | Config/metadata review | Missing |
+| PII in prompts | — | De-identification/pseudonymization pre-call | Re-identification test on outputs | Missing |
+| Prompt injection *from transcripts* | — | Treat transcript as untrusted input; injection-resistant prompting; output bounds | Red-team transcripts with injected instructions | Missing |
+| Arbitrary file write (MCP export) | `_confine_export_path` sandbox to exports dir | — | Traversal-payload tests (present) | Done |
+| Stored XSS in web UI | `markupsafe.escape` on all dynamic values | — | XSS payload tests | Done |
+| Unauthenticated local API/MCP | Loopback binding | AuthN/AuthZ for any non-loopback use | Bind-address + auth test | Partial |
+| Accidental raw-data export / cross-project leakage | Per-project store | Export scoping + content hashes | Export audit | Partial |
+| Sensitive text in logs | — | Log redaction policy | Log inspection | Missing |
+| Right-to-delete | File deletion | Cascade across state, exports, logs, observability DB | Deletion-completeness test | Missing |
 
-We commit to publishing an explicit threat model (likely harms and attack paths) before describing the system as a "trusted research instrument" in any external venue. Until then, the honest label is "auditable local research tool with a known, bounded security posture."
+We will publish a full threat model before describing the system as a "trusted research instrument" in any external venue. Until then the honest label is **"auditable local research tool with a known, bounded security posture."**
 
 ---
 
 ## 9. Limitations
 
-- **LLM bias may be systematic, not random.** LLM coding errors can be biased with respect to respondent characteristics, which can mislead inference (Ashwin, Chhabra & Rao, 2025). Agreement and stability metrics detect *inconsistency*; neither detects a *consistent* bias shared across passes and models. Human review and (hardened) negative-case analysis are mitigations, not proofs.
-- **Reliability ≠ validity.** High LLM-pass agreement means the method is *consistent*, not *correct*.
-- **Pseudo-replication.** Treating LLM passes/models as independent raters overstates statistical independence; multi-model panels reduce but do not eliminate it (§6).
-- **GT fidelity is partial.** Theoretical sampling, category-level saturation, full axial decomposition, and analytic (vs. summary) memoing are not yet implemented — hence "GT-inspired," not "full GT."
-- **Quote attribution is brittle** (substring matching; §5.1) until span anchoring lands.
-- **Auditability is partial** until an append-only event log and export hashes exist (§3, §10).
-- **Non-determinism is inherent**; we measure and report it rather than hide it.
+- **LLM bias may be systematic, not random** (Ashwin, Chhabra & Rao, 2025): errors can correlate with respondent characteristics and mislead inference. Agreement/stability detect *inconsistency*, never a *consistent* shared bias.
+- **Reliability ≠ validity; consistency ≠ truth.**
+- **Pseudo-replication** in treating LLM passes/models as raters (§6).
+- **GT fidelity is partial** — hence "GT-inspired," and "procedural mimicry," not "full GT" (§5).
+- **Quote attribution is brittle** until span anchoring lands (§5.1) — the highest-priority technical gap.
+- **Disconfirmation is experimental**, not credibility evidence (§6).
+- **Auditability is partial** until an append-only log and export hashes exist.
+- **Methodological validity is unmeasured** (§7).
+- **Non-determinism is inherent**; we measure and report it.
 
 ---
 
-## 10. Beyond Current Prototypes
+## 10. Roadmap (Beyond Current Prototypes)
 
-The architecture was designed so the next capabilities are *extensions*, not rewrites.
+Each item is a stage or layer over the existing typed state, observability, and consistency metrics — none requires abandoning the foundation.
 
-1. **Span-anchored grounding.** Stable span identifiers (doc/speaker/offsets/hash) with a hard requirement that every generated quote resolve to an anchored span — the precondition for the grounding metric in §7 and for trustworthy negative-case evidence.
-2. **Hardened, retrieval-first negative-case search** using a *different* model/adversarial prompt family, mandatory quote spans, and human review before synthesis — to defeat confirmation laundering (§6).
-3. **Multi-model consensus** that merges codebooks across providers and reports agreement with the existing statistics — diversifying the *source* of bias to attack the systematic-bias threat, while honestly reporting shared-dependency risk.
-4. **True theoretical sampling** — a stage that identifies under-developed categories and recommends what kind of data would develop them, closing the GT loop.
-5. **Per-category saturation** — property/dimension tracking, so the system can say "the core category is saturated but category X needs three more cases."
-6. **Active learning from review** — treat approve/reject/modify/merge/split decisions as a signal that refines project prompting over time.
-7. **Append-only audit log + export hashes (+ optional DB backend)** — turning "single JSON" into a defensible audit substrate for larger and collaborative projects.
-8. **Collaborative coding** — multiple human reviewers with explicit conflict resolution and its own reliability accounting.
-9. **Retrieval grounding** — semantic search across the corpus (the capability QualCoder has and this system lacks) to ground code application and reduce hallucinated quotes.
-
-Each is a stage or layer over the existing typed state, observability, and consistency metrics — none requires abandoning the methodology-aware, schema-constrained, fail-loud foundation.
+1. **Span-anchored grounding** — stable span ids with a hard requirement that every generated quote resolve to an anchored span (precondition for the §7 grounding metric and for trustworthy disconfirmation).
+2. **Hardened, retrieval-first disconfirmation** — different model/adversarial prompt, mandatory spans, human adjudication (defeats confirmation laundering).
+3. **Multi-model consensus** — merge codebooks across providers; report agreement; diversify the *source* of bias.
+4. **True theoretical sampling** — identify under-developed categories and recommend data to develop them.
+5. **Per-category saturation** — property/dimension tracking.
+6. **Active learning from review** — treat approve/reject/modify/merge/split as a signal refining project prompting.
+7. **Append-only audit log + export hashes (+ optional DB)** — a defensible audit substrate.
+8. **Collaborative coding** — multiple reviewers with conflict resolution.
+9. **Retrieval grounding** — corpus semantic search (the capability QualCoder has and this system lacks).
+10. **Methodological evaluation** — execute the §7 plan; report real numbers.
 
 ---
 
 ## 11. Conclusion
 
-Most shipping QDA products bolt AI onto a manual workflow; a wave of research prototypes automates parts of TA and GT but as artifacts rather than auditable tools. This system's contribution is an *integration*: full TA and GT-inspired pipelines, structured output enforced at decode time, fail-loud inter-stage contracts, native consistency/stability reporting, automated (first-pass) negative-case search, per-stage memos and per-code provenance, multi-format export including QDPX, and end-to-end observability — assembled into one instrument whose outputs a reviewer can interrogate.
+Most shipping QDA products bolt AI onto a manual workflow; a wave of research prototypes automates parts of TA and GT but as artifacts rather than integrated tools. This system's contribution is an **auditable integration** — TA and GT-inspired pipelines, schema-constrained typed output, fail-loud orchestration, human-review provenance, consistency/stability reporting, multi-format export including QDPX, and observability, assembled into one inspectable open-source tool.
 
-We deliberately do **not** claim to be beyond the state of the art in broad terms; that claim is falsifiable by a single literature search and would not survive review. The credible claim is narrower and, we believe, more durable: an *auditable, methodology-aware engineering integration* that improves on fragmented prototypes and assistive products by combining orchestration, structured output, provenance, review, consistency measurement, and interoperable export — with an honest ledger of what is proven (the software runs and fails safely), what is measured (consistency, not validity), and what remains (methodological evaluation, GT fidelity, span-anchored grounding, hardened disconfirmation, and a published threat model). The wager of this design is that the future of qualitative analysis is neither pure-human (too slow, inconsistently documented) nor pure-LLM (fast but unfalsifiable), but a disciplined collaboration in which programmatic code guarantees coverage, the LLM supplies semantic judgment, and the human supplies direction and final authority.
+We deliberately do **not** claim to be beyond the state of the art, first to automate, or to have demonstrated methodological rigor. The credible claim is narrower: an *auditable, methodology-aware engineering integration* that supplies the **scaffold** rigor requires, with an explicit ledger of what is proven (the software runs and fails safely), what is merely measured (computational consistency, not validity), and what remains (span-anchored grounding, hardened disconfirmation, GT fidelity, a published threat model, and — above all — the methodological evaluation in §7). On two dimensions it currently *lags* its comparators: established QDA tools beat it on span-anchored grounding, and the research prototypes beat it on published evaluation. The wager of the design is that the future of qualitative analysis is neither pure-human (slow, inconsistently documented) nor pure-LLM (fast but unfalsifiable), but a disciplined collaboration in which programmatic code guarantees coverage, the LLM supplies semantic judgment, and the human supplies direction and final authority — *once the evidence in §7 is in hand*.
 
 ---
 
 ## References
 
-*Note: the LLM-prototype citations below were supplied during review and should be version-/venue-verified before formal publication.*
-
 **Qualitative methodology and reporting standards**
 - Strauss, A., & Corbin, J. (2008). *Basics of Qualitative Research* (3rd ed.). Sage.
 - Charmaz, K. (2014). *Constructing Grounded Theory* (2nd ed.). Sage.
+- Braun, V., & Clarke, V. (2021). *Thematic Analysis: A Practical Guide*. Sage. (Reflexive TA.)
 - Lincoln, Y. S., & Guba, E. G. (1985). *Naturalistic Inquiry*. Sage.
-- Tong, A., Sainsbury, P., & Craig, J. (2007). Consolidated criteria for reporting qualitative research (COREQ). *Int. J. Qual. Health Care*, 19(6).
-- O'Brien, B. C., et al. (2014). Standards for Reporting Qualitative Research (SRQR). *Academic Medicine*, 89(9).
+- Tong, A., Sainsbury, P., & Craig, J. (2007). Consolidated criteria for reporting qualitative research (COREQ). *Int. J. Qual. Health Care*, 19(6), 349–357.
+- O'Brien, B. C., et al. (2014). Standards for Reporting Qualitative Research (SRQR). *Academic Medicine*, 89(9), 1245–1251.
 
 **Reliability and agreement**
 - Cohen, J. (1960). A coefficient of agreement for nominal scales. *Educ. Psychol. Meas.*, 20(1).
 - Fleiss, J. L. (1971). Measuring nominal scale agreement among many raters. *Psychol. Bull.*, 76(5).
 - Landis, J. R., & Koch, G. G. (1977). The measurement of observer agreement for categorical data. *Biometrics*, 33(1).
-- Krippendorff, K. (2004). *Content Analysis* (2nd ed.). Sage. (α ≥ 0.80 reliable; ≥ 0.67 tentative.)
+- Krippendorff, K. (2004). *Content Analysis* (2nd ed.). Sage.
 - O'Connor, C., & Joffe, H. (2020). Intercoder reliability in qualitative research: debates and practical guidelines. *Int. J. Qual. Methods*, 19.
 
-**LLMs in qualitative analysis — bias, evaluation, and prototypes**
-- Ashwin, J., Chhabra, A., & Rao, V. (2025). Using large language models for qualitative analysis can introduce serious bias. *Sociological Methods & Research* (online first).
-- (2026). The use and methodological reporting of large language models in qualitative research: a scoping review. *BMC Medical Research Methodology*.
-- (n.d.). Large language models for thematic analysis in healthcare research: a blinded mixed-methods comparison with human analysts. *PLOS Digital Health*.
-- AcademiaOS (2024): Automating grounded theory development with LLMs. arXiv:2403.08844.
-- LOGOS (2025): LLM-driven end-to-end grounded theory development and schema induction. arXiv:2509.24294.
-- MindCoder (2025): Using an LLM to support flexible and structural inductive qualitative analysis. arXiv:2501.00775.
-- TAMA (2025): A human–AI collaborative thematic analysis framework using multi-agent LLMs for clinical interviews. arXiv:2503.20666.
-- Auto-TA (2025): Towards scalable automated thematic analysis via multi-agent LLMs with RL. arXiv:2506.23998.
-- HICode (2025): Hierarchical inductive coding with LLMs. EMNLP 2025.
+**LLMs in qualitative analysis — bias, evaluation, prototypes** *(verified June 2026)*
+- Ashwin, J., Chhabra, A., & Rao, V. (2025). Using large language models for qualitative analysis can introduce serious bias. *Sociological Methods & Research*. doi:10.1177/00491241251338246 (preprint arXiv:2309.17147).
+- Hill, C., Dahil, A., Simpson, G., Hardisty, D., Keast, J., Pinn, C. K., et al. (2026). Large language models for thematic analysis in healthcare research: a blinded mixed-methods comparison with human analysts. *PLOS Digital Health*. doi:10.1371/journal.pdig.0001189.
+- (2026). The use and methodological reporting of large language models in qualitative research: a scoping review. *BMC Medical Research Methodology*. doi:10.1186/s12874-026-02913-1.
+- Übellacker, T. (2024). AcademiaOS: automating grounded theory development in qualitative research with large language models. arXiv:2403.08844.
+- Pi, X., Yang, Q., & Nguyen, C. (2025). LOGOS: LLM-driven end-to-end grounded theory development and schema induction for qualitative research. arXiv:2509.24294.
+- Gao, J., Shu, Z., Yeo, S. Y., Prakash, A., Huang, C.-M., Dredze, M., & Xiao, Z. (2025). Efficiency with rigor! A trustworthy LLM-powered workflow for qualitative data analysis (system: MindCoder). arXiv:2501.00775.
+- Xu, H., Yi, S., Lim, T., et al. (2025). TAMA: a human–AI collaborative thematic analysis framework using multi-agent LLMs for clinical interviews. arXiv:2503.20666.
+- Yi, S., Nguyen, J., Xu, H., Lim, T., Well, A., Markey, M., & Ding, Y. (2025). Auto-TA: towards scalable automated thematic analysis via multi-agent LLMs with reinforcement learning. arXiv:2506.23998.
+- Zhong, M., Wang, P., & Field, A. (2025). HICode: hierarchical inductive coding with LLMs. *Proc. EMNLP 2025* (arXiv:2509.17946).
