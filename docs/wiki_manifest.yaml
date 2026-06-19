@@ -1,0 +1,15 @@
+version: 1
+project: qualitative_coding
+publish:
+  - path: README.md
+    type: ProjectOverview
+    title: Qualitative Coding Overview
+    tags: [portfolio, analysis, qualitative-coding]
+  - path: docs/whitepaper_automated_qualitative_coding.md
+    type: Whitepaper
+    tags: [analysis, qualitative-coding, methodology]
+exclude:
+  - docs/CLAUDE.md
+  - data/**
+  - .pytest_cache/**
+  - archive/**
