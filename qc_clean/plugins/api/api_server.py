@@ -48,7 +48,10 @@ class QCAPIServer:
             self._app.add_middleware(
                 CORSMiddleware,
                 allow_origins=self.config.get('cors_origins', DEFAULT_CORS_ORIGINS),
-                allow_credentials=True,
+                # No cookie/credential auth is used; keeping this False prevents a
+                # widened CORS_ORIGINS (e.g. "*") from reflecting credentialed
+                # cross-origin reads.
+                allow_credentials=False,
                 allow_methods=["*"],
                 allow_headers=["*"],
             )

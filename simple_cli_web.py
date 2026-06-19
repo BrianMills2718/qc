@@ -11,6 +11,7 @@ import subprocess
 import sys
 from pathlib import Path
 from flask import Flask, request, jsonify
+from markupsafe import escape
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
@@ -456,14 +457,14 @@ def show_results(job_id):
         response = requests.get(f'http://127.0.0.1:8002/jobs/{job_id}')
         if response.status_code != 200:
             return f'''
-            <div class="error">Could not retrieve results for job {job_id}</div>
+            <div class="error">Could not retrieve results for job {escape(job_id)}</div>
             <a href="/">← Back to upload</a>
             '''
         
         job_data = response.json()
         if job_data.get('status') != 'completed':
             return f'''
-            <div class="error">Analysis not completed yet. Status: {job_data.get('status', 'unknown')}</div>
+            <div class="error">Analysis not completed yet. Status: {escape(job_data.get('status', 'unknown'))}</div>
             <a href="/">← Back to upload</a>
             '''
         
@@ -496,45 +497,45 @@ def show_results(job_id):
                 <div class="section">
                     <h3>📈 Analysis Summary:</h3>
                     <div class="results">
-                        <p><strong>Total Interviews:</strong> {detailed_results.get('total_interviews', 'N/A')}</p>
-                        <p><strong>Processing Time:</strong> {detailed_results.get('processing_time_seconds', 'N/A')} seconds</p>
-                        <p><strong>Model Used:</strong> {detailed_results.get('model_used', 'N/A')}</p>
+                        <p><strong>Total Interviews:</strong> {escape(detailed_results.get('total_interviews', 'N/A'))}</p>
+                        <p><strong>Processing Time:</strong> {escape(detailed_results.get('processing_time_seconds', 'N/A'))} seconds</p>
+                        <p><strong>Model Used:</strong> {escape(detailed_results.get('model_used', 'N/A'))}</p>
                         <p><strong>Demo Mode:</strong> {'❌ No (Real Analysis)' if not detailed_results.get('demo_mode', True) else '✅ Yes (Demo)'}</p>
-                        <p><strong>Job ID:</strong> <code>{job_id}</code></p>
+                        <p><strong>Job ID:</strong> <code>{escape(job_id)}</code></p>
                     </div>
                 </div>
-                
+
                 <div class="section">
                     <h3>🎯 Key Themes Identified:</h3>
                     <div class="themes">
                         <ul>
-                            {''.join([f"<li><strong>{theme}</strong></li>" for theme in detailed_results.get('key_themes', [])])}
+                            {''.join([f"<li><strong>{escape(theme)}</strong></li>" for theme in detailed_results.get('key_themes', [])])}
                         </ul>
                     </div>
                 </div>
-                
+
                 <div class="section">
                     <h3>📋 Codes Identified:</h3>
                     <div class="results">
                         <ul class="code-list">
-                            {''.join([f'<li class="code-item"><strong>{code.get("code", "Unknown")}</strong> - Frequency: {code.get("frequency", 0)}, Confidence: {code.get("confidence", 0)}</li>' for code in detailed_results.get('codes_identified', [])])}
+                            {''.join([f'<li class="code-item"><strong>{escape(code.get("code", "Unknown"))}</strong> - Frequency: {escape(code.get("frequency", 0))}, Confidence: {escape(code.get("confidence", 0))}</li>' for code in detailed_results.get('codes_identified', [])])}
                         </ul>
                     </div>
                 </div>
-                
+
                 <div class="section">
                     <h3>💡 Recommendations:</h3>
                     <div class="recommendations">
                         <ul>
-                            {''.join([f"<li>{rec}</li>" for rec in detailed_results.get('recommendations', [])])}
+                            {''.join([f"<li>{escape(rec)}</li>" for rec in detailed_results.get('recommendations', [])])}
                         </ul>
                     </div>
                 </div>
-                
+
                 <div class="section">
                     <h3>📝 Full Comprehensive Analysis:</h3>
                     <div class="full-analysis">
-{detailed_results.get('full_analysis', 'No detailed analysis available')}
+{escape(detailed_results.get('full_analysis', 'No detailed analysis available'))}
                     </div>
                 </div>
                 
@@ -548,7 +549,7 @@ def show_results(job_id):
         
     except Exception as e:
         return f'''
-        <div class="error">Error loading results: {str(e)}</div>
+        <div class="error">Error loading results: {escape(str(e))}</div>
         <a href="/">← Back to upload</a>
         '''
 
@@ -572,13 +573,13 @@ def test_cli():
         <h1>CLI Integration Test</h1>
         <h3>Command: qc_cli --help</h3>
         <div class="debug">
-Return Code: {cli_result['returncode']}
+Return Code: {escape(cli_result['returncode'])}
 
 STDOUT:
-{cli_result['stdout']}
+{escape(cli_result['stdout'])}
 
 STDERR:
-{cli_result['stderr']}
+{escape(cli_result['stderr'])}
         </div>
         <a href="/">← Back to main page</a>
     </body>
@@ -591,4 +592,7 @@ if __name__ == '__main__':
     print("This version uses subprocess to call CLI commands")
     print("Perfect for WSL/Linux environment!")
     print("===================================")
-    app.run(debug=True, host='127.0.0.1', port=5003)
+    # debug=False: Werkzeug's debug console is a remote-code-execution surface.
+    # Override locally with FLASK_DEBUG=1 only when actively debugging.
+    debug_enabled = os.environ.get("FLASK_DEBUG", "").lower() in {"1", "true", "yes"}
+    app.run(debug=debug_enabled, host='127.0.0.1', port=5003)

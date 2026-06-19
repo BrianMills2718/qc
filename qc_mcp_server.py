@@ -45,6 +45,30 @@ mcp = FastMCP("qualitative-coding")
 store = ProjectStore()
 exporter = ProjectExporter()
 
+# Agent-driven exports are confined to a dedicated directory so a caller cannot
+# use ``output_file`` to perform an arbitrary write (e.g. "/home/brian/.bashrc"
+# or "../../etc/cron.d/x"). The trusted CLI keeps full path freedom; only this
+# MCP surface is sandboxed.
+import re as _re
+
+EXPORTS_DIR = (store.projects_dir / "exports").resolve()
+_UNSAFE_NAME_RE = _re.compile(r"[^A-Za-z0-9._-]+")
+
+
+def _confine_export_path(output_file: Optional[str], default_name: str) -> str:
+    """Map an agent-supplied output_file to a sanitized path inside EXPORTS_DIR.
+
+    Directory components in the request are discarded; only a sanitized basename
+    is honored. The resolved path is verified to remain within EXPORTS_DIR.
+    """
+    EXPORTS_DIR.mkdir(parents=True, exist_ok=True)
+    raw_name = Path(output_file).name if output_file else default_name
+    safe_name = _UNSAFE_NAME_RE.sub("_", raw_name).strip(" .") or default_name
+    candidate = (EXPORTS_DIR / safe_name).resolve()
+    if EXPORTS_DIR != candidate.parent:
+        raise ValueError(f"Refusing to export outside {EXPORTS_DIR}: {output_file!r}")
+    return str(candidate)
+
 
 @mcp.tool()
 def qc_list_projects() -> str:
@@ -282,7 +306,8 @@ def qc_export_markdown(project_id: str, output_file: str | None = None) -> str:
     except FileNotFoundError:
         return json.dumps({"error": f"Project '{project_id}' not found."})
 
-    path = exporter.export_markdown(state, output_file)
+    safe_path = _confine_export_path(output_file, f"{state.name}_report.md")
+    path = exporter.export_markdown(state, safe_path)
     return json.dumps({"exported_to": path, "format": "markdown"})
 
 
@@ -299,7 +324,8 @@ def qc_export_json(project_id: str, output_file: str | None = None) -> str:
     except FileNotFoundError:
         return json.dumps({"error": f"Project '{project_id}' not found."})
 
-    path = exporter.export_json(state, output_file)
+    safe_path = _confine_export_path(output_file, f"{state.name}.json")
+    path = exporter.export_json(state, safe_path)
     return json.dumps({"exported_to": path, "format": "json"})
 
 
