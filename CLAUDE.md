@@ -26,15 +26,16 @@ All stages use structured LLM output via Pydantic schemas + JSON mode. State is 
 
 ## Current State
 
-The software is **built and software-validated** (559 deterministic tests + 6 live-LLM E2E; ruff + docs gates green) — "the program does what it's built to do," *not* evidence the analysis is methodologically valid. Implemented:
+The software is **built and software-validated** (563 deterministic tests + 6 live-LLM E2E; ruff + docs gates green) — "the program does what it's built to do," *not* evidence the analysis is methodologically valid. Implemented:
 
 - Thematic and **GT-inspired** (not "full GT") pipelines; `NegativeCaseStage` runs **last** in both (INV-6), automatic cross-interview analysis for multi-doc corpora.
 - GT constant comparison; incremental re-coding via `project recode` (flags stale higher-order outputs, INV-11).
 - **Span-anchored grounding** (INV-1, mostly met): quotes resolve to char offsets + hash or are dropped + warned; `verify_grounding`/`make bench` measure the rate.
+- **Segment universe + coverage** (INV-8): every doc split into char-anchored segments; `project run --exhaustive` codes *every* segment (examined-and-judged coverage, segment-anchored applications), else traversal coverage.
 - Human review (CLI + browser), `project irr` (LLM-pass *codebook-discovery* agreement — not application-level), `project stability`.
 - Graph viz, JSON/CSV/Markdown/QDPX export, per-stage memos, per-code audit trail; typed `PipelineContext`/results, fail-loud inter-stage checks, `llm_client` observability.
 
-**Direction:** the end product is public and SOTA-targeting; the proven/measured/planned ledger, the architectural invariants, and the ranked roadmap are in `docs/PROJECT_THEORY_AND_GOALS.md` (§13/§13.1/§18). Next structural work: the evaluation harness (keystone, Phase 0 done) and the **segment universe** (INV-8).
+**Direction:** the end product is public and SOTA-targeting; the proven/measured/planned ledger, the architectural invariants, and the ranked roadmap are in `docs/PROJECT_THEORY_AND_GOALS.md` (§13/§13.1/§18). Recent structural work landed: span anchoring (INV-1), the segment universe + exhaustive coverage (INV-8). Next: the **first-class claim ledger** (INV-9) and wiring `project irr` to application-level (per-segment) agreement.
 
 ## Architecture
 
@@ -98,7 +99,7 @@ start_server.py                              # Server startup script
 - `qc_clean/core/export/data_exporter.py` - ProjectExporter (JSON/CSV/Markdown/QDPX from ProjectState)
 - `qc_cli.py` - CLI interface (analyze, project, review, status, server)
 - `qc_mcp_server.py` - MCP server: 20 tools for project management, pipeline execution, codebook inspection, review, IRR/stability, export
-- `tests/` - 559 deterministic tests + 6 live LLM E2E tests (37 test files)
+- `tests/` - 563 deterministic tests + 6 live LLM E2E tests (38 test files)
 
 ### How It Works
 - `project run` runs the pipeline locally (no server needed); `analyze` uses the API server

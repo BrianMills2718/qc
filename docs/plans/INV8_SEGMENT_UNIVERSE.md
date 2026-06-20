@@ -68,9 +68,9 @@ exhaustive mode).
 | 4 | Docs: INV-8 UNMET→PARTIAL, roadmap, counts | DONE |
 | 5 | Exhaustive coding: `Segment.decision`, `ExhaustiveCodingResponse`, `ctx.exhaustive_coding` branch + tests | DONE (3 tests) |
 | 6 | `compute_coverage` examined/coded rates; surface in bench; CLI opt-in + tests | DONE |
-| 7 | Docs: INV-8 → MET (exhaustive mode); roadmap; counts | IN PROGRESS |
+| 7 | Docs: INV-8 → MET (exhaustive mode); roadmap; counts | DONE |
 
-**Foundational half complete.** INV-8 UNMET→PARTIAL: char-anchored segment universe + coverage denominator (D2) built and surfaced. 559 tests, all gates green.
+**COMPLETE (all 7 phases).** INV-8 MET in exhaustive mode (`project run --exhaustive`): char-anchored segment universe, examined-and-judged coverage, segment-anchored applications. PARTIAL by default (traversal coverage). 563 tests, all gates green. Follow-ups: wire `project irr` to per-segment application-level agreement; decide if exhaustive becomes default after live validation.
 
 ## Notes / findings log
 - The exhaustive per-segment-coding half (examined-and-judged coverage + application-level agreement unit) is a **cost/method fork (~5-10x LLM cost)** deliberately deferred to a user decision.
