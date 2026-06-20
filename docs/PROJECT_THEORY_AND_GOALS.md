@@ -22,6 +22,22 @@
 
 ---
 
+## Ambition (where this is going — read this to set priorities)
+
+**The end product is public, and the target is genuinely state-of-the-art.** Not "an LLM that codes" — every tool has that now and it is not a moat. The moat is being **the qualitative coding system that can *prove*, on shared benchmarks, that it is more exhaustive, better grounded, more auditable, and more rigorously disconfirmed than anything else — while matching expert humans on interpretive validity.**
+
+Honest shape of the SOTA claim (this is the bar we build toward, and the framing we will defend):
+
+- **Decisively SOTA on the structural rigor dimensions** — coverage/exhaustiveness (INV-8), evidentiary grounding (INV-1), auditability/reproducibility (INV-9 + audit log), disconfirmation rigor (INV-2/6), reliability, scale, and cost. On these, a well-built machine system beats human/think-tank/academic practice *categorically*, and no current tool (ATLAS.ti, NVivo, QualCoder, or the research prototypes) occupies that combined position.
+- **Expert-parity on interpretive validity**, augmented by human-in-the-loop — *not* "beats humans at interpretation." Current evidence (PLOS blinded study; LLMCode; Ashwin et al.) is that LLMs match humans on deductive code application but are weaker/variable on latent inductive meaning. Closing that is a research frontier; near-term we target parity and measure it.
+- **The only system that can prove it.** "Better" is only credible with a ground truth to measure against. The **evaluation harness (§ harness, INV-3) is the keystone**: it is simultaneously the *proof* of the SOTA claim and the *feedback loop* that makes the system better. You cannot beat SOTA you cannot measure.
+
+Deliberately **not** the framing: "better in *every* measurement." That sets a trap — one dimension where we tie-or-lose (deep latent interpretation) sinks an absolute claim. "SOTA on measurable rigor, expert-parity on interpretation, and the only system that can prove it on shared benchmarks" is *stronger because it survives scrutiny*, and it is still a claim no competitor can make.
+
+**Implication for this document:** the invariants in §13.1 are a **committed build spec toward that product**, not an idealized measuring stick we shrug at. UNMET invariants are work items with a destination, ranked in §18. The evaluation harness comes first because it converts ambition into evidence — see `docs/EVALUATION_HARNESS.md`.
+
+---
+
 ## Part I — Orientation
 
 ## 1. What this project is, in one paragraph
@@ -216,7 +232,7 @@ Categorize any capability before relying on or describing it.
 
 ### 13.1 Architectural invariants (the north-star — and where the build falls short)
 
-§13 says what *is*; this says what *must be true* for the system's outputs to be trustworthy. These are the non-negotiable correctness conditions of the target architecture — the north-star is stricter than the current build. Several are **unmet today**; that is stated loudly so agents do not mistake the build for the target. Until an invariant is met, the outputs it governs are *provisional*, and an agent must say so.
+§13 says what *is*; this says what *must be true* for the system's outputs to be trustworthy. These are the non-negotiable correctness conditions of the target architecture — and, per the Ambition section, the **committed build spec** for the public product, not an idealized measuring stick. The north-star is stricter than the current build; several invariants are **unmet today**, stated loudly so agents do not mistake the build for the target. Until an invariant is met, the outputs it governs are *provisional*, and an agent must say so. Each UNMET invariant is a ranked work item in §18.
 
 **Met by the current build (keep them met — do not regress):**
 - **INV-A — Fail-loud inter-stage contracts.** Missing upstream data raises (`ctx.require`), never silently degrades. *Met.*
@@ -287,19 +303,19 @@ The system is a **local research tool**, loopback-bound and unauthenticated; har
 
 LLM bias may be systematic not random (INV-3/5); reliability ≠ validity; pseudo-replication; the denominator problem (INV-8); claims not first-class (INV-9); GT fidelity partial ("GT-inspired," not "full GT"); quote attribution brittle (INV-1, top priority); disconfirmation experimental and partial-coverage (INV-2/6); confidence uncalibrated; corpus boundary unstated; incremental staleness now flagged but outputs not auto-refreshed (INV-11); audit substrate not tamper-evident; methodological validity unmeasured; non-determinism inherent (we measure and report it).
 
-## 18. Roadmap (priority order — invariants before features)
+## 18. Roadmap (priority order — toward the public SOTA product)
 
-The reviewer's key insight: the next correction is **not more features** — it is adding the *objects* that make the existing guarantees true (a segment universe and a claim ledger), and aligning the formal state model with the inferential quantities the system already names.
+Sequencing rule: **the evaluation harness is the keystone** (it proves the SOTA claim *and* drives improvement), then the *objects* that make the guarantees true (segment universe, claim ledger), then the rigor edges — not features. Full harness design: `docs/EVALUATION_HARNESS.md`.
 
-1. **Segment universe** — a stable registry of textual units with per-unit coding decisions (incl. nulls). *Closes INV-8*; the precondition for honest coverage, application-level agreement, and corpus prevalence. Foundational alongside INV-1.
-2. **Span-anchored grounding** — populate/verify `start_char`/`end_char` + quote hash; reject quotes that don't resolve. *Closes INV-1*.
-3. **First-class claim ledger** — make every substantive assertion a typed object (source, scope, supporting/contrary anchors, adjudication, revision). *Closes INV-9*; the object that lets disconfirmation (INV-6) and adjudication (INV-10) operate over *all* final claims, not selected memos.
-4. **Disconfirmation + adjudication over the ledger** — extend negative-case search and human review to applications/claims/relations/negative-cases. *Closes INV-6 fully and INV-10*; hardened retrieval-first, different-model disconfirmation *closes INV-2*.
-5. **Methodological evaluation** — *closes INV-3*, and **counterfactual identity-cue tests** for *INV-5*: grounding rate, blind expert ratings, gold-standard comparison, stability CIs, anchoring-bias study (LLM-first vs blind-human-first), confidence **calibration** against adjudicated samples.
-6. **Stale-output handling** — *INV-11 flagging is DONE* (`project recode` warns about non-recomputed outputs). Remaining: optional automatic re-computation or hard invalidation on corpus mutation.
-7. **Instruction/data separation + prompt-injection tests** — *closes INV-7*.
-8. **True theoretical sampling + per-category saturation** — *closes INV-4* (only if the GT path claims theory generation).
-9. **Corpus-boundary / scope-condition contract** — bind final claims to the actual sampling frame.
+1. **Evaluation harness (KEYSTONE)** — gold-standard corpora, grounding rate, blind expert ratings, agreement-vs-gold (κ/α, IoU/Hausdorff), coverage, bias stratification + counterfactual identity-cue tests, disconfirmation recall/precision, confidence calibration, baselines (generic ChatGPT, ATLAS.ti/MAXQDA, human-only, task-matched prototypes). *Closes INV-3*, operationalizes INV-5; built on `prompt_eval`. Without it the SOTA claim is unprovable and improvement is blind.
+2. **Span-anchored grounding** — populate/verify `start_char`/`end_char` + quote hash; reject quotes that don't resolve. *Closes INV-1*; the first measurable structural edge.
+3. **Segment universe** — a stable registry of textual units with per-unit coding decisions (incl. nulls). *Closes INV-8*; the precondition for honest coverage, application-level agreement, and corpus prevalence.
+4. **First-class claim ledger** — make every substantive assertion a typed object (source, scope, supporting/contrary anchors, adjudication, revision). *Closes INV-9*; the object that lets disconfirmation (INV-6) and adjudication (INV-10) operate over *all* final claims, not selected memos.
+5. **Disconfirmation + adjudication over the ledger** — extend negative-case search and human review to applications/claims/relations/negative-cases. *Closes INV-6 fully and INV-10*; hardened retrieval-first, different-model disconfirmation *closes INV-2*.
+6. **Instruction/data separation + prompt-injection tests** — *closes INV-7*.
+7. **True theoretical sampling + per-category saturation** — *closes INV-4* (only if the GT path claims theory generation).
+8. **Corpus-boundary / scope-condition contract** — bind final claims to the actual sampling frame.
+9. **Stale-output handling** — *INV-11 flagging DONE*; remaining: auto-recompute/hard invalidation on corpus mutation.
 10. **Features:** multi-model consensus; active learning from review; collaborative coding; retrieval grounding.
 11. **Tamper-evident audit substrate** (append-only log + export hashes + optional DB).
 

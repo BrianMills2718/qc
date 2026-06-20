@@ -9,6 +9,10 @@ publish:
     type: Reference
     title: Project Theory & Goals (Agent Orientation)
     tags: [analysis, qualitative-coding, methodology]
+  - path: docs/EVALUATION_HARNESS.md
+    type: Reference
+    title: Evaluation Harness Design
+    tags: [analysis, qualitative-coding, evaluation]
 exclude:
   - docs/CLAUDE.md
   - data/**
