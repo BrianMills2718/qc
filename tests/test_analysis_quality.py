@@ -56,18 +56,20 @@ class TestThematicCodeSchema:
         )
         assert code.discovery_confidence == 0.1
 
-    def test_confidence_out_of_range_rejected(self):
-        with pytest.raises(ValidationError):
-            ThematicCode(
-                id="BAD",
-                name="Bad",
-                description="x",
-                semantic_definition="x",
-                level=0,
-                example_quotes=["x"],
-                mention_count=1,
-                discovery_confidence=1.5,
-            )
+    def test_confidence_out_of_range_clamped(self):
+        # Providers don't decode-enforce min/max; an out-of-range LLM value must
+        # clamp into [0,1] rather than crash the stage (Confidence01).
+        code = ThematicCode(
+            id="BAD",
+            name="Bad",
+            description="x",
+            semantic_definition="x",
+            level=0,
+            example_quotes=["x"],
+            mention_count=1,
+            discovery_confidence=1.5,
+        )
+        assert code.discovery_confidence == 1.0
 
     def test_missing_mention_count_rejected(self):
         with pytest.raises(ValidationError):

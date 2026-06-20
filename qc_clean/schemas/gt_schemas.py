@@ -10,6 +10,8 @@ from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, Field
 
+from qc_clean.schemas._validators import Confidence01
+
 
 class OpenCode(BaseModel):
     """A concept identified during open coding with hierarchical structure support."""
@@ -19,7 +21,7 @@ class OpenCode(BaseModel):
     dimensions: List[str] = Field(default_factory=list, description="Dimensional variations")
     supporting_quotes: List[str] = Field(default_factory=list, description="Quotes that support this code")
     frequency: int = Field(description="Number of occurrences")
-    confidence: float = Field(description="Confidence in this code 0-1")
+    confidence: Confidence01 = Field(default=0.0, description="Confidence in this code 0-1")
     reasoning: str = Field(
         default="",
         description="Brief explanation of why this code was created and what analytical decision led to it",
@@ -54,7 +56,7 @@ class AxialRelationship(BaseModel):
     conditions: List[str] = Field(default_factory=list, description="Conditions that influence this relationship")
     consequences: List[str] = Field(default_factory=list, description="Consequences of this relationship")
     supporting_evidence: List[str] = Field(default_factory=list, description="Evidence supporting this relationship")
-    strength: float = Field(description="Strength of relationship 0-1")
+    strength: Confidence01 = Field(default=0.0, description="Strength of relationship 0-1")
 
 
 class CoreCategory(BaseModel):

@@ -6,6 +6,8 @@ These schemas define the exact structure expected from LLM-based analysis phases
 from pydantic import BaseModel, Field
 from typing import List, Optional
 
+from qc_clean.schemas._validators import Confidence01
+
 
 class ThematicCode(BaseModel):
     """Individual thematic code in hierarchical structure"""
@@ -17,7 +19,7 @@ class ThematicCode(BaseModel):
     level: int = Field(..., description="Hierarchy level (0=top, 1=sub, 2=detailed)")
     example_quotes: List[str] = Field(default_factory=list, description="1-3 illustrative quotes")
     mention_count: int = Field(..., description="Approximate number of times this theme is mentioned or referenced in the interviews")
-    discovery_confidence: float = Field(..., ge=0.0, le=1.0, description="Confidence score from 0.0 to 1.0 using the FULL range: 0.0-0.3 weak, 0.3-0.6 moderate, 0.6-0.8 strong, 0.8-1.0 very strong")
+    discovery_confidence: Confidence01 = Field(..., description="Confidence score from 0.0 to 1.0 using the FULL range: 0.0-0.3 weak, 0.3-0.6 moderate, 0.6-0.8 strong, 0.8-1.0 very strong")
     reasoning: str = Field(
         default="",
         description="Brief explanation of why this code was created and what analytical decision led to it",
@@ -82,7 +84,7 @@ class EntityRelationship(BaseModel):
     entity_1: str = Field(..., description="First entity in relationship")
     entity_2: str = Field(..., description="Second entity in relationship")
     relationship_type: str = Field(..., description="Type of relationship")
-    strength: float = Field(..., ge=0.0, le=1.0, description="Relationship strength")
+    strength: Confidence01 = Field(..., description="Relationship strength")
     supporting_evidence: List[str] = Field(default_factory=list, description="Supporting quotes/evidence")
 
 
@@ -109,7 +111,7 @@ class AnalysisRecommendation(BaseModel):
 class ConfidenceEntry(BaseModel):
     """Confidence assessment for a theme"""
     level: str = Field(..., description="Confidence level: high, medium, low")
-    score: float = Field(..., ge=0.0, le=1.0, description="Numeric confidence score")
+    score: Confidence01 = Field(..., description="Numeric confidence score")
     evidence: str = Field("", description="Supporting evidence for this confidence level")
 
 
@@ -117,7 +119,7 @@ class ThemeConfidence(BaseModel):
     """Confidence assessment for a specific theme."""
     theme: str = Field(..., description="Theme name or code ID")
     level: str = Field(..., description="Confidence level: high, medium, low")
-    score: float = Field(..., ge=0.0, le=1.0, description="Numeric confidence score")
+    score: Confidence01 = Field(..., description="Numeric confidence score")
     evidence: str = Field(default="", description="Supporting evidence for this confidence level")
 
 

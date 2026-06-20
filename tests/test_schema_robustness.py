@@ -140,3 +140,35 @@ def test_omitted_list_fields_are_independent_instances(model_cls, kwargs, list_f
     for field in list_fields:
         getattr(a, field).append("x")
         assert getattr(b, field) == [], f"{model_cls.__name__}.{field} shares a mutable default"
+
+
+# --- value-range clamping (LLM out-of-range must not crash the stage) ---------
+
+def test_confidence_out_of_range_clamps_not_crashes():
+    """Providers don't decode-enforce minimum/maximum; an out-of-range LLM value
+    must clamp into [0,1], never raise (which would kill the stage)."""
+    from qc_clean.schemas.analysis_schemas import (
+        EntityRelationship, ThemeConfidence, ThematicCode,
+    )
+    from qc_clean.schemas.gt_schemas import AxialRelationship, OpenCode
+
+    tc = ThematicCode.model_validate(
+        {"id": "X", "name": "n", "description": "d", "semantic_definition": "s",
+         "level": 0, "mention_count": 1, "discovery_confidence": 1.7})
+    assert tc.discovery_confidence == 1.0
+
+    er = EntityRelationship.model_validate(
+        {"entity_1": "a", "entity_2": "b", "relationship_type": "x", "strength": -0.5})
+    assert er.strength == 0.0
+
+    th = ThemeConfidence.model_validate({"theme": "t", "level": "high", "score": 2.0})
+    assert th.score == 1.0
+
+    oc = OpenCode.model_validate(
+        {"code_name": "c", "description": "d", "frequency": 1, "confidence": 5.0})
+    assert oc.confidence == 1.0
+
+    ax = AxialRelationship.model_validate(
+        {"central_category": "a", "related_category": "b",
+         "relationship_type": "causal", "strength": 9.9})
+    assert ax.strength == 1.0
