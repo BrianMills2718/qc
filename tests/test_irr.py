@@ -361,12 +361,13 @@ class TestOrchestration:
         assert state.irr_result.num_passes == 2
 
     def test_gt_methodology_routing(self):
-        """Grounded theory projects should use GTOpenCodingStage."""
+        """Grounded theory IRR must route through the ACTUAL GT pipeline stage
+        (constant comparison), not the legacy open-coding stage."""
         state = _make_project(methodology="grounded_theory")
         codes = [["Concept A"]] * 2
 
         with patch(
-            "qc_clean.core.pipeline.stages.gt_open_coding.GTOpenCodingStage.execute",
+            "qc_clean.core.pipeline.stages.gt_constant_comparison.GTConstantComparisonStage.execute",
             new=_mock_thematic_execute(codes),
         ):
             result = asyncio.run(run_irr_analysis(state, num_passes=2))

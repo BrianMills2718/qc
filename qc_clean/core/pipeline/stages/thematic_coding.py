@@ -64,12 +64,16 @@ class ThematicCodingStage(PipelineStage):
         # The LLM produced codes from all docs combined, so we match each
         # quote to the document(s) it actually appears in.
         all_applications = []
+        unanchored = 0
         for tc in phase1_response.codes:
             for quote in tc.example_quotes:
                 matched_docs = _match_quote_to_docs(quote, state.corpus.documents)
                 if not matched_docs:
-                    # Fallback: if no exact match, assign to first doc
-                    matched_docs = [state.corpus.documents[0].id]
+                    # No source match: drop the application rather than fabricate
+                    # a provenance link to documents[0]. A false evidence link is
+                    # worse than a missing one (INV-1; fail loud, not silent).
+                    unanchored += 1
+                    continue
                 for doc_id in matched_docs:
                     app = CodeApplication(
                         code_id=tc.id,
@@ -81,6 +85,11 @@ class ThematicCodingStage(PipelineStage):
                     )
                     all_applications.append(app)
         state.code_applications = all_applications
+        if unanchored:
+            state.data_warnings.append(
+                f"{unanchored} quote(s) did not match any source document and were "
+                f"dropped as unanchored (not attributed to documents[0]); see INV-1."
+            )
 
         # Extract analytical memo
         if phase1_response.analytical_memo:

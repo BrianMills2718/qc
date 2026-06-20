@@ -87,6 +87,7 @@ ANALYTICAL MEMO: After completing the analysis above, write a brief analytical m
 
         # Build code applications from supporting quotes
         all_apps = []
+        unanchored = 0
         for oc in open_codes:
             code = codebook.get_code_by_name(oc.code_name)
             code_id = code.id if code else oc.code_name
@@ -103,17 +104,15 @@ ANALYTICAL MEMO: After completing the analysis above, write a brief analytical m
                         ))
                         break
                 else:
-                    # Assign to first doc if quote not found verbatim
-                    if state.corpus.documents:
-                        all_apps.append(CodeApplication(
-                            code_id=code_id,
-                            doc_id=state.corpus.documents[0].id,
-                            quote_text=quote,
-                            confidence=oc.confidence,
-                            applied_by=Provenance.LLM,
-                            codebook_version=codebook.version,
-                        ))
+                    # Drop rather than fabricate provenance to documents[0] (INV-1):
+                    # a false evidence link is worse than a missing one.
+                    unanchored += 1
         state.code_applications = all_apps
+        if unanchored:
+            state.data_warnings.append(
+                f"{unanchored} quote(s) did not match any source document and were "
+                f"dropped as unanchored (not attributed to documents[0]); see INV-1."
+            )
 
         # Extract analytical memo
         if response.analytical_memo:

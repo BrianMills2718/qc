@@ -276,23 +276,35 @@ class TestRunStabilityAnalysis:
         assert len(result.stable_codes) == 0
         assert result.overall_stability == pytest.approx(1 / 3)
 
-    def test_gt_methodology_uses_gt_stage(self):
-        """GT methodology should use GTOpenCodingStage, not ThematicCodingStage."""
-        from qc_clean.core.pipeline.stages.gt_open_coding import OpenCodesResponse
+    def test_gt_methodology_uses_constant_comparison_stage(self):
+        """GT stability must measure the ACTUAL GT pipeline stage (constant
+        comparison), not the legacy open-coding stage (INV: reliability must be
+        about the algorithm the pipeline runs)."""
+        from qc_clean.core.pipeline.stages.gt_constant_comparison import (
+            SegmentCodeApplication,
+            SegmentCodingResponse,
+        )
         from qc_clean.schemas.gt_schemas import OpenCode
 
         state = _make_state(
             config=ProjectConfig(methodology=Methodology.GROUNDED_THEORY)
         )
 
-        mock_response = OpenCodesResponse(
-            open_codes=[
+        mock_response = SegmentCodingResponse(
+            applications=[
+                SegmentCodeApplication(
+                    code_name="GT Code",
+                    quote="Interview content here about AI and work.",
+                    is_new_code=True,
+                ),
+            ],
+            new_codes=[
                 OpenCode(
                     code_name="GT Code",
                     description="A grounded theory code",
                     properties=["p"],
                     dimensions=["d"],
-                    supporting_quotes=["quote"],
+                    supporting_quotes=["Interview content here about AI and work."],
                     frequency=1,
                     confidence=0.7,
                 ),

@@ -240,6 +240,7 @@ def _process_thematic_response(
     import re
 
     new_applications = []
+    unanchored = 0
     existing_names = {normalize_code_name(c.name): c for c in state.codebook.codes}
 
     for tc in response.codes:
@@ -294,17 +295,15 @@ def _process_thematic_response(
                     matched = True
                     break
 
-            if not matched and new_docs:
-                # Fallback: assign to first new doc
-                new_applications.append(CodeApplication(
-                    code_id=code_id,
-                    doc_id=new_docs[0].id,
-                    quote_text=quote,
-                    confidence=tc.discovery_confidence,
-                    applied_by=Provenance.LLM,
-                    codebook_version=state.codebook.version,
-                ))
+            if not matched:
+                # Drop rather than fabricate provenance to new_docs[0] (INV-1).
+                unanchored += 1
 
+    if unanchored:
+        state.data_warnings.append(
+            f"Incremental coding: {unanchored} quote(s) did not match any new "
+            f"document and were dropped as unanchored; see INV-1."
+        )
     return new_applications
 
 
@@ -318,6 +317,7 @@ def _process_gt_response(
     from qc_clean.schemas.adapters import open_codes_to_codebook
 
     new_applications = []
+    unanchored = 0
     existing_names = {normalize_code_name(c.name): c for c in state.codebook.codes}
 
     for oc in response.open_codes:
@@ -362,14 +362,13 @@ def _process_gt_response(
                     ))
                     matched = True
                     break
-            if not matched and new_docs:
-                new_applications.append(CodeApplication(
-                    code_id=code_id,
-                    doc_id=new_docs[0].id,
-                    quote_text=quote,
-                    confidence=oc.confidence,
-                    applied_by=Provenance.LLM,
-                    codebook_version=state.codebook.version,
-                ))
+            if not matched:
+                # Drop rather than fabricate provenance to new_docs[0] (INV-1).
+                unanchored += 1
 
+    if unanchored:
+        state.data_warnings.append(
+            f"Incremental GT coding: {unanchored} quote(s) did not match any new "
+            f"document and were dropped as unanchored; see INV-1."
+        )
     return new_applications

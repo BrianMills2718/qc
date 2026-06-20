@@ -881,8 +881,12 @@ class TestStageEdgeCases:
         # No memos when no causal chains and no analytical memo
         assert len(result.memos) == 0
 
-    def test_gt_open_coding_fallback_doc_assignment(self):
-        """Quotes not found verbatim should be assigned to first document."""
+    def test_gt_open_coding_unmatched_quote_dropped_not_misattributed(self):
+        """Quotes not found verbatim must be DROPPED, not fabricated onto documents[0].
+
+        A false evidence link is worse than a missing one (INV-1). The dropped
+        quote must surface as a data_warning rather than silent loss.
+        """
         from qc_clean.core.pipeline.stages.gt_open_coding import GTOpenCodingStage, OpenCodesResponse
 
         state = _make_state()
@@ -906,9 +910,9 @@ class TestStageEdgeCases:
             instance.extract_structured = AsyncMock(return_value=mock_response)
             result = asyncio.run(GTOpenCodingStage().execute(state, ctx))
 
-        # Should fall back to first document
-        assert len(result.code_applications) == 1
-        assert result.code_applications[0].doc_id == state.corpus.documents[0].id
+        # No fabricated provenance: the unmatched quote is dropped, not applied.
+        assert len(result.code_applications) == 0
+        assert any("unanchored" in w for w in result.data_warnings)
 
     def test_axial_coding_unresolved_code_names(self):
         """Axial relationships with unrecognized code names should use raw names as IDs."""

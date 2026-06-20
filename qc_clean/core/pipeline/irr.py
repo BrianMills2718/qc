@@ -251,8 +251,13 @@ async def run_irr_analysis(
         )
 
         if is_gt:
-            from qc_clean.core.pipeline.stages.gt_open_coding import GTOpenCodingStage
-            stage = GTOpenCodingStage()
+            # Measure the ACTUAL GT pipeline stage (constant comparison), not the
+            # legacy open-coding stage — otherwise reliability is reported for an
+            # algorithm the pipeline no longer runs.
+            from qc_clean.core.pipeline.stages.gt_constant_comparison import (
+                GTConstantComparisonStage,
+            )
+            stage = GTConstantComparisonStage()
         else:
             from qc_clean.core.pipeline.stages.thematic_coding import ThematicCodingStage
             stage = ThematicCodingStage()
@@ -394,8 +399,11 @@ async def run_stability_analysis(
         )
 
         if is_gt:
-            from qc_clean.core.pipeline.stages.gt_open_coding import GTOpenCodingStage
-            stage = GTOpenCodingStage()
+            # Measure the actual GT pipeline stage (constant comparison), not legacy.
+            from qc_clean.core.pipeline.stages.gt_constant_comparison import (
+                GTConstantComparisonStage,
+            )
+            stage = GTConstantComparisonStage()
         else:
             from qc_clean.core.pipeline.stages.thematic_coding import ThematicCodingStage
             stage = ThematicCodingStage()
