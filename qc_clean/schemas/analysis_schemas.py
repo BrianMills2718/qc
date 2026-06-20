@@ -35,6 +35,21 @@ class CodeHierarchy(BaseModel):
     )
 
 
+class SegmentDecision(BaseModel):
+    """Exhaustive coding: the code decision for one segment of the corpus."""
+    segment_index: int = Field(..., description="0-based index of the segment (as numbered in the prompt)")
+    code_ids: List[str] = Field(default_factory=list, description="IDs of codes that apply to this segment; EMPTY means no code applies (examined, not relevant)")
+
+
+class ExhaustiveCodingResponse(BaseModel):
+    """Discover a codebook AND render a decision for every segment in one call."""
+    codes: List[ThematicCode] = Field(default_factory=list, description="The hierarchical codebook discovered across the corpus")
+    decisions: List[SegmentDecision] = Field(default_factory=list, description="One decision per segment — EVERY segment index must appear exactly once")
+    total_codes: int = Field(default=0, description="Total number of codes")
+    analysis_confidence: float = Field(default=0.0, description="Overall analysis confidence")
+    analytical_memo: str = Field(default="", description="Analytical memo: reasoning, uncertainties, emerging patterns")
+
+
 class ParticipantProfile(BaseModel):
     """Individual participant analysis"""
     name: str = Field(..., description="Participant name or identifier")

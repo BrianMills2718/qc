@@ -169,6 +169,10 @@ class Segment(BaseModel):
     end_char: int = 0
     speaker: str = ""
     text: str = ""
+    # Exhaustive-coding decision (INV-8): None = not examined, "coded" = >=1 code
+    # applied, "no_code" = examined but no code applies. Distinguishes
+    # "not relevant" from "never examined".
+    decision: Optional[str] = None
 
 
 class CodeRelationship(BaseModel):

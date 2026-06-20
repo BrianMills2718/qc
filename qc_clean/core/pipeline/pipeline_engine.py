@@ -40,6 +40,13 @@ class PipelineContext(BaseModel):
     # --- Input fields (set by caller) ---
     model_name: str = "gpt-5-mini"
     interviews: List[Dict[str, Any]] = Field(default_factory=list)
+    exhaustive_coding: bool = Field(
+        default=False,
+        description="Thematic coding: if True, render a decision on EVERY segment "
+        "(coded / no_code) in one batched call instead of surfacing example "
+        "quotes. Closes INV-8 (examined-and-judged coverage) and anchors apps to "
+        "segments. Opt-in; default keeps the cheaper example-quote behavior.",
+    )
     irr_prompt_suffix: str = ""
     task_prefix: str = Field(
         default="qualitative_coding",

@@ -21,14 +21,16 @@ INV-8 has two halves:
    segments**. No change to LLM cost or to how coding works; it adds an honest
    denominator. Deterministic.
 
-2. **Exhaustive null-coding (NOT this plan — a genuine fork for the user):**
-   forcing the LLM to render a decision on *every* segment (incl. "no code
-   applies") so we can distinguish "examined-but-irrelevant" from "not
-   examined." This ~5–10×'s LLM cost and changes the thematic method's
-   character. **Flagged for the user; do not implement without an explicit
-   decision.**
+2. **Exhaustive per-segment coding (APPROVED 2026-06-20 — Phases 5–7).**
+   A decision on *every* segment (incl. "no code applies"). **Cost correction:**
+   NOT one call per segment — the model codes the whole segmented document in
+   ONE batched structured call that returns a per-segment decision array. Real
+   delta vs today ≈ more output tokens, not 5–10×. Bonus: applications anchor
+   directly to segment offsets (no fuzzy matching), strengthening INV-1. Wired
+   as opt-in `ctx.exhaustive_coding` (default off → no behavior change).
 
-This plan delivers #1 and moves INV-8 from UNMET to PARTIAL.
+Phases 1–4 delivered #1 (PARTIAL). Phases 5–7 deliver #2 → INV-8 MET (in
+exhaustive mode).
 
 ## Pre-made decisions
 
@@ -64,6 +66,9 @@ This plan delivers #1 and moves INV-8 from UNMET to PARTIAL.
 | 2 | `ProjectState.segments`; populate in ingest; coverage helper (app↔segment overlap) + tests | DONE |
 | 3 | Surface coverage in scorecard/MCP + tests | DONE |
 | 4 | Docs: INV-8 UNMET→PARTIAL, roadmap, counts | DONE |
+| 5 | Exhaustive coding: `Segment.decision`, `ExhaustiveCodingResponse`, `ctx.exhaustive_coding` branch + tests | DONE (3 tests) |
+| 6 | `compute_coverage` examined/coded rates; surface in bench; CLI opt-in + tests | IN PROGRESS |
+| 7 | Docs: INV-8 → MET (exhaustive mode); roadmap; counts | PENDING |
 
 **Foundational half complete.** INV-8 UNMET→PARTIAL: char-anchored segment universe + coverage denominator (D2) built and surfaced. 559 tests, all gates green.
 

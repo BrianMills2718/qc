@@ -28,6 +28,11 @@ class ThematicCodingStage(PipelineStage):
         return self._pause_for_review
 
     async def execute(self, state: ProjectState, ctx: PipelineContext) -> ProjectState:
+        if ctx.exhaustive_coding:
+            return await self._execute_exhaustive(state, ctx)
+        return await self._execute_example_quotes(state, ctx)
+
+    async def _execute_example_quotes(self, state: ProjectState, ctx: PipelineContext) -> ProjectState:
         from qc_clean.core.llm.llm_handler import LLMHandler
 
         logger.info(
@@ -110,10 +115,122 @@ class ThematicCodingStage(PipelineStage):
         )
         return state
 
+    async def _execute_exhaustive(self, state: ProjectState, ctx: PipelineContext) -> ProjectState:
+        """Exhaustive coding: one batched call renders a decision for EVERY segment.
+
+        Closes INV-8 (examined-and-judged coverage) and INV-1 (applications anchor
+        directly to segment offsets — no fuzzy matching). Segments with no code are
+        recorded as 'no_code' (examined, not relevant), distinct from 'not examined'.
+        """
+        from qc_clean.core.llm.llm_handler import LLMHandler
+        from qc_clean.core.grounding import quote_hash
+        from qc_clean.core.segmentation import segment_corpus
+        from qc_clean.schemas.analysis_schemas import CodeHierarchy, ExhaustiveCodingResponse
+
+        if not state.segments:
+            state.segments = segment_corpus(state.corpus.documents)
+        segments = state.segments
+        if not segments:
+            raise RuntimeError("Exhaustive coding requires segments but the corpus produced none.")
+
+        logger.info(
+            "Starting exhaustive thematic_coding: docs=%d, segments=%d, model=%s",
+            state.corpus.num_documents, len(segments), ctx.model_name,
+        )
+        llm = LLMHandler(model_name=ctx.model_name)
+
+        prompt = _build_exhaustive_prompt(segments)
+        if ctx.irr_prompt_suffix:
+            prompt = prompt + "\n\n" + ctx.irr_prompt_suffix
+
+        response = await llm.extract_structured(
+            prompt, ExhaustiveCodingResponse, **ctx.llm_call_options(self.name())
+        )
+
+        # Codebook from discovered codes (reuse the thematic adapter).
+        codebook = code_hierarchy_to_codebook(
+            CodeHierarchy(codes=response.codes, total_codes=len(response.codes),
+                          analysis_confidence=response.analysis_confidence)
+        )
+        state.codebook = codebook
+        valid_code_ids = {c.id for c in codebook.codes}
+
+        decisions_by_index = {d.segment_index: d for d in response.decisions}
+        applications = []
+        coded = no_code = 0
+        for i, seg in enumerate(segments):
+            d = decisions_by_index.get(i)
+            applied = [cid for cid in d.code_ids if cid in valid_code_ids] if d else []
+            if d is None:
+                seg.decision = None  # the model skipped this segment (honest gap)
+                continue
+            if applied:
+                seg.decision = "coded"
+                coded += 1
+                for code_id in applied:
+                    applications.append(CodeApplication(
+                        code_id=code_id,
+                        doc_id=seg.doc_id,
+                        quote_text=seg.text,
+                        speaker=seg.speaker or None,
+                        start_char=seg.start_char,
+                        end_char=seg.end_char,
+                        quote_hash=quote_hash(seg.text, 0, len(seg.text)),
+                        applied_by=Provenance.LLM,
+                        codebook_version=codebook.version,
+                    ))
+            else:
+                seg.decision = "no_code"
+                no_code += 1
+
+        state.code_applications = applications
+        examined = coded + no_code
+        if examined < len(segments):
+            state.data_warnings.append(
+                f"Exhaustive coding: {len(segments) - examined} of {len(segments)} "
+                f"segment(s) received no decision from the model (left 'not examined')."
+            )
+
+        if response.analytical_memo:
+            state.memos.append(AnalysisMemo(
+                memo_type="coding",
+                title="Exhaustive Thematic Coding Memo",
+                content=response.analytical_memo,
+                code_refs=[c.id for c in codebook.codes],
+            ))
+
+        logger.info(
+            "Exhaustive coding complete: %d codes, %d/%d segments examined "
+            "(%d coded, %d no-code), %d applications",
+            len(codebook.codes), examined, len(segments), coded, no_code, len(applications),
+        )
+        return state
+
 
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
+
+def _build_exhaustive_prompt(segments) -> str:
+    """Prompt for exhaustive coding: discover codes + decide EVERY segment."""
+    lines = []
+    for i, seg in enumerate(segments):
+        who = f"{seg.speaker}: " if seg.speaker else ""
+        lines.append(f"[SEGMENT {i}] {who}{seg.text}")
+    numbered = "\n".join(lines)
+    return f"""You are a qualitative researcher performing EXHAUSTIVE thematic coding. Every segment below must receive a decision — this is what makes the analysis defensible (no segment silently skipped).
+
+TASK:
+1. Discover a hierarchical codebook from the data. Each code has an `id` in CAPS_WITH_UNDERSCORES, a name, description, semantic_definition, level, mention_count, and discovery_confidence.
+2. For EVERY segment, output a decision: the list of code `id`s that apply to it. If no code applies (e.g. interviewer prompts, filler, off-topic), return an EMPTY list for that segment — do NOT force a code.
+
+Return `codes` (the codebook) and `decisions` (exactly one entry per segment index below, with `segment_index` matching the [SEGMENT N] number). Every segment index from 0 to {len(segments) - 1} must appear in `decisions`.
+
+SEGMENTS:
+{numbered}
+
+Also write a brief analytical_memo (3-5 sentences) on key decisions, surprises, and uncertainties."""
 
 def _build_combined_text(state: ProjectState) -> str:
     parts = []
