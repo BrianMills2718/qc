@@ -1,6 +1,17 @@
-# Qualitative Coding Analysis System (v2.2)
+# Qualitative Coding Analysis System
 
-*Last Updated: 2026-04-05*
+*Last Updated: 2026-06-20*
+
+> **Canonical status/theory docs (read before describing the system).** This
+> file is the **operational** reference (architecture, commands, config). The
+> *strategic* layer — honest state ledger, the INV-0..11 architectural
+> invariants, the **claim-discipline** table (what you may/may not assert), the
+> roadmap, and the prior-art/competitive landscape — lives in
+> **`docs/PROJECT_THEORY_AND_GOALS.md`**, and the SOTA-evaluation plan in
+> **`docs/EVALUATION_HARNESS.md`**. Where this file and the theory doc disagree
+> about *status or claims*, the theory doc wins. Do not assert "validated",
+> "full grounded theory", "SOTA", or "inter-rater reliability" without the
+> caveats in theory doc §14.
 
 ## What This Project Does
 
@@ -13,19 +24,17 @@ LLM-powered qualitative coding analysis for interview transcripts. Accepts .txt,
 
 All stages use structured LLM output via Pydantic schemas + JSON mode. State is held in a single `ProjectState` Pydantic model that can be saved/loaded as JSON.
 
-## Current State (2026-04-05)
+## Current State
 
-The v2.2 feature set is implemented and validated. The project currently supports:
+The software is **built and software-validated** (550 deterministic tests + 6 live-LLM E2E; ruff + docs gates green) — "the program does what it's built to do," *not* evidence the analysis is methodologically valid. Implemented:
 
-- Full thematic and grounded theory pipelines, including `NegativeCaseStage` in both methodologies and automatic cross-interview analysis for multi-document corpora
-- Grounded theory constant comparison in place of legacy batch open coding, iterative saturation checks, and incremental re-coding of newly added documents via `project recode`
-- Human review in both CLI and browser flows, inter-rater reliability via `project irr`, and multi-run stability analysis via `project stability`
-- Interactive graph visualization, JSON/CSV/Markdown/QDPX export, analytical memos at every stage, and per-code reasoning/audit trail output
-- Typed `PipelineContext` and typed result models, fail-loud inter-stage dependency checks, and LLM observability logging for model/schema/prompt/cost/token usage
-- `LLMHandler` migrated to shared `llm_client`, plus schema-hardening fixes so omitted LLM list/dict fields default safely instead of causing validation failures
-- Automated E2E validation for default, grounded theory, incremental, graph, and export flows alongside the broader unit test suite
+- Thematic and **GT-inspired** (not "full GT") pipelines; `NegativeCaseStage` runs **last** in both (INV-6), automatic cross-interview analysis for multi-doc corpora.
+- GT constant comparison; incremental re-coding via `project recode` (flags stale higher-order outputs, INV-11).
+- **Span-anchored grounding** (INV-1, mostly met): quotes resolve to char offsets + hash or are dropped + warned; `verify_grounding`/`make bench` measure the rate.
+- Human review (CLI + browser), `project irr` (LLM-pass *codebook-discovery* agreement — not application-level), `project stability`.
+- Graph viz, JSON/CSV/Markdown/QDPX export, per-stage memos, per-code audit trail; typed `PipelineContext`/results, fail-loud inter-stage checks, `llm_client` observability.
 
-The remaining roadmap is no longer the original v2.2 backlog. Open work is focused on grounded theory fidelity improvements and higher-level extensions such as prompt optimization, multi-model consensus, active learning from review decisions, and collaborative review workflows.
+**Direction:** the end product is public and SOTA-targeting; the proven/measured/planned ledger, the architectural invariants, and the ranked roadmap are in `docs/PROJECT_THEORY_AND_GOALS.md` (§13/§13.1/§18). Next structural work: the evaluation harness (keystone, Phase 0 done) and the **segment universe** (INV-8).
 
 ## Architecture
 
@@ -48,15 +57,16 @@ qc_cli.py                                    # CLI entry point
            -> perspective.py                 # Speaker/participant analysis
            -> relationship.py                # Entity & relationship mapping
            -> synthesis.py                   # Synthesis & recommendations
-           -> negative_case.py               # Negative case analysis (disconfirming evidence)
            -> cross_interview.py             # Cross-document pattern analysis
+           -> negative_case.py               # Negative case analysis (runs LAST; disconfirming evidence)
            -> incremental_coding.py           # Incremental re-coding of new documents
-           -> gt_constant_comparison.py      # GT: Iterative constant comparison coding
-           -> gt_open_coding.py              # GT: Open coding (legacy, replaced by constant comparison)
+           -> gt_constant_comparison.py      # GT: Iterative constant comparison coding (the live GT coder)
            -> gt_axial_coding.py             # GT: Axial coding (relationships)
            -> gt_selective_coding.py         # GT: Core category identification
            -> gt_theory_integration.py       # GT: Theoretical model building
      -> qc_clean/core/llm/llm_handler.py    # Thin adapter over llm_client for structured extraction
+     -> qc_clean/core/grounding.py          # Span anchoring (INV-1): resolve quotes to char offsets+hash, verify_grounding
+     -> qc_clean/core/bench.py              # Eval-harness Phase 0 scorecard (grounding/reliability)
      -> qc_clean/schemas/                    # Pydantic schemas
         -> domain.py                         # Unified domain model (ProjectState, Code, Codebook, etc.)
         -> analysis_schemas.py               # LLM output schemas (CodeHierarchy, SpeakerAnalysis, etc.)
@@ -171,7 +181,7 @@ python qc_mcp_server.py                                                   # run 
 #   qc_add_documents, qc_run_pipeline, qc_run_stage, qc_recode,
 #   qc_run_irr, qc_run_stability, qc_get_codebook, qc_get_applications,
 #   qc_get_memos, qc_get_synthesis, qc_review_summary, qc_approve_all_codes,
-#   qc_review_codes, qc_export_markdown, qc_export_json
+#   qc_review_codes, qc_export_markdown, qc_export_json, qc_grounding_report
 
 # Run tests
 python -m pytest tests/ -v
@@ -221,38 +231,9 @@ Local models work for all pipeline stages but quality varies. For GT axial/selec
 - **Single ingestion path**: all file reading (CLI and API server) goes through `qc_clean/core/cli/utils/file_handler.py:read_file_content` (uses `pypdf`, not the unmaintained PyPDF2). `api_client.py` delegates to it — do not reintroduce a divergent reader.
 - **MCP export is sandboxed**: `qc_export_json/markdown` confine `output_file` to `<projects_dir>/exports/` via `_confine_export_path` (agent-driven surface, prevents arbitrary writes). The CLI exporter keeps full path freedom for the trusted local user.
 
-## Competitive Landscape (assessed 2026-02-12)
+## Competitive Landscape & Positioning
 
-### Our Unique Position
-Only open-source tool combining: full GT pipeline (constant comparison -> axial -> selective -> theory integration), methodology-aware multi-stage pipeline engine, structured LLM output via Pydantic schemas, human review loop (approve/reject/modify/merge/split), cross-interview analysis, speaker detection, saturation detection, theoretical sampling, incremental re-coding, and interactive graph visualization.
-
-### Open-Source Competitors
-| Tool | Stars | Approach | Key Difference from Us |
-|------|-------|----------|----------------------|
-| **QualCoder** | 560 | Desktop QDA (PyQt6/SQLite), AI bolted on via RAG+LangChain | Manual-first; AI is assistive chat, not automated pipeline. Has IRR (Cohen's kappa). No GT pipeline. |
-| **LLMCode** | 69 | Jupyter notebooks for thematic analysis | Academic (CHI paper). Can compare LLM vs human codes. No pipeline orchestration, no GT. |
-| **qc (Proctor)** | 23 | CLI QDA tool, YAML codebook, JOSS published | Manual coding with Unix composability. No LLM pipeline. Multi-coder support. |
-| **iQual** (World Bank) | 25 | Scale human codes via ML classifiers | No LLMs. Train-on-human-examples approach. Has formal bias/reliability testing. |
-| **Yale LLM-TA Tool** | 2 | Multi-model thematic analysis with IRR | Runs same analysis across 6+ models, computes Cohen's kappa + cosine similarity. No GT. |
-| **CRISP-T** | 8 | GT-focused NLP/ML toolkit, adding Claude agent | Successor to QRMine. GT mentions but no formal pipeline. Transitioning to LLM. |
-
-### Commercial Competitors (AI Features)
-| Tool | AI Approach | Weakness |
-|------|-----------|----------|
-| **ATLAS.ti** ($750-1840/yr) | AI open coding (GPT), Intentional AI Coding | Produces 450+ irrelevant codes; no methodology awareness; locked to OpenAI |
-| **NVivo** ($849-2500/yr) | Subcode suggestions, summarization, autocoding | Conservative AI; no pipeline; expensive collaboration ($499 add-on) |
-| **MAXQDA** ($253-1499/yr) | AI code/subcode suggestions, summarization, chat | AI Assist is add-on; no cross-document intelligence; no GT pipeline |
-| **Dedoose** ($15/mo) | Keyword-based auto-coding only | Minimal AI; traditional NLP not LLM-powered |
-
-### Strategic Insight
-Commercial tools treat AI as a **feature bolted onto manual coding**. We treat AI as the **core engine of a methodology-aware pipeline**. No commercial or open-source tool offers: (1) automated GT pipeline, (2) cross-interview analysis, (3) structured LLM output with schema validation, (4) integrated human review checkpoints. The market gap is "academic-grade, LLM-native, methodology-aware QDA tool."
-
-### What Competitors Have That We Don't
-- ~~**Inter-rater reliability**: QualCoder, iQual, Yale tool all compute IRR metrics~~ (Now implemented)
-- **Desktop GUI**: QualCoder has full PyQt6 desktop app with audio/video/image coding
-- **Academic publications**: LLMCode (CHI), qc (JOSS), iQual (World Bank paper), DeTAILS (ACM CUI)
-- ~~**Local model support** (documented): QualCoder supports Ollama; our LiteLLM can route to local models but this isn't documented~~ (Now documented)
-- **RAG/vector search**: QualCoder uses FAISS + embeddings for semantic search across corpus
+Moved to the canonical theory doc: `docs/PROJECT_THEORY_AND_GOALS.md` §2 (granular feature matrix vs ATLAS.ti/MAXQDA/NVivo/QualCoder + the research prototypes) and §19 (prior art worth learning from). The honest positioning is an *auditable, methodology-aware integration* — **not** 'the only tool that does X' / SOTA (see claim discipline, §14).
 
 ## E2E Validation (updated 2026-02-13)
 
@@ -295,71 +276,13 @@ Bugs found and fixed during E2E testing:
 1. **Schema duplication**: `analysis_schemas.py` / `gt_schemas.py` (LLM output shapes) and `domain.py` (internal model) overlap; this is intentional — adapters bridge them
 2. **`methodology_config.py`**: Only imported by tests now (not production code); could be removed if tests are refactored
 
-## Academic Standards Gap Analysis (assessed 2026-02-12)
+## Academic Standards & Honest State
 
-Evaluated against Strauss & Corbin GT, Charmaz constructivist GT, COREQ/SRQR reporting standards, Lincoln & Guba trustworthiness criteria, and emerging LLM-assisted QC validation requirements.
-
-### What We Have (Tier 1 — Publishable Basics)
-- Inter-rater reliability: multi-pass LLM coding with prompt variation, Cohen's kappa / Fleiss' kappa / percent agreement
-- Human-in-the-loop code review with approve/reject/modify/merge/split
-- Hierarchical codebook with definitions, confidence, provenance (LLM vs human)
-- Quote-to-code attribution with source documents and speaker detection
-- Multi-format export (JSON/CSV/Markdown/QDPX for ATLAS.ti/NVivo)
-- Methodology declaration in ProjectConfig
-- Codebook versioning via ReviewManager
-- Analytical memo generation: all pipeline stages produce LLM-generated memos with reasoning, uncertainties, and emerging patterns
-- Per-code audit trail: each code includes LLM reasoning for why it was created (Lincoln & Guba dependability)
-- Negative case analysis: automated search for disconfirming evidence after coding (Lincoln & Guba credibility)
-- Multi-run stability analysis: run identical coding N times, per-code stability scores, stable/moderate/unstable classification
-
-### Completed (Tier 2 — Expected by Reviewers) ✓
-
-All Tier 2 gaps have been closed:
-
-- **Inter-rater reliability** — Multi-pass coding with prompt variation, Cohen's/Fleiss' kappa, Landis & Koch interpretation. CLI: `project irr`.
-- **Memo generation** — All pipeline stages generate analytical memos via LLM `analytical_memo` field. Exported in Markdown, CSV (`memos.csv`), and QDPX (`<Notes>`).
-- **Audit trail for LLM decisions** — Per-code `reasoning` field explains why each code was created. Exported in CSV (`reasoning` column) and Markdown (Audit Trail section).
-- **Negative case analysis** — `NegativeCaseStage` runs after coding in both pipelines. LLM searches for disconfirming evidence and produces structured negative case memos.
-- **Multi-run stability** — `project stability` runs N identical passes, computes per-code stability scores, classifies as stable/moderate/unstable. Exported in Markdown and CSV.
-
-### GT-Specific Gaps (Tier 3 — Required for GT Publications)
-
-**Completed:**
-- **Constant comparison** — `GTConstantComparisonStage` replaces batch open coding. Segments documents by speaker turns or paragraph chunks, iteratively codes each segment against evolving codebook, checks saturation after each pass.
-- **Iterative re-coding** — `project recode` command: codes only new/uncoded documents against existing codebook, merges results, re-runs downstream stages.
-
-**Remaining (Future):**
-
-| Gap | Severity | Description |
-|-----|----------|-------------|
-| **Theoretical sampling** | Moderate | Current heuristic uses speaker count + uncoded status. Should identify under-developed categories and seek data to develop them. |
-| **Per-category saturation** | Moderate | `saturation.py` checks codebook-level stability. GT requires per-category property/dimension tracking. |
-| **Full axial paradigm** | Low | Partially covers Strauss & Corbin paradigm (conditions, consequences) but not full decomposition (context vs intervening conditions). |
-
-### Key Academic References
-- Strauss & Corbin (2008) *Basics of Qualitative Research* 3rd ed — canonical Straussian GT
-- Charmaz (2014) *Constructing Grounded Theory* 2nd ed — constructivist GT criteria: credibility, originality, resonance, usefulness
-- Lincoln & Guba (1985) — trustworthiness: credibility, transferability, dependability, confirmability
-- COREQ (Tong et al. 2007) — 32-item reporting checklist for interview/focus group research
-- SRQR (O'Brien et al. 2014) — 21-item reporting standard for all qualitative approaches
-- Ashwin, Chhabra & Rao (2025) — LLM coding errors may be systematically biased, not random
-- O'Connor & Joffe (2020) — IRR thresholds depend on manifest vs latent content
-- Krippendorff (2004) — alpha >= 0.80 for reliable conclusions, >= 0.67 for tentative
+Superseded by the canonical theory doc: the proven/measured/planned **state ledger** is `docs/PROJECT_THEORY_AND_GOALS.md` §13, the **architectural invariants** (INV-0..11, each MET/PARTIAL/UNMET) are §13.1, and the academic references + prior art are §19. Do **not** re-introduce a 'Tier 2 complete / validated' ledger here — it contradicts the invariants (e.g. disconfirmation is INV-2 UNMET / INV-6 PARTIAL; `project irr` is codebook-discovery agreement, not application-level IRR).
 
 ## Next Steps
 
-v2.2 is complete. Remaining work is focused on deeper methodological fidelity and follow-on product capabilities rather than missing core pipeline features.
-
-### Future — GT Fidelity (Tier 3)
-- **True theoretical sampling** (Moderate): Identify under-developed categories, suggest specific data sources to develop them
-- **Per-category saturation** (Moderate): Track property/dimension saturation per category, not just codebook-level stability
-- **Full axial paradigm** (Low): Decompose Strauss & Corbin paradigm fully (context vs intervening conditions vs causal conditions)
-
-### Future — Features
-- **Prompt optimization**: Infrastructure in place (see below). Next: run actual optimization experiments, bake best prompts into stages
-- **Multi-model consensus**: Run analysis across GPT/Claude/Gemini and merge codebooks. Can use `prompt_eval` to compare model performance on same inputs
-- **Active learning**: Use human review decisions to fine-tune prompting for the project
-- **Collaborative coding**: Multiple human reviewers with conflict resolution
+The ranked roadmap (invariants before features) lives in `docs/PROJECT_THEORY_AND_GOALS.md` §18 — evaluation harness (keystone), span anchoring (done), segment universe (INV-8), claim ledger (INV-9), hardened disconfirmation, theoretical sampling/saturation, etc. Don't duplicate it here.
 
 ### Maintenance Follow-Ups (2026-06-19)
 - **Line endings**: Normalize mixed CRLF/LF files in one mechanical commit with no behavior changes, then run `make check`.

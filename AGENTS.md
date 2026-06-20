@@ -1,4 +1,4 @@
-# Qualitative Coding Analysis System (v2.2)
+# Qualitative Coding Analysis System
 
 <!-- GENERATED FILE: DO NOT EDIT DIRECTLY -->
 <!-- generated_by: scripts/meta/render_agents_md.py -->
@@ -16,7 +16,18 @@ Canonical governance sources:
 
 ## Purpose
 
-*Last Updated: 2026-04-05*
+*Last Updated: 2026-06-20*
+
+> **Canonical status/theory docs (read before describing the system).** This
+> file is the **operational** reference (architecture, commands, config). The
+> *strategic* layer — honest state ledger, the INV-0..11 architectural
+> invariants, the **claim-discipline** table (what you may/may not assert), the
+> roadmap, and the prior-art/competitive landscape — lives in
+> **`docs/PROJECT_THEORY_AND_GOALS.md`**, and the SOTA-evaluation plan in
+> **`docs/EVALUATION_HARNESS.md`**. Where this file and the theory doc disagree
+> about *status or claims*, the theory doc wins. Do not assert "validated",
+> "full grounded theory", "SOTA", or "inter-rater reliability" without the
+> caveats in theory doc §14.
 
 ## Commands
 

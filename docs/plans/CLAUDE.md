@@ -4,10 +4,15 @@ Track all implementation work here.
 
 ## Active Plans
 
-| # | Name | Priority | Status | Blocks |
-|---|------|----------|--------|--------|
+| # | Name | Priority | Status | Plan doc |
+|---|------|----------|--------|----------|
+| INV-8 | Segment universe (defensible denominator) | High — next structural edge | In Progress | `INV8_SEGMENT_UNIVERSE.md` |
 
-No active implementation plans are currently tracked in this repo.
+## Completed Plans
+
+| Name | Outcome | Record |
+|------|---------|--------|
+| INV-1 span anchoring + harness Phase 0 | INV-1 mostly met; `make bench` Phase 0 stood up | `completed/INV1_OVERNIGHT_SPRINT.md` |
 
 ## Status Key
 

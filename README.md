@@ -1,10 +1,12 @@
-# Qualitative Coding Analysis System (v2.2)
+# Qualitative Coding Analysis System
 
-LLM-powered qualitative coding analysis for interview transcripts. The system supports both thematic analysis and grounded theory, uses structured Pydantic-backed LLM output throughout, and keeps project state in a single JSON-serializable `ProjectState`.
+LLM-powered qualitative coding analysis for interview transcripts. The system supports **thematic analysis** and a **grounded-theory-inspired** pipeline (not "full GT" — see caveats below), uses structured Pydantic-backed LLM output throughout, span-anchors quote evidence to source spans, and keeps project state in a single JSON-serializable `ProjectState`.
+
+> **Status & honest claims.** The software is built and software-validated (tests pass) — not a demonstration of *methodological* validity. The proven/measured/planned state ledger, the architectural invariants (what's met vs. unmet), the **claim-discipline** table (what may/may not be asserted), and the roadmap toward a public, evaluation-backed release live in **`docs/PROJECT_THEORY_AND_GOALS.md`**; the SOTA-evaluation plan in **`docs/EVALUATION_HARNESS.md`**. Read those before describing the system's capabilities.
 
 ## Quick Start
 
-The local project workflow is the main path for v2.2. The API server is only required for one-shot `analyze` runs and the browser UIs.
+The local project workflow is the main path. The API server is only required for one-shot `analyze` runs and the browser UIs.
 
 ```bash
 # Install dependencies
@@ -57,16 +59,16 @@ python qc_cli.py analyze --files interview1.docx interview2.docx --format json -
 
 Both methodologies use structured LLM output, fail-loud stage dependencies, and optional human review checkpoints.
 
-## v2.2 Capabilities
+## Capabilities
 
 - Full thematic and grounded theory pipelines, including negative case analysis in both methodologies
 - Automatic cross-interview analysis for multi-document corpora
 - Incremental re-coding of newly added documents via `python qc_cli.py project recode <project_id>`
 - Human review in both CLI and browser flows
-- Inter-rater reliability analysis via `project irr`
-- Multi-run stability analysis via `project stability`
+- Span-anchored quote evidence (char offsets + hash; ambiguous/unresolvable quotes are dropped, not misattributed) and a grounding metric (`make bench`)
+- LLM-pass agreement via `project irr` (codebook-discovery agreement — *not* application-level inter-rater reliability; see theory doc §11) and multi-run stability via `project stability`
 - Interactive graph visualization in the browser
-- JSON, CSV, and Markdown export from persisted project state
+- JSON, CSV, Markdown, and **QDPX** (REFI-QDA, for ATLAS.ti/NVivo) export from persisted project state
 - Analytical memos at every stage plus per-code reasoning and audit-trail output
 
 ## Common Commands
@@ -153,4 +155,4 @@ python -m pytest tests/ -v
 - `qc_clean/core/export/data_exporter.py`: export from `ProjectState`
 - `qc_clean/plugins/api/`: FastAPI server plus review and graph browser UIs
 
-See `CLAUDE.md` for the canonical project documentation.
+See `CLAUDE.md` (operational) and `docs/PROJECT_THEORY_AND_GOALS.md` (theory, invariants, claim discipline) for canonical documentation.
