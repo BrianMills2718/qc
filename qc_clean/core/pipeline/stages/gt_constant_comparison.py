@@ -122,15 +122,11 @@ def split_by_speaker_turns(
     content: str, speakers: List[str]
 ) -> List[Dict]:
     """Split transcript into speaker turns."""
-    if not speakers:
+    # Shared speaker-turn regex (single source of truth in core.segmentation).
+    from qc_clean.core.segmentation import speaker_turn_pattern
+    pattern = speaker_turn_pattern(speakers)
+    if pattern is None:
         return [{"text": content, "speaker": ""}]
-
-    # Build pattern matching any known speaker at start of line
-    escaped = [re.escape(s) for s in speakers]
-    pattern = re.compile(
-        r"^(" + "|".join(escaped) + r")(?::\s|\s{2,}\d+:\d{2})",
-        re.MULTILINE,
-    )
 
     turns = []
     last_end = 0

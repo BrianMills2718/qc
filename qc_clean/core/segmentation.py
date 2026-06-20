@@ -32,15 +32,27 @@ def _trim_span(content: str, start: int, end: int) -> Tuple[int, int]:
     return start, end
 
 
-def _speaker_turn_spans(content: str, speakers: Sequence[str]) -> List[Tuple[int, int, str]]:
-    """Return (start, end, speaker) raw spans for each speaker turn, or []."""
+def speaker_turn_pattern(speakers: Sequence[str]):
+    """Compiled regex matching any known speaker label at line start.
+
+    Single source of truth for speaker-turn detection — used by both the
+    char-anchored segmenter here and the GT constant-comparison segmenter.
+    Returns None when there are no usable speaker names.
+    """
     escaped = [re.escape(s) for s in speakers if s]
     if not escaped:
-        return []
-    pattern = re.compile(
+        return None
+    return re.compile(
         r"^(" + "|".join(escaped) + r")(?::\s|\s{2,}\d+:\d{2})",
         re.MULTILINE,
     )
+
+
+def _speaker_turn_spans(content: str, speakers: Sequence[str]) -> List[Tuple[int, int, str]]:
+    """Return (start, end, speaker) raw spans for each speaker turn, or []."""
+    pattern = speaker_turn_pattern(speakers)
+    if pattern is None:
+        return []
     matches = list(pattern.finditer(content))
     if not matches:
         return []

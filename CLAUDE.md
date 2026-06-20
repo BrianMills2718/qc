@@ -277,6 +277,7 @@ Bugs found and fixed during E2E testing:
 
 1. **Schema duplication**: `analysis_schemas.py` / `gt_schemas.py` (LLM output shapes) and `domain.py` (internal model) overlap; this is intentional — adapters bridge them
 2. **`methodology_config.py`**: Only imported by tests now (not production code); could be removed if tests are refactored
+3. **Two segmenters** (refactor candidate): `core/segmentation.py` (canonical, char-anchored typed `Segment`) and the older dict-based segmenter inside `gt_constant_comparison.py` (`segment_documents`/`group_into_chunks`, strips offsets). The speaker-turn *regex* is now shared (`segmentation.speaker_turn_pattern`), but GT still re-segments into untyped dicts and 500-word chunks. Full unification (GT consumes typed `Segment`s + chunking moved into `segment_corpus`) would give GT exact offsets and one segmenter — but it changes GT's non-speaker granularity and ~7 direct tests, so it was deferred (not a pure refactor). Do it as its own focused change, behavior-preserving via a `chunk_target_words` param.
 
 ## Academic Standards & Honest State
 
