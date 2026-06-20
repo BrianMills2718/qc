@@ -67,8 +67,8 @@ exhaustive mode).
 | 3 | Surface coverage in scorecard/MCP + tests | DONE |
 | 4 | Docs: INV-8 UNMET→PARTIAL, roadmap, counts | DONE |
 | 5 | Exhaustive coding: `Segment.decision`, `ExhaustiveCodingResponse`, `ctx.exhaustive_coding` branch + tests | DONE (3 tests) |
-| 6 | `compute_coverage` examined/coded rates; surface in bench; CLI opt-in + tests | IN PROGRESS |
-| 7 | Docs: INV-8 → MET (exhaustive mode); roadmap; counts | PENDING |
+| 6 | `compute_coverage` examined/coded rates; surface in bench; CLI opt-in + tests | DONE |
+| 7 | Docs: INV-8 → MET (exhaustive mode); roadmap; counts | IN PROGRESS |
 
 **Foundational half complete.** INV-8 UNMET→PARTIAL: char-anchored segment universe + coverage denominator (D2) built and surfaced. 559 tests, all gates green.
 

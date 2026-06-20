@@ -181,15 +181,19 @@ def _run_project(store: ProjectStore, args) -> int:
 
     from qc_clean.core.pipeline.pipeline_engine import PipelineContext
     model_name = getattr(args, "model", None) or state.config.model_name
+    exhaustive = bool(getattr(args, "exhaustive", False))
     ctx = PipelineContext(
         model_name=model_name,
         trace_id=f"qualitative_coding/project/{state.id}",
+        exhaustive_coding=exhaustive,
     )
 
     print(f"Running pipeline on project: {state.name}")
     print(f"  Methodology: {state.config.methodology.value}")
     print(f"  Documents: {state.corpus.num_documents}")
     print(f"  Model: {model_name}")
+    if exhaustive:
+        print("  Exhaustive coding: every segment decided (INV-8)")
     if enable_review:
         print("  Human review: enabled")
     print()

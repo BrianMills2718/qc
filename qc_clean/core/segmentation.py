@@ -106,41 +106,60 @@ def segment_corpus(documents: Sequence[Document]) -> List[Segment]:
 
 @dataclass
 class CoverageReport:
-    """Corpus coverage against the segment universe (INV-8 denominator)."""
+    """Corpus coverage against the segment universe (INV-8 denominator).
+
+    Two notions, both honest:
+    - *traversal* coverage (`covered_*`): segments touched by an anchored
+      application. Works in any mode.
+    - *examined-and-judged* coverage (`examined_*`): segments that received an
+      explicit decision (coded or no_code) under exhaustive coding. Only this
+      distinguishes "not relevant" from "never examined".
+    """
     total_segments: int = 0
-    covered_segments: int = 0           # segments overlapped by >=1 anchored application
-    coverage_rate: float = 0.0          # covered / total (0.0 when no segments)
+    covered_segments: int = 0           # overlapped by >=1 anchored application
+    coverage_rate: float = 0.0          # covered / total
+    examined_segments: int = 0          # decision is not None (exhaustive coding)
+    coded_segments: int = 0             # decision == "coded"
+    examined_rate: float = 0.0          # examined / total
+    mode: str = "traversal"             # "examined" once any segment has a decision
 
 
 def compute_coverage(state) -> CoverageReport:
-    """Fraction of segments touched by at least one anchored code application.
+    """Coverage of the segment universe (INV-8).
 
-    A segment is 'covered' when some application in the SAME document has char
-    offsets (INV-1 anchored) that overlap the segment span. Unanchored
-    applications (no offsets) cannot contribute — coverage is only as honest as
-    the anchoring. This is corpus-traversal coverage, NOT a claim that every
-    segment was examined-and-judged (that needs exhaustive null coding).
+    Traversal coverage = segments overlapped by an INV-1-anchored application
+    (unanchored apps can't contribute). Examined coverage = segments with an
+    explicit exhaustive-coding decision. When every segment is examined,
+    `examined_rate == 1.0` and the denominator is fully defensible.
     """
     segments = state.segments
     total = len(segments)
     if total == 0:
         return CoverageReport()
 
-    # Bucket anchored applications by doc for cheap overlap checks.
     apps_by_doc: dict = {}
     for app in state.code_applications:
         if app.start_char is None or app.end_char is None:
             continue
         apps_by_doc.setdefault(app.doc_id, []).append((app.start_char, app.end_char))
 
-    covered = 0
+    covered = examined = coded = 0
     for seg in segments:
         for a_start, a_end in apps_by_doc.get(seg.doc_id, ()):
-            if a_start < seg.end_char and a_end > seg.start_char:  # spans overlap
+            if a_start < seg.end_char and a_end > seg.start_char:
                 covered += 1
                 break
+        if seg.decision is not None:
+            examined += 1
+            if seg.decision == "coded":
+                coded += 1
+
     return CoverageReport(
         total_segments=total,
         covered_segments=covered,
         coverage_rate=covered / total,
+        examined_segments=examined,
+        coded_segments=coded,
+        examined_rate=examined / total,
+        mode="examined" if examined else "traversal",
     )

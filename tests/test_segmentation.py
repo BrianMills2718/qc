@@ -121,3 +121,22 @@ def test_ingest_populates_segment_universe():
     docs = {d.id: d for d in result.corpus.documents}
     assert all(docs[s.doc_id].content[s.start_char:s.end_char] == s.text
                for s in result.segments)
+
+
+def test_coverage_examined_rate_from_decisions():
+    """Exhaustive-mode coverage reports examined/coded from Segment.decision."""
+    from qc_clean.core.segmentation import compute_coverage
+    from qc_clean.schemas.domain import Corpus, ProjectState
+    content = "Alex: one.\nSam: two.\nSam: three."
+    doc = Document(id="d1", name="d.txt", content=content, detected_speakers=["Alex", "Sam"])
+    state = ProjectState(name="t", corpus=Corpus(documents=[doc]))
+    state.segments = segment_corpus([doc])
+    assert len(state.segments) == 3
+    state.segments[0].decision = "no_code"
+    state.segments[1].decision = "coded"
+    state.segments[2].decision = "coded"
+    rep = compute_coverage(state)
+    assert rep.examined_segments == 3
+    assert rep.coded_segments == 2
+    assert rep.examined_rate == 1.0
+    assert rep.mode == "examined"
