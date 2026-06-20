@@ -478,5 +478,7 @@ python -m qc analyze --methodology grounded_theory interview.txt
 
 - `CLAUDE.md` — This file (canonical operating guidance)
 - `AGENTS.md` — Generated mirror for non-Claude agents
-- `docs/` — Design docs and plans
+- `docs/PROJECT_THEORY_AND_GOALS.md` — **Theory, goals, honest state, and the architectural invariants (INV-0..11).** Read its state ledger (§13), invariants (§13.1), and claim-discipline table (§14) before describing the system anywhere. The end product is public and SOTA-targeting; the UNMET invariants are a committed build spec, not a wishlist.
+- `docs/EVALUATION_HARNESS.md` — **The keystone**: how we prove SOTA (metrics, gold standards, baselines, `make bench`), built on `prompt_eval`. Roadmap item #1.
+- `docs/` — Other design docs and plans
 - `scripts/relationships.yaml` — Doc-code coupling graph
