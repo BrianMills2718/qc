@@ -63,7 +63,10 @@ This plan delivers #1 and moves INV-8 from UNMET to PARTIAL.
 | 1 | `segmentation.py`: `Segment` + `segment_corpus` (char-anchored) + tests | DONE (6 tests) |
 | 2 | `ProjectState.segments`; populate in ingest; coverage helper (app↔segment overlap) + tests | DONE |
 | 3 | Surface coverage in scorecard/MCP + tests | DONE |
-| 4 | Docs: INV-8 UNMET→PARTIAL, roadmap, counts | IN PROGRESS |
+| 4 | Docs: INV-8 UNMET→PARTIAL, roadmap, counts | DONE |
+
+**Foundational half complete.** INV-8 UNMET→PARTIAL: char-anchored segment universe + coverage denominator (D2) built and surfaced. 559 tests, all gates green.
 
 ## Notes / findings log
-- (append as phases run)
+- The exhaustive per-segment-coding half (examined-and-judged coverage + application-level agreement unit) is a **cost/method fork (~5-10x LLM cost)** deliberately deferred to a user decision.
+- Reused nothing from the GT segmenter (it strips offsets); the new segmenter is offset-preserving and round-trip-verified.

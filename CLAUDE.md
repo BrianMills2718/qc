@@ -26,7 +26,7 @@ All stages use structured LLM output via Pydantic schemas + JSON mode. State is 
 
 ## Current State
 
-The software is **built and software-validated** (550 deterministic tests + 6 live-LLM E2E; ruff + docs gates green) — "the program does what it's built to do," *not* evidence the analysis is methodologically valid. Implemented:
+The software is **built and software-validated** (559 deterministic tests + 6 live-LLM E2E; ruff + docs gates green) — "the program does what it's built to do," *not* evidence the analysis is methodologically valid. Implemented:
 
 - Thematic and **GT-inspired** (not "full GT") pipelines; `NegativeCaseStage` runs **last** in both (INV-6), automatic cross-interview analysis for multi-doc corpora.
 - GT constant comparison; incremental re-coding via `project recode` (flags stale higher-order outputs, INV-11).
@@ -66,7 +66,8 @@ qc_cli.py                                    # CLI entry point
            -> gt_theory_integration.py       # GT: Theoretical model building
      -> qc_clean/core/llm/llm_handler.py    # Thin adapter over llm_client for structured extraction
      -> qc_clean/core/grounding.py          # Span anchoring (INV-1): resolve quotes to char offsets+hash, verify_grounding
-     -> qc_clean/core/bench.py              # Eval-harness Phase 0 scorecard (grounding/reliability)
+     -> qc_clean/core/segmentation.py       # Segment universe (INV-8): char-anchored segments + compute_coverage
+     -> qc_clean/core/bench.py              # Eval-harness Phase 0 scorecard (grounding D1 / coverage D2 / reliability)
      -> qc_clean/schemas/                    # Pydantic schemas
         -> domain.py                         # Unified domain model (ProjectState, Code, Codebook, etc.)
         -> analysis_schemas.py               # LLM output schemas (CodeHierarchy, SpeakerAnalysis, etc.)
@@ -97,7 +98,7 @@ start_server.py                              # Server startup script
 - `qc_clean/core/export/data_exporter.py` - ProjectExporter (JSON/CSV/Markdown/QDPX from ProjectState)
 - `qc_cli.py` - CLI interface (analyze, project, review, status, server)
 - `qc_mcp_server.py` - MCP server: 20 tools for project management, pipeline execution, codebook inspection, review, IRR/stability, export
-- `tests/` - 550 deterministic tests + 6 live LLM E2E tests (36 test files)
+- `tests/` - 559 deterministic tests + 6 live LLM E2E tests (37 test files)
 
 ### How It Works
 - `project run` runs the pipeline locally (no server needed); `analyze` uses the API server
