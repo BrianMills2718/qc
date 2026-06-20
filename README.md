@@ -42,8 +42,8 @@ python qc_cli.py analyze --files interview1.docx interview2.docx --format json -
 3. **Perspective Analysis**: analyze participant perspectives and tensions
 4. **Relationship Mapping**: extract entities and evidence-backed relationships
 5. **Synthesis**: integrate findings and recommendations
-6. **Negative Case Analysis**: identify disconfirming evidence
-7. **Cross-Interview Analysis**: compare patterns across documents when the corpus has multiple interviews
+6. **Cross-Interview Analysis**: compare patterns across documents when the corpus has multiple interviews
+7. **Negative Case Analysis**: identify disconfirming evidence (runs last so it can challenge cross-interview claims too)
 
 ### Grounded Theory
 
@@ -52,8 +52,8 @@ python qc_cli.py analyze --files interview1.docx interview2.docx --format json -
 3. **Axial Coding**: identify relationships between categories
 4. **Selective Coding**: identify core categories
 5. **Theory Integration**: build the theoretical model
-6. **Negative Case Analysis**: identify disconfirming evidence
-7. **Cross-Interview Analysis**: compare patterns across documents when the corpus has multiple interviews
+6. **Cross-Interview Analysis**: compare patterns across documents when the corpus has multiple interviews
+7. **Negative Case Analysis**: identify disconfirming evidence (runs last so it can challenge cross-interview claims too)
 
 Both methodologies use structured LLM output, fail-loud stage dependencies, and optional human review checkpoints.
 

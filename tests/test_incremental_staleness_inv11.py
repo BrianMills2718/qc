@@ -53,3 +53,19 @@ def test_empty_collections_not_flagged():
     # An empty entities list is not a stale output.
     state = _state(entities=[], core_categories=[])
     assert _stale_higher_order_outputs(state) == []
+
+
+def test_markdown_export_surfaces_data_warnings(tmp_path):
+    """data_warnings must be rendered in the Markdown report, not silently
+    dropped while stale synthesis/etc. are rendered (INV-11)."""
+    from qc_clean.core.export.data_exporter import ProjectExporter
+
+    state = _state(
+        synthesis=Synthesis(executive_summary="stale summary"),
+        data_warnings=["Incremental recode ... did not recompute: synthesis."],
+    )
+    out = tmp_path / "report.md"
+    ProjectExporter().export_markdown(state, str(out))
+    text = out.read_text()
+    assert "Data warnings" in text
+    assert "did not recompute: synthesis" in text

@@ -177,6 +177,14 @@ class ProjectExporter:
         _a(f"**Generated**: {datetime.now().strftime('%Y-%m-%d %H:%M')}")
         _a("")
 
+        # Data warnings — surfaced prominently so stale or unanchored outputs are
+        # never silently rendered as current (INV-11/INV-1).
+        if state.data_warnings:
+            _a("> ⚠️ **Data warnings** — read before relying on the results below:")
+            for w in state.data_warnings:
+                _a(f"> - {w}")
+            _a("")
+
         # Executive summary
         if state.synthesis and state.synthesis.executive_summary:
             _a("## Executive Summary")

@@ -51,8 +51,9 @@ def create_pipeline(
             GTSelectiveCodingStage(),
             GTTheoryIntegrationStage(),
             CrossInterviewStage(),  # only runs if corpus > 1 doc
-            # Disconfirmation runs LAST so it covers the final claim set,
-            # including cross-interview claims (INV-6).
+            # Disconfirmation runs LAST so it covers the codebook + cross-interview
+            # claims. NOTE: it does not yet challenge synthesis/perspective/entity/
+            # GT outputs — INV-6 is PARTIAL (see PROJECT_THEORY_AND_GOALS.md).
             NegativeCaseStage(),
         ]
     else:
@@ -64,8 +65,9 @@ def create_pipeline(
             RelationshipStage(),
             SynthesisStage(),
             CrossInterviewStage(),  # only runs if corpus > 1 doc
-            # Disconfirmation runs LAST so it covers the final claim set,
-            # including cross-interview claims (INV-6).
+            # Disconfirmation runs LAST so it covers the codebook + cross-interview
+            # claims. NOTE: it does not yet challenge synthesis/perspective/entity/
+            # GT outputs — INV-6 is PARTIAL (see PROJECT_THEORY_AND_GOALS.md).
             NegativeCaseStage(),
         ]
 
@@ -97,8 +99,8 @@ def create_incremental_pipeline(
     stages = [
         IncrementalCodingStage(),
         CrossInterviewStage(),
-        # Disconfirmation runs LAST so it covers the final claim set,
-        # including cross-interview claims (INV-6).
+        # Disconfirmation runs LAST so it covers the codebook + cross-interview
+        # claims (not synthesis/perspective/entity/GT outputs — INV-6 PARTIAL).
         NegativeCaseStage(),
     ]
 

@@ -55,6 +55,15 @@ EXPORTS_DIR = (store.projects_dir / "exports").resolve()
 _UNSAFE_NAME_RE = _re.compile(r"[^A-Za-z0-9._-]+")
 
 
+def _warn_payload(state) -> dict:
+    """Return {"data_warnings": [...]} when the state carries warnings, else {}.
+
+    Surfacing data_warnings on agent-facing MCP outputs keeps stale/unanchored
+    outputs from being consumed as current (INV-11/INV-1).
+    """
+    return {"data_warnings": list(state.data_warnings)} if state.data_warnings else {}
+
+
 def _confine_export_path(output_file: Optional[str], default_name: str) -> str:
     """Map an agent-supplied output_file to a sanitized path inside EXPORTS_DIR.
 
@@ -287,6 +296,7 @@ def qc_get_synthesis(project_id: str) -> str:
             {"title": r.title, "priority": r.priority, "description": r.description}
             for r in (synth.recommendations or [])
         ],
+        **_warn_payload(state),
     }, indent=2)
 
 
@@ -624,6 +634,7 @@ async def qc_recode(
         "codes": len(state.codebook.codes),
         "code_applications": len(state.code_applications),
         "iteration": state.iteration,
+        **_warn_payload(state),
     })
 
 

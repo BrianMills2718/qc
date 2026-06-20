@@ -12,12 +12,15 @@
 > the system better. It closes **INV-3** (validity adjudication separate from
 > consistency) and operationalizes **INV-5** (bias). It is roadmap item #1.
 >
-> **Build on, don't hand-roll.** This harness is built on `prompt_eval`
+> **Build on, don't hand-roll.** This harness will be built on `prompt_eval`
 > (`~/projects/prompt_eval`) — frozen case sets, evaluators (`llm_judge`,
 > `kappa`, `exact_match`, `contains`), bootstrap CIs, Welch's test, instruction
-> search — and `llm_client` observability. QC already integrates `prompt_eval`
-> (see CLAUDE.md "prompt_eval Integration"). Do not reimplement scoring,
-> statistics, or experiment tracking.
+> search — and `llm_client` observability. *Current integration is minimal:* one
+> optimization script imports `prompt_eval` (`scripts/optimize_thematic_prompt.py`)
+> and `PipelineContext.prompt_overrides` exists; the `make bench` / `qc bench`
+> surface and the QC-specific evaluators below are **to be built** (this is a
+> design doc). Do not reimplement scoring, statistics, or experiment tracking —
+> extend `prompt_eval`.
 
 ---
 
@@ -44,9 +47,9 @@ Each dimension maps to a SOTA claim and (where relevant) an invariant. The bar i
 
 - **D1 grounding:** `% quotes whose normalized text resolves to a unique anchored span (doc_id + char offsets + hash)`; count of unresolvable / multiply-resolvable / hallucinated quotes. Depends on INV-1 anchoring landing first.
 - **D2 coverage:** `|units with an explicit decision| / |segment universe|`, including explicit "examined, not relevant" nulls. Depends on INV-8.
-- **D3 application validity:** against adjudicated gold on the **same units** — Cohen's κ (2 raters) / **Krippendorff's α** (handles multi-label, missing, boundary disagreement), precision/recall/F1 on code labels, and **span alignment via IoU + Modified Hausdorff Distance** (the LLMCode metrics). The unit-of-analysis fix the IRR caveat (theory doc §11) demands.
+- **D3 application validity:** against adjudicated gold on the **same units** — Cohen's κ (2 raters) / **Krippendorff's α** (handles multi-label, missing, boundary disagreement), precision/recall/F1 on code labels, and **span alignment via IoU + Modified Hausdorff Distance** (the LLMCode metrics). The unit-of-analysis fix the IRR caveat (theory doc §11) demands. **Report a prevalence-robust coefficient (Gwet's AC1) alongside κ:** qualitative codes are often rare, and κ collapses under skewed prevalence even at high raw agreement (the 2026 PLOS study reported κ≈0.34 despite high agreement, and reports AC1 for exactly this reason). Make prevalence attenuation a first-class reported quantity, not a caveat.
 - **D4 codebook quality:** `llm_judge` rubric (clarity / specificity / usefulness / grounding, 0–1 each) **plus** a blind human expert panel; report both and their agreement.
-- **D5 reliability:** existing `project irr` / `project stability`, but reported with **bootstrap CIs** and prevalence, and labeled *codebook-discovery* vs *application-level* agreement (the latter requires INV-8).
+- **D5 reliability:** existing `project irr` / `project stability`, but reported with **bootstrap CIs**, prevalence, and a prevalence-robust coefficient (**Gwet's AC1**) alongside κ, and labeled *codebook-discovery* vs *application-level* agreement (the latter requires INV-8). (GT reliability now measures the actual constant-comparison stage — fixed; see theory doc §11.)
 - **D6 bias:** (i) stratified error rate by respondent attribute where ethical; (ii) **counterfactual masking/swap** — hold substantive text constant, vary identity markers, measure code-change rate (target ≈0).
 - **D7 disconfirmation:** recall/precision of system negative cases against a human-built gold set of disconfirming passages.
 - **D8 GT fidelity:** expert rubric on constant comparison, category property/dimension development, memo quality, saturation justification.
@@ -61,7 +64,7 @@ Each dimension maps to a SOTA claim and (where relevant) an invariant. The bar i
 - **LLMCode** (github.com/PerttuHamalainen/LLMCode) — human-annotated data + tooling that compares LLM to human codes with IoU / Modified Hausdorff. Closest ready-made evaluator; reuse its metrics and data.
 - **HICode** (github.com/mianzg/HICode) — 3 datasets with human-constructed themes; reported **P=0.72 / R=0.74** — a concrete head-to-head target for hierarchical coding.
 - **LOGOS** (arXiv:2509.24294) — 5 corpora + a 5-dimensional metric and an expert-developed schema (≈80.4% alignment reported) for GT-style evaluation.
-- *Caveat:* public datasets may be in model training data → **train/test contamination**. Flag it; do not base the *headline* SOTA claim on possibly-contaminated public sets.
+- **Design rule (not just a caveat):** public datasets may be in model training data → **train/test contamination**. Therefore public sets are **regression/comparator suites only** (head-to-head vs HICode/LOGOS/etc.); the **headline SOTA/parity claims must rest on fresh in-house held-out gold** the models have never seen. "Contamination-checked" means: search for verbatim overlap, prefer post-cutoff data, and treat any public-set result as a comparator, never as the headline.
 
 **Build a small in-house adjudicated gold set (for headline claims):** follow the expert-consensus-panel method — ≥2 qualified coders independently code, a third adjudicates disagreements, producing gold codes with labels, definitions, supporting anchored spans, and a recorded human–human agreement (the ceiling). Target the actual product domain (interviews/focus groups). Keep it held-out and prompt-frozen.
 
@@ -92,7 +95,12 @@ Each dimension maps to a SOTA claim and (where relevant) an invariant. The bar i
 
 ## 7. Acceptance criteria (the SOTA gate)
 
-A public claim of the form "more X than existing methods" is licensed **only** when, for dimension X, the harness shows the system ≥ the named baseline/human ceiling on a held-out, prompt-frozen, contamination-checked dataset, with a CI excluding the baseline — recorded with hashes. Until then, claim discipline (theory doc §14) applies: describe capability, not superiority.
+Two different statistical tests, because we make two different kinds of claim — do not conflate them:
+
+- **Superiority** (for "more X than existing methods", e.g. D1/D2/D7): licensed only when the system is ≥ the named baseline with a **CI that excludes the baseline** (a one-sided superiority test).
+- **Non-inferiority / parity** (for "matches expert humans", e.g. D9 and D3 where parity is the claim): licensed only when the system is within a **pre-registered non-inferiority margin** of the human ceiling — i.e. the CI for (system − human) lies above −δ for a δ fixed *before* the run. A superiority test is the wrong tool for a parity claim; using "CI excludes baseline" everywhere would either over-reject parity or smuggle in an unearned superiority claim.
+
+Both require a held-out, prompt-frozen, contamination-checked dataset, recorded with dataset/prompt/model hashes. Until a dimension passes its appropriate test, claim discipline (theory doc §14) applies: describe capability, not superiority/parity.
 
 ## 8. Phasing (smallest real slice first)
 
