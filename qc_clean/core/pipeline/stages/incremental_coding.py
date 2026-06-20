@@ -10,6 +10,7 @@ from __future__ import annotations
 import logging
 from typing import List
 
+from qc_clean.core.grounding import MatchStatus, resolve_against_docs, warn_unanchored
 from qc_clean.core.pipeline.irr import normalize_code_name
 from qc_clean.core.pipeline.saturation import calculate_codebook_change
 from qc_clean.schemas.analysis_schemas import CodeHierarchy
@@ -237,10 +238,9 @@ def _process_thematic_response(
     uncoded_ids: set,
 ) -> List[CodeApplication]:
     """Process thematic coding response: merge codes and build applications."""
-    import re
-
     new_applications = []
-    unanchored = 0
+    unresolvable = 0
+    ambiguous = 0
     existing_names = {normalize_code_name(c.name): c for c in state.codebook.codes}
 
     for tc in response.codes:
@@ -270,40 +270,27 @@ def _process_thematic_response(
             existing_names[norm_name] = new_code
             code_id = new_code.id
 
-        # Build applications only for new documents
+        # Build applications only for new documents, span-anchored (INV-1).
         for quote in tc.example_quotes:
-            norm_quote = re.sub(r"\s+", " ", quote.lower().strip())
-            if len(norm_quote) > 40:
-                start = len(norm_quote) // 5
-                end = len(norm_quote) * 4 // 5
-                search_snippet = norm_quote[start:end]
+            m = resolve_against_docs(quote, new_docs)
+            if m.status is MatchStatus.UNIQUE:
+                new_applications.append(CodeApplication(
+                    code_id=code_id,
+                    doc_id=m.doc_id,
+                    quote_text=quote,
+                    start_char=m.start_char,
+                    end_char=m.end_char,
+                    quote_hash=m.quote_hash,
+                    confidence=tc.discovery_confidence,
+                    applied_by=Provenance.LLM,
+                    codebook_version=state.codebook.version,
+                ))
+            elif m.status is MatchStatus.AMBIGUOUS:
+                ambiguous += 1
             else:
-                search_snippet = norm_quote
+                unresolvable += 1
 
-            matched = False
-            for doc in new_docs:
-                norm_content = re.sub(r"\s+", " ", doc.content.lower())
-                if search_snippet in norm_content:
-                    new_applications.append(CodeApplication(
-                        code_id=code_id,
-                        doc_id=doc.id,
-                        quote_text=quote,
-                        confidence=tc.discovery_confidence,
-                        applied_by=Provenance.LLM,
-                        codebook_version=state.codebook.version,
-                    ))
-                    matched = True
-                    break
-
-            if not matched:
-                # Drop rather than fabricate provenance to new_docs[0] (INV-1).
-                unanchored += 1
-
-    if unanchored:
-        state.data_warnings.append(
-            f"Incremental coding: {unanchored} quote(s) did not match any new "
-            f"document and were dropped as unanchored; see INV-1."
-        )
+    warn_unanchored(state, unresolvable, ambiguous, label="Incremental coding")
     return new_applications
 
 
@@ -317,7 +304,8 @@ def _process_gt_response(
     from qc_clean.schemas.adapters import open_codes_to_codebook
 
     new_applications = []
-    unanchored = 0
+    unresolvable = 0
+    ambiguous = 0
     existing_names = {normalize_code_name(c.name): c for c in state.codebook.codes}
 
     for oc in response.open_codes:
@@ -347,28 +335,25 @@ def _process_gt_response(
             existing_names[norm_name] = new_code
             code_id = new_code.id
 
-        # Build applications for new documents
+        # Build applications for new documents, span-anchored (INV-1).
         for quote in oc.supporting_quotes:
-            matched = False
-            for doc in new_docs:
-                if quote in doc.content:
-                    new_applications.append(CodeApplication(
-                        code_id=code_id,
-                        doc_id=doc.id,
-                        quote_text=quote,
-                        confidence=oc.confidence,
-                        applied_by=Provenance.LLM,
-                        codebook_version=state.codebook.version,
-                    ))
-                    matched = True
-                    break
-            if not matched:
-                # Drop rather than fabricate provenance to new_docs[0] (INV-1).
-                unanchored += 1
+            m = resolve_against_docs(quote, new_docs)
+            if m.status is MatchStatus.UNIQUE:
+                new_applications.append(CodeApplication(
+                    code_id=code_id,
+                    doc_id=m.doc_id,
+                    quote_text=quote,
+                    start_char=m.start_char,
+                    end_char=m.end_char,
+                    quote_hash=m.quote_hash,
+                    confidence=oc.confidence,
+                    applied_by=Provenance.LLM,
+                    codebook_version=state.codebook.version,
+                ))
+            elif m.status is MatchStatus.AMBIGUOUS:
+                ambiguous += 1
+            else:
+                unresolvable += 1
 
-    if unanchored:
-        state.data_warnings.append(
-            f"Incremental GT coding: {unanchored} quote(s) did not match any new "
-            f"document and were dropped as unanchored; see INV-1."
-        )
+    warn_unanchored(state, unresolvable, ambiguous, label="Incremental GT coding")
     return new_applications

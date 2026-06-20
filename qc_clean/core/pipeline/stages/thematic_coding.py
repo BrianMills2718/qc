@@ -7,11 +7,10 @@ from __future__ import annotations
 
 import logging
 
-from typing import List
-
+from qc_clean.core.grounding import MatchStatus, resolve_against_docs, warn_unanchored as _warn_unanchored
 from qc_clean.schemas.analysis_schemas import CodeHierarchy
 from qc_clean.schemas.adapters import code_hierarchy_to_codebook
-from qc_clean.schemas.domain import AnalysisMemo, CodeApplication, Document, ProjectState, Provenance
+from qc_clean.schemas.domain import AnalysisMemo, CodeApplication, ProjectState, Provenance
 from ..pipeline_engine import PipelineContext, PipelineStage
 
 logger = logging.getLogger(__name__)
@@ -64,32 +63,33 @@ class ThematicCodingStage(PipelineStage):
         # The LLM produced codes from all docs combined, so we match each
         # quote to the document(s) it actually appears in.
         all_applications = []
-        unanchored = 0
+        unresolvable = 0
+        ambiguous = 0
         for tc in phase1_response.codes:
             for quote in tc.example_quotes:
-                matched_docs = _match_quote_to_docs(quote, state.corpus.documents)
-                if not matched_docs:
-                    # No source match: drop the application rather than fabricate
-                    # a provenance link to documents[0]. A false evidence link is
-                    # worse than a missing one (INV-1; fail loud, not silent).
-                    unanchored += 1
+                m = resolve_against_docs(quote, state.corpus.documents)
+                if m.status is MatchStatus.NONE:
+                    # No source match: drop rather than fabricate provenance (INV-1).
+                    unresolvable += 1
                     continue
-                for doc_id in matched_docs:
-                    app = CodeApplication(
-                        code_id=tc.id,
-                        doc_id=doc_id,
-                        quote_text=quote,
-                        confidence=tc.discovery_confidence,
-                        applied_by=Provenance.LLM,
-                        codebook_version=codebook.version,
-                    )
-                    all_applications.append(app)
+                if m.status is MatchStatus.AMBIGUOUS:
+                    # Same quote occurs >1x across the corpus -> cannot uniquely
+                    # anchor; drop rather than guess a document (INV-1).
+                    ambiguous += 1
+                    continue
+                all_applications.append(CodeApplication(
+                    code_id=tc.id,
+                    doc_id=m.doc_id,
+                    quote_text=quote,
+                    start_char=m.start_char,
+                    end_char=m.end_char,
+                    quote_hash=m.quote_hash,
+                    confidence=tc.discovery_confidence,
+                    applied_by=Provenance.LLM,
+                    codebook_version=codebook.version,
+                ))
         state.code_applications = all_applications
-        if unanchored:
-            state.data_warnings.append(
-                f"{unanchored} quote(s) did not match any source document and were "
-                f"dropped as unanchored (not attributed to documents[0]); see INV-1."
-            )
+        _warn_unanchored(state, unresolvable, ambiguous)
 
         # Extract analytical memo
         if phase1_response.analytical_memo:
@@ -164,29 +164,3 @@ ANALYTICAL MEMO: After completing the analysis above, write a brief analytical m
 - Uncertainties or areas needing further investigation"""
 
 
-def _match_quote_to_docs(quote: str, documents: List[Document]) -> List[str]:
-    """Match a quote to the document(s) it appears in.
-
-    Uses substring matching with a normalized version of the quote.
-    Returns a list of matching document IDs (usually 1).
-    """
-    # Normalize for fuzzy matching: lowercase, collapse whitespace
-    import re
-    norm_quote = re.sub(r"\s+", " ", quote.lower().strip())
-
-    # Use a shorter snippet for matching (LLM may paraphrase edges)
-    # Take middle 60% of the quote for more reliable matching
-    if len(norm_quote) > 40:
-        start = len(norm_quote) // 5
-        end = len(norm_quote) * 4 // 5
-        search_snippet = norm_quote[start:end]
-    else:
-        search_snippet = norm_quote
-
-    matched = []
-    for doc in documents:
-        norm_content = re.sub(r"\s+", " ", doc.content.lower())
-        if search_snippet in norm_content:
-            matched.append(doc.id)
-
-    return matched

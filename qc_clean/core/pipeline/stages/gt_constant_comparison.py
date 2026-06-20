@@ -15,7 +15,7 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from pydantic import BaseModel, Field
 
@@ -217,6 +217,7 @@ class GTConstantComparisonStage(PipelineStage):
         llm = LLMHandler(model_name=ctx.model_name)
 
         segments = segment_documents(state.corpus.documents)
+        doc_lookup = {d.id: d.content for d in state.corpus.documents}
         if not segments:
             raise RuntimeError(
                 "No segments found in documents — cannot perform constant comparison. "
@@ -252,7 +253,9 @@ class GTConstantComparisonStage(PipelineStage):
                     SegmentCodingResponse,
                     **ctx.llm_call_options(self.name()),
                 )
-                _merge_segment_results(codebook, all_applications, response, segment)
+                _merge_segment_results(
+                    codebook, all_applications, response, segment, doc_lookup
+                )
 
                 if response.analytical_memo:
                     iteration_memos.append(response.analytical_memo)
@@ -377,8 +380,16 @@ def _merge_segment_results(
     all_applications: List[CodeApplication],
     response: SegmentCodingResponse,
     segment: Dict,
+    doc_lookup: Optional[Dict[str, str]] = None,
 ) -> None:
-    """Merge segment coding results into the codebook and applications list."""
+    """Merge segment coding results into the codebook and applications list.
+
+    ``doc_id`` is reliable here (it comes from segmentation, not quote matching),
+    so applications are never dropped. When the quote resolves uniquely within its
+    document we additionally populate doc-relative char offsets + hash (INV-1);
+    otherwise the application keeps its correct doc_id/speaker without offsets.
+    """
+    from qc_clean.core.grounding import MatchStatus, resolve_span
     from qc_clean.core.pipeline.irr import normalize_code_name
 
     # 1. Add new codes to codebook
@@ -428,11 +439,20 @@ def _merge_segment_results(
                 break
 
         if code:
+            start_char = end_char = q_hash = None
+            doc_content = (doc_lookup or {}).get(segment["doc_id"])
+            if doc_content is not None:
+                sm = resolve_span(app.quote, doc_content)
+                if sm.status is MatchStatus.UNIQUE:
+                    start_char, end_char, q_hash = sm.start_char, sm.end_char, sm.quote_hash
             all_applications.append(CodeApplication(
                 code_id=code.id,
                 doc_id=segment["doc_id"],
                 quote_text=app.quote,
                 speaker=segment.get("speaker") or None,
+                start_char=start_char,
+                end_char=end_char,
+                quote_hash=q_hash,
                 confidence=code.confidence,
                 applied_by=Provenance.LLM,
                 codebook_version=codebook.version,

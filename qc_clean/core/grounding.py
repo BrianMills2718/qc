@@ -156,6 +156,21 @@ def resolve_against_docs(quote: str, documents: Sequence) -> DocSpanMatch:
     )
 
 
+def warn_unanchored(state, unresolvable: int, ambiguous: int, label: str = "") -> None:
+    """Append INV-1 data_warnings for dropped (unresolvable / ambiguous) quotes."""
+    prefix = f"{label}: " if label else ""
+    if unresolvable:
+        state.data_warnings.append(
+            f"{prefix}{unresolvable} quote(s) matched no source document and were "
+            f"dropped as unanchored (INV-1)."
+        )
+    if ambiguous:
+        state.data_warnings.append(
+            f"{prefix}{ambiguous} quote(s) occurred more than once in the corpus and "
+            f"could not be uniquely anchored; dropped rather than misattributed (INV-1)."
+        )
+
+
 def verify_anchor(content: str, start: Optional[int], end: Optional[int],
                   expected_hash: Optional[str]) -> bool:
     """True iff the span at [start:end] still hashes to ``expected_hash``."""

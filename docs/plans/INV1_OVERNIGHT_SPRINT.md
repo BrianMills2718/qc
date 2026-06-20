@@ -48,8 +48,8 @@ foundation the public-SOTA claim rests on (see `PROJECT_THEORY_AND_GOALS.md`
 | Phase | Scope | Status |
 |---|---|---|
 | 1 | `grounding.py`: `resolve_span` (offset-mapped, status) + `quote_hash` + unit tests | DONE (10 tests) |
-| 2 | Wire anchors into thematic/incremental/legacy/constant-comparison; add `quote_hash` field; drop ambiguous+unresolvable | IN PROGRESS |
-| 3 | `verify_grounding(state)` + report model + tests; CLI/MCP surface | PENDING |
+| 2 | Wire anchors into thematic/incremental/legacy/constant-comparison; add `quote_hash` field; drop ambiguous+unresolvable | DONE |
+| 3 | `verify_grounding(state)` + report model + tests; CLI/MCP surface | IN PROGRESS |
 | 4 | Harness Phase 0: `scripts/bench_phase0.py` + `make bench` + scoring tests | PENDING |
 | 5 | Docs: INV-1 status (precise, no overclaim), harness Phase 0 started, roadmap, theory doc, counts | PENDING |
 

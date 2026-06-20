@@ -8,6 +8,7 @@ import logging
 from pydantic import BaseModel, Field
 from typing import List
 
+from qc_clean.core.grounding import MatchStatus, resolve_against_docs, warn_unanchored
 from qc_clean.schemas.gt_schemas import OpenCode
 from qc_clean.schemas.adapters import open_codes_to_codebook
 from qc_clean.schemas.domain import AnalysisMemo, CodeApplication, ProjectState, Provenance
@@ -85,34 +86,33 @@ ANALYTICAL MEMO: After completing the analysis above, write a brief analytical m
         codebook = open_codes_to_codebook(open_codes)
         state.codebook = codebook
 
-        # Build code applications from supporting quotes
+        # Build span-anchored code applications from supporting quotes (INV-1).
         all_apps = []
-        unanchored = 0
+        unresolvable = 0
+        ambiguous = 0
         for oc in open_codes:
             code = codebook.get_code_by_name(oc.code_name)
             code_id = code.id if code else oc.code_name
             for quote in oc.supporting_quotes:
-                for doc in state.corpus.documents:
-                    if quote in doc.content:
-                        all_apps.append(CodeApplication(
-                            code_id=code_id,
-                            doc_id=doc.id,
-                            quote_text=quote,
-                            confidence=oc.confidence,
-                            applied_by=Provenance.LLM,
-                            codebook_version=codebook.version,
-                        ))
-                        break
+                m = resolve_against_docs(quote, state.corpus.documents)
+                if m.status is MatchStatus.UNIQUE:
+                    all_apps.append(CodeApplication(
+                        code_id=code_id,
+                        doc_id=m.doc_id,
+                        quote_text=quote,
+                        start_char=m.start_char,
+                        end_char=m.end_char,
+                        quote_hash=m.quote_hash,
+                        confidence=oc.confidence,
+                        applied_by=Provenance.LLM,
+                        codebook_version=codebook.version,
+                    ))
+                elif m.status is MatchStatus.AMBIGUOUS:
+                    ambiguous += 1
                 else:
-                    # Drop rather than fabricate provenance to documents[0] (INV-1):
-                    # a false evidence link is worse than a missing one.
-                    unanchored += 1
+                    unresolvable += 1
         state.code_applications = all_apps
-        if unanchored:
-            state.data_warnings.append(
-                f"{unanchored} quote(s) did not match any source document and were "
-                f"dropped as unanchored (not attributed to documents[0]); see INV-1."
-            )
+        warn_unanchored(state, unresolvable, ambiguous)
 
         # Extract analytical memo
         if response.analytical_memo:

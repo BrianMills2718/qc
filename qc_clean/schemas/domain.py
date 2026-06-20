@@ -146,6 +146,7 @@ class CodeApplication(BaseModel):
     speaker: Optional[str] = None
     start_char: Optional[int] = None
     end_char: Optional[int] = None
+    quote_hash: Optional[str] = None  # sha256 of doc.content[start_char:end_char] (INV-1)
     confidence: float = 0.0
     applied_by: Provenance = Provenance.LLM
     codebook_version: int = 1
