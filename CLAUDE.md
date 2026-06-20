@@ -111,7 +111,7 @@ start_server.py                              # Server startup script
 - `ProjectStore` saves/loads entire ProjectState as JSON (no database needed)
 - Cross-interview analysis runs automatically for multi-document corpora
 - Saturation detection compares codebooks across iterations
-- Default model: gpt-5-mini via OpenAI API. LLMHandler is a thin adapter over shared `llm_client` library (retry, backoff, structured extraction via `acall_llm_structured` / `acall_llm_structured_batch`)
+- Default model: `gpt-5-mini`. LLMHandler passes the bare model name to `llm_client`, whose default `routing_policy="openrouter"` resolves it to `openrouter/openai/gpt-5-mini` — so calls route through **OpenRouter** (`OPENROUTER_API_KEY`), not the OpenAI API directly. LLMHandler is a thin adapter over the shared `llm_client` library (retry, backoff, structured extraction via `acall_llm_structured` / `acall_llm_structured_batch`)
 - `analysis_schemas.py` defines LLM output shapes; `adapters.py` converts them to domain objects
 - Every stage produces an analytical memo (LLM reasoning trail) saved to `state.memos`
 - GT constant comparison: segments documents by speaker turns or paragraph chunks, iteratively codes each segment against an evolving codebook, stops when saturation reached
@@ -194,7 +194,8 @@ python -m pytest tests/ -v
 API keys are read from environment variables by `llm_client` (via litellm). Default model: `gpt-5-mini`.
 
 Key env vars:
-- `OPENAI_API_KEY` / `GEMINI_API_KEY` / `ANTHROPIC_API_KEY` -- API key for the model provider
+- `OPENROUTER_API_KEY` -- **the key actually used by default** (`llm_client` routes the default model through OpenRouter). The live E2E tests gate on this key.
+- `OPENAI_API_KEY` / `GEMINI_API_KEY` / `ANTHROPIC_API_KEY` -- used only when you route direct to a provider (e.g. `--model gemini/...`, or with `routing_policy="direct"`)
 - `qc_clean/config/unified_config.py` -- `UnifiedConfig` dataclass reads env vars: `API_PROVIDER`, `MODEL`, `METHODOLOGY`, `CODING_APPROACH`, `VALIDATION_LEVEL`, `TEMPERATURE`
 - `qc_clean/core/config/env_config.py` -- Active server config (used by `start_server.py`)
 

@@ -1,15 +1,21 @@
 """
 End-to-end tests with real LLM calls.
 
-These tests require OPENAI_API_KEY to be set and make actual API calls.
+These tests make actual API calls. By default `llm_client` routes through
+OpenRouter (`routing_policy="openrouter"`), so the bare default model
+``gpt-5-mini`` is resolved to ``openrouter/openai/gpt-5-mini`` and billed to
+``OPENROUTER_API_KEY`` — *not* the OpenAI key directly. The skip gate therefore
+checks OPENROUTER_API_KEY (the key actually used), so a host configured with the
+correct default key runs the suite instead of silently skipping it.
+
 They validate the full pipeline produces meaningful output, not just that
 it runs without errors.
 
 Run with:
-    OPENAI_API_KEY=... python -m pytest tests/test_e2e.py -v -s
+    OPENROUTER_API_KEY=... python -m pytest tests/test_e2e.py -v -s
 
 Skip in CI:
-    Tests are automatically skipped if OPENAI_API_KEY is not set.
+    Tests are automatically skipped if OPENROUTER_API_KEY is not set.
 """
 
 import asyncio
@@ -38,8 +44,8 @@ from qc_clean.schemas.domain import (
 pytestmark = [
     pytest.mark.live_llm,
     pytest.mark.skipif(
-        not os.environ.get("OPENAI_API_KEY"),
-        reason="OPENAI_API_KEY not set",
+        not os.environ.get("OPENROUTER_API_KEY"),
+        reason="OPENROUTER_API_KEY not set (llm_client routes the default model through OpenRouter)",
     ),
 ]
 
