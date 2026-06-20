@@ -99,6 +99,30 @@ def build_coding_matrix(
     return matrix
 
 
+def build_application_matrix(
+    passes_segment_codes: List[Dict[str, set]],
+) -> Dict[str, List[int]]:
+    """Binary (segment × code) presence matrix for application-level agreement.
+
+    ``passes_segment_codes[i]`` is ``{seg_key: {normalized_code_name, ...}}`` for
+    pass i. Each row is one ``(segment, code)`` cell that was applied by at least
+    one pass; the value is 1 if that pass assigned that code to that segment, else
+    0. Reuses the same metric functions as codebook-discovery IRR — the only
+    difference is the unit of analysis (segment×code vs. code).
+    """
+    cells = set()
+    for sc in passes_segment_codes:
+        for seg_key, codes in sc.items():
+            for code in codes:
+                cells.add((seg_key, code))
+
+    matrix: Dict[str, List[int]] = {}
+    for seg_key, code in sorted(cells):
+        row = f"{seg_key}::{code}"
+        matrix[row] = [1 if code in sc.get(seg_key, set()) else 0 for sc in passes_segment_codes]
+    return matrix
+
+
 def compute_percent_agreement(matrix: Dict[str, List[int]]) -> float:
     """Proportion of codes where all passes agree (all 1 or all 0)."""
     if not matrix:
@@ -209,6 +233,7 @@ async def run_irr_analysis(
     num_passes: int = 3,
     model_name: str = "gpt-5-mini",
     models: Optional[List[str]] = None,
+    application_level: bool = False,
 ) -> IRRResult:
     """
     Run multiple coding passes and compute IRR metrics.
@@ -233,7 +258,7 @@ async def run_irr_analysis(
     is_gt = state.config.methodology == Methodology.GROUNDED_THEORY
     from qc_clean.core.pipeline.pipeline_engine import PipelineContext
 
-    async def _run_one_pass(i: int) -> IRRCodingPass:
+    async def _run_one_pass(i: int) -> Tuple[IRRCodingPass, Dict[str, set]]:
         suffix = PROMPT_SUFFIXES[i % len(PROMPT_SUFFIXES)]
         pass_model = model_name
         if models:
@@ -247,6 +272,7 @@ async def run_irr_analysis(
             model_name=pass_model,
             irr_prompt_suffix=suffix,
             trace_id=f"qualitative_coding/irr/{state.id}/pass-{i + 1}",
+            exhaustive_coding=application_level,  # per-segment decisions for app-level IRR
         )
 
         if is_gt:
@@ -274,6 +300,16 @@ async def run_irr_analysis(
             for c in pass_state.codebook.codes
         ]
 
+        # For application-level IRR, derive {seg_key: {normalized code names}}
+        # from the exhaustively-coded applications (anchored to segment spans).
+        seg_codes: Dict[str, set] = {}
+        if application_level:
+            id_to_name = {c.id: normalize_code_name(c.name) for c in pass_state.codebook.codes}
+            for app in pass_state.code_applications:
+                name = id_to_name.get(app.code_id)
+                if name:
+                    seg_codes.setdefault(f"{app.doc_id}#{app.start_char}", set()).add(name)
+
         return IRRCodingPass(
             pass_index=i,
             prompt_suffix=suffix,
@@ -281,9 +317,11 @@ async def run_irr_analysis(
             codes_discovered=code_names,
             code_details=code_details,
             timestamp=datetime.now().isoformat(),
-        )
+        ), seg_codes
 
-    passes = list(await asyncio.gather(*[_run_one_pass(i) for i in range(num_passes)]))
+    pass_results = list(await asyncio.gather(*[_run_one_pass(i) for i in range(num_passes)]))
+    passes = [pr[0] for pr in pass_results]
+    seg_code_maps = [pr[1] for pr in pass_results]
 
     # Compute metrics
     all_pass_codes = [p.codes_discovered for p in passes]
@@ -304,6 +342,19 @@ async def run_irr_analysis(
     best_kappa = ck if ck is not None else fk
     interp = interpret_kappa(best_kappa) if best_kappa is not None else ""
 
+    # Application-level (segment × code) agreement — the stronger "same code on
+    # the same text" number, computed from the exhaustive per-segment decisions.
+    app_matrix: Dict[str, List[int]] = {}
+    app_pct = app_ck = app_fk = None
+    app_interp = ""
+    if application_level:
+        app_matrix = build_application_matrix(seg_code_maps)
+        app_pct = compute_percent_agreement(app_matrix)
+        app_ck = compute_cohens_kappa(app_matrix) if num_passes == 2 else None
+        app_fk = compute_fleiss_kappa(app_matrix)
+        app_best = app_ck if app_ck is not None else app_fk
+        app_interp = interpret_kappa(app_best) if app_best is not None else ""
+
     result = IRRResult(
         num_passes=num_passes,
         passes=passes,
@@ -314,6 +365,13 @@ async def run_irr_analysis(
         cohens_kappa=ck,
         fleiss_kappa=fk,
         interpretation=interp,
+        application_level=application_level,
+        application_units=len(app_matrix),
+        application_percent_agreement=app_pct,
+        application_cohens_kappa=app_ck,
+        application_fleiss_kappa=app_fk,
+        application_interpretation=app_interp,
+        application_matrix=app_matrix,
         timestamp=datetime.now().isoformat(),
     )
 
