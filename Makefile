@@ -19,6 +19,9 @@ test-e2e:  ## Run live LLM E2E tests
 test-all:  ## Run deterministic tests and live LLM E2E tests
 	python -m pytest tests/ -v
 
+bench:  ## Evaluation-harness Phase 0 scorecard for a project (ID=<project_id>)
+	python scripts/bench_phase0.py $(ID)
+
 check:  ## Run deterministic tests + lint + docs checks
 	python -m pytest tests/ -m "not live_llm" -x -q
 	$(MAKE) lint
