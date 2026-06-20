@@ -51,8 +51,25 @@ foundation the public-SOTA claim rests on (see `PROJECT_THEORY_AND_GOALS.md`
 | 2 | Wire anchors into thematic/incremental/legacy/constant-comparison; add `quote_hash` field; drop ambiguous+unresolvable | DONE |
 | 3 | `verify_grounding(state)` + report model + tests; CLI/MCP surface | DONE (MCP qc_grounding_report) |
 | 4 | Harness Phase 0: `scripts/bench_phase0.py` + `make bench` + scoring tests | DONE (`make bench ID=...`) |
-| 5 | Docs: INV-1 status (precise, no overclaim), harness Phase 0 started, roadmap, theory doc, counts | IN PROGRESS |
+| 5 | Docs: INV-1 status (precise, no overclaim), harness Phase 0 started, roadmap, theory doc, counts | DONE |
+
+**Sprint complete.** INV-1 mostly met (anchoring + verification + drop-on-ambiguous/unresolvable across all coding paths; grounding metric + `make bench`). 550 deterministic tests, all gates green, all phases committed+pushed.
 
 ## Notes / findings log
 
-- (append discoveries here as phases run)
+- The live GT path (`gt_constant_comparison`) never fabricated provenance — it
+  attributes by segment `doc_id`. The false-attribution bug was thematic /
+  incremental / legacy-GT only (resolved Phase 2).
+- Dropping ambiguous/unresolvable quotes reduces application *recall* (paraphrased
+  quotes are dropped). This is correct (no false provenance) but makes a
+  fuzzy/semantic matcher the natural INV-1 follow-up to recover real evidence.
+- `speaker` on applications is still best-effort (constant-comparison only).
+- Next structural edge (per roadmap): **INV-8 segment universe** — it is the
+  precondition for honest coverage, application-level agreement, and corpus
+  prevalence, and unblocks the harness's D2/D3.
+
+## Follow-ups needing the user (not done autonomously)
+- **Live E2E validation** of the anchoring changes against real transcripts
+  (needs `OPENAI_API_KEY` + budget). The deterministic suite + a mocked
+  integration test cover the logic; a real run would confirm grounding rates on
+  actual LLM output.

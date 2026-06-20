@@ -45,7 +45,7 @@ Each dimension maps to a SOTA claim and (where relevant) an invariant. The bar i
 
 ## 2. Metrics (concrete and computable)
 
-- **D1 grounding:** `% quotes whose normalized text resolves to a unique anchored span (doc_id + char offsets + hash)`; count of unresolvable / multiply-resolvable / hallucinated quotes. Depends on INV-1 anchoring landing first.
+- **D1 grounding:** `% quotes whose normalized text resolves to a unique anchored span (doc_id + char offsets + hash)`; count of unresolvable / multiply-resolvable / hallucinated quotes. **Implemented** — `qc_clean/core/grounding.verify_grounding` (INV-1 landed); surfaced via `make bench` and MCP `qc_grounding_report`.
 - **D2 coverage:** `|units with an explicit decision| / |segment universe|`, including explicit "examined, not relevant" nulls. Depends on INV-8.
 - **D3 application validity:** against adjudicated gold on the **same units** — Cohen's κ (2 raters) / **Krippendorff's α** (handles multi-label, missing, boundary disagreement), precision/recall/F1 on code labels, and **span alignment via IoU + Modified Hausdorff Distance** (the LLMCode metrics). The unit-of-analysis fix the IRR caveat (theory doc §11) demands. **Report a prevalence-robust coefficient (Gwet's AC1) alongside κ:** qualitative codes are often rare, and κ collapses under skewed prevalence even at high raw agreement (the 2026 PLOS study reported κ≈0.34 despite high agreement, and reports AC1 for exactly this reason). Make prevalence attenuation a first-class reported quantity, not a caveat.
 - **D4 codebook quality:** `llm_judge` rubric (clarity / specificity / usefulness / grounding, 0–1 each) **plus** a blind human expert panel; report both and their agreement.
@@ -104,7 +104,7 @@ Both require a held-out, prompt-frozen, contamination-checked dataset, recorded 
 
 ## 8. Phasing (smallest real slice first)
 
-- **Phase 0 — plumbing + cheap metrics (no new human coding).** Wire QC into `prompt_eval`; compute D1 (grounding, once INV-1 lands — until then report the *resolution-failure rate* of current substring matching as the baseline to beat), D5 (reliability/stability with CIs), D10 (cost), on existing transcripts + reused public gold. Goal: real numbers and the harness skeleton in days, not the full study.
+- **Phase 0 — plumbing + cheap metrics (no new human coding). STARTED.** `make bench ID=<project>` (`qc_clean/core/bench.py` → `phase0_scorecard`) computes **D1 grounding** (now real: `verify_grounding` returns the fraction of applications whose span anchor verifies — INV-1 landed) and surfaces **D5** reliability/stability when present, deterministically. Remaining Phase 0: wire into `prompt_eval` for frozen case sets + CIs, add D10 cost from the observability DB, and run on reused public gold as a comparator.
 - **Phase 1 — small adjudicated gold.** Build/borrow a small expert gold set; compute D3 (κ/α, IoU/Hausdorff), D4 (codebook quality), D7 (disconfirmation recall) vs the human ceiling.
 - **Phase 2 — full benchmark + public scorecard.** Add baselines (ChatGPT, commercial, prototypes), D6 (bias + counterfactual), confidence calibration, D8 (GT fidelity), D9 (interpretive-depth preference). Publish the scorecard with the SOTA gate (§7) applied per dimension.
 

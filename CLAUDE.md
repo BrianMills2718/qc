@@ -66,7 +66,7 @@ qc_cli.py                                    # CLI entry point
         -> project_store.py                  # Save/load ProjectState as JSON files
      -> qc_clean/core/export/               # Export from ProjectState
         -> data_exporter.py                  # ProjectExporter (JSON/CSV/Markdown/QDPX)
-qc_mcp_server.py                             # MCP server (19 tools for agent access)
+qc_mcp_server.py                             # MCP server (20 tools for agent access)
 simple_cli_web.py                            # Flask web UI (port 5003, subprocess-based)
 start_server.py                              # Server startup script
 ```
@@ -86,8 +86,8 @@ start_server.py                              # Server startup script
 - `qc_clean/core/llm/llm_handler.py` - Thin adapter over `llm_client.acall_llm_structured` (QC config wiring, LLMError wrapping, system prompt)
 - `qc_clean/core/export/data_exporter.py` - ProjectExporter (JSON/CSV/Markdown/QDPX from ProjectState)
 - `qc_cli.py` - CLI interface (analyze, project, review, status, server)
-- `qc_mcp_server.py` - MCP server: 19 tools for project management, pipeline execution, codebook inspection, review, IRR/stability, export
-- `tests/` - 534 deterministic tests + 6 live LLM E2E tests (33 test files)
+- `qc_mcp_server.py` - MCP server: 20 tools for project management, pipeline execution, codebook inspection, review, IRR/stability, export
+- `tests/` - 550 deterministic tests + 6 live LLM E2E tests (36 test files)
 
 ### How It Works
 - `project run` runs the pipeline locally (no server needed); `analyze` uses the API server
@@ -165,7 +165,7 @@ python qc_cli.py review <project_id> --file decisions.json
 python qc_cli.py status --server
 python qc_cli.py status --job <job_id>
 
-# MCP server (for agent access - 19 tools)
+# MCP server (for agent access - 20 tools)
 python qc_mcp_server.py                                                   # run via stdio
 # Tools: qc_list_projects, qc_create_project, qc_show_project, qc_delete_project,
 #   qc_add_documents, qc_run_pipeline, qc_run_stage, qc_recode,

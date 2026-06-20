@@ -122,7 +122,7 @@ Each stage implements `PipelineStage` (`can_execute(state) -> bool`, `execute(st
 **Shared / thematic:**
 
 - **Ingest** (`ingest.py`) — parses `.txt/.docx/.pdf/.rtf`, detects speakers (handles `Name:` and `Name 0:03` timestamp formats), populates `corpus.documents`. *Reads:* loaded docs. *Writes:* `corpus` (content, `detected_speakers`). *Runs:* always.
-- **Thematic Coding** (`thematic_coding.py`) — LLM discovers a hierarchical codebook. *Schema:* `CodeHierarchy` (codes with id/name/description/semantic_definition/level/example_quotes/mention_count/discovery_confidence/reasoning). *Writes:* `codebook.codes`, and `code_applications` (one per `example_quote`, attributed to source by substring match — see INV-1). *Prompt is overridable* via `ctx.prompt_overrides["thematic_coding"]`. *Runs:* always (the foundational stage).
+- **Thematic Coding** (`thematic_coding.py`) — LLM discovers a hierarchical codebook. *Schema:* `CodeHierarchy` (codes with id/name/description/semantic_definition/level/example_quotes/mention_count/discovery_confidence/reasoning). *Writes:* `codebook.codes`, and `code_applications` (one per `example_quote` that resolves to a **unique** span via `grounding.resolve_against_docs` — anchored with `start_char`/`end_char`/`quote_hash`; ambiguous/unresolvable quotes are dropped + warned, INV-1). *Prompt is overridable* via `ctx.prompt_overrides["thematic_coding"]`. *Runs:* always (the foundational stage).
 - **Perspective Analysis** (`perspective.py`) — maps participants to emphasized codes; single-speaker (introspection: strongest positions / internal tensions) vs. multi-speaker (consensus / divergence) mode chosen from detected speaker count. *Schema:* `SpeakerAnalysis`. *Writes:* `perspective_analysis`. *Requires:* codebook (`ctx.require`).
 - **Relationship Mapping** (`relationship.py`) — extracts entities and typed relationships (powers the graph views). *Schema:* `EntityMapping`. *Writes:* `entities`, `entity_relationships`. *Requires:* codebook.
 - **Synthesis** (`synthesis.py`) — executive summary, key findings, cross-cutting patterns, prioritized recommendations. *Schema:* `AnalysisSynthesis`. *Writes:* `synthesis`. *Requires:* upstream coding/perspective.
@@ -150,18 +150,18 @@ A 2-document interview corpus about remote work. (Synthetic, illustrative.)
    reasoning="Repeated across both interviews when discussing manager check-ins",
    example_quotes=["I do my best work when no one's hovering"]
    ```
-   and a `CodeApplication`:
+   and a `CodeApplication` (now span-anchored, INV-1):
    ```
    code_id=AUTONOMY_VS_OVERSIGHT, doc_id=d1, speaker="Alex",
    quote_text="I do my best work when no one's hovering",
-   start_char=None, end_char=None   # <- INV-1 gap: offsets not populated; if Sam said the
-                                     #    same sentence, this evidence link could not be
-                                     #    distinguished from Sam's.
+   start_char=14, end_char=55, quote_hash="…"   # resolved uniquely in d1.
+   # If Sam had said the SAME sentence, the quote would occur twice in the corpus
+   # -> AMBIGUOUS -> the application is dropped + a data_warning, never guessed.
    ```
 3. **Cross-Interview** writes a `cross_case` memo: *"Consensus: both value autonomy. Divergent: Alex frames oversight as distrust; Sam frames it as support."*
 4. **Negative Case** (runs last) ingests that memo and challenges it: *"Sam at 12:30 says 'I actually asked for more check-ins' — partially contradicts the 'oversight = imposed' framing."* — a disconfirming case against a **cross-interview** claim (INV-6 in action). Marked experimental (INV-2): the same model produced both, so absence of a found negative case is not proof none exists.
 
-This example is the unit to test definitions against: a code, its evidence link (with the unpopulated anchor that INV-1 targets), a cross-interview claim, and disconfirmation over that final claim.
+This example is the unit to test definitions against: a code, its span-anchored evidence link (INV-1), a cross-interview claim, and disconfirmation over that final claim.
 
 ---
 
@@ -212,7 +212,7 @@ The distinction is the point: IRR ≈ "does the method agree with itself under v
 - **JSON** — full state.
 - **CSV** — codes, applications, memos (`memos.csv`), reasoning column (audit trail), stability.
 - **Markdown** — human-readable report incl. audit-trail and memo sections.
-- **QDPX** — the REFI-QDA interchange ZIP (`project.qde` XML + source files) for ATLAS.ti / NVivo. Filenames are sanitized against path traversal. **Caveat:** QDPX evidentiary integrity depends on INV-1 — exported coded segments are only as trustworthy as the quote anchoring that produced them.
+- **QDPX** — the REFI-QDA interchange ZIP (`project.qde` XML + source files) for ATLAS.ti / NVivo. Filenames are sanitized against path traversal. Exported applications now carry verifiable span anchors (INV-1 mostly met); paraphrased quotes that couldn't be anchored were dropped upstream, so exported segments are trustworthy-where-present.
 
 MCP export tools (`qc_export_json/markdown`) confine the `output_file` to a sandboxed exports directory; the CLI exporter keeps full path freedom for the trusted local user.
 
@@ -224,11 +224,11 @@ MCP export tools (`qc_export_json/markdown`) confine the `output_file` to a sand
 
 Categorize any capability before relying on or describing it.
 
-**Proven (software works; verified by tests + live E2E):** both pipelines run end-to-end; stages compose; schemas validate; failures are caught and localized; review (CLI + browser), IRR/stability, incremental recode, graph views, and JSON/CSV/Markdown/QDPX export function; 534 deterministic tests + 6 live-LLM E2E pass; ruff + docs gates green. This is **software/integration validation** — "the program does what it's built to do." It is *not* evidence the analysis is correct.
+**Proven (software works; verified by tests + live E2E):** both pipelines run end-to-end; stages compose; schemas validate; failures are caught and localized; **span-anchored grounding** (char offsets + hash + verification, ambiguous/unresolvable dropped — INV-1 mostly met); review (CLI + browser), IRR/stability, incremental recode, graph views, and JSON/CSV/Markdown/QDPX export function; 550 deterministic tests + 6 live-LLM E2E pass; ruff + docs gates green. This is **software/integration validation** — "the program does what it's built to do." It is *not* evidence the analysis is correct.
 
-**Measured (quantified, but not validity):** **LLM-pass agreement** (`project irr`) and **stability** (`project stability`) — computational consistency, not human inter-rater reliability and not correctness.
+**Measured (quantified, but not validity):** **grounding rate** (`verify_grounding` / `make bench` — fraction of applications whose anchor verifies, D1); **LLM-pass agreement** (`project irr`) and **stability** (`project stability`) — computational consistency, not human inter-rater reliability and not correctness.
 
-**Planned / not yet done (do not imply these exist):** any **methodological validity** evidence (grounding rate, blind expert ratings, gold-standard agreement, bias stratification); **span-anchored quote grounding** (INV-1); **tamper-evident audit substrate**; **hardened disconfirmation** (INV-2); true theoretical sampling, per-category saturation, full axial decomposition, multi-model consensus, active learning, collaborative coding, retrieval grounding.
+**Planned / not yet done (do not imply these exist):** any **methodological validity** evidence (blind expert ratings, gold-standard agreement, bias stratification); **tamper-evident audit substrate**; **hardened disconfirmation** (INV-2); segment universe (INV-8); claim ledger (INV-9); true theoretical sampling, per-category saturation, full axial decomposition, multi-model consensus, active learning, collaborative coding, retrieval grounding.
 
 ### 13.1 Architectural invariants (the north-star — and where the build falls short)
 
@@ -240,7 +240,7 @@ Categorize any capability before relying on or describing it.
 - **INV-C — Provenance recorded.** Every code/application is tagged LLM- vs. human- vs. system-originated. *Met.*
 
 **Target invariants the build does NOT yet satisfy (treat governed outputs as provisional):**
-- **INV-1 — Evidentiary anchoring.** Every quoted piece of evidence must resolve to a stable anchor (`doc_id`, `speaker`, `start_char`/`end_char`, quote hash) and fail loudly if it cannot. *Status: UNMET* — the schema *has* the anchor fields (§5), but `start_char`/`end_char` are not reliably populated and attribution is substring matching. **Until met, all quote-level evidence — codebooks, negative cases, synthesis, QDPX — may be misattributed and must be labeled provisional.** Foundational; most others depend on it.
+- **INV-1 — Evidentiary anchoring.** Every quoted piece of evidence must resolve to a stable anchor (`doc_id`, `start_char`/`end_char`, `quote_hash`) and fail loudly if it cannot. *Status: **MOSTLY MET**.* `qc_clean/core/grounding.py` resolves each quote to exact original-document char offsets + a sha256 span hash, robust to smart quotes / whitespace / case; a quote is anchored only if it occurs **exactly once** in the corpus — **ambiguous (>1) and unresolvable (0) quotes are dropped + `data_warning`, never misattributed**. Wired into thematic, incremental, legacy-GT, and constant-comparison paths; `verify_grounding()` / `make bench` measure the grounding rate (D1). *Remaining (why not fully MET):* (a) **`speaker` is best-effort** (constant-comparison segments only); (b) matching is **exact-normalized, not fuzzy/semantic** — a genuinely paraphrased "quote" is correctly dropped, but that is a recall cost a semantic matcher could recover; (c) constant-comparison offsets are best-effort. Quote-level evidence that *is* anchored is now verifiable; the headline misattribution risk is closed.
 - **INV-2 — Source-anchored, retrieval-first disconfirmation.** Negative cases must be drawn by retrieving candidate contrary passages from the corpus *first*, then interpreting — ideally with a different model/adversarial prompt — each anchored (INV-1) and human-adjudicated **before the claim set is treated as final** (note: not "before `SynthesisStage`," which currently runs *early*, before disconfirmation — meaning synthesis claims are produced and never disconfirmed; this is the same gap as INV-6). *Status: UNMET* (same-model, memory-first pass that can launder confirmation). Disconfirmation is experimental and **not** credibility evidence.
 - **INV-3 — Validity adjudication is separate from consistency.** Correctness must be estimated by human/expert adjudication on a sample of coding decisions, distinct from agreement/stability. Consistency metrics cannot detect stable error (same wrong code, high agreement). *Status: UNMET.*
 - **INV-4 — Stability ≠ saturation.** Codebook-stability convergence and GT category saturation (per-property/dimension adequacy) must be separate, separately-labeled outputs; codebook convergence must never be reported as theoretical adequacy. *Status: PARTIAL* (codebook stability exists; category saturation UNMET). *Scope note:* category saturation + theoretical sampling are mandatory **only insofar as the GT path claims theory generation**; for explicitly fixed-corpus codebook/post-positivist use, their absence is a stated scope boundary (§6), not a defect — but then the output must not be called grounded theory.
@@ -263,7 +263,7 @@ When writing commits, memos, reports, exports, or user-facing text about this sy
 | "Methodology-aware multi-stage pipeline for TA and GT-inspired coding" | "Full grounded theory" / "implements grounded theory" |
 | "Structured output validated against schemas" | "Schema enforcement guarantees correct/valid coding" |
 | "Measures LLM-pass agreement and stability" | "Inter-rater reliability" without the LLM-pass caveat; "kappa proves rigor" |
-| "Quotes attributed to source (currently substring-based, brittle)" | "Quotes are reliably grounded to exact source spans" |
+| "Quotes anchored to verifiable source spans where uniquely resolvable (ambiguous/unresolvable are dropped)" | "Every quote is grounded" (exact-match only — paraphrased quotes are dropped, not anchored; speaker best-effort) |
 | "Experimental disconfirmation over the codebook + cross-interview claims" | "Negative-case analysis establishes credibility" / "all final claims were disconfirmed" (synthesis/perspective/entity/GT claims are not; INV-6) |
 | "Cross-interview counts over LLM-surfaced example quotes" | "Consensus / prevalence across the corpus" (no segment-universe denominator; INV-8) |
 | "Codebook-discovery agreement across passes" | "Inter-rater reliability on code application" (wrong unit; INV-8) |
@@ -278,7 +278,7 @@ When unsure which column a claim is in, default to the conservative phrasing and
 ## 15. Methodological honesty (the things most likely to bite)
 
 - **Consistency ≠ validity.** Agreement and stability detect *inconsistency*; they cannot detect a *consistent* shared bias across passes/models. LLM coding bias can be **systematic** w.r.t. respondent characteristics (Ashwin, Chhabra & Rao, 2025), not just random — the metrics we have will not catch it. (INV-3, INV-5.)
-- **Quote attribution is the highest-priority technical weakness** (INV-1). Substring matching proves a phrase exists *somewhere*, not which speaker/interview/turn produced it. If three participants say "I felt ignored," the evidentiary chain breaks. Undermines confirmability, disconfirmation evidence, QDPX integrity.
+- **Quote anchoring is mostly met now** (INV-1). Quotes resolve to verifiable char spans + hash, and the "three people said 'I felt ignored'" case is handled (ambiguous → dropped, never guessed). *Residual weaknesses:* matching is exact-normalized, so a genuinely **paraphrased** "quote" is dropped (recall cost, not a misattribution); and `speaker` is best-effort. A fuzzy/semantic matcher and segment-derived speaker are the follow-ups.
 - **Disconfirmation can launder confirmation** (INV-2). Same model+prompt lineage refuting its own codes may stay inside its own assumptions. The real version needs a different model/adversarial prompt, retrieval-first search, anchored spans, and human adjudication. *Absence of a found negative case is not evidence none exists.*
 - **Pseudo-replication.** Repeated LLM passes — even across model families trained on overlapping corpora — are not independent raters; panels reduce but don't remove the shared-dependency risk.
 - **The denominator problem** (INV-8). Coverage, agreement, consensus, prevalence, co-occurrence, and "absence of evidence" all need a defined set of examined units. The thematic path has none (applications = example quotes), so any count over them measures generation salience, not corpus prevalence.
@@ -301,15 +301,15 @@ The system is a **local research tool**, loopback-bound and unauthenticated; har
 
 ## 17. Limitations (the short list)
 
-LLM bias may be systematic not random (INV-3/5); reliability ≠ validity; pseudo-replication; the denominator problem (INV-8); claims not first-class (INV-9); GT fidelity partial ("GT-inspired," not "full GT"); quote attribution brittle (INV-1, top priority); disconfirmation experimental and partial-coverage (INV-2/6); confidence uncalibrated; corpus boundary unstated; incremental staleness now flagged but outputs not auto-refreshed (INV-11); audit substrate not tamper-evident; methodological validity unmeasured; non-determinism inherent (we measure and report it).
+LLM bias may be systematic not random (INV-3/5); reliability ≠ validity; pseudo-replication; the denominator problem (INV-8); claims not first-class (INV-9); GT fidelity partial ("GT-inspired," not "full GT"); quote anchoring mostly met (INV-1; residual: exact-match recall + best-effort speaker); disconfirmation experimental and partial-coverage (INV-2/6); confidence uncalibrated; corpus boundary unstated; incremental staleness now flagged but outputs not auto-refreshed (INV-11); audit substrate not tamper-evident; methodological validity unmeasured; non-determinism inherent (we measure and report it).
 
 ## 18. Roadmap (priority order — toward the public SOTA product)
 
 Sequencing rule: **the evaluation harness is the keystone** (it proves the SOTA claim *and* drives improvement), then the *objects* that make the guarantees true (segment universe, claim ledger), then the rigor edges — not features. Full harness design: `docs/EVALUATION_HARNESS.md`.
 
-1. **Evaluation harness (KEYSTONE)** — gold-standard corpora, grounding rate, blind expert ratings, agreement-vs-gold (κ/α, IoU/Hausdorff), coverage, bias stratification + counterfactual identity-cue tests, disconfirmation recall/precision, confidence calibration, baselines (generic ChatGPT, ATLAS.ti/MAXQDA, human-only, task-matched prototypes). *Closes INV-3*, operationalizes INV-5; built on `prompt_eval`. Without it the SOTA claim is unprovable and improvement is blind.
-2. **Span-anchored grounding** — populate/verify `start_char`/`end_char` + quote hash; reject quotes that don't resolve. *Closes INV-1*; the first measurable structural edge.
-3. **Segment universe** — a stable registry of textual units with per-unit coding decisions (incl. nulls). *Closes INV-8*; the precondition for honest coverage, application-level agreement, and corpus prevalence.
+1. **Evaluation harness (KEYSTONE)** — *Phase 0 DONE* (`make bench`: grounding rate D1 + reliability/stability, deterministic; `qc_clean/core/bench.py`). Remaining: gold-standard corpora, blind expert ratings, agreement-vs-gold (κ/α/AC1, IoU/Hausdorff), coverage, bias stratification + counterfactual identity-cue tests, disconfirmation recall/precision, confidence calibration, baselines — built on `prompt_eval`. *Closes INV-3*, operationalizes INV-5.
+2. **Span-anchored grounding** — *MOSTLY DONE* (`qc_clean/core/grounding.py`: offsets + hash + verify + unique-resolution, ambiguous/unresolvable dropped). Remaining for full INV-1: fuzzy/semantic matcher (recover paraphrased quotes) + segment-derived `speaker`.
+3. **Segment universe** — a stable registry of textual units with per-unit coding decisions (incl. nulls). *Closes INV-8*; the precondition for honest coverage, application-level agreement, and corpus prevalence. **Now the top remaining structural edge.**
 4. **First-class claim ledger** — make every substantive assertion a typed object (source, scope, supporting/contrary anchors, adjudication, revision). *Closes INV-9*; the object that lets disconfirmation (INV-6) and adjudication (INV-10) operate over *all* final claims, not selected memos.
 5. **Disconfirmation + adjudication over the ledger** — extend negative-case search and human review to applications/claims/relations/negative-cases. *Closes INV-6 fully and INV-10*; hardened retrieval-first, different-model disconfirmation *closes INV-2*.
 6. **Instruction/data separation + prompt-injection tests** — *closes INV-7*.
