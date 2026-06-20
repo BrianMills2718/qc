@@ -33,7 +33,7 @@
 
 Honest shape of the SOTA claim (this is the bar we build toward, and the framing we will defend):
 
-- **Target SOTA on the structural rigor dimensions** — coverage/exhaustiveness (INV-8), evidentiary grounding (INV-1), auditability/reproducibility (INV-9 + audit log), disconfirmation rigor (INV-2/6), reliability, scale, and cost. The defensible claim is about the **integrated bundle**, not any single dimension: several research prototypes already do parts well (HICode reports human-evaluated P/R on hierarchical coding; LOGOS a 5-dim GT metric; LLMCode IoU/Hausdorff alignment; Auto-TA end-to-end TA). What no widely-adopted tool *or* prototype combines is *all* of {exhaustive coverage + span-anchored grounding + first-class claim ledger + auditable provenance + systematic disconfirmation + QDA-format interop} in one system — and that combined claim must still be earned per dimension on a shared benchmark, not asserted.
+- **Target SOTA on the structural rigor dimensions** — coverage/exhaustiveness (INV-8), evidentiary grounding (INV-1), auditability/reproducibility (INV-9 + audit log), disconfirmation rigor (INV-2/6), reliability, scale, and cost. The defensible claim is about the **integrated bundle**, not any single dimension: several research prototypes already do parts well (HICode reports human-evaluated P/R on hierarchical coding; LOGOS a 5-dim GT metric; LLMCode IoU/Hausdorff alignment; Auto-TA end-to-end TA). What no widely-adopted tool *or* prototype combines is *all* of {exhaustive coverage + span-anchored grounding + first-class claim ledger + auditable provenance + systematic disconfirmation + QDA-format interop} in one system — and that combined claim must still be earned per dimension on a shared benchmark, not asserted. (**Landscape note, 2026-06:** the commercial field is moving — MAXQDA 26.2 (Mar 2026) shipped segment-level AI coding with an accept/decline workflow and validation against manual coding. So individual dimensions like segment-level coverage are *not* differentiating on their own; the defensible claim is the integrated, *scored* bundle, and it decays if not re-checked against the field. Re-audit competitors before any public claim.)
 - **Expert-parity on interpretive validity**, augmented by human-in-the-loop — *not* "beats humans at interpretation." Current evidence (PLOS blinded study; LLMCode; Ashwin et al.) is that LLMs match humans on deductive code application but are weaker/variable on latent inductive meaning. Closing that is a research frontier; near-term we target parity and measure it.
 - **Prove it on shared benchmarks.** "Better" is only credible with a ground truth to measure against. We do **not** claim to be "the only system that can prove it" — HICode/LOGOS/LLMCode publish evaluation machinery too. We claim to make evaluation *first-class for this exact integrated bundle*. The **evaluation harness (INV-3) is the keystone**: simultaneously the *proof* of each per-dimension claim and the *feedback loop* that improves the system. You cannot beat SOTA you cannot measure.
 
@@ -111,7 +111,7 @@ All analysis state lives in one Pydantic model, `ProjectState` (`qc_clean/schema
 
 ## 6. The methodology model (theory the code implements)
 
-Two pipelines, each a fixed ordered sequence of stages over `ProjectState`. **Disconfirmation runs last in both** so it covers the final claim set (INV-6).
+Two pipelines, each a fixed ordered sequence of stages over `ProjectState`. **Disconfirmation runs last in both** so it sees the codebook and cross-interview claims — but not synthesis/perspective/entity/GT-model claims (INV-6 is PARTIAL, see §13.1).
 
 **Thematic / default (7 stages):** Ingest → Thematic Coding → Perspective Analysis → Relationship Mapping → Synthesis → Cross-Interview → Negative Case.
 
@@ -236,7 +236,7 @@ Categorize any capability before relying on or describing it.
 
 **Measured (quantified, but not validity):** **grounding rate** (D1) and **coverage** (D2 — segments with anchored evidence / total) via `verify_grounding`/`compute_coverage`/`make bench`; **LLM-pass agreement** (`project irr` — codebook-discovery by default, **segment × code application-level** with `--application-level`) and **stability** (`project stability`) — computational consistency, not human inter-rater reliability and not correctness.
 
-**Planned / not yet done (do not imply these exist):** any **methodological validity** evidence (blind expert ratings, gold-standard agreement, bias stratification); **tamper-evident audit substrate**; **hardened disconfirmation** (INV-2); segment universe (INV-8); claim ledger (INV-9); true theoretical sampling, per-category saturation, full axial decomposition, multi-model consensus, active learning, collaborative coding, retrieval grounding.
+**Planned / not yet done (do not imply these exist):** any **methodological validity** evidence (blind expert ratings, gold-standard agreement, bias stratification); **tamper-evident audit substrate**; **hardened disconfirmation** (INV-2); **claim ledger** (INV-9, claims as first-class verifiable objects); true theoretical sampling, per-category saturation, full axial decomposition, multi-model consensus, active learning, collaborative coding, retrieval grounding.
 
 ### 13.1 Architectural invariants (the north-star — and where the build falls short)
 

@@ -28,10 +28,10 @@ No active implementation plan tracked. Next up: the claim ledger (INV-9).
 
 ## Creating a New Plan
 
-1. Copy `TEMPLATE.md` to `NN_name.md`
+1. Copy `TEMPLATE.md` to a descriptive `NAME.md` (e.g. `INV9_CLAIM_LEDGER.md`)
 2. Fill in gap, steps, required tests
-3. Add to this index
-4. Commit with `[Plan #N]` prefix
+3. Add a row to the **Active Plans** table above
+4. Commit with a `[Plan: NAME]` prefix
 
 ## Trivial Changes
 
@@ -46,8 +46,6 @@ git commit -m "[Trivial] Fix typo in README"
 
 ## Completing Plans
 
-```bash
-python scripts/meta/complete_plan.py --plan N
-```
-
-This verifies tests pass and records completion evidence.
+1. Move the plan doc to `completed/NAME.md` (add a one-paragraph outcome + verification evidence at the top)
+2. Remove its row from **Active Plans** and add one to **Completed Plans** pointing at `completed/NAME.md`
+3. `python scripts/sync_plan_status.py --check` (run by `make docs-check`) verifies every Completed row resolves and every record file is listed

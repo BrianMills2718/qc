@@ -5,7 +5,26 @@ required_reading:
     - CLAUDE.md
 
 governance: []
-couplings: []
+
+# Doc-code couplings: when a `sources` file changes, the coupled `docs` should be
+# reconsidered. Kept `soft: true` so these warn (not hard-fail) — they flag
+# "you touched invariant-bearing code; check the doc still matches", which is the
+# real risk this repo's docs drifted into (claims outrunning code). Not vacuous:
+# `make docs-check` (--validate-config) verifies every doc path here exists.
+couplings:
+  - sources: ["qc_clean/core/grounding.py", "qc_clean/core/segmentation.py"]
+    docs: ["docs/PROJECT_THEORY_AND_GOALS.md", "docs/EVALUATION_HARNESS.md"]
+    description: "INV-1 grounding / INV-8 segment universe + coverage — theory invariants and harness D1/D2 must track this code"
+    soft: true
+  - sources: ["qc_clean/core/bench.py"]
+    docs: ["docs/EVALUATION_HARNESS.md"]
+    description: "Phase 0 scorecard implements harness D1/D2; keep the harness doc's 'implemented vs to-be-built' status honest"
+    soft: true
+  - sources: ["qc_clean/core/pipeline/stages/negative_case.py"]
+    docs: ["docs/PROJECT_THEORY_AND_GOALS.md"]
+    description: "INV-6 disconfirmation scope (PARTIAL) — claim discipline depends on what this stage actually re-examines"
+    soft: true
+
 architecture: []
 adrs: {}
 

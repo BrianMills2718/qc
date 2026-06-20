@@ -9,9 +9,11 @@ Unlike the GT constant-comparison segmenter (which strips text and tracks no
 offsets), every segment here round-trips: ``doc.content[seg.start_char:seg.end_char]
 == seg.text``. Speaker transcripts split by speaker turn; otherwise by paragraph.
 
-This module does NOT change how coding works or add LLM calls — it only builds
-the registry. Forcing a coding decision on *every* segment (exhaustive null
-coding) is a separate, cost-bearing step left as an explicit product decision.
+This module only builds the registry; it adds no LLM calls. Forcing a coding
+decision on *every* segment (exhaustive coding) is the separate, cost-bearing
+step that turns traversal coverage into examined-and-judged coverage — it now
+ships behind `project run --exhaustive` (see `ThematicCodingStage._execute_exhaustive`
+and `compute_coverage`, whose `mode` flips to "examined" once decisions exist).
 """
 
 from __future__ import annotations

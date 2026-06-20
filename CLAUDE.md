@@ -20,7 +20,7 @@ LLM-powered qualitative coding analysis for interview transcripts. Accepts .txt,
 - **Default/Thematic Analysis** - 7-stage pipeline: Ingest -> Thematic Coding -> Perspective Analysis -> Relationship Mapping -> Synthesis -> Cross-Interview Analysis -> Negative Case Analysis
 - **Grounded Theory** - 7-stage pipeline: Ingest -> Constant Comparison Coding -> Axial Coding -> Selective Coding -> Theory Integration -> Cross-Interview Analysis -> Negative Case Analysis
 
-  (Negative Case Analysis runs last so disconfirmation covers the final claim set, including cross-interview claims — see invariant INV-6 in `docs/PROJECT_THEORY_AND_GOALS.md`.)
+  (Negative Case Analysis runs last so disconfirmation sees the codebook and cross-interview claims. It does NOT re-examine synthesis, perspective, entity, or GT-model claims produced alongside/after it — INV-6 is PARTIAL, not "the final claim set." See INV-6 in `docs/PROJECT_THEORY_AND_GOALS.md`.)
 
 All stages use structured LLM output via Pydantic schemas + JSON mode. State is held in a single `ProjectState` Pydantic model that can be saved/loaded as JSON.
 
@@ -285,7 +285,7 @@ Superseded by the canonical theory doc: the proven/measured/planned **state ledg
 
 ## Next Steps
 
-The ranked roadmap (invariants before features) lives in `docs/PROJECT_THEORY_AND_GOALS.md` §18 — evaluation harness (keystone), span anchoring (done), segment universe (INV-8), claim ledger (INV-9), hardened disconfirmation, theoretical sampling/saturation, etc. Don't duplicate it here.
+The ranked roadmap (invariants before features) lives in `docs/PROJECT_THEORY_AND_GOALS.md` §18 — evaluation harness (keystone), span anchoring (done), segment universe + exhaustive coding (INV-8, done), claim ledger (INV-9, next), hardened disconfirmation, theoretical sampling/saturation, etc. Don't duplicate it here.
 
 ### Maintenance Follow-Ups (2026-06-19)
 - **Line endings**: Normalize mixed CRLF/LF files in one mechanical commit with no behavior changes, then run `make check`.
@@ -381,9 +381,9 @@ make status             # Show git status
 make cost               # Show LLM spend (DAYS=7)
 make errors             # Show recent error breakdown
 
-# Pipeline
-python -m qc analyze interview.txt
-python -m qc analyze --methodology grounded_theory interview.txt
+# Pipeline (local run; `project run` needs no server, `analyze` needs the API server)
+python qc_cli.py project run <project_id>
+python qc_cli.py project run <project_id> --exhaustive   # code every segment (INV-8)
 ```
 
 ## Principles

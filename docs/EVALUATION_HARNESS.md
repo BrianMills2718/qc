@@ -17,10 +17,13 @@
 > `kappa`, `exact_match`, `contains`), bootstrap CIs, Welch's test, instruction
 > search — and `llm_client` observability. *Current integration is minimal:* one
 > optimization script imports `prompt_eval` (`scripts/optimize_thematic_prompt.py`)
-> and `PipelineContext.prompt_overrides` exists; the `make bench` / `qc bench`
-> surface and the QC-specific evaluators below are **to be built** (this is a
-> design doc). Do not reimplement scoring, statistics, or experiment tracking —
-> extend `prompt_eval`.
+> and `PipelineContext.prompt_overrides` exists. **Built so far (Phase 0):**
+> `make bench ID=<project_id>` → `qc_clean/core/bench.phase0_scorecard` (D1
+> grounding + D2 coverage, deterministic, LLM-free). **Not yet built:** there is
+> no `qc bench` CLI subcommand (use `make bench`); and the full `prompt_eval`-backed
+> suite — frozen case sets, the QC-specific evaluators below, gold-vs-agreement
+> (D3), bias (D6), calibration, baselines — remains a design target. Do not
+> reimplement scoring, statistics, or experiment tracking — extend `prompt_eval`.
 
 ---
 
@@ -31,7 +34,7 @@ Each dimension maps to a SOTA claim and (where relevant) an invariant. The bar i
 | # | Dimension | What it answers | Invariant | SOTA bar (target) |
 |---|-----------|-----------------|-----------|-------------------|
 | D1 | **Evidentiary grounding** | Do quotes resolve to the exact source span? | INV-1 | ≥0.95 exact-span resolution; ~0 unresolvable. (Machine advantage via hard enforcement.) |
-| D2 | **Coverage** | Did every textual unit get a coding decision (incl. null)? | INV-8 | 1.0 over the segment universe. Humans rarely code exhaustively → categorical edge. |
+| D2 | **Coverage** | Did every textual unit get a coding decision (incl. null)? | INV-8 | 1.0 over the segment universe. Edge vs *humans* (who rarely code exhaustively); **not** vs all tools — MAXQDA 26.2 (Mar 2026) ships segment-level AI coding. So the defensible edge is exhaustive coverage *with a scored, span-anchored denominator* (`examined_rate` + `make bench`), not segment-level coding per se. |
 | D3 | **Application validity vs gold** | Do code→segment assignments match an adjudicated gold? | INV-3 | Agreement with gold ≥ human–human agreement on the same task (κ/α in the human band, see §3). |
 | D4 | **Codebook quality** | Are the codes clear, specific, useful, grounded? | — | Blind expert ratings ≥ human-generated codebook. |
 | D5 | **Reliability (consistency, not validity)** | Is the system self-consistent across passes? | — | Report LLM-pass agreement + stability with bootstrap CIs. Necessary, not sufficient. |

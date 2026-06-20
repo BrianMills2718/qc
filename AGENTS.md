@@ -4,7 +4,7 @@
 <!-- generated_by: scripts/meta/render_agents_md.py -->
 <!-- canonical_claude: CLAUDE.md -->
 <!-- canonical_relationships: scripts/relationships.yaml -->
-<!-- canonical_relationships_sha256: 840b164dcfa4 -->
+<!-- canonical_relationships_sha256: b97774a40764 -->
 <!-- sync_check: python scripts/meta/check_agents_sync.py --check -->
 
 This file is a generated Codex-oriented projection of repo governance.
@@ -41,9 +41,9 @@ make status             # Show git status
 make cost               # Show LLM spend (DAYS=7)
 make errors             # Show recent error breakdown
 
-# Pipeline
-python -m qc analyze interview.txt
-python -m qc analyze --methodology grounded_theory interview.txt
+# Pipeline (local run; `project run` needs no server, `analyze` needs the API server)
+python qc_cli.py project run <project_id>
+python qc_cli.py project run <project_id> --exhaustive   # code every segment (INV-8)
 ```
 
 ## Operating Rules

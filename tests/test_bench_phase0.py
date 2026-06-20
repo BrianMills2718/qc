@@ -12,6 +12,7 @@ from qc_clean.schemas.domain import (
     Methodology,
     ProjectConfig,
     ProjectState,
+    Segment,
     StabilityResult,
 )
 
@@ -59,6 +60,33 @@ def test_scorecard_includes_reliability_and_stability_when_present():
     assert "consistency not validity" in card["reliability_llm_pass_agreement"]["note"]
     assert card["stability"]["overall_stability"] == 0.8
     assert card["stability"]["unstable"] == 1
+
+
+def test_coverage_note_is_conditional_on_exhaustive_mode():
+    """F6: the scorecard's coverage_note must not claim 'traversal only' once
+    every segment carries a coding decision (exhaustive mode), and must not claim
+    examined-and-judged coverage when no segment was judged."""
+    content = "Alex: autonomy matters here."
+    doc = Document(name="d.txt", content=content)
+
+    # Traversal mode: a segment exists but has no decision.
+    traversal = ProjectState(
+        name="t",
+        config=ProjectConfig(methodology=Methodology.THEMATIC_ANALYSIS),
+        corpus=Corpus(documents=[doc]),
+        segments=[Segment(id="S1", doc_id=doc.id, index=0, start_char=0,
+                          end_char=len(content), text=content, decision=None)],
+    )
+    note_t = phase0_scorecard(traversal)["_meta"]["coverage_note"]
+    assert "traversal coverage only" in note_t
+    assert "examined-and-judged coverage available" not in note_t
+
+    # Examined mode: the segment carries a decision.
+    examined = traversal.model_copy(deep=True)
+    examined.segments[0].decision = "no_code"
+    note_e = phase0_scorecard(examined)["_meta"]["coverage_note"]
+    assert "examined-and-judged coverage available" in note_e
+    assert "traversal coverage only" not in note_e
 
 
 def test_scorecard_grounding_rate_one_when_no_applications():

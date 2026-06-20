@@ -61,12 +61,12 @@ Both methodologies use structured LLM output, fail-loud stage dependencies, and 
 
 ## Capabilities
 
-- Full thematic and grounded theory pipelines, including negative case analysis in both methodologies
+- A thematic pipeline and a GT-inspired pipeline (constant comparison → axial → selective → theory integration; not a literal Strauss-&-Corbin reproduction — see theory doc §6), including negative case analysis in both
 - Automatic cross-interview analysis for multi-document corpora
 - Incremental re-coding of newly added documents via `python qc_cli.py project recode <project_id>`
 - Human review in both CLI and browser flows
 - Span-anchored quote evidence (char offsets + hash; ambiguous/unresolvable quotes are dropped, not misattributed) and a grounding metric (`make bench`)
-- LLM-pass agreement via `project irr` (codebook-discovery agreement — *not* application-level inter-rater reliability; see theory doc §11) and multi-run stability via `project stability`
+- LLM-pass agreement via `project irr`: codebook-discovery agreement by default, or segment × code application-level agreement with `--application-level` (see theory doc §11); plus multi-run stability via `project stability`
 - Interactive graph visualization in the browser
 - JSON, CSV, Markdown, and **QDPX** (REFI-QDA, for ATLAS.ti/NVivo) export from persisted project state
 - Analytical memos at every stage plus per-code reasoning and audit-trail output

@@ -50,10 +50,24 @@ def phase0_scorecard(state) -> Dict[str, Any]:
         }
 
     # Honest framing so a reader never mistakes Phase 0 for a SOTA claim.
+    # The coverage note depends on whether this run was exhaustive: in "examined"
+    # mode every segment carries a coding decision, so examined-and-judged
+    # coverage is real; in "traversal" mode only touched segments are counted.
+    if card["coverage"].get("mode") == "examined":
+        coverage_note = (
+            "examined-and-judged coverage available: every segment carries a coding "
+            "decision (INV-8 exhaustive mode). Use `examined_rate` as the defensible "
+            "denominator; `covered_rate` still reports only segments with anchored evidence."
+        )
+    else:
+        coverage_note = (
+            "traversal coverage only (segments with anchored evidence); examined-and-judged "
+            "coverage is NOT available — re-run with `--exhaustive` for per-segment decisions (INV-8)"
+        )
     card["_meta"] = {
         "phase": 0,
         "claims": "capability only — not a SOTA/parity claim (needs gold + baselines; see EVALUATION_HARNESS.md §7)",
-        "coverage_note": "corpus-traversal coverage (segments with anchored evidence); NOT 'every segment examined-and-judged' (that needs exhaustive null coding — INV-8 fork)",
+        "coverage_note": coverage_note,
         "cost_note": "LLM cost is in the observability DB, not in ProjectState; queried separately",
     }
     return card
