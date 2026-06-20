@@ -179,3 +179,41 @@ def verify_anchor(content: str, start: Optional[int], end: Optional[int],
     if start < 0 or end > len(content) or start >= end:
         return False
     return _sha256(content[start:end]) == expected_hash
+
+
+@dataclass
+class GroundingReport:
+    """How well a project's code applications are anchored to source spans (D1)."""
+    total_applications: int = 0
+    anchored_verified: int = 0   # offsets + hash present AND re-verify against the doc
+    anchored_no_hash: int = 0    # has a doc_id but missing/partial offsets+hash
+    hash_mismatch: int = 0       # hash present but the span no longer matches (drift/tamper)
+    missing_doc: int = 0         # references a doc_id not in the corpus
+    grounding_rate: float = 1.0  # anchored_verified / total (1.0 when no applications)
+
+
+def verify_grounding(state) -> GroundingReport:
+    """Recompute anchors for every application and report grounding quality.
+
+    This is the D1 metric: ``grounding_rate`` is the fraction of applications
+    whose stored span (``start_char``/``end_char``/``quote_hash``) still resolves
+    to the same source text. It re-derives from the corpus, so it catches drift,
+    fabricated provenance, and unanchored applications.
+    """
+    docs = {d.id: d.content for d in state.corpus.documents}
+    report = GroundingReport(total_applications=len(state.code_applications))
+    for app in state.code_applications:
+        content = docs.get(app.doc_id)
+        if content is None:
+            report.missing_doc += 1
+            continue
+        if app.quote_hash is None or app.start_char is None or app.end_char is None:
+            report.anchored_no_hash += 1
+            continue
+        if verify_anchor(content, app.start_char, app.end_char, app.quote_hash):
+            report.anchored_verified += 1
+        else:
+            report.hash_mismatch += 1
+    total = report.total_applications
+    report.grounding_rate = (report.anchored_verified / total) if total else 1.0
+    return report

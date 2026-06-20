@@ -8,6 +8,13 @@ from qc_clean.core.grounding import (
     resolve_against_docs,
     resolve_span,
     verify_anchor,
+    verify_grounding,
+)
+from qc_clean.schemas.domain import (
+    CodeApplication,
+    Corpus,
+    Document,
+    ProjectState,
 )
 
 
@@ -97,3 +104,47 @@ def test_verify_anchor_rejects_missing_or_out_of_range():
     assert not verify_anchor("abc", None, 2, "x")
     assert not verify_anchor("abc", 0, 99, "x")
     assert not verify_anchor("abc", 2, 1, "x")
+
+
+# --- verify_grounding report --------------------------------------------------
+
+def _state_with_apps(content: str, apps):
+    doc = Document(name="d.txt", content=content)
+    for a in apps:
+        a.doc_id = a.doc_id or doc.id
+    return ProjectState(
+        name="t",
+        corpus=Corpus(documents=[doc]),
+        code_applications=apps,
+    ), doc
+
+
+def test_grounding_report_counts_verified_unhashed_mismatch_and_missing():
+    content = "The quote lives right here in the document, clearly."
+    m = resolve_span("right here", content)
+    apps = [
+        # verified: correct offsets + hash
+        CodeApplication(code_id="c", doc_id="", quote_text="right here",
+                        start_char=m.start_char, end_char=m.end_char, quote_hash=m.quote_hash),
+        # no hash: doc_id only
+        CodeApplication(code_id="c", doc_id="", quote_text="clearly"),
+        # hash mismatch: wrong hash for the span
+        CodeApplication(code_id="c", doc_id="", quote_text="the quote",
+                        start_char=0, end_char=9, quote_hash="deadbeef"),
+        # missing doc
+        CodeApplication(code_id="c", doc_id="no-such-doc", quote_text="x",
+                        start_char=0, end_char=1, quote_hash="z"),
+    ]
+    state, _ = _state_with_apps(content, apps)
+    r = verify_grounding(state)
+    assert r.total_applications == 4
+    assert r.anchored_verified == 1
+    assert r.anchored_no_hash == 1
+    assert r.hash_mismatch == 1
+    assert r.missing_doc == 1
+    assert abs(r.grounding_rate - 0.25) < 1e-9
+
+
+def test_grounding_rate_is_one_when_no_applications():
+    state = ProjectState(name="t", corpus=Corpus(documents=[]))
+    assert verify_grounding(state).grounding_rate == 1.0

@@ -301,6 +301,29 @@ def qc_get_synthesis(project_id: str) -> str:
 
 
 @mcp.tool()
+def qc_grounding_report(project_id: str) -> str:
+    """Report how well a project's code applications are anchored to source spans.
+
+    The D1 grounding metric (INV-1): re-resolves every application's stored span
+    and reports the fraction that still verifies against the source documents.
+
+    Args:
+        project_id: The project ID
+    """
+    from dataclasses import asdict
+    from qc_clean.core.grounding import verify_grounding
+
+    try:
+        state = store.load(project_id)
+    except FileNotFoundError:
+        return json.dumps({"error": f"Project '{project_id}' not found."})
+
+    report = asdict(verify_grounding(state))
+    report["project"] = state.name
+    return json.dumps(report, indent=2)
+
+
+@mcp.tool()
 def qc_export_markdown(project_id: str, output_file: str | None = None) -> str:
     """Export a project as a human-readable Markdown report.
 
