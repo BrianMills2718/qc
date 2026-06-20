@@ -190,6 +190,8 @@ Examples:
     proj_irr.add_argument('--passes', type=int, default=3, help='Number of coding passes (default: 3)')
     proj_irr.add_argument('--model', default=None, help='LLM model to use (default: gpt-5-mini)')
     proj_irr.add_argument('--models', nargs='+', help='Multiple models to rotate across passes')
+    proj_irr.add_argument('--application-level', action='store_true',
+                          help='Measure segment x code agreement (do passes code the same text the same way?) via exhaustive per-segment coding, not just codebook-discovery agreement')
 
     proj_stability = project_subparsers.add_parser('stability', help='Run multi-run stability analysis')
     proj_stability.add_argument('project_id', help='Project ID')

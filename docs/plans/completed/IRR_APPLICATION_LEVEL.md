@@ -41,4 +41,4 @@ keys align across passes.
 |---|-------|--------|
 | 1 | `build_application_matrix` + IRRResult fields + pure tests | DONE |
 | 2 | Wire run_irr_analysis(application_level=True) + e2e test | DONE |
-| 3 | CLI `project irr --application-level`; docs (§11, ledger, claim discipline) | PENDING |
+| 3 | CLI `--application-level`; docs (§11, ledger, INV-8) | DONE |

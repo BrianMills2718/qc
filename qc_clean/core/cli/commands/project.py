@@ -298,6 +298,7 @@ def _run_irr(store: ProjectStore, args) -> int:
     num_passes = getattr(args, "passes", 3)
     model_name = getattr(args, "model", None) or state.config.model_name
     models = getattr(args, "models", None)
+    application_level = bool(getattr(args, "application_level", False))
 
     print(f"Running IRR analysis on project: {state.name}")
     print(f"  Methodology: {state.config.methodology.value}")
@@ -305,6 +306,8 @@ def _run_irr(store: ProjectStore, args) -> int:
     print(f"  Model: {model_name}")
     if models:
         print(f"  Model rotation: {', '.join(models)}")
+    if application_level:
+        print("  Application-level: exhaustive per-segment coding (segment x code agreement)")
     print()
 
     try:
@@ -313,6 +316,7 @@ def _run_irr(store: ProjectStore, args) -> int:
             num_passes=num_passes,
             model_name=model_name,
             models=models,
+            application_level=application_level,
         ))
     except Exception as e:
         print(f"\nIRR analysis failed: {e}", file=sys.stderr)
@@ -331,7 +335,17 @@ def _run_irr(store: ProjectStore, args) -> int:
         print(f"  Cohen's kappa: {result.cohens_kappa:.3f}")
     if result.fleiss_kappa is not None:
         print(f"  Fleiss' kappa: {result.fleiss_kappa:.3f}")
-    print(f"  Interpretation: {result.interpretation}")
+    print(f"  Interpretation: {result.interpretation} (codebook-discovery agreement)")
+    if result.application_level:
+        print("\n  Application-level (segment x code) agreement — the stronger 'same code on the same text' number:")
+        print(f"    Units compared: {result.application_units} (segment, code) cells")
+        if result.application_percent_agreement is not None:
+            print(f"    Percent agreement: {result.application_percent_agreement:.1%}")
+        if result.application_cohens_kappa is not None:
+            print(f"    Cohen's kappa: {result.application_cohens_kappa:.3f}")
+        if result.application_fleiss_kappa is not None:
+            print(f"    Fleiss' kappa: {result.application_fleiss_kappa:.3f}")
+        print(f"    Interpretation: {result.application_interpretation}")
 
     return 0
 
