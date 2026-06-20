@@ -312,15 +312,18 @@ def qc_grounding_report(project_id: str) -> str:
     """
     from dataclasses import asdict
     from qc_clean.core.grounding import verify_grounding
+    from qc_clean.core.segmentation import compute_coverage
 
     try:
         state = store.load(project_id)
     except FileNotFoundError:
         return json.dumps({"error": f"Project '{project_id}' not found."})
 
-    report = asdict(verify_grounding(state))
-    report["project"] = state.name
-    return json.dumps(report, indent=2)
+    return json.dumps({
+        "project": state.name,
+        "grounding": asdict(verify_grounding(state)),       # D1
+        "coverage": asdict(compute_coverage(state)),         # D2 (segment universe)
+    }, indent=2)
 
 
 @mcp.tool()

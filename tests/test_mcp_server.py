@@ -521,9 +521,10 @@ class TestGroundingAndWarnings:
         )
         tmp_store.save(state)
         result = json.loads(qc_mcp_server.qc_grounding_report("proj-ground"))
-        assert result["total_applications"] == 2
-        assert result["anchored_verified"] == 1
-        assert abs(result["grounding_rate"] - 0.5) < 1e-9
+        assert result["grounding"]["total_applications"] == 2
+        assert result["grounding"]["anchored_verified"] == 1
+        assert abs(result["grounding"]["grounding_rate"] - 0.5) < 1e-9
+        assert "coverage_rate" in result["coverage"]
 
     def test_grounding_report_not_found(self, tmp_store):
         result = json.loads(qc_mcp_server.qc_grounding_report("nope"))

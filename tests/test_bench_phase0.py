@@ -39,6 +39,7 @@ def test_scorecard_grounding_rate_reflects_anchors():
     assert card["grounding"]["anchored_verified"] == 1
     assert card["grounding"]["anchored_no_hash"] == 1
     assert abs(card["grounding"]["grounding_rate"] - 0.5) < 1e-9
+    assert "coverage" in card and "coverage_rate" in card["coverage"]
     assert card["_meta"]["phase"] == 0
 
 

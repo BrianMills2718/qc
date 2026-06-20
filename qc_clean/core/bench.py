@@ -14,6 +14,7 @@ from dataclasses import asdict
 from typing import Any, Dict
 
 from qc_clean.core.grounding import verify_grounding
+from qc_clean.core.segmentation import compute_coverage
 
 
 def phase0_scorecard(state) -> Dict[str, Any]:
@@ -26,6 +27,8 @@ def phase0_scorecard(state) -> Dict[str, Any]:
         "code_applications": len(state.code_applications),
         # D1 — grounding (the headline structural-rigor metric).
         "grounding": asdict(verify_grounding(state)),
+        # D2 — coverage over the segment universe (INV-8 denominator).
+        "coverage": asdict(compute_coverage(state)),
         "data_warnings": list(state.data_warnings),
     }
 
@@ -50,6 +53,7 @@ def phase0_scorecard(state) -> Dict[str, Any]:
     card["_meta"] = {
         "phase": 0,
         "claims": "capability only — not a SOTA/parity claim (needs gold + baselines; see EVALUATION_HARNESS.md §7)",
+        "coverage_note": "corpus-traversal coverage (segments with anchored evidence); NOT 'every segment examined-and-judged' (that needs exhaustive null coding — INV-8 fork)",
         "cost_note": "LLM cost is in the observability DB, not in ProjectState; queried separately",
     }
     return card

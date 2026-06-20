@@ -62,8 +62,8 @@ This plan delivers #1 and moves INV-8 from UNMET to PARTIAL.
 |---|---|---|
 | 1 | `segmentation.py`: `Segment` + `segment_corpus` (char-anchored) + tests | DONE (6 tests) |
 | 2 | `ProjectState.segments`; populate in ingest; coverage helper (app↔segment overlap) + tests | DONE |
-| 3 | Surface coverage in scorecard/MCP + tests | IN PROGRESS |
-| 4 | Docs: INV-8 UNMET→PARTIAL (registry+denominator done; exhaustive null-coding = user fork), roadmap, counts | PENDING |
+| 3 | Surface coverage in scorecard/MCP + tests | DONE |
+| 4 | Docs: INV-8 UNMET→PARTIAL, roadmap, counts | IN PROGRESS |
 
 ## Notes / findings log
 - (append as phases run)
