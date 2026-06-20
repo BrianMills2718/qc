@@ -113,7 +113,47 @@ class IncrementalCodingStage(PipelineStage):
                 code_refs=[c.id for c in state.codebook.codes],
             ))
 
+        # INV-11: the incremental pipeline does NOT recompute the higher-order
+        # interpretive outputs (perspective, entities/relationships, synthesis,
+        # GT core categories / theoretical model). New documents can change all of
+        # them, so flag any that are populated as possibly stale rather than
+        # silently retaining them as if current. Non-destructive: we warn, we do
+        # not clear the prior outputs.
+        stale = _stale_higher_order_outputs(state)
+        if stale:
+            warning = (
+                f"Incremental recode (iteration {state.iteration}) added "
+                f"{len(new_docs)} document(s) but did not recompute: "
+                f"{', '.join(stale)}. These reflect the corpus before this recode "
+                f"and may be stale; re-run the full pipeline to refresh them."
+            )
+            state.data_warnings.append(warning)
+            logger.warning("INV-11 staleness: %s", warning)
+
         return state
+
+
+def _stale_higher_order_outputs(state: ProjectState) -> List[str]:
+    """Names of populated outputs the incremental pipeline does not recompute.
+
+    Used to flag inferential staleness after a recode (INV-11). Cross-interview
+    and negative-case outputs are excluded because the incremental pipeline does
+    re-run those stages.
+    """
+    stale: List[str] = []
+    if state.synthesis is not None:
+        stale.append("synthesis")
+    if state.perspective_analysis is not None:
+        stale.append("perspective_analysis")
+    if state.entities:
+        stale.append("entities")
+    if state.entity_relationships:
+        stale.append("entity_relationships")
+    if state.core_categories:
+        stale.append("core_categories")
+    if state.theoretical_model is not None:
+        stale.append("theoretical_model")
+    return stale
 
 
 def _format_codebook_for_prompt(codebook: Codebook) -> str:
