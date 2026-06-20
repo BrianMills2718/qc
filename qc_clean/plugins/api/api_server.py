@@ -32,7 +32,7 @@ class QCAPIServer:
         """Start the API server"""
         try:
             # Check if FastAPI is available
-            from fastapi import FastAPI, HTTPException, BackgroundTasks
+            from fastapi import FastAPI
             from fastapi.middleware.cors import CORSMiddleware
             import uvicorn
             

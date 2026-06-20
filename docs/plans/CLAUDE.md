@@ -6,13 +6,15 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| INV-8 | Segment universe (defensible denominator) | High — next structural edge | In Progress | `INV8_SEGMENT_UNIVERSE.md` |
+
+No active implementation plan tracked. Next up: application-level IRR (over per-segment decisions), then the claim ledger (INV-9).
 
 ## Completed Plans
 
 | Name | Outcome | Record |
 |------|---------|--------|
 | INV-1 span anchoring + harness Phase 0 | INV-1 mostly met; `make bench` Phase 0 stood up | `completed/INV1_OVERNIGHT_SPRINT.md` |
+| INV-8 segment universe + exhaustive coding | INV-8 met in exhaustive mode (`--exhaustive`); coverage denominator | `completed/INV8_SEGMENT_UNIVERSE.md` |
 
 ## Status Key
 

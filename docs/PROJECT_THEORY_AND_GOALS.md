@@ -2,7 +2,12 @@
 
 **A detailed orientation and theory reference for coding agents working on this project.**
 
-*Version 3.0 — 2026-06-19*
+*Version 3.1 — 2026-06-20*
+
+> **Since v3.0:** INV-1 span anchoring landed (mostly met); INV-8 segment universe
+> + coverage built, with **exhaustive per-segment coding** (`--exhaustive`) closing
+> INV-8 in that mode; structured-output fix (out-of-range confidence now clamps,
+> not crashes). Statuses below reflect this.
 
 > **Purpose & audience.** This is the single canonical statement of *why this
 > project exists, the theory it implements, the conceptual model it operates on,

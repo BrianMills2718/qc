@@ -10,7 +10,7 @@ from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, Field
 
-from qc_clean.schemas._validators import Confidence01
+from qc_clean.schemas.validators import Confidence01
 
 
 class OpenCode(BaseModel):

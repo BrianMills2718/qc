@@ -301,7 +301,6 @@ def _process_gt_response(
     uncoded_ids: set,
 ) -> List[CodeApplication]:
     """Process GT open coding response: merge codes and build applications."""
-    from qc_clean.schemas.adapters import open_codes_to_codebook
 
     new_applications = []
     unresolvable = 0

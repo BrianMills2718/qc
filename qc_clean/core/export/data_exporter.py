@@ -213,9 +213,8 @@ class ProjectExporter:
 
         # Code hierarchy (top-level with children)
         top_level = state.codebook.top_level_codes()
-        # Build a normalized lookup: parent_id values may differ in case from
-        # code.id (e.g. GT open coding uses "Code_Name" vs ID "CODE_NAME").
-        id_to_code = {c.id.upper(): c for c in state.codebook.codes}
+        # parent_id values may differ in case from code.id (e.g. GT open coding
+        # uses "Code_Name" vs ID "CODE_NAME"), so normalize when grouping.
         children_map: Dict[str, list] = {}
         for code in state.codebook.codes:
             if code.parent_id:
