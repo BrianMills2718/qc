@@ -411,3 +411,91 @@ class TestExportE2E:
         print(f"\n  JSON: {json_path}")
         print(f"  Markdown: {md_path}")
         print(f"  CSV files: {csv_paths}")
+
+
+# ---------------------------------------------------------------------------
+# Exhaustive coverage (INV-8) + application-level IRR E2E
+#
+# These exercise the recently-built paths that the original E2E suite predates:
+# `--exhaustive` per-segment coding and `irr --application-level`. They are the
+# code most likely to hide a live-LLM seam because the deterministic tests mock
+# the segment-coding call.
+# ---------------------------------------------------------------------------
+
+class TestExhaustiveCoverageE2E:
+
+    def test_exhaustive_coding_examines_every_segment(self, single_doc_state):
+        """`exhaustive_coding=True` must give examined-and-judged coverage:
+        every segment in the universe carries a coding decision, coverage flips
+        to 'examined' mode, and the Phase 0 scorecard says so."""
+        from qc_clean.core.segmentation import compute_coverage
+        from qc_clean.core.bench import phase0_scorecard
+
+        pipeline = create_pipeline(methodology="default")
+        ctx = PipelineContext(
+            interviews=[{"name": "interview1.txt", "content": INTERVIEW_1}],
+            exhaustive_coding=True,
+        )
+
+        result = asyncio.run(pipeline.run(single_doc_state, ctx))
+        assert result.pipeline_status == PipelineStatus.COMPLETED
+
+        # The segment universe was built and every segment was judged.
+        assert len(result.segments) >= 3, (
+            f"Expected a segment universe, got {len(result.segments)} segments"
+        )
+        undecided = [s for s in result.segments if s.decision is None]
+        assert not undecided, (
+            f"{len(undecided)} segments were never examined (decision is None) "
+            "under exhaustive coding"
+        )
+        assert all(s.decision in {"coded", "no_code"} for s in result.segments), (
+            "segment decisions must be 'coded' or 'no_code'"
+        )
+
+        # Coverage report reflects examined-and-judged mode at full rate.
+        cov = compute_coverage(result)
+        assert cov.mode == "examined"
+        assert abs(cov.examined_rate - 1.0) < 1e-9, (
+            f"examined_rate should be 1.0 under exhaustive coding, got {cov.examined_rate}"
+        )
+
+        # The scorecard's honest note must report the real (examined) coverage.
+        note = phase0_scorecard(result)["_meta"]["coverage_note"]
+        assert "examined-and-judged coverage available" in note
+
+        print(
+            f"\n  segments={len(result.segments)} "
+            f"coded={cov.coded_segments} examined_rate={cov.examined_rate} mode={cov.mode}"
+        )
+
+
+class TestApplicationLevelIRRE2E:
+
+    def test_application_level_irr_compares_segment_code_cells(self, single_doc_state):
+        """`run_irr_analysis(application_level=True)` must produce segment x code
+        agreement (the stronger 'same code on the same text' number), not just
+        codebook-discovery agreement. Uses 2 passes to bound cost."""
+        from qc_clean.core.pipeline.irr import run_irr_analysis
+
+        result = asyncio.run(
+            run_irr_analysis(single_doc_state, num_passes=2, application_level=True)
+        )
+
+        assert result.application_level is True
+        assert result.num_passes == 2
+        # Cells were actually compared across passes over the segment universe.
+        assert result.application_units >= 1, (
+            "expected at least one (segment, code) cell compared"
+        )
+        assert result.application_matrix, "application_matrix should be populated"
+        assert result.application_percent_agreement is not None, (
+            "application-level percent agreement must be computed"
+        )
+        assert 0.0 <= result.application_percent_agreement <= 1.0
+
+        print(
+            f"\n  app-level units={result.application_units} "
+            f"%agree={result.application_percent_agreement} "
+            f"kappa={result.application_cohens_kappa}"
+        )

@@ -138,10 +138,9 @@ class ThematicCodingStage(PipelineStage):
         )
 
         # Codebook from discovered codes (reuse the thematic adapter).
-        codebook = code_hierarchy_to_codebook(
-            CodeHierarchy(codes=response.codes, total_codes=len(response.codes),
-                          analysis_confidence=response.analysis_confidence)
-        )
+        hierarchy = CodeHierarchy(codes=response.codes, total_codes=len(response.codes),
+                                  analysis_confidence=response.analysis_confidence)
+        codebook = code_hierarchy_to_codebook(hierarchy)
         state.codebook = codebook
         valid_code_ids = {c.id for c in codebook.codes}
 
@@ -188,6 +187,12 @@ class ThematicCodingStage(PipelineStage):
                 content=response.analytical_memo,
                 code_refs=[c.id for c in codebook.codes],
             ))
+
+        # Stash the discovered codebook as phase1_json so downstream stages
+        # (perspective/relationship/synthesis) that require it work identically
+        # to the example-quote path. Without this, `project run --exhaustive`
+        # crashes at the perspective stage on a default-methodology project.
+        ctx.phase1_json = hierarchy.model_dump_json(indent=2)
 
         logger.info(
             "Exhaustive coding complete: %d codes, %d/%d segments examined "

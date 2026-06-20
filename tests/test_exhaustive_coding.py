@@ -76,6 +76,35 @@ def test_exhaustive_codes_every_segment_and_anchors_to_spans():
         assert verify_anchor(doc.content, a.start_char, a.end_char, a.quote_hash)
 
 
+def test_exhaustive_sets_phase1_json_for_downstream_stages():
+    """Regression: exhaustive coding must stash the codebook as ctx.phase1_json,
+    exactly like the example-quote path. Downstream stages (perspective,
+    relationship, synthesis) `ctx.require("phase1_json")`, so without this
+    `project run --exhaustive` crashes at perspective on a default-methodology
+    project. Caught by the full-pipeline live E2E; locked here deterministically."""
+    state, _ = _state()
+    mock = ExhaustiveCodingResponse(
+        codes=[ThematicCode(id="ANXIETY", name="Surveillance anxiety", description="d",
+                            semantic_definition="s", level=0, mention_count=1,
+                            discovery_confidence=0.8)],
+        decisions=[
+            SegmentDecision(segment_index=0, code_ids=[]),
+            SegmentDecision(segment_index=1, code_ids=["ANXIETY"]),
+            SegmentDecision(segment_index=2, code_ids=["ANXIETY"]),
+        ],
+        total_codes=1, analysis_confidence=0.8,
+    )
+    ctx = PipelineContext(exhaustive_coding=True)
+    with patch("qc_clean.core.llm.llm_handler.LLMHandler") as MockLLM:
+        MockLLM.return_value.extract_structured = AsyncMock(return_value=mock)
+        asyncio.run(ThematicCodingStage().execute(state, ctx))
+
+    assert ctx.phase1_json, "exhaustive path must populate ctx.phase1_json"
+    import json
+    parsed = json.loads(ctx.phase1_json)
+    assert any(c.get("id") == "ANXIETY" for c in parsed.get("codes", []))
+
+
 def test_exhaustive_warns_when_model_skips_a_segment():
     state, _ = _state()
     mock = ExhaustiveCodingResponse(
