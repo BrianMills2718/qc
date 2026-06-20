@@ -87,9 +87,10 @@ def check_saturation(
 
     if saturated:
         msg = (
-            f"Saturation reached at iteration {state.iteration}: "
+            f"Codebook stability reached at iteration {state.iteration}: "
             f"{metrics.pct_change:.1%} change (threshold={threshold:.0%}). "
-            f"{len(metrics.stable_codes)} codes stable."
+            f"{len(metrics.stable_codes)} codes stable. "
+            f"(Codebook convergence, NOT grounded-theory category saturation — INV-4.)"
         )
     else:
         msg = (

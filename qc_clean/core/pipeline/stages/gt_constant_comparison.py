@@ -266,7 +266,11 @@ class GTConstantComparisonStage(PipelineStage):
                     change.pct_change * 100,
                 )
                 if change.pct_change < self._saturation_threshold:
-                    logger.info("Saturation reached at iteration %d", iteration + 1)
+                    logger.info(
+                        "Codebook stability reached at iteration %d "
+                        "(codebook convergence, not GT category saturation — INV-4)",
+                        iteration + 1,
+                    )
                     break
             else:
                 logger.info(
