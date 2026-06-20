@@ -17,6 +17,7 @@ coding) is a separate, cost-bearing step left as an explicit product decision.
 from __future__ import annotations
 
 import re
+from dataclasses import dataclass
 from typing import List, Sequence, Tuple
 
 from qc_clean.schemas.domain import Document, Segment
@@ -101,3 +102,45 @@ def segment_corpus(documents: Sequence[Document]) -> List[Segment]:
     for doc in documents:
         out.extend(segment_document(doc))
     return out
+
+
+@dataclass
+class CoverageReport:
+    """Corpus coverage against the segment universe (INV-8 denominator)."""
+    total_segments: int = 0
+    covered_segments: int = 0           # segments overlapped by >=1 anchored application
+    coverage_rate: float = 0.0          # covered / total (0.0 when no segments)
+
+
+def compute_coverage(state) -> CoverageReport:
+    """Fraction of segments touched by at least one anchored code application.
+
+    A segment is 'covered' when some application in the SAME document has char
+    offsets (INV-1 anchored) that overlap the segment span. Unanchored
+    applications (no offsets) cannot contribute — coverage is only as honest as
+    the anchoring. This is corpus-traversal coverage, NOT a claim that every
+    segment was examined-and-judged (that needs exhaustive null coding).
+    """
+    segments = state.segments
+    total = len(segments)
+    if total == 0:
+        return CoverageReport()
+
+    # Bucket anchored applications by doc for cheap overlap checks.
+    apps_by_doc: dict = {}
+    for app in state.code_applications:
+        if app.start_char is None or app.end_char is None:
+            continue
+        apps_by_doc.setdefault(app.doc_id, []).append((app.start_char, app.end_char))
+
+    covered = 0
+    for seg in segments:
+        for a_start, a_end in apps_by_doc.get(seg.doc_id, ()):
+            if a_start < seg.end_char and a_end > seg.start_char:  # spans overlap
+                covered += 1
+                break
+    return CoverageReport(
+        total_segments=total,
+        covered_segments=covered,
+        coverage_rate=covered / total,
+    )

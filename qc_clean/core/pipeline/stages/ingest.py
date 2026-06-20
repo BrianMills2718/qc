@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import logging
 
+from qc_clean.core.segmentation import segment_corpus
 from qc_clean.schemas.domain import (
     Corpus,
     Document,
@@ -39,6 +40,7 @@ class IngestStage(PipelineStage):
                     doc.detected_speakers = _detect_speakers(doc.content)
             logger.info("Corpus already populated (%d docs), ran speaker detection",
                         state.corpus.num_documents)
+            state.segments = segment_corpus(state.corpus.documents)
             return state
 
         corpus = Corpus()
@@ -76,10 +78,14 @@ class IngestStage(PipelineStage):
         state.corpus = corpus
         state.data_warnings.extend(data_warnings)
 
+        # Build the segment universe (INV-8 denominator).
+        state.segments = segment_corpus(corpus.documents)
+
         logger.info(
-            "Ingested %d documents (%d warnings)",
+            "Ingested %d documents (%d warnings), %d segments",
             corpus.num_documents,
             len(data_warnings),
+            len(state.segments),
         )
         return state
 

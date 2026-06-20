@@ -457,6 +457,7 @@ class ProjectState(BaseModel):
     # Coding layer
     codebook: Codebook = Field(default_factory=Codebook)
     code_applications: List[CodeApplication] = Field(default_factory=list)
+    segments: List[Segment] = Field(default_factory=list)  # the INV-8 segment universe
     code_relationships: List[CodeRelationship] = Field(default_factory=list)
 
     # Entity layer
