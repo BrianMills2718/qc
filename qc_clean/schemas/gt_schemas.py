@@ -87,3 +87,12 @@ class TheoreticalModel(BaseModel):
     def core_category(self) -> str:
         """Backward compatibility: return first core category as string."""
         return self.core_categories[0] if self.core_categories else ""
+
+
+class OpenCodesResponse(BaseModel):
+    """LLM response for a batch of GT open codes (used by incremental GT coding)."""
+    open_codes: List[OpenCode] = Field(default_factory=list, description="List of open codes identified")
+    analytical_memo: str = Field(
+        default="",
+        description="Analytical memo: record your reasoning, uncertainties, and emerging patterns",
+    )

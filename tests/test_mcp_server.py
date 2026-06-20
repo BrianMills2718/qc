@@ -494,3 +494,48 @@ class TestExport:
     def test_export_not_found(self, tmp_store):
         result = json.loads(qc_mcp_server.qc_export_markdown("nope"))
         assert "error" in result
+
+
+# ---------------------------------------------------------------------------
+# Grounding report + data_warnings surfacing (INV-1 / INV-11)
+# ---------------------------------------------------------------------------
+
+class TestGroundingAndWarnings:
+    def test_grounding_report(self, tmp_store):
+        from qc_clean.core.grounding import resolve_span
+        from qc_clean.schemas.domain import (
+            Code, CodeApplication, Codebook, Corpus, Document, ProjectState,
+        )
+        content = "Alex: autonomy matters more than oversight here."
+        doc = Document(id="dg", name="d.txt", content=content)
+        m = resolve_span("autonomy matters", content)
+        state = ProjectState(
+            id="proj-ground", name="G",
+            corpus=Corpus(documents=[doc]),
+            codebook=Codebook(codes=[Code(id="C1", name="Autonomy", description="d")]),
+            code_applications=[
+                CodeApplication(code_id="C1", doc_id="dg", quote_text="autonomy matters",
+                                start_char=m.start_char, end_char=m.end_char, quote_hash=m.quote_hash),
+                CodeApplication(code_id="C1", doc_id="dg", quote_text="oversight"),  # no hash
+            ],
+        )
+        tmp_store.save(state)
+        result = json.loads(qc_mcp_server.qc_grounding_report("proj-ground"))
+        assert result["total_applications"] == 2
+        assert result["anchored_verified"] == 1
+        assert abs(result["grounding_rate"] - 0.5) < 1e-9
+
+    def test_grounding_report_not_found(self, tmp_store):
+        result = json.loads(qc_mcp_server.qc_grounding_report("nope"))
+        assert "error" in result
+
+    def test_synthesis_surfaces_data_warnings(self, tmp_store):
+        from qc_clean.schemas.domain import ProjectState, Synthesis
+        state = ProjectState(
+            id="proj-warn", name="W",
+            synthesis=Synthesis(executive_summary="stale summary"),
+            data_warnings=["synthesis may be stale after recode"],
+        )
+        tmp_store.save(state)
+        result = json.loads(qc_mcp_server.qc_get_synthesis("proj-warn"))
+        assert result["data_warnings"] == ["synthesis may be stale after recode"]

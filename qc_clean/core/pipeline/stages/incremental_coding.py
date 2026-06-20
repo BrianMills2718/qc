@@ -67,7 +67,7 @@ class IncrementalCodingStage(PipelineStage):
         new_doc_text = _build_new_doc_text(new_docs)
 
         if is_gt:
-            from qc_clean.core.pipeline.stages.gt_open_coding import OpenCodesResponse
+            from qc_clean.schemas.gt_schemas import OpenCodesResponse
             prompt = _build_incremental_gt_prompt(codebook_context, new_doc_text)
             response = await llm.extract_structured(
                 prompt, OpenCodesResponse, **ctx.llm_call_options(self.name())

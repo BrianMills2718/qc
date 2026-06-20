@@ -21,7 +21,7 @@ from qc_clean.schemas.analysis_schemas import (
     SpeakerAnalysis,
 )
 from qc_clean.schemas.gt_schemas import TheoreticalModel
-from qc_clean.core.pipeline.stages.gt_open_coding import OpenCodesResponse
+from qc_clean.schemas.gt_schemas import OpenCodesResponse
 from qc_clean.core.pipeline.stages.gt_axial_coding import AxialRelationshipsResponse
 from qc_clean.core.pipeline.stages.gt_selective_coding import CoreCategoriesResponse
 from qc_clean.core.pipeline.pipeline_engine import PipelineContext
@@ -275,30 +275,6 @@ class TestSynthesisStageMemo:
         assert len(result.memos) == 1
         assert result.memos[0].title == "Synthesis & Recommendations Memo"
         assert result.memos[0].memo_type == "theoretical"
-
-
-class TestGTOpenCodingStageMemo:
-    def test_memo_extracted(self):
-        from qc_clean.core.pipeline.stages.gt_open_coding import GTOpenCodingStage
-
-        mock_response = OpenCodesResponse(
-            open_codes=[],
-            analytical_memo="Open coding surfaced unexpected themes.",
-        )
-
-        state = _make_gt_state()
-        ctx = PipelineContext()
-
-        with patch("qc_clean.core.llm.llm_handler.LLMHandler") as MockLLM:
-            instance = MockLLM.return_value
-            instance.extract_structured = AsyncMock(return_value=mock_response)
-            result = asyncio.run(
-                GTOpenCodingStage().execute(state, ctx)
-            )
-
-        assert len(result.memos) == 1
-        assert result.memos[0].title == "Open Coding Memo"
-        assert result.memos[0].memo_type == "coding"
 
 
 class TestGTAxialCodingStageMemo:

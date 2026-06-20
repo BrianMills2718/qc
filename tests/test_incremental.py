@@ -268,7 +268,7 @@ class TestIncrementalCodingStage:
 
     def test_gt_methodology(self):
         """Incremental coding should work with GT methodology."""
-        from qc_clean.core.pipeline.stages.gt_open_coding import OpenCodesResponse
+        from qc_clean.schemas.gt_schemas import OpenCodesResponse
         from qc_clean.schemas.gt_schemas import OpenCode
 
         state = _make_state_with_codes()
