@@ -156,6 +156,21 @@ class CodeApplication(BaseModel):
 # Code relationships
 # ---------------------------------------------------------------------------
 
+class Segment(BaseModel):
+    """One examined textual unit of a document (the INV-8 denominator).
+
+    Char offsets index the original ``Document.content`` so coverage and
+    agreement can be computed against a stable, examinable set of units.
+    """
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    doc_id: str
+    index: int = 0
+    start_char: int = 0
+    end_char: int = 0
+    speaker: str = ""
+    text: str = ""
+
+
 class CodeRelationship(BaseModel):
     """Relationship between two codes."""
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
