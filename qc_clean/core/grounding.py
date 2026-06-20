@@ -156,6 +156,31 @@ def resolve_against_docs(quote: str, documents: Sequence) -> DocSpanMatch:
     )
 
 
+def resolve_and_anchor(quote, documents, *, code_id, codebook_version, confidence):
+    """Resolve ``quote`` across ``documents`` and build an anchored application.
+
+    Returns ``(CodeApplication | None, MatchStatus)``. UNIQUE → a fully anchored
+    application (doc_id + offsets + hash); AMBIGUOUS / NONE → ``(None, status)`` so
+    the caller can drop it and count the reason. Shared by the thematic and both
+    incremental coding paths (was duplicated three times).
+    """
+    from qc_clean.schemas.domain import CodeApplication, Provenance
+    m = resolve_against_docs(quote, documents)
+    if m.status is not MatchStatus.UNIQUE:
+        return None, m.status
+    return CodeApplication(
+        code_id=code_id,
+        doc_id=m.doc_id,
+        quote_text=quote,
+        start_char=m.start_char,
+        end_char=m.end_char,
+        quote_hash=m.quote_hash,
+        confidence=confidence,
+        applied_by=Provenance.LLM,
+        codebook_version=codebook_version,
+    ), m.status
+
+
 def warn_unanchored(state, unresolvable: int, ambiguous: int, label: str = "") -> None:
     """Append INV-1 data_warnings for dropped (unresolvable / ambiguous) quotes."""
     prefix = f"{label}: " if label else ""

@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import logging
 
-from qc_clean.core.grounding import MatchStatus, resolve_against_docs, warn_unanchored as _warn_unanchored
+from qc_clean.core.grounding import MatchStatus, resolve_and_anchor, warn_unanchored as _warn_unanchored
 from qc_clean.schemas.analysis_schemas import CodeHierarchy
 from qc_clean.schemas.adapters import code_hierarchy_to_codebook
 from qc_clean.schemas.domain import AnalysisMemo, CodeApplication, ProjectState, Provenance
@@ -72,27 +72,17 @@ class ThematicCodingStage(PipelineStage):
         ambiguous = 0
         for tc in phase1_response.codes:
             for quote in tc.example_quotes:
-                m = resolve_against_docs(quote, state.corpus.documents)
-                if m.status is MatchStatus.NONE:
-                    # No source match: drop rather than fabricate provenance (INV-1).
-                    unresolvable += 1
-                    continue
-                if m.status is MatchStatus.AMBIGUOUS:
-                    # Same quote occurs >1x across the corpus -> cannot uniquely
-                    # anchor; drop rather than guess a document (INV-1).
-                    ambiguous += 1
-                    continue
-                all_applications.append(CodeApplication(
-                    code_id=tc.id,
-                    doc_id=m.doc_id,
-                    quote_text=quote,
-                    start_char=m.start_char,
-                    end_char=m.end_char,
-                    quote_hash=m.quote_hash,
+                app, status = resolve_and_anchor(
+                    quote, state.corpus.documents,
+                    code_id=tc.id, codebook_version=codebook.version,
                     confidence=tc.discovery_confidence,
-                    applied_by=Provenance.LLM,
-                    codebook_version=codebook.version,
-                ))
+                )
+                if app is not None:
+                    all_applications.append(app)
+                elif status is MatchStatus.AMBIGUOUS:
+                    ambiguous += 1  # occurs >1x -> can't uniquely anchor (INV-1)
+                else:
+                    unresolvable += 1  # no source match -> drop (INV-1)
         state.code_applications = all_applications
         _warn_unanchored(state, unresolvable, ambiguous)
 

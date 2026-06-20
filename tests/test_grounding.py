@@ -148,3 +148,22 @@ def test_grounding_report_counts_verified_unhashed_mismatch_and_missing():
 def test_grounding_rate_is_one_when_no_applications():
     state = ProjectState(name="t", corpus=Corpus(documents=[]))
     assert verify_grounding(state).grounding_rate == 1.0
+
+
+def test_resolve_and_anchor_builds_app_or_returns_status():
+    from qc_clean.core.grounding import MatchStatus, resolve_and_anchor
+    docs = [_Doc("d1", "Alex values autonomy."), _Doc("d2", "Sam felt rushed. Sam felt rushed.")]
+    # unique -> anchored application
+    app, status = resolve_and_anchor("values autonomy", docs, code_id="C1",
+                                     codebook_version=1, confidence=0.8)
+    assert status is MatchStatus.UNIQUE
+    assert app is not None and app.code_id == "C1" and app.doc_id == "d1"
+    assert app.quote_hash is not None and app.confidence == 0.8
+    # ambiguous (twice in d2) -> no app
+    app2, status2 = resolve_and_anchor("Sam felt rushed", docs, code_id="C1",
+                                       codebook_version=1, confidence=0.5)
+    assert app2 is None and status2 is MatchStatus.AMBIGUOUS
+    # none -> no app
+    app3, status3 = resolve_and_anchor("not present", docs, code_id="C1",
+                                       codebook_version=1, confidence=0.5)
+    assert app3 is None and status3 is MatchStatus.NONE

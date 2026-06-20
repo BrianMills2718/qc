@@ -10,7 +10,7 @@ from __future__ import annotations
 import logging
 from typing import List
 
-from qc_clean.core.grounding import MatchStatus, resolve_against_docs, warn_unanchored
+from qc_clean.core.grounding import MatchStatus, resolve_and_anchor, warn_unanchored
 from qc_clean.core.pipeline.irr import normalize_code_name
 from qc_clean.core.pipeline.saturation import calculate_codebook_change
 from qc_clean.schemas.analysis_schemas import CodeHierarchy
@@ -272,20 +272,14 @@ def _process_thematic_response(
 
         # Build applications only for new documents, span-anchored (INV-1).
         for quote in tc.example_quotes:
-            m = resolve_against_docs(quote, new_docs)
-            if m.status is MatchStatus.UNIQUE:
-                new_applications.append(CodeApplication(
-                    code_id=code_id,
-                    doc_id=m.doc_id,
-                    quote_text=quote,
-                    start_char=m.start_char,
-                    end_char=m.end_char,
-                    quote_hash=m.quote_hash,
-                    confidence=tc.discovery_confidence,
-                    applied_by=Provenance.LLM,
-                    codebook_version=state.codebook.version,
-                ))
-            elif m.status is MatchStatus.AMBIGUOUS:
+            app, status = resolve_and_anchor(
+                quote, new_docs, code_id=code_id,
+                codebook_version=state.codebook.version,
+                confidence=tc.discovery_confidence,
+            )
+            if app is not None:
+                new_applications.append(app)
+            elif status is MatchStatus.AMBIGUOUS:
                 ambiguous += 1
             else:
                 unresolvable += 1
@@ -336,20 +330,14 @@ def _process_gt_response(
 
         # Build applications for new documents, span-anchored (INV-1).
         for quote in oc.supporting_quotes:
-            m = resolve_against_docs(quote, new_docs)
-            if m.status is MatchStatus.UNIQUE:
-                new_applications.append(CodeApplication(
-                    code_id=code_id,
-                    doc_id=m.doc_id,
-                    quote_text=quote,
-                    start_char=m.start_char,
-                    end_char=m.end_char,
-                    quote_hash=m.quote_hash,
-                    confidence=oc.confidence,
-                    applied_by=Provenance.LLM,
-                    codebook_version=state.codebook.version,
-                ))
-            elif m.status is MatchStatus.AMBIGUOUS:
+            app, status = resolve_and_anchor(
+                quote, new_docs, code_id=code_id,
+                codebook_version=state.codebook.version,
+                confidence=oc.confidence,
+            )
+            if app is not None:
+                new_applications.append(app)
+            elif status is MatchStatus.AMBIGUOUS:
                 ambiguous += 1
             else:
                 unresolvable += 1
