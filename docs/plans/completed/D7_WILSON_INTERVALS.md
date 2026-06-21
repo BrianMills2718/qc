@@ -1,6 +1,21 @@
 # Plan #18: D7 Wilson Intervals
 
-**Status:** Planned
+**Outcome:** Complete. `disconfirmation_d7_scorecard()` now emits
+`recall_ci` and `precision_ci` with 95% Wilson score intervals when D7 gold is
+available. The interval records include method, confidence level, successes,
+denominator, lower, and upper, with an explicit undefined-denominator shape for
+future zero-denominator cases.
+
+**Verification:** `python -m pytest
+tests/test_bench_phase0.py::test_scorecard_reports_d7_wilson_intervals_for_perfect_match
+tests/test_bench_phase0.py::test_scorecard_reports_d7_wilson_intervals_for_mixed_counts
+tests/test_bench_phase0.py tests/test_bench_phase0_script.py -q` passed with
+12 tests; `python -m ruff check qc_clean/core/bench.py
+tests/test_bench_phase0.py` passed. Final full gate: `make check` passed with
+655 tests passed, 1 skipped, 8 deselected; Ruff and docs gates passed; type
+check is not yet configured.
+
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** None
@@ -103,17 +118,17 @@ cross-project callable capability.
 ## Acceptance Criteria
 
 > Feature-level criteria (what the plan accomplishes):
-- [ ] Scored D7 output includes `recall_ci` and `precision_ci`.
-- [ ] Intervals include method, confidence level, denominator, lower, and upper.
-- [ ] Undefined denominators are explicit and do not crash.
-- [ ] Existing TP/FP/FN, recall, precision, F1, and key lists remain compatible.
-- [ ] Docs state these are Phase 0 interval estimates only, not held-out D7 validation or baseline comparison.
+- [x] Scored D7 output includes `recall_ci` and `precision_ci`.
+- [x] Intervals include method, confidence level, denominator, lower, and upper.
+- [x] Undefined denominators are explicit and do not crash.
+- [x] Existing TP/FP/FN, recall, precision, F1, and key lists remain compatible.
+- [x] Docs state these are Phase 0 interval estimates only, not held-out D7 validation or baseline comparison.
 
 > Process criteria (quality gates):
-- [ ] Required tests pass
-- [ ] Full test suite passes
-- [ ] Type check status is reported
-- [ ] Docs updated
+- [x] Required tests pass
+- [x] Full test suite passes
+- [x] Type check status is reported
+- [x] Docs updated
 
 ---
 

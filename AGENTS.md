@@ -40,7 +40,7 @@ make lint               # Run Ruff fatal-error lint gate
 make docs-check         # Run documentation and governance checks
 make check              # Run deterministic tests + lint + docs checks
 make status             # Show git status
-make bench ID=<project_id>              # Phase 0 scorecard (D1/D2/D5 plus D7 if gold is present)
+make bench ID=<project_id>              # Phase 0 scorecard (D1/D2/D5 plus D7 + intervals if gold is present)
 make bench ID=<project_id> GOLD=gold.json  # Add external D7 gold anchors without mutating project state
 make cost               # Show LLM spend (DAYS=7)
 make errors             # Show recent error breakdown

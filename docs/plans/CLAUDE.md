@@ -6,7 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 18 | D7 Wilson intervals | High | Planned | `D7_WILSON_INTERVALS.md` |
+| — | No active implementation plan. | — | — | — |
 
 ## Completed Plans
 
@@ -29,6 +29,7 @@ Track all implementation work here.
 | INV-4 diagnostic-driven theoretical sampling | INV-4 follow-up: sampling suggestions use category adequacy gaps before falling back to low application coverage | `completed/INV4_DIAGNOSTIC_THEORETICAL_SAMPLING.md` |
 | Corpus scope contract | Report-boundary first slice: optional `ProjectState.corpus_scope` records scope and Markdown export surfaces it before claims | `completed/CORPUS_SCOPE_CONTRACT.md` |
 | INV-2 query-expansion disconfirmation retrieval | INV-2 follow-up: BM25-style retrieval can use weighted deterministic query-expansion terms while preserving exact candidate anchors | `completed/INV2_QUERY_EXPANSION_DISCONFIRMATION_RETRIEVAL.md` |
+| D7 Wilson intervals | Evaluation-harness follow-up: gold-dependent D7 recall/precision now include 95% Wilson intervals in `make bench` | `completed/D7_WILSON_INTERVALS.md` |
 
 ## Status Key
 
