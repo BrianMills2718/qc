@@ -6,7 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| — | No active implementation plan. | — | — | — |
+| 18 | D7 Wilson intervals | High | Planned | `D7_WILSON_INTERVALS.md` |
 
 ## Completed Plans
 
