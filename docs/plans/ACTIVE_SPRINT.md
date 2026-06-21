@@ -40,8 +40,10 @@ packages are validated by
 `make validate-d7-gold GOLD=gold_set.json`. INV-7 now has both deterministic
 structural fixture export (`make run-inv7-fixtures`) and opt-in live model
 canary fixture export (`make run-inv7-live-fixtures`) for the `PROMPT_INJECTION=`
-scorecard path. This remains a gold-dependent exact-score/provenance/uncertainty
-and canary-fixture substrate, not a populated held-out benchmark, full D3/D7
-validity, κ/α/AC1, human-ceiling agreement, held-out live-baseline result,
-committed/scored live adversarial prompt-injection benchmark, or
+scorecard path. D3/D7 scorecards also compare exact recall/precision/F1 against
+supplied versioned-package human-human metrics when present. This remains a
+gold-dependent exact-score/provenance/uncertainty, human-ceiling-comparison, and
+canary-fixture substrate, not a populated held-out benchmark, full D3/D7
+validity, κ/α/AC1, populated human-ceiling agreement, held-out live-baseline
+result, committed/scored live adversarial prompt-injection benchmark, or
 expert-parity/SOTA evidence.

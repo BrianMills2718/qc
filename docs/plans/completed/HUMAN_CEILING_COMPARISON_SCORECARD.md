@@ -1,10 +1,29 @@
 # Plan #44: Human-Ceiling Comparison Scorecard
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** None
 **Blocks:** D3/D7 expert-parity reporting; SOTA-gate audit trail
+
+---
+
+## Outcome
+
+Implemented first-class `human_ceiling_comparison` sections for scored D3 and
+D7 Phase 0 scorecards. When a versioned gold-set package includes numeric
+human-human `recall`, `precision`, or `f1`, the scorecard reports system value,
+human value, system-minus-human delta, and whether the system meets or exceeds
+that metric. Missing or non-comparable human metrics produce explicit
+`not_available` states. Documentation preserves the caveat that this is a
+comparison substrate, not expert-parity evidence without populated held-out
+human-adjudicated gold.
+
+**Verification:** `python -m pytest tests/test_bench_phase0.py
+tests/test_d3_gold_set.py tests/test_d7_gold_set.py -q` (39 passed); `python -m
+ruff check qc_clean/core/bench.py tests/test_bench_phase0.py`; `make check` (729
+passed, 1 skipped, 8 deselected; Ruff and docs checks passed; type check not yet
+configured).
 
 ---
 
@@ -61,13 +80,13 @@ Internal scorecard capability only; no cross-project boundary is created.
 
 ### Capability Validation
 
-- [ ] D3 scorecard reports comparable recall/precision/F1 deltas when a package
+- [x] D3 scorecard reports comparable recall/precision/F1 deltas when a package
   supplies numeric human metrics.
-- [ ] D7 scorecard reports comparable recall/precision/F1 deltas when a package
+- [x] D7 scorecard reports comparable recall/precision/F1 deltas when a package
   supplies numeric human metrics.
-- [ ] Scorecards report `not_available` when human metrics are absent or have no
+- [x] Scorecards report `not_available` when human metrics are absent or have no
   comparable exact-score keys.
-- [ ] Docs state this is a comparison substrate, not expert-parity evidence
+- [x] Docs state this is a comparison substrate, not expert-parity evidence
   unless populated from held-out adjudicated gold.
 
 ---
@@ -120,24 +139,24 @@ Internal scorecard capability only; no cross-project boundary is created.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] D3 and D7 scorecards include `human_ceiling_comparison`.
-- [ ] Comparable metrics include `system_value`, `human_value`,
+- [x] D3 and D7 scorecards include `human_ceiling_comparison`.
+- [x] Comparable metrics include `system_value`, `human_value`,
   `system_minus_human`, and `meets_or_exceeds_human`.
-- [ ] Non-comparable or missing human metrics are explicit `not_available`
+- [x] Non-comparable or missing human metrics are explicit `not_available`
   states.
-- [ ] No SOTA, expert-parity, or methodological-validity claim is introduced.
+- [x] No SOTA, expert-parity, or methodological-validity claim is introduced.
 
 > Process criteria:
-- [ ] Required tests pass
-- [ ] Full test suite passes
-- [ ] Type check status reported
-- [ ] Docs updated
-- [ ] Plan completed, committed, and pushed
+- [x] Required tests pass
+- [x] Full test suite passes
+- [x] Type check status reported
+- [x] Docs updated
+- [x] Plan completed, committed, and pushed
 
 ---
 
 ## Open Questions
 
-- [ ] Should κ/α/AC1 become first-class computed metrics in this repo? — Status:
+- [x] Should κ/α/AC1 become first-class computed metrics in this repo? — Status:
   DEFERRED | Why it matters: those require agreement-unit modeling beyond this
   exact-anchor scorer and should be a separate D5/D3 agreement plan.
