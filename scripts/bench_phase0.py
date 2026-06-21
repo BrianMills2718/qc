@@ -31,6 +31,7 @@ from qc_clean.core.bench import (
     d10_wall_clock_scorecard,
     phase0_scorecard,
 )
+from qc_clean.core.d7_gold import d7_gold_payload_for_scorecard
 from qc_clean.core.persistence.project_store import ProjectStore
 
 
@@ -330,14 +331,10 @@ def load_d7_gold_file(path: Path) -> Any:
     except json.JSONDecodeError as exc:
         raise ValueError(f"D7 gold file '{path}' is not valid JSON: {exc}") from exc
 
-    if isinstance(raw, list):
-        return raw
-    if isinstance(raw, dict) and isinstance(raw.get("contrary_evidence"), list):
-        return raw
-    raise ValueError(
-        "D7 gold file must be a JSON list of anchors or an object with a "
-        "'contrary_evidence' list"
-    )
+    try:
+        return d7_gold_payload_for_scorecard(raw)
+    except ValueError as exc:
+        raise ValueError(f"D7 gold file '{path}' is invalid: {exc}") from exc
 
 
 def load_d7_baselines_file(path: Path) -> Any:

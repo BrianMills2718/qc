@@ -46,6 +46,7 @@ make bench ID=<project_id> GOLD=gold.json BASELINES=baselines.json  # Add extern
 make bench ID=<project_id> PROMPT_INJECTION=inv7.json  # Add external INV-7 fixture results without mutating state
 make bench ID=<project_id> OBS_DB=path TRACE_ID=trace  # Override D10 observability DB / exact trace
 make bench ID=<project_id> ARTIFACT_DIR=benchmark_results  # Write versioned Phase 0 scorecard package
+make validate-d7-gold GOLD=gold_set.json  # Validate versioned held-out D7 gold-set package
 make cost               # Show LLM spend (DAYS=7)
 make errors             # Show recent error breakdown
 

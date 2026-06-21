@@ -1,6 +1,6 @@
 # Plan #31: D7 Held-Out Gold-Set Scaffold
 
-**Status:** Planned
+**Status:** In Progress
 **Type:** implementation
 **Priority:** High
 **Blocked By:** D7 gold-file bench input; Phase 0 benchmark artifacts

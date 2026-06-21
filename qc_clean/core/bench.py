@@ -19,6 +19,7 @@ from typing import Any, Dict
 
 from pydantic import BaseModel, Field, ValidationError, model_validator
 
+from qc_clean.core.d7_gold import DisconfirmationGoldAnchor
 from qc_clean.core.grounding import verify_grounding
 from qc_clean.core.pipeline.saturation import assess_category_saturation
 from qc_clean.core.segmentation import compute_coverage
@@ -31,34 +32,6 @@ _RUN_TIMING_EXTRA_KEY = "run_timing"
 _PROMPT_INJECTION_EXTRA_KEY = "prompt_injection_evaluations"
 DEFAULT_OBSERVABILITY_DB_PATH = Path.home() / "projects" / "data" / "llm_observability.db"
 _WILSON_Z_95 = 1.959963984540054
-
-
-class DisconfirmationGoldAnchor(BaseModel):
-    """Human/adjudicated contrary-evidence anchor used for D7 scoring."""
-
-    target_claim_id: str = Field(description="AnalyticClaim ID the gold contrary evidence challenges")
-    doc_id: str = Field(description="Document containing the contrary evidence")
-    start_char: int | None = Field(default=None, description="Start offset of the gold source span")
-    end_char: int | None = Field(default=None, description="End offset of the gold source span")
-    segment_id: str | None = Field(default=None, description="Segment ID when span offsets are unavailable")
-    quote_text: str = Field(default="", description="Optional evidence text for human inspection")
-
-    @model_validator(mode="after")
-    def require_exact_key(self) -> "DisconfirmationGoldAnchor":
-        """Require a deterministic comparison key for every gold record."""
-        has_start = self.start_char is not None
-        has_end = self.end_char is not None
-        if has_start != has_end:
-            raise ValueError("D7 gold anchors must provide both start_char and end_char")
-        if has_start and has_end:
-            if self.start_char is None or self.end_char is None:
-                raise ValueError("D7 gold span offsets are incomplete")
-            if self.start_char < 0 or self.end_char <= self.start_char:
-                raise ValueError("D7 gold span offsets must satisfy 0 <= start_char < end_char")
-            return self
-        if not self.segment_id:
-            raise ValueError("D7 gold anchors require span offsets or a segment_id")
-        return self
 
 
 class PromptInjectionEvaluation(BaseModel):

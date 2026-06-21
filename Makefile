@@ -1,4 +1,4 @@
-.PHONY: help test test-quick test-e2e test-all check lint docs-check clean status cost errors
+.PHONY: help test test-quick test-e2e test-all bench validate-d7-gold check lint docs-check clean status cost errors
 
 DAYS ?= 7
 PROJECT ?= qualitative_coding
@@ -21,6 +21,12 @@ test-all:  ## Run deterministic tests and live LLM E2E tests
 
 bench:  ## Evaluation-harness Phase 0 scorecard (ID=<project_id> [GOLD=gold.json] [BASELINES=baselines.json] [PROMPT_INJECTION=inv7.json] [OBS_DB=path] [TRACE_ID=id] [ARTIFACT_DIR=benchmark_results])
 	python scripts/bench_phase0.py $(ID) $(if $(GOLD),--gold-file $(GOLD),) $(if $(BASELINES),--d7-baselines-file $(BASELINES),) $(if $(PROMPT_INJECTION),--prompt-injection-file $(PROMPT_INJECTION),) $(if $(OBS_DB),--observability-db $(OBS_DB),) $(if $(TRACE_ID),--trace-id $(TRACE_ID),) $(if $(ARTIFACT_DIR),--artifact-dir $(ARTIFACT_DIR),)
+
+validate-d7-gold:  ## Validate a versioned D7 gold-set package (GOLD=gold_set.json)
+ifndef GOLD
+	$(error GOLD is required. Usage: make validate-d7-gold GOLD=gold_set.json)
+endif
+	python scripts/validate_d7_gold_set.py $(GOLD)
 
 check:  ## Run deterministic tests + lint + docs checks
 	python -m pytest tests/ -m "not live_llm" -x -q
