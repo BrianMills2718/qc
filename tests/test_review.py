@@ -5,6 +5,10 @@ Tests for the human review loop (qc_clean.core.pipeline.review).
 import pytest
 
 from qc_clean.schemas.domain import (
+    AnalyticClaim,
+    ClaimAdjudicationStatus,
+    ClaimKind,
+    ClaimScope,
     Code,
     CodeApplication,
     Codebook,
@@ -48,6 +52,7 @@ class TestReviewManager:
         summary = rm.get_review_summary()
         assert summary.codes_count == 3
         assert summary.applications_count == 4
+        assert summary.claims_count == 0
         assert summary.pipeline_status == "paused_for_review"
 
     def test_approve_code(self, review_state):
@@ -134,6 +139,82 @@ class TestReviewManager:
         rm.apply_decision(decision)
         assert all(a.id != "A2" for a in review_state.code_applications)
         assert len(review_state.code_applications) == 3
+
+    def test_claim_review_approve_reject_modify_updates_claim_adjudication(self, review_state):
+        review_state.claims = [
+            AnalyticClaim(
+                id="claim-1",
+                claim_kind=ClaimKind.SYNTHESIS_FINDING,
+                source_stage="synthesis",
+                claim_text="Efficiency improves workflow.",
+                scope=ClaimScope(corpus_level=True, code_ids=["C1"]),
+                origin_object_type="synthesis",
+                origin_object_id="finding:0",
+            )
+        ]
+        rm = ReviewManager(review_state)
+        assert rm.get_pending_claims()[0].id == "claim-1"
+        assert rm.get_review_summary().claims_count == 1
+
+        rm.apply_decision(HumanReviewDecision(
+            target_type="claim",
+            target_id="claim-1",
+            action=ReviewAction.APPROVE,
+            rationale="Supported by reviewed evidence.",
+        ))
+        claim = review_state.claims[0]
+        assert claim.adjudication_status == ClaimAdjudicationStatus.RETAINED
+        assert claim.revision_history[-1].action == "approve"
+
+        rm.apply_decision(HumanReviewDecision(
+            target_type="claim",
+            target_id="claim-1",
+            action=ReviewAction.MODIFY,
+            rationale="Narrow scope.",
+            new_value={"claim_text": "Efficiency improves workflow for Alex."},
+        ))
+        assert claim.claim_text == "Efficiency improves workflow for Alex."
+        assert claim.adjudication_status == ClaimAdjudicationStatus.REVISED
+        assert claim.revision_history[-1].previous_claim_text == "Efficiency improves workflow."
+        assert claim.revision_history[-1].new_claim_text == "Efficiency improves workflow for Alex."
+
+        rm.apply_decision(HumanReviewDecision(
+            target_type="claim",
+            target_id="claim-1",
+            action=ReviewAction.REJECT,
+            rationale="Contradicted by a negative case.",
+        ))
+        assert claim.adjudication_status == ClaimAdjudicationStatus.WITHDRAWN
+        assert claim.revision_history[-1].action == "reject"
+
+    def test_claim_review_invalid_claim_id_fails_loud(self, review_state):
+        rm = ReviewManager(review_state)
+        with pytest.raises(ValueError, match="Claim not found"):
+            rm.apply_decision(HumanReviewDecision(
+                target_type="claim",
+                target_id="missing-claim",
+                action=ReviewAction.APPROVE,
+            ))
+
+    def test_claim_review_unsupported_action_fails_loud(self, review_state):
+        review_state.claims = [
+            AnalyticClaim(
+                id="claim-1",
+                claim_kind=ClaimKind.CODE,
+                source_stage="thematic_coding",
+                claim_text="Theme A is a code.",
+                scope=ClaimScope(code_ids=["C1"]),
+                origin_object_type="code",
+                origin_object_id="C1",
+            )
+        ]
+        rm = ReviewManager(review_state)
+        with pytest.raises(ValueError, match="not supported for claim targets"):
+            rm.apply_decision(HumanReviewDecision(
+                target_type="claim",
+                target_id="claim-1",
+                action=ReviewAction.MERGE,
+            ))
 
     def test_approve_all_codes(self, review_state):
         rm = ReviewManager(review_state)

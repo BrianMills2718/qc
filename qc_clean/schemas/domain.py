@@ -314,7 +314,7 @@ class AnalyticClaim(BaseModel):
 class HumanReviewDecision(BaseModel):
     """Record of a human review action."""
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    target_type: str  # "code", "code_application", "codebook"
+    target_type: str  # "code", "code_application", "codebook", "claim"
     target_id: str
     action: ReviewAction
     rationale: str = ""
@@ -493,6 +493,7 @@ class ReviewSummary(BaseModel):
     """Summary of review state."""
     codes_count: int = 0
     applications_count: int = 0
+    claims_count: int = 0
     existing_decisions: int = 0
     pipeline_status: str = ""
     current_phase: Optional[str] = None

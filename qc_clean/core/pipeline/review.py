@@ -12,6 +12,9 @@ import logging
 from typing import Dict, List, Optional
 
 from qc_clean.schemas.domain import (
+    AnalyticClaim,
+    ClaimAdjudicationStatus,
+    ClaimRevision,
     Code,
     CodeApplication,
     HumanReviewDecision,
@@ -45,11 +48,16 @@ class ReviewManager:
             return [a for a in self.state.code_applications if a.code_id == code_id]
         return list(self.state.code_applications)
 
+    def get_pending_claims(self) -> List[AnalyticClaim]:
+        """Get all analytic claims available for review."""
+        return list(self.state.claims)
+
     def get_review_summary(self) -> ReviewSummary:
         """Summary of what's available for review."""
         return ReviewSummary(
             codes_count=len(self.state.codebook.codes),
             applications_count=len(self.state.code_applications),
+            claims_count=len(self.state.claims),
             existing_decisions=len(self.state.review_decisions),
             pipeline_status=self.state.pipeline_status.value,
             current_phase=self.state.current_phase,
@@ -69,10 +77,12 @@ class ReviewManager:
             self._apply_application_decision(decision)
         elif decision.target_type == "codebook":
             self._apply_codebook_decision(decision)
+        elif decision.target_type == "claim":
+            self._apply_claim_decision(decision)
         else:
             raise ValueError(
                 f"Unknown target_type: '{decision.target_type}'. "
-                f"Must be 'code', 'code_application', or 'codebook'."
+                f"Must be 'code', 'code_application', 'codebook', or 'claim'."
             )
 
         self.state.touch()
@@ -242,6 +252,53 @@ class ReviewManager:
                 f"Action '{decision.action.value}' not supported for codebook targets. "
                 f"Supported: approve."
             )
+
+    def _apply_claim_decision(self, decision: HumanReviewDecision) -> None:
+        claim = self._get_claim(decision.target_id)
+        if claim is None:
+            raise ValueError(f"Claim not found: {decision.target_id}")
+
+        if decision.action == ReviewAction.APPROVE:
+            claim.adjudication_status = ClaimAdjudicationStatus.RETAINED
+            claim.revision_history.append(ClaimRevision(
+                actor=Provenance.HUMAN,
+                action=decision.action.value,
+                rationale=decision.rationale,
+            ))
+            logger.info("Approved claim: %s", decision.target_id)
+        elif decision.action == ReviewAction.REJECT:
+            claim.adjudication_status = ClaimAdjudicationStatus.WITHDRAWN
+            claim.revision_history.append(ClaimRevision(
+                actor=Provenance.HUMAN,
+                action=decision.action.value,
+                rationale=decision.rationale,
+            ))
+            logger.info("Rejected claim: %s", decision.target_id)
+        elif decision.action == ReviewAction.MODIFY:
+            previous_text = claim.claim_text
+            if decision.new_value and "claim_text" in decision.new_value:
+                claim.claim_text = str(decision.new_value["claim_text"])
+            claim.adjudication_status = ClaimAdjudicationStatus.REVISED
+            claim.revision_history.append(ClaimRevision(
+                actor=Provenance.HUMAN,
+                action=decision.action.value,
+                rationale=decision.rationale,
+                previous_claim_text=previous_text,
+                new_claim_text=claim.claim_text,
+            ))
+            logger.info("Modified claim: %s", decision.target_id)
+        else:
+            raise ValueError(
+                f"Action '{decision.action.value}' not supported for claim targets. "
+                f"Supported: approve, reject, modify."
+            )
+
+    def _get_claim(self, claim_id: str) -> AnalyticClaim | None:
+        """Return a claim by ID."""
+        for claim in self.state.claims:
+            if claim.id == claim_id:
+                return claim
+        return None
 
     def _bump_codebook_version(self) -> None:
         """Save current codebook to history and create new version."""
