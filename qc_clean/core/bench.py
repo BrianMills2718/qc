@@ -19,8 +19,8 @@ from typing import Any, Dict
 
 from pydantic import BaseModel, Field, ValidationError, model_validator
 
-from qc_clean.core.d3_gold import ApplicationGoldAnchor
-from qc_clean.core.d7_gold import DisconfirmationGoldAnchor
+from qc_clean.core.d3_gold import ApplicationGoldAnchor, validate_d3_gold_set_payload
+from qc_clean.core.d7_gold import DisconfirmationGoldAnchor, validate_d7_gold_set_payload
 from qc_clean.core.grounding import verify_grounding
 from qc_clean.core.pipeline.saturation import assess_category_saturation
 from qc_clean.core.segmentation import compute_coverage
@@ -507,6 +507,9 @@ def disconfirmation_d7_scorecard(state: ProjectState) -> Dict[str, Any]:
         ),
     }
     card.update(system_score)
+    gold_provenance = _d7_gold_provenance(state)
+    if gold_provenance is not None:
+        card["gold_provenance"] = gold_provenance
 
     baselines = _d7_baselines(state)
     if baselines:
@@ -624,6 +627,31 @@ def _d7_baselines(state: ProjectState) -> list[DisconfirmationBaselinePrediction
     return baselines
 
 
+def _d7_gold_provenance(state: ProjectState) -> dict[str, Any] | None:
+    """Return compact D7 gold-set package provenance when available."""
+    raw = state.config.extra.get(_D7_GOLD_EXTRA_KEY)
+    if not (isinstance(raw, dict) and raw.get("schema_version") == 1):
+        return None
+    package = validate_d7_gold_set_payload(raw)
+    return _gold_set_provenance(
+        schema_version=package.schema_version,
+        gold_set_id=package.gold_set_id,
+        dataset_name=package.dataset_name,
+        split=package.split,
+        corpus_sha256=package.corpus_sha256,
+        project_state_sha256=package.project_state_sha256,
+        prompt_frozen=package.prompt_frozen,
+        contamination_checked=package.contamination_checked,
+        coder_count=package.adjudication.coder_count,
+        adjudicator=package.adjudication.adjudicator,
+        protocol=package.adjudication.protocol,
+        human_human_agreement=package.adjudication.human_human_agreement,
+        notes=package.adjudication.notes,
+        count_key="contrary_evidence_count",
+        anchor_count=len(package.contrary_evidence),
+    )
+
+
 def application_validity_d3_scorecard(state: ProjectState) -> Dict[str, Any]:
     """Score code applications against D3 application gold, if available."""
     gold = _d3_application_gold_annotations(state)
@@ -644,7 +672,7 @@ def application_validity_d3_scorecard(state: ProjectState) -> Dict[str, Any]:
     gold_keys = {_key_for_application_gold(anchor) for anchor in gold}
     predicted_keys, unscored_predicted = _predicted_application_keys(state)
     score = _exact_anchor_score(gold_keys, predicted_keys, unscored_predicted)
-    return {
+    card: Dict[str, Any] = {
         "status": "scored",
         "gold_source": f"ProjectState.config.extra['{_D3_GOLD_EXTRA_KEY}']",
         "note": (
@@ -654,6 +682,10 @@ def application_validity_d3_scorecard(state: ProjectState) -> Dict[str, Any]:
         ),
         **score,
     }
+    gold_provenance = _d3_gold_provenance(state)
+    if gold_provenance is not None:
+        card["gold_provenance"] = gold_provenance
+    return card
 
 
 def _d3_application_gold_annotations(state: ProjectState) -> list[ApplicationGoldAnchor]:
@@ -679,6 +711,70 @@ def _d3_application_gold_annotations(state: ProjectState) -> list[ApplicationGol
     if duplicates:
         raise ValueError("Duplicate D3 application gold anchor key(s): " + ", ".join(duplicates))
     return anchors
+
+
+def _d3_gold_provenance(state: ProjectState) -> dict[str, Any] | None:
+    """Return compact D3 gold-set package provenance when available."""
+    raw = state.config.extra.get(_D3_GOLD_EXTRA_KEY)
+    if not (isinstance(raw, dict) and raw.get("schema_version") == 1):
+        return None
+    package = validate_d3_gold_set_payload(raw)
+    return _gold_set_provenance(
+        schema_version=package.schema_version,
+        gold_set_id=package.gold_set_id,
+        dataset_name=package.dataset_name,
+        split=package.split,
+        corpus_sha256=package.corpus_sha256,
+        project_state_sha256=package.project_state_sha256,
+        prompt_frozen=package.prompt_frozen,
+        contamination_checked=package.contamination_checked,
+        coder_count=package.adjudication.coder_count,
+        adjudicator=package.adjudication.adjudicator,
+        protocol=package.adjudication.protocol,
+        human_human_agreement=package.adjudication.human_human_agreement,
+        notes=package.adjudication.notes,
+        count_key="application_gold_count",
+        anchor_count=len(package.application_gold),
+    )
+
+
+def _gold_set_provenance(
+    *,
+    schema_version: int,
+    gold_set_id: str,
+    dataset_name: str,
+    split: str,
+    corpus_sha256: str,
+    project_state_sha256: str | None,
+    prompt_frozen: bool,
+    contamination_checked: bool,
+    coder_count: int,
+    adjudicator: str,
+    protocol: str,
+    human_human_agreement: dict[str, Any] | None,
+    notes: str,
+    count_key: str,
+    anchor_count: int,
+) -> dict[str, Any]:
+    """Build anchor-free gold-set provenance for scorecard output."""
+    return {
+        "schema_version": schema_version,
+        "gold_set_id": gold_set_id,
+        "dataset_name": dataset_name,
+        "split": split,
+        "corpus_sha256": corpus_sha256,
+        "project_state_sha256": project_state_sha256,
+        "prompt_frozen": prompt_frozen,
+        "contamination_checked": contamination_checked,
+        "adjudication": {
+            "coder_count": coder_count,
+            "adjudicator": adjudicator,
+            "protocol": protocol,
+            "human_human_agreement": human_human_agreement,
+            "notes": notes,
+        },
+        count_key: anchor_count,
+    }
 
 
 def _predicted_application_keys(state: ProjectState) -> tuple[set[str], list[str]]:

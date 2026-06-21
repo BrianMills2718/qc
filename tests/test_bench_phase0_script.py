@@ -197,6 +197,7 @@ def test_bench_phase0_scores_d3_from_gold_file_without_mutating_state(
     assert output["application_validity_d3"]["status"] == "scored"
     assert output["application_validity_d3"]["recall"] == 1.0
     assert output["_meta"]["input_hashes"]["d3_gold_file_sha256"] == _sha256_file(d3_gold_file)
+    assert "gold_provenance" not in output["application_validity_d3"]
     reloaded = store.load(state.id)
     assert "application_gold" not in reloaded.config.extra
 
@@ -262,6 +263,14 @@ def test_bench_phase0_scores_d3_from_versioned_gold_package(
     assert output["application_validity_d3"]["status"] == "scored"
     assert output["application_validity_d3"]["recall"] == 1.0
     assert output["application_validity_d3"]["precision"] == 1.0
+    provenance = output["application_validity_d3"]["gold_provenance"]
+    assert provenance["gold_set_id"] == "d3-heldout-v1"
+    assert provenance["dataset_name"] == "Held-out D3 package"
+    assert provenance["split"] == "held_out"
+    assert provenance["prompt_frozen"] is True
+    assert provenance["contamination_checked"] is True
+    assert provenance["adjudication"]["coder_count"] == 2
+    assert provenance["application_gold_count"] == 1
     reloaded = store.load(state.id)
     assert "application_gold" not in reloaded.config.extra
 
@@ -481,6 +490,7 @@ def test_bench_phase0_scores_d7_from_gold_file_without_mutating_state(
     assert output["disconfirmation_d7"]["status"] == "scored"
     assert output["disconfirmation_d7"]["recall"] == 1.0
     assert output["disconfirmation_d7"]["precision"] == 1.0
+    assert "gold_provenance" not in output["disconfirmation_d7"]
     reloaded = store.load(state.id)
     assert "disconfirmation_gold" not in reloaded.config.extra
 
@@ -558,6 +568,14 @@ def test_bench_phase0_scores_d7_from_versioned_gold_package(
     assert output["disconfirmation_d7"]["status"] == "scored"
     assert output["disconfirmation_d7"]["recall"] == 1.0
     assert output["disconfirmation_d7"]["precision"] == 1.0
+    provenance = output["disconfirmation_d7"]["gold_provenance"]
+    assert provenance["gold_set_id"] == "d7-heldout-v1"
+    assert provenance["dataset_name"] == "Held-out D7 package"
+    assert provenance["split"] == "held_out"
+    assert provenance["prompt_frozen"] is True
+    assert provenance["contamination_checked"] is True
+    assert provenance["adjudication"]["coder_count"] == 2
+    assert provenance["contrary_evidence_count"] == 1
 
 
 def test_bench_phase0_scores_d7_baselines_from_file_without_mutating_state(
