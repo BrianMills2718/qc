@@ -1,10 +1,33 @@
 # Plan #21: INV-7 Prompt Injection Scorecard
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** INV-7 instruction/data separation; INV-7 prompt override guards
 **Blocks:** live adversarial prompt-injection evaluation; broader custom-prompt governance
+
+---
+
+## Outcome
+
+`phase0_scorecard()` now includes `prompt_injection_inv7`. It reports
+`not_available` when no fixture outcomes are present, and scores externally
+supplied fixture outcomes from `ProjectState.config.extra`, `scripts/bench_phase0.py
+--prompt-injection-file`, or `make bench PROMPT_INJECTION=inv7.json` without
+mutating saved project state. The score reports total fixtures, pass/fail
+counts, pass rate, attack-success rate, failed fixture IDs, and per-surface
+summaries.
+
+This is a measurement substrate only. It does not run a live adversarial model
+benchmark or prove prompt-injection robustness.
+
+**Verification:** `python -m pytest tests/test_bench_phase0.py
+tests/test_bench_phase0_script.py tests/test_prompt_boundaries_inv7.py -q`
+passed (31 tests), and `python -m ruff check qc_clean/core/bench.py
+scripts/bench_phase0.py tests/test_bench_phase0.py
+tests/test_bench_phase0_script.py` passed. Final `make check` passed (666
+passed, 1 skipped, 8 deselected; Ruff passed; docs-check passed). Type checking
+is not configured in this repo.
 
 ---
 
@@ -128,21 +151,21 @@ cross-project callable capability.
 ## Acceptance Criteria
 
 > Feature-level criteria (what the plan accomplishes):
-- [ ] `phase0_scorecard()` includes `prompt_injection_inv7`.
-- [ ] Missing prompt-injection fixture results report `not_available`, not pass.
-- [ ] Supplied fixture results produce pass/fail counts, pass rate,
+- [x] `phase0_scorecard()` includes `prompt_injection_inv7`.
+- [x] Missing prompt-injection fixture results report `not_available`, not pass.
+- [x] Supplied fixture results produce pass/fail counts, pass rate,
   attack-success rate, by-surface summaries, and failed fixture IDs.
-- [ ] `scripts/bench_phase0.py --prompt-injection-file results.json` feeds the
+- [x] `scripts/bench_phase0.py --prompt-injection-file results.json` feeds the
   scorecard in memory only.
-- [ ] `make bench ID=<project> PROMPT_INJECTION=results.json` forwards the file.
-- [ ] Docs state this is a measurement substrate, not a live adversarial
+- [x] `make bench ID=<project> PROMPT_INJECTION=results.json` forwards the file.
+- [x] Docs state this is a measurement substrate, not a live adversarial
   robustness claim.
 
 > Process criteria (quality gates):
-- [ ] Required tests pass
-- [ ] Full test suite passes
-- [ ] Type check status is reported
-- [ ] Docs updated
+- [x] Required tests pass (`python -m pytest tests/test_bench_phase0.py tests/test_bench_phase0_script.py tests/test_prompt_boundaries_inv7.py -q`: 31 passed)
+- [x] Full test suite passes (`make check`: 666 passed, 1 skipped, 8 deselected; Ruff/docs-check passed)
+- [x] Type check status is reported (`make check`: type check not yet configured)
+- [x] Docs updated
 
 ---
 
