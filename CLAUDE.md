@@ -29,7 +29,7 @@ All stages use structured LLM output via Pydantic schemas + JSON mode. State is 
 The software is **built and software-validated** (deterministic tests + live-LLM E2E; ruff + docs gates green) — "the program does what it's built to do," *not* evidence the analysis is methodologically valid. Implemented:
 
 - Thematic and **GT-inspired** (not "full GT") pipelines; `NegativeCaseStage` runs **last** in both (INV-6), automatic cross-interview analysis for multi-doc corpora.
-- GT constant comparison; incremental re-coding via `project recode` (flags stale higher-order outputs, INV-11).
+- GT constant comparison; category-saturation diagnostics separate from codebook stability (INV-4 partial); incremental re-coding via `project recode` (flags stale higher-order outputs, INV-11).
 - **Span-anchored grounding** (INV-1, mostly met): quotes resolve to char offsets + hash or are dropped + warned; `verify_grounding`/`make bench` measure the rate.
 - **Segment universe + coverage** (INV-8): every doc split into char-anchored segments; `project run --exhaustive` codes *every* segment (examined-and-judged coverage, segment-anchored applications), else traversal coverage.
 - **First-class claim ledger** (INV-9 object layer): substantive stage outputs become `AnalyticClaim` objects or no-claims events, with source stage, kind, scope, support/adjudication status, anchors where available, and CLI/API/MCP/export read surfaces.
@@ -38,7 +38,7 @@ The software is **built and software-validated** (deterministic tests + live-LLM
 - Human review (CLI + browser), `project irr` (LLM-pass *codebook-discovery* agreement by default; **application-level** positive segment × code agreement plus segment-decision agreement via `--application-level`, using exhaustive coding), `project stability`.
 - Graph viz, JSON/CSV/Markdown/QDPX export, per-stage memos, per-code audit trail; typed `PipelineContext`/results, fail-loud inter-stage checks, `llm_client` observability.
 
-**Direction:** the end product is public and SOTA-targeting; the proven/measured/planned ledger, the architectural invariants, and the ranked roadmap are in `docs/PROJECT_THEORY_AND_GOALS.md` (§13/§13.1/§18). Recent structural work landed: span anchoring (INV-1), the segment universe + exhaustive coverage (INV-8), the first-class claim ledger object layer (INV-9), retrieval-first/adversarial/BM25-style ledger disconfirmation/claim review first slices plus a gold-dependent D7 scorecard substrate (INV-2/INV-6/INV-10 partial), and first-party instruction/data separation for raw + derived prompt inputs (INV-7 partial). Next high-value lanes: semantic/embedding retrieval + held-out D7 evaluation/gold-set wiring (INV-2 follow-up), custom-prompt threat-model hardening / live injection evaluation (INV-7 follow-up), and theoretical sampling/saturation (INV-4 when GT claims theory generation).
+**Direction:** the end product is public and SOTA-targeting; the proven/measured/planned ledger, the architectural invariants, and the ranked roadmap are in `docs/PROJECT_THEORY_AND_GOALS.md` (§13/§13.1/§18). Recent structural work landed: span anchoring (INV-1), the segment universe + exhaustive coverage (INV-8), the first-class claim ledger object layer (INV-9), retrieval-first/adversarial/BM25-style ledger disconfirmation/claim review first slices plus a gold-dependent D7 scorecard substrate (INV-2/INV-6/INV-10 partial), first-party instruction/data separation for raw + derived prompt inputs (INV-7 partial), and category-saturation diagnostics (INV-4 partial). Next high-value lanes: semantic/embedding retrieval + held-out D7 evaluation/gold-set wiring (INV-2 follow-up), live injection evaluation / broader custom-prompt governance (INV-7 follow-up), and theoretical sampling protocol (INV-4 when GT claims theory generation).
 
 ## Architecture
 
@@ -298,7 +298,7 @@ Superseded by the canonical theory doc: the proven/measured/planned **state ledg
 
 ## Next Steps
 
-The ranked roadmap (invariants before features) lives in `docs/PROJECT_THEORY_AND_GOALS.md` §18 — evaluation harness (keystone), span anchoring (done), segment universe + exhaustive coding (INV-8, done), claim ledger object layer (INV-9, mostly done), retrieval-first/adversarial/BM25-style disconfirmation/adjudication first slices (INV-2/INV-6/INV-10 partial), raw + derived instruction/data separation first slices (INV-7 partial), semantic retrieval + held-out D7 evaluation, custom-prompt hardening, theoretical sampling/saturation, etc. Don't duplicate it here.
+The ranked roadmap (invariants before features) lives in `docs/PROJECT_THEORY_AND_GOALS.md` §18 — evaluation harness (keystone), span anchoring (done), segment universe + exhaustive coding (INV-8, done), claim ledger object layer (INV-9, mostly done), retrieval-first/adversarial/BM25-style disconfirmation/adjudication first slices (INV-2/INV-6/INV-10 partial), raw + derived instruction/data separation first slices (INV-7 partial), category-saturation diagnostics (INV-4 partial), semantic retrieval + held-out D7 evaluation, live prompt-injection evaluation, theoretical sampling protocol, etc. Don't duplicate it here.
 
 ### Maintenance Follow-Ups (2026-06-19)
 - **Line endings**: Normalize mixed CRLF/LF files in one mechanical commit with no behavior changes, then run `make check`.

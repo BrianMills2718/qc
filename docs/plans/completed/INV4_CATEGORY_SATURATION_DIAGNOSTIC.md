@@ -1,10 +1,30 @@
 # Plan #14: INV-4 Category Saturation Diagnostic
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** None
 **Blocks:** INV-4 category-level saturation; theoretical sampling protocol
+
+---
+
+## Outcome
+
+Completed 2026-06-21. Added `CategorySaturationDiagnostic` and
+`CategorySaturationSummary` domain models plus
+`assess_category_saturation()` in `qc_clean/core/pipeline/saturation.py`.
+`phase0_scorecard()` now includes `category_saturation`, reporting each
+category's property count, dimension count, supporting applications/documents,
+status, and gaps. The diagnostic is explicitly separate from the existing
+codebook-stability `check_saturation()` path.
+
+This is an adequacy diagnostic only. It does not implement theoretical sampling,
+expert GT-fidelity adjudication, or a methodological saturation proof. INV-4
+remains PARTIAL.
+
+Verification: `python -m pytest tests/test_category_saturation_inv4.py tests/test_bench_phase0.py tests/test_cross_interview.py -q`
+passed (`24 passed`) and Ruff passed on touched files before the implementation
+commit. Final plan completion was verified with `make check`.
 
 ---
 
