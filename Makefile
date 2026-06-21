@@ -1,4 +1,4 @@
-.PHONY: help test test-quick test-e2e test-all bench validate-d3-gold validate-d7-gold run-d7-retrieval compare-d7-retrieval run-inv7-fixtures check lint docs-check clean status cost errors
+.PHONY: help test test-quick test-e2e test-all bench validate-d3-gold validate-d7-gold run-d7-retrieval compare-d7-retrieval run-inv7-fixtures run-inv7-live-fixtures check lint docs-check clean status cost errors
 
 DAYS ?= 7
 PROJECT ?= qualitative_coding
@@ -62,6 +62,12 @@ ifndef OUTPUT
 	$(error OUTPUT is required. Usage: make run-inv7-fixtures OUTPUT=inv7.json)
 endif
 	python scripts/run_inv7_fixtures.py --output $(OUTPUT)
+
+run-inv7-live-fixtures:  ## Run live INV-7 model fixtures (OUTPUT=inv7_live.json [MODEL=gpt-5-mini] [TRACE_ID=id] [MAX_BUDGET=1.0])
+ifndef OUTPUT
+	$(error OUTPUT is required. Usage: make run-inv7-live-fixtures OUTPUT=inv7_live.json MODEL=<model>)
+endif
+	python scripts/run_inv7_live_fixtures.py --output $(OUTPUT) $(if $(MODEL),--model $(MODEL),) $(if $(TRACE_ID),--trace-id $(TRACE_ID),) $(if $(MAX_BUDGET),--max-budget $(MAX_BUDGET),)
 
 check:  ## Run deterministic tests + lint + docs checks
 	python -m pytest tests/ -m "not live_llm" -x -q
