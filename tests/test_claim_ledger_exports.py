@@ -8,6 +8,7 @@ from qc_clean.schemas.domain import (
     ClaimKind,
     ClaimScope,
     ClaimSupportStatus,
+    CorpusScope,
     ProjectState,
 )
 
@@ -56,3 +57,29 @@ def test_markdown_export_includes_claim_ledger_summary(tmp_path):
     assert "**Total claims**: 1" in content
     assert "synthesis_finding" in content
     assert "AI changes workflow." in content
+
+
+def test_markdown_export_includes_corpus_scope(tmp_path):
+    from qc_clean.core.export.data_exporter import ProjectExporter
+
+    state = _claim_state()
+    state.corpus_scope = CorpusScope(
+        phenomenon="AI-assisted workflow change",
+        population="Operations teams in the pilot clinics",
+        sampling_frame="Volunteer interviewees from two pilot clinics",
+        inclusion_criteria=["Participated in the AI workflow pilot"],
+        exclusion_criteria=["No direct workflow involvement"],
+        notes="Bounded to the loaded transcript corpus.",
+    )
+
+    out = tmp_path / "scope.md"
+    ProjectExporter().export_markdown(state, str(out))
+
+    content = Path(out).read_text()
+    assert "## Corpus Scope" in content
+    assert "**Phenomenon**: AI-assisted workflow change" in content
+    assert "**Population**: Operations teams in the pilot clinics" in content
+    assert "**Sampling frame**: Volunteer interviewees from two pilot clinics" in content
+    assert "- Participated in the AI workflow pilot" in content
+    assert "- No direct workflow involvement" in content
+    assert "Bounded to the loaded transcript corpus." in content

@@ -116,6 +116,34 @@ class Corpus(BaseModel):
         return len(self.documents)
 
 
+class CorpusScope(BaseModel):
+    """Analytic boundary for interpreting corpus-level claims."""
+    phenomenon: str = Field(
+        default="",
+        description="Phenomenon, topic, or research question the analysis is scoped to.",
+    )
+    population: str = Field(
+        default="",
+        description="Population, community, or case universe that claims may apply to.",
+    )
+    sampling_frame: str = Field(
+        default="",
+        description="How the source documents or participants were selected for the corpus.",
+    )
+    inclusion_criteria: List[str] = Field(
+        default_factory=list,
+        description="Criteria that qualified documents or participants for inclusion.",
+    )
+    exclusion_criteria: List[str] = Field(
+        default_factory=list,
+        description="Criteria that ruled documents or participants out of scope.",
+    )
+    notes: str = Field(
+        default="",
+        description="Additional caveats, scope conditions, or boundary notes.",
+    )
+
+
 # ---------------------------------------------------------------------------
 # Codebook layer
 # ---------------------------------------------------------------------------
@@ -589,6 +617,10 @@ class ProjectState(BaseModel):
 
     # Document layer
     corpus: Corpus = Field(default_factory=Corpus)
+    corpus_scope: Optional[CorpusScope] = Field(
+        default=None,
+        description="Optional analytic boundary that constrains interpretation of corpus-level claims.",
+    )
 
     # Coding layer
     codebook: Codebook = Field(default_factory=Codebook)

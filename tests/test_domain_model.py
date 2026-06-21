@@ -16,6 +16,7 @@ from qc_clean.schemas.domain import (
     CodeRelationship,
     CoreCategoryResult,
     Corpus,
+    CorpusScope,
     Document,
     DomainEntityRelationship,
     Entity,
@@ -72,6 +73,38 @@ class TestCorpus:
         assert corpus.num_documents == 1
         assert corpus.get_document("d1") is doc
         assert corpus.get_document("missing") is None
+
+
+class TestCorpusScope:
+    def test_project_state_corpus_scope_round_trips(self):
+        state = ProjectState(
+            name="Scope Study",
+            corpus=Corpus(documents=[Document(id="d1", name="interview.txt")]),
+            corpus_scope=CorpusScope(
+                phenomenon="AI adoption in clinics",
+                population="Clinic operations staff",
+                sampling_frame="Three volunteer clinics in the pilot program",
+                inclusion_criteria=["Directly involved in the pilot"],
+                exclusion_criteria=["Vendors and implementation consultants"],
+                notes="Findings are bounded to early-adopter clinics.",
+            ),
+        )
+
+        loaded = ProjectState.model_validate_json(state.model_dump_json())
+
+        assert loaded.corpus_scope is not None
+        assert loaded.corpus_scope.phenomenon == "AI adoption in clinics"
+        assert loaded.corpus_scope.population == "Clinic operations staff"
+        assert loaded.corpus_scope.sampling_frame == (
+            "Three volunteer clinics in the pilot program"
+        )
+        assert loaded.corpus_scope.inclusion_criteria == [
+            "Directly involved in the pilot"
+        ]
+        assert loaded.corpus_scope.exclusion_criteria == [
+            "Vendors and implementation consultants"
+        ]
+        assert loaded.corpus_scope.notes == "Findings are bounded to early-adopter clinics."
 
 
 # ---------------------------------------------------------------------------

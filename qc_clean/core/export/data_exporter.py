@@ -239,6 +239,40 @@ class ProjectExporter:
                 _a(f"> - {w}")
             _a("")
 
+        if state.corpus_scope:
+            scope = state.corpus_scope
+            _a("## Corpus Scope")
+            _a("")
+            wrote_scope_detail = False
+            if scope.phenomenon:
+                _a(f"**Phenomenon**: {scope.phenomenon}")
+                wrote_scope_detail = True
+            if scope.population:
+                _a(f"**Population**: {scope.population}")
+                wrote_scope_detail = True
+            if scope.sampling_frame:
+                _a(f"**Sampling frame**: {scope.sampling_frame}")
+                wrote_scope_detail = True
+            if scope.inclusion_criteria:
+                _a("")
+                _a("**Inclusion criteria**:")
+                for criterion in scope.inclusion_criteria:
+                    _a(f"- {criterion}")
+                wrote_scope_detail = True
+            if scope.exclusion_criteria:
+                _a("")
+                _a("**Exclusion criteria**:")
+                for criterion in scope.exclusion_criteria:
+                    _a(f"- {criterion}")
+                wrote_scope_detail = True
+            if scope.notes:
+                _a("")
+                _a(f"**Notes**: {scope.notes}")
+                wrote_scope_detail = True
+            if not wrote_scope_detail:
+                _a("Scope record exists, but no scope details are specified.")
+            _a("")
+
         # Executive summary
         if state.synthesis and state.synthesis.executive_summary:
             _a("## Executive Summary")
