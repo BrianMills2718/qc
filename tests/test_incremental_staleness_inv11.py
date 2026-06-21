@@ -1,23 +1,33 @@
-"""INV-11 regression: incremental recode must flag stale higher-order outputs.
+"""INV-11 regression: incremental recode must invalidate stale higher-order outputs.
 
 `project recode` does not recompute perspective/entities/synthesis/GT outputs.
-When the corpus changes, those become stale; the system must flag them rather
-than silently retain them as if current. These tests cover the detector.
+When the corpus changes, those become stale; the system must invalidate them
+rather than silently retain them as if current. These tests cover the detector
+and invalidator.
 """
 
 from qc_clean.core.pipeline.stages.incremental_coding import (
+    invalidate_stale_higher_order_outputs,
     _stale_higher_order_outputs,
 )
 from qc_clean.schemas.domain import (
+    AnalyticClaim,
+    AnalysisPhaseResult,
+    ClaimKind,
+    ClaimScope,
+    CodeRelationship,
     Corpus,
     CoreCategoryResult,
+    DomainEntityRelationship,
     Document,
     Entity,
     Methodology,
     PerspectiveAnalysis,
+    PipelineStatus,
     ProjectConfig,
     ProjectState,
     Synthesis,
+    TheoreticalModelResult,
 )
 
 
@@ -39,14 +49,29 @@ def test_detects_populated_outputs():
     state = _state(
         synthesis=Synthesis(executive_summary="s"),
         perspective_analysis=PerspectiveAnalysis(),
+        code_relationships=[CodeRelationship(source_code_id="c1", target_code_id="c2")],
         entities=[Entity(name="X")],
+        entity_relationships=[
+            DomainEntityRelationship(
+                entity_1_id="e1",
+                entity_2_id="e2",
+                relationship_type="influences",
+            )
+        ],
         core_categories=[CoreCategoryResult(category_name="C")],
+        theoretical_model=TheoreticalModelResult(
+            model_name="M",
+            propositions=["P"],
+        ),
     )
     stale = _stale_higher_order_outputs(state)
     assert "synthesis" in stale
     assert "perspective_analysis" in stale
+    assert "code_relationships" in stale
     assert "entities" in stale
+    assert "entity_relationships" in stale
     assert "core_categories" in stale
+    assert "theoretical_model" in stale
 
 
 def test_empty_collections_not_flagged():
@@ -55,17 +80,93 @@ def test_empty_collections_not_flagged():
     assert _stale_higher_order_outputs(state) == []
 
 
+def test_invalidate_stale_higher_order_outputs_clears_outputs_phase_results_and_claims():
+    state = _state(
+        synthesis=Synthesis(executive_summary="stale"),
+        perspective_analysis=PerspectiveAnalysis(),
+        code_relationships=[CodeRelationship(source_code_id="c1", target_code_id="c2")],
+        entities=[Entity(id="e1", name="Entity")],
+        entity_relationships=[
+            DomainEntityRelationship(
+                entity_1_id="e1",
+                entity_2_id="e2",
+                relationship_type="influences",
+            )
+        ],
+        core_categories=[CoreCategoryResult(category_name="Core")],
+        theoretical_model=TheoreticalModelResult(
+            model_name="Theory",
+            propositions=["P"],
+        ),
+        claims=[
+            _claim("synthesis", ClaimKind.SYNTHESIS_FINDING),
+            _claim("perspective", ClaimKind.PERSPECTIVE),
+            _claim("relationship", ClaimKind.RELATIONSHIP),
+            _claim("gt_axial_coding", ClaimKind.RELATIONSHIP),
+            _claim("gt_selective_coding", ClaimKind.GT_CATEGORY),
+            _claim("gt_theory_integration", ClaimKind.GT_PROPOSITION),
+            _claim("thematic_coding", ClaimKind.CODE),
+            _claim("cross_interview", ClaimKind.CROSS_CASE),
+            _claim("negative_case_analysis", ClaimKind.NEGATIVE_CASE),
+        ],
+        phase_results=[
+            AnalysisPhaseResult(phase_name="synthesis", status=PipelineStatus.COMPLETED),
+            AnalysisPhaseResult(phase_name="relationship", status=PipelineStatus.COMPLETED),
+            AnalysisPhaseResult(phase_name="gt_selective_coding", status=PipelineStatus.COMPLETED),
+            AnalysisPhaseResult(phase_name="thematic_coding", status=PipelineStatus.COMPLETED),
+            AnalysisPhaseResult(phase_name="cross_interview", status=PipelineStatus.COMPLETED),
+        ],
+    )
+
+    invalidated = invalidate_stale_higher_order_outputs(state)
+
+    assert set(invalidated) == {
+        "synthesis",
+        "perspective_analysis",
+        "code_relationships",
+        "entities",
+        "entity_relationships",
+        "core_categories",
+        "theoretical_model",
+    }
+    assert state.synthesis is None
+    assert state.perspective_analysis is None
+    assert state.code_relationships == []
+    assert state.entities == []
+    assert state.entity_relationships == []
+    assert state.core_categories == []
+    assert state.theoretical_model is None
+    assert {claim.source_stage for claim in state.claims} == {
+        "thematic_coding",
+        "cross_interview",
+        "negative_case_analysis",
+    }
+    assert [result.phase_name for result in state.phase_results] == [
+        "thematic_coding",
+        "cross_interview",
+    ]
+
+
 def test_markdown_export_surfaces_data_warnings(tmp_path):
-    """data_warnings must be rendered in the Markdown report, not silently
-    dropped while stale synthesis/etc. are rendered (INV-11)."""
+    """data_warnings must be rendered in the Markdown report (INV-11)."""
     from qc_clean.core.export.data_exporter import ProjectExporter
 
     state = _state(
-        synthesis=Synthesis(executive_summary="stale summary"),
-        data_warnings=["Incremental recode ... did not recompute: synthesis."],
+        data_warnings=["Incremental recode ... invalidated: synthesis."],
     )
     out = tmp_path / "report.md"
     ProjectExporter().export_markdown(state, str(out))
     text = out.read_text()
     assert "Data warnings" in text
-    assert "did not recompute: synthesis" in text
+    assert "invalidated: synthesis" in text
+
+
+def _claim(source_stage: str, kind: ClaimKind) -> AnalyticClaim:
+    return AnalyticClaim(
+        claim_kind=kind,
+        source_stage=source_stage,
+        claim_text=f"{source_stage} claim",
+        scope=ClaimScope(corpus_level=True),
+        origin_object_type="fixture",
+        origin_object_id=source_stage,
+    )

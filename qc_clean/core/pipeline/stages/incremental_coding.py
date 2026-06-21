@@ -29,6 +29,15 @@ from ..pipeline_engine import PipelineContext, PipelineStage
 
 logger = logging.getLogger(__name__)
 
+_STALE_CLAIM_SOURCE_STAGES = {
+    "perspective",
+    "relationship",
+    "synthesis",
+    "gt_axial_coding",
+    "gt_selective_coding",
+    "gt_theory_integration",
+}
+
 
 class IncrementalCodingStage(PipelineStage):
     """Code only new/uncoded documents against an existing codebook."""
@@ -118,38 +127,72 @@ class IncrementalCodingStage(PipelineStage):
                 code_refs=[c.id for c in state.codebook.codes],
             ))
 
-        # INV-11: the incremental pipeline does NOT recompute the higher-order
-        # interpretive outputs (perspective, entities/relationships, synthesis,
-        # GT core categories / theoretical model). New documents can change all of
-        # them, so flag any that are populated as possibly stale rather than
-        # silently retaining them as if current. Non-destructive: we warn, we do
-        # not clear the prior outputs.
-        stale = _stale_higher_order_outputs(state)
-        if stale:
+        # INV-11: the incremental pipeline does NOT recompute these higher-order
+        # interpretive outputs. New documents can change all of them, so remove
+        # stale objects and stale ledger rows rather than exporting pre-recode
+        # interpretations as if current.
+        invalidated = invalidate_stale_higher_order_outputs(state)
+        if invalidated:
             warning = (
                 f"Incremental recode (iteration {state.iteration}) added "
-                f"{len(new_docs)} document(s) but did not recompute: "
-                f"{', '.join(stale)}. These reflect the corpus before this recode "
-                f"and may be stale; re-run the full pipeline to refresh them."
+                f"{len(new_docs)} document(s) and invalidated: "
+                f"{', '.join(invalidated)}. Re-run the full pipeline to "
+                f"regenerate these outputs for the updated corpus."
             )
             state.data_warnings.append(warning)
-            logger.warning("INV-11 staleness: %s", warning)
+            logger.warning("INV-11 invalidation: %s", warning)
 
         return state
+
+
+def invalidate_stale_higher_order_outputs(state: ProjectState) -> List[str]:
+    """Clear higher-order outputs the incremental pipeline does not recompute."""
+    stale = _stale_higher_order_outputs(state)
+    if not stale:
+        return []
+
+    if "synthesis" in stale:
+        state.synthesis = None
+    if "perspective_analysis" in stale:
+        state.perspective_analysis = None
+    if "code_relationships" in stale:
+        state.code_relationships = []
+    if "entities" in stale:
+        state.entities = []
+    if "entity_relationships" in stale:
+        state.entity_relationships = []
+    if "core_categories" in stale:
+        state.core_categories = []
+    if "theoretical_model" in stale:
+        state.theoretical_model = None
+
+    state.phase_results = [
+        result
+        for result in state.phase_results
+        if result.phase_name not in _STALE_CLAIM_SOURCE_STAGES
+    ]
+    state.claims = [
+        claim
+        for claim in state.claims
+        if claim.source_stage not in _STALE_CLAIM_SOURCE_STAGES
+    ]
+    return stale
 
 
 def _stale_higher_order_outputs(state: ProjectState) -> List[str]:
     """Names of populated outputs the incremental pipeline does not recompute.
 
-    Used to flag inferential staleness after a recode (INV-11). Cross-interview
-    and negative-case outputs are excluded because the incremental pipeline does
-    re-run those stages.
+    Used to invalidate inferential staleness after a recode (INV-11).
+    Cross-interview and negative-case outputs are excluded because the
+    incremental pipeline reruns those stages.
     """
     stale: List[str] = []
     if state.synthesis is not None:
         stale.append("synthesis")
     if state.perspective_analysis is not None:
         stale.append("perspective_analysis")
+    if state.code_relationships:
+        stale.append("code_relationships")
     if state.entities:
         stale.append("entities")
     if state.entity_relationships:

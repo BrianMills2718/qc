@@ -20,6 +20,9 @@ from qc_clean.core.pipeline.stages.incremental_coding import (
 from qc_clean.core.pipeline.pipeline_factory import create_incremental_pipeline
 from qc_clean.schemas.analysis_schemas import CodeHierarchy, ThematicCode
 from qc_clean.schemas.domain import (
+    AnalyticClaim,
+    ClaimKind,
+    ClaimScope,
     Code,
     CodeApplication,
     Codebook,
@@ -29,6 +32,7 @@ from qc_clean.schemas.domain import (
     ProjectConfig,
     ProjectState,
     Provenance,
+    Synthesis,
 )
 
 
@@ -262,6 +266,50 @@ class TestIncrementalCodingStage:
 
         # Must have at least the original applications
         assert len(result.code_applications) >= original_apps
+
+    def test_incremental_coding_invalidates_stale_higher_order_outputs(self):
+        """Successful incremental recode hard-invalidates outputs it cannot refresh."""
+        state = _make_state_with_codes()
+        state.synthesis = Synthesis(executive_summary="stale summary")
+        state.claims = [
+            AnalyticClaim(
+                claim_kind=ClaimKind.SYNTHESIS_FINDING,
+                source_stage="synthesis",
+                claim_text="Old synthesis claim.",
+                scope=ClaimScope(corpus_level=True),
+                origin_object_type="synthesis",
+                origin_object_id="old",
+            ),
+            AnalyticClaim(
+                claim_kind=ClaimKind.CODE,
+                source_stage="thematic_coding",
+                claim_text="Code claim should remain.",
+                scope=ClaimScope(code_ids=["AI_ADOPTION"]),
+                origin_object_type="code",
+                origin_object_id="AI_ADOPTION",
+            ),
+        ]
+        response = _make_code_hierarchy([
+            {
+                "id": "DATA_PRIVACY",
+                "name": "Data Privacy",
+                "description": "Concerns about data protection",
+                "example_quotes": ["Data privacy is our top concern"],
+                "confidence": 0.9,
+            },
+        ])
+
+        with patch("qc_clean.core.llm.llm_handler.LLMHandler") as MockLLM:
+            instance = MockLLM.return_value
+            instance.extract_structured = AsyncMock(return_value=response)
+            result = asyncio.run(
+                IncrementalCodingStage().execute(state, PipelineContext())
+            )
+
+        assert result.synthesis is None
+        assert [claim.source_stage for claim in result.claims] == ["thematic_coding"]
+        assert any("invalidated: synthesis" in warning for warning in result.data_warnings)
+        assert not any("may be stale" in warning for warning in result.data_warnings)
 
     def test_stage_name(self):
         assert IncrementalCodingStage().name() == "incremental_coding"
