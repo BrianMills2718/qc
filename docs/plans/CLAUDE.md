@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 38 | Gold-set provenance in scorecards | High | Planned | `GOLD_SET_PROVENANCE_SCORECARD.md` |
 
 ## Completed Plans
 
