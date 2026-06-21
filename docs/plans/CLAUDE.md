@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 44 | Human-ceiling comparison scorecard | High | Planned | `HUMAN_CEILING_COMPARISON_SCORECARD.md` |
 
 ## Completed Plans
 
