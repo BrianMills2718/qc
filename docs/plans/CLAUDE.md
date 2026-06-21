@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 45 | D5 Gwet AC1 reliability scorecard | High | Planned | `D5_GWET_AC1_RELIABILITY_SCORECARD.md` |
 
 ## Completed Plans
 
