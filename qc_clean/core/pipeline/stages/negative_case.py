@@ -9,11 +9,15 @@ disconfirming evidence. Addresses Lincoln & Guba's credibility criterion.
 from __future__ import annotations
 
 import logging
-from typing import List
+from typing import List, Optional
 
 from pydantic import BaseModel, Field
 
-from qc_clean.core.claims import claims_for_negative_cases, replace_claims_for_stage
+from qc_clean.core.claims import (
+    claims_for_negative_cases,
+    format_disconfirmation_targets,
+    replace_claims_for_stage,
+)
 from qc_clean.schemas.domain import AnalysisMemo, ProjectState, Provenance
 from ..pipeline_engine import PipelineContext, PipelineStage
 
@@ -23,6 +27,10 @@ logger = logging.getLogger(__name__)
 class NegativeCase(BaseModel):
     """A piece of data that contradicts or doesn't fit the emerging categories."""
     code_name: str = Field(description="The code/category being challenged")
+    target_claim_id: Optional[str] = Field(
+        default=None,
+        description="Exact claim_id being challenged when the evidence contradicts a listed claim-ledger target",
+    )
     disconfirming_evidence: str = Field(description="Quote or data that contradicts this code")
     explanation: str = Field(description="Why this evidence challenges the code")
     implication: str = Field(default="", description="What this means for the analysis")
@@ -63,6 +71,7 @@ class NegativeCaseStage(PipelineStage):
         combined_text = _build_combined_text(state)
         codes_text = _format_codebook(state)
         cross_claims = _format_cross_interview_claims(state)
+        ledger_targets = format_disconfirmation_targets(state)
 
         # When cross-interview analysis has run, disconfirmation must cover those
         # final claims too, not only the codebook (INV-6). The section is omitted
@@ -71,6 +80,12 @@ class NegativeCaseStage(PipelineStage):
             f"\n\nCROSS-INTERVIEW CLAIMS TO ALSO CHALLENGE (consensus / divergent themes "
             f"asserted across interviews — test whether the data actually supports them):\n{cross_claims}"
             if cross_claims
+            else ""
+        )
+        ledger_section = (
+            f"\n\n{ledger_targets}\n\nIf a negative case challenges one of these ledger targets, "
+            "copy that exact claim_id into target_claim_id."
+            if ledger_targets
             else ""
         )
 
@@ -83,12 +98,13 @@ Given the codebook AND any cross-interview claims developed from the interview d
 4. Shows exceptions to the patterns identified
 
 CURRENT CODEBOOK:
-{codes_text}{cross_section}
+{codes_text}{cross_section}{ledger_section}
 
 INTERVIEW DATA:
 {combined_text}
 
 For each negative case found:
+- If it challenges a listed claim-ledger target, copy that target's exact claim_id into target_claim_id
 - Identify which code/category is being challenged
 - Provide the specific disconfirming evidence (verbatim quote or paraphrase)
 - Explain WHY this evidence challenges the code

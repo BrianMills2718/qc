@@ -6,9 +6,15 @@ codebook. These tests lock in the plumbing that surfaces the cross-interview
 ``cross_case`` memo to the disconfirmation prompt.
 """
 
+import asyncio
+from unittest.mock import AsyncMock, patch
+
 from qc_clean.core.claims import claims_for_negative_cases
+from qc_clean.core.pipeline.pipeline_engine import PipelineContext
 from qc_clean.core.pipeline.stages.negative_case import (
     NegativeCase,
+    NegativeCaseResponse,
+    NegativeCaseStage,
     _format_cross_interview_claims,
 )
 from qc_clean.schemas.domain import (
@@ -111,3 +117,74 @@ def test_negative_case_claim_links_challenged_cross_case_claim_and_contrary_anch
     assert claim.scope.claim_ids == ["claim-cross-ai"]
     assert claim.support_status == ClaimSupportStatus.SUPPORTED
     assert claim.contrary_anchors[0].doc_id == "d1"
+
+
+def test_negative_case_prompt_includes_claim_ledger_targets():
+    state = _state(
+        corpus=Corpus(documents=[
+            Document(id="d1", name="d1.txt", content="Alex abandoned AI after errors.")
+        ]),
+        codebook=Codebook(codes=[Code(id="C1", name="AI Adoption")]),
+        claims=[
+            AnalyticClaim(
+                id="claim-synthesis",
+                claim_kind=ClaimKind.SYNTHESIS_FINDING,
+                source_stage="synthesis",
+                claim_text="AI Adoption improves workflow across the corpus.",
+                scope=ClaimScope(corpus_level=True, code_ids=["C1"]),
+                origin_object_type="synthesis",
+                origin_object_id="finding:0",
+                support_status=ClaimSupportStatus.NEEDS_ANCHOR,
+            )
+        ],
+    )
+    response = NegativeCaseResponse(
+        negative_cases=[],
+        overall_assessment="No negative cases found.",
+    )
+    captured_prompt = ""
+
+    async def capture_prompt(prompt, *_args, **_kwargs):
+        nonlocal captured_prompt
+        captured_prompt = prompt
+        return response
+
+    with patch("qc_clean.core.llm.llm_handler.LLMHandler") as MockLLM:
+        instance = MockLLM.return_value
+        instance.extract_structured = AsyncMock(side_effect=capture_prompt)
+        asyncio.run(NegativeCaseStage().execute(state, PipelineContext()))
+
+    assert "CLAIM LEDGER TARGETS TO CHALLENGE" in captured_prompt
+    assert "claim_id=claim-synthesis" in captured_prompt
+    assert "AI Adoption improves workflow across the corpus." in captured_prompt
+
+
+def test_negative_case_builder_prefers_explicit_target_claim_id():
+    state = _state(
+        corpus=Corpus(documents=[
+            Document(id="d1", name="d1.txt", content="Alex abandoned AI after errors.")
+        ]),
+        codebook=Codebook(codes=[Code(id="C1", name="AI Adoption")]),
+        claims=[
+            AnalyticClaim(
+                id="claim-synthesis",
+                claim_kind=ClaimKind.SYNTHESIS_FINDING,
+                source_stage="synthesis",
+                claim_text="AI Adoption improves workflow across the corpus.",
+                scope=ClaimScope(corpus_level=True, code_ids=["C1"]),
+                origin_object_type="synthesis",
+                origin_object_id="finding:0",
+            )
+        ],
+    )
+    negative_case = NegativeCase(
+        code_name="Unmatched Theme",
+        target_claim_id="claim-synthesis",
+        disconfirming_evidence="abandoned AI after errors",
+        explanation="This challenges the workflow-improvement claim.",
+        implication="The claim needs a boundary condition.",
+    )
+
+    claims = claims_for_negative_cases(state, [negative_case])
+
+    assert claims[0].scope.claim_ids == ["claim-synthesis"]

@@ -98,7 +98,7 @@ These are internal project capabilities, not cross-project boundary APIs.
 | Phase | Scope | Verification | Commit |
 |---|---|---|---|
 | 1 | Ledger target enumeration and disconfirmation coverage summary over `ProjectState.claims` | DONE: `tests/test_claims.py` focused target/coverage tests | `[Plan: INV6] Add ledger disconfirmation helpers` |
-| 2 | Negative-case schema/prompt wiring: include bounded claim targets and preserve explicit challenged claim IDs | `tests/test_negative_case_inv6.py`; prompt-target and builder tests | `[Plan: INV6] Target negative cases to ledger claims` |
+| 2 | Negative-case schema/prompt wiring: include bounded claim targets and preserve explicit challenged claim IDs | DONE: `tests/test_negative_case_inv6.py`; prompt-target and builder tests | `[Plan: INV6] Target negative cases to ledger claims` |
 | 3 | Claim adjudication via `ReviewManager`: approve/reject/modify claim objects, append `ClaimRevision`, preserve fail-loud unknown targets | review manager tests | `[Plan: INV10] Add claim review decisions` |
 | 4 | Read surfaces for disconfirmation/adjudication summaries where useful: CLI/API/MCP bounded summary, no raw full-state dump | CLI/API/MCP tests if surface added | `[Plan: INV6] Expose disconfirmation coverage` |
 | 5 | Docs/governance: update INV-6/INV-10 statuses conservatively and move plan to completed records | `make docs-check`; `make check` | `[Plan: INV6] Document ledger disconfirmation` |
@@ -132,8 +132,8 @@ These are internal project capabilities, not cross-project boundary APIs.
 Feature-level criteria:
 
 - [x] Every non-negative, non-no-claims substantive claim can be enumerated as a disconfirmation target.
-- [ ] Negative-case prompts include claim IDs/text/scope for all bounded ledger targets or a documented truncation.
-- [ ] `NegativeCase` can name an explicit challenged claim ID; builder stores it in `ClaimScope.claim_ids`.
+- [x] Negative-case prompts include claim IDs/text/scope for all bounded ledger targets or a documented truncation.
+- [x] `NegativeCase` can name an explicit challenged claim ID; builder stores it in `ClaimScope.claim_ids`.
 - [x] Disconfirmation coverage summary reports total targets, challenged targets, unchallenged targets, and challenged rate.
 - [ ] Claim review decisions can approve, reject/withdraw, or modify an `AnalyticClaim` and append revision history.
 - [ ] Unknown claim IDs and unsupported claim review actions fail loudly.
@@ -169,3 +169,9 @@ Phase 1 complete 2026-06-21: added deterministic claim-target enumeration,
 disconfirmation coverage summaries, and bounded target formatting for prompt
 use. Verification: focused Phase 1 tests (2 passed) and `tests/test_claims.py`
 (12 passed).
+
+Phase 2 complete 2026-06-21: added `NegativeCase.target_claim_id`, injected
+bounded claim-ledger targets into the negative-case prompt, and made
+negative-case claim construction prefer exact live target IDs over code-name
+fallbacks. Verification: focused Phase 2 tests (2 passed) and affected
+claim/negative-case/pipeline suites (26 passed).

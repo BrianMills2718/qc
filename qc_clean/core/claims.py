@@ -358,7 +358,12 @@ def claims_for_negative_cases(
         code_id = _code_id_by_name(state, negative_case.code_name)
         anchor = _anchor_from_quote(state, negative_case.disconfirming_evidence)
         contrary_anchors = [anchor] if anchor else []
-        target_claim_ids = _claim_ids_for_code_target(state, code_id, source_stage)
+        target_claim_ids = _claim_ids_for_negative_case_target(
+            state,
+            negative_case,
+            code_id,
+            source_stage,
+        )
         claims.append(AnalyticClaim(
             claim_kind=ClaimKind.NEGATIVE_CASE,
             source_stage=source_stage,
@@ -646,6 +651,24 @@ def _claim_ids_for_code_target(
         if code_id in claim.scope.code_ids:
             target_ids.append(claim.id)
     return target_ids
+
+
+def _claim_ids_for_negative_case_target(
+    state: ProjectState,
+    negative_case: Any,
+    code_id: str | None,
+    source_stage: str,
+) -> list[str]:
+    """Resolve exact or fallback challenged claim IDs for a negative case."""
+    explicit_target = getattr(negative_case, "target_claim_id", None)
+    if explicit_target:
+        target_ids = {claim.id for claim in disconfirmation_targets(state)}
+        if explicit_target not in target_ids:
+            raise ValueError(
+                f"Negative case target_claim_id '{explicit_target}' is not a live disconfirmation target"
+            )
+        return [explicit_target]
+    return _claim_ids_for_code_target(state, code_id, source_stage)
 
 
 def _anchor_from_quote(state: ProjectState, quote: str) -> ClaimAnchor | None:
