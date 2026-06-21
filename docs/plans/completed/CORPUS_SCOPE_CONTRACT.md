@@ -1,6 +1,22 @@
 # Plan #16: Corpus Scope Contract
 
-**Status:** Planned
+**Outcome:** Complete. Added optional `ProjectState.corpus_scope` with typed
+`CorpusScope` fields for phenomenon, population, sampling frame,
+inclusion/exclusion criteria, and notes. Markdown export now renders a `Corpus
+Scope` section before analytic claims when the field is present. Documentation
+now describes this as report-boundary context, not sampling-frame validation.
+
+**Verification:** `python -m pytest
+tests/test_domain_model.py::TestCorpusScope::test_project_state_corpus_scope_round_trips
+tests/test_claim_ledger_exports.py::test_markdown_export_includes_corpus_scope
+tests/test_claim_ledger_exports.py::test_markdown_export_includes_claim_ledger_summary`
+and `python -m ruff check qc_clean/schemas/domain.py
+qc_clean/core/export/data_exporter.py tests/test_domain_model.py
+tests/test_claim_ledger_exports.py` passed. Final full gate: `make check`
+passed with 650 tests passed, 1 skipped, 8 deselected; Ruff and docs gates
+passed; type check is not yet configured.
+
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** None
@@ -102,16 +118,16 @@ not create a cross-project callable capability.
 ## Acceptance Criteria
 
 > Feature-level criteria (what the plan accomplishes):
-- [ ] `ProjectState.corpus_scope` is optional and typed.
-- [ ] Corpus scope round-trips through `ProjectState.model_dump_json()` / validation.
-- [ ] Markdown export includes corpus scope when present and omits it when absent.
-- [ ] Docs state this binds report claims to a scope boundary but does not validate the sampling frame.
+- [x] `ProjectState.corpus_scope` is optional and typed.
+- [x] Corpus scope round-trips through `ProjectState.model_dump_json()` / validation.
+- [x] Markdown export includes corpus scope when present and omits it when absent.
+- [x] Docs state this binds report claims to a scope boundary but does not validate the sampling frame.
 
 > Process criteria (quality gates):
-- [ ] Required tests pass
-- [ ] Full test suite passes
-- [ ] Type check status is reported
-- [ ] Docs updated
+- [x] Required tests pass
+- [x] Full test suite passes
+- [x] Type check status is reported
+- [x] Docs updated
 
 ---
 
