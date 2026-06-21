@@ -1,10 +1,31 @@
 # Plan #9: INV-7 Derived-Output Prompt Boundaries
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** None
 **Blocks:** INV-7 full prompt-injection hardening
+
+---
+
+## Completion Outcome
+
+Completed 2026-06-21. First-party downstream prompts now wrap upstream
+LLM-derived artifacts and codebook context in the same `DATA>` untrusted-data
+boundary used for raw transcripts. Covered paths: perspective, relationship,
+synthesis, GT constant-comparison codebook context, GT axial/selective/theory
+integration derived text, incremental recoding existing-codebook context, and
+negative-case codebook/cross-case/claim-target context. Prompt-capture tests
+cover malicious phase JSON, GT derived text, and codebook descriptions/example
+quotes.
+
+This extends INV-7 structural prompt hygiene, but does not prove model obedience
+to the boundary, reject unsafe fully custom prompt templates, or provide live
+prompt-injection evaluation.
+
+Verification: targeted affected suites passed (`114 passed`), and `make check`
+passed with `635 passed, 1 skipped, 8 deselected`; Ruff and docs checks were
+green.
 
 ---
 
@@ -122,18 +143,18 @@ Skipped. This modifies internal prompt construction only.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] Downstream prompts wrap upstream phase JSON/text as untrusted data.
-- [ ] GT prompts wrap open/axial/core derived outputs and evolving codebook context as untrusted data.
-- [ ] Incremental recoding wraps existing codebook context as untrusted data.
-- [ ] Prompt-capture tests prove malicious derived instructions stay prefixed.
-- [ ] Docs keep INV-7 conservative and do not claim prompt injection is solved.
+- [x] Downstream prompts wrap upstream phase JSON/text as untrusted data.
+- [x] GT prompts wrap open/axial/core derived outputs and evolving codebook context as untrusted data.
+- [x] Incremental recoding wraps existing codebook context as untrusted data.
+- [x] Prompt-capture tests prove malicious derived instructions stay prefixed.
+- [x] Docs keep INV-7 conservative and do not claim prompt injection is solved.
 
 > Process criteria:
-- [ ] Required targeted tests pass.
-- [ ] Full deterministic suite passes through `make check`.
-- [ ] Lint passes through `make check`.
-- [ ] Docs checks pass.
-- [ ] Verified work is committed and pushed.
+- [x] Required targeted tests pass.
+- [x] Full deterministic suite passes through `make check`.
+- [x] Lint passes through `make check`.
+- [x] Docs checks pass.
+- [x] Verified work is committed and pushed.
 
 ---
 

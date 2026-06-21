@@ -6,9 +6,9 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 9 | INV-7 derived-output prompt boundaries | High | Planned | `INV7_DERIVED_OUTPUT_PROMPT_BOUNDARIES.md` |
 
-Active implementation is currently focused on the roadmap's INV-7 derived-output prompt-hardening follow-up.
+No active implementation plan is currently tracked here. Use the roadmap in
+`docs/PROJECT_THEORY_AND_GOALS.md` §18 to choose the next invariant lane.
 
 ## Completed Plans
 
@@ -22,6 +22,7 @@ Active implementation is currently focused on the roadmap's INV-7 derived-output
 | INV-7 instruction/data separation | INV-7 first slice: raw transcript/segment prompt data is line-prefixed as untrusted; prompt-injection regressions added | `completed/INV7_INSTRUCTION_DATA_SEPARATION.md` |
 | INV-2 retrieval-first disconfirmation | INV-2 first slice: negative-case analysis retrieves anchored candidate passages before LLM interpretation | `completed/INV2_RETRIEVAL_FIRST_DISCONFIRMATION.md` |
 | INV-2 adversarial disconfirmation model routing | INV-2 follow-up: configurable disconfirmation model override and adversarial evidence-bound prompt stance | `completed/INV2_ADVERSARIAL_DISCONFIRMATION_MODEL.md` |
+| INV-7 derived-output prompt boundaries | INV-7 follow-up: downstream LLM/codebook artifacts are also line-prefixed as untrusted data | `completed/INV7_DERIVED_OUTPUT_PROMPT_BOUNDARIES.md` |
 
 ## Status Key
 
