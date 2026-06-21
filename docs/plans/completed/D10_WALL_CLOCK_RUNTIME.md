@@ -1,10 +1,36 @@
 # Plan #27: D10 Wall-Clock Runtime
 
-**Status:** In Progress
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** D10 cost latency scorecard
 **Blocks:** full benchmark cost/latency reporting
+
+---
+
+## Outcome
+
+`project run` now records last-run wall-clock metadata in
+`ProjectState.config.extra["run_timing"]`. The record includes schema version,
+started/completed timestamps, monotonic duration seconds, final run status,
+trace ID, model, exhaustive-coding flag, resume point, document count, and phase
+result count. Completed, paused-for-review, and failed runs record timing before
+the project state is saved.
+
+`make bench` now emits `wall_clock_d10` next to `cost_latency_d10`. Missing
+timing reports `not_available`; invalid timing metadata fails loudly; durations
+are never estimated from stage timestamps or summed LLM-call latency. This is
+last-local-run timing metadata, not a versioned public benchmark artifact or
+baseline comparison.
+
+**Verification:** `python -m pytest tests/test_bench_phase0.py
+tests/test_bench_phase0_script.py tests/test_project_commands.py -q` passed (52
+tests), and `python -m ruff check qc_clean/core/bench.py
+scripts/bench_phase0.py qc_clean/core/cli/commands/project.py
+tests/test_bench_phase0.py tests/test_bench_phase0_script.py
+tests/test_project_commands.py` passed. Final closeout gate: `make check`
+passed with 682 tests passing, 1 skipped, 8 deselected, Ruff passing, docs
+checks passing, and type checking reported as not configured.
 
 ---
 
@@ -119,20 +145,20 @@ not create a cross-project callable capability.
 ## Acceptance Criteria
 
 > Feature-level criteria (what the plan accomplishes):
-- [ ] `project run` records `ProjectState.config.extra["run_timing"]`.
-- [ ] Failed runs record timing before failed state is saved.
-- [ ] `make bench` emits `wall_clock_d10`.
-- [ ] Missing timing reports `not_available`, never estimated from stage
+- [x] `project run` records `ProjectState.config.extra["run_timing"]`.
+- [x] Failed runs record timing before failed state is saved.
+- [x] `make bench` emits `wall_clock_d10`.
+- [x] Missing timing reports `not_available`, never estimated from stage
   timestamps.
-- [ ] `wall_clock_d10` clearly distinguishes end-to-end wall-clock runtime from
+- [x] `wall_clock_d10` clearly distinguishes end-to-end wall-clock runtime from
   summed LLM-call latency.
-- [ ] Docs state this is last-run metadata, not a benchmark/baseline result.
+- [x] Docs state this is last-run metadata, not a benchmark/baseline result.
 
 > Process criteria (quality gates):
-- [ ] Required tests pass
-- [ ] Full test suite passes
-- [ ] Type check status is reported
-- [ ] Docs updated
+- [x] Required tests pass (`python -m pytest tests/test_bench_phase0.py tests/test_bench_phase0_script.py tests/test_project_commands.py -q`: 52 passed)
+- [x] Full test suite passes (`make check`: 682 passed, 1 skipped, 8 deselected)
+- [x] Type check status is reported (`make check`: type checking not configured)
+- [x] Docs updated
 
 ---
 

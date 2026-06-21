@@ -6,7 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 27 | D10 wall-clock runtime | High | In Progress | `D10_WALL_CLOCK_RUNTIME.md` |
+| _none_ | _No active plan_ | - | - | - |
 
 ## Completed Plans
 
@@ -38,6 +38,7 @@ Track all implementation work here.
 | Review summary active inactive counts | Review summaries and CLI now distinguish active decisions from historical inactive decisions | `completed/REVIEW_SUMMARY_ACTIVE_INACTIVE_COUNTS.md` |
 | D10 cost latency scorecard | Evaluation-harness follow-up: `make bench` now reports D10 cost/latency from real llm_client observability rows | `completed/D10_COST_LATENCY_SCORECARD.md` |
 | D7 baseline comparison | Evaluation-harness follow-up: `make bench` can score externally supplied D7 baseline predictions against the same gold as the system | `completed/D7_BASELINE_COMPARISON.md` |
+| D10 wall-clock runtime | Evaluation-harness follow-up: `project run` records last-run wall-clock metadata and `make bench` reports `wall_clock_d10` | `completed/D10_WALL_CLOCK_RUNTIME.md` |
 
 ## Status Key
 
