@@ -6,7 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| _none_ | _No active plan_ | - | - | - |
+| 22 | INV-11 incremental hard invalidation | High | Planned | `INV11_INCREMENTAL_HARD_INVALIDATION.md` |
 
 ## Completed Plans
 
