@@ -186,13 +186,38 @@ def phase0_scorecard(state: ProjectState) -> Dict[str, Any]:
 
     # D5 — consistency (reported, NOT validity; see theory doc §11/§15).
     if state.irr_result is not None:
+        irr = state.irr_result
         card["reliability_llm_pass_agreement"] = {
-            "percent_agreement": state.irr_result.percent_agreement,
-            "cohens_kappa": state.irr_result.cohens_kappa,
-            "fleiss_kappa": state.irr_result.fleiss_kappa,
-            "interpretation": state.irr_result.interpretation,
-            "note": "code-DISCOVERY agreement, not application-level; consistency not validity",
+            "percent_agreement": irr.percent_agreement,
+            "cohens_kappa": irr.cohens_kappa,
+            "fleiss_kappa": irr.fleiss_kappa,
+            "gwet_ac1": irr.gwet_ac1,
+            "interpretation": irr.interpretation,
+            "application_level": irr.application_level,
+            "note": (
+                "LLM-pass agreement, not human inter-rater reliability; "
+                "consistency not validity."
+            ),
         }
+        if irr.application_level:
+            card["reliability_llm_pass_agreement"]["application_positive_segment_code"] = {
+                "units": irr.application_units,
+                "percent_agreement": irr.application_percent_agreement,
+                "cohens_kappa": irr.application_cohens_kappa,
+                "fleiss_kappa": irr.application_fleiss_kappa,
+                "gwet_ac1": irr.application_gwet_ac1,
+                "interpretation": irr.application_interpretation,
+                "note": "Positive segment x code cells where at least one pass applied the code.",
+            }
+            card["reliability_llm_pass_agreement"]["segment_decision"] = {
+                "units": irr.segment_decision_units,
+                "percent_agreement": irr.segment_decision_percent_agreement,
+                "cohens_kappa": irr.segment_decision_cohens_kappa,
+                "fleiss_kappa": irr.segment_decision_fleiss_kappa,
+                "gwet_ac1": irr.segment_decision_gwet_ac1,
+                "interpretation": irr.segment_decision_interpretation,
+                "note": "coded/no_code/not_examined decisions over the segment universe.",
+            }
     if state.stability_result is not None:
         card["stability"] = {
             "overall_stability": state.stability_result.overall_stability,

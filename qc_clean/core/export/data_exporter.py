@@ -477,6 +477,8 @@ class ProjectExporter:
             if irr.fleiss_kappa is not None:
                 label = irr.interpretation if irr.cohens_kappa is None else ""
                 _a(f"| Fleiss' kappa | {irr.fleiss_kappa:.3f} | {label} |")
+            if irr.gwet_ac1 is not None:
+                _a(f"| Gwet's AC1 | {irr.gwet_ac1:.3f} | prevalence-robust consistency |")
             _a("")
             if irr.application_level:
                 _a("### Application-Level Agreement")
@@ -493,6 +495,8 @@ class ProjectExporter:
                 if irr.application_fleiss_kappa is not None:
                     label = irr.application_interpretation if irr.application_cohens_kappa is None else ""
                     _a(f"| Positive cell Fleiss' kappa | {irr.application_fleiss_kappa:.3f} | {label} |")
+                if irr.application_gwet_ac1 is not None:
+                    _a(f"| Positive cell Gwet's AC1 | {irr.application_gwet_ac1:.3f} | prevalence-robust consistency |")
                 _a(f"| Segment decision units | {irr.segment_decision_units} | |")
                 if irr.segment_decision_percent_agreement is not None:
                     _a(f"| Segment decision percent agreement | {irr.segment_decision_percent_agreement:.1%} | |")
@@ -501,6 +505,8 @@ class ProjectExporter:
                 if irr.segment_decision_fleiss_kappa is not None:
                     label = irr.segment_decision_interpretation if irr.segment_decision_cohens_kappa is None else ""
                     _a(f"| Segment decision Fleiss' kappa | {irr.segment_decision_fleiss_kappa:.3f} | {label} |")
+                if irr.segment_decision_gwet_ac1 is not None:
+                    _a(f"| Segment decision Gwet's AC1 | {irr.segment_decision_gwet_ac1:.3f} | prevalence-robust consistency |")
                 _a("")
             if irr.coding_matrix:
                 _a("### Coding Matrix")

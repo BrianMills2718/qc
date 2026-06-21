@@ -6,9 +6,11 @@ from qc_clean.core.pipeline.irr import (
     build_segment_decision_matrix,
     compute_categorical_cohens_kappa,
     compute_categorical_fleiss_kappa,
+    compute_categorical_gwet_ac1,
     compute_categorical_percent_agreement,
     compute_cohens_kappa,
     compute_fleiss_kappa,
+    compute_gwet_ac1,
     compute_percent_agreement,
 )
 
@@ -34,6 +36,18 @@ def test_application_matrix_perfect_agreement():
     m = build_application_matrix(passes)
     assert compute_percent_agreement(m) == 1.0
     assert compute_cohens_kappa(m) == 1.0  # 2 passes, total agreement
+    assert compute_gwet_ac1(m) == 1.0
+
+
+def test_binary_gwet_ac1_reports_prevalence_robust_agreement():
+    matrix = {
+        "cell-1": [1, 1],
+        "cell-2": [0, 0],
+        "cell-3": [0, 0],
+        "cell-4": [0, 1],
+    }
+
+    assert abs(compute_gwet_ac1(matrix) - 0.5294117647058824) < 1e-9
 
 
 def test_application_matrix_three_passes_fleiss():
@@ -73,6 +87,7 @@ def test_segment_decision_matrix_disagreement_and_missing_decision():
     assert m["d#10"] == ["coded", "coded"]
     assert m["d#20"] == ["coded", "not_examined"]
     assert abs(compute_categorical_percent_agreement(m) - (1 / 3)) < 1e-9
+    assert abs(compute_categorical_gwet_ac1(m) - (1 / 9)) < 1e-9
 
 
 def test_segment_decision_matrix_three_passes_fleiss():
@@ -120,15 +135,18 @@ def test_run_irr_application_level_end_to_end():
     assert result.application_units == 1            # one (segment, code) cell applied
     assert result.application_percent_agreement == 1.0
     assert result.application_cohens_kappa == 1.0
+    assert result.application_gwet_ac1 == 1.0
     assert result.application_interpretation == "almost perfect"
     assert result.segment_decision_units == 2
     first_seg_key = f"{state.segments[0].doc_id}#{state.segments[0].start_char}"
     assert result.segment_decision_matrix[first_seg_key] == ["no_code", "no_code"]
     assert result.segment_decision_percent_agreement == 1.0
     assert result.segment_decision_cohens_kappa == 1.0
+    assert result.segment_decision_gwet_ac1 == 1.0
     assert result.segment_decision_interpretation == "almost perfect"
     # codebook-discovery metrics still present
     assert result.percent_agreement == 1.0
+    assert result.gwet_ac1 == 1.0
 
 
 def test_run_irr_application_level_all_no_code_reports_segment_agreement():
@@ -159,8 +177,10 @@ def test_run_irr_application_level_all_no_code_reports_segment_agreement():
     assert result.application_units == 0
     assert result.application_percent_agreement is None
     assert result.application_cohens_kappa is None
+    assert result.application_gwet_ac1 is None
     assert result.application_interpretation == "no positive code applications compared"
     assert result.segment_decision_units == 2
     assert result.segment_decision_percent_agreement == 1.0
     assert result.segment_decision_cohens_kappa == 1.0
+    assert result.segment_decision_gwet_ac1 == 1.0
     assert result.segment_decision_interpretation == "almost perfect"

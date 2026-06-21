@@ -445,6 +445,7 @@ class IRRResult(BaseModel):
     percent_agreement: float = 0.0
     cohens_kappa: Optional[float] = None
     fleiss_kappa: Optional[float] = None
+    gwet_ac1: Optional[float] = None
     interpretation: str = ""
     # Application-level agreement (requires exhaustive coding). Positive
     # application metrics compare segment x code cells; segment-decision metrics
@@ -454,12 +455,14 @@ class IRRResult(BaseModel):
     application_percent_agreement: Optional[float] = None
     application_cohens_kappa: Optional[float] = None
     application_fleiss_kappa: Optional[float] = None
+    application_gwet_ac1: Optional[float] = None
     application_interpretation: str = ""
     application_matrix: Dict[str, List[int]] = Field(default_factory=dict)
     segment_decision_units: int = 0  # number of segment decision rows compared
     segment_decision_percent_agreement: Optional[float] = None
     segment_decision_cohens_kappa: Optional[float] = None
     segment_decision_fleiss_kappa: Optional[float] = None
+    segment_decision_gwet_ac1: Optional[float] = None
     segment_decision_interpretation: str = ""
     segment_decision_matrix: Dict[str, List[str]] = Field(default_factory=dict)
     timestamp: str = ""

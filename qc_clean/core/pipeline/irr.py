@@ -9,6 +9,7 @@ References:
 - Landis & Koch (1977) for kappa interpretation
 - Cohen (1960) for 2-rater kappa
 - Fleiss (1971) for multi-rater kappa
+- Gwet's AC1 for prevalence-robust agreement
 """
 
 from __future__ import annotations
@@ -16,6 +17,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import re
+from collections import Counter
 from datetime import datetime
 from typing import Dict, List, Optional, Tuple
 
@@ -237,6 +239,15 @@ def compute_fleiss_kappa(matrix: Dict[str, List[int]]) -> float:
     return (p_bar - p_e) / (1 - p_e)
 
 
+def compute_gwet_ac1(matrix: Dict[str, List[int]]) -> float:
+    """Gwet's AC1 for binary agreement matrices."""
+    categorical_matrix = {
+        key: [str(value) for value in row]
+        for key, row in matrix.items()
+    }
+    return compute_categorical_gwet_ac1(categorical_matrix)
+
+
 def compute_categorical_percent_agreement(matrix: Dict[str, List[str]]) -> float:
     """Proportion of categorical rows where all passes assign the same value."""
     if not matrix:
@@ -295,6 +306,40 @@ def compute_categorical_fleiss_kappa(matrix: Dict[str, List[str]]) -> float:
     if p_e == 1.0:
         return 1.0
     return (p_bar - p_e) / (1 - p_e)
+
+
+def compute_categorical_gwet_ac1(matrix: Dict[str, List[str]]) -> float:
+    """Gwet's AC1 for nominal categorical agreement matrices."""
+    if not matrix:
+        return 0.0
+    rows = list(matrix.values())
+    k = len(rows[0])
+    if k == 0:
+        return 0.0
+    if any(len(row) != k for row in rows):
+        raise ValueError("Gwet AC1 requires every row to have the same number of ratings")
+    if k == 1:
+        return 1.0
+
+    categories = sorted({value for row in rows for value in row})
+    if len(categories) <= 1:
+        return 1.0
+
+    observed = 0.0
+    category_totals = {cat: 0 for cat in categories}
+    for row in rows:
+        counts = Counter(row)
+        for cat, count in counts.items():
+            category_totals[cat] += count
+        observed += sum(count * (count - 1) for count in counts.values()) / (k * (k - 1))
+    observed /= len(rows)
+
+    total_ratings = len(rows) * k
+    proportions = [count / total_ratings for count in category_totals.values()]
+    expected = sum(p * (1 - p) for p in proportions) / (len(categories) - 1)
+    if expected == 1.0:
+        return 1.0
+    return (observed - expected) / (1 - expected)
 
 
 def interpret_kappa(kappa: float) -> str:
@@ -432,6 +477,7 @@ async def run_irr_analysis(
         ck = compute_cohens_kappa(matrix)
 
     fk = compute_fleiss_kappa(matrix)
+    ac1 = compute_gwet_ac1(matrix)
 
     best_kappa = ck if ck is not None else fk
     interp = interpret_kappa(best_kappa) if best_kappa is not None else ""
@@ -440,10 +486,10 @@ async def run_irr_analysis(
     # 1. Positive segment × code cells (where any pass applied a code)
     # 2. Segment decision rows (coded/no_code/not_examined) over the segment universe
     app_matrix: Dict[str, List[int]] = {}
-    app_pct = app_ck = app_fk = None
+    app_pct = app_ck = app_fk = app_ac1 = None
     app_interp = ""
     seg_decision_matrix: Dict[str, List[str]] = {}
-    seg_decision_pct = seg_decision_ck = seg_decision_fk = None
+    seg_decision_pct = seg_decision_ck = seg_decision_fk = seg_decision_ac1 = None
     seg_decision_interp = ""
     if application_level:
         app_matrix = build_application_matrix(seg_code_maps)
@@ -451,6 +497,7 @@ async def run_irr_analysis(
             app_pct = compute_percent_agreement(app_matrix)
             app_ck = compute_cohens_kappa(app_matrix) if num_passes == 2 else None
             app_fk = compute_fleiss_kappa(app_matrix)
+            app_ac1 = compute_gwet_ac1(app_matrix)
             app_best = app_ck if app_ck is not None else app_fk
             app_interp = interpret_kappa(app_best) if app_best is not None else ""
         else:
@@ -464,6 +511,7 @@ async def run_irr_analysis(
                 if num_passes == 2 else None
             )
             seg_decision_fk = compute_categorical_fleiss_kappa(seg_decision_matrix)
+            seg_decision_ac1 = compute_categorical_gwet_ac1(seg_decision_matrix)
             seg_decision_best = seg_decision_ck if seg_decision_ck is not None else seg_decision_fk
             seg_decision_interp = (
                 interpret_kappa(seg_decision_best) if seg_decision_best is not None else ""
@@ -480,18 +528,21 @@ async def run_irr_analysis(
         percent_agreement=pct,
         cohens_kappa=ck,
         fleiss_kappa=fk,
+        gwet_ac1=ac1,
         interpretation=interp,
         application_level=application_level,
         application_units=len(app_matrix),
         application_percent_agreement=app_pct,
         application_cohens_kappa=app_ck,
         application_fleiss_kappa=app_fk,
+        application_gwet_ac1=app_ac1,
         application_interpretation=app_interp,
         application_matrix=app_matrix,
         segment_decision_units=len(seg_decision_matrix),
         segment_decision_percent_agreement=seg_decision_pct,
         segment_decision_cohens_kappa=seg_decision_ck,
         segment_decision_fleiss_kappa=seg_decision_fk,
+        segment_decision_gwet_ac1=seg_decision_ac1,
         segment_decision_interpretation=seg_decision_interp,
         segment_decision_matrix=seg_decision_matrix,
         timestamp=datetime.now().isoformat(),

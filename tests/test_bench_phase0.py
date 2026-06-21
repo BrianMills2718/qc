@@ -58,16 +58,70 @@ def test_scorecard_includes_reliability_and_stability_when_present():
         config=ProjectConfig(methodology=Methodology.THEMATIC_ANALYSIS),
         corpus=Corpus(documents=[Document(name="d.txt", content="x")]),
         irr_result=IRRResult(num_passes=2, percent_agreement=0.9,
-                             cohens_kappa=0.7, interpretation="substantial"),
+                             cohens_kappa=0.7, gwet_ac1=0.8, interpretation="substantial"),
         stability_result=StabilityResult(num_runs=5, overall_stability=0.8,
                                           stable_codes=["a"], moderate_codes=[],
                                           unstable_codes=["b"]),
     )
     card = phase0_scorecard(state)
     assert card["reliability_llm_pass_agreement"]["cohens_kappa"] == 0.7
+    assert card["reliability_llm_pass_agreement"]["gwet_ac1"] == 0.8
+    assert card["reliability_llm_pass_agreement"]["application_level"] is False
     assert "consistency not validity" in card["reliability_llm_pass_agreement"]["note"]
     assert card["stability"]["overall_stability"] == 0.8
     assert card["stability"]["unstable"] == 1
+
+
+def test_scorecard_surfaces_application_level_reliability_metrics():
+    state = ProjectState(
+        name="s",
+        config=ProjectConfig(methodology=Methodology.THEMATIC_ANALYSIS),
+        corpus=Corpus(documents=[Document(name="d.txt", content="x")]),
+        irr_result=IRRResult(
+            num_passes=2,
+            percent_agreement=0.75,
+            cohens_kappa=0.4,
+            fleiss_kappa=0.4,
+            gwet_ac1=0.6,
+            interpretation="fair",
+            application_level=True,
+            application_units=3,
+            application_percent_agreement=2 / 3,
+            application_cohens_kappa=0.25,
+            application_fleiss_kappa=0.25,
+            application_gwet_ac1=0.5,
+            application_interpretation="fair",
+            segment_decision_units=4,
+            segment_decision_percent_agreement=0.75,
+            segment_decision_cohens_kappa=0.5,
+            segment_decision_fleiss_kappa=0.5,
+            segment_decision_gwet_ac1=0.65,
+            segment_decision_interpretation="moderate",
+        ),
+    )
+
+    reliability = phase0_scorecard(state)["reliability_llm_pass_agreement"]
+
+    assert reliability["gwet_ac1"] == 0.6
+    assert reliability["application_level"] is True
+    assert reliability["application_positive_segment_code"] == {
+        "units": 3,
+        "percent_agreement": 2 / 3,
+        "cohens_kappa": 0.25,
+        "fleiss_kappa": 0.25,
+        "gwet_ac1": 0.5,
+        "interpretation": "fair",
+        "note": "Positive segment x code cells where at least one pass applied the code.",
+    }
+    assert reliability["segment_decision"] == {
+        "units": 4,
+        "percent_agreement": 0.75,
+        "cohens_kappa": 0.5,
+        "fleiss_kappa": 0.5,
+        "gwet_ac1": 0.65,
+        "interpretation": "moderate",
+        "note": "coded/no_code/not_examined decisions over the segment universe.",
+    }
 
 
 def test_coverage_note_is_conditional_on_exhaustive_mode():

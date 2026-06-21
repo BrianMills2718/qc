@@ -371,6 +371,8 @@ def _run_irr(store: ProjectStore, args) -> int:
         print(f"  Cohen's kappa: {result.cohens_kappa:.3f}")
     if result.fleiss_kappa is not None:
         print(f"  Fleiss' kappa: {result.fleiss_kappa:.3f}")
+    if result.gwet_ac1 is not None:
+        print(f"  Gwet's AC1: {result.gwet_ac1:.3f}")
     print(f"  Interpretation: {result.interpretation} (codebook-discovery agreement)")
     if result.application_level:
         print("\n  Application-level agreement:")
@@ -382,6 +384,8 @@ def _run_irr(store: ProjectStore, args) -> int:
             print(f"      Cohen's kappa: {result.application_cohens_kappa:.3f}")
         if result.application_fleiss_kappa is not None:
             print(f"      Fleiss' kappa: {result.application_fleiss_kappa:.3f}")
+        if result.application_gwet_ac1 is not None:
+            print(f"      Gwet's AC1: {result.application_gwet_ac1:.3f}")
         print(f"      Interpretation: {result.application_interpretation}")
 
         print("    Segment decisions (coded / no_code / not_examined):")
@@ -392,6 +396,8 @@ def _run_irr(store: ProjectStore, args) -> int:
             print(f"      Cohen's kappa: {result.segment_decision_cohens_kappa:.3f}")
         if result.segment_decision_fleiss_kappa is not None:
             print(f"      Fleiss' kappa: {result.segment_decision_fleiss_kappa:.3f}")
+        if result.segment_decision_gwet_ac1 is not None:
+            print(f"      Gwet's AC1: {result.segment_decision_gwet_ac1:.3f}")
         print(f"      Interpretation: {result.segment_decision_interpretation}")
 
     return 0
