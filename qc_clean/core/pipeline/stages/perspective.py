@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import logging
 
+from qc_clean.core.claims import claims_for_perspectives, replace_claims_for_stage
 from qc_clean.schemas.analysis_schemas import SpeakerAnalysis
 from qc_clean.schemas.adapters import speaker_analysis_to_perspectives
 from qc_clean.schemas.domain import AnalysisMemo, ProjectState
@@ -61,6 +62,12 @@ class PerspectiveStage(PipelineStage):
 
         # Stash for downstream
         ctx.phase2_json = phase2_response.model_dump_json(indent=2)
+        replace_claims_for_stage(
+            state,
+            self.name(),
+            claims_for_perspectives(state, self.name()),
+            no_claims_reason="perspective analysis produced no participants or themes",
+        )
 
         logger.info(
             "Perspective analysis complete: %d participants",

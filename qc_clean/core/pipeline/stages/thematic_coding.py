@@ -7,6 +7,11 @@ from __future__ import annotations
 
 import logging
 
+from qc_clean.core.claims import (
+    claims_for_code_applications,
+    claims_for_codes,
+    replace_claims_for_stage,
+)
 from qc_clean.core.grounding import MatchStatus, resolve_and_anchor, warn_unanchored as _warn_unanchored
 from qc_clean.schemas.analysis_schemas import CodeHierarchy
 from qc_clean.schemas.adapters import code_hierarchy_to_codebook
@@ -97,6 +102,13 @@ class ThematicCodingStage(PipelineStage):
 
         # Stash raw response for downstream stages
         ctx.phase1_json = phase1_response.model_dump_json(indent=2)
+        replace_claims_for_stage(
+            state,
+            self.name(),
+            claims_for_codes(state, self.name())
+            + claims_for_code_applications(state, self.name()),
+            no_claims_reason="thematic coding produced no codes or applications",
+        )
 
         logger.info(
             "Thematic coding complete: %d codes, %d applications",
@@ -193,6 +205,13 @@ class ThematicCodingStage(PipelineStage):
         # to the example-quote path. Without this, `project run --exhaustive`
         # crashes at the perspective stage on a default-methodology project.
         ctx.phase1_json = hierarchy.model_dump_json(indent=2)
+        replace_claims_for_stage(
+            state,
+            self.name(),
+            claims_for_codes(state, self.name())
+            + claims_for_code_applications(state, self.name()),
+            no_claims_reason="exhaustive thematic coding produced no codes or applications",
+        )
 
         logger.info(
             "Exhaustive coding complete: %d codes, %d/%d segments examined "

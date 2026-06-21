@@ -13,6 +13,7 @@ from typing import List
 
 from pydantic import BaseModel, Field
 
+from qc_clean.core.claims import claims_for_negative_cases, replace_claims_for_stage
 from qc_clean.schemas.domain import AnalysisMemo, ProjectState, Provenance
 from ..pipeline_engine import PipelineContext, PipelineStage
 
@@ -133,6 +134,13 @@ ANALYTICAL MEMO: After completing the analysis above, write a brief analytical m
                 title="Negative Case Analysis Memo",
                 content=response.analytical_memo,
             ))
+
+        replace_claims_for_stage(
+            state,
+            self.name(),
+            claims_for_negative_cases(state, response.negative_cases, self.name()),
+            no_claims_reason="negative-case analysis found no disconfirming cases",
+        )
 
         logger.info(
             "Negative case analysis complete: %d cases found",

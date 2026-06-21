@@ -359,6 +359,38 @@ def claims_for_negative_cases(
     return claims
 
 
+def no_claims_event(source_stage: str, reason: str) -> AnalyticClaim:
+    """Create a system claim recording that a stage emitted no substantive claims."""
+    return AnalyticClaim(
+        claim_kind=ClaimKind.NO_CLAIMS_EVENT,
+        source_stage=source_stage,
+        claim_text=f"No analytic claims emitted: {reason}",
+        scope=ClaimScope(corpus_level=True),
+        origin_object_type="stage",
+        origin_object_id=source_stage,
+        support_status=ClaimSupportStatus.SUPPORTED,
+        created_by=Provenance.SYSTEM,
+    )
+
+
+def replace_claims_for_stage(
+    state: ProjectState,
+    source_stage: str,
+    claims: Iterable[AnalyticClaim],
+    *,
+    no_claims_reason: str = "",
+) -> None:
+    """Replace a stage's prior ledger entries with freshly-derived claims."""
+    fresh_claims = list(claims)
+    if not fresh_claims and no_claims_reason:
+        fresh_claims = [no_claims_event(source_stage, no_claims_reason)]
+    state.claims = [
+        claim for claim in state.claims
+        if claim.source_stage != source_stage
+    ]
+    state.claims.extend(fresh_claims)
+
+
 def summarize_claim_ledger(state: ProjectState) -> dict[str, Any]:
     """Return a compact deterministic summary of a project's claim ledger."""
     by_kind = Counter(claim.claim_kind.value for claim in state.claims)

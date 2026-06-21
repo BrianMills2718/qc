@@ -11,6 +11,7 @@ import logging
 from collections import Counter, defaultdict
 from typing import Dict, List
 
+from qc_clean.core.claims import claims_for_cross_interview, replace_claims_for_stage
 from qc_clean.schemas.domain import (
     AnalysisMemo,
     CrossInterviewResult,
@@ -49,6 +50,12 @@ class CrossInterviewStage(PipelineStage):
             created_by=Provenance.SYSTEM,
         )
         state.memos.append(memo)
+        replace_claims_for_stage(
+            state,
+            self.name(),
+            claims_for_cross_interview(state, results, self.name()),
+            no_claims_reason="cross-interview analysis produced no consensus, divergence, or co-occurrence claims",
+        )
 
         logger.info(
             "Cross-interview analysis: %d shared codes, %d consensus, %d divergent",

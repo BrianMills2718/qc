@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import logging
 
+from qc_clean.core.claims import claims_for_relationships, replace_claims_for_stage
 from qc_clean.schemas.analysis_schemas import EntityMapping
 from qc_clean.schemas.adapters import entity_mapping_to_entities
 from qc_clean.schemas.domain import ProjectState
@@ -72,6 +73,12 @@ class RelationshipStage(PipelineStage):
 
         # Stash for downstream
         ctx.phase3_json = phase3_response.model_dump_json(indent=2)
+        replace_claims_for_stage(
+            state,
+            self.name(),
+            claims_for_relationships(state, self.name()),
+            no_claims_reason="relationship mapping produced no entity or code relationships",
+        )
 
         logger.info(
             "Relationship mapping complete: %d entities, %d relationships",

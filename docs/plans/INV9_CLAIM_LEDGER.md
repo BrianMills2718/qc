@@ -176,7 +176,7 @@ highest-value independent phase.
 |---|---|---|---|
 | 1 | Schema: `AnalyticClaim`, anchor, scope, adjudication/revision models, `ProjectState.claims`, pure summary helper | DONE: `tests/test_claims.py`; JSON round-trip/backward compatibility | `[Plan: INV9] Add claim ledger schema` |
 | 2 | Deterministic claim builders for codes, applications, perspectives, relationships, synthesis, cross-case, GT objects, and negative cases | DONE: `tests/test_claims.py` expanded with focused fixtures | `[Plan: INV9] Add claim builders` |
-| 3 | Wire default thematic pipeline stages; enforce no prose-only bypass for default path | `tests/test_claim_ledger_pipeline.py`, targeted stage tests | `[Plan: INV9] Wire default pipeline claims` |
+| 3 | Wire default thematic pipeline stages; enforce no prose-only bypass for default path | DONE: `tests/test_claim_ledger_pipeline.py`, targeted stage tests | `[Plan: INV9] Wire default pipeline claims` |
 | 4 | Wire GT stages; explicitly reject/flag any GT claim class not yet representable | GT stage tests; no app-level IRR scope expansion | `[Plan: INV9] Wire GT claims` |
 | 5 | Surface ledger in CSV/Markdown exports, CLI/API/MCP read paths | export/API/MCP/CLI tests | `[Plan: INV9] Expose claim ledger` |
 | 6 | Negative-case linkage: store negative cases as claims and attach contrary anchors/target refs where deterministic | `tests/test_negative_case_inv6.py` updated; no claim over full INV-6 | `[Plan: INV9] Link negative cases to claims` |
@@ -267,4 +267,11 @@ Phase 2 complete 2026-06-21: added deterministic claim builders for code,
 application, perspective, relationship, synthesis, cross-case, GT category,
 GT proposition, and negative-case objects. Verification: `tests/test_claims.py`
 (10 passed), focused affected set (75 passed), and `make check` (591 passed,
+1 skipped, 8 deselected; Ruff/docs green).
+
+Phase 3 complete 2026-06-21: wired claim recording into the default/thematic
+pipeline stages (`thematic_coding`, `perspective`, `relationship`, `synthesis`,
+`cross_interview`, `negative_case_analysis`) using replace-by-stage semantics so
+reruns do not duplicate a stage's claims. Verification: `tests/test_claim_ledger_pipeline.py`
+(6 passed), focused affected set (57 passed), and `make check` (597 passed,
 1 skipped, 8 deselected; Ruff/docs green).
