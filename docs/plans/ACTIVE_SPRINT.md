@@ -22,11 +22,11 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Plan #30: Phase 0 benchmark artifact export. Write versioned
-   `benchmark_results/` packages for the deterministic scorecard without
-   reimplementing prompt_eval statistics.
+1. Held-out D7 gold-set scaffold: define and validate a versioned adjudicated
+   contrary-evidence gold-set package that future prompt_eval D7 runs can
+   consume.
 2. Next evaluation-harness slice chosen after that checkpoint, likely live INV-7
-   fixture execution, held-out D7 gold-set scaffolding, or semantic retrieval
-   depending on what the repo makes concrete.
+   fixture execution or semantic retrieval depending on what the repo makes
+   concrete.
 3. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.

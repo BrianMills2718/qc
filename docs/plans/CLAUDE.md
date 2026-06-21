@@ -6,7 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 30 | Phase 0 Benchmark Artifacts | High | In Progress | `PHASE0_BENCHMARK_ARTIFACTS.md` |
+| _none_ | _none_ | _none_ | _none_ | _none_ |
 
 ## Completed Plans
 
@@ -41,6 +41,7 @@ Track all implementation work here.
 | D10 wall-clock runtime | Evaluation-harness follow-up: `project run` records last-run wall-clock metadata and `make bench` reports `wall_clock_d10` | `completed/D10_WALL_CLOCK_RUNTIME.md` |
 | Phase 0 input hashes | Evaluation-harness follow-up: `make bench` reports SHA-256 hashes for loaded state, corpus, and supplied benchmark files | `completed/PHASE0_INPUT_HASHES.md` |
 | QC bench CLI | Evaluation-harness follow-up: `qc_cli.py bench` wraps the deterministic Phase 0 scorecard with the same current flags as `make bench` | `completed/QC_BENCH_CLI.md` |
+| Phase 0 benchmark artifacts | Evaluation-harness follow-up: Phase 0 bench writes versioned `benchmark_results/` packages with scorecard and manifest provenance | `completed/PHASE0_BENCHMARK_ARTIFACTS.md` |
 
 ## Status Key
 

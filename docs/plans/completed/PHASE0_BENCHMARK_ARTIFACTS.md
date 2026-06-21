@@ -1,10 +1,34 @@
 # Plan #30: Phase 0 Benchmark Artifacts
 
-**Status:** In Progress
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Phase 0 input hashes; QC bench CLI
 **Blocks:** prompt_eval-backed benchmark suite; public benchmark evidence packages
+
+---
+
+## Outcome
+
+Phase 0 bench can now write versioned benchmark artifact packages through
+`scripts/bench_phase0.py --artifact-dir <dir>`,
+`qc_cli.py bench --artifact-dir <dir>`, and
+`make bench ARTIFACT_DIR=<dir>`. Each run creates a timestamped directory with
+`scorecard.json` and `manifest.json`. The manifest records schema version,
+artifact type, UTC generation time, project identity, phase, scorecard SHA-256,
+copied `_meta.input_hashes`, claim-discipline text, CLI provenance, and an
+explicit `prompt_eval.status=not_run` caveat.
+
+Generated `benchmark_results/` directories are gitignored because local
+benchmark packages can contain project metadata. Docs frame the package as
+Phase 0 provenance, not full prompt_eval benchmark evidence and not SOTA,
+parity, validity, or prompt-injection proof.
+
+Verification:
+- TDD/focused: `python -m pytest tests/test_bench_phase0_script.py tests/test_qc_cli_bench.py -q` -> 15 passed.
+- Focused lint: `python -m ruff check scripts/bench_phase0.py qc_cli.py tests/test_bench_phase0_script.py tests/test_qc_cli_bench.py` -> passed.
+- Makefile dry-run: `make -n bench ID=example_project ARTIFACT_DIR=benchmark_results` included `--artifact-dir benchmark_results`.
+- Full gate: `make check` -> 690 passed, 1 skipped, 8 deselected; Ruff passed; docs checks passed; type check not yet configured.
 
 ---
 
@@ -155,24 +179,24 @@ ROOT/
 ## Acceptance Criteria
 
 > Feature-level criteria (what the plan accomplishes):
-- [ ] `scripts/bench_phase0.py --artifact-dir <dir>` writes a versioned run
+- [x] `scripts/bench_phase0.py --artifact-dir <dir>` writes a versioned run
   directory with `scorecard.json` and `manifest.json`.
-- [ ] The manifest records schema version, artifact type, generation timestamp,
+- [x] The manifest records schema version, artifact type, generation timestamp,
   project identity, phase, scorecard SHA-256, input hashes, claim-discipline
   note, prompt_eval not-run status, and CLI provenance.
-- [ ] The artifact writer fails loudly rather than overwriting an existing run
+- [x] The artifact writer fails loudly rather than overwriting an existing run
   directory.
-- [ ] `qc_cli.py bench --artifact-dir <dir>` forwards the artifact directory.
-- [ ] `make bench ARTIFACT_DIR=<dir>` forwards the artifact directory.
-- [ ] Generated `benchmark_results/` artifacts are gitignored.
-- [ ] Docs describe this as Phase 0 artifact packaging, not full prompt_eval
+- [x] `qc_cli.py bench --artifact-dir <dir>` forwards the artifact directory.
+- [x] `make bench ARTIFACT_DIR=<dir>` forwards the artifact directory.
+- [x] Generated `benchmark_results/` artifacts are gitignored.
+- [x] Docs describe this as Phase 0 artifact packaging, not full prompt_eval
   benchmark evidence.
 
 > Process criteria (quality gates):
-- [ ] Required tests pass
-- [ ] Full test suite passes
-- [ ] Type check status is reported
-- [ ] Docs updated
+- [x] Required tests pass
+- [x] Full test suite passes
+- [x] Type check status is reported
+- [x] Docs updated
 
 ---
 
