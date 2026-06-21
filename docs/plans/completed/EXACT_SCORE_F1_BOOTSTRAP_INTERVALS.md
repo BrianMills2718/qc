@@ -1,12 +1,27 @@
 # Plan #39: Exact-Score F1 Bootstrap Intervals
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** None
 **Blocks:** D3/D7 benchmark reporting; future interval-tested baseline deltas
 
 ---
+
+## Outcome
+
+Implemented and verified in commit `cf27375`. D3 and D7 exact-anchor scorecards
+now include deterministic `f1_bootstrap_ci` output by default, with method,
+metric, confidence level, sample count, seed, bootstrap unit, population size,
+and conservative note. D7 baseline exact scores receive the same local F1
+bootstrap interval, while `system_minus_baseline` remains a point delta. Bootstrap
+settings are configurable through
+`ProjectState.config.extra["phase0_exact_bootstrap"]` and can be disabled.
+
+Verification:
+- `python -m pytest tests/test_bench_phase0.py tests/test_bench_phase0_script.py -q` — 40 passed
+- `python -m ruff check qc_clean/core/bench.py tests/test_bench_phase0.py` — passed
+- `make check` — 721 passed, 1 skipped, 8 deselected; Ruff passed; docs checks passed; type check not yet configured
 
 ## Gap
 
@@ -56,10 +71,10 @@ Internal project capability only; no cross-project boundary is created.
 
 ### Capability Validation
 
-- [ ] D3 scored sections include deterministic `f1_bootstrap_ci`.
-- [ ] D7 scored sections include deterministic `f1_bootstrap_ci`.
-- [ ] D7 baseline scores include deterministic `f1_bootstrap_ci`.
-- [ ] Bootstrap settings are configurable through `ProjectState.config.extra`
+- [x] D3 scored sections include deterministic `f1_bootstrap_ci`.
+- [x] D7 scored sections include deterministic `f1_bootstrap_ci`.
+- [x] D7 baseline scores include deterministic `f1_bootstrap_ci`.
+- [x] Bootstrap settings are configurable through `ProjectState.config.extra`
   rather than hardcoded only.
 
 ---
@@ -114,26 +129,26 @@ Internal project capability only; no cross-project boundary is created.
 ## Acceptance Criteria
 
 > Feature-level criteria (what the plan accomplishes):
-- [ ] D3 scored sections report `f1_bootstrap_ci` by default.
-- [ ] D7 scored sections and D7 baseline sections report `f1_bootstrap_ci` by
+- [x] D3 scored sections report `f1_bootstrap_ci` by default.
+- [x] D7 scored sections and D7 baseline sections report `f1_bootstrap_ci` by
   default.
-- [ ] Bootstrap settings are configurable from project metadata and can be
+- [x] Bootstrap settings are configurable from project metadata and can be
   disabled.
-- [ ] Docs no longer say no F1/bootstrap interval exists, but still say no
+- [x] Docs no longer say no F1/bootstrap interval exists, but still say no
   interval-tested baseline delta or held-out D3/D7 benchmark exists.
 
 > Process criteria (quality gates):
-- [ ] Required tests pass
-- [ ] Full test suite passes
-- [ ] Type check status reported
-- [ ] Docs updated
-- [ ] Plan completed, committed, and pushed
+- [x] Required tests pass
+- [x] Full test suite passes
+- [x] Type check status reported
+- [x] Docs updated
+- [x] Plan completed, committed, and pushed
 
 ---
 
 ## Open Questions
 
-- [ ] Should bootstrap units be documents instead of exact keys? — Status:
+- [x] Should bootstrap units be documents instead of exact keys? — Status:
   DEFERRED | Why it matters: document-level bootstrap needs enough held-out
   documents and document-aware gold packages. This slice uses exact keys because
   Phase 0 currently scores exact anchor keys and often runs on tiny fixtures.
