@@ -6,7 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| _none_ | _No active plan_ | - | - | - |
+| 24 | Review summary active inactive counts | Medium | Planned | `REVIEW_SUMMARY_ACTIVE_INACTIVE_COUNTS.md` |
 
 ## Completed Plans
 
