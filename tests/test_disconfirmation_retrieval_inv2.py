@@ -180,6 +180,74 @@ def test_invalid_negative_case_candidate_id_fails_loud():
         claims_for_negative_cases(state, [negative_case], candidate_anchors={})
 
 
+def test_negative_case_uses_configured_disconfirmation_model():
+    state = _state_with_segments("AI failed for this team after repeated errors.")
+    state.claims = [_claim("claim-ai", "AI improves workflow across the corpus.")]
+    response = NegativeCaseResponse(
+        negative_cases=[],
+        overall_assessment="No retrieved candidate was sufficient.",
+    )
+
+    with patch("qc_clean.core.llm.llm_handler.LLMHandler") as MockLLM:
+        MockLLM.return_value.extract_structured = AsyncMock(return_value=response)
+        result = asyncio.run(
+            NegativeCaseStage().execute(
+                state,
+                PipelineContext(
+                    model_name="primary-model",
+                    disconfirmation_model_name="adversarial-reviewer-model",
+                ),
+            )
+        )
+
+    MockLLM.assert_called_once_with(model_name="adversarial-reviewer-model")
+    assert "Interpretation model: adversarial-reviewer-model." in result.memos[0].content
+
+
+def test_negative_case_defaults_to_pipeline_model_without_disconfirmation_override():
+    state = _state_with_segments("AI failed for this team after repeated errors.")
+    state.claims = [_claim("claim-ai", "AI improves workflow across the corpus.")]
+    response = NegativeCaseResponse(
+        negative_cases=[],
+        overall_assessment="No retrieved candidate was sufficient.",
+    )
+
+    with patch("qc_clean.core.llm.llm_handler.LLMHandler") as MockLLM:
+        MockLLM.return_value.extract_structured = AsyncMock(return_value=response)
+        asyncio.run(
+            NegativeCaseStage().execute(
+                state,
+                PipelineContext(model_name="primary-model"),
+            )
+        )
+
+    MockLLM.assert_called_once_with(model_name="primary-model")
+
+
+def test_negative_case_prompt_uses_adversarial_reviewer_stance():
+    state = _state_with_segments("AI failed for this team after repeated errors.")
+    state.claims = [_claim("claim-ai", "AI improves workflow across the corpus.")]
+    captured_prompt = ""
+    response = NegativeCaseResponse(
+        negative_cases=[],
+        overall_assessment="No retrieved candidate was sufficient.",
+    )
+
+    async def capture_prompt(prompt, *_args, **_kwargs):
+        nonlocal captured_prompt
+        captured_prompt = prompt
+        return response
+
+    with patch("qc_clean.core.llm.llm_handler.LLMHandler") as MockLLM:
+        MockLLM.return_value.extract_structured = AsyncMock(side_effect=capture_prompt)
+        asyncio.run(NegativeCaseStage().execute(state, PipelineContext()))
+
+    assert "adversarial qualitative methods reviewer" in captured_prompt
+    assert "skeptical and evidence-bound" in captured_prompt
+    assert "do not fabricate evidence" in captured_prompt
+    assert "do not overstate weak candidates" in captured_prompt
+
+
 def _state_with_segments(content: str) -> ProjectState:
     doc = Document(id="d1", name="interview.txt", content=content)
     state = ProjectState(

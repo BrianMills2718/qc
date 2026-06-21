@@ -39,6 +39,11 @@ class PipelineContext(BaseModel):
 
     # --- Input fields (set by caller) ---
     model_name: str = "gpt-5-mini"
+    disconfirmation_model_name: Optional[str] = Field(
+        default=None,
+        description="Optional model override for negative-case disconfirmation interpretation. "
+        "Falls back to model_name when unset.",
+    )
     interviews: List[Dict[str, Any]] = Field(default_factory=list)
     exhaustive_coding: bool = Field(
         default=False,

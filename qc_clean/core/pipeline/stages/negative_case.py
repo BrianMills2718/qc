@@ -72,11 +72,12 @@ class NegativeCaseStage(PipelineStage):
     async def execute(self, state: ProjectState, ctx: PipelineContext) -> ProjectState:
         from qc_clean.core.llm.llm_handler import LLMHandler
 
+        disconfirmation_model = ctx.disconfirmation_model_name or ctx.model_name
         logger.info(
             "Starting negative_case_analysis: codes=%d, docs=%d, model=%s",
-            len(state.codebook.codes), state.corpus.num_documents, ctx.model_name,
+            len(state.codebook.codes), state.corpus.num_documents, disconfirmation_model,
         )
-        llm = LLMHandler(model_name=ctx.model_name)
+        llm = LLMHandler(model_name=disconfirmation_model)
 
         codes_text = _format_codebook(state)
         cross_claims = _format_cross_interview_claims(state)
@@ -100,7 +101,8 @@ class NegativeCaseStage(PipelineStage):
         candidate_section = format_disconfirmation_candidates(candidates)
         retrieval_summary = (
             f"Retrieved {len(candidates)} candidate passage(s) for "
-            f"{len(target_claims)} claim target(s)."
+            f"{len(target_claims)} claim target(s). "
+            f"Interpretation model: {disconfirmation_model}."
         )
 
         # When cross-interview analysis has run, disconfirmation must cover those
@@ -119,7 +121,9 @@ class NegativeCaseStage(PipelineStage):
             else ""
         )
 
-        prompt = f"""You are a qualitative researcher conducting negative case analysis — a critical step for ensuring the credibility and trustworthiness of qualitative findings (Lincoln & Guba, 1985).
+        prompt = f"""You are an adversarial qualitative methods reviewer conducting negative case analysis — a critical step for testing the credibility and trustworthiness of qualitative findings (Lincoln & Guba, 1985).
+
+Adversarial here means skeptical and evidence-bound: actively look for exceptions, boundary conditions, and contradictions in the retrieved source candidates, but do not fabricate evidence and do not overstate weak candidates.
 
 Given the codebook, any cross-interview claims, and the RETRIEVED CANDIDATE PASSAGES below, your task is to assess whether the retrieved source passages contain data that:
 1. Contradicts the emerging categories, themes, or cross-interview claims
