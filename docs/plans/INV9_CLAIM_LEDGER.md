@@ -175,7 +175,7 @@ highest-value independent phase.
 | Phase | Scope | Verification | Commit |
 |---|---|---|---|
 | 1 | Schema: `AnalyticClaim`, anchor, scope, adjudication/revision models, `ProjectState.claims`, pure summary helper | DONE: `tests/test_claims.py`; JSON round-trip/backward compatibility | `[Plan: INV9] Add claim ledger schema` |
-| 2 | Deterministic claim builders for codes, applications, perspectives, relationships, synthesis, cross-case, GT objects, and negative cases | `tests/test_claims.py` expanded with focused fixtures | `[Plan: INV9] Add claim builders` |
+| 2 | Deterministic claim builders for codes, applications, perspectives, relationships, synthesis, cross-case, GT objects, and negative cases | DONE: `tests/test_claims.py` expanded with focused fixtures | `[Plan: INV9] Add claim builders` |
 | 3 | Wire default thematic pipeline stages; enforce no prose-only bypass for default path | `tests/test_claim_ledger_pipeline.py`, targeted stage tests | `[Plan: INV9] Wire default pipeline claims` |
 | 4 | Wire GT stages; explicitly reject/flag any GT claim class not yet representable | GT stage tests; no app-level IRR scope expansion | `[Plan: INV9] Wire GT claims` |
 | 5 | Surface ledger in CSV/Markdown exports, CLI/API/MCP read paths | export/API/MCP/CLI tests | `[Plan: INV9] Expose claim ledger` |
@@ -262,3 +262,9 @@ Phase 1 complete 2026-06-21: added the claim ledger schema,
 Verification: `tests/test_claims.py` (5 passed),
 `tests/test_domain_model.py tests/test_claims.py` (29 passed), and `make check`
 (586 passed, 1 skipped, 8 deselected; Ruff/docs green).
+
+Phase 2 complete 2026-06-21: added deterministic claim builders for code,
+application, perspective, relationship, synthesis, cross-case, GT category,
+GT proposition, and negative-case objects. Verification: `tests/test_claims.py`
+(10 passed), focused affected set (75 passed), and `make check` (591 passed,
+1 skipped, 8 deselected; Ruff/docs green).

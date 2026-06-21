@@ -1,6 +1,19 @@
 """Tests for the first-class analytic claim ledger (INV-9)."""
 
-from qc_clean.core.claims import summarize_claim_ledger
+from qc_clean.core.claims import (
+    claims_for_code_applications,
+    claims_for_codes,
+    claims_for_cross_interview,
+    claims_for_gt_categories,
+    claims_for_gt_theory,
+    claims_for_negative_cases,
+    claims_for_perspectives,
+    claims_for_relationships,
+    claims_for_synthesis,
+    summarize_claim_ledger,
+)
+from qc_clean.core.pipeline.stages.cross_interview import analyze_cross_interview_patterns
+from qc_clean.core.pipeline.stages.negative_case import NegativeCase
 from qc_clean.schemas.domain import (
     ClaimAdjudicationStatus,
     ClaimAnchor,
@@ -12,9 +25,17 @@ from qc_clean.schemas.domain import (
     CodeApplication,
     Codebook,
     Corpus,
+    CoreCategoryResult,
     Document,
+    DomainEntityRelationship,
+    Entity,
+    ParticipantPerspective,
+    PerspectiveAnalysis,
     ProjectState,
     Provenance,
+    Recommendation,
+    Synthesis,
+    TheoreticalModelResult,
     AnalyticClaim,
 )
 
@@ -156,3 +177,179 @@ def test_claim_summary_counts_by_kind_stage_status_and_support():
         "by_support_status": {"needs_anchor": 1, "supported": 1},
         "unsupported_or_needing_anchor": 1,
     }
+
+
+def test_code_and_application_builders_include_supporting_anchors():
+    """Code and application builders preserve anchored evidence."""
+    doc = Document(id="d1", name="d.txt", content="Alex: AI saved time.")
+    app = CodeApplication(
+        id="a1",
+        code_id="C1",
+        doc_id=doc.id,
+        quote_text="AI saved time",
+        start_char=6,
+        end_char=19,
+        quote_hash="hash1",
+    )
+    state = ProjectState(
+        corpus=Corpus(documents=[doc]),
+        codebook=Codebook(codes=[Code(id="C1", name="Efficiency", description="Time savings")]),
+        code_applications=[app],
+    )
+
+    code_claims = claims_for_codes(state)
+    app_claims = claims_for_code_applications(state)
+
+    assert len(code_claims) == 1
+    assert code_claims[0].claim_kind == ClaimKind.CODE
+    assert code_claims[0].support_status == ClaimSupportStatus.SUPPORTED
+    assert code_claims[0].supporting_anchors[0].code_application_id == "a1"
+
+    assert len(app_claims) == 1
+    assert app_claims[0].claim_kind == ClaimKind.CODE_APPLICATION
+    assert app_claims[0].origin_object_id == "a1"
+    assert app_claims[0].supporting_anchors[0].start_char == 6
+
+
+def test_higher_order_builders_mark_unanchored_claims_as_needing_anchors():
+    """Perspective, relationship, and synthesis prose starts visibly unanchored."""
+    state = ProjectState(
+        perspective_analysis=PerspectiveAnalysis(
+            participants=[
+                ParticipantPerspective(
+                    name="Alex",
+                    perspective_summary="Alex sees AI as a time saver.",
+                    codes_emphasized=["C1"],
+                )
+            ],
+            consensus_themes=["AI is useful"],
+            divergent_viewpoints=["Privacy concerns remain"],
+        ),
+        entities=[Entity(id="e1", name="AI"), Entity(id="e2", name="Workflow")],
+        entity_relationships=[
+            DomainEntityRelationship(
+                id="r1",
+                entity_1_id="e1",
+                entity_2_id="e2",
+                relationship_type="changes",
+                supporting_evidence=["AI changed workflow"],
+            )
+        ],
+        synthesis=Synthesis(
+            key_findings=["AI saves time."],
+            cross_cutting_patterns=["Efficiency and privacy are linked."],
+            recommendations=[Recommendation(title="Train staff", supporting_themes=["C1"])],
+            confidence_assessment={"AI saves time": {"level": "high", "score": 0.8}},
+        ),
+    )
+
+    claims = (
+        claims_for_perspectives(state)
+        + claims_for_relationships(state)
+        + claims_for_synthesis(state)
+    )
+
+    assert {claim.claim_kind for claim in claims} == {
+        ClaimKind.PERSPECTIVE,
+        ClaimKind.RELATIONSHIP,
+        ClaimKind.SYNTHESIS_FINDING,
+    }
+    assert all(claim.support_status == ClaimSupportStatus.NEEDS_ANCHOR for claim in claims)
+    assert any(claim.scope.participant_names == ["Alex"] for claim in claims)
+    assert any(claim.scope.entity_ids == ["e1", "e2"] for claim in claims)
+    assert any(claim.scope.code_ids == ["C1"] for claim in claims)
+
+
+def test_cross_case_builder_uses_code_application_support():
+    """Cross-case claims inherit support from code applications for their code."""
+    docs = [
+        Document(id="d1", name="a.txt", content="AI helps."),
+        Document(id="d2", name="b.txt", content="AI helps again."),
+    ]
+    apps = [
+        CodeApplication(
+            id="a1",
+            code_id="C1",
+            doc_id="d1",
+            quote_text="AI helps",
+            start_char=0,
+            end_char=8,
+            quote_hash="h1",
+        ),
+        CodeApplication(
+            id="a2",
+            code_id="C1",
+            doc_id="d2",
+            quote_text="AI helps again",
+            start_char=0,
+            end_char=14,
+            quote_hash="h2",
+        ),
+    ]
+    state = ProjectState(
+        corpus=Corpus(documents=docs),
+        codebook=Codebook(codes=[Code(id="C1", name="AI Use")]),
+        code_applications=apps,
+    )
+    results = analyze_cross_interview_patterns(state)
+
+    claims = claims_for_cross_interview(state, results)
+
+    assert len(claims) >= 1
+    consensus = [claim for claim in claims if "present in 2/2 documents" in claim.claim_text]
+    assert consensus
+    assert consensus[0].claim_kind == ClaimKind.CROSS_CASE
+    assert consensus[0].support_status == ClaimSupportStatus.SUPPORTED
+    assert {a.code_application_id for a in consensus[0].supporting_anchors} == {"a1", "a2"}
+
+
+def test_gt_builders_emit_category_and_proposition_claims():
+    """GT domain results become first-class claim objects."""
+    state = ProjectState(
+        core_categories=[
+            CoreCategoryResult(
+                category_name="Managed adoption",
+                definition="AI adoption is staged and managed.",
+                related_categories=["Training"],
+            )
+        ],
+        theoretical_model=TheoreticalModelResult(
+            model_name="Adoption model",
+            propositions=["If training is strong, adoption resistance falls."],
+            scope_conditions=["Workplace AI implementation"],
+            implications=["Invest in training"],
+        ),
+    )
+
+    claims = claims_for_gt_categories(state) + claims_for_gt_theory(state)
+
+    assert [claim.claim_kind for claim in claims].count(ClaimKind.GT_CATEGORY) == 1
+    assert [claim.claim_kind for claim in claims].count(ClaimKind.GT_PROPOSITION) == 3
+    assert all(claim.support_status == ClaimSupportStatus.NEEDS_ANCHOR for claim in claims)
+    assert any("If training is strong" in claim.claim_text for claim in claims)
+
+
+def test_negative_case_builder_resolves_unique_contrary_anchor():
+    """Negative cases become claims with contrary anchors when evidence resolves."""
+    doc = Document(id="d1", name="d.txt", content="Alex abandoned AI after errors.")
+    state = ProjectState(
+        corpus=Corpus(documents=[doc]),
+        codebook=Codebook(codes=[Code(id="C1", name="AI Adoption")]),
+    )
+    negative = NegativeCase(
+        code_name="AI Adoption",
+        disconfirming_evidence="abandoned AI after errors",
+        explanation="This challenges a simple adoption narrative.",
+        implication="Adoption has failure cases.",
+    )
+
+    claims = claims_for_negative_cases(state, [negative])
+
+    assert len(claims) == 1
+    claim = claims[0]
+    assert claim.claim_kind == ClaimKind.NEGATIVE_CASE
+    assert claim.scope.code_ids == ["C1"]
+    assert claim.support_status == ClaimSupportStatus.SUPPORTED
+    assert len(claim.contrary_anchors) == 1
+    assert claim.contrary_anchors[0].doc_id == "d1"
+    assert claim.contrary_anchors[0].quote_text == "abandoned AI after errors"
