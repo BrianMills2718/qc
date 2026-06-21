@@ -1,10 +1,30 @@
 # Plan #11: INV-2 BM25 Disconfirmation Retrieval
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** None
 **Blocks:** INV-2 hardened disconfirmation; held-out D7 retrieval evaluation
+
+---
+
+## Outcome
+
+Completed 2026-06-21. `retrieve_disconfirmation_candidates()` now ranks source
+segments with BM25-style term weighting plus configurable contradiction-cue
+boosts. `PipelineContext` exposes `disconfirmation_bm25_k1`,
+`disconfirmation_bm25_b`, and `disconfirmation_contrary_cue_weight`, and
+`NegativeCaseStage` passes those values into retrieval. Candidate IDs, exact
+anchors, quote hashes, prompt formatting, and D7 scorecard consumption remain
+compatible.
+
+This is a retrieval-quality slice only. It does not provide semantic/embedding
+retrieval, human adjudication, validated reviewer model policy, or held-out D7
+evidence. INV-2/INV-6 remain PARTIAL.
+
+Verification: `python -m pytest tests/test_disconfirmation_retrieval_inv2.py tests/test_bench_phase0.py -q`
+passed (`19 passed`) and Ruff passed on touched files before the implementation
+commit. Final plan completion was verified with `make check`.
 
 ---
 
