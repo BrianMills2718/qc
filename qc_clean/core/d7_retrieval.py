@@ -7,13 +7,15 @@ from typing import Any, Iterable, Literal, Mapping
 
 from pydantic import BaseModel, Field
 
+from qc_clean.core.bench import phase0_scorecard
 from qc_clean.core.claims import disconfirmation_targets
-from qc_clean.core.d7_gold import DisconfirmationGoldAnchor
+from qc_clean.core.d7_gold import DisconfirmationGoldAnchor, d7_gold_payload_for_scorecard
 from qc_clean.core.disconfirmation import EmbeddingProvider, retrieve_disconfirmation_candidates
 from qc_clean.schemas.domain import ProjectState
 
 
 _PACKAGE_TYPE = "qualitative_coding.d7_retrieval_predictions"
+_COMPARISON_REPORT_TYPE = "qualitative_coding.d7_retrieval_comparison"
 
 
 class D7RetrievalBaselineRecord(BaseModel):
@@ -66,6 +68,22 @@ class D7RetrievalBaselinePackage(BaseModel):
     disconfirmation_baselines: list[D7RetrievalBaselineRecord] = Field(
         description="Baseline records accepted by Phase 0 D7 scoring"
     )
+
+
+class D7RetrievalComparisonReport(BaseModel):
+    """Exact D7 comparison report for retrieval prediction packages."""
+
+    schema_version: Literal[1] = Field(default=1, description="Comparison report schema version")
+    report_type: Literal["qualitative_coding.d7_retrieval_comparison"] = Field(
+        default=_COMPARISON_REPORT_TYPE,
+        description="Stable report type identifier",
+    )
+    project_id: str = Field(description="Project ID scored")
+    project_name: str = Field(description="Project name scored")
+    package_count: int = Field(description="Number of retrieval prediction packages compared")
+    baseline_count: int = Field(description="Number of baseline records scored")
+    disconfirmation_d7: dict[str, Any] = Field(description="D7 scorecard section from Phase 0")
+    note: str = Field(description="Claim-discipline note for consumers")
 
 
 def export_d7_retrieval_baseline(
@@ -161,6 +179,50 @@ def export_d7_retrieval_baseline(
         disconfirmation_baselines=[baseline],
     )
     return package.model_dump(mode="json")
+
+
+def compare_d7_retrieval_predictions(
+    state: ProjectState,
+    *,
+    gold_payload: Any,
+    prediction_packages: Iterable[Mapping[str, Any]],
+) -> dict[str, Any]:
+    """Score retrieval prediction packages against one D7 gold payload."""
+    packages = list(prediction_packages)
+    if not packages:
+        raise ValueError("At least one D7 retrieval prediction package is required")
+
+    baselines: list[Any] = []
+    for index, package in enumerate(packages, start=1):
+        raw_baselines = package.get("disconfirmation_baselines")
+        if not isinstance(raw_baselines, list):
+            raise ValueError(
+                f"D7 retrieval prediction package #{index} must include a "
+                "'disconfirmation_baselines' list"
+            )
+        baselines.extend(raw_baselines)
+    if not baselines:
+        raise ValueError("D7 retrieval comparison requires at least one baseline record")
+
+    working_state = state.model_copy(deep=True)
+    working_state.config.extra = dict(working_state.config.extra)
+    working_state.config.extra["disconfirmation_gold"] = d7_gold_payload_for_scorecard(gold_payload)
+    working_state.config.extra["disconfirmation_baselines"] = baselines
+    d7_scorecard = phase0_scorecard(working_state)["disconfirmation_d7"]
+
+    report = D7RetrievalComparisonReport(
+        project_id=state.id,
+        project_name=state.name,
+        package_count=len(packages),
+        baseline_count=len(baselines),
+        disconfirmation_d7=d7_scorecard,
+        note=(
+            "D7 retrieval comparison reports exact-span point estimates from exported "
+            "candidate predictions. This is not a held-out result or superiority claim "
+            "without frozen data, live baselines, and interval-tested deltas."
+        ),
+    )
+    return report.model_dump(mode="json")
 
 
 def default_d7_retrieval_baseline_name(

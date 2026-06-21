@@ -4,7 +4,12 @@ from __future__ import annotations
 
 import json
 
-from qc_clean.core.d7_retrieval import export_d7_retrieval_baseline
+import pytest
+
+from qc_clean.core.d7_retrieval import (
+    compare_d7_retrieval_predictions,
+    export_d7_retrieval_baseline,
+)
 from qc_clean.core.segmentation import segment_corpus
 from qc_clean.schemas.domain import (
     AnalyticClaim,
@@ -89,6 +94,94 @@ def test_export_package_is_accepted_by_phase0_baseline_loader(tmp_path):
     loaded = load_d7_baselines_file(path)
 
     assert loaded == package["disconfirmation_baselines"]
+
+
+def test_compares_retrieval_prediction_packages_against_gold():
+    content = "AI failed badly after rollout.\n\nAI only succeeded elsewhere."
+    state = _state_with_claim(content, "AI improves workflow.")
+    good_package = export_d7_retrieval_baseline(
+        state,
+        name="good_retrieval",
+        candidates_per_claim=1,
+    )
+    empty_package = {
+        "disconfirmation_baselines": [
+            {
+                "name": "empty_retrieval",
+                "description": "No candidates.",
+                "contrary_evidence": [],
+            }
+        ]
+    }
+    gold = [
+        {
+            "target_claim_id": "claim-ai",
+            "doc_id": "d1",
+            "start_char": 0,
+            "end_char": len("AI failed badly after rollout."),
+        }
+    ]
+
+    report = compare_d7_retrieval_predictions(
+        state,
+        gold_payload=gold,
+        prediction_packages=[good_package, empty_package],
+    )
+
+    baselines = report["disconfirmation_d7"]["baselines"]
+    assert report["report_type"] == "qualitative_coding.d7_retrieval_comparison"
+    assert report["package_count"] == 2
+    assert report["baseline_count"] == 2
+    assert baselines["good_retrieval"]["recall"] == 1.0
+    assert baselines["good_retrieval"]["precision"] == 1.0
+    assert baselines["empty_retrieval"]["recall"] == 0.0
+    assert baselines["empty_retrieval"]["precision"] == 0.0
+
+
+def test_comparison_fails_loud_on_duplicate_baseline_names():
+    state = _state_with_claim("AI failed badly after rollout.", "AI improves workflow.")
+    package = export_d7_retrieval_baseline(
+        state,
+        name="duplicate",
+        candidates_per_claim=1,
+    )
+    gold = [
+        {
+            "target_claim_id": "claim-ai",
+            "doc_id": "d1",
+            "start_char": 0,
+            "end_char": len("AI failed badly after rollout."),
+        }
+    ]
+
+    with pytest.raises(ValueError, match="Duplicate D7 baseline"):
+        compare_d7_retrieval_predictions(
+            state,
+            gold_payload=gold,
+            prediction_packages=[package, package],
+        )
+
+
+def test_comparison_does_not_mutate_project_state():
+    state = _state_with_claim("AI failed badly after rollout.", "AI improves workflow.")
+    before = state.model_dump(mode="json")
+    package = export_d7_retrieval_baseline(state, candidates_per_claim=1)
+    gold = [
+        {
+            "target_claim_id": "claim-ai",
+            "doc_id": "d1",
+            "start_char": 0,
+            "end_char": len("AI failed badly after rollout."),
+        }
+    ]
+
+    compare_d7_retrieval_predictions(
+        state,
+        gold_payload=gold,
+        prediction_packages=[package],
+    )
+
+    assert state.model_dump(mode="json") == before
 
 
 def _state_with_claim(content: str, claim_text: str) -> ProjectState:
