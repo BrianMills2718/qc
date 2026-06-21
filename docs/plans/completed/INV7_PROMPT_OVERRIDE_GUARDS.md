@@ -1,10 +1,30 @@
 # Plan #13: INV-7 Prompt Override Guards
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** None
 **Blocks:** INV-7 custom-prompt hardening; live adversarial injection evaluation
+
+---
+
+## Outcome
+
+Completed 2026-06-21. `qc_clean/core/prompting.py` now provides
+`render_prompt_override()`, which parses override templates and fails loudly if
+required protected data placeholders are absent. `thematic_coding` requires
+`{combined_text}` and `gt_constant_comparison` requires `{segment_text}` before
+formatting; malformed/unknown placeholders become stage-specific `ValueError`s.
+Existing valid overrides still receive already-boundaried untrusted data blocks.
+
+This narrows one INV-7 custom-prompt failure mode, but it does not prove model
+obedience, govern all possible future override surfaces, sanitize unsafe
+metadata, or replace live adversarial injection evaluation. INV-7 remains
+PARTIAL.
+
+Verification: `python -m pytest tests/test_prompt_boundaries_inv7.py -q` passed
+(`14 passed`) and Ruff passed on touched files before the implementation commit.
+Final plan completion was verified with `make check`.
 
 ---
 

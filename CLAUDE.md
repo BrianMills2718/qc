@@ -34,7 +34,7 @@ The software is **built and software-validated** (deterministic tests + live-LLM
 - **Segment universe + coverage** (INV-8): every doc split into char-anchored segments; `project run --exhaustive` codes *every* segment (examined-and-judged coverage, segment-anchored applications), else traversal coverage.
 - **First-class claim ledger** (INV-9 object layer): substantive stage outputs become `AnalyticClaim` objects or no-claims events, with source stage, kind, scope, support/adjudication status, anchors where available, and CLI/API/MCP/export read surfaces.
 - **Retrieval-first/adversarial ledger disconfirmation + claim review first slices** (INV-2/INV-6/INV-10 partial): negative-case prompts include bounded claim targets by ID and BM25-style lexical source-candidate passages; valid `candidate_id`s attach exact contrary anchors; `disconfirmation_model_name` can route interpretation through a separate model; coverage summaries report challenged/unchallenged targets; `make bench` includes a D7 scorecard substrate when adjudicated contrary-evidence gold anchors are supplied via project metadata or `GOLD=gold.json`; `ReviewManager` supports `target_type="claim"` approve/reject/modify decisions with revision history.
-- **Instruction/data separation first slices** (INV-7 partial): raw transcript/document/segment prompt sections and downstream LLM/codebook artifacts are rendered as untrusted `DATA>` lines via `qc_clean/core/prompting.py`, with deterministic prompt-injection regressions; custom-prompt hardening and live adversarial evaluation remain.
+- **Instruction/data separation first slices** (INV-7 partial): raw transcript/document/segment prompt sections and downstream LLM/codebook artifacts are rendered as untrusted `DATA>` lines via `qc_clean/core/prompting.py`; current prompt override surfaces fail loudly if they omit required protected data placeholders; deterministic prompt-injection regressions exist. Broader custom-prompt governance and live adversarial evaluation remain.
 - Human review (CLI + browser), `project irr` (LLM-pass *codebook-discovery* agreement by default; **application-level** positive segment × code agreement plus segment-decision agreement via `--application-level`, using exhaustive coding), `project stability`.
 - Graph viz, JSON/CSV/Markdown/QDPX export, per-stage memos, per-code audit trail; typed `PipelineContext`/results, fail-loud inter-stage checks, `llm_client` observability.
 
@@ -311,7 +311,7 @@ The ranked roadmap (invariants before features) lives in `docs/PROJECT_THEORY_AN
 
 ### Infrastructure
 
-`PipelineContext.prompt_overrides` allows passing custom prompts to stages without editing source code. Supported stages: `thematic_coding`, `gt_constant_comparison`. The `qc_run_pipeline` MCP tool accepts `prompt_overrides` dict.
+`PipelineContext.prompt_overrides` allows passing custom prompts to stages without editing source code. Supported stages: `thematic_coding`, `gt_constant_comparison`. Overrides must include the required protected data placeholder for that stage (`{combined_text}` for thematic, `{segment_text}` for GT constant comparison); missing placeholders raise `ValueError` before an LLM call. The `qc_run_pipeline` MCP tool accepts `prompt_overrides` dict.
 
 Both MCP servers (QC + prompt_eval) are configured in `~/projects/.mcp.json`. An agent with access to both can orchestrate the full optimization loop.
 
