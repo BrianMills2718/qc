@@ -1,6 +1,18 @@
 # Plan #35: D7 Retrieval Comparison Report
 
-**Status:** Planned
+**Outcome:** Complete. Added `compare_d7_retrieval_predictions()` plus
+`scripts/compare_d7_retrieval.py` and `make compare-d7-retrieval` so agents can
+score multiple exported D7 retrieval prediction packages against one gold file
+without manually merging baseline JSON. The report reuses the Phase 0 D7 scorer,
+deep-copies state before applying gold/baselines, and preserves the exact-span
+point-estimate caveat.
+
+Verification: `python -m pytest tests/test_d7_retrieval.py tests/test_bench_phase0.py -q`
+passed with 27 tests; `make check` passed with 710 tests, 1 skipped, 8
+deselected, Ruff clean, docs checks clean, and type checking still not
+configured.
+
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** None
@@ -55,9 +67,9 @@ Internal project capability only; no cross-project boundary is created.
 
 ### Capability Validation
 
-- [ ] Uses existing D7 gold and baseline Pydantic contracts.
-- [ ] Duplicate baseline names fail loudly through the existing scorer.
-- [ ] Does not mutate saved project state.
+- [x] Uses existing D7 gold and baseline Pydantic contracts.
+- [x] Duplicate baseline names fail loudly through the existing scorer.
+- [x] Does not mutate saved project state.
 
 ---
 
@@ -113,20 +125,20 @@ Internal project capability only; no cross-project boundary is created.
 ## Acceptance Criteria
 
 > Feature-level criteria (what the plan accomplishes):
-- [ ] Agents can run one command to score multiple exported retrieval prediction
+- [x] Agents can run one command to score multiple exported retrieval prediction
   packages against one D7 gold file.
-- [ ] Report includes exact D7 baseline scores from the existing scorer, plus
+- [x] Report includes exact D7 baseline scores from the existing scorer, plus
   project ID, package count, and claim-discipline note.
-- [ ] Duplicate baseline names fail loudly.
-- [ ] State is deep-copied before applying gold/baseline metadata.
-- [ ] Docs continue to say this is not a held-out D7 result or superiority claim.
+- [x] Duplicate baseline names fail loudly.
+- [x] State is deep-copied before applying gold/baseline metadata.
+- [x] Docs continue to say this is not a held-out D7 result or superiority claim.
 
 > Process criteria (quality gates):
-- [ ] Required tests pass
-- [ ] Full test suite passes
-- [ ] Type check status reported
-- [ ] Docs updated
-- [ ] Plan completed, committed, and pushed
+- [x] Required tests pass
+- [x] Full test suite passes
+- [x] Type check status reported
+- [x] Docs updated
+- [x] Plan completed, committed, and pushed
 
 ---
 

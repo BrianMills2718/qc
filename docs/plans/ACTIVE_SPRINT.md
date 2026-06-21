@@ -22,14 +22,14 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Next evaluation-harness slice after D7 retrieval export: add a deterministic
-   retrieval-mode comparison/report wrapper or move to the next highest-value
-   unmet harness lane if the repo makes a better dependency concrete.
+1. Next evaluation-harness slice after D7 retrieval comparison reporting:
+   choose the next highest-value unmet harness lane that can be advanced without
+   pretending held-out expert data exists.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Completed checkpoint:** D7 retrieval-mode export now provides
-`make run-d7-retrieval ID=<project> OUTPUT=predictions.json`, writing
-retrieval candidates as baseline-compatible predictions for the existing
-`make bench GOLD=... BASELINES=...` path. It is a comparison substrate, not a
-held-out D7 result.
+**Completed checkpoint:** D7 retrieval comparison reporting now provides
+`make compare-d7-retrieval ID=<project> GOLD=gold.json PREDICTIONS="a.json b.json"`,
+scoring exported retrieval prediction packages through the existing exact-span
+D7 scorer. It is a point-estimate report substrate, not a held-out D7 result or
+superiority claim.

@@ -6,7 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 35 | D7 retrieval comparison report | High | Planned | `D7_RETRIEVAL_COMPARISON_REPORT.md` |
+| — | — | — | No active plan | — |
 
 ## Completed Plans
 
@@ -46,6 +46,7 @@ Track all implementation work here.
 | D7 held-out gold-set scaffold | Evaluation-harness follow-up: versioned D7 gold-set packages can be validated and used as `--gold-file` inputs without claiming held-out results | `completed/D7_HELD_OUT_GOLD_SET_SCAFFOLD.md` |
 | INV-7 fixture runner scaffold | Evaluation-harness follow-up: `make run-inv7-fixtures` writes deterministic structural prompt-boundary fixture outcomes for `PROMPT_INJECTION=` | `completed/INV7_FIXTURE_RUNNER_SCAFFOLD.md` |
 | D7 retrieval-mode export | Evaluation-harness follow-up: `make run-d7-retrieval` exports retrieval candidates as D7 baseline-compatible predictions for `make bench BASELINES=...` | `completed/D7_RETRIEVAL_MODE_EXPORT.md` |
+| D7 retrieval comparison report | Evaluation-harness follow-up: `make compare-d7-retrieval` scores multiple retrieval prediction packages against one D7 gold file with the existing exact-span scorer | `completed/D7_RETRIEVAL_COMPARISON_REPORT.md` |
 
 ## Status Key
 
