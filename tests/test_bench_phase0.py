@@ -189,6 +189,62 @@ def test_scorecard_scores_d3_application_gold_exact_span_and_code():
     ]
     assert d3["recall_ci"]["method"] == "wilson"
     assert d3["precision_ci"]["method"] == "wilson"
+    assert d3["f1_bootstrap_ci"]["method"] == "key_universe_bootstrap"
+    assert d3["f1_bootstrap_ci"]["metric"] == "f1"
+    assert d3["f1_bootstrap_ci"]["confidence_level"] == 0.95
+    assert d3["f1_bootstrap_ci"]["samples"] == 1000
+    assert d3["f1_bootstrap_ci"]["seed"] == 0
+    assert d3["f1_bootstrap_ci"]["population_size"] == 4
+    assert d3["f1_bootstrap_ci"]["lower"] <= d3["f1_bootstrap_ci"]["upper"]
+
+
+def test_scorecard_d3_f1_bootstrap_configurable_and_disableable():
+    content = "AI helped here."
+    doc = Document(id="d1", name="d.txt", content=content)
+    state = ProjectState(
+        config=ProjectConfig(
+            methodology=Methodology.THEMATIC_ANALYSIS,
+            extra={
+                "phase0_exact_bootstrap": {
+                    "samples": 25,
+                    "confidence_level": 0.8,
+                    "seed": 7,
+                },
+                "application_gold": [
+                    {
+                        "code_id": "AI_USE",
+                        "doc_id": doc.id,
+                        "start_char": 0,
+                        "end_char": len(content),
+                    }
+                ],
+            },
+        ),
+        corpus=Corpus(documents=[doc]),
+        code_applications=[
+            CodeApplication(
+                code_id="AI_USE",
+                doc_id=doc.id,
+                quote_text=content,
+                start_char=0,
+                end_char=len(content),
+            )
+        ],
+    )
+
+    d3 = phase0_scorecard(state)["application_validity_d3"]
+
+    assert d3["f1_bootstrap_ci"]["samples"] == 25
+    assert d3["f1_bootstrap_ci"]["confidence_level"] == 0.8
+    assert d3["f1_bootstrap_ci"]["seed"] == 7
+
+    disabled = state.model_copy(deep=True)
+    disabled.config.extra = dict(disabled.config.extra)
+    disabled.config.extra["phase0_exact_bootstrap"] = {"enabled": False}
+
+    disabled_d3 = phase0_scorecard(disabled)["application_validity_d3"]
+
+    assert "f1_bootstrap_ci" not in disabled_d3
 
 
 def test_scorecard_invalid_d3_gold_fails_loud():
@@ -537,6 +593,9 @@ def test_scorecard_computes_d7_perfect_match_against_gold():
     assert d7["recall"] == 1.0
     assert d7["precision"] == 1.0
     assert d7["f1"] == 1.0
+    assert d7["f1_bootstrap_ci"]["method"] == "key_universe_bootstrap"
+    assert d7["f1_bootstrap_ci"]["lower"] == 1.0
+    assert d7["f1_bootstrap_ci"]["upper"] == 1.0
     assert d7["matched_gold_keys"] == [f"claim-ai|{doc.id}|{start}:{end}"]
     assert d7["missed_gold_keys"] == []
     assert d7["extra_predicted_keys"] == []
@@ -768,6 +827,9 @@ def test_scorecard_scores_d7_baselines_against_same_gold():
     assert baseline["f1"] == 0.5
     assert baseline["recall_ci"]["method"] == "wilson"
     assert baseline["precision_ci"]["method"] == "wilson"
+    assert d7["f1_bootstrap_ci"]["method"] == "key_universe_bootstrap"
+    assert baseline["f1_bootstrap_ci"]["method"] == "key_universe_bootstrap"
+    assert baseline["f1_bootstrap_ci"]["samples"] == d7["f1_bootstrap_ci"]["samples"]
     assert baseline["matched_gold_keys"] == [f"claim-ai|{doc.id}|{second_start}:{second_end}"]
     assert baseline["missed_gold_keys"] == [f"claim-ai|{doc.id}|{first_start}:{first_end}"]
     assert baseline["extra_predicted_keys"] == [f"claim-ai|{doc.id}|{extra_start}:{extra_end}"]

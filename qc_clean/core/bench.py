@@ -14,6 +14,7 @@ from collections import Counter
 from dataclasses import asdict
 from math import sqrt
 from pathlib import Path
+from random import Random
 import sqlite3
 from typing import Any, Dict
 
@@ -32,8 +33,39 @@ _D7_GOLD_EXTRA_KEY = "disconfirmation_gold"
 _D7_BASELINES_EXTRA_KEY = "disconfirmation_baselines"
 _RUN_TIMING_EXTRA_KEY = "run_timing"
 _PROMPT_INJECTION_EXTRA_KEY = "prompt_injection_evaluations"
+_EXACT_BOOTSTRAP_EXTRA_KEY = "phase0_exact_bootstrap"
 DEFAULT_OBSERVABILITY_DB_PATH = Path.home() / "projects" / "data" / "llm_observability.db"
 _WILSON_Z_95 = 1.959963984540054
+
+
+class ExactScoreBootstrapConfig(BaseModel):
+    """Config for deterministic exact-anchor F1 bootstrap intervals."""
+
+    enabled: bool = Field(
+        default=True,
+        description="Whether exact-anchor scorecards should include F1 bootstrap intervals",
+    )
+    samples: int = Field(
+        default=1000,
+        description="Number of bootstrap resamples to draw over exact gold/prediction keys",
+    )
+    confidence_level: float = Field(
+        default=0.95,
+        description="Two-sided confidence level for the bootstrap interval",
+    )
+    seed: int = Field(
+        default=0,
+        description="Deterministic random seed for bootstrap resampling",
+    )
+
+    @model_validator(mode="after")
+    def require_valid_settings(self) -> "ExactScoreBootstrapConfig":
+        """Reject malformed bootstrap settings instead of silently defaulting."""
+        if self.samples < 1:
+            raise ValueError("phase0_exact_bootstrap.samples must be at least 1")
+        if not 0 < self.confidence_level < 1:
+            raise ValueError("phase0_exact_bootstrap.confidence_level must be between 0 and 1")
+        return self
 
 
 class PromptInjectionEvaluation(BaseModel):
@@ -496,8 +528,14 @@ def disconfirmation_d7_scorecard(state: ProjectState) -> Dict[str, Any]:
 
     gold_keys = {_key_for_gold(anchor) for anchor in gold}
     predicted_keys, unscored_predicted = _predicted_disconfirmation_keys(state)
+    bootstrap_config = _exact_bootstrap_config(state)
 
-    system_score = _exact_anchor_score(gold_keys, predicted_keys, unscored_predicted)
+    system_score = _exact_anchor_score(
+        gold_keys,
+        predicted_keys,
+        unscored_predicted,
+        bootstrap_config=bootstrap_config,
+    )
     card: Dict[str, Any] = {
         "status": "scored",
         "gold_source": f"ProjectState.config.extra['{_D7_GOLD_EXTRA_KEY}']",
@@ -513,7 +551,12 @@ def disconfirmation_d7_scorecard(state: ProjectState) -> Dict[str, Any]:
 
     baselines = _d7_baselines(state)
     if baselines:
-        card["baselines"] = _score_d7_baselines(gold_keys, baselines, system_score)
+        card["baselines"] = _score_d7_baselines(
+            gold_keys,
+            baselines,
+            system_score,
+            bootstrap_config=bootstrap_config,
+        )
         card["baseline_note"] = (
             "Baseline scores use the same exact D7 anchor matching as the system. "
             "System deltas are point estimates only; superiority still requires "
@@ -535,8 +578,11 @@ def _exact_anchor_score(
     gold_keys: set[str],
     predicted_keys: set[str],
     unscored_predicted: list[str],
+    *,
+    bootstrap_config: ExactScoreBootstrapConfig | None = None,
 ) -> Dict[str, Any]:
     """Score exact predicted keys against exact gold keys."""
+    bootstrap_config = bootstrap_config or ExactScoreBootstrapConfig()
     matched = sorted(gold_keys & predicted_keys)
     missed = sorted(gold_keys - predicted_keys)
     extra = sorted(predicted_keys - gold_keys)
@@ -549,7 +595,7 @@ def _exact_anchor_score(
     recall_denominator = true_positives + false_negatives
     precision_denominator = true_positives + false_positives
 
-    return {
+    score: Dict[str, Any] = {
         "gold_count": len(gold_keys),
         "predicted_count": len(predicted_keys) + len(unscored_predicted),
         "true_positives": true_positives,
@@ -565,18 +611,137 @@ def _exact_anchor_score(
         "extra_predicted_keys": extra,
         "unscored_predicted_anchors": unscored_predicted,
     }
+    if bootstrap_config.enabled:
+        score["f1_bootstrap_ci"] = _exact_anchor_f1_bootstrap_ci(
+            gold_keys,
+            predicted_keys,
+            unscored_predicted,
+            bootstrap_config=bootstrap_config,
+        )
+    return score
+
+
+def _exact_bootstrap_config(state: ProjectState) -> ExactScoreBootstrapConfig:
+    """Load Phase 0 exact-score bootstrap config from project metadata."""
+    raw = state.config.extra.get(_EXACT_BOOTSTRAP_EXTRA_KEY)
+    if raw is None:
+        return ExactScoreBootstrapConfig()
+    if not isinstance(raw, dict):
+        raise ValueError(
+            f"ProjectState.config.extra['{_EXACT_BOOTSTRAP_EXTRA_KEY}'] must be an object"
+        )
+    try:
+        return ExactScoreBootstrapConfig.model_validate(raw)
+    except ValidationError as exc:
+        raise ValueError(f"Invalid phase0_exact_bootstrap config: {exc}") from exc
+
+
+def _exact_anchor_f1_bootstrap_ci(
+    gold_keys: set[str],
+    predicted_keys: set[str],
+    unscored_predicted: list[str],
+    *,
+    bootstrap_config: ExactScoreBootstrapConfig,
+) -> Dict[str, Any]:
+    """Return a deterministic F1 bootstrap interval over exact anchor keys."""
+    items = _exact_anchor_bootstrap_items(gold_keys, predicted_keys, unscored_predicted)
+    base: Dict[str, Any] = {
+        "method": "key_universe_bootstrap",
+        "metric": "f1",
+        "confidence_level": bootstrap_config.confidence_level,
+        "samples": bootstrap_config.samples,
+        "seed": bootstrap_config.seed,
+        "unit": "exact gold/prediction anchor key",
+        "population_size": len(items),
+        "note": (
+            "Deterministic bootstrap over exact gold/prediction keys. This is local "
+            "uncertainty metadata, not a held-out superiority or non-inferiority test."
+        ),
+    }
+    if not items:
+        return {
+            **base,
+            "lower": None,
+            "upper": None,
+            "note": "undefined empty key universe",
+        }
+
+    rng = Random(bootstrap_config.seed)
+    sample_size = len(items)
+    values: list[float] = []
+    for _ in range(bootstrap_config.samples):
+        sample = [items[rng.randrange(sample_size)] for _ in range(sample_size)]
+        values.append(_f1_from_bootstrap_items(sample))
+
+    alpha = (1 - bootstrap_config.confidence_level) / 2
+    values.sort()
+    return {
+        **base,
+        "lower": _percentile(values, alpha),
+        "upper": _percentile(values, 1 - alpha),
+    }
+
+
+def _exact_anchor_bootstrap_items(
+    gold_keys: set[str],
+    predicted_keys: set[str],
+    unscored_predicted: list[str],
+) -> list[tuple[bool, bool]]:
+    """Represent exact score keys as (is_gold, is_predicted) bootstrap items."""
+    items = [
+        (key in gold_keys, key in predicted_keys)
+        for key in sorted(gold_keys | predicted_keys)
+    ]
+    items.extend((False, True) for _ in unscored_predicted)
+    return items
+
+
+def _f1_from_bootstrap_items(items: list[tuple[bool, bool]]) -> float:
+    """Compute F1 from bootstrapped exact-key classification items."""
+    true_positives = sum(1 for is_gold, is_predicted in items if is_gold and is_predicted)
+    false_positives = sum(1 for is_gold, is_predicted in items if is_predicted and not is_gold)
+    false_negatives = sum(1 for is_gold, is_predicted in items if is_gold and not is_predicted)
+    recall = _safe_div(true_positives, true_positives + false_negatives)
+    precision = _safe_div(true_positives, true_positives + false_positives)
+    return _safe_div(2 * precision * recall, precision + recall)
+
+
+def _percentile(sorted_values: list[float], percentile: float) -> float:
+    """Return a linearly interpolated percentile from sorted values."""
+    if not sorted_values:
+        raise ValueError("percentile requires at least one value")
+    if not 0 <= percentile <= 1:
+        raise ValueError("percentile must be between 0 and 1")
+    if len(sorted_values) == 1:
+        return sorted_values[0]
+    position = percentile * (len(sorted_values) - 1)
+    lower_index = int(position)
+    upper_index = min(lower_index + 1, len(sorted_values) - 1)
+    fraction = position - lower_index
+    return (
+        sorted_values[lower_index] * (1 - fraction)
+        + sorted_values[upper_index] * fraction
+    )
 
 
 def _score_d7_baselines(
     gold_keys: set[str],
     baselines: list[DisconfirmationBaselinePrediction],
     system_score: Dict[str, Any],
+    *,
+    bootstrap_config: ExactScoreBootstrapConfig | None = None,
 ) -> Dict[str, Dict[str, Any]]:
     """Score D7 baselines and include point deltas versus the system."""
+    bootstrap_config = bootstrap_config or ExactScoreBootstrapConfig()
     scored: Dict[str, Dict[str, Any]] = {}
     for baseline in baselines:
         predicted_keys = {_key_for_gold(anchor) for anchor in baseline.contrary_evidence}
-        baseline_score = _exact_anchor_score(gold_keys, predicted_keys, [])
+        baseline_score = _exact_anchor_score(
+            gold_keys,
+            predicted_keys,
+            [],
+            bootstrap_config=bootstrap_config,
+        )
         baseline_score["description"] = baseline.description
         baseline_score["system_minus_baseline"] = {
             "recall": system_score["recall"] - baseline_score["recall"],
@@ -671,7 +836,12 @@ def application_validity_d3_scorecard(state: ProjectState) -> Dict[str, Any]:
 
     gold_keys = {_key_for_application_gold(anchor) for anchor in gold}
     predicted_keys, unscored_predicted = _predicted_application_keys(state)
-    score = _exact_anchor_score(gold_keys, predicted_keys, unscored_predicted)
+    score = _exact_anchor_score(
+        gold_keys,
+        predicted_keys,
+        unscored_predicted,
+        bootstrap_config=_exact_bootstrap_config(state),
+    )
     card: Dict[str, Any] = {
         "status": "scored",
         "gold_source": f"ProjectState.config.extra['{_D3_GOLD_EXTRA_KEY}']",
