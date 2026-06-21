@@ -33,7 +33,7 @@ The software is **built and software-validated** (deterministic tests + live-LLM
 - **Span-anchored grounding** (INV-1, mostly met): quotes resolve to char offsets + hash or are dropped + warned; `verify_grounding`/`make bench` measure the rate.
 - **Segment universe + coverage** (INV-8): every doc split into char-anchored segments; `project run --exhaustive` codes *every* segment (examined-and-judged coverage, segment-anchored applications), else traversal coverage.
 - **First-class claim ledger** (INV-9 object layer): substantive stage outputs become `AnalyticClaim` objects or no-claims events, with source stage, kind, scope, support/adjudication status, anchors where available, and CLI/API/MCP/export read surfaces.
-- **Retrieval-first/adversarial ledger disconfirmation + claim review first slices** (INV-2/INV-6/INV-10 partial): negative-case prompts include bounded claim targets by ID and BM25-style lexical source-candidate passages; valid `candidate_id`s attach exact contrary anchors; `disconfirmation_model_name` can route interpretation through a separate model; coverage summaries report challenged/unchallenged targets; `make bench` includes a D7 scorecard substrate when adjudicated contrary-evidence gold anchors are supplied; `ReviewManager` supports `target_type="claim"` approve/reject/modify decisions with revision history.
+- **Retrieval-first/adversarial ledger disconfirmation + claim review first slices** (INV-2/INV-6/INV-10 partial): negative-case prompts include bounded claim targets by ID and BM25-style lexical source-candidate passages; valid `candidate_id`s attach exact contrary anchors; `disconfirmation_model_name` can route interpretation through a separate model; coverage summaries report challenged/unchallenged targets; `make bench` includes a D7 scorecard substrate when adjudicated contrary-evidence gold anchors are supplied via project metadata or `GOLD=gold.json`; `ReviewManager` supports `target_type="claim"` approve/reject/modify decisions with revision history.
 - **Instruction/data separation first slices** (INV-7 partial): raw transcript/document/segment prompt sections and downstream LLM/codebook artifacts are rendered as untrusted `DATA>` lines via `qc_clean/core/prompting.py`, with deterministic prompt-injection regressions; custom-prompt hardening and live adversarial evaluation remain.
 - Human review (CLI + browser), `project irr` (LLM-pass *codebook-discovery* agreement by default; **application-level** positive segment × code agreement plus segment-decision agreement via `--application-level`, using exhaustive coding), `project stability`.
 - Graph viz, JSON/CSV/Markdown/QDPX export, per-stage memos, per-code audit trail; typed `PipelineContext`/results, fail-loud inter-stage checks, `llm_client` observability.
@@ -393,6 +393,8 @@ make lint               # Run Ruff fatal-error lint gate
 make docs-check         # Run documentation and governance checks
 make check              # Run deterministic tests + lint + docs checks
 make status             # Show git status
+make bench ID=<project_id>              # Phase 0 scorecard (D1/D2/D5 plus D7 if gold is present)
+make bench ID=<project_id> GOLD=gold.json  # Add external D7 gold anchors without mutating project state
 make cost               # Show LLM spend (DAYS=7)
 make errors             # Show recent error breakdown
 

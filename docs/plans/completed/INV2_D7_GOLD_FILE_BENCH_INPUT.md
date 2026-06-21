@@ -1,10 +1,28 @@
 # Plan #12: INV-2 D7 Gold File Bench Input
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** None
 **Blocks:** held-out D7 evaluation; prompt_eval-backed benchmark suite
+
+---
+
+## Outcome
+
+Completed 2026-06-21. `scripts/bench_phase0.py` now accepts
+`--gold-file gold.json`, and `make bench ID=<project> GOLD=gold.json` forwards
+that file. The gold JSON may be a list of D7 anchors or an object with a
+`contrary_evidence` list. Gold is applied to an in-memory `ProjectState` copy
+before `phase0_scorecard()` runs, so the persisted project state is not mutated.
+Malformed gold input returns a non-zero exit with a JSON error.
+
+This is gold-file wiring only. It does not create a held-out gold set, run a D7
+benchmark, compute CIs/baselines, or license any disconfirmation-validity claim.
+
+Verification: `python -m pytest tests/test_bench_phase0_script.py tests/test_bench_phase0.py -q`
+passed (`9 passed`) and Ruff passed on touched script/test files before the
+implementation commit. Final plan completion was verified with `make check`.
 
 ---
 
