@@ -15,6 +15,7 @@ from qc_clean.schemas.domain import (
     ClaimAnchor,
     ClaimKind,
     ClaimScope,
+    CodeApplication,
     Corpus,
     Document,
     ProjectConfig,
@@ -50,6 +51,7 @@ def test_bench_phase0_includes_input_hashes_without_external_files(
     assert hashes["corpus_sha256"] == bench_phase0.sha256_jsonable(
         bench_phase0.corpus_hash_payload(persisted)
     )
+    assert hashes["d3_gold_file_sha256"] is None
     assert hashes["gold_file_sha256"] is None
     assert hashes["d7_baselines_file_sha256"] is None
     assert hashes["prompt_injection_file_sha256"] is None
@@ -66,6 +68,20 @@ def test_bench_phase0_hashes_external_input_files(
     state = ProjectState(id="project_external_hashes", name="External hashes", corpus=Corpus(documents=[doc]))
     store = ProjectStore(projects_dir=tmp_path / "projects")
     store.save(state)
+    d3_gold_file = tmp_path / "d3_gold.json"
+    d3_gold_file.write_text(
+        json.dumps({
+            "application_gold": [
+                {
+                    "code_id": "AI_USE",
+                    "doc_id": doc.id,
+                    "start_char": 0,
+                    "end_char": len(content),
+                }
+            ],
+        }),
+        encoding="utf-8",
+    )
     gold_file = tmp_path / "gold.json"
     gold_file.write_text(
         json.dumps({
@@ -108,6 +124,8 @@ def test_bench_phase0_hashes_external_input_files(
 
     exit_code = bench_phase0.main([
         state.id,
+        "--d3-gold-file",
+        str(d3_gold_file),
         "--gold-file",
         str(gold_file),
         "--d7-baselines-file",
@@ -121,14 +139,66 @@ def test_bench_phase0_hashes_external_input_files(
     assert exit_code == 0
     output = json.loads(capsys.readouterr().out)
     hashes = output["_meta"]["input_hashes"]
+    assert hashes["d3_gold_file_sha256"] == _sha256_file(d3_gold_file)
     assert hashes["gold_file_sha256"] == _sha256_file(gold_file)
     assert hashes["d7_baselines_file_sha256"] == _sha256_file(baselines_file)
     assert hashes["prompt_injection_file_sha256"] == _sha256_file(injection_file)
     assert hashes["observability_db_sha256"] == _sha256_file(db_path)
     reloaded = store.load(state.id)
+    assert "application_gold" not in reloaded.config.extra
     assert "disconfirmation_gold" not in reloaded.config.extra
     assert "disconfirmation_baselines" not in reloaded.config.extra
     assert "prompt_injection_evaluations" not in reloaded.config.extra
+
+
+def test_bench_phase0_scores_d3_from_gold_file_without_mutating_state(
+    tmp_path,
+    monkeypatch,
+    capsys,
+):
+    content = "AI helped here."
+    doc = Document(id="d1", name="a.txt", content=content)
+    state = ProjectState(
+        id="project_d3_gold",
+        name="D3 gold project",
+        corpus=Corpus(documents=[doc]),
+        code_applications=[
+            CodeApplication(
+                code_id="AI_USE",
+                doc_id=doc.id,
+                quote_text=content,
+                start_char=0,
+                end_char=len(content),
+            )
+        ],
+    )
+    store = ProjectStore(projects_dir=tmp_path / "projects")
+    store.save(state)
+    d3_gold_file = tmp_path / "d3_gold.json"
+    d3_gold_file.write_text(
+        json.dumps({
+            "application_gold": [
+                {
+                    "code_id": "AI_USE",
+                    "doc_id": doc.id,
+                    "start_char": 0,
+                    "end_char": len(content),
+                }
+            ],
+        }),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(bench_phase0, "ProjectStore", lambda: store)
+
+    exit_code = bench_phase0.main([state.id, "--d3-gold-file", str(d3_gold_file)])
+
+    assert exit_code == 0
+    output = json.loads(capsys.readouterr().out)
+    assert output["application_validity_d3"]["status"] == "scored"
+    assert output["application_validity_d3"]["recall"] == 1.0
+    assert output["_meta"]["input_hashes"]["d3_gold_file_sha256"] == _sha256_file(d3_gold_file)
+    reloaded = store.load(state.id)
+    assert "application_gold" not in reloaded.config.extra
 
 
 def test_bench_phase0_writes_versioned_artifact_package(

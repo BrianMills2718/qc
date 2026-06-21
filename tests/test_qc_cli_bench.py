@@ -36,6 +36,20 @@ def test_qc_cli_bench_forwards_files_and_output(tmp_path, monkeypatch, capsys):
     state = ProjectState(id="cli_bench_files", name="CLI Bench Files", corpus=Corpus(documents=[doc]))
     store = ProjectStore(projects_dir=tmp_path / "projects")
     store.save(state)
+    d3_gold_file = tmp_path / "d3_gold.json"
+    d3_gold_file.write_text(
+        json.dumps({
+            "application_gold": [
+                {
+                    "code_id": "AI_USE",
+                    "doc_id": doc.id,
+                    "start_char": 0,
+                    "end_char": len(content),
+                }
+            ],
+        }),
+        encoding="utf-8",
+    )
     gold_file = tmp_path / "gold.json"
     gold_file.write_text(
         json.dumps({
@@ -59,6 +73,8 @@ def test_qc_cli_bench_forwards_files_and_output(tmp_path, monkeypatch, capsys):
             "qc_cli.py",
             "bench",
             state.id,
+            "--d3-gold-file",
+            str(d3_gold_file),
             "--gold-file",
             str(gold_file),
             "--output",
@@ -72,8 +88,11 @@ def test_qc_cli_bench_forwards_files_and_output(tmp_path, monkeypatch, capsys):
     stdout_scorecard = json.loads(capsys.readouterr().out)
     file_scorecard = json.loads(output_file.read_text(encoding="utf-8"))
     assert stdout_scorecard == file_scorecard
+    assert stdout_scorecard["application_validity_d3"]["status"] == "scored"
     assert stdout_scorecard["disconfirmation_d7"]["status"] == "scored"
+    expected_d3_hash = hashlib.sha256(d3_gold_file.read_bytes()).hexdigest()
     expected_hash = hashlib.sha256(gold_file.read_bytes()).hexdigest()
+    assert stdout_scorecard["_meta"]["input_hashes"]["d3_gold_file_sha256"] == expected_d3_hash
     assert stdout_scorecard["_meta"]["input_hashes"]["gold_file_sha256"] == expected_hash
 
 

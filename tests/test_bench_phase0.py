@@ -106,6 +106,107 @@ def test_scorecard_grounding_rate_one_when_no_applications():
     assert phase0_scorecard(state)["grounding"]["grounding_rate"] == 1.0
 
 
+def test_scorecard_reports_d3_not_available_without_application_gold():
+    state = ProjectState(name="no d3 gold")
+
+    d3 = phase0_scorecard(state)["application_validity_d3"]
+
+    assert d3["status"] == "not_available"
+    assert "application gold" in d3["reason"]
+    assert "not evidence" in d3["note"]
+
+
+def test_scorecard_scores_d3_application_gold_exact_span_and_code():
+    content = "AI helped here. AI failed later. AI only appeared."
+    doc = Document(id="d1", name="d.txt", content=content)
+    first_start = content.index("AI helped")
+    first_end = first_start + len("AI helped here.")
+    second_start = content.index("AI failed")
+    second_end = second_start + len("AI failed later.")
+    extra_start = content.index("AI only")
+    extra_end = len(content)
+    state = ProjectState(
+        config=ProjectConfig(
+            methodology=Methodology.THEMATIC_ANALYSIS,
+            extra={
+                "application_gold": [
+                    {
+                        "code_id": "AI_USE",
+                        "doc_id": doc.id,
+                        "start_char": first_start,
+                        "end_char": first_end,
+                    },
+                    {
+                        "code_id": "AI_USE",
+                        "doc_id": doc.id,
+                        "start_char": second_start,
+                        "end_char": second_end,
+                    },
+                ]
+            },
+        ),
+        corpus=Corpus(documents=[doc]),
+        code_applications=[
+            CodeApplication(
+                code_id="AI_USE",
+                doc_id=doc.id,
+                quote_text=content[first_start:first_end],
+                start_char=first_start,
+                end_char=first_end,
+            ),
+            CodeApplication(
+                code_id="AI_USE",
+                doc_id=doc.id,
+                quote_text=content[extra_start:extra_end],
+                start_char=extra_start,
+                end_char=extra_end,
+            ),
+            CodeApplication(
+                id="unanchored-app",
+                code_id="AI_USE",
+                doc_id=doc.id,
+                quote_text="AI somewhere",
+            ),
+        ],
+    )
+
+    d3 = phase0_scorecard(state)["application_validity_d3"]
+
+    assert d3["status"] == "scored"
+    assert d3["gold_count"] == 2
+    assert d3["predicted_count"] == 3
+    assert d3["true_positives"] == 1
+    assert d3["false_positives"] == 2
+    assert d3["false_negatives"] == 1
+    assert d3["recall"] == 0.5
+    assert d3["precision"] == pytest.approx(1 / 3)
+    assert d3["f1"] == pytest.approx(0.4)
+    assert d3["matched_gold_keys"] == [f"AI_USE|{doc.id}|{first_start}:{first_end}"]
+    assert d3["missed_gold_keys"] == [f"AI_USE|{doc.id}|{second_start}:{second_end}"]
+    assert d3["extra_predicted_keys"] == [f"AI_USE|{doc.id}|{extra_start}:{extra_end}"]
+    assert d3["unscored_predicted_anchors"] == [
+        "unanchored-app|code=AI_USE|doc=d1|missing-span-or-segment"
+    ]
+    assert d3["recall_ci"]["method"] == "wilson"
+    assert d3["precision_ci"]["method"] == "wilson"
+
+
+def test_scorecard_invalid_d3_gold_fails_loud():
+    state = ProjectState(
+        config=ProjectConfig(
+            extra={
+                "application_gold": [
+                    {"code_id": "AI_USE", "doc_id": "d1", "segment_id": "s1"},
+                    {"code_id": "AI_USE", "doc_id": "d1", "segment_id": "s1"},
+                ]
+            }
+        )
+    )
+
+    with pytest.raises(ValueError, match="Duplicate D3 application gold"):
+        phase0_scorecard(state)
+
+
 def test_scorecard_includes_category_saturation_diagnostic():
     doc = Document(name="d.txt", content="Trust varied by context.")
     state = ProjectState(

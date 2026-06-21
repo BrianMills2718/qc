@@ -127,6 +127,10 @@ Examples:
     )
     bench_parser.add_argument('project_id', help='Project ID to score')
     bench_parser.add_argument(
+        '--d3-gold-file',
+        help='Optional D3 application-validity gold JSON file; applied in memory only'
+    )
+    bench_parser.add_argument(
         '--gold-file',
         help='Optional D7 disconfirmation gold JSON file; applied in memory only'
     )
@@ -337,6 +341,8 @@ def handle_bench_command(args) -> int:
     from scripts import bench_phase0
 
     argv = [args.project_id]
+    if args.d3_gold_file:
+        argv.extend(["--d3-gold-file", args.d3_gold_file])
     if args.gold_file:
         argv.extend(["--gold-file", args.gold_file])
     if args.d7_baselines_file:

@@ -19,8 +19,8 @@ test-e2e:  ## Run live LLM E2E tests
 test-all:  ## Run deterministic tests and live LLM E2E tests
 	python -m pytest tests/ -v
 
-bench:  ## Evaluation-harness Phase 0 scorecard (ID=<project_id> [GOLD=gold.json] [BASELINES=baselines.json] [PROMPT_INJECTION=inv7.json] [OBS_DB=path] [TRACE_ID=id] [ARTIFACT_DIR=benchmark_results])
-	python scripts/bench_phase0.py $(ID) $(if $(GOLD),--gold-file $(GOLD),) $(if $(BASELINES),--d7-baselines-file $(BASELINES),) $(if $(PROMPT_INJECTION),--prompt-injection-file $(PROMPT_INJECTION),) $(if $(OBS_DB),--observability-db $(OBS_DB),) $(if $(TRACE_ID),--trace-id $(TRACE_ID),) $(if $(ARTIFACT_DIR),--artifact-dir $(ARTIFACT_DIR),)
+bench:  ## Evaluation-harness Phase 0 scorecard (ID=<project_id> [D3_GOLD=d3_gold.json] [GOLD=gold.json] [BASELINES=baselines.json] [PROMPT_INJECTION=inv7.json] [OBS_DB=path] [TRACE_ID=id] [ARTIFACT_DIR=benchmark_results])
+	python scripts/bench_phase0.py $(ID) $(if $(D3_GOLD),--d3-gold-file $(D3_GOLD),) $(if $(GOLD),--gold-file $(GOLD),) $(if $(BASELINES),--d7-baselines-file $(BASELINES),) $(if $(PROMPT_INJECTION),--prompt-injection-file $(PROMPT_INJECTION),) $(if $(OBS_DB),--observability-db $(OBS_DB),) $(if $(TRACE_ID),--trace-id $(TRACE_ID),) $(if $(ARTIFACT_DIR),--artifact-dir $(ARTIFACT_DIR),)
 
 validate-d7-gold:  ## Validate a versioned D7 gold-set package (GOLD=gold_set.json)
 ifndef GOLD

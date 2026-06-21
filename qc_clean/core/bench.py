@@ -19,6 +19,7 @@ from typing import Any, Dict
 
 from pydantic import BaseModel, Field, ValidationError, model_validator
 
+from qc_clean.core.d3_gold import ApplicationGoldAnchor
 from qc_clean.core.d7_gold import DisconfirmationGoldAnchor
 from qc_clean.core.grounding import verify_grounding
 from qc_clean.core.pipeline.saturation import assess_category_saturation
@@ -26,6 +27,7 @@ from qc_clean.core.segmentation import compute_coverage
 from qc_clean.schemas.domain import ClaimAnchor, ClaimKind, ProjectState
 
 
+_D3_GOLD_EXTRA_KEY = "application_gold"
 _D7_GOLD_EXTRA_KEY = "disconfirmation_gold"
 _D7_BASELINES_EXTRA_KEY = "disconfirmation_baselines"
 _RUN_TIMING_EXTRA_KEY = "run_timing"
@@ -128,6 +130,8 @@ def phase0_scorecard(state: ProjectState) -> Dict[str, Any]:
         "grounding": asdict(verify_grounding(state)),
         # D2 — coverage over the segment universe (INV-8 denominator).
         "coverage": asdict(compute_coverage(state)),
+        # D3 — application validity when human/adjudicated gold is present.
+        "application_validity_d3": application_validity_d3_scorecard(state),
         # D7 — disconfirmation quality when human/adjudicated gold is present.
         "disconfirmation_d7": disconfirmation_d7_scorecard(state),
         # INV-4 — category adequacy diagnostic, not proof of GT saturation.
@@ -493,7 +497,7 @@ def disconfirmation_d7_scorecard(state: ProjectState) -> Dict[str, Any]:
     gold_keys = {_key_for_gold(anchor) for anchor in gold}
     predicted_keys, unscored_predicted = _predicted_disconfirmation_keys(state)
 
-    system_score = _d7_exact_score(gold_keys, predicted_keys, unscored_predicted)
+    system_score = _exact_anchor_score(gold_keys, predicted_keys, unscored_predicted)
     card: Dict[str, Any] = {
         "status": "scored",
         "gold_source": f"ProjectState.config.extra['{_D7_GOLD_EXTRA_KEY}']",
@@ -521,6 +525,15 @@ def _d7_exact_score(
     unscored_predicted: list[str],
 ) -> Dict[str, Any]:
     """Score exact D7 prediction keys against gold keys."""
+    return _exact_anchor_score(gold_keys, predicted_keys, unscored_predicted)
+
+
+def _exact_anchor_score(
+    gold_keys: set[str],
+    predicted_keys: set[str],
+    unscored_predicted: list[str],
+) -> Dict[str, Any]:
+    """Score exact predicted keys against exact gold keys."""
     matched = sorted(gold_keys & predicted_keys)
     missed = sorted(gold_keys - predicted_keys)
     extra = sorted(predicted_keys - gold_keys)
@@ -560,7 +573,7 @@ def _score_d7_baselines(
     scored: Dict[str, Dict[str, Any]] = {}
     for baseline in baselines:
         predicted_keys = {_key_for_gold(anchor) for anchor in baseline.contrary_evidence}
-        baseline_score = _d7_exact_score(gold_keys, predicted_keys, [])
+        baseline_score = _exact_anchor_score(gold_keys, predicted_keys, [])
         baseline_score["description"] = baseline.description
         baseline_score["system_minus_baseline"] = {
             "recall": system_score["recall"] - baseline_score["recall"],
@@ -609,6 +622,114 @@ def _d7_baselines(state: ProjectState) -> list[DisconfirmationBaselinePrediction
     if duplicates:
         raise ValueError("Duplicate D7 baseline name(s): " + ", ".join(duplicates))
     return baselines
+
+
+def application_validity_d3_scorecard(state: ProjectState) -> Dict[str, Any]:
+    """Score code applications against D3 application gold, if available."""
+    gold = _d3_application_gold_annotations(state)
+    if not gold:
+        return {
+            "status": "not_available",
+            "reason": (
+                "No D3 application gold annotations found at "
+                f"ProjectState.config.extra['{_D3_GOLD_EXTRA_KEY}']; scoring requires "
+                "human/adjudicated code-to-source assignments."
+            ),
+            "note": (
+                "D3 is gold-dependent; absence of this section is not evidence of "
+                "application validity."
+            ),
+        }
+
+    gold_keys = {_key_for_application_gold(anchor) for anchor in gold}
+    predicted_keys, unscored_predicted = _predicted_application_keys(state)
+    score = _exact_anchor_score(gold_keys, predicted_keys, unscored_predicted)
+    return {
+        "status": "scored",
+        "gold_source": f"ProjectState.config.extra['{_D3_GOLD_EXTRA_KEY}']",
+        "note": (
+            "Exact code/source-anchor D3 score. This is a measurement substrate, "
+            "not application-validity evidence without adjudicated held-out gold "
+            "and human-ceiling comparison."
+        ),
+        **score,
+    }
+
+
+def _d3_application_gold_annotations(state: ProjectState) -> list[ApplicationGoldAnchor]:
+    """Load D3 application gold annotations from project config metadata."""
+    raw = state.config.extra.get(_D3_GOLD_EXTRA_KEY)
+    if raw is None:
+        return []
+    if isinstance(raw, dict) and _D3_GOLD_EXTRA_KEY in raw:
+        raw = raw[_D3_GOLD_EXTRA_KEY]
+    if isinstance(raw, dict) and "code_applications" in raw:
+        raw = raw["code_applications"]
+    if not isinstance(raw, list):
+        raise ValueError(
+            f"ProjectState.config.extra['{_D3_GOLD_EXTRA_KEY}'] must be a list "
+            "of D3 application gold anchors"
+        )
+    try:
+        anchors = [ApplicationGoldAnchor.model_validate(item) for item in raw]
+    except ValidationError as exc:
+        raise ValueError(f"Invalid D3 application gold annotations: {exc}") from exc
+    keys = [_key_for_application_gold(anchor) for anchor in anchors]
+    duplicates = sorted(key for key, count in Counter(keys).items() if count > 1)
+    if duplicates:
+        raise ValueError("Duplicate D3 application gold anchor key(s): " + ", ".join(duplicates))
+    return anchors
+
+
+def _predicted_application_keys(state: ProjectState) -> tuple[set[str], list[str]]:
+    """Return scoreable system code-application keys and unscoreable descriptions."""
+    keys: set[str] = set()
+    unscored: list[str] = []
+    for app in state.code_applications:
+        key = _key_for_application_anchor(
+            code_id=app.code_id,
+            doc_id=app.doc_id,
+            start_char=app.start_char,
+            end_char=app.end_char,
+            segment_id=None,
+        )
+        if key is None:
+            unscored.append(
+                f"{app.id}|code={app.code_id}|doc={app.doc_id}|missing-span-or-segment"
+            )
+            continue
+        keys.add(key)
+    return keys, sorted(unscored)
+
+
+def _key_for_application_gold(anchor: ApplicationGoldAnchor) -> str:
+    """Build an exact D3 comparison key from a gold application anchor."""
+    key = _key_for_application_anchor(
+        code_id=anchor.code_id,
+        doc_id=anchor.doc_id,
+        start_char=anchor.start_char,
+        end_char=anchor.end_char,
+        segment_id=anchor.segment_id,
+    )
+    if key is None:
+        raise ValueError("D3 application gold anchor validation failed to produce a comparison key")
+    return key
+
+
+def _key_for_application_anchor(
+    *,
+    code_id: str,
+    doc_id: str,
+    start_char: int | None,
+    end_char: int | None,
+    segment_id: str | None,
+) -> str | None:
+    """Build an exact D3 key from code identity plus source anchor."""
+    if start_char is not None and end_char is not None:
+        return f"{code_id}|{doc_id}|{start_char}:{end_char}"
+    if segment_id:
+        return f"{code_id}|{doc_id}|segment:{segment_id}"
+    return None
 
 
 def _predicted_disconfirmation_keys(state: ProjectState) -> tuple[set[str], list[str]]:
