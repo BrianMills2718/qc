@@ -6,9 +6,9 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 4 | INV-9 first-class claim ledger | High | Planned | `INV9_CLAIM_LEDGER.md` |
 
-Active implementation plan tracked. Execute `INV9_CLAIM_LEDGER.md` phases in order.
+No active implementation plan is currently tracked here. Use the roadmap in
+`docs/PROJECT_THEORY_AND_GOALS.md` §18 to choose the next invariant lane.
 
 ## Completed Plans
 
@@ -17,6 +17,7 @@ Active implementation plan tracked. Execute `INV9_CLAIM_LEDGER.md` phases in ord
 | INV-1 span anchoring + harness Phase 0 | INV-1 mostly met; `make bench` Phase 0 stood up | `completed/INV1_OVERNIGHT_SPRINT.md` |
 | INV-8 segment universe + exhaustive coding | INV-8 met in exhaustive mode (`--exhaustive`); coverage denominator | `completed/INV8_SEGMENT_UNIVERSE.md` |
 | Application-level IRR | `project irr --application-level` reports positive segment x code agreement plus segment-decision agreement | `completed/IRR_APPLICATION_LEVEL.md` |
+| INV-9 first-class claim ledger | INV-9 object layer mostly met; claims emitted/read across stages and surfaces | `completed/INV9_CLAIM_LEDGER.md` |
 
 ## Status Key
 

@@ -1,12 +1,25 @@
 # Plan #4: INV-9 First-Class Claim Ledger
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** None
 **Blocks:** INV-6 full disconfirmation coverage; INV-10 review beyond code labels; public SOTA claim discipline
 
 *Started: 2026-06-21. Owner: autonomous agent. Re-read after any compaction.*
+
+---
+
+## Completion Outcome
+
+Completed 2026-06-21. The INV-9 object layer is implemented and verified:
+`ProjectState.claims` stores first-class `AnalyticClaim` objects; default,
+thematic, and GT stages emit claims or explicit no-claims events; negative
+cases can link challenged code/claim targets and contrary anchors where
+deterministic; CSV/Markdown/CLI/API/MCP read surfaces expose bounded ledger
+summaries. This deliberately does **not** claim ledger-wide disconfirmation
+(INV-6), human claim adjudication (INV-10), retrieval-first disconfirmation
+(INV-2), or methodological validity.
 
 ---
 
@@ -39,7 +52,7 @@ negative cases while those assertions are only embedded in prose.
 - `docs/PROJECT_THEORY_AND_GOALS.md:239-323` — honest state, INV-6, INV-9, INV-10, roadmap priority.
 - `docs/EVALUATION_HARNESS.md:1-170` — claim discipline and future validity/evaluation requirements.
 - `docs/plans/TEMPLATE.md` — required plan structure.
-- `docs/plans/CLAUDE.md` — active plan index; currently no active plan and "Next up: the claim ledger (INV-9)."
+- `docs/plans/CLAUDE.md` — active/completed plan index; this plan is now listed under completed records.
 - `docs/plans/completed/INV8_SEGMENT_UNIVERSE.md` — prior overnight-plan style and status tracking.
 - `docs/plans/completed/IRR_APPLICATION_LEVEL.md` — prior completed plan scope and explicit thematic-only boundary.
 - `qc_clean/schemas/domain.py` — `ProjectState`, `Code`, `CodeApplication`, `AnalysisMemo`, perspectives, synthesis, GT result models.
@@ -180,7 +193,7 @@ highest-value independent phase.
 | 4 | Wire GT stages; explicitly reject/flag any GT claim class not yet representable | DONE: GT stage tests; no app-level IRR scope expansion | `[Plan: INV9] Wire GT claims` |
 | 5 | Surface ledger in CSV/Markdown exports, CLI/API/MCP read paths | DONE: export/API/MCP/CLI tests | `[Plan: INV9] Expose claim ledger` |
 | 6 | Negative-case linkage: store negative cases as claims and attach contrary anchors/target refs where deterministic | DONE: `tests/test_negative_case_inv6.py` updated; no claim over full INV-6 | `[Plan: INV9] Link negative cases to claims` |
-| 7 | Docs and governance: update theory ledger, plan status, command docs, audit caveats | `make docs-check`; `make check` | `[Plan: INV9] Document claim ledger` |
+| 7 | Docs and governance: update theory ledger, plan status, command docs, audit caveats | DONE: `make docs-check`; `make check` | `[Plan: INV9] Document claim ledger` |
 
 ---
 
@@ -230,15 +243,15 @@ Feature-level criteria:
 - [x] Negative cases are first-class claims and can link to the claim/code target they challenge.
 - [x] CLI/API/MCP/export surfaces expose claim counts by kind, stage, and adjudication/support status.
 - [x] Markdown and CSV exports include the claim ledger summary/details.
-- [ ] Docs update INV-9 status precisely, without marking INV-6, INV-10, INV-2, or methodological validity as met.
+- [x] Docs update INV-9 status precisely, without marking INV-6, INV-10, INV-2, or methodological validity as met.
 
 Process criteria:
 
 - [x] New targeted tests pass after each phase.
-- [ ] `make check` passes before final completion.
-- [ ] Plan tracker is updated as phases complete.
-- [ ] Each verified phase is committed separately with `[Plan: INV9]`.
-- [ ] Pre-existing `.claude/hook_log.jsonl` dirt is not staged or committed.
+- [x] `make check` passes before final completion.
+- [x] Plan tracker is updated as phases complete.
+- [x] Each verified phase is committed separately with `[Plan: INV9]`.
+- [x] Pre-existing `.claude/hook_log.jsonl` dirt is not staged or committed.
 
 ---
 
@@ -293,3 +306,8 @@ challenged code. Negative-case claims now retain challenged code IDs,
 challenged claim IDs where resolvable, and contrary source anchors where the
 evidence quote resolves uniquely. Verification: `tests/test_negative_case_inv6.py`
 plus claim and pipeline tests (22 passed).
+
+Phase 7 complete 2026-06-21: updated `docs/PROJECT_THEORY_AND_GOALS.md`,
+`CLAUDE.md`, regenerated `AGENTS.md`, moved this plan to completed records, and
+updated `docs/plans/CLAUDE.md`. Verification: `make docs-check` and `make check`
+green at closure.

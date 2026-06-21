@@ -1,6 +1,6 @@
 # Qualitative Coding Analysis System
 
-*Last Updated: 2026-06-20*
+*Last Updated: 2026-06-21*
 
 > **Canonical status/theory docs (read before describing the system).** This
 > file is the **operational** reference (architecture, commands, config). The
@@ -32,10 +32,11 @@ The software is **built and software-validated** (deterministic tests + live-LLM
 - GT constant comparison; incremental re-coding via `project recode` (flags stale higher-order outputs, INV-11).
 - **Span-anchored grounding** (INV-1, mostly met): quotes resolve to char offsets + hash or are dropped + warned; `verify_grounding`/`make bench` measure the rate.
 - **Segment universe + coverage** (INV-8): every doc split into char-anchored segments; `project run --exhaustive` codes *every* segment (examined-and-judged coverage, segment-anchored applications), else traversal coverage.
+- **First-class claim ledger** (INV-9 object layer): substantive stage outputs become `AnalyticClaim` objects or no-claims events, with source stage, kind, scope, support/adjudication status, anchors where available, and CLI/API/MCP/export read surfaces.
 - Human review (CLI + browser), `project irr` (LLM-pass *codebook-discovery* agreement by default; **application-level** positive segment × code agreement plus segment-decision agreement via `--application-level`, using exhaustive coding), `project stability`.
 - Graph viz, JSON/CSV/Markdown/QDPX export, per-stage memos, per-code audit trail; typed `PipelineContext`/results, fail-loud inter-stage checks, `llm_client` observability.
 
-**Direction:** the end product is public and SOTA-targeting; the proven/measured/planned ledger, the architectural invariants, and the ranked roadmap are in `docs/PROJECT_THEORY_AND_GOALS.md` (§13/§13.1/§18). Recent structural work landed: span anchoring (INV-1), the segment universe + exhaustive coverage (INV-8). Next: the **first-class claim ledger** (INV-9).
+**Direction:** the end product is public and SOTA-targeting; the proven/measured/planned ledger, the architectural invariants, and the ranked roadmap are in `docs/PROJECT_THEORY_AND_GOALS.md` (§13/§13.1/§18). Recent structural work landed: span anchoring (INV-1), the segment universe + exhaustive coverage (INV-8), and the first-class claim ledger object layer (INV-9). Next: ledger-wide disconfirmation/adjudication (INV-6/INV-10) and hardened retrieval-first disconfirmation (INV-2).
 
 ## Architecture
 
@@ -68,9 +69,10 @@ qc_cli.py                                    # CLI entry point
      -> qc_clean/core/llm/llm_handler.py    # Thin adapter over llm_client for structured extraction
      -> qc_clean/core/grounding.py          # Span anchoring (INV-1): resolve quotes to char offsets+hash, verify_grounding
      -> qc_clean/core/segmentation.py       # Segment universe (INV-8): char-anchored segments + compute_coverage
+     -> qc_clean/core/claims.py             # Claim ledger (INV-9): deterministic builders + summaries
      -> qc_clean/core/bench.py              # Eval-harness Phase 0 scorecard (grounding D1 / coverage D2 / reliability)
      -> qc_clean/schemas/                    # Pydantic schemas
-        -> domain.py                         # Unified domain model (ProjectState, Code, Codebook, etc.)
+        -> domain.py                         # Unified domain model (ProjectState, Code, Codebook, AnalyticClaim, etc.)
         -> analysis_schemas.py               # LLM output schemas (CodeHierarchy, SpeakerAnalysis, etc.)
         -> gt_schemas.py                     # GT LLM output schemas (OpenCode, CoreCategory, etc.)
         -> adapters.py                       # Convert LLM output schemas to domain model
@@ -84,7 +86,8 @@ start_server.py                              # Server startup script
 ```
 
 ### Key Files
-- `qc_clean/schemas/domain.py` - Unified data model: ProjectState, Document, Corpus, Code, Codebook, CodeApplication, etc.
+- `qc_clean/schemas/domain.py` - Unified data model: ProjectState, Document, Corpus, Code, Codebook, CodeApplication, AnalyticClaim, etc.
+- `qc_clean/core/claims.py` - First-class claim ledger builders/summaries for pipeline stages and read surfaces
 - `qc_clean/core/pipeline/pipeline_engine.py` - PipelineStage ABC, PipelineContext (typed config), AnalysisPipeline orchestrator
 - `qc_clean/core/pipeline/irr.py` - Inter-rater reliability + multi-run stability analysis
 - `qc_clean/core/pipeline/review.py` - ReviewManager for human-in-the-loop code review
@@ -106,6 +109,7 @@ start_server.py                              # Server startup script
 - CLI is a pure HTTP client for `analyze` -- all analysis runs on the API server
 - API server creates an `AnalysisPipeline` via the factory and runs it
 - Each stage reads from / writes to `ProjectState` (single Pydantic model) via typed `PipelineContext`
+- Substantive stages write `state.claims` entries or explicit no-claims events (INV-9)
 - Pipeline pauses at human review checkpoints when `enable_human_review=True`
 - `ReviewManager` handles approve/reject/modify/merge/split of codes
 - `ProjectStore` saves/loads entire ProjectState as JSON (no database needed)
@@ -134,6 +138,7 @@ python qc_cli.py analyze --directory /path/to/interviews/ --format json --output
 python qc_cli.py project create --name "My Study" --methodology grounded_theory
 python qc_cli.py project list
 python qc_cli.py project show <project_id>
+python qc_cli.py project claims <project_id> --limit 20
 python qc_cli.py project add-docs <project_id> --files interview1.docx interview2.docx
 
 # Run pipeline on a project (local, no server needed)
@@ -291,7 +296,7 @@ Superseded by the canonical theory doc: the proven/measured/planned **state ledg
 
 ## Next Steps
 
-The ranked roadmap (invariants before features) lives in `docs/PROJECT_THEORY_AND_GOALS.md` §18 — evaluation harness (keystone), span anchoring (done), segment universe + exhaustive coding (INV-8, done), claim ledger (INV-9, next), hardened disconfirmation, theoretical sampling/saturation, etc. Don't duplicate it here.
+The ranked roadmap (invariants before features) lives in `docs/PROJECT_THEORY_AND_GOALS.md` §18 — evaluation harness (keystone), span anchoring (done), segment universe + exhaustive coding (INV-8, done), claim ledger object layer (INV-9, mostly done), ledger-wide disconfirmation/adjudication (next), hardened retrieval-first disconfirmation, theoretical sampling/saturation, etc. Don't duplicate it here.
 
 ### Maintenance Follow-Ups (2026-06-19)
 - **Line endings**: Normalize mixed CRLF/LF files in one mechanical commit with no behavior changes, then run `make check`.
@@ -392,6 +397,7 @@ make errors             # Show recent error breakdown
 # Pipeline (local run; `project run` needs no server, `analyze` needs the API server)
 python qc_cli.py project run <project_id>
 python qc_cli.py project run <project_id> --exhaustive   # code every segment (INV-8)
+python qc_cli.py project claims <project_id>              # inspect first-class claim ledger (INV-9)
 ```
 
 ## Principles
@@ -406,7 +412,8 @@ python qc_cli.py project run <project_id> --exhaustive   # code every segment (I
 1. Feed transcript files (txt/docx/pdf/rtf) to the pipeline
 2. Default 7-stage pipeline: Ingest → Thematic Coding → Perspective Analysis → Relationship Mapping → Synthesis → Cross-Interview → Negative Case (disconfirmation runs last; INV-6)
 3. Human review via CLI or browser; IRR via `project irr`
-4. Export to JSON/CSV/Markdown/QDPX
+4. Inspect claim ledger via `project claims` or `/projects/{project_id}/claims`
+5. Export to JSON/CSV/Markdown/QDPX
 
 ## References
 
