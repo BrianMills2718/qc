@@ -22,15 +22,14 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Next evaluation-harness slice after embedding-hybrid retrieval: make D7
-   retrieval-mode comparison agent-drivable so lexical/query-expanded and
-   embedding-hybrid candidate predictions can be exported/scored against held-out
-   gold without mutating project state.
+1. Next evaluation-harness slice after D7 retrieval export: add a deterministic
+   retrieval-mode comparison/report wrapper or move to the next highest-value
+   unmet harness lane if the repo makes a better dependency concrete.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Completed checkpoint:** INV-2 embedding-hybrid retrieval now provides an
-opt-in `embedding_hybrid` disconfirmation retrieval mode with exact source
-anchors, explicit embedding-model configuration, and fail-loud invalid
-configuration. It is not held-out D7 evidence and has no validated default
-embedding/reviewer policy.
+**Completed checkpoint:** D7 retrieval-mode export now provides
+`make run-d7-retrieval ID=<project> OUTPUT=predictions.json`, writing
+retrieval candidates as baseline-compatible predictions for the existing
+`make bench GOLD=... BASELINES=...` path. It is a comparison substrate, not a
+held-out D7 result.

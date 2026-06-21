@@ -1,6 +1,19 @@
 # Plan #34: D7 Retrieval-Mode Export
 
-**Status:** Planned
+**Outcome:** Complete. Added `qc_clean/core/d7_retrieval.py`,
+`scripts/run_d7_retrieval.py`, and `make run-d7-retrieval` to export configured
+disconfirmation retrieval candidates as D7 baseline-compatible prediction
+packages. The exporter deep-copies state before retrieval, preserves exact
+target-claim/source anchors, supports lexical and opt-in embedding-hybrid
+retrieval, and composes with the existing `make bench GOLD=... BASELINES=...`
+scorecard path without mutating saved project state.
+
+Verification: `python -m pytest tests/test_d7_retrieval.py tests/test_disconfirmation_retrieval_inv2.py tests/test_bench_phase0.py -q`
+passed with 43 tests; `make check` passed with 707 tests, 1 skipped, 8
+deselected, Ruff clean, docs checks clean, and type checking still not
+configured.
+
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** None
@@ -62,10 +75,10 @@ Internal project capability only; no cross-project boundary is created.
 
 ### Capability Validation
 
-- [ ] Input/output schemas use existing Pydantic `ProjectState` and
+- [x] Input/output schemas use existing Pydantic `ProjectState` and
   `DisconfirmationGoldAnchor` contracts.
-- [ ] Exported package can be consumed by existing `load_d7_baselines_file()`.
-- [ ] No mutation of saved project state.
+- [x] Exported package can be consumed by existing `load_d7_baselines_file()`.
+- [x] No mutation of saved project state.
 
 ---
 
@@ -130,22 +143,22 @@ Internal project capability only; no cross-project boundary is created.
 ## Acceptance Criteria
 
 > Feature-level criteria (what the plan accomplishes):
-- [ ] Agents can run one command to export D7 retrieval predictions for a
+- [x] Agents can run one command to export D7 retrieval predictions for a
   project and retrieval mode.
-- [ ] Exported JSON includes a `disconfirmation_baselines` list accepted by the
+- [x] Exported JSON includes a `disconfirmation_baselines` list accepted by the
   current Phase 0 baseline loader.
-- [ ] Exported anchors preserve `target_claim_id`, `doc_id`, `start_char`,
+- [x] Exported anchors preserve `target_claim_id`, `doc_id`, `start_char`,
   `end_char`, `segment_id`, and `quote_text` where available.
-- [ ] Lexical export makes no embedding calls; embedding-hybrid export remains
+- [x] Lexical export makes no embedding calls; embedding-hybrid export remains
   opt-in and fail-loud through the existing retriever.
-- [ ] Docs make clear this is a comparison substrate, not held-out D7 evidence.
+- [x] Docs make clear this is a comparison substrate, not held-out D7 evidence.
 
 > Process criteria (quality gates):
-- [ ] Required tests pass
-- [ ] Full test suite passes
-- [ ] Type check status reported
-- [ ] Docs updated
-- [ ] Plan completed, committed, and pushed
+- [x] Required tests pass
+- [x] Full test suite passes
+- [x] Type check status reported
+- [x] Docs updated
+- [x] Plan completed, committed, and pushed
 
 ---
 
