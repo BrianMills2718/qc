@@ -6,7 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| _none_ | _No active plan_ | - | - | - |
+| 27 | D10 wall-clock runtime | High | Planned | `D10_WALL_CLOCK_RUNTIME.md` |
 
 ## Completed Plans
 
