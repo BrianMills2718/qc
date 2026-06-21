@@ -1,12 +1,29 @@
 # Plan #37: D3 Held-Out Gold-Set Scaffold
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** None
 **Blocks:** Held-out D3 application-validity evaluation; expert-parity D3 claims
 
 ---
+
+## Outcome
+
+Implemented and verified in commit `3374532`. D3 now has a
+`schema_version=1` gold-set package contract with adjudication metadata,
+held-out provenance checks, SHA-256 corpus/project-state hash validation,
+duplicate exact-key rejection, `load_d3_gold_set()` /
+`validate_d3_gold_set_payload()`, a `scripts/validate_d3_gold_set.py` JSON
+validator, and `make validate-d3-gold GOLD=...`. `make bench
+ID=<project> D3_GOLD=package.json` accepts versioned packages without mutating
+saved project state. This is still only a provenance scaffold; no human-populated
+held-out D3 package has been created or scored, and no full D3 validity,
+κ/α/AC1, IoU/Hausdorff, human-ceiling, or expert-parity claim is licensed.
+
+Verification:
+- `python -m pytest tests/test_d3_gold_set.py tests/test_bench_phase0_script.py tests/test_bench_phase0.py -q` — 44 passed
+- `make check` — 720 passed, 1 skipped, 8 deselected; Ruff passed; docs checks passed; type check not yet configured
 
 ## Gap
 
@@ -53,10 +70,10 @@ Internal project capability only; no cross-project boundary is created.
 
 ### Capability Validation
 
-- [ ] Versioned package validates prompt freeze, contamination check, coder count,
+- [x] Versioned package validates prompt freeze, contamination check, coder count,
   corpus hash, and exact-key uniqueness.
-- [ ] Bench loader accepts schema_version=1 D3 packages as `--d3-gold-file`.
-- [ ] Validation script emits machine-readable JSON.
+- [x] Bench loader accepts schema_version=1 D3 packages as `--d3-gold-file`.
+- [x] Validation script emits machine-readable JSON.
 
 ---
 
@@ -112,24 +129,24 @@ Internal project capability only; no cross-project boundary is created.
 ## Acceptance Criteria
 
 > Feature-level criteria (what the plan accomplishes):
-- [ ] D3 package schema enforces held-out provenance and adjudication invariants.
-- [ ] `make validate-d3-gold GOLD=...` validates packages with JSON output.
-- [ ] `make bench ID=<project> D3_GOLD=package.json` accepts versioned D3 gold
+- [x] D3 package schema enforces held-out provenance and adjudication invariants.
+- [x] `make validate-d3-gold GOLD=...` validates packages with JSON output.
+- [x] `make bench ID=<project> D3_GOLD=package.json` accepts versioned D3 gold
   packages without mutating project state.
-- [ ] Docs say this is a scaffold only; no held-out D3 result exists.
+- [x] Docs say this is a scaffold only; no held-out D3 result exists.
 
 > Process criteria (quality gates):
-- [ ] Required tests pass
-- [ ] Full test suite passes
-- [ ] Type check status reported
-- [ ] Docs updated
-- [ ] Plan completed, committed, and pushed
+- [x] Required tests pass
+- [x] Full test suite passes
+- [x] Type check status reported
+- [x] Docs updated
+- [x] Plan completed, committed, and pushed
 
 ---
 
 ## Open Questions
 
-- [ ] Should D3 packages include human-human agreement metrics now? — Status:
+- [x] Should D3 packages include human-human agreement metrics now? — Status:
   DEFERRED | Why it matters: the field exists as optional metadata, but computing
   κ/α/AC1 belongs to the future full D3 evaluation lane.
 
