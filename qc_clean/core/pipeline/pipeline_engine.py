@@ -93,6 +93,21 @@ class PipelineContext(BaseModel):
         ge=0,
         description="Score boost per contradiction/exception cue in disconfirmation retrieval.",
     )
+    disconfirmation_query_expansions: Dict[str, List[str]] = Field(
+        default_factory=dict,
+        description=(
+            "Optional trigger term -> expansion terms for disconfirmation retrieval. "
+            "When empty, the retriever uses its deterministic default expansions."
+        ),
+    )
+    disconfirmation_expanded_term_weight: float = Field(
+        default=0.5,
+        ge=0,
+        description=(
+            "BM25 weight multiplier for query-expansion term matches in "
+            "disconfirmation retrieval; 0 disables expansion matches."
+        ),
+    )
 
     # --- Inter-stage: thematic pipeline ---
     phase1_json: Optional[str] = None

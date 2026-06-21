@@ -88,6 +88,38 @@ def test_bm25_ranks_rare_specific_terms_above_repeated_generic_terms():
     assert candidates[0].score > candidates[1].score
 
 
+def test_query_expansion_retrieves_contrary_segment_without_exact_claim_terms():
+    state = _state_with_segments("The rollout created delays and slower handoffs.")
+    target = _claim("claim-service", "Automation improves service.")
+
+    candidates = retrieve_disconfirmation_candidates(state, [target], candidates_per_claim=1)
+
+    assert candidates
+    assert candidates[0].matched_terms == []
+    assert {"delays", "slower"}.issubset(set(candidates[0].expanded_terms))
+    assert candidates[0].quote_text == "The rollout created delays and slower handoffs."
+    assert verify_anchor(
+        state.corpus.documents[0].content,
+        candidates[0].start_char,
+        candidates[0].end_char,
+        candidates[0].quote_hash,
+    )
+
+
+def test_query_expansion_can_be_disabled_with_zero_weight():
+    state = _state_with_segments("The rollout created delays and slower handoffs.")
+    target = _claim("claim-service", "Automation improves service.")
+
+    candidates = retrieve_disconfirmation_candidates(
+        state,
+        [target],
+        candidates_per_claim=1,
+        expanded_term_weight=0.0,
+    )
+
+    assert candidates == []
+
+
 def test_candidate_format_includes_ids_and_untrusted_data_boundaries():
     state = _state_with_segments("AI failed for this team.")
     target = _claim("claim-ai", "AI improves workflow across the corpus.")
@@ -272,6 +304,40 @@ def test_negative_case_passes_bm25_retrieval_config():
     assert mock_retrieve.call_args.kwargs["bm25_k1"] == 1.7
     assert mock_retrieve.call_args.kwargs["bm25_b"] == 0.55
     assert mock_retrieve.call_args.kwargs["contrary_cue_weight"] == 2.25
+
+
+def test_negative_case_passes_query_expansion_config():
+    state = _state_with_segments("The rollout created delays and slower handoffs.")
+    state.claims = [_claim("claim-service", "Automation improves service.")]
+    response = NegativeCaseResponse(
+        negative_cases=[],
+        overall_assessment="No retrieved candidate was sufficient.",
+    )
+
+    with (
+        patch("qc_clean.core.llm.llm_handler.LLMHandler") as MockLLM,
+        patch(
+            "qc_clean.core.pipeline.stages.negative_case.retrieve_disconfirmation_candidates",
+            return_value=[],
+        ) as mock_retrieve,
+    ):
+        MockLLM.return_value.extract_structured = AsyncMock(return_value=response)
+        asyncio.run(
+            NegativeCaseStage().execute(
+                state,
+                PipelineContext(
+                    disconfirmation_query_expansions={
+                        "improves": ["slower", "delays"],
+                    },
+                    disconfirmation_expanded_term_weight=0.25,
+                ),
+            )
+        )
+
+    assert mock_retrieve.call_args.kwargs["query_expansions"] == {
+        "improves": ["slower", "delays"],
+    }
+    assert mock_retrieve.call_args.kwargs["expanded_term_weight"] == 0.25
 
 
 def test_negative_case_prompt_uses_adversarial_reviewer_stance():

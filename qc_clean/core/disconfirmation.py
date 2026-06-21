@@ -12,7 +12,7 @@ from __future__ import annotations
 import re
 from collections import Counter
 from math import log
-from typing import Iterable
+from typing import Iterable, Mapping
 
 from pydantic import BaseModel, Field
 
@@ -37,6 +37,29 @@ _CONTRARY_CUES = {
     "risks", "slow", "stopped", "unable", "unreliable", "worse",
 }
 
+_DEFAULT_QUERY_EXPANSIONS: dict[str, list[str]] = {
+    "adopt": ["abandon", "avoid", "refuse", "stopped"],
+    "adopted": ["abandoned", "avoided", "refused", "stopped"],
+    "adoption": ["abandon", "avoid", "refuse", "stopped"],
+    "automation": ["manual", "paperwork", "handoff", "handoffs"],
+    "benefit": ["problem", "problems", "risk", "risks"],
+    "benefits": ["problem", "problems", "risk", "risks"],
+    "efficient": ["delay", "delays", "slow", "slower"],
+    "efficiency": ["delay", "delays", "slow", "slower"],
+    "faster": ["delay", "delays", "slow", "slower"],
+    "improve": ["delay", "delays", "fail", "failed", "problem", "slow", "slower", "worse"],
+    "improved": ["delay", "delays", "fail", "failed", "problem", "slow", "slower", "worse"],
+    "improvement": ["delay", "delays", "fail", "failed", "problem", "slow", "slower", "worse"],
+    "improves": ["delay", "delays", "fail", "failed", "problem", "slow", "slower", "worse"],
+    "reliable": ["error", "errors", "failed", "unreliable"],
+    "reliability": ["error", "errors", "failed", "unreliable"],
+    "service": ["delays", "handoffs", "slow", "slower"],
+    "trust": ["concern", "concerns", "distrust", "risk", "risks", "skeptical"],
+    "trusted": ["concern", "concerns", "distrust", "risk", "risks", "skeptical"],
+    "use": ["abandon", "avoid", "never", "stopped"],
+    "used": ["abandoned", "avoided", "never", "stopped"],
+}
+
 
 class DisconfirmationCandidate(BaseModel):
     """A retrieved source passage for disconfirmation interpretation."""
@@ -51,6 +74,10 @@ class DisconfirmationCandidate(BaseModel):
     quote_text: str = Field(description="Candidate passage text")
     quote_hash: str | None = Field(default=None, description="Hash of the exact source span")
     matched_terms: list[str] = Field(description="Claim/code terms found in the passage")
+    expanded_terms: list[str] = Field(
+        default_factory=list,
+        description="Configured query-expansion terms found in the passage",
+    )
     contrary_cues: list[str] = Field(description="Contradiction/exception cue terms found in the passage")
     score: float = Field(description="Deterministic retrieval score used for ranking")
 
@@ -63,6 +90,8 @@ def retrieve_disconfirmation_candidates(
     bm25_k1: float = 1.2,
     bm25_b: float = 0.75,
     contrary_cue_weight: float = 1.25,
+    query_expansions: Mapping[str, Iterable[str]] | None = None,
+    expanded_term_weight: float = 0.5,
 ) -> list[DisconfirmationCandidate]:
     """Return bounded retrieved source candidates for each target claim."""
     if bm25_k1 <= 0:
@@ -71,6 +100,8 @@ def retrieve_disconfirmation_candidates(
         raise ValueError("bm25_b must be between 0 and 1")
     if contrary_cue_weight < 0:
         raise ValueError("contrary_cue_weight must be non-negative")
+    if expanded_term_weight < 0:
+        raise ValueError("expanded_term_weight must be non-negative")
 
     if not state.segments:
         state.segments = segment_corpus(state.corpus.documents)
@@ -90,12 +121,18 @@ def retrieve_disconfirmation_candidates(
         claim_terms = _claim_terms(state, claim)
         if not claim_terms:
             continue
-        scored: list[tuple[float, int, int, Segment, list[str], list[str]]] = []
+        expanded_terms = (
+            _query_expansion_terms(claim_terms, query_expansions)
+            if expanded_term_weight > 0
+            else set()
+        )
+        scored: list[tuple[float, int, int, Segment, list[str], list[str], list[str]]] = []
         for segment in state.segments:
             term_counts = term_counts_by_segment.get(segment.id, Counter())
             segment_terms = set(term_counts)
             matched = sorted(claim_terms & segment_terms)
-            if not matched:
+            expanded = sorted(expanded_terms & segment_terms)
+            if not matched and not expanded:
                 continue
             cues = sorted(segment_terms & _CONTRARY_CUES)
             score = _bm25_score(
@@ -107,11 +144,30 @@ def retrieve_disconfirmation_candidates(
                 document_frequency=document_frequency,
                 k1=bm25_k1,
                 b=bm25_b,
+            ) + (
+                expanded_term_weight * _bm25_score(
+                    expanded,
+                    term_counts,
+                    segment_len=segment_lengths.get(segment.id, 0),
+                    average_segment_len=average_segment_len,
+                    segment_count=segment_count,
+                    document_frequency=document_frequency,
+                    k1=bm25_k1,
+                    b=bm25_b,
+                )
             ) + (contrary_cue_weight * len(cues))
-            scored.append((score, len(cues), len(matched), segment, matched, cues))
+            scored.append((
+                score,
+                len(cues),
+                len(matched) + len(expanded),
+                segment,
+                matched,
+                expanded,
+                cues,
+            ))
 
         scored.sort(key=lambda item: (-item[0], -item[1], -item[2], item[3].doc_id, item[3].start_char))
-        for rank, (score, _cue_count, _match_count, segment, matched, cues) in enumerate(
+        for rank, (score, _cue_count, _match_count, segment, matched, expanded, cues) in enumerate(
             scored[:per_claim],
             start=1,
         ):
@@ -132,6 +188,7 @@ def retrieve_disconfirmation_candidates(
                 quote_text=segment.text,
                 quote_hash=span_hash,
                 matched_terms=matched,
+                expanded_terms=expanded,
                 contrary_cues=cues,
                 score=score,
             ))
@@ -156,6 +213,7 @@ def format_disconfirmation_candidates(candidates: Iterable[DisconfirmationCandid
             f"span={candidate.start_char}:{candidate.end_char} "
             f"score={candidate.score:.2f} "
             f"matched_terms={','.join(candidate.matched_terms)} "
+            f"expanded_terms={','.join(candidate.expanded_terms)} "
             f"contrary_cues={','.join(candidate.contrary_cues)}"
         )
         lines.append(format_untrusted_data_block(f"Disconfirmation candidate {candidate.id}", candidate.quote_text))
@@ -183,6 +241,26 @@ def _claim_terms(state: ProjectState, claim: AnalyticClaim) -> set[str]:
             continue
         parts.extend([code.name, code.description, code.definition])
     return _terms(" ".join(parts))
+
+
+def _query_expansion_terms(
+    claim_terms: set[str],
+    query_expansions: Mapping[str, Iterable[str]] | None,
+) -> set[str]:
+    """Return configured expansion terms triggered by normalized claim terms."""
+    source = _DEFAULT_QUERY_EXPANSIONS if query_expansions is None else query_expansions
+    expanded: set[str] = set()
+    for raw_trigger, raw_terms in source.items():
+        trigger_terms = _terms(raw_trigger)
+        if not trigger_terms or not (trigger_terms & claim_terms):
+            continue
+        if isinstance(raw_terms, str):
+            values = [raw_terms]
+        else:
+            values = list(raw_terms)
+        for raw in values:
+            expanded.update(_terms(raw))
+    return expanded - claim_terms
 
 
 def _bm25_index(

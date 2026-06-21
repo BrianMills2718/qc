@@ -102,6 +102,8 @@ class NegativeCaseStage(PipelineStage):
             bm25_k1=ctx.disconfirmation_bm25_k1,
             bm25_b=ctx.disconfirmation_bm25_b,
             contrary_cue_weight=ctx.disconfirmation_contrary_cue_weight,
+            query_expansions=ctx.disconfirmation_query_expansions or None,
+            expanded_term_weight=ctx.disconfirmation_expanded_term_weight,
         )
         candidate_anchors = {
             candidate.id: anchor_for_candidate(candidate)
