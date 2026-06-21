@@ -6,7 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 32 | INV-7 Fixture Runner Scaffold | High | In Progress | `INV7_FIXTURE_RUNNER_SCAFFOLD.md` |
+| — | — | — | No active plan | — |
 
 ## Completed Plans
 
@@ -43,6 +43,7 @@ Track all implementation work here.
 | QC bench CLI | Evaluation-harness follow-up: `qc_cli.py bench` wraps the deterministic Phase 0 scorecard with the same current flags as `make bench` | `completed/QC_BENCH_CLI.md` |
 | Phase 0 benchmark artifacts | Evaluation-harness follow-up: Phase 0 bench writes versioned `benchmark_results/` packages with scorecard and manifest provenance | `completed/PHASE0_BENCHMARK_ARTIFACTS.md` |
 | D7 held-out gold-set scaffold | Evaluation-harness follow-up: versioned D7 gold-set packages can be validated and used as `--gold-file` inputs without claiming held-out results | `completed/D7_HELD_OUT_GOLD_SET_SCAFFOLD.md` |
+| INV-7 fixture runner scaffold | Evaluation-harness follow-up: `make run-inv7-fixtures` writes deterministic structural prompt-boundary fixture outcomes for `PROMPT_INJECTION=` | `completed/INV7_FIXTURE_RUNNER_SCAFFOLD.md` |
 
 ## Status Key
 

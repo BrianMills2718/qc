@@ -1,6 +1,21 @@
 # Plan #32: INV-7 Fixture Runner Scaffold
 
-**Status:** In Progress
+## Outcome
+
+Complete on 2026-06-21. Added deterministic structural INV-7 fixture runner
+support through `qc_clean/core/inv7_fixtures.py`,
+`scripts/run_inv7_fixtures.py`, and `make run-inv7-fixtures OUTPUT=inv7.json`.
+The output feeds the existing `PROMPT_INJECTION=` scorecard path and is labeled
+as structural prompt-construction evidence, not live model-obedience evidence.
+
+Verification:
+
+- `python -m pytest tests/test_inv7_fixture_runner.py tests/test_bench_phase0_script.py tests/test_prompt_boundaries_inv7.py -q`
+  -> `31 passed`
+- `make check` -> `699 passed, 1 skipped, 8 deselected`; ruff, docs-check,
+  plan status sync, and AGENTS sync passed; type check not yet configured
+
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** INV-7 prompt boundary tests; INV-7 prompt injection scorecard
@@ -159,20 +174,20 @@ The existing Phase 0 bench loader already accepts an object with
 ## Acceptance Criteria
 
 > Feature-level criteria (what the plan accomplishes):
-- [ ] A deterministic INV-7 fixture runner exists.
-- [ ] Runner output matches the existing `prompt_injection_evaluations` shape.
-- [ ] Runner output can be consumed by `bench_phase0 --prompt-injection-file`.
-- [ ] A Makefile target runs the fixture runner.
-- [ ] The runner explicitly labels itself `mode=structural` /
+- [x] A deterministic INV-7 fixture runner exists.
+- [x] Runner output matches the existing `prompt_injection_evaluations` shape.
+- [x] Runner output can be consumed by `bench_phase0 --prompt-injection-file`.
+- [x] A Makefile target runs the fixture runner.
+- [x] The runner explicitly labels itself `mode=structural` /
   `evaluator=structural_boundary`.
-- [ ] Docs state this is not a live adversarial model benchmark and does not
+- [x] Docs state this is not a live adversarial model benchmark and does not
   prove prompt-injection robustness.
 
 > Process criteria (quality gates):
-- [ ] Required tests pass
-- [ ] Full test suite passes
-- [ ] Type check status is reported
-- [ ] Docs updated
+- [x] Required tests pass
+- [x] Full test suite passes
+- [x] Type check status is reported
+- [x] Docs updated
 
 ---
 

@@ -22,10 +22,13 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. INV-7 live-fixture runner scaffold: define an agent-drivable way to execute
-   prompt-injection fixtures and produce the existing `PROMPT_INJECTION=` result
-   file shape without claiming model obedience is solved.
-2. Next evaluation-harness slice chosen after that checkpoint, likely semantic
+1. Next evaluation-harness slice chosen after the INV-7 fixture-runner
+   checkpoint, likely semantic
    retrieval depending on what the repo makes concrete.
-3. Continue through the ranked roadmap without pausing after each verified
+2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
+
+**Completed checkpoint:** INV-7 fixture runner scaffold now provides
+`make run-inv7-fixtures OUTPUT=inv7.json`, producing deterministic structural
+prompt-boundary fixture outcomes for the existing `PROMPT_INJECTION=` scorecard
+path without claiming live model obedience is solved.
