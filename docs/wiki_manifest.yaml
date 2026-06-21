@@ -5,6 +5,10 @@ publish:
     type: ProjectOverview
     title: Qualitative Coding Overview
     tags: [portfolio, analysis, qualitative-coding]
+  - path: docs/PORTFOLIO_REVIEWER_GUIDE.md
+    type: PortfolioGuide
+    title: Qualitative Coding Portfolio Reviewer Guide
+    tags: [portfolio, qualitative-coding, computational-social-science]
   - path: docs/PROJECT_THEORY_AND_GOALS.md
     type: Reference
     title: Project Theory & Goals (Agent Orientation)
