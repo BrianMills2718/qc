@@ -13,8 +13,10 @@ docs/EVALUATION_HARNESS.md (Phase 0). Deterministic, no LLM calls.
 from __future__ import annotations
 
 import argparse
+from datetime import datetime, timezone
 import hashlib
 import json
+import re
 import sys
 from pathlib import Path
 from typing import Any, Sequence
@@ -62,6 +64,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         help="Optional exact trace_id for D10 cost/latency; default uses project trace prefix",
     )
     parser.add_argument("--output", help="Optional path to write the JSON scorecard")
+    parser.add_argument(
+        "--artifact-dir",
+        type=Path,
+        help="Optional root directory for a versioned Phase 0 benchmark artifact package",
+    )
     args = parser.parse_args(argv)
 
     store = ProjectStore()
@@ -123,10 +130,139 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
 
     text = json.dumps(card, indent=2)
+    if args.artifact_dir:
+        try:
+            write_phase0_benchmark_artifact(
+                card,
+                args.artifact_dir,
+                state=loaded_state,
+                command=phase0_command_provenance(args),
+                scorecard_text=text,
+            )
+        except (OSError, ValueError) as exc:
+            print(json.dumps({"error": str(exc)}))
+            return 1
     print(text)
     if args.output:
         Path(args.output).write_text(text, encoding="utf-8")
     return 0
+
+
+def write_phase0_benchmark_artifact(
+    card: dict[str, Any],
+    artifact_root: Path,
+    *,
+    state,
+    command: dict[str, Any],
+    generated_at: datetime | None = None,
+    scorecard_text: str | None = None,
+) -> Path:
+    """Write a versioned Phase 0 benchmark artifact package."""
+    generated_at = _utc_generated_at(generated_at)
+    run_dir = artifact_root / phase0_artifact_dir_name(state.id, generated_at)
+    if run_dir.exists():
+        raise ValueError(f"Benchmark artifact directory already exists: {run_dir}")
+    run_dir.mkdir(parents=True, exist_ok=False)
+
+    scorecard_text = scorecard_text if scorecard_text is not None else json.dumps(card, indent=2)
+    scorecard_bytes = scorecard_text.encode("utf-8")
+    scorecard_path = run_dir / "scorecard.json"
+    scorecard_path.write_bytes(scorecard_bytes)
+
+    manifest = phase0_artifact_manifest(
+        card,
+        state=state,
+        command=command,
+        generated_at=generated_at,
+        scorecard_sha256=hashlib.sha256(scorecard_bytes).hexdigest(),
+    )
+    (run_dir / "manifest.json").write_text(
+        json.dumps(manifest, indent=2, sort_keys=True),
+        encoding="utf-8",
+    )
+    return run_dir
+
+
+def phase0_artifact_manifest(
+    card: dict[str, Any],
+    *,
+    state,
+    command: dict[str, Any],
+    generated_at: datetime,
+    scorecard_sha256: str,
+) -> dict[str, Any]:
+    """Build the manifest for a Phase 0 benchmark artifact package."""
+    meta = card.get("_meta", {})
+    input_hashes = meta.get("input_hashes")
+    if not isinstance(input_hashes, dict):
+        raise ValueError("Phase 0 scorecard is missing _meta.input_hashes; cannot write artifact")
+    return {
+        "schema_version": 1,
+        "artifact_type": "qualitative_coding.phase0_scorecard",
+        "generated_at": _format_generated_at(generated_at),
+        "project_id": state.id,
+        "project_name": state.name,
+        "phase": meta.get("phase", 0),
+        "scorecard_file": "scorecard.json",
+        "scorecard_sha256": scorecard_sha256,
+        "input_hashes": input_hashes,
+        "claim_discipline": meta.get("claims"),
+        "prompt_eval": {
+            "status": "not_run",
+            "owner": "prompt_eval",
+            "note": (
+                "Phase 0 artifact packaging only; bootstrap intervals, statistical "
+                "comparisons, held-out datasets, and full experiment tracking belong "
+                "to the future prompt_eval-backed suite."
+            ),
+        },
+        "command": command,
+    }
+
+
+def phase0_command_provenance(args: argparse.Namespace) -> dict[str, Any]:
+    """Return CLI provenance for Phase 0 artifact manifests."""
+    return {
+        "entrypoint": "scripts/bench_phase0.py",
+        "project_id": args.project_id,
+        "gold_file": str(Path(args.gold_file)) if args.gold_file else None,
+        "d7_baselines_file": (
+            str(Path(args.d7_baselines_file)) if args.d7_baselines_file else None
+        ),
+        "prompt_injection_file": (
+            str(Path(args.prompt_injection_file)) if args.prompt_injection_file else None
+        ),
+        "observability_db": str(args.observability_db) if args.observability_db else None,
+        "trace_id": args.trace_id,
+        "output": args.output,
+        "artifact_dir": str(args.artifact_dir) if args.artifact_dir else None,
+    }
+
+
+def phase0_artifact_dir_name(project_id: str, generated_at: datetime) -> str:
+    """Return the versioned run-directory name for a Phase 0 artifact."""
+    return f"{_format_artifact_timestamp(generated_at)}-{_artifact_slug(project_id)}-phase0"
+
+
+def _utc_generated_at(generated_at: datetime | None) -> datetime:
+    if generated_at is None:
+        return datetime.now(timezone.utc)
+    if generated_at.tzinfo is None:
+        return generated_at.replace(tzinfo=timezone.utc)
+    return generated_at.astimezone(timezone.utc)
+
+
+def _format_generated_at(generated_at: datetime) -> str:
+    return _utc_generated_at(generated_at).isoformat().replace("+00:00", "Z")
+
+
+def _format_artifact_timestamp(generated_at: datetime) -> str:
+    return _utc_generated_at(generated_at).strftime("%Y%m%dT%H%M%S%fZ")
+
+
+def _artifact_slug(value: str) -> str:
+    slug = re.sub(r"[^A-Za-z0-9_.-]+", "-", value.strip()).strip("-._")
+    return slug or "project"
 
 
 def phase0_input_hashes(

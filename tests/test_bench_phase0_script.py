@@ -3,6 +3,9 @@
 import hashlib
 import json
 import sqlite3
+from datetime import datetime, timezone
+
+import pytest
 
 from scripts import bench_phase0
 from qc_clean.core.persistence.project_store import ProjectStore
@@ -125,6 +128,165 @@ def test_bench_phase0_hashes_external_input_files(
     assert "disconfirmation_gold" not in reloaded.config.extra
     assert "disconfirmation_baselines" not in reloaded.config.extra
     assert "prompt_injection_evaluations" not in reloaded.config.extra
+
+
+def test_bench_phase0_writes_versioned_artifact_package(
+    tmp_path,
+    monkeypatch,
+    capsys,
+):
+    state = ProjectState(
+        id="project_artifacts",
+        name="Artifact project",
+        corpus=Corpus(documents=[Document(id="d1", name="a.txt", content="A")]),
+    )
+    store = ProjectStore(projects_dir=tmp_path / "projects")
+    store.save(state)
+    artifact_root = tmp_path / "benchmark_results"
+    monkeypatch.setattr(bench_phase0, "ProjectStore", lambda: store)
+
+    exit_code = bench_phase0.main([
+        state.id,
+        "--artifact-dir",
+        str(artifact_root),
+    ])
+
+    assert exit_code == 0
+    stdout_scorecard = json.loads(capsys.readouterr().out)
+    run_dir = _single_artifact_dir(artifact_root)
+    assert run_dir.name.endswith("-project_artifacts-phase0")
+    scorecard_path = run_dir / "scorecard.json"
+    manifest_path = run_dir / "manifest.json"
+    assert scorecard_path.exists()
+    assert manifest_path.exists()
+    scorecard = json.loads(scorecard_path.read_text(encoding="utf-8"))
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    assert scorecard == stdout_scorecard
+    assert manifest["schema_version"] == 1
+    assert manifest["artifact_type"] == "qualitative_coding.phase0_scorecard"
+    assert manifest["project_id"] == state.id
+    assert manifest["project_name"] == state.name
+    assert manifest["phase"] == 0
+    assert manifest["scorecard_file"] == "scorecard.json"
+    assert manifest["scorecard_sha256"] == hashlib.sha256(scorecard_path.read_bytes()).hexdigest()
+    assert manifest["input_hashes"] == stdout_scorecard["_meta"]["input_hashes"]
+    assert manifest["claim_discipline"] == stdout_scorecard["_meta"]["claims"]
+    assert manifest["prompt_eval"]["status"] == "not_run"
+
+
+def test_bench_phase0_artifact_manifest_records_external_inputs(
+    tmp_path,
+    monkeypatch,
+    capsys,
+):
+    content = "AI failed here."
+    doc = Document(id="d1", name="a.txt", content=content)
+    state = ProjectState(id="project_artifact_inputs", name="Artifact inputs", corpus=Corpus(documents=[doc]))
+    store = ProjectStore(projects_dir=tmp_path / "projects")
+    store.save(state)
+    gold_file = tmp_path / "gold.json"
+    gold_file.write_text(
+        json.dumps({
+            "contrary_evidence": [
+                {
+                    "target_claim_id": "claim-ai",
+                    "doc_id": doc.id,
+                    "start_char": 0,
+                    "end_char": len(content),
+                }
+            ],
+        }),
+        encoding="utf-8",
+    )
+    baselines_file = tmp_path / "baselines.json"
+    baselines_file.write_text(
+        json.dumps({
+            "disconfirmation_baselines": [
+                {"name": "empty_baseline", "contrary_evidence": []}
+            ]
+        }),
+        encoding="utf-8",
+    )
+    injection_file = tmp_path / "prompt_injection.json"
+    injection_file.write_text(
+        json.dumps({
+            "prompt_injection_evaluations": [
+                {
+                    "fixture_id": "direct",
+                    "surface": "thematic_coding",
+                    "attack_succeeded": False,
+                }
+            ]
+        }),
+        encoding="utf-8",
+    )
+    db_path = tmp_path / "observability.db"
+    _create_llm_observability_db(db_path)
+    artifact_root = tmp_path / "benchmark_results"
+    monkeypatch.setattr(bench_phase0, "ProjectStore", lambda: store)
+
+    exit_code = bench_phase0.main([
+        state.id,
+        "--gold-file",
+        str(gold_file),
+        "--d7-baselines-file",
+        str(baselines_file),
+        "--prompt-injection-file",
+        str(injection_file),
+        "--observability-db",
+        str(db_path),
+        "--trace-id",
+        "trace-123",
+        "--artifact-dir",
+        str(artifact_root),
+    ])
+
+    assert exit_code == 0
+    stdout_scorecard = json.loads(capsys.readouterr().out)
+    manifest = json.loads((_single_artifact_dir(artifact_root) / "manifest.json").read_text(encoding="utf-8"))
+    assert manifest["input_hashes"] == stdout_scorecard["_meta"]["input_hashes"]
+    assert manifest["input_hashes"]["gold_file_sha256"] == _sha256_file(gold_file)
+    assert manifest["input_hashes"]["d7_baselines_file_sha256"] == _sha256_file(baselines_file)
+    assert manifest["input_hashes"]["prompt_injection_file_sha256"] == _sha256_file(injection_file)
+    assert manifest["input_hashes"]["observability_db_sha256"] == _sha256_file(db_path)
+    assert manifest["command"]["gold_file"] == str(gold_file)
+    assert manifest["command"]["d7_baselines_file"] == str(baselines_file)
+    assert manifest["command"]["prompt_injection_file"] == str(injection_file)
+    assert manifest["command"]["observability_db"] == str(db_path)
+    assert manifest["command"]["trace_id"] == "trace-123"
+
+
+def test_phase0_artifact_writer_fails_when_run_dir_exists(tmp_path):
+    state = ProjectState(
+        id="existing_project",
+        name="Existing project",
+        corpus=Corpus(documents=[Document(id="d1", name="a.txt", content="A")]),
+    )
+    card = {
+        "_meta": {
+            "phase": 0,
+            "claims": "capability only",
+            "input_hashes": {"hash_algorithm": "sha256", "project_id": state.id},
+        }
+    }
+    generated_at = datetime(2026, 6, 21, 12, 0, 0, tzinfo=timezone.utc)
+
+    bench_phase0.write_phase0_benchmark_artifact(
+        card,
+        tmp_path,
+        state=state,
+        command={"project_id": state.id},
+        generated_at=generated_at,
+    )
+
+    with pytest.raises(ValueError, match="already exists"):
+        bench_phase0.write_phase0_benchmark_artifact(
+            card,
+            tmp_path,
+            state=state,
+            command={"project_id": state.id},
+            generated_at=generated_at,
+        )
 
 
 def test_bench_phase0_scores_d7_from_gold_file_without_mutating_state(
@@ -449,6 +611,12 @@ def test_bench_phase0_includes_d10_from_observability_db(
     assert output["cost_latency_d10"]["total_cost_usd"] == 0.25
     assert output["wall_clock_d10"]["status"] == "scored"
     assert output["wall_clock_d10"]["duration_s"] == 1.5
+
+
+def _single_artifact_dir(root):
+    dirs = [path for path in root.iterdir() if path.is_dir()]
+    assert len(dirs) == 1
+    return dirs[0]
 
 
 def _create_llm_observability_db(path) -> None:

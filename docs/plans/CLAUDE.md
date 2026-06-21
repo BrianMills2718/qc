@@ -6,7 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 30 | Phase 0 Benchmark Artifacts | High | Planned | `PHASE0_BENCHMARK_ARTIFACTS.md` |
+| 30 | Phase 0 Benchmark Artifacts | High | In Progress | `PHASE0_BENCHMARK_ARTIFACTS.md` |
 
 ## Completed Plans
 

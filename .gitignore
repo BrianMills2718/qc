@@ -64,6 +64,7 @@ test_output*/
 integration_test_report.json
 reports/
 **/reports/
+benchmark_results/
 
 # Test artifacts and temporary files
 temp*

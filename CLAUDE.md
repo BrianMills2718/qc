@@ -146,6 +146,7 @@ python qc_cli.py project show <project_id>
 python qc_cli.py project claims <project_id> --limit 20
 python qc_cli.py project add-docs <project_id> --files interview1.docx interview2.docx
 python qc_cli.py bench <project_id>                                     # Phase 0 scorecard (same engine as make bench)
+python qc_cli.py bench <project_id> --artifact-dir benchmark_results    # Write versioned Phase 0 scorecard package
 
 # Run pipeline on a project (local, no server needed)
 python qc_cli.py project run <project_id>                          # run full pipeline
@@ -402,6 +403,7 @@ python qc_cli.py bench <project_id>     # Same Phase 0 scorecard through the can
 make bench ID=<project_id> GOLD=gold.json BASELINES=baselines.json  # Add external D7 gold/baselines without mutating project state
 make bench ID=<project_id> PROMPT_INJECTION=inv7.json  # Add external INV-7 fixture results without mutating state
 make bench ID=<project_id> OBS_DB=path TRACE_ID=trace  # Override D10 observability DB / exact trace
+make bench ID=<project_id> ARTIFACT_DIR=benchmark_results  # Write versioned Phase 0 scorecard package
 make cost               # Show LLM spend (DAYS=7)
 make errors             # Show recent error breakdown
 

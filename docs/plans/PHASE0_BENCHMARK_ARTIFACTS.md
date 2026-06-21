@@ -1,6 +1,6 @@
 # Plan #30: Phase 0 Benchmark Artifacts
 
-**Status:** Planned
+**Status:** In Progress
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Phase 0 input hashes; QC bench CLI

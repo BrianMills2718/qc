@@ -75,3 +75,36 @@ def test_qc_cli_bench_forwards_files_and_output(tmp_path, monkeypatch, capsys):
     assert stdout_scorecard["disconfirmation_d7"]["status"] == "scored"
     expected_hash = hashlib.sha256(gold_file.read_bytes()).hexdigest()
     assert stdout_scorecard["_meta"]["input_hashes"]["gold_file_sha256"] == expected_hash
+
+
+def test_qc_cli_bench_forwards_artifact_dir(tmp_path, monkeypatch, capsys):
+    state = ProjectState(
+        id="cli_bench_artifacts",
+        name="CLI Bench Artifacts",
+        corpus=Corpus(documents=[Document(id="d1", name="a.txt", content="A")]),
+    )
+    store = ProjectStore(projects_dir=tmp_path / "projects")
+    store.save(state)
+    artifact_root = tmp_path / "benchmark_results"
+    monkeypatch.setattr(bench_phase0, "ProjectStore", lambda: store)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "qc_cli.py",
+            "bench",
+            state.id,
+            "--artifact-dir",
+            str(artifact_root),
+        ],
+    )
+
+    exit_code = qc_cli.main()
+
+    assert exit_code == 0
+    stdout_scorecard = json.loads(capsys.readouterr().out)
+    run_dirs = [path for path in artifact_root.iterdir() if path.is_dir()]
+    assert len(run_dirs) == 1
+    scorecard = json.loads((run_dirs[0] / "scorecard.json").read_text(encoding="utf-8"))
+    assert scorecard == stdout_scorecard
+    assert (run_dirs[0] / "manifest.json").exists()

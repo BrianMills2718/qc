@@ -147,6 +147,10 @@ Examples:
         help='Optional exact trace_id for D10 cost/latency; default uses project trace prefix'
     )
     bench_parser.add_argument('--output', help='Optional path to write the JSON scorecard')
+    bench_parser.add_argument(
+        '--artifact-dir',
+        help='Optional root directory for a versioned Phase 0 benchmark artifact package'
+    )
 
     # Server command
     server_parser = subparsers.add_parser(
@@ -345,6 +349,8 @@ def handle_bench_command(args) -> int:
         argv.extend(["--trace-id", args.trace_id])
     if args.output:
         argv.extend(["--output", args.output])
+    if args.artifact_dir:
+        argv.extend(["--artifact-dir", args.artifact_dir])
     return bench_phase0.main(argv)
 
 
