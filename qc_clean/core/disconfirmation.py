@@ -1,10 +1,10 @@
 """
 Retrieval-first disconfirmation helpers.
 
-This module surfaces source passages before negative-case interpretation. The
-retriever is deliberately deterministic and local: it scores char-anchored
-segments against claim/code terms and contradiction cues, then formats bounded
-candidates for the LLM to assess.
+This module surfaces source passages before negative-case interpretation.
+Default retrieval is deterministic/local BM25-style scoring over char-anchored
+segments. Opt-in embedding-hybrid retrieval adds embedding cosine similarity
+when an embedding model is explicitly configured.
 """
 
 from __future__ import annotations
@@ -303,7 +303,7 @@ def format_disconfirmation_candidates(candidates: Iterable[DisconfirmationCandid
     if not candidates:
         return (
             "RETRIEVED CANDIDATE PASSAGES: none. "
-            "No lexical candidate passages were retrieved; do not treat this as evidence "
+            "No candidate passages were retrieved; do not treat this as evidence "
             "that no contrary evidence exists."
         )
 

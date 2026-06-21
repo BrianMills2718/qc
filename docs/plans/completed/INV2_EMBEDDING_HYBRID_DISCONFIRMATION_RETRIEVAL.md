@@ -1,6 +1,19 @@
 # Plan #33: INV-2 Embedding-Hybrid Disconfirmation Retrieval
 
-**Status:** Planned
+**Outcome:** Complete. `retrieve_disconfirmation_candidates()` now keeps the
+default lexical BM25/query-expansion path while supporting opt-in
+`embedding_hybrid` retrieval with embedding cosine similarity, explicit model
+configuration, provider-output validation, task/trace/budget pass-through, and
+fail-loud invalid modes. `NegativeCaseStage` passes retrieval-mode config from
+`PipelineContext`, and candidate prompts/memos expose retrieval mode and semantic
+scores without claiming D7 validation.
+
+Verification: `python -m pytest tests/test_disconfirmation_retrieval_inv2.py tests/test_bench_phase0.py -q`
+passed with 39 tests; `make check` passed with 703 tests, 1 skipped, 8
+deselected, Ruff clean, docs checks clean, and type checking still not
+configured.
+
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** None
@@ -127,24 +140,24 @@ helper but does not create a cross-project callable boundary or registry entry.
 ## Acceptance Criteria
 
 > Feature-level criteria (what the plan accomplishes):
-- [ ] Existing default disconfirmation retrieval remains lexical BM25/query
+- [x] Existing default disconfirmation retrieval remains lexical BM25/query
   expansion and existing tests continue to pass.
-- [ ] `embedding_hybrid` mode can retrieve and anchor a candidate with no lexical
+- [x] `embedding_hybrid` mode can retrieve and anchor a candidate with no lexical
   overlap when embedding similarity is high.
-- [ ] Embedding mode requires an explicit embedding model and fails loudly on
+- [x] Embedding mode requires an explicit embedding model and fails loudly on
   unknown mode, invalid weights, missing vectors, or zero-length vectors.
-- [ ] Negative-case execution passes retrieval mode, embedding model, dimensions,
+- [x] Negative-case execution passes retrieval mode, embedding model, dimensions,
   semantic weight, similarity threshold, task, trace ID, and max budget to the
   retriever.
-- [ ] Docs preserve claim discipline: this is opt-in, unvalidated embedding
+- [x] Docs preserve claim discipline: this is opt-in, unvalidated embedding
   retrieval, not D7 evidence or methodological credibility.
 
 > Process criteria (quality gates):
-- [ ] Required tests pass
-- [ ] Full test suite passes
-- [ ] Type check status reported
-- [ ] Docs updated
-- [ ] Plan completed, committed, and pushed
+- [x] Required tests pass
+- [x] Full test suite passes
+- [x] Type check status reported
+- [x] Docs updated
+- [x] Plan completed, committed, and pushed
 
 ---
 

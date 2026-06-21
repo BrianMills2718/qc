@@ -22,13 +22,15 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Next evaluation-harness slice chosen after the INV-7 fixture-runner
-   checkpoint, likely semantic
-   retrieval depending on what the repo makes concrete.
+1. Next evaluation-harness slice after embedding-hybrid retrieval: make D7
+   retrieval-mode comparison agent-drivable so lexical/query-expanded and
+   embedding-hybrid candidate predictions can be exported/scored against held-out
+   gold without mutating project state.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Completed checkpoint:** INV-7 fixture runner scaffold now provides
-`make run-inv7-fixtures OUTPUT=inv7.json`, producing deterministic structural
-prompt-boundary fixture outcomes for the existing `PROMPT_INJECTION=` scorecard
-path without claiming live model obedience is solved.
+**Completed checkpoint:** INV-2 embedding-hybrid retrieval now provides an
+opt-in `embedding_hybrid` disconfirmation retrieval mode with exact source
+anchors, explicit embedding-model configuration, and fail-loud invalid
+configuration. It is not held-out D7 evidence and has no validated default
+embedding/reviewer policy.
