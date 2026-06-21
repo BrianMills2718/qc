@@ -178,7 +178,7 @@ highest-value independent phase.
 | 2 | Deterministic claim builders for codes, applications, perspectives, relationships, synthesis, cross-case, GT objects, and negative cases | DONE: `tests/test_claims.py` expanded with focused fixtures | `[Plan: INV9] Add claim builders` |
 | 3 | Wire default thematic pipeline stages; enforce no prose-only bypass for default path | DONE: `tests/test_claim_ledger_pipeline.py`, targeted stage tests | `[Plan: INV9] Wire default pipeline claims` |
 | 4 | Wire GT stages; explicitly reject/flag any GT claim class not yet representable | DONE: GT stage tests; no app-level IRR scope expansion | `[Plan: INV9] Wire GT claims` |
-| 5 | Surface ledger in CSV/Markdown exports, CLI/API/MCP read paths | export/API/MCP/CLI tests | `[Plan: INV9] Expose claim ledger` |
+| 5 | Surface ledger in CSV/Markdown exports, CLI/API/MCP read paths | DONE: export/API/MCP/CLI tests | `[Plan: INV9] Expose claim ledger` |
 | 6 | Negative-case linkage: store negative cases as claims and attach contrary anchors/target refs where deterministic | `tests/test_negative_case_inv6.py` updated; no claim over full INV-6 | `[Plan: INV9] Link negative cases to claims` |
 | 7 | Docs and governance: update theory ledger, plan status, command docs, audit caveats | `make docs-check`; `make check` | `[Plan: INV9] Document claim ledger` |
 
@@ -228,8 +228,8 @@ Feature-level criteria:
 - [ ] Code, application, perspective, relationship, synthesis, cross-case, negative-case, and GT outputs are represented as claims or explicit no-claim events.
 - [x] Claims without anchors are visible as unsupported/needs-anchor; they are never silently treated as grounded.
 - [ ] Negative cases are first-class claims and can link to the claim/code target they challenge.
-- [ ] CLI/API/MCP/export surfaces expose claim counts by kind, stage, and adjudication/support status.
-- [ ] Markdown and CSV exports include the claim ledger summary/details.
+- [x] CLI/API/MCP/export surfaces expose claim counts by kind, stage, and adjudication/support status.
+- [x] Markdown and CSV exports include the claim ledger summary/details.
 - [ ] Docs update INV-9 status precisely, without marking INV-6, INV-10, INV-2, or methodological validity as met.
 
 Process criteria:
@@ -280,3 +280,9 @@ Phase 4 complete 2026-06-21: wired claim recording into GT constant comparison,
 axial coding, selective coding, and theory integration. Verification:
 `tests/test_claim_ledger_pipeline.py` (8 passed), focused affected set
 (79 passed), and `make check` (599 passed, 1 skipped, 8 deselected; Ruff/docs green).
+
+Phase 5 complete 2026-06-21: exposed the claim ledger through CSV
+(`claims.csv`), Markdown (`## Claim Ledger`), CLI (`project claims`), API
+(`/projects/{project_id}/claims`), and MCP (`qc_get_claims`) read paths.
+Verification: focused Phase 5 tests (6 passed) and broader affected surface
+tests (90 passed).

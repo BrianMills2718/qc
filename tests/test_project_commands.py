@@ -12,6 +12,10 @@ from pathlib import Path
 from unittest.mock import patch, MagicMock
 
 from qc_clean.schemas.domain import (
+    AnalyticClaim,
+    ClaimKind,
+    ClaimScope,
+    ClaimSupportStatus,
     Code,
     CodeApplication,
     Codebook,
@@ -440,6 +444,48 @@ class TestCLIParsing:
         assert args.format == "qdpx"
         assert args.output_file == "out.qdpx"
 
+    def test_claims_subparser(self):
+        from qc_cli import create_parser
+        parser = create_parser()
+
+        args = parser.parse_args(["project", "claims", "pid", "--limit", "5"])
+        assert args.command == "project"
+        assert args.project_action == "claims"
+        assert args.project_id == "pid"
+        assert args.limit == 5
+
+
+class TestProjectClaimsCommand:
+    def test_project_claims_command_outputs_summary(self, tmp_store, capsys):
+        from qc_clean.core.cli.commands.project import _show_claims
+
+        state = ProjectState(
+            id="claims-proj",
+            name="Claims Project",
+            claims=[
+                AnalyticClaim(
+                    claim_kind=ClaimKind.CODE,
+                    source_stage="thematic_coding",
+                    claim_text="Efficiency is a code.",
+                    scope=ClaimScope(code_ids=["C1"]),
+                    origin_object_type="code",
+                    origin_object_id="C1",
+                    support_status=ClaimSupportStatus.SUPPORTED,
+                )
+            ],
+        )
+        tmp_store.save(state)
+        args = MagicMock(project_id="claims-proj", limit=10)
+
+        result = _show_claims(tmp_store, args)
+
+        assert result == 0
+        out = capsys.readouterr().out
+        assert "Claim Ledger: Claims Project" in out
+        assert "Total claims: 1" in out
+        assert "thematic_coding" in out
+        assert "Efficiency is a code." in out
+
 
 # ---------------------------------------------------------------------------
 # Tests: API endpoints
@@ -460,6 +506,7 @@ class TestAPIEndpoints:
             server._register_default_endpoints()
             paths = [e["path"] for e in server.endpoints]
             assert "/projects/{project_id}" in paths
+            assert "/projects/{project_id}/claims" in paths
             assert "/projects/{project_id}/resume" in paths
         except ImportError:
             pytest.skip("FastAPI not installed")

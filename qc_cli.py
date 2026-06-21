@@ -167,6 +167,10 @@ Examples:
     proj_show = project_subparsers.add_parser('show', help='Show project details')
     proj_show.add_argument('project_id', help='Project ID')
 
+    proj_claims = project_subparsers.add_parser('claims', help='Show project claim ledger')
+    proj_claims.add_argument('project_id', help='Project ID')
+    proj_claims.add_argument('--limit', type=int, default=20, help='Maximum claims to show (default: 20)')
+
     proj_add = project_subparsers.add_parser('add-docs', help='Add documents to project')
     proj_add.add_argument('project_id', help='Project ID')
     proj_add.add_argument('--files', nargs='+', help='Files to add')

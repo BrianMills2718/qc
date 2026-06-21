@@ -18,6 +18,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 from xml.etree.ElementTree import Element, SubElement, ElementTree
 
+from qc_clean.core.claims import summarize_claim_ledger
 from qc_clean.schemas.domain import ProjectState
 
 logger = logging.getLogger(__name__)
@@ -122,6 +123,35 @@ class ProjectExporter:
                         memo.created_at,
                     ])
             paths.append(str(memos_path))
+
+        # -- claims.csv (only if claim ledger exists) --
+        if state.claims:
+            claims_path = out / "claims.csv"
+            with open(claims_path, "w", newline="", encoding="utf-8") as f:
+                writer = csv.writer(f)
+                writer.writerow([
+                    "claim_id", "kind", "source_stage", "adjudication_status",
+                    "support_status", "origin_object_type", "origin_object_id",
+                    "claim_text", "supporting_anchors", "contrary_anchors",
+                ])
+                for claim in state.claims:
+                    writer.writerow([
+                        claim.id,
+                        claim.claim_kind.value,
+                        claim.source_stage,
+                        claim.adjudication_status.value,
+                        claim.support_status.value,
+                        claim.origin_object_type,
+                        claim.origin_object_id,
+                        claim.claim_text,
+                        json.dumps([
+                            a.model_dump(mode="json") for a in claim.supporting_anchors
+                        ], ensure_ascii=False),
+                        json.dumps([
+                            a.model_dump(mode="json") for a in claim.contrary_anchors
+                        ], ensure_ascii=False),
+                    ])
+            paths.append(str(claims_path))
 
         # -- irr_matrix.csv (only if IRR has been run) --
         if state.irr_result and state.irr_result.coding_matrix:
@@ -301,6 +331,38 @@ class ProjectExporter:
                 _a("")
                 _a(memo.content)
                 _a("")
+
+        # First-class claim ledger (INV-9)
+        if state.claims:
+            summary = summarize_claim_ledger(state)
+            _a("## Claim Ledger")
+            _a("")
+            _a(f"**Total claims**: {summary['total_claims']}")
+            _a(f"**Unsupported or needing anchors**: {summary['unsupported_or_needing_anchor']}")
+            _a("")
+            _a("### Counts")
+            _a("")
+            _a(f"- By kind: {summary['by_kind']}")
+            _a(f"- By stage: {summary['by_stage']}")
+            _a(f"- By adjudication status: {summary['by_adjudication_status']}")
+            _a(f"- By support status: {summary['by_support_status']}")
+            _a("")
+            _a("### Claims")
+            _a("")
+            _a("| Kind | Stage | Support | Adjudication | Claim |")
+            _a("|------|-------|---------|--------------|-------|")
+            for claim in state.claims[:50]:
+                text = claim.claim_text.replace("|", "\\|")
+                if len(text) > 120:
+                    text = text[:117] + "..."
+                _a(
+                    f"| {claim.claim_kind.value} | {claim.source_stage} | "
+                    f"{claim.support_status.value} | {claim.adjudication_status.value} | {text} |"
+                )
+            if len(state.claims) > 50:
+                _a("")
+                _a(f"*... and {len(state.claims) - 50} more claims*")
+            _a("")
 
         # Perspectives
         if state.perspective_analysis and state.perspective_analysis.participants:

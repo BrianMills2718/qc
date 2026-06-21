@@ -13,8 +13,12 @@ import pytest
 
 from qc_clean.core.persistence.project_store import ProjectStore
 from qc_clean.schemas.domain import (
+    AnalyticClaim,
     AnalysisMemo,
     AnalysisPhaseResult,
+    ClaimKind,
+    ClaimScope,
+    ClaimSupportStatus,
     Code,
     CodeApplication,
     Codebook,
@@ -241,6 +245,26 @@ class TestInspection:
     def test_get_synthesis_empty(self, sample_project, tmp_store):
         result = json.loads(qc_mcp_server.qc_get_synthesis("proj-1"))
         assert "message" in result
+
+    def test_get_claims(self, completed_project, tmp_store):
+        completed_project.claims = [
+            AnalyticClaim(
+                claim_kind=ClaimKind.CODE,
+                source_stage="thematic_coding",
+                claim_text="AI Adoption is a code.",
+                scope=ClaimScope(code_ids=["C1"]),
+                origin_object_type="code",
+                origin_object_id="C1",
+                support_status=ClaimSupportStatus.SUPPORTED,
+            )
+        ]
+        tmp_store.save(completed_project)
+
+        result = json.loads(qc_mcp_server.qc_get_claims("proj-done"))
+
+        assert result["claim_summary"]["total_claims"] == 1
+        assert result["claims"][0]["claim_text"] == "AI Adoption is a code."
+        assert result["claims"][0]["support_status"] == "supported"
 
 
 # ---------------------------------------------------------------------------

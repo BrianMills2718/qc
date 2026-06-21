@@ -7,6 +7,7 @@ import logging
 import sys
 from pathlib import Path
 
+from qc_clean.core.claims import summarize_claim_ledger
 from qc_clean.core.persistence.project_store import ProjectStore
 from qc_clean.schemas.domain import Methodology, PipelineStatus, ProjectConfig, ProjectState
 
@@ -23,6 +24,8 @@ def handle_project_command(args) -> int:
         return _list_projects(store)
     elif args.project_action == "show":
         return _show_project(store, args)
+    elif args.project_action == "claims":
+        return _show_claims(store, args)
     elif args.project_action == "add-docs":
         return _add_docs(store, args)
     elif args.project_action == "run":
@@ -89,6 +92,7 @@ def _show_project(store: ProjectStore, args) -> int:
     print(f"  Documents: {state.corpus.num_documents}")
     print(f"  Codes: {len(state.codebook.codes)}")
     print(f"  Applications: {len(state.code_applications)}")
+    print(f"  Claims: {len(state.claims)}")
     print(f"  Iteration: {state.iteration}")
     print(f"  Updated: {state.updated_at}")
 
@@ -357,6 +361,38 @@ def _run_irr(store: ProjectStore, args) -> int:
         if result.segment_decision_fleiss_kappa is not None:
             print(f"      Fleiss' kappa: {result.segment_decision_fleiss_kappa:.3f}")
         print(f"      Interpretation: {result.segment_decision_interpretation}")
+
+    return 0
+
+
+def _show_claims(store: ProjectStore, args) -> int:
+    """Show a compact claim-ledger summary for a project."""
+    project_id = args.project_id
+    try:
+        state = store.load(project_id)
+    except FileNotFoundError:
+        print(f"Project not found: {project_id}", file=sys.stderr)
+        return 1
+
+    limit = max(0, int(getattr(args, "limit", 20)))
+    summary = summarize_claim_ledger(state)
+    print(f"Claim Ledger: {state.name}")
+    print(f"  Total claims: {summary['total_claims']}")
+    print(f"  Unsupported or needing anchors: {summary['unsupported_or_needing_anchor']}")
+    print(f"  By kind: {summary['by_kind']}")
+    print(f"  By stage: {summary['by_stage']}")
+    print(f"  By adjudication: {summary['by_adjudication_status']}")
+    print(f"  By support: {summary['by_support_status']}")
+
+    if state.claims and limit:
+        print("\n  Claims:")
+        for claim in state.claims[:limit]:
+            print(
+                f"    - [{claim.claim_kind.value}/{claim.source_stage}/"
+                f"{claim.support_status.value}] {claim.claim_text}"
+            )
+        if len(state.claims) > limit:
+            print(f"    ... and {len(state.claims) - limit} more")
 
     return 0
 

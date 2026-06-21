@@ -25,6 +25,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from qc_clean.core.persistence.project_store import ProjectStore
 from qc_clean.core.export.data_exporter import ProjectExporter
+from qc_clean.core.claims import summarize_claim_ledger
 from qc_clean.core.pipeline.review import ReviewManager
 from qc_clean.core.pipeline.pipeline_factory import create_pipeline, create_incremental_pipeline
 from qc_clean.core.pipeline.pipeline_engine import PipelineContext
@@ -148,10 +149,47 @@ def qc_show_project(project_id: str) -> str:
         "documents": state.corpus.num_documents,
         "codes": len(state.codebook.codes),
         "code_applications": len(state.code_applications),
+        "claims": len(state.claims),
         "memos": len(state.memos),
         "entities": len(state.entities),
         "phase_results": phase_results,
         "updated_at": state.updated_at,
+    }, indent=2)
+
+
+@mcp.tool()
+def qc_get_claims(project_id: str, limit: int = 50) -> str:
+    """Get the first-class analytic claim ledger for a project.
+
+    Args:
+        project_id: The project ID
+        limit: Maximum number of claim rows to return (default 50)
+    """
+    try:
+        state = store.load(project_id)
+    except FileNotFoundError:
+        return json.dumps({"error": f"Project '{project_id}' not found."})
+
+    rows = []
+    for claim in state.claims[:max(0, limit)]:
+        rows.append({
+            "id": claim.id,
+            "kind": claim.claim_kind.value,
+            "source_stage": claim.source_stage,
+            "support_status": claim.support_status.value,
+            "adjudication_status": claim.adjudication_status.value,
+            "claim_text": claim.claim_text,
+            "origin_object_type": claim.origin_object_type,
+            "origin_object_id": claim.origin_object_id,
+            "supporting_anchors": len(claim.supporting_anchors),
+            "contrary_anchors": len(claim.contrary_anchors),
+        })
+
+    return json.dumps({
+        "project": state.name,
+        "claim_summary": summarize_claim_ledger(state),
+        "returned": len(rows),
+        "claims": rows,
     }, indent=2)
 
 

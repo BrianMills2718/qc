@@ -526,6 +526,7 @@ class QCAPIServer:
                 "documents": state.corpus.num_documents,
                 "codes": len(state.codebook.codes),
                 "applications": len(state.code_applications),
+                "claims": len(state.claims),
                 "phases": [
                     {"phase": pr.phase_name, "status": pr.status.value}
                     for pr in state.phase_results
@@ -533,11 +534,40 @@ class QCAPIServer:
                 "updated_at": state.updated_at,
             }
 
+        @self._app.get("/projects/{project_id}/claims")
+        async def get_project_claims(project_id: str):
+            """Get claim-ledger summary and bounded claim rows for a project."""
+            from qc_clean.core.claims import summarize_claim_ledger
+            from qc_clean.core.persistence.project_store import ProjectStore
+            store = ProjectStore()
+            try:
+                state = store.load(project_id)
+            except FileNotFoundError:
+                raise HTTPException(status_code=404, detail=f"Project not found: {project_id}")
+            return {
+                "project": state.name,
+                "claim_summary": summarize_claim_ledger(state),
+                "claims": [
+                    {
+                        "id": claim.id,
+                        "kind": claim.claim_kind.value,
+                        "source_stage": claim.source_stage,
+                        "support_status": claim.support_status.value,
+                        "adjudication_status": claim.adjudication_status.value,
+                        "claim_text": claim.claim_text,
+                        "origin_object_type": claim.origin_object_type,
+                        "origin_object_id": claim.origin_object_id,
+                    }
+                    for claim in state.claims[:100]
+                ],
+            }
+
         self.endpoints = [
             {"method": "GET", "path": "/health", "description": "Health check"},
             {"method": "POST", "path": "/analyze", "description": "Start analysis"},
             {"method": "GET", "path": "/jobs/{job_id}", "description": "Get job status"},
             {"method": "GET", "path": "/projects/{project_id}", "description": "Get project status"},
+            {"method": "GET", "path": "/projects/{project_id}/claims", "description": "Get claim ledger"},
             {"method": "GET", "path": "/graph/{project_id}", "description": "Graph visualization UI"},
             {"method": "GET", "path": "/projects/{project_id}/graph/codes", "description": "Code graph data"},
             {"method": "GET", "path": "/projects/{project_id}/graph/entities", "description": "Entity graph data"},
