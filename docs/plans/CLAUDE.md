@@ -6,8 +6,9 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 4 | INV-9 first-class claim ledger | High | Planned | `INV9_CLAIM_LEDGER.md` |
 
-No active implementation plan tracked. Next up: the claim ledger (INV-9).
+Active implementation plan tracked. Execute `INV9_CLAIM_LEDGER.md` phases in order.
 
 ## Completed Plans
 
