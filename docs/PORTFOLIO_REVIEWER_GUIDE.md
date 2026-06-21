@@ -18,8 +18,13 @@ This project should be presented as computational social-science infrastructure 
 ## Reviewer Path
 
 1. Read `README.md` for the capability list and honest status.
-2. Read `docs/PROJECT_THEORY_AND_GOALS.md` for the methodological claim discipline.
-3. Read `docs/EVALUATION_HARNESS.md` for the SOTA evaluation plan.
+2. Read `docs/portfolio/QUALITATIVE_CODING_EVIDENCE_BUNDLE.md` for the compact
+   evidence trail and reviewer caveats.
+3. Read `docs/PROJECT_THEORY_AND_GOALS.md` for the methodological claim discipline.
+4. Read `docs/EVALUATION_HARNESS.md` for the SOTA evaluation plan.
+5. Inspect the selected completed plan artifacts for span anchoring, segment
+   coverage, claim ledger, instruction/data separation, application-level
+   agreement, and Phase 0 benchmark packaging.
 
 ## Current Use In The Portfolio
 

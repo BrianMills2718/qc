@@ -9,6 +9,10 @@ publish:
     type: PortfolioGuide
     title: Qualitative Coding Portfolio Reviewer Guide
     tags: [portfolio, qualitative-coding, computational-social-science]
+  - path: docs/portfolio/QUALITATIVE_CODING_EVIDENCE_BUNDLE.md
+    type: PortfolioEvidence
+    title: Qualitative Coding Evidence Bundle
+    tags: [portfolio, qualitative-coding, computational-social-science, evidence]
   - path: docs/PROJECT_THEORY_AND_GOALS.md
     type: Reference
     title: Project Theory & Goals (Agent Orientation)
@@ -17,6 +21,38 @@ publish:
     type: Reference
     title: Evaluation Harness Design
     tags: [analysis, qualitative-coding, evaluation]
+  - path: docs/plans/ACTIVE_SPRINT.md
+    type: Roadmap
+    title: Qualitative Coding Active Sprint
+    tags: [qualitative-coding, roadmap, evaluation]
+  - path: docs/plans/completed/INV1_OVERNIGHT_SPRINT.md
+    type: Plan
+    title: INV-1 Span Anchoring and Harness Phase 0
+    tags: [qualitative-coding, grounding, evidence]
+  - path: docs/plans/completed/INV8_SEGMENT_UNIVERSE.md
+    type: Plan
+    title: INV-8 Segment Universe
+    tags: [qualitative-coding, coverage, evaluation]
+  - path: docs/plans/completed/INV9_CLAIM_LEDGER.md
+    type: Plan
+    title: INV-9 Claim Ledger
+    tags: [qualitative-coding, claims, evaluation]
+  - path: docs/plans/completed/INV2_D7_DISCONFIRMATION_SCORECARD.md
+    type: Plan
+    title: INV-2 D7 Disconfirmation Scorecard
+    tags: [qualitative-coding, disconfirmation, evaluation]
+  - path: docs/plans/completed/INV7_INSTRUCTION_DATA_SEPARATION.md
+    type: Plan
+    title: INV-7 Instruction/Data Separation
+    tags: [qualitative-coding, prompt-injection, evaluation]
+  - path: docs/plans/completed/IRR_APPLICATION_LEVEL.md
+    type: Plan
+    title: Application-Level IRR
+    tags: [qualitative-coding, reliability, evaluation]
+  - path: docs/plans/completed/PHASE0_BENCHMARK_ARTIFACTS.md
+    type: Plan
+    title: Phase 0 Benchmark Artifacts
+    tags: [qualitative-coding, benchmarking, evaluation]
 exclude:
   - docs/CLAUDE.md
   - data/**
