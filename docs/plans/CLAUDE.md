@@ -6,7 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| — | No active implementation plan. | — | — | — |
+| 20 | Missing corpus scope report warning | High | Planned | `CORPUS_SCOPE_MISSING_REPORT_WARNING.md` |
 
 ## Completed Plans
 
