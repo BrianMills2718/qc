@@ -69,8 +69,8 @@ These are internal project capabilities, not cross-project boundary APIs.
 ### Capability Validation
 
 - [x] Internal-only; no cross-project registry entry required.
-- [ ] Inputs/outputs use existing Pydantic state/decision models or plain summaries.
-- [ ] Tests verify deterministic behavior without live LLM calls.
+- [x] Inputs/outputs use existing Pydantic state/decision models or plain summaries.
+- [x] Tests verify deterministic behavior without live LLM calls.
 
 ---
 
@@ -97,7 +97,7 @@ These are internal project capabilities, not cross-project boundary APIs.
 
 | Phase | Scope | Verification | Commit |
 |---|---|---|---|
-| 1 | Ledger target enumeration and disconfirmation coverage summary over `ProjectState.claims` | `tests/test_claims.py` focused target/coverage tests | `[Plan: INV6] Add ledger disconfirmation helpers` |
+| 1 | Ledger target enumeration and disconfirmation coverage summary over `ProjectState.claims` | DONE: `tests/test_claims.py` focused target/coverage tests | `[Plan: INV6] Add ledger disconfirmation helpers` |
 | 2 | Negative-case schema/prompt wiring: include bounded claim targets and preserve explicit challenged claim IDs | `tests/test_negative_case_inv6.py`; prompt-target and builder tests | `[Plan: INV6] Target negative cases to ledger claims` |
 | 3 | Claim adjudication via `ReviewManager`: approve/reject/modify claim objects, append `ClaimRevision`, preserve fail-loud unknown targets | review manager tests | `[Plan: INV10] Add claim review decisions` |
 | 4 | Read surfaces for disconfirmation/adjudication summaries where useful: CLI/API/MCP bounded summary, no raw full-state dump | CLI/API/MCP tests if surface added | `[Plan: INV6] Expose disconfirmation coverage` |
@@ -131,10 +131,10 @@ These are internal project capabilities, not cross-project boundary APIs.
 
 Feature-level criteria:
 
-- [ ] Every non-negative, non-no-claims substantive claim can be enumerated as a disconfirmation target.
+- [x] Every non-negative, non-no-claims substantive claim can be enumerated as a disconfirmation target.
 - [ ] Negative-case prompts include claim IDs/text/scope for all bounded ledger targets or a documented truncation.
 - [ ] `NegativeCase` can name an explicit challenged claim ID; builder stores it in `ClaimScope.claim_ids`.
-- [ ] Disconfirmation coverage summary reports total targets, challenged targets, unchallenged targets, and challenged rate.
+- [x] Disconfirmation coverage summary reports total targets, challenged targets, unchallenged targets, and challenged rate.
 - [ ] Claim review decisions can approve, reject/withdraw, or modify an `AnalyticClaim` and append revision history.
 - [ ] Unknown claim IDs and unsupported claim review actions fail loudly.
 - [ ] Docs update INV-6 and INV-10 only to the exact implemented scope, without marking INV-2 or methodological validity as met.
@@ -164,3 +164,8 @@ This plan moves INV-6/INV-10 from "selected code/cross-case surfaces only" to
 experimental until INV-2 retrieval-first, different-model/adversarial,
 source-anchored disconfirmation and human adjudication are implemented and
 evaluated.
+
+Phase 1 complete 2026-06-21: added deterministic claim-target enumeration,
+disconfirmation coverage summaries, and bounded target formatting for prompt
+use. Verification: focused Phase 1 tests (2 passed) and `tests/test_claims.py`
+(12 passed).

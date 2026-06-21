@@ -10,6 +10,8 @@ from qc_clean.core.claims import (
     claims_for_perspectives,
     claims_for_relationships,
     claims_for_synthesis,
+    disconfirmation_targets,
+    summarize_disconfirmation_coverage,
     summarize_claim_ledger,
 )
 from qc_clean.core.pipeline.stages.cross_interview import analyze_cross_interview_patterns
@@ -176,6 +178,98 @@ def test_claim_summary_counts_by_kind_stage_status_and_support():
         "by_adjudication_status": {"needs_review": 1, "pending": 1},
         "by_support_status": {"needs_anchor": 1, "supported": 1},
         "unsupported_or_needing_anchor": 1,
+    }
+
+
+def test_disconfirmation_targets_exclude_negative_and_no_claim_events():
+    """Only live substantive claims become disconfirmation targets."""
+    state = ProjectState(claims=[
+        AnalyticClaim(
+            id="claim-code",
+            claim_kind=ClaimKind.CODE,
+            source_stage="thematic_coding",
+            claim_text="Efficiency is a code.",
+            scope=ClaimScope(code_ids=["C1"]),
+            origin_object_type="code",
+            origin_object_id="C1",
+        ),
+        AnalyticClaim(
+            id="claim-negative",
+            claim_kind=ClaimKind.NEGATIVE_CASE,
+            source_stage="negative_case_analysis",
+            claim_text="Negative case for Efficiency.",
+            scope=ClaimScope(claim_ids=["claim-code"], code_ids=["C1"]),
+            origin_object_type="negative_case",
+            origin_object_id="negative_case:0:Efficiency",
+        ),
+        AnalyticClaim(
+            id="claim-none",
+            claim_kind=ClaimKind.NO_CLAIMS_EVENT,
+            source_stage="relationship",
+            claim_text="No analytic claims emitted.",
+            scope=ClaimScope(corpus_level=True),
+            origin_object_type="stage",
+            origin_object_id="relationship",
+        ),
+        AnalyticClaim(
+            id="claim-withdrawn",
+            claim_kind=ClaimKind.SYNTHESIS_FINDING,
+            source_stage="synthesis",
+            claim_text="Withdrawn finding.",
+            scope=ClaimScope(corpus_level=True),
+            origin_object_type="synthesis",
+            origin_object_id="finding:0",
+            adjudication_status=ClaimAdjudicationStatus.WITHDRAWN,
+        ),
+    ])
+
+    targets = disconfirmation_targets(state)
+
+    assert [claim.id for claim in targets] == ["claim-code"]
+
+
+def test_disconfirmation_coverage_counts_challenged_claim_ids():
+    """Coverage summaries count exact claim IDs challenged by negative cases."""
+    state = ProjectState(claims=[
+        AnalyticClaim(
+            id="claim-code",
+            claim_kind=ClaimKind.CODE,
+            source_stage="thematic_coding",
+            claim_text="Efficiency is a code.",
+            scope=ClaimScope(code_ids=["C1"]),
+            origin_object_type="code",
+            origin_object_id="C1",
+        ),
+        AnalyticClaim(
+            id="claim-synthesis",
+            claim_kind=ClaimKind.SYNTHESIS_FINDING,
+            source_stage="synthesis",
+            claim_text="Efficiency improves workflow.",
+            scope=ClaimScope(corpus_level=True, code_ids=["C1"]),
+            origin_object_type="synthesis",
+            origin_object_id="finding:0",
+        ),
+        AnalyticClaim(
+            id="claim-negative",
+            claim_kind=ClaimKind.NEGATIVE_CASE,
+            source_stage="negative_case_analysis",
+            claim_text="Negative case for Efficiency.",
+            scope=ClaimScope(claim_ids=["claim-code"], code_ids=["C1"]),
+            origin_object_type="negative_case",
+            origin_object_id="negative_case:0:Efficiency",
+        ),
+    ])
+
+    summary = summarize_disconfirmation_coverage(state)
+
+    assert summary == {
+        "total_targets": 2,
+        "challenged_targets": 1,
+        "unchallenged_targets": 1,
+        "challenged_rate": 0.5,
+        "challenged_claim_ids": ["claim-code"],
+        "unchallenged_claim_ids": ["claim-synthesis"],
+        "negative_case_claims": 1,
     }
 
 

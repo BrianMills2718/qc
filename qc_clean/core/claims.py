@@ -8,6 +8,7 @@ from typing import Any, Iterable
 from qc_clean.core.grounding import MatchStatus, resolve_against_docs
 from qc_clean.schemas.domain import (
     AnalyticClaim,
+    ClaimAdjudicationStatus,
     ClaimAnchor,
     ClaimKind,
     ClaimScope,
@@ -26,6 +27,15 @@ NEGATIVE_CASE_TARGET_KINDS = {
     ClaimKind.SYNTHESIS_FINDING,
     ClaimKind.GT_CATEGORY,
     ClaimKind.GT_PROPOSITION,
+}
+
+DISCONFIRMATION_EXCLUDED_KINDS = {
+    ClaimKind.NEGATIVE_CASE,
+    ClaimKind.NO_CLAIMS_EVENT,
+}
+
+DISCONFIRMATION_EXCLUDED_ADJUDICATIONS = {
+    ClaimAdjudicationStatus.WITHDRAWN,
 }
 
 
@@ -420,6 +430,84 @@ def summarize_claim_ledger(state: ProjectState) -> dict[str, Any]:
     }
 
 
+def disconfirmation_targets(
+    state: ProjectState,
+    limit: int | None = None,
+) -> list[AnalyticClaim]:
+    """Return live substantive claims that should face disconfirmation."""
+    targets = [
+        claim for claim in state.claims
+        if claim.claim_kind not in DISCONFIRMATION_EXCLUDED_KINDS
+        and claim.adjudication_status not in DISCONFIRMATION_EXCLUDED_ADJUDICATIONS
+    ]
+    if limit is None:
+        return targets
+    return targets[:max(0, limit)]
+
+
+def summarize_disconfirmation_coverage(state: ProjectState) -> dict[str, Any]:
+    """Return claim-ledger disconfirmation coverage from exact target IDs."""
+    targets = disconfirmation_targets(state)
+    target_ids = [claim.id for claim in targets]
+    target_id_set = set(target_ids)
+
+    challenged_set: set[str] = set()
+    negative_case_claims = 0
+    for claim in state.claims:
+        if claim.claim_kind != ClaimKind.NEGATIVE_CASE:
+            continue
+        negative_case_claims += 1
+        challenged_set.update(
+            claim_id for claim_id in claim.scope.claim_ids
+            if claim_id in target_id_set
+        )
+
+    challenged_ids = [claim_id for claim_id in target_ids if claim_id in challenged_set]
+    unchallenged_ids = [claim_id for claim_id in target_ids if claim_id not in challenged_set]
+    total = len(target_ids)
+    challenged = len(challenged_ids)
+
+    return {
+        "total_targets": total,
+        "challenged_targets": challenged,
+        "unchallenged_targets": len(unchallenged_ids),
+        "challenged_rate": challenged / total if total else 0.0,
+        "challenged_claim_ids": challenged_ids,
+        "unchallenged_claim_ids": unchallenged_ids,
+        "negative_case_claims": negative_case_claims,
+    }
+
+
+def format_disconfirmation_targets(
+    state: ProjectState,
+    limit: int = 50,
+) -> str:
+    """Format bounded claim targets for a negative-case prompt."""
+    bounded_limit = max(0, limit)
+    targets = disconfirmation_targets(state)
+    shown = targets[:bounded_limit]
+    if not shown:
+        return ""
+
+    lines = [
+        "CLAIM LEDGER TARGETS TO CHALLENGE "
+        f"(showing {len(shown)}/{len(targets)} live substantive claims):"
+    ]
+    for claim in shown:
+        text = claim.claim_text.replace("\n", " ").strip()
+        if len(text) > 220:
+            text = text[:217] + "..."
+        lines.append(
+            f"- claim_id={claim.id} kind={claim.claim_kind.value} "
+            f"stage={claim.source_stage} support={claim.support_status.value} "
+            f"adjudication={claim.adjudication_status.value} "
+            f"scope={_format_scope_summary(claim.scope)} text={text}"
+        )
+    if len(targets) > bounded_limit:
+        lines.append(f"... {len(targets) - bounded_limit} additional claims omitted by limit.")
+    return "\n".join(lines)
+
+
 def _anchors_for_code(state: ProjectState, code_id: str) -> list[ClaimAnchor]:
     """Return all anchored application spans for a code."""
     anchors: list[ClaimAnchor] = []
@@ -435,6 +523,26 @@ def _anchors_for_code(state: ProjectState, code_id: str) -> list[ClaimAnchor]:
 def _support_status(anchors: list[ClaimAnchor]) -> ClaimSupportStatus:
     """Return supported when at least one source anchor exists."""
     return ClaimSupportStatus.SUPPORTED if anchors else ClaimSupportStatus.NEEDS_ANCHOR
+
+
+def _format_scope_summary(scope: ClaimScope) -> str:
+    """Return a compact, deterministic claim scope summary."""
+    parts: list[str] = []
+    if scope.corpus_level:
+        parts.append("corpus")
+    for label, values in (
+        ("claims", scope.claim_ids),
+        ("docs", scope.doc_ids),
+        ("codes", scope.code_ids),
+        ("segments", scope.segment_ids),
+        ("apps", scope.application_ids),
+        ("entities", scope.entity_ids),
+        ("relationships", scope.relationship_ids),
+        ("participants", scope.participant_names),
+    ):
+        if values:
+            parts.append(f"{label}={','.join(values)}")
+    return ";".join(parts) if parts else "unspecified"
 
 
 def _needs_anchor_claim(
