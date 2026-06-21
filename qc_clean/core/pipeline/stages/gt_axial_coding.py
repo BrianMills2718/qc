@@ -9,7 +9,7 @@ from pydantic import BaseModel, Field
 from typing import List
 
 from qc_clean.core.claims import claims_for_relationships, replace_claims_for_stage
-from qc_clean.core.prompting import format_untrusted_documents
+from qc_clean.core.prompting import format_untrusted_data_block, format_untrusted_documents
 from qc_clean.schemas.gt_schemas import AxialRelationship
 from qc_clean.schemas.adapters import axial_relationships_to_code_relationships
 from qc_clean.schemas.domain import AnalysisMemo, ProjectState
@@ -51,7 +51,10 @@ class GTAxialCodingStage(PipelineStage):
         )
         llm = LLMHandler(model_name=ctx.model_name)
 
-        codes_text = ctx.require("gt_open_codes_text", self.name())
+        codes_text = format_untrusted_data_block(
+            "GT open codes text",
+            ctx.require("gt_open_codes_text", self.name()),
+        )
         combined_text = _build_combined_text(state)
 
         prompt = f"""You are conducting axial coding analysis in grounded theory methodology.

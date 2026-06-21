@@ -24,6 +24,7 @@ from qc_clean.core.disconfirmation import (
     format_disconfirmation_candidates,
     retrieve_disconfirmation_candidates,
 )
+from qc_clean.core.prompting import format_untrusted_data_block
 from qc_clean.schemas.domain import AnalysisMemo, ProjectState, Provenance
 from ..pipeline_engine import PipelineContext, PipelineStage
 
@@ -79,15 +80,20 @@ class NegativeCaseStage(PipelineStage):
         )
         llm = LLMHandler(model_name=disconfirmation_model)
 
-        codes_text = _format_codebook(state)
+        codes_text = format_untrusted_data_block("Current codebook", _format_codebook(state))
         cross_claims = _format_cross_interview_claims(state)
         target_claims = disconfirmation_targets(
             state,
             limit=ctx.disconfirmation_max_targets,
         )
-        ledger_targets = format_disconfirmation_targets(
+        raw_ledger_targets = format_disconfirmation_targets(
             state,
             limit=ctx.disconfirmation_max_targets,
+        )
+        ledger_targets = (
+            format_untrusted_data_block("Claim ledger targets", raw_ledger_targets)
+            if raw_ledger_targets
+            else ""
         )
         candidates = retrieve_disconfirmation_candidates(
             state,
@@ -110,7 +116,8 @@ class NegativeCaseStage(PipelineStage):
         # for single-document corpora where no cross-interview stage ran.
         cross_section = (
             f"\n\nCROSS-INTERVIEW CLAIMS TO ALSO CHALLENGE (consensus / divergent themes "
-            f"asserted across interviews — test whether the data actually supports them):\n{cross_claims}"
+            "asserted across interviews — test whether the data actually supports them):\n"
+            f"{format_untrusted_data_block('Cross-interview claims memo', cross_claims)}"
             if cross_claims
             else ""
         )

@@ -7,6 +7,7 @@ from __future__ import annotations
 import logging
 
 from qc_clean.core.claims import claims_for_gt_theory, replace_claims_for_stage
+from qc_clean.core.prompting import format_untrusted_data_block
 from qc_clean.schemas.gt_schemas import TheoreticalModel
 from qc_clean.schemas.adapters import theoretical_model_to_domain
 from qc_clean.schemas.domain import AnalysisMemo, ProjectState
@@ -32,9 +33,18 @@ class GTTheoryIntegrationStage(PipelineStage):
         )
         llm = LLMHandler(model_name=ctx.model_name)
 
-        codes_text = ctx.require("gt_open_codes_text", self.name())
-        axial_text = ctx.require("gt_axial_text", self.name())
-        core_text = ctx.require("gt_core_text", self.name())
+        codes_text = format_untrusted_data_block(
+            "GT open codes text",
+            ctx.require("gt_open_codes_text", self.name()),
+        )
+        axial_text = format_untrusted_data_block(
+            "GT axial relationships text",
+            ctx.require("gt_axial_text", self.name()),
+        )
+        core_text = format_untrusted_data_block(
+            "GT core categories text",
+            ctx.require("gt_core_text", self.name()),
+        )
 
         prompt = f"""You are completing grounded theory analysis by integrating all phases into a coherent theoretical model.
 

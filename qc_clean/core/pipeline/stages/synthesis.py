@@ -7,7 +7,7 @@ from __future__ import annotations
 import logging
 
 from qc_clean.core.claims import claims_for_synthesis, replace_claims_for_stage
-from qc_clean.core.prompting import format_untrusted_documents
+from qc_clean.core.prompting import format_untrusted_data_block, format_untrusted_documents
 from qc_clean.schemas.analysis_schemas import AnalysisSynthesis
 from qc_clean.schemas.adapters import analysis_synthesis_to_synthesis
 from qc_clean.schemas.domain import AnalysisMemo, ProjectState
@@ -32,9 +32,18 @@ class SynthesisStage(PipelineStage):
         llm = LLMHandler(model_name=ctx.model_name)
 
         combined_text = _build_combined_text(state)
-        phase1_text = ctx.require("phase1_json", self.name())
-        phase2_text = ctx.require("phase2_json", self.name())
-        phase3_text = ctx.require("phase3_json", self.name())
+        phase1_text = format_untrusted_data_block(
+            "Phase 1 code hierarchy JSON",
+            ctx.require("phase1_json", self.name()),
+        )
+        phase2_text = format_untrusted_data_block(
+            "Phase 2 perspective analysis JSON",
+            ctx.require("phase2_json", self.name()),
+        )
+        phase3_text = format_untrusted_data_block(
+            "Phase 3 relationship mapping JSON",
+            ctx.require("phase3_json", self.name()),
+        )
 
         prompt = _build_phase4_prompt(combined_text, phase1_text, phase2_text, phase3_text)
 

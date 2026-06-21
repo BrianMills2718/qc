@@ -9,6 +9,7 @@ from pydantic import BaseModel, Field
 from typing import List
 
 from qc_clean.core.claims import claims_for_gt_categories, replace_claims_for_stage
+from qc_clean.core.prompting import format_untrusted_data_block
 from qc_clean.schemas.gt_schemas import CoreCategory
 from qc_clean.schemas.adapters import core_category_to_domain
 from qc_clean.schemas.domain import AnalysisMemo, ProjectState
@@ -44,8 +45,14 @@ class GTSelectiveCodingStage(PipelineStage):
         )
         llm = LLMHandler(model_name=ctx.model_name)
 
-        codes_text = ctx.require("gt_open_codes_text", self.name())
-        axial_text = ctx.require("gt_axial_text", self.name())
+        codes_text = format_untrusted_data_block(
+            "GT open codes text",
+            ctx.require("gt_open_codes_text", self.name()),
+        )
+        axial_text = format_untrusted_data_block(
+            "GT axial relationships text",
+            ctx.require("gt_axial_text", self.name()),
+        )
 
         prompt = f"""You are conducting selective coding in grounded theory methodology to identify the core categories.
 

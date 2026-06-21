@@ -11,7 +11,7 @@ import logging
 from typing import List
 
 from qc_clean.core.grounding import MatchStatus, resolve_and_anchor, warn_unanchored
-from qc_clean.core.prompting import format_untrusted_documents
+from qc_clean.core.prompting import format_untrusted_data_block, format_untrusted_documents
 from qc_clean.core.pipeline.irr import normalize_code_name
 from qc_clean.core.pipeline.saturation import calculate_codebook_change
 from qc_clean.schemas.analysis_schemas import CodeHierarchy
@@ -64,7 +64,10 @@ class IncrementalCodingStage(PipelineStage):
 
         # Build prompt with existing codebook context + new doc text
         is_gt = state.config.methodology == Methodology.GROUNDED_THEORY
-        codebook_context = _format_codebook_for_prompt(state.codebook)
+        codebook_context = format_untrusted_data_block(
+            "Existing codebook context",
+            _format_codebook_for_prompt(state.codebook),
+        )
         new_doc_text = _build_new_doc_text(new_docs)
 
         if is_gt:

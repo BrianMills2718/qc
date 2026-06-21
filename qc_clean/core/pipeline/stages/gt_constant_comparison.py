@@ -236,9 +236,13 @@ class GTConstantComparisonStage(PipelineStage):
 
             for seg_idx, segment in enumerate(segments):
                 protected_segment_text = _format_segment_data_block(segment, seg_idx)
+                protected_codebook_context = format_untrusted_data_block(
+                    "Current GT codebook context",
+                    _format_codebook_context(codebook),
+                )
                 if ctx.prompt_overrides.get("gt_constant_comparison"):
                     prompt = ctx.prompt_overrides["gt_constant_comparison"].format(
-                        codebook_context=_format_codebook_context(codebook),
+                        codebook_context=protected_codebook_context,
                         segment_text=protected_segment_text,
                         seg_idx=seg_idx,
                         total_segments=len(segments),
@@ -332,7 +336,10 @@ def _build_comparison_prompt(
     total_segments: int,
 ) -> str:
     """Build the constant comparison prompt for a single segment."""
-    codebook_section = _format_codebook_context(codebook)
+    codebook_section = format_untrusted_data_block(
+        "Current GT codebook context",
+        _format_codebook_context(codebook),
+    )
     segment_block = _format_segment_data_block(segment, seg_idx)
 
     return f"""You are conducting grounded theory open coding using the constant comparison method.
