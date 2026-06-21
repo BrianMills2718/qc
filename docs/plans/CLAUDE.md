@@ -6,7 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| — | — | — | No active plan | — |
+| 34 | D7 retrieval-mode export | High | Planned | `D7_RETRIEVAL_MODE_EXPORT.md` |
 
 ## Completed Plans
 
