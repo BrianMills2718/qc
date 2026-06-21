@@ -256,6 +256,100 @@ def test_scorecard_computes_d7_false_positive_and_false_negative():
     assert d7["extra_predicted_keys"] == [f"claim-ai|{doc.id}|{extra_start}:{extra_end}"]
 
 
+def test_scorecard_reports_d7_wilson_intervals_for_perfect_match():
+    content = "AI improved delivery. AI failed for this team."
+    doc = Document(id="d1", name="d.txt", content=content)
+    start = content.index("AI failed")
+    end = len(content)
+    state = ProjectState(
+        config=ProjectConfig(
+            methodology=Methodology.THEMATIC_ANALYSIS,
+            extra={
+                "disconfirmation_gold": [
+                    {
+                        "target_claim_id": "claim-ai",
+                        "doc_id": doc.id,
+                        "start_char": start,
+                        "end_char": end,
+                    },
+                ],
+            },
+        ),
+        corpus=Corpus(documents=[doc]),
+        claims=[
+            _negative_case_claim(
+                "claim-ai",
+                ClaimAnchor(doc_id=doc.id, start_char=start, end_char=end),
+            ),
+        ],
+    )
+
+    d7 = phase0_scorecard(state)["disconfirmation_d7"]
+
+    assert d7["recall_ci"]["method"] == "wilson"
+    assert d7["recall_ci"]["confidence_level"] == 0.95
+    assert d7["recall_ci"]["denominator"] == 1
+    assert d7["recall_ci"]["lower"] <= d7["recall"] <= d7["recall_ci"]["upper"]
+    assert d7["precision_ci"]["method"] == "wilson"
+    assert d7["precision_ci"]["confidence_level"] == 0.95
+    assert d7["precision_ci"]["denominator"] == 1
+    assert d7["precision_ci"]["lower"] <= d7["precision"] <= d7["precision_ci"]["upper"]
+
+
+def test_scorecard_reports_d7_wilson_intervals_for_mixed_counts():
+    content = "AI failed here. AI also failed later. AI only succeeded elsewhere."
+    doc = Document(id="d1", name="d.txt", content=content)
+    first_start = content.index("AI failed")
+    first_end = first_start + len("AI failed here.")
+    second_start = content.index("AI also")
+    second_end = second_start + len("AI also failed later.")
+    extra_start = content.index("AI only")
+    extra_end = len(content)
+    state = ProjectState(
+        config=ProjectConfig(
+            methodology=Methodology.THEMATIC_ANALYSIS,
+            extra={
+                "disconfirmation_gold": [
+                    {
+                        "target_claim_id": "claim-ai",
+                        "doc_id": doc.id,
+                        "start_char": first_start,
+                        "end_char": first_end,
+                    },
+                    {
+                        "target_claim_id": "claim-ai",
+                        "doc_id": doc.id,
+                        "start_char": second_start,
+                        "end_char": second_end,
+                    },
+                ],
+            },
+        ),
+        corpus=Corpus(documents=[doc]),
+        claims=[
+            _negative_case_claim(
+                "claim-ai",
+                ClaimAnchor(doc_id=doc.id, start_char=first_start, end_char=first_end),
+            ),
+            _negative_case_claim(
+                "claim-ai",
+                ClaimAnchor(doc_id=doc.id, start_char=extra_start, end_char=extra_end),
+            ),
+        ],
+    )
+
+    d7 = phase0_scorecard(state)["disconfirmation_d7"]
+
+    assert d7["recall"] == 0.5
+    assert d7["recall_ci"]["denominator"] == 2
+    assert d7["recall_ci"]["successes"] == 1
+    assert d7["recall_ci"]["lower"] < d7["recall"] < d7["recall_ci"]["upper"]
+    assert d7["precision"] == 0.5
+    assert d7["precision_ci"]["denominator"] == 2
+    assert d7["precision_ci"]["successes"] == 1
+    assert d7["precision_ci"]["lower"] < d7["precision"] < d7["precision_ci"]["upper"]
+
+
 def _negative_case_claim(target_claim_id: str, anchor: ClaimAnchor) -> AnalyticClaim:
     return AnalyticClaim(
         claim_kind=ClaimKind.NEGATIVE_CASE,

@@ -11,6 +11,7 @@ Deterministic and LLM-free so it can run in CI and be diffed across runs.
 from __future__ import annotations
 
 from dataclasses import asdict
+from math import sqrt
 from typing import Any, Dict
 
 from pydantic import BaseModel, Field, ValidationError, model_validator
@@ -22,6 +23,7 @@ from qc_clean.schemas.domain import ClaimAnchor, ClaimKind, ProjectState
 
 
 _D7_GOLD_EXTRA_KEY = "disconfirmation_gold"
+_WILSON_Z_95 = 1.959963984540054
 
 
 class DisconfirmationGoldAnchor(BaseModel):
@@ -138,6 +140,8 @@ def disconfirmation_d7_scorecard(state: ProjectState) -> Dict[str, Any]:
     recall = _safe_div(true_positives, true_positives + false_negatives)
     precision = _safe_div(true_positives, true_positives + false_positives)
     f1 = _safe_div(2 * precision * recall, precision + recall)
+    recall_denominator = true_positives + false_negatives
+    precision_denominator = true_positives + false_positives
 
     return {
         "status": "scored",
@@ -150,6 +154,8 @@ def disconfirmation_d7_scorecard(state: ProjectState) -> Dict[str, Any]:
         "recall": recall,
         "precision": precision,
         "f1": f1,
+        "recall_ci": _wilson_interval(true_positives, recall_denominator),
+        "precision_ci": _wilson_interval(true_positives, precision_denominator),
         "matched_gold_keys": matched,
         "missed_gold_keys": missed,
         "extra_predicted_keys": extra,
@@ -250,3 +256,45 @@ def _safe_div(numerator: float, denominator: float) -> float:
     if denominator == 0:
         return 0.0
     return numerator / denominator
+
+
+def _wilson_interval(
+    successes: int,
+    denominator: int,
+    *,
+    confidence_level: float = 0.95,
+) -> Dict[str, Any]:
+    """Return a Wilson score interval for a binomial proportion."""
+    if confidence_level != 0.95:
+        raise ValueError("Only 95% Wilson intervals are supported in Phase 0")
+    if successes < 0 or denominator < 0:
+        raise ValueError("Wilson interval counts must be non-negative")
+    if successes > denominator:
+        raise ValueError("Wilson interval successes cannot exceed denominator")
+    if denominator == 0:
+        return {
+            "method": "wilson",
+            "confidence_level": confidence_level,
+            "successes": successes,
+            "denominator": denominator,
+            "lower": None,
+            "upper": None,
+            "note": "undefined denominator",
+        }
+
+    z = _WILSON_Z_95
+    p_hat = successes / denominator
+    z2 = z * z
+    denom = 1 + (z2 / denominator)
+    center = (p_hat + (z2 / (2 * denominator))) / denom
+    margin = (
+        z * sqrt((p_hat * (1 - p_hat) / denominator) + (z2 / (4 * denominator * denominator)))
+    ) / denom
+    return {
+        "method": "wilson",
+        "confidence_level": confidence_level,
+        "successes": successes,
+        "denominator": denominator,
+        "lower": max(0.0, center - margin),
+        "upper": min(1.0, center + margin),
+    }
