@@ -73,6 +73,27 @@ def test_thematic_prompt_wraps_malicious_transcript_as_untrusted_data():
     _assert_malicious_payload_is_data(captured_prompt)
 
 
+def test_thematic_prompt_override_receives_boundaried_combined_text():
+    state = _state_with_malicious_doc()
+    response = _code_hierarchy_response()
+    captured_prompt = ""
+
+    async def capture_prompt(prompt, *_args, **_kwargs):
+        nonlocal captured_prompt
+        captured_prompt = prompt
+        return response
+
+    ctx = PipelineContext(prompt_overrides={
+        "thematic_coding": "CUSTOM OVERRIDE\n{combined_text}\nN={num_interviews}",
+    })
+    with patch("qc_clean.core.llm.llm_handler.LLMHandler") as MockLLM:
+        MockLLM.return_value.extract_structured = AsyncMock(side_effect=capture_prompt)
+        asyncio.run(ThematicCodingStage().execute(state, ctx))
+
+    assert captured_prompt.startswith("CUSTOM OVERRIDE")
+    _assert_malicious_payload_is_data(captured_prompt)
+
+
 def test_negative_case_prompt_wraps_malicious_transcript_as_untrusted_data():
     state = _state_with_malicious_doc()
     state.codebook = Codebook(codes=[
@@ -115,6 +136,31 @@ def test_gt_constant_comparison_wraps_malicious_segment_as_untrusted_data():
             )
         )
 
+    _assert_malicious_payload_is_data(captured_prompt)
+
+
+def test_gt_prompt_override_receives_boundaried_segment_text():
+    state = _state_with_malicious_doc()
+    captured_prompt = ""
+
+    async def capture_prompt(prompt, *_args, **_kwargs):
+        nonlocal captured_prompt
+        captured_prompt = prompt
+        return SegmentCodingResponse()
+
+    ctx = PipelineContext(prompt_overrides={
+        "gt_constant_comparison": "CUSTOM GT OVERRIDE\n{segment_text}",
+    })
+    with patch("qc_clean.core.llm.llm_handler.LLMHandler") as MockLLM:
+        MockLLM.return_value.extract_structured = AsyncMock(side_effect=capture_prompt)
+        asyncio.run(
+            GTConstantComparisonStage(max_iterations=1).execute(
+                state,
+                ctx,
+            )
+        )
+
+    assert captured_prompt.startswith("CUSTOM GT OVERRIDE")
     _assert_malicious_payload_is_data(captured_prompt)
 
 
