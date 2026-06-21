@@ -1,10 +1,31 @@
 # Plan #29: QC Bench CLI
 
-**Status:** In Progress
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Phase 0 scorecard
 **Blocks:** first-class benchmark command; future prompt_eval-backed `qc bench`
+
+---
+
+## Outcome
+
+`qc_cli.py bench <project_id>` now delegates to `scripts.bench_phase0.main()`
+and supports the same current Phase 0 flags as `make bench`: `--gold-file`,
+`--d7-baselines-file`, `--prompt-injection-file`, `--observability-db`,
+`--trace-id`, and `--output`. The wrapper preserves the existing JSON stdout,
+output-file writing, externally supplied benchmark-file scoring, D7/D10 metrics,
+and `_meta.input_hashes` behavior because it reuses the script implementation
+instead of duplicating scorecard logic.
+
+Docs now describe `qc_cli.py bench <project_id>` as the current canonical CLI
+surface for the deterministic Phase 0 scorecard while preserving the caveat
+that the full `prompt_eval` benchmark suite remains future work.
+
+Verification:
+- Focused: `python -m pytest tests/test_qc_cli_bench.py tests/test_bench_phase0_script.py -q` -> 11 passed.
+- Focused lint: `python -m ruff check qc_cli.py tests/test_qc_cli_bench.py` -> passed.
+- Full gate: `make check` -> 686 passed, 1 skipped, 8 deselected; Ruff passed; docs checks passed; type check not yet configured.
 
 ---
 
@@ -102,18 +123,18 @@ cross-project callable capability.
 ## Acceptance Criteria
 
 > Feature-level criteria (what the plan accomplishes):
-- [ ] `qc_cli.py bench <project_id>` works.
-- [ ] Current Phase 0 bench flags are supported.
-- [ ] The command reuses `scripts.bench_phase0.main` rather than duplicating
+- [x] `qc_cli.py bench <project_id>` works.
+- [x] Current Phase 0 bench flags are supported.
+- [x] The command reuses `scripts.bench_phase0.main` rather than duplicating
   scorecard logic.
-- [ ] JSON stdout and `--output` behavior match the script path.
-- [ ] Docs say this is a Phase 0 wrapper, not the full prompt_eval suite.
+- [x] JSON stdout and `--output` behavior match the script path.
+- [x] Docs say this is a Phase 0 wrapper, not the full prompt_eval suite.
 
 > Process criteria (quality gates):
-- [ ] Required tests pass
-- [ ] Full test suite passes
-- [ ] Type check status is reported
-- [ ] Docs updated
+- [x] Required tests pass
+- [x] Full test suite passes
+- [x] Type check status is reported
+- [x] Docs updated
 
 ---
 

@@ -6,7 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 29 | QC bench CLI | High | In Progress | `QC_BENCH_CLI.md` |
+| _none_ | _none_ | _none_ | _none_ | _none_ |
 
 ## Completed Plans
 
@@ -40,6 +40,7 @@ Track all implementation work here.
 | D7 baseline comparison | Evaluation-harness follow-up: `make bench` can score externally supplied D7 baseline predictions against the same gold as the system | `completed/D7_BASELINE_COMPARISON.md` |
 | D10 wall-clock runtime | Evaluation-harness follow-up: `project run` records last-run wall-clock metadata and `make bench` reports `wall_clock_d10` | `completed/D10_WALL_CLOCK_RUNTIME.md` |
 | Phase 0 input hashes | Evaluation-harness follow-up: `make bench` reports SHA-256 hashes for loaded state, corpus, and supplied benchmark files | `completed/PHASE0_INPUT_HASHES.md` |
+| QC bench CLI | Evaluation-harness follow-up: `qc_cli.py bench` wraps the deterministic Phase 0 scorecard with the same current flags as `make bench` | `completed/QC_BENCH_CLI.md` |
 
 ## Status Key
 
