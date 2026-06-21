@@ -102,6 +102,37 @@ def test_scorecard_grounding_rate_one_when_no_applications():
     assert phase0_scorecard(state)["grounding"]["grounding_rate"] == 1.0
 
 
+def test_scorecard_includes_category_saturation_diagnostic():
+    doc = Document(name="d.txt", content="Trust varied by context.")
+    state = ProjectState(
+        name="gt",
+        config=ProjectConfig(methodology=Methodology.GROUNDED_THEORY),
+        corpus=Corpus(documents=[doc]),
+        codebook=Codebook(codes=[
+            Code(
+                id="TRUST",
+                name="Trust",
+                properties=["institutional"],
+                dimensions=["low-high"],
+            )
+        ]),
+        code_applications=[
+            CodeApplication(
+                code_id="TRUST",
+                doc_id=doc.id,
+                quote_text="Trust varied by context.",
+            )
+        ],
+    )
+
+    diagnostic = phase0_scorecard(state)["category_saturation"]
+
+    assert diagnostic["status"] == "diagnostic"
+    assert diagnostic["all_categories_adequate"] is True
+    assert diagnostic["adequate_count"] == 1
+    assert "diagnostic only" in diagnostic["note"]
+
+
 def test_scorecard_reports_d7_unavailable_without_gold():
     state = ProjectState(
         name="no-gold",

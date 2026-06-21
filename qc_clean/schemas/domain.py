@@ -478,6 +478,36 @@ class SaturationCheckResult(BaseModel):
     message: str = ""
 
 
+class CategorySaturationDiagnostic(BaseModel):
+    """Per-category diagnostic for grounded-theory category adequacy."""
+    code_id: str = Field(description="Code/category identifier being assessed")
+    code_name: str = Field(description="Human-readable code/category name")
+    property_count: int = Field(description="Number of named properties recorded for the category")
+    dimension_count: int = Field(description="Number of dimensional variations recorded for the category")
+    supporting_application_count: int = Field(description="Number of code applications supporting the category")
+    supporting_document_count: int = Field(description="Number of distinct documents supporting the category")
+    status: str = Field(description="Diagnostic status: adequate, developing, or underdeveloped")
+    gaps: List[str] = Field(default_factory=list, description="Named adequacy gaps for this category")
+
+
+class CategorySaturationSummary(BaseModel):
+    """Diagnostic summary for GT category adequacy, separate from codebook stability."""
+    status: str = Field(description="Diagnostic availability/status label")
+    categories: List[CategorySaturationDiagnostic] = Field(
+        default_factory=list,
+        description="Per-category adequacy diagnostics",
+    )
+    all_categories_adequate: bool = Field(description="True when every observed category meets thresholds")
+    adequate_count: int = Field(description="Number of categories meeting deterministic adequacy thresholds")
+    developing_count: int = Field(description="Number of partially developed categories")
+    underdeveloped_count: int = Field(description="Number of categories with no observed development")
+    min_properties: int = Field(description="Minimum properties threshold used by the diagnostic")
+    min_dimensions: int = Field(description="Minimum dimensions threshold used by the diagnostic")
+    min_supporting_applications: int = Field(description="Minimum supporting applications threshold used")
+    min_supporting_documents: int = Field(description="Minimum supporting documents threshold used")
+    note: str = Field(description="Honest framing for interpreting the diagnostic")
+
+
 class CrossInterviewResult(BaseModel):
     """Result of cross-interview pattern analysis."""
     shared_codes: Dict[str, List[str]] = Field(default_factory=dict)

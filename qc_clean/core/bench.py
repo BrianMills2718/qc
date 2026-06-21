@@ -16,6 +16,7 @@ from typing import Any, Dict
 from pydantic import BaseModel, Field, ValidationError, model_validator
 
 from qc_clean.core.grounding import verify_grounding
+from qc_clean.core.pipeline.saturation import assess_category_saturation
 from qc_clean.core.segmentation import compute_coverage
 from qc_clean.schemas.domain import ClaimAnchor, ClaimKind, ProjectState
 
@@ -65,6 +66,8 @@ def phase0_scorecard(state: ProjectState) -> Dict[str, Any]:
         "coverage": asdict(compute_coverage(state)),
         # D7 — disconfirmation quality when human/adjudicated gold is present.
         "disconfirmation_d7": disconfirmation_d7_scorecard(state),
+        # INV-4 — category adequacy diagnostic, not proof of GT saturation.
+        "category_saturation": assess_category_saturation(state).model_dump(),
         "data_warnings": list(state.data_warnings),
     }
 
