@@ -1,6 +1,24 @@
 # Plan #17: INV-2 Query-Expansion Disconfirmation Retrieval
 
-**Status:** Planned
+**Outcome:** Complete. `retrieve_disconfirmation_candidates()` now applies
+deterministic query-expansion terms at a configurable BM25 weight, records
+matched expansion terms on each `DisconfirmationCandidate`, and includes those
+terms in candidate prompt metadata. `PipelineContext` exposes
+`disconfirmation_query_expansions` and
+`disconfirmation_expanded_term_weight`, and `NegativeCaseStage` passes both to
+the retriever.
+
+**Verification:** `python -m pytest
+tests/test_disconfirmation_retrieval_inv2.py::test_query_expansion_retrieves_contrary_segment_without_exact_claim_terms
+tests/test_disconfirmation_retrieval_inv2.py::test_query_expansion_can_be_disabled_with_zero_weight
+tests/test_disconfirmation_retrieval_inv2.py::test_negative_case_passes_query_expansion_config`
+passed; `python -m pytest tests/test_disconfirmation_retrieval_inv2.py
+tests/test_bench_phase0.py -q` passed with 23 tests; Ruff passed on touched
+implementation and test files. Final full gate: `make check` passed with 653
+tests passed, 1 skipped, 8 deselected; Ruff and docs gates passed; type check
+is not yet configured.
+
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** None
@@ -114,17 +132,17 @@ cross-project callable capability.
 ## Acceptance Criteria
 
 > Feature-level criteria (what the plan accomplishes):
-- [ ] Expanded contrary terms can retrieve source candidates without exact claim-term overlap.
-- [ ] `expanded_terms` are recorded and shown in candidate prompt metadata.
-- [ ] Existing exact candidate anchors, candidate IDs, quote hashes, and D7 scoring keys remain compatible.
-- [ ] Query expansion can be configured or disabled.
-- [ ] Docs state this is deterministic lexical query expansion, not semantic/embedding retrieval or validation.
+- [x] Expanded contrary terms can retrieve source candidates without exact claim-term overlap.
+- [x] `expanded_terms` are recorded and shown in candidate prompt metadata.
+- [x] Existing exact candidate anchors, candidate IDs, quote hashes, and D7 scoring keys remain compatible.
+- [x] Query expansion can be configured or disabled.
+- [x] Docs state this is deterministic lexical query expansion, not semantic/embedding retrieval or validation.
 
 > Process criteria (quality gates):
-- [ ] Required tests pass
-- [ ] Full test suite passes
-- [ ] Type check status is reported
-- [ ] Docs updated
+- [x] Required tests pass
+- [x] Full test suite passes
+- [x] Type check status is reported
+- [x] Docs updated
 
 ---
 
