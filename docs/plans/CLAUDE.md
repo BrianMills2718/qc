@@ -6,7 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| _none_ | _No active plan_ | - | - | - |
+| 23 | INV-11 review decisions inactive on invalidation | Medium | Planned | `INV11_REVIEW_DECISION_INACTIVE_ON_INVALIDATION.md` |
 
 ## Completed Plans
 
