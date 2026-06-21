@@ -1,6 +1,18 @@
 # Plan #36: D3 Application Validity Scorecard
 
-**Status:** Planned
+**Outcome:** Complete. Added `qc_clean/core/d3_gold.py` and
+`application_validity_d3_scorecard()` so Phase 0 reports exact code/source-anchor
+D3 TP/FP/FN, precision, recall, F1, Wilson intervals, and unscored system
+applications when adjudicated application gold is supplied. `make bench` and
+`qc_cli.py bench` now accept `D3_GOLD=` / `--d3-gold-file`, apply gold in memory
+only, and include the D3 file hash in `_meta.input_hashes`.
+
+Verification: `python -m pytest tests/test_bench_phase0.py tests/test_bench_phase0_script.py tests/test_qc_cli_bench.py -q`
+passed with 41 tests; `make check` passed with 714 tests, 1 skipped, 8
+deselected, Ruff clean, docs checks clean, and type checking still not
+configured.
+
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** None
@@ -57,10 +69,10 @@ Internal project capability only; no cross-project boundary is created.
 
 ### Capability Validation
 
-- [ ] Gold input is validated with Pydantic fields and fail-loud duplicate keys.
-- [ ] External gold is applied to a deep copy by the CLI and does not mutate saved
+- [x] Gold input is validated with Pydantic fields and fail-loud duplicate keys.
+- [x] External gold is applied to a deep copy by the CLI and does not mutate saved
   project state.
-- [ ] Scorecard reports exact TP/FP/FN, precision, recall, F1, and unscored
+- [x] Scorecard reports exact TP/FP/FN, precision, recall, F1, and unscored
   system applications.
 
 ---
@@ -125,20 +137,20 @@ Internal project capability only; no cross-project boundary is created.
 ## Acceptance Criteria
 
 > Feature-level criteria (what the plan accomplishes):
-- [ ] `phase0_scorecard` includes `application_validity_d3`.
-- [ ] Without D3 gold, D3 reports `not_available` and does not imply quality.
-- [ ] With D3 gold, exact code+source-anchor TP/FP/FN, precision, recall, F1,
+- [x] `phase0_scorecard` includes `application_validity_d3`.
+- [x] Without D3 gold, D3 reports `not_available` and does not imply quality.
+- [x] With D3 gold, exact code+source-anchor TP/FP/FN, precision, recall, F1,
   matched/missed/extra keys, and unscored system applications are reported.
-- [ ] `make bench D3_GOLD=...` and `qc_cli.py bench --d3-gold-file ...` apply
+- [x] `make bench D3_GOLD=...` and `qc_cli.py bench --d3-gold-file ...` apply
   gold in memory only and include the file hash in `_meta.input_hashes`.
-- [ ] Docs state this is exact-span scoring only, not full D3 validity evidence.
+- [x] Docs state this is exact-span scoring only, not full D3 validity evidence.
 
 > Process criteria (quality gates):
-- [ ] Required tests pass
-- [ ] Full test suite passes
-- [ ] Type check status reported
-- [ ] Docs updated
-- [ ] Plan completed, committed, and pushed
+- [x] Required tests pass
+- [x] Full test suite passes
+- [x] Type check status reported
+- [x] Docs updated
+- [x] Plan completed, committed, and pushed
 
 ---
 

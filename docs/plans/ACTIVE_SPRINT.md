@@ -22,14 +22,14 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Next evaluation-harness slice after D7 retrieval comparison reporting:
-   choose the next highest-value unmet harness lane that can be advanced without
-   pretending held-out expert data exists.
+1. Next evaluation-harness slice after D3 exact application scoring: choose the
+   next highest-value unmet harness lane that can be advanced without pretending
+   held-out expert data exists.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Completed checkpoint:** D7 retrieval comparison reporting now provides
-`make compare-d7-retrieval ID=<project> GOLD=gold.json PREDICTIONS="a.json b.json"`,
-scoring exported retrieval prediction packages through the existing exact-span
-D7 scorer. It is a point-estimate report substrate, not a held-out D7 result or
-superiority claim.
+**Completed checkpoint:** D3 application-validity scoring now provides
+`make bench ID=<project> D3_GOLD=d3_gold.json`, reporting exact code/source-anchor
+TP/FP/FN, precision, recall, F1, Wilson intervals, and unscored system
+applications. It is a gold-dependent exact-score substrate, not full D3 validity,
+κ/α/AC1, IoU/Hausdorff, or expert-parity evidence.

@@ -6,7 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 36 | D3 application validity scorecard | High | Planned | `D3_APPLICATION_VALIDITY_SCORECARD.md` |
+| — | — | — | No active plan | — |
 
 ## Completed Plans
 
@@ -47,6 +47,7 @@ Track all implementation work here.
 | INV-7 fixture runner scaffold | Evaluation-harness follow-up: `make run-inv7-fixtures` writes deterministic structural prompt-boundary fixture outcomes for `PROMPT_INJECTION=` | `completed/INV7_FIXTURE_RUNNER_SCAFFOLD.md` |
 | D7 retrieval-mode export | Evaluation-harness follow-up: `make run-d7-retrieval` exports retrieval candidates as D7 baseline-compatible predictions for `make bench BASELINES=...` | `completed/D7_RETRIEVAL_MODE_EXPORT.md` |
 | D7 retrieval comparison report | Evaluation-harness follow-up: `make compare-d7-retrieval` scores multiple retrieval prediction packages against one D7 gold file with the existing exact-span scorer | `completed/D7_RETRIEVAL_COMPARISON_REPORT.md` |
+| D3 application validity scorecard | Evaluation-harness follow-up: `make bench D3_GOLD=...` reports exact code/source-anchor application-validity scores when adjudicated D3 gold is supplied | `completed/D3_APPLICATION_VALIDITY_SCORECARD.md` |
 
 ## Status Key
 
