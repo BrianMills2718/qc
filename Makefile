@@ -1,4 +1,4 @@
-.PHONY: help test test-quick test-e2e test-all bench validate-d7-gold run-inv7-fixtures check lint docs-check clean status cost errors
+.PHONY: help test test-quick test-e2e test-all bench validate-d7-gold run-d7-retrieval run-inv7-fixtures check lint docs-check clean status cost errors
 
 DAYS ?= 7
 PROJECT ?= qualitative_coding
@@ -27,6 +27,17 @@ ifndef GOLD
 	$(error GOLD is required. Usage: make validate-d7-gold GOLD=gold_set.json)
 endif
 	python scripts/validate_d7_gold_set.py $(GOLD)
+
+MODE ?= lexical_bm25
+
+run-d7-retrieval:  ## Export D7 retrieval baseline predictions (ID=<project_id> OUTPUT=predictions.json [MODE=lexical_bm25] [MODEL=embedding-model] [CANDIDATES=5])
+ifndef ID
+	$(error ID is required. Usage: make run-d7-retrieval ID=<project_id> OUTPUT=predictions.json)
+endif
+ifndef OUTPUT
+	$(error OUTPUT is required. Usage: make run-d7-retrieval ID=<project_id> OUTPUT=predictions.json)
+endif
+	python scripts/run_d7_retrieval.py $(ID) --output $(OUTPUT) --retrieval-mode $(MODE) $(if $(MODEL),--embedding-model $(MODEL),) $(if $(CANDIDATES),--candidates-per-claim $(CANDIDATES),)
 
 run-inv7-fixtures:  ## Run deterministic INV-7 structural fixtures (OUTPUT=inv7.json)
 ifndef OUTPUT
