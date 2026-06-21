@@ -830,13 +830,78 @@ def test_scorecard_scores_d7_baselines_against_same_gold():
     assert d7["f1_bootstrap_ci"]["method"] == "key_universe_bootstrap"
     assert baseline["f1_bootstrap_ci"]["method"] == "key_universe_bootstrap"
     assert baseline["f1_bootstrap_ci"]["samples"] == d7["f1_bootstrap_ci"]["samples"]
+    delta_ci = baseline["system_minus_baseline_ci"]
+    assert delta_ci["method"] == "paired_key_universe_bootstrap"
+    assert delta_ci["samples"] == d7["f1_bootstrap_ci"]["samples"]
+    assert delta_ci["seed"] == d7["f1_bootstrap_ci"]["seed"]
+    assert set(delta_ci["deltas"]) == {"recall", "precision", "f1"}
+    for interval in delta_ci["deltas"].values():
+        assert interval["lower"] <= interval["upper"]
     assert baseline["matched_gold_keys"] == [f"claim-ai|{doc.id}|{second_start}:{second_end}"]
     assert baseline["missed_gold_keys"] == [f"claim-ai|{doc.id}|{first_start}:{first_end}"]
     assert baseline["extra_predicted_keys"] == [f"claim-ai|{doc.id}|{extra_start}:{extra_end}"]
     assert baseline["system_minus_baseline"]["recall"] == 0.0
     assert baseline["system_minus_baseline"]["precision"] == 0.5
     assert baseline["system_minus_baseline"]["f1"] == pytest.approx(1 / 6)
-    assert "point estimates only" in d7["baseline_note"]
+    assert "local paired exact-key bootstrap intervals" in d7["baseline_note"]
+
+
+def test_scorecard_d7_baseline_bootstrap_disable_suppresses_delta_ci():
+    content = "AI failed here. AI also failed later."
+    doc = Document(id="d1", name="d.txt", content=content)
+    first_start = content.index("AI failed")
+    first_end = first_start + len("AI failed here.")
+    second_start = content.index("AI also")
+    second_end = len(content)
+    state = ProjectState(
+        config=ProjectConfig(
+            methodology=Methodology.THEMATIC_ANALYSIS,
+            extra={
+                "phase0_exact_bootstrap": {"enabled": False},
+                "disconfirmation_gold": [
+                    {
+                        "target_claim_id": "claim-ai",
+                        "doc_id": doc.id,
+                        "start_char": first_start,
+                        "end_char": first_end,
+                    },
+                    {
+                        "target_claim_id": "claim-ai",
+                        "doc_id": doc.id,
+                        "start_char": second_start,
+                        "end_char": second_end,
+                    },
+                ],
+                "disconfirmation_baselines": [
+                    {
+                        "name": "single_prompt",
+                        "contrary_evidence": [
+                            {
+                                "target_claim_id": "claim-ai",
+                                "doc_id": doc.id,
+                                "start_char": second_start,
+                                "end_char": second_end,
+                            }
+                        ],
+                    }
+                ],
+            },
+        ),
+        corpus=Corpus(documents=[doc]),
+        claims=[
+            _negative_case_claim(
+                "claim-ai",
+                ClaimAnchor(doc_id=doc.id, start_char=first_start, end_char=first_end),
+            ),
+        ],
+    )
+
+    d7 = phase0_scorecard(state)["disconfirmation_d7"]
+    baseline = d7["baselines"]["single_prompt"]
+
+    assert "f1_bootstrap_ci" not in d7
+    assert "f1_bootstrap_ci" not in baseline
+    assert "system_minus_baseline_ci" not in baseline
 
 
 def test_scorecard_invalid_d7_baseline_metadata_fails_loud():

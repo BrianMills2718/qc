@@ -555,12 +555,14 @@ def disconfirmation_d7_scorecard(state: ProjectState) -> Dict[str, Any]:
             gold_keys,
             baselines,
             system_score,
+            system_predicted_keys=predicted_keys,
+            system_unscored_predicted=unscored_predicted,
             bootstrap_config=bootstrap_config,
         )
         card["baseline_note"] = (
             "Baseline scores use the same exact D7 anchor matching as the system. "
-            "System deltas are point estimates only; superiority still requires "
-            "held-out data and interval testing."
+            "System deltas include local paired exact-key bootstrap intervals; "
+            "superiority still requires held-out data and prompt_eval-backed testing."
         )
     return card
 
@@ -706,6 +708,104 @@ def _f1_from_bootstrap_items(items: list[tuple[bool, bool]]) -> float:
     return _safe_div(2 * precision * recall, precision + recall)
 
 
+def _exact_anchor_delta_bootstrap_ci(
+    gold_keys: set[str],
+    system_predicted_keys: set[str],
+    system_unscored_predicted: list[str],
+    baseline_predicted_keys: set[str],
+    baseline_unscored_predicted: list[str],
+    *,
+    bootstrap_config: ExactScoreBootstrapConfig,
+) -> Dict[str, Any]:
+    """Return paired bootstrap intervals for system-minus-baseline deltas."""
+    items = _exact_anchor_delta_bootstrap_items(
+        gold_keys,
+        system_predicted_keys,
+        system_unscored_predicted,
+        baseline_predicted_keys,
+        baseline_unscored_predicted,
+    )
+    base: Dict[str, Any] = {
+        "method": "paired_key_universe_bootstrap",
+        "confidence_level": bootstrap_config.confidence_level,
+        "samples": bootstrap_config.samples,
+        "seed": bootstrap_config.seed,
+        "unit": "exact gold/system/baseline anchor key",
+        "population_size": len(items),
+        "note": (
+            "Deterministic paired bootstrap over exact gold/system/baseline keys. "
+            "This is local uncertainty metadata, not a held-out superiority test."
+        ),
+    }
+    if not items:
+        return {
+            **base,
+            "deltas": {
+                "recall": {"lower": None, "upper": None},
+                "precision": {"lower": None, "upper": None},
+                "f1": {"lower": None, "upper": None},
+            },
+            "note": "undefined empty key universe",
+        }
+
+    rng = Random(bootstrap_config.seed)
+    sample_size = len(items)
+    deltas: dict[str, list[float]] = {"recall": [], "precision": [], "f1": []}
+    for _ in range(bootstrap_config.samples):
+        sample = [items[rng.randrange(sample_size)] for _ in range(sample_size)]
+        system_metrics = _metrics_from_delta_bootstrap_items(sample, prediction_index=1)
+        baseline_metrics = _metrics_from_delta_bootstrap_items(sample, prediction_index=2)
+        for metric in deltas:
+            deltas[metric].append(system_metrics[metric] - baseline_metrics[metric])
+
+    alpha = (1 - bootstrap_config.confidence_level) / 2
+    interval_deltas: dict[str, dict[str, float]] = {}
+    for metric, values in deltas.items():
+        values.sort()
+        interval_deltas[metric] = {
+            "lower": _percentile(values, alpha),
+            "upper": _percentile(values, 1 - alpha),
+        }
+
+    return {**base, "deltas": interval_deltas}
+
+
+def _exact_anchor_delta_bootstrap_items(
+    gold_keys: set[str],
+    system_predicted_keys: set[str],
+    system_unscored_predicted: list[str],
+    baseline_predicted_keys: set[str],
+    baseline_unscored_predicted: list[str],
+) -> list[tuple[bool, bool, bool]]:
+    """Represent paired D7 comparison keys as gold/system/baseline items."""
+    items = [
+        (
+            key in gold_keys,
+            key in system_predicted_keys,
+            key in baseline_predicted_keys,
+        )
+        for key in sorted(gold_keys | system_predicted_keys | baseline_predicted_keys)
+    ]
+    items.extend((False, True, False) for _ in system_unscored_predicted)
+    items.extend((False, False, True) for _ in baseline_unscored_predicted)
+    return items
+
+
+def _metrics_from_delta_bootstrap_items(
+    items: list[tuple[bool, bool, bool]],
+    *,
+    prediction_index: int,
+) -> dict[str, float]:
+    """Compute recall, precision, and F1 for one side of paired delta items."""
+    true_positives = sum(1 for item in items if item[0] and item[prediction_index])
+    false_positives = sum(1 for item in items if item[prediction_index] and not item[0])
+    false_negatives = sum(1 for item in items if item[0] and not item[prediction_index])
+    recall = _safe_div(true_positives, true_positives + false_negatives)
+    precision = _safe_div(true_positives, true_positives + false_positives)
+    f1 = _safe_div(2 * precision * recall, precision + recall)
+    return {"recall": recall, "precision": precision, "f1": f1}
+
+
 def _percentile(sorted_values: list[float], percentile: float) -> float:
     """Return a linearly interpolated percentile from sorted values."""
     if not sorted_values:
@@ -729,6 +829,8 @@ def _score_d7_baselines(
     baselines: list[DisconfirmationBaselinePrediction],
     system_score: Dict[str, Any],
     *,
+    system_predicted_keys: set[str],
+    system_unscored_predicted: list[str],
     bootstrap_config: ExactScoreBootstrapConfig | None = None,
 ) -> Dict[str, Dict[str, Any]]:
     """Score D7 baselines and include point deltas versus the system."""
@@ -748,6 +850,15 @@ def _score_d7_baselines(
             "precision": system_score["precision"] - baseline_score["precision"],
             "f1": system_score["f1"] - baseline_score["f1"],
         }
+        if bootstrap_config.enabled:
+            baseline_score["system_minus_baseline_ci"] = _exact_anchor_delta_bootstrap_ci(
+                gold_keys,
+                system_predicted_keys,
+                system_unscored_predicted,
+                predicted_keys,
+                [],
+                bootstrap_config=bootstrap_config,
+            )
         scored[baseline.name] = baseline_score
     return dict(sorted(scored.items()))
 
