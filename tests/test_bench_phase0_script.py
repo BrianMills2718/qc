@@ -8,6 +8,7 @@ from datetime import datetime, timezone
 import pytest
 
 from scripts import bench_phase0
+from qc_clean.core.inv7_fixtures import run_inv7_structural_fixtures
 from qc_clean.core.persistence.project_store import ProjectStore
 from qc_clean.schemas.domain import (
     AnalyticClaim,
@@ -601,6 +602,38 @@ def test_bench_phase0_scores_prompt_injection_from_file_without_mutating_state(
     assert output["prompt_injection_inv7"]["failed"] == 1
     reloaded = store.load(state.id)
     assert "prompt_injection_evaluations" not in reloaded.config.extra
+
+
+def test_bench_phase0_scores_inv7_runner_output_file(
+    tmp_path,
+    monkeypatch,
+    capsys,
+):
+    state = ProjectState(
+        id="project_inv7_runner",
+        name="INV7 runner project",
+        corpus=Corpus(documents=[Document(id="d1", name="a.txt", content="A")]),
+    )
+    store = ProjectStore(projects_dir=tmp_path / "projects")
+    store.save(state)
+    injection_file = tmp_path / "inv7_runner.json"
+    injection_file.write_text(
+        json.dumps(run_inv7_structural_fixtures()),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(bench_phase0, "ProjectStore", lambda: store)
+
+    exit_code = bench_phase0.main([
+        state.id,
+        "--prompt-injection-file",
+        str(injection_file),
+    ])
+
+    assert exit_code == 0
+    output = json.loads(capsys.readouterr().out)
+    assert output["prompt_injection_inv7"]["status"] == "scored"
+    assert output["prompt_injection_inv7"]["failed"] == 0
+    assert output["prompt_injection_inv7"]["total_fixtures"] >= 3
 
 
 def test_bench_phase0_invalid_prompt_injection_file_fails_loud(

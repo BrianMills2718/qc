@@ -6,7 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 32 | INV-7 Fixture Runner Scaffold | High | Planned | `INV7_FIXTURE_RUNNER_SCAFFOLD.md` |
+| 32 | INV-7 Fixture Runner Scaffold | High | In Progress | `INV7_FIXTURE_RUNNER_SCAFFOLD.md` |
 
 ## Completed Plans
 

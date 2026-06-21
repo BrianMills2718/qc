@@ -1,4 +1,4 @@
-.PHONY: help test test-quick test-e2e test-all bench validate-d7-gold check lint docs-check clean status cost errors
+.PHONY: help test test-quick test-e2e test-all bench validate-d7-gold run-inv7-fixtures check lint docs-check clean status cost errors
 
 DAYS ?= 7
 PROJECT ?= qualitative_coding
@@ -27,6 +27,12 @@ ifndef GOLD
 	$(error GOLD is required. Usage: make validate-d7-gold GOLD=gold_set.json)
 endif
 	python scripts/validate_d7_gold_set.py $(GOLD)
+
+run-inv7-fixtures:  ## Run deterministic INV-7 structural fixtures (OUTPUT=inv7.json)
+ifndef OUTPUT
+	$(error OUTPUT is required. Usage: make run-inv7-fixtures OUTPUT=inv7.json)
+endif
+	python scripts/run_inv7_fixtures.py --output $(OUTPUT)
 
 check:  ## Run deterministic tests + lint + docs checks
 	python -m pytest tests/ -m "not live_llm" -x -q

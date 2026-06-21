@@ -1,6 +1,6 @@
 # Plan #32: INV-7 Fixture Runner Scaffold
 
-**Status:** Planned
+**Status:** In Progress
 **Type:** implementation
 **Priority:** High
 **Blocked By:** INV-7 prompt boundary tests; INV-7 prompt injection scorecard
