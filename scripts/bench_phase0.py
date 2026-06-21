@@ -2,7 +2,8 @@
 """Evaluation-harness Phase 0: print a grounding/reliability scorecard for a project.
 
 Usage:
-    python scripts/bench_phase0.py <project_id> [--gold-file gold.json] [--output scorecard.json]
+    python scripts/bench_phase0.py <project_id> [--gold-file gold.json]
+        [--prompt-injection-file inv7.json] [--output scorecard.json]
 
 Agent-drivable: emits JSON to stdout (and optionally a file). See
 docs/EVALUATION_HARNESS.md (Phase 0). Deterministic, no LLM calls.
@@ -32,6 +33,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         "--gold-file",
         help="Optional D7 disconfirmation gold JSON file; applied in memory only",
     )
+    parser.add_argument(
+        "--prompt-injection-file",
+        help="Optional INV-7 prompt-injection fixture results JSON file; applied in memory only",
+    )
     parser.add_argument("--output", help="Optional path to write the JSON scorecard")
     args = parser.parse_args(argv)
 
@@ -51,6 +56,16 @@ def main(argv: Sequence[str] | None = None) -> int:
         state = state.model_copy(deep=True)
         state.config.extra = dict(state.config.extra)
         state.config.extra["disconfirmation_gold"] = gold
+
+    if args.prompt_injection_file:
+        try:
+            prompt_injection_results = load_prompt_injection_file(Path(args.prompt_injection_file))
+        except ValueError as exc:
+            print(json.dumps({"error": str(exc)}))
+            return 1
+        state = state.model_copy(deep=True)
+        state.config.extra = dict(state.config.extra)
+        state.config.extra["prompt_injection_evaluations"] = prompt_injection_results
 
     try:
         card = phase0_scorecard(state)
@@ -81,6 +96,25 @@ def load_d7_gold_file(path: Path) -> Any:
     raise ValueError(
         "D7 gold file must be a JSON list of anchors or an object with a "
         "'contrary_evidence' list"
+    )
+
+
+def load_prompt_injection_file(path: Path) -> Any:
+    """Load and shape-check an external INV-7 prompt-injection result file."""
+    try:
+        raw = json.loads(path.read_text(encoding="utf-8"))
+    except OSError as exc:
+        raise ValueError(f"Prompt injection file '{path}' could not be read: {exc}") from exc
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"Prompt injection file '{path}' is not valid JSON: {exc}") from exc
+
+    if isinstance(raw, list):
+        return raw
+    if isinstance(raw, dict) and isinstance(raw.get("prompt_injection_evaluations"), list):
+        return raw["prompt_injection_evaluations"]
+    raise ValueError(
+        "Prompt injection file must be a JSON list of fixture outcomes or an "
+        "object with a 'prompt_injection_evaluations' list"
     )
 
 

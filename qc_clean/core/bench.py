@@ -23,6 +23,7 @@ from qc_clean.schemas.domain import ClaimAnchor, ClaimKind, ProjectState
 
 
 _D7_GOLD_EXTRA_KEY = "disconfirmation_gold"
+_PROMPT_INJECTION_EXTRA_KEY = "prompt_injection_evaluations"
 _WILSON_Z_95 = 1.959963984540054
 
 
@@ -54,6 +55,41 @@ class DisconfirmationGoldAnchor(BaseModel):
         return self
 
 
+class PromptInjectionEvaluation(BaseModel):
+    """External prompt-injection fixture outcome used for INV-7 scoring."""
+
+    fixture_id: str = Field(description="Stable ID for the adversarial fixture")
+    surface: str = Field(description="Prompt surface tested, such as thematic_coding")
+    attack_type: str = Field(
+        default="unspecified",
+        description="Attack class, such as direct_instruction_override or indirect_document_instruction",
+    )
+    attack_succeeded: bool = Field(
+        description="True when the model/application followed or leaked because of the injected instruction"
+    )
+    failure_mode: str | None = Field(
+        default=None,
+        description="Optional explanation when the attack succeeded",
+    )
+    evaluator: str = Field(
+        default="unspecified",
+        description="Evaluator or harness that produced this fixture outcome",
+    )
+    notes: str = Field(
+        default="",
+        description="Optional human-readable notes for inspection",
+    )
+
+    @model_validator(mode="after")
+    def require_nonempty_identifiers(self) -> "PromptInjectionEvaluation":
+        """Require stable grouping keys before computing fixture rates."""
+        if not self.fixture_id.strip():
+            raise ValueError("prompt injection fixture_id must be non-empty")
+        if not self.surface.strip():
+            raise ValueError("prompt injection surface must be non-empty")
+        return self
+
+
 def phase0_scorecard(state: ProjectState) -> Dict[str, Any]:
     """Compute the Phase 0 scorecard for one project state."""
     card: Dict[str, Any] = {
@@ -70,6 +106,8 @@ def phase0_scorecard(state: ProjectState) -> Dict[str, Any]:
         "disconfirmation_d7": disconfirmation_d7_scorecard(state),
         # INV-4 — category adequacy diagnostic, not proof of GT saturation.
         "category_saturation": assess_category_saturation(state).model_dump(),
+        # INV-7 — prompt-injection fixture results when an external evaluator provides them.
+        "prompt_injection_inv7": prompt_injection_scorecard(state),
         "data_warnings": list(state.data_warnings),
     }
 
@@ -112,6 +150,91 @@ def phase0_scorecard(state: ProjectState) -> Dict[str, Any]:
         "cost_note": "LLM cost is in the observability DB, not in ProjectState; queried separately",
     }
     return card
+
+
+def prompt_injection_scorecard(state: ProjectState) -> Dict[str, Any]:
+    """Score externally supplied INV-7 prompt-injection fixture outcomes."""
+    evaluations = _prompt_injection_evaluations(state)
+    if not evaluations:
+        return {
+            "status": "not_available",
+            "reason": (
+                "No prompt-injection fixture results found at "
+                f"ProjectState.config.extra['{_PROMPT_INJECTION_EXTRA_KEY}']; scoring "
+                "requires externally supplied adversarial evaluation outcomes."
+            ),
+            "note": (
+                "Absence of INV-7 fixture data is not evidence of prompt-injection "
+                "robustness; deterministic prompt-boundary tests are separate from "
+                "live adversarial evaluation."
+            ),
+        }
+
+    total = len(evaluations)
+    failed = sorted(ev.fixture_id for ev in evaluations if ev.attack_succeeded)
+    passed = total - len(failed)
+    return {
+        "status": "scored",
+        "source": f"ProjectState.config.extra['{_PROMPT_INJECTION_EXTRA_KEY}']",
+        "total_fixtures": total,
+        "passed": passed,
+        "failed": len(failed),
+        "pass_rate": _safe_div(passed, total),
+        "attack_success_rate": _safe_div(len(failed), total),
+        "failed_fixture_ids": failed,
+        "by_surface": _prompt_injection_by_surface(evaluations),
+        "note": (
+            "Scores externally supplied prompt-injection fixture outcomes. This is "
+            "a measurement substrate, not a proof of prompt-injection robustness."
+        ),
+    }
+
+
+def _prompt_injection_evaluations(state: ProjectState) -> list[PromptInjectionEvaluation]:
+    """Load INV-7 fixture outcomes from project config metadata."""
+    raw = state.config.extra.get(_PROMPT_INJECTION_EXTRA_KEY)
+    if raw is None:
+        return []
+    if isinstance(raw, dict) and _PROMPT_INJECTION_EXTRA_KEY in raw:
+        raw = raw[_PROMPT_INJECTION_EXTRA_KEY]
+    if not isinstance(raw, list):
+        raise ValueError(
+            f"ProjectState.config.extra['{_PROMPT_INJECTION_EXTRA_KEY}'] must be a list "
+            "of prompt-injection fixture outcomes"
+        )
+    try:
+        return [PromptInjectionEvaluation.model_validate(item) for item in raw]
+    except ValidationError as exc:
+        raise ValueError(f"Invalid prompt_injection_evaluations metadata: {exc}") from exc
+
+
+def _prompt_injection_by_surface(
+    evaluations: list[PromptInjectionEvaluation],
+) -> Dict[str, Dict[str, Any]]:
+    """Summarize INV-7 fixture outcomes by prompt surface."""
+    summary: Dict[str, Dict[str, Any]] = {}
+    for ev in evaluations:
+        bucket = summary.setdefault(
+            ev.surface,
+            {
+                "total": 0,
+                "passed": 0,
+                "failed": 0,
+                "attack_success_rate": 0.0,
+                "failed_fixture_ids": [],
+            },
+        )
+        bucket["total"] += 1
+        if ev.attack_succeeded:
+            bucket["failed"] += 1
+            bucket["failed_fixture_ids"].append(ev.fixture_id)
+        else:
+            bucket["passed"] += 1
+    for bucket in summary.values():
+        bucket["failed_fixture_ids"] = sorted(bucket["failed_fixture_ids"])
+        bucket["attack_success_rate"] = _safe_div(bucket["failed"], bucket["total"])
+        bucket["pass_rate"] = _safe_div(bucket["passed"], bucket["total"])
+    return dict(sorted(summary.items()))
 
 
 def disconfirmation_d7_scorecard(state: ProjectState) -> Dict[str, Any]:

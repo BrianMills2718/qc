@@ -19,8 +19,8 @@ test-e2e:  ## Run live LLM E2E tests
 test-all:  ## Run deterministic tests and live LLM E2E tests
 	python -m pytest tests/ -v
 
-bench:  ## Evaluation-harness Phase 0 scorecard for a project (ID=<project_id> [GOLD=gold.json])
-	python scripts/bench_phase0.py $(ID) $(if $(GOLD),--gold-file $(GOLD),)
+bench:  ## Evaluation-harness Phase 0 scorecard (ID=<project_id> [GOLD=gold.json] [PROMPT_INJECTION=inv7.json])
+	python scripts/bench_phase0.py $(ID) $(if $(GOLD),--gold-file $(GOLD),) $(if $(PROMPT_INJECTION),--prompt-injection-file $(PROMPT_INJECTION),)
 
 check:  ## Run deterministic tests + lint + docs checks
 	python -m pytest tests/ -m "not live_llm" -x -q

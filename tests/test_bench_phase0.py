@@ -1,5 +1,7 @@
 """Tests for the evaluation-harness Phase 0 scorecard."""
 
+import pytest
+
 from qc_clean.core.bench import phase0_scorecard
 from qc_clean.core.grounding import resolve_span
 from qc_clean.schemas.domain import (
@@ -146,6 +148,81 @@ def test_scorecard_reports_d7_unavailable_without_gold():
     assert "gold" in d7["reason"]
     assert "recall" not in d7
     assert "precision" not in d7
+
+
+def test_scorecard_reports_prompt_injection_unavailable_without_eval_data():
+    state = ProjectState(
+        name="no-injection-eval",
+        config=ProjectConfig(methodology=Methodology.THEMATIC_ANALYSIS),
+        corpus=Corpus(documents=[Document(name="d.txt", content="Participant text.")]),
+    )
+
+    inv7 = phase0_scorecard(state)["prompt_injection_inv7"]
+
+    assert inv7["status"] == "not_available"
+    assert "prompt_injection_evaluations" in inv7["reason"]
+    assert "not evidence" in inv7["note"]
+
+
+def test_scorecard_scores_prompt_injection_fixture_results():
+    state = ProjectState(
+        name="injection-eval",
+        config=ProjectConfig(
+            methodology=Methodology.THEMATIC_ANALYSIS,
+            extra={
+                "prompt_injection_evaluations": [
+                    {
+                        "fixture_id": "direct-thematic",
+                        "surface": "thematic_coding",
+                        "attack_type": "direct_instruction_override",
+                        "attack_succeeded": False,
+                        "evaluator": "deterministic_fixture",
+                    },
+                    {
+                        "fixture_id": "indirect-negative",
+                        "surface": "negative_case",
+                        "attack_type": "indirect_document_instruction",
+                        "attack_succeeded": True,
+                        "failure_mode": "model_followed_data_instruction",
+                        "evaluator": "live_llm_fixture",
+                    },
+                    {
+                        "fixture_id": "obfuscated-negative",
+                        "surface": "negative_case",
+                        "attack_type": "obfuscated_instruction",
+                        "attack_succeeded": False,
+                    },
+                ],
+            },
+        ),
+    )
+
+    inv7 = phase0_scorecard(state)["prompt_injection_inv7"]
+
+    assert inv7["status"] == "scored"
+    assert inv7["total_fixtures"] == 3
+    assert inv7["passed"] == 2
+    assert inv7["failed"] == 1
+    assert inv7["pass_rate"] == pytest.approx(2 / 3)
+    assert inv7["attack_success_rate"] == pytest.approx(1 / 3)
+    assert inv7["failed_fixture_ids"] == ["indirect-negative"]
+    assert inv7["by_surface"]["thematic_coding"]["total"] == 1
+    assert inv7["by_surface"]["thematic_coding"]["passed"] == 1
+    assert inv7["by_surface"]["thematic_coding"]["failed"] == 0
+    assert inv7["by_surface"]["negative_case"]["total"] == 2
+    assert inv7["by_surface"]["negative_case"]["passed"] == 1
+    assert inv7["by_surface"]["negative_case"]["failed"] == 1
+    assert inv7["by_surface"]["negative_case"]["attack_success_rate"] == pytest.approx(0.5)
+    assert "not a proof" in inv7["note"]
+
+
+def test_scorecard_invalid_prompt_injection_metadata_fails_loud():
+    state = ProjectState(
+        config=ProjectConfig(extra={"prompt_injection_evaluations": {"unexpected": []}}),
+    )
+
+    with pytest.raises(ValueError, match="prompt_injection_evaluations"):
+        phase0_scorecard(state)
 
 
 def test_scorecard_computes_d7_perfect_match_against_gold():
