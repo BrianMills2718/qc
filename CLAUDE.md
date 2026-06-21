@@ -145,6 +145,7 @@ python qc_cli.py project list
 python qc_cli.py project show <project_id>
 python qc_cli.py project claims <project_id> --limit 20
 python qc_cli.py project add-docs <project_id> --files interview1.docx interview2.docx
+python qc_cli.py bench <project_id>                                     # Phase 0 scorecard (same engine as make bench)
 
 # Run pipeline on a project (local, no server needed)
 python qc_cli.py project run <project_id>                          # run full pipeline
@@ -397,6 +398,7 @@ make docs-check         # Run documentation and governance checks
 make check              # Run deterministic tests + lint + docs checks
 make status             # Show git status
 make bench ID=<project_id>              # Phase 0 scorecard (D1/D2/D5/D10 plus optional D7/INV-7 scores)
+python qc_cli.py bench <project_id>     # Same Phase 0 scorecard through the canonical CLI
 make bench ID=<project_id> GOLD=gold.json BASELINES=baselines.json  # Add external D7 gold/baselines without mutating project state
 make bench ID=<project_id> PROMPT_INJECTION=inv7.json  # Add external INV-7 fixture results without mutating state
 make bench ID=<project_id> OBS_DB=path TRACE_ID=trace  # Override D10 observability DB / exact trace

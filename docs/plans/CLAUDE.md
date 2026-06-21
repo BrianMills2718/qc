@@ -6,7 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 29 | QC bench CLI | High | Planned | `QC_BENCH_CLI.md` |
+| 29 | QC bench CLI | High | In Progress | `QC_BENCH_CLI.md` |
 
 ## Completed Plans
 

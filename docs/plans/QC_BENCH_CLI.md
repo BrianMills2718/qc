@@ -1,6 +1,6 @@
 # Plan #29: QC Bench CLI
 
-**Status:** Planned
+**Status:** In Progress
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Phase 0 scorecard

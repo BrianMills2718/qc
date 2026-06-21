@@ -41,6 +41,7 @@ Examples:
   qc_cli analyze --files interview1.txt interview2.docx
   qc_cli project create --name "My Study" --methodology grounded_theory
   qc_cli project run <project_id>
+  qc_cli bench <project_id>
   qc_cli project export <project_id> --format markdown --output-file report.md
   qc_cli status --server
         """
@@ -117,7 +118,36 @@ Examples:
         action='store_true',
         help='Check server connectivity only'
     )
-    
+
+    # Bench command
+    bench_parser = subparsers.add_parser(
+        'bench',
+        help='Run evaluation-harness Phase 0 scorecard',
+        description='Emit the deterministic Phase 0 benchmark scorecard for a project'
+    )
+    bench_parser.add_argument('project_id', help='Project ID to score')
+    bench_parser.add_argument(
+        '--gold-file',
+        help='Optional D7 disconfirmation gold JSON file; applied in memory only'
+    )
+    bench_parser.add_argument(
+        '--d7-baselines-file',
+        help='Optional D7 baseline prediction JSON file; applied in memory only'
+    )
+    bench_parser.add_argument(
+        '--prompt-injection-file',
+        help='Optional INV-7 prompt-injection fixture results JSON file; applied in memory only'
+    )
+    bench_parser.add_argument(
+        '--observability-db',
+        help='Optional llm_client observability SQLite DB for D10 cost/latency'
+    )
+    bench_parser.add_argument(
+        '--trace-id',
+        help='Optional exact trace_id for D10 cost/latency; default uses project trace prefix'
+    )
+    bench_parser.add_argument('--output', help='Optional path to write the JSON scorecard')
+
     # Server command
     server_parser = subparsers.add_parser(
         'server',
@@ -269,6 +299,8 @@ def main() -> int:
             return handle_analyze_command(args)
         elif args.command == 'status':
             return handle_status_command(args)
+        elif args.command == 'bench':
+            return handle_bench_command(args)
         elif args.command == 'server':
             return handle_server_command(args)
         elif args.command == 'project':
@@ -295,6 +327,26 @@ def main() -> int:
             logger.error("Full traceback:")
             logger.error(traceback.format_exc())
         return 1
+
+def handle_bench_command(args) -> int:
+    """Run the Phase 0 benchmark scorecard through the canonical CLI."""
+    from scripts import bench_phase0
+
+    argv = [args.project_id]
+    if args.gold_file:
+        argv.extend(["--gold-file", args.gold_file])
+    if args.d7_baselines_file:
+        argv.extend(["--d7-baselines-file", args.d7_baselines_file])
+    if args.prompt_injection_file:
+        argv.extend(["--prompt-injection-file", args.prompt_injection_file])
+    if args.observability_db:
+        argv.extend(["--observability-db", args.observability_db])
+    if args.trace_id:
+        argv.extend(["--trace-id", args.trace_id])
+    if args.output:
+        argv.extend(["--output", args.output])
+    return bench_phase0.main(argv)
+
 
 if __name__ == "__main__":
     exit_code = main()
