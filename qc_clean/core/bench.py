@@ -1123,6 +1123,12 @@ def _d3_span_overlap_score(
         "status": "scored",
         "mean_best_gold_iou": _mean(row["best_iou"] for row in gold_rows),
         "mean_best_predicted_iou": _mean(row["best_iou"] for row in predicted_rows),
+        "mean_best_gold_modified_hausdorff_distance": _mean_optional(
+            row["best_modified_hausdorff_distance"] for row in gold_rows
+        ),
+        "mean_best_predicted_modified_hausdorff_distance": _mean_optional(
+            row["best_modified_hausdorff_distance"] for row in predicted_rows
+        ),
         "gold_best_overlaps": gold_rows,
         "predicted_best_overlaps": predicted_rows,
     }
@@ -1191,15 +1197,25 @@ def _best_application_span_overlap_row(
         if candidate.code_id == source.code_id and candidate.doc_id == source.doc_id
     ]
     if not same_surface:
-        return {source_key: source.key, best_key: None, "best_iou": 0.0}
+        return {
+            source_key: source.key,
+            best_key: None,
+            "best_iou": 0.0,
+            "best_modified_hausdorff_distance": None,
+        }
     best = max(
         same_surface,
-        key=lambda candidate: (_span_iou(source, candidate), candidate.key),
+        key=lambda candidate: (
+            _span_iou(source, candidate),
+            -_modified_hausdorff_distance(source, candidate),
+            candidate.key,
+        ),
     )
     return {
         source_key: source.key,
         best_key: best.key,
         "best_iou": _span_iou(source, best),
+        "best_modified_hausdorff_distance": _modified_hausdorff_distance(source, best),
     }
 
 
@@ -1212,9 +1228,39 @@ def _span_iou(a: _ApplicationSpan, b: _ApplicationSpan) -> float:
     return _safe_div(intersection, union)
 
 
+def _modified_hausdorff_distance(a: _ApplicationSpan, b: _ApplicationSpan) -> float:
+    """Compute discrete modified Hausdorff distance between two char spans."""
+    a_to_b = _mean(
+        _distance_from_position_to_span(position, b)
+        for position in range(a.start_char, a.end_char)
+    )
+    b_to_a = _mean(
+        _distance_from_position_to_span(position, a)
+        for position in range(b.start_char, b.end_char)
+    )
+    return max(a_to_b, b_to_a)
+
+
+def _distance_from_position_to_span(position: int, span: _ApplicationSpan) -> int:
+    """Return nearest-char distance from one position to a half-open span."""
+    if span.start_char <= position < span.end_char:
+        return 0
+    if position < span.start_char:
+        return span.start_char - position
+    return position - (span.end_char - 1)
+
+
 def _mean(values: Iterable[float]) -> float:
     """Return zero for an empty mean."""
     items = list(values)
+    return _safe_div(sum(items), len(items))
+
+
+def _mean_optional(values: Iterable[float | None]) -> float | None:
+    """Return None when no numeric values exist."""
+    items = [value for value in values if value is not None]
+    if not items:
+        return None
     return _safe_div(sum(items), len(items))
 
 

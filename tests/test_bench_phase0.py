@@ -205,6 +205,9 @@ def test_scorecard_scores_d3_application_gold_exact_span_and_code():
     assert overlap["unscored_predicted_count"] == 1
     assert overlap["mean_best_gold_iou"] == pytest.approx(0.5)
     assert overlap["mean_best_predicted_iou"] == pytest.approx(0.5)
+    assert overlap["gold_best_overlaps"][0]["best_modified_hausdorff_distance"] == 0.0
+    assert overlap["mean_best_gold_modified_hausdorff_distance"] is not None
+    assert overlap["mean_best_predicted_modified_hausdorff_distance"] is not None
 
 
 def test_scorecard_d3_f1_bootstrap_configurable_and_disableable():
@@ -294,11 +297,14 @@ def test_scorecard_d3_span_overlap_scores_near_boundary_match():
     assert overlap["status"] == "scored"
     assert overlap["mean_best_gold_iou"] == pytest.approx(5 / 15)
     assert overlap["mean_best_predicted_iou"] == pytest.approx(5 / 15)
+    assert overlap["mean_best_gold_modified_hausdorff_distance"] == pytest.approx(1.5)
+    assert overlap["mean_best_predicted_modified_hausdorff_distance"] == pytest.approx(1.5)
     assert overlap["gold_best_overlaps"] == [
         {
             "gold_key": "AI_USE|d1|10:20",
             "best_predicted_key": "AI_USE|d1|15:25",
             "best_iou": pytest.approx(5 / 15),
+            "best_modified_hausdorff_distance": pytest.approx(1.5),
         }
     ]
 
@@ -347,6 +353,7 @@ def test_scorecard_d3_span_overlap_counts_unscored_records():
     assert overlap["unscored_gold_count"] == 1
     assert overlap["unscored_predicted_count"] == 1
     assert overlap["mean_best_gold_iou"] == 1.0
+    assert overlap["mean_best_gold_modified_hausdorff_distance"] == 0.0
 
 
 def test_scorecard_invalid_d3_gold_fails_loud():
