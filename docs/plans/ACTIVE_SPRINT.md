@@ -22,9 +22,9 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Prompt-eval handoff plan: define the first thin bridge from the deterministic
-   Phase 0 scorecard to versioned benchmark artifacts without reimplementing
-   prompt_eval statistics.
+1. Plan #30: Phase 0 benchmark artifact export. Write versioned
+   `benchmark_results/` packages for the deterministic scorecard without
+   reimplementing prompt_eval statistics.
 2. Next evaluation-harness slice chosen after that checkpoint, likely live INV-7
    fixture execution, held-out D7 gold-set scaffolding, or semantic retrieval
    depending on what the repo makes concrete.
