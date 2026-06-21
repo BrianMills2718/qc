@@ -272,6 +272,15 @@ class ProjectExporter:
             if not wrote_scope_detail:
                 _a("Scope record exists, but no scope details are specified.")
             _a("")
+        elif state.claims:
+            _a("## Corpus Scope")
+            _a("")
+            _a(
+                "No corpus scope is recorded. Treat all claims below as bounded to "
+                "the loaded documents only; do not generalize to a population without "
+                "a stated and defensible sampling frame."
+            )
+            _a("")
 
         # Executive summary
         if state.synthesis and state.synthesis.executive_summary:

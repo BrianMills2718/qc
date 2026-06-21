@@ -59,6 +59,29 @@ def test_markdown_export_includes_claim_ledger_summary(tmp_path):
     assert "AI changes workflow." in content
 
 
+def test_markdown_export_warns_when_claims_have_no_corpus_scope(tmp_path):
+    from qc_clean.core.export.data_exporter import ProjectExporter
+
+    out = tmp_path / "missing-scope.md"
+    ProjectExporter().export_markdown(_claim_state(), str(out))
+
+    content = Path(out).read_text()
+    assert "## Corpus Scope" in content
+    assert "No corpus scope is recorded" in content
+    assert "bounded to the loaded documents" in content
+
+
+def test_markdown_export_omits_missing_scope_warning_without_claims(tmp_path):
+    from qc_clean.core.export.data_exporter import ProjectExporter
+
+    out = tmp_path / "minimal.md"
+    ProjectExporter().export_markdown(ProjectState(name="Minimal"), str(out))
+
+    content = Path(out).read_text()
+    assert "## Corpus Scope" not in content
+    assert "No corpus scope is recorded" not in content
+
+
 def test_markdown_export_includes_corpus_scope(tmp_path):
     from qc_clean.core.export.data_exporter import ProjectExporter
 
