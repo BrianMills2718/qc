@@ -53,7 +53,34 @@ class TestReviewManager:
         assert summary.codes_count == 3
         assert summary.applications_count == 4
         assert summary.claims_count == 0
+        assert summary.existing_decisions == 0
+        assert summary.active_decisions == 0
+        assert summary.inactive_decisions == 0
         assert summary.pipeline_status == "paused_for_review"
+
+    def test_review_summary_counts_active_and_inactive_decisions(self, review_state):
+        review_state.review_decisions = [
+            HumanReviewDecision(
+                target_type="code",
+                target_id="C1",
+                action=ReviewAction.APPROVE,
+            ),
+            HumanReviewDecision(
+                target_type="claim",
+                target_id="claim-old",
+                action=ReviewAction.REJECT,
+                is_active=False,
+                inactive_reason="target claim invalidated by incremental recode",
+                inactive_at="2026-06-21T00:00:00",
+            ),
+        ]
+        rm = ReviewManager(review_state)
+
+        summary = rm.get_review_summary()
+
+        assert summary.existing_decisions == 2
+        assert summary.active_decisions == 1
+        assert summary.inactive_decisions == 1
 
     def test_approve_code(self, review_state):
         rm = ReviewManager(review_state)

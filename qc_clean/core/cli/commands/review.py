@@ -48,6 +48,8 @@ def _show_review_summary(rm: ReviewManager, state) -> int:
     print(f"  Codes to review: {summary.codes_count}")
     print(f"  Applications to review: {summary.applications_count}")
     print(f"  Decisions already made: {summary.existing_decisions}")
+    print(f"    Active decisions: {summary.active_decisions}")
+    print(f"    Historical decisions: {summary.inactive_decisions}")
 
     if summary.codes_count > 0:
         print("\nCodes:")

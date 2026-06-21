@@ -565,6 +565,14 @@ class ReviewSummary(BaseModel):
     applications_count: int = 0
     claims_count: int = 0
     existing_decisions: int = 0
+    active_decisions: int = Field(
+        default=0,
+        description="Number of review decisions that still apply to current targets",
+    )
+    inactive_decisions: int = Field(
+        default=0,
+        description="Number of historical-only review decisions whose targets no longer apply",
+    )
     pipeline_status: str = ""
     current_phase: Optional[str] = None
 

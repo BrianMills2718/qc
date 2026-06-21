@@ -54,11 +54,14 @@ class ReviewManager:
 
     def get_review_summary(self) -> ReviewSummary:
         """Summary of what's available for review."""
+        active_decisions = sum(1 for decision in self.state.review_decisions if decision.is_active)
         return ReviewSummary(
             codes_count=len(self.state.codebook.codes),
             applications_count=len(self.state.code_applications),
             claims_count=len(self.state.claims),
             existing_decisions=len(self.state.review_decisions),
+            active_decisions=active_decisions,
+            inactive_decisions=len(self.state.review_decisions) - active_decisions,
             pipeline_status=self.state.pipeline_status.value,
             current_phase=self.state.current_phase,
         )
