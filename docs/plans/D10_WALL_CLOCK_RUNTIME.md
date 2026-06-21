@@ -1,6 +1,6 @@
 # Plan #27: D10 Wall-Clock Runtime
 
-**Status:** Planned
+**Status:** In Progress
 **Type:** implementation
 **Priority:** High
 **Blocked By:** D10 cost latency scorecard

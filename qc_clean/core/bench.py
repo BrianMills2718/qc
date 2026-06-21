@@ -27,6 +27,7 @@ from qc_clean.schemas.domain import ClaimAnchor, ClaimKind, ProjectState
 
 _D7_GOLD_EXTRA_KEY = "disconfirmation_gold"
 _D7_BASELINES_EXTRA_KEY = "disconfirmation_baselines"
+_RUN_TIMING_EXTRA_KEY = "run_timing"
 _PROMPT_INJECTION_EXTRA_KEY = "prompt_injection_evaluations"
 DEFAULT_OBSERVABILITY_DB_PATH = Path.home() / "projects" / "data" / "llm_observability.db"
 _WILSON_Z_95 = 1.959963984540054
@@ -110,6 +111,35 @@ class DisconfirmationBaselinePrediction(BaseModel):
         if not self.name.strip():
             raise ValueError("D7 baseline name must be non-empty")
         self.name = self.name.strip()
+        return self
+
+
+class RunTimingMetadata(BaseModel):
+    """Run-level wall-clock timing metadata recorded by project run."""
+
+    schema_version: int = Field(description="Version of the run timing metadata shape")
+    started_at: str = Field(description="Wall-clock start timestamp for the project run")
+    completed_at: str = Field(description="Wall-clock completion timestamp for the project run")
+    duration_s: float = Field(description="Monotonic elapsed duration in seconds")
+    status: str = Field(description="Final pipeline status for this run")
+    trace_id: str = Field(description="Trace ID shared across LLM calls for this run")
+    model: str = Field(description="Primary model configured for the run")
+    exhaustive_coding: bool = Field(description="Whether this run used exhaustive segment coding")
+    resume_from: str | None = Field(default=None, description="Stage name resumed from, if this was a resume run")
+    document_count: int = Field(description="Number of documents present during the run")
+    phase_result_count: int = Field(description="Number of phase result records after the run")
+
+    @model_validator(mode="after")
+    def require_valid_duration(self) -> "RunTimingMetadata":
+        """Reject malformed timing metadata rather than estimating."""
+        if self.schema_version != 1:
+            raise ValueError("run_timing schema_version must be 1")
+        if self.duration_s < 0:
+            raise ValueError("run_timing duration_s must be non-negative")
+        if self.document_count < 0:
+            raise ValueError("run_timing document_count must be non-negative")
+        if self.phase_result_count < 0:
+            raise ValueError("run_timing phase_result_count must be non-negative")
         return self
 
 
@@ -255,6 +285,52 @@ def d10_cost_latency_scorecard(
             "D10 uses summed observed LLM-call latency and real logged cost from "
             "llm_client; it is not full pipeline wall-clock time and is not a "
             "baseline comparison."
+        ),
+    }
+
+
+def d10_wall_clock_scorecard(state: ProjectState) -> Dict[str, Any]:
+    """Score D10 end-to-end wall-clock runtime from project-run metadata."""
+    raw = state.config.extra.get(_RUN_TIMING_EXTRA_KEY)
+    if raw is None:
+        return {
+            "status": "not_available",
+            "reason": (
+                f"No ProjectState.config.extra['{_RUN_TIMING_EXTRA_KEY}'] metadata "
+                "found; run the project through `project run` to record wall-clock timing."
+            ),
+            "note": (
+                "D10 wall-clock runtime requires recorded project-run metadata; do not estimate "
+                "it from stage timestamps or summed LLM-call latency."
+            ),
+        }
+    if not isinstance(raw, dict):
+        raise ValueError(
+            f"ProjectState.config.extra['{_RUN_TIMING_EXTRA_KEY}'] must be a metadata object"
+        )
+
+    try:
+        timing = RunTimingMetadata.model_validate(raw)
+    except ValidationError as exc:
+        raise ValueError(f"Invalid run_timing metadata: {exc}") from exc
+
+    return {
+        "status": "scored",
+        "source": f"ProjectState.config.extra['{_RUN_TIMING_EXTRA_KEY}']",
+        "started_at": timing.started_at,
+        "completed_at": timing.completed_at,
+        "duration_s": timing.duration_s,
+        "run_status": timing.status,
+        "trace_id": timing.trace_id,
+        "model": timing.model,
+        "exhaustive_coding": timing.exhaustive_coding,
+        "resume_from": timing.resume_from,
+        "document_count": timing.document_count,
+        "phase_result_count": timing.phase_result_count,
+        "note": (
+            "D10 wall-clock runtime is end-to-end elapsed time for the last local "
+            "project run; it is not summed LLM-call latency and is not a baseline "
+            "benchmark result."
         ),
     }
 

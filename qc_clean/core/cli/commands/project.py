@@ -5,7 +5,9 @@ Project management CLI command handlers.
 import asyncio
 import logging
 import sys
+from datetime import datetime
 from pathlib import Path
+from time import perf_counter
 
 from qc_clean.core.claims import summarize_claim_ledger, summarize_disconfirmation_coverage
 from qc_clean.core.persistence.project_store import ProjectStore
@@ -199,6 +201,8 @@ def _run_project(store: ProjectStore, args) -> int:
         trace_id=f"qualitative_coding/project/{state.id}",
         exhaustive_coding=exhaustive,
     )
+    run_started_at = datetime.now().isoformat()
+    run_started_monotonic = perf_counter()
 
     print(f"Running pipeline on project: {state.name}")
     print(f"  Methodology: {state.config.methodology.value}")
@@ -213,10 +217,30 @@ def _run_project(store: ProjectStore, args) -> int:
     try:
         state = asyncio.run(pipeline.run(state, ctx, resume_from=resume_from))
     except Exception as e:
+        _record_project_run_timing(
+            state,
+            started_at=run_started_at,
+            duration_s=perf_counter() - run_started_monotonic,
+            status=PipelineStatus.FAILED.value,
+            trace_id=ctx.trace_id,
+            model_name=model_name,
+            exhaustive=exhaustive,
+            resume_from=resume_from,
+        )
         store.save(state)
         print(f"\nPipeline failed: {e}", file=sys.stderr)
         return 1
 
+    _record_project_run_timing(
+        state,
+        started_at=run_started_at,
+        duration_s=perf_counter() - run_started_monotonic,
+        status=state.pipeline_status.value,
+        trace_id=ctx.trace_id,
+        model_name=model_name,
+        exhaustive=exhaustive,
+        resume_from=resume_from,
+    )
     store.save(state)
 
     # Print summary
@@ -371,6 +395,34 @@ def _run_irr(store: ProjectStore, args) -> int:
         print(f"      Interpretation: {result.segment_decision_interpretation}")
 
     return 0
+
+
+def _record_project_run_timing(
+    state: ProjectState,
+    *,
+    started_at: str,
+    duration_s: float,
+    status: str,
+    trace_id: str,
+    model_name: str,
+    exhaustive: bool,
+    resume_from: str | None,
+) -> None:
+    """Record last-run wall-clock metadata for D10 reporting."""
+    state.config.extra = dict(state.config.extra)
+    state.config.extra["run_timing"] = {
+        "schema_version": 1,
+        "started_at": started_at,
+        "completed_at": datetime.now().isoformat(),
+        "duration_s": max(0.0, duration_s),
+        "status": status,
+        "trace_id": trace_id,
+        "model": model_name,
+        "exhaustive_coding": exhaustive,
+        "resume_from": resume_from,
+        "document_count": state.corpus.num_documents,
+        "phase_result_count": len(state.phase_results),
+    }
 
 
 def _show_claims(store: ProjectStore, args) -> int:

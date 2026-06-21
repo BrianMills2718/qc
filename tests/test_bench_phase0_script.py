@@ -288,6 +288,23 @@ def test_bench_phase0_includes_d10_from_observability_db(
     state = ProjectState(
         id="project_d10",
         name="D10 project",
+        config=ProjectConfig(
+            extra={
+                "run_timing": {
+                    "schema_version": 1,
+                    "started_at": "2026-06-21T10:00:00",
+                    "completed_at": "2026-06-21T10:00:01",
+                    "duration_s": 1.5,
+                    "status": "completed",
+                    "trace_id": "qualitative_coding/project/project_d10",
+                    "model": "gpt-5-mini",
+                    "exhaustive_coding": False,
+                    "resume_from": None,
+                    "document_count": 1,
+                    "phase_result_count": 7,
+                },
+            },
+        ),
         corpus=Corpus(documents=[Document(name="a.txt", content="A")]),
     )
     store = ProjectStore(projects_dir=tmp_path / "projects")
@@ -320,6 +337,8 @@ def test_bench_phase0_includes_d10_from_observability_db(
     assert output["cost_latency_d10"]["status"] == "scored"
     assert output["cost_latency_d10"]["call_count"] == 1
     assert output["cost_latency_d10"]["total_cost_usd"] == 0.25
+    assert output["wall_clock_d10"]["status"] == "scored"
+    assert output["wall_clock_d10"]["duration_s"] == 1.5
 
 
 def _create_llm_observability_db(path) -> None:

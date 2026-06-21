@@ -9,8 +9,10 @@ import json
 import pytest
 import zipfile
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import patch, MagicMock
 
+from qc_clean.core.cli.commands import project as project_commands
 from qc_clean.schemas.domain import (
     AnalyticClaim,
     ClaimKind,
@@ -113,6 +115,14 @@ class MockSynthesisStage(PipelineStage):
             key_findings=["Mock finding"],
         )
         return state
+
+
+class MockFailingRunStage(PipelineStage):
+    def name(self) -> str:
+        return "mock_failure"
+
+    async def execute(self, state: ProjectState, config: dict) -> ProjectState:
+        raise RuntimeError("mock run failure")
 
 
 class MockReviewStage(PipelineStage):
@@ -223,6 +233,88 @@ class TestProjectRun:
         )
 
         assert callback_count[0] == 2
+
+    def test_run_project_records_wall_clock_timing(self, tmp_store, monkeypatch):
+        """CLI project run records end-to-end wall-clock timing metadata."""
+        state = ProjectState(
+            id="timing-test",
+            name="Timing Test",
+            corpus=Corpus(documents=[Document(name="t.txt", content="x")]),
+        )
+        tmp_store.save(state)
+
+        def fake_create_pipeline(methodology, on_stage_complete, enable_human_review):
+            return AnalysisPipeline(
+                stages=[MockCodingStage()],
+                on_stage_complete=on_stage_complete,
+            )
+
+        monkeypatch.setattr(
+            "qc_clean.core.pipeline.pipeline_factory.create_pipeline",
+            fake_create_pipeline,
+        )
+
+        result = project_commands._run_project(
+            tmp_store,
+            SimpleNamespace(
+                project_id=state.id,
+                review=False,
+                model=None,
+                exhaustive=True,
+            ),
+        )
+
+        assert result == 0
+        saved = tmp_store.load(state.id)
+        timing = saved.config.extra["run_timing"]
+        assert timing["schema_version"] == 1
+        assert timing["status"] == "completed"
+        assert timing["duration_s"] >= 0
+        assert timing["trace_id"] == f"qualitative_coding/project/{state.id}"
+        assert timing["model"] == "gpt-5-mini"
+        assert timing["exhaustive_coding"] is True
+        assert timing["resume_from"] is None
+        assert timing["document_count"] == 1
+        assert timing["phase_result_count"] == 1
+
+    def test_run_project_records_wall_clock_timing_on_failure(self, tmp_store, monkeypatch):
+        """Failed CLI project runs record timing before the failed state is saved."""
+        state = ProjectState(
+            id="timing-failed",
+            name="Timing Failed",
+            corpus=Corpus(documents=[Document(name="t.txt", content="x")]),
+        )
+        tmp_store.save(state)
+
+        def fake_create_pipeline(methodology, on_stage_complete, enable_human_review):
+            return AnalysisPipeline(
+                stages=[MockFailingRunStage()],
+                on_stage_complete=on_stage_complete,
+            )
+
+        monkeypatch.setattr(
+            "qc_clean.core.pipeline.pipeline_factory.create_pipeline",
+            fake_create_pipeline,
+        )
+
+        result = project_commands._run_project(
+            tmp_store,
+            SimpleNamespace(
+                project_id=state.id,
+                review=False,
+                model="gpt-5-mini",
+                exhaustive=False,
+            ),
+        )
+
+        assert result == 1
+        saved = tmp_store.load(state.id)
+        timing = saved.config.extra["run_timing"]
+        assert saved.pipeline_status == PipelineStatus.FAILED
+        assert timing["status"] == "failed"
+        assert timing["duration_s"] >= 0
+        assert timing["trace_id"] == f"qualitative_coding/project/{state.id}"
+        assert timing["exhaustive_coding"] is False
 
 
 # ---------------------------------------------------------------------------

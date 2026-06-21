@@ -22,7 +22,12 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from qc_clean.core.bench import DEFAULT_OBSERVABILITY_DB_PATH, d10_cost_latency_scorecard, phase0_scorecard
+from qc_clean.core.bench import (
+    DEFAULT_OBSERVABILITY_DB_PATH,
+    d10_cost_latency_scorecard,
+    d10_wall_clock_scorecard,
+    phase0_scorecard,
+)
 from qc_clean.core.persistence.project_store import ProjectStore
 
 
@@ -97,6 +102,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     except ValueError as exc:
         print(json.dumps({"error": str(exc)}))
         return 1
+    card["wall_clock_d10"] = d10_wall_clock_scorecard(state)
     card["cost_latency_d10"] = d10_cost_latency_scorecard(
         state,
         args.observability_db,

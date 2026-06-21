@@ -4,7 +4,7 @@ import sqlite3
 
 import pytest
 
-from qc_clean.core.bench import d10_cost_latency_scorecard, phase0_scorecard
+from qc_clean.core.bench import d10_cost_latency_scorecard, d10_wall_clock_scorecard, phase0_scorecard
 from qc_clean.core.grounding import resolve_span
 from qc_clean.schemas.domain import (
     AnalyticClaim,
@@ -281,6 +281,54 @@ def test_d10_cost_latency_uses_explicit_trace_id(tmp_path):
     }
     assert d10["call_count"] == 1
     assert d10["total_cost_usd"] == pytest.approx(0.42)
+
+
+def test_d10_wall_clock_unavailable_without_run_timing():
+    state = ProjectState(id="project-runtime", name="Runtime")
+
+    runtime = d10_wall_clock_scorecard(state)
+
+    assert runtime["status"] == "not_available"
+    assert "run_timing" in runtime["reason"]
+    assert "not estimate" in runtime["note"]
+
+
+def test_d10_wall_clock_scores_run_timing_metadata():
+    state = ProjectState(
+        id="project-runtime",
+        name="Runtime",
+        corpus=Corpus(documents=[Document(name="a.txt", content="A")]),
+        config=ProjectConfig(
+            extra={
+                "run_timing": {
+                    "schema_version": 1,
+                    "started_at": "2026-06-21T10:00:00",
+                    "completed_at": "2026-06-21T10:00:02",
+                    "duration_s": 2.25,
+                    "status": "completed",
+                    "trace_id": "qualitative_coding/project/project-runtime",
+                    "model": "gpt-5-mini",
+                    "exhaustive_coding": True,
+                    "resume_from": None,
+                    "document_count": 1,
+                    "phase_result_count": 7,
+                },
+            },
+        ),
+    )
+
+    runtime = d10_wall_clock_scorecard(state)
+
+    assert runtime["status"] == "scored"
+    assert runtime["duration_s"] == 2.25
+    assert runtime["run_status"] == "completed"
+    assert runtime["trace_id"] == "qualitative_coding/project/project-runtime"
+    assert runtime["model"] == "gpt-5-mini"
+    assert runtime["exhaustive_coding"] is True
+    assert runtime["resume_from"] is None
+    assert runtime["document_count"] == 1
+    assert runtime["phase_result_count"] == 7
+    assert "not summed LLM-call latency" in runtime["note"]
 
 
 def test_scorecard_scores_prompt_injection_fixture_results():
