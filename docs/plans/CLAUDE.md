@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 41 | D3 span-overlap IoU scorecard | High | Planned | `D3_SPAN_OVERLAP_IOU_SCORECARD.md` |
 
 ## Completed Plans
 
