@@ -6,7 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| — | No active implementation plan. | — | — | — |
+| 17 | INV-2 query-expansion disconfirmation retrieval | High | Planned | `INV2_QUERY_EXPANSION_DISCONFIRMATION_RETRIEVAL.md` |
 
 ## Completed Plans
 
