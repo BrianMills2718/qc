@@ -3,6 +3,10 @@
 from qc_clean.core.bench import phase0_scorecard
 from qc_clean.core.grounding import resolve_span
 from qc_clean.schemas.domain import (
+    AnalyticClaim,
+    ClaimAnchor,
+    ClaimKind,
+    ClaimScope,
     Code,
     CodeApplication,
     Codebook,
@@ -96,3 +100,138 @@ def test_scorecard_grounding_rate_one_when_no_applications():
         corpus=Corpus(documents=[]),
     )
     assert phase0_scorecard(state)["grounding"]["grounding_rate"] == 1.0
+
+
+def test_scorecard_reports_d7_unavailable_without_gold():
+    state = ProjectState(
+        name="no-gold",
+        config=ProjectConfig(methodology=Methodology.THEMATIC_ANALYSIS),
+        corpus=Corpus(documents=[Document(name="d.txt", content="AI failed here.")]),
+    )
+
+    d7 = phase0_scorecard(state)["disconfirmation_d7"]
+
+    assert d7["status"] == "not_available"
+    assert "gold" in d7["reason"]
+    assert "recall" not in d7
+    assert "precision" not in d7
+
+
+def test_scorecard_computes_d7_perfect_match_against_gold():
+    content = "AI improved delivery. AI failed for this team."
+    doc = Document(id="d1", name="d.txt", content=content)
+    start = content.index("AI failed")
+    end = len(content)
+    state = ProjectState(
+        name="gold",
+        config=ProjectConfig(
+            methodology=Methodology.THEMATIC_ANALYSIS,
+            extra={
+                "disconfirmation_gold": [
+                    {
+                        "target_claim_id": "claim-ai",
+                        "doc_id": doc.id,
+                        "start_char": start,
+                        "end_char": end,
+                        "quote_text": content[start:end],
+                    },
+                ],
+            },
+        ),
+        corpus=Corpus(documents=[doc]),
+        claims=[
+            _negative_case_claim(
+                "claim-ai",
+                ClaimAnchor(
+                    doc_id=doc.id,
+                    start_char=start,
+                    end_char=end,
+                    quote_text=content[start:end],
+                ),
+            ),
+        ],
+    )
+
+    d7 = phase0_scorecard(state)["disconfirmation_d7"]
+
+    assert d7["status"] == "scored"
+    assert d7["true_positives"] == 1
+    assert d7["false_positives"] == 0
+    assert d7["false_negatives"] == 0
+    assert d7["recall"] == 1.0
+    assert d7["precision"] == 1.0
+    assert d7["f1"] == 1.0
+    assert d7["matched_gold_keys"] == [f"claim-ai|{doc.id}|{start}:{end}"]
+    assert d7["missed_gold_keys"] == []
+    assert d7["extra_predicted_keys"] == []
+
+
+def test_scorecard_computes_d7_false_positive_and_false_negative():
+    content = "AI failed here. AI also failed later. AI only succeeded elsewhere."
+    doc = Document(id="d1", name="d.txt", content=content)
+    first_start = content.index("AI failed")
+    first_end = first_start + len("AI failed here.")
+    second_start = content.index("AI also")
+    second_end = second_start + len("AI also failed later.")
+    extra_start = content.index("AI only")
+    extra_end = len(content)
+    state = ProjectState(
+        name="mixed",
+        config=ProjectConfig(
+            methodology=Methodology.THEMATIC_ANALYSIS,
+            extra={
+                "disconfirmation_gold": [
+                    {
+                        "target_claim_id": "claim-ai",
+                        "doc_id": doc.id,
+                        "start_char": first_start,
+                        "end_char": first_end,
+                    },
+                    {
+                        "target_claim_id": "claim-ai",
+                        "doc_id": doc.id,
+                        "start_char": second_start,
+                        "end_char": second_end,
+                    },
+                ],
+            },
+        ),
+        corpus=Corpus(documents=[doc]),
+        claims=[
+            _negative_case_claim(
+                "claim-ai",
+                ClaimAnchor(doc_id=doc.id, start_char=first_start, end_char=first_end),
+            ),
+            _negative_case_claim(
+                "claim-ai",
+                ClaimAnchor(doc_id=doc.id, start_char=extra_start, end_char=extra_end),
+            ),
+        ],
+    )
+
+    d7 = phase0_scorecard(state)["disconfirmation_d7"]
+
+    assert d7["status"] == "scored"
+    assert d7["gold_count"] == 2
+    assert d7["predicted_count"] == 2
+    assert d7["true_positives"] == 1
+    assert d7["false_positives"] == 1
+    assert d7["false_negatives"] == 1
+    assert d7["recall"] == 0.5
+    assert d7["precision"] == 0.5
+    assert d7["f1"] == 0.5
+    assert d7["matched_gold_keys"] == [f"claim-ai|{doc.id}|{first_start}:{first_end}"]
+    assert d7["missed_gold_keys"] == [f"claim-ai|{doc.id}|{second_start}:{second_end}"]
+    assert d7["extra_predicted_keys"] == [f"claim-ai|{doc.id}|{extra_start}:{extra_end}"]
+
+
+def _negative_case_claim(target_claim_id: str, anchor: ClaimAnchor) -> AnalyticClaim:
+    return AnalyticClaim(
+        claim_kind=ClaimKind.NEGATIVE_CASE,
+        source_stage="negative_case_analysis",
+        claim_text="Contrary evidence was found.",
+        scope=ClaimScope(claim_ids=[target_claim_id]),
+        origin_object_type="negative_case",
+        origin_object_id=f"negative:{target_claim_id}:{anchor.start_char}",
+        contrary_anchors=[anchor],
+    )
