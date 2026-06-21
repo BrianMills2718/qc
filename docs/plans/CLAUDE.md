@@ -6,9 +6,10 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 5 | INV-6 ledger-wide disconfirmation and claim review | High | Planned | `INV6_LEDGER_DISCONFIRMATION.md` |
 
-No active implementation plan is currently tracked here. Use the roadmap in
-`docs/PROJECT_THEORY_AND_GOALS.md` §18 to choose the next invariant lane.
+Active implementation plan tracked. Execute `INV6_LEDGER_DISCONFIRMATION.md`
+phases in order.
 
 ## Completed Plans
 
