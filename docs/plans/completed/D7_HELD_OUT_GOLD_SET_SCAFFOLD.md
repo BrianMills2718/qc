@@ -1,10 +1,35 @@
 # Plan #31: D7 Held-Out Gold-Set Scaffold
 
-**Status:** In Progress
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** D7 gold-file bench input; Phase 0 benchmark artifacts
 **Blocks:** held-out D7 prompt_eval runs; live baseline comparison; D7 public benchmark evidence
+
+---
+
+## Outcome
+
+The repo now has a versioned D7 gold-set package scaffold and validator. The
+new `qc_clean/core/d7_gold.py` defines the D7 gold anchor, adjudication metadata,
+and `schema_version=1` gold-set package. Held-out packages require prompt freeze,
+contamination check, at least two coders, valid corpus/project hashes, non-empty
+contrary evidence, and unique exact D7 anchor keys.
+
+`scripts/validate_d7_gold_set.py <gold_set.json>` and
+`make validate-d7-gold GOLD=<path>` validate packages and emit JSON success or
+failure output. `scripts/bench_phase0.py --gold-file` now accepts versioned
+packages while preserving legacy raw anchor-list/object compatibility.
+
+Docs explicitly state that this is a scaffold and validator only: no
+human-populated held-out D7 package, live baseline run, interval-tested baseline
+delta, or D7 validity/superiority evidence has been produced.
+
+Verification:
+- TDD/focused: `python -m pytest tests/test_d7_gold_set.py tests/test_bench_phase0_script.py -q` -> 17 passed.
+- Focused lint: `python -m ruff check qc_clean/core/d7_gold.py qc_clean/core/bench.py scripts/bench_phase0.py scripts/validate_d7_gold_set.py tests/test_d7_gold_set.py tests/test_bench_phase0_script.py` -> passed.
+- Makefile dry-run: `make -n validate-d7-gold GOLD=gold_set.json` -> `python scripts/validate_d7_gold_set.py gold_set.json`.
+- Full gate: `make check` -> 695 passed, 1 skipped, 8 deselected; Ruff passed; docs checks passed; type check not yet configured.
 
 ---
 
@@ -182,21 +207,21 @@ Validation rules:
 ## Acceptance Criteria
 
 > Feature-level criteria (what the plan accomplishes):
-- [ ] A versioned D7 gold-set package schema exists.
-- [ ] Valid held-out packages require freeze/contamination/adjudication metadata.
-- [ ] Duplicate D7 anchor keys fail loudly.
-- [ ] A CLI script validates packages and emits machine-readable JSON.
-- [ ] `make validate-d7-gold GOLD=<path>` runs the validator.
-- [ ] `bench_phase0 --gold-file` accepts a versioned package while preserving raw
+- [x] A versioned D7 gold-set package schema exists.
+- [x] Valid held-out packages require freeze/contamination/adjudication metadata.
+- [x] Duplicate D7 anchor keys fail loudly.
+- [x] A CLI script validates packages and emits machine-readable JSON.
+- [x] `make validate-d7-gold GOLD=<path>` runs the validator.
+- [x] `bench_phase0 --gold-file` accepts a versioned package while preserving raw
   anchor-list compatibility.
-- [ ] Docs state no held-out D7 benchmark, live baseline run, or superiority
+- [x] Docs state no held-out D7 benchmark, live baseline run, or superiority
   evidence has been produced.
 
 > Process criteria (quality gates):
-- [ ] Required tests pass
-- [ ] Full test suite passes
-- [ ] Type check status is reported
-- [ ] Docs updated
+- [x] Required tests pass
+- [x] Full test suite passes
+- [x] Type check status is reported
+- [x] Docs updated
 
 ---
 

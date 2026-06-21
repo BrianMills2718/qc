@@ -6,7 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 31 | D7 Held-Out Gold-Set Scaffold | High | In Progress | `D7_HELD_OUT_GOLD_SET_SCAFFOLD.md` |
+| _none_ | _none_ | _none_ | _none_ | _none_ |
 
 ## Completed Plans
 
@@ -42,6 +42,7 @@ Track all implementation work here.
 | Phase 0 input hashes | Evaluation-harness follow-up: `make bench` reports SHA-256 hashes for loaded state, corpus, and supplied benchmark files | `completed/PHASE0_INPUT_HASHES.md` |
 | QC bench CLI | Evaluation-harness follow-up: `qc_cli.py bench` wraps the deterministic Phase 0 scorecard with the same current flags as `make bench` | `completed/QC_BENCH_CLI.md` |
 | Phase 0 benchmark artifacts | Evaluation-harness follow-up: Phase 0 bench writes versioned `benchmark_results/` packages with scorecard and manifest provenance | `completed/PHASE0_BENCHMARK_ARTIFACTS.md` |
+| D7 held-out gold-set scaffold | Evaluation-harness follow-up: versioned D7 gold-set packages can be validated and used as `--gold-file` inputs without claiming held-out results | `completed/D7_HELD_OUT_GOLD_SET_SCAFFOLD.md` |
 
 ## Status Key
 

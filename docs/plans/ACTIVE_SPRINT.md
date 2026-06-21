@@ -22,11 +22,10 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Held-out D7 gold-set scaffold: define and validate a versioned adjudicated
-   contrary-evidence gold-set package that future prompt_eval D7 runs can
-   consume.
-2. Next evaluation-harness slice chosen after that checkpoint, likely live INV-7
-   fixture execution or semantic retrieval depending on what the repo makes
-   concrete.
+1. INV-7 live-fixture runner scaffold: define an agent-drivable way to execute
+   prompt-injection fixtures and produce the existing `PROMPT_INJECTION=` result
+   file shape without claiming model obedience is solved.
+2. Next evaluation-harness slice chosen after that checkpoint, likely semantic
+   retrieval depending on what the repo makes concrete.
 3. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
