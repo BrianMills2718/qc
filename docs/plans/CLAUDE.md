@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 42 | D3 Modified Hausdorff scorecard | High | Planned | `D3_MODIFIED_HAUSDORFF_SCORECARD.md` |
 
 ## Completed Plans
 
