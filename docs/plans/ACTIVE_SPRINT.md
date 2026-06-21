@@ -22,8 +22,9 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Next evaluation-harness slice chosen after the input-hash checkpoint, likely
+1. `qc bench` CLI wrapper for the Phase 0 scorecard.
+2. Next evaluation-harness slice chosen after the CLI checkpoint, likely
    prompt-eval handoff, live INV-7 fixture execution, held-out gold-set
    scaffolding, or semantic retrieval depending on what the repo makes concrete.
-2. Continue through the ranked roadmap without pausing after each verified
+3. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
