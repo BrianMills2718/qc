@@ -51,6 +51,7 @@ Thumbs.db
 
 # Log files - may contain sensitive info
 *.log
+.claude/hook_log.jsonl
 logs/
 provenance_logs/
 **/logs/
