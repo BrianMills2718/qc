@@ -196,6 +196,15 @@ def test_scorecard_scores_d3_application_gold_exact_span_and_code():
     assert d3["f1_bootstrap_ci"]["seed"] == 0
     assert d3["f1_bootstrap_ci"]["population_size"] == 4
     assert d3["f1_bootstrap_ci"]["lower"] <= d3["f1_bootstrap_ci"]["upper"]
+    overlap = d3["span_overlap"]
+    assert overlap["status"] == "scored"
+    assert overlap["metric"] == "char_span_iou_same_code_doc"
+    assert overlap["gold_span_count"] == 2
+    assert overlap["predicted_span_count"] == 2
+    assert overlap["unscored_gold_count"] == 0
+    assert overlap["unscored_predicted_count"] == 1
+    assert overlap["mean_best_gold_iou"] == pytest.approx(0.5)
+    assert overlap["mean_best_predicted_iou"] == pytest.approx(0.5)
 
 
 def test_scorecard_d3_f1_bootstrap_configurable_and_disableable():
@@ -245,6 +254,99 @@ def test_scorecard_d3_f1_bootstrap_configurable_and_disableable():
     disabled_d3 = phase0_scorecard(disabled)["application_validity_d3"]
 
     assert "f1_bootstrap_ci" not in disabled_d3
+
+
+def test_scorecard_d3_span_overlap_scores_near_boundary_match():
+    content = "0123456789abcdefghij0123456789"
+    doc = Document(id="d1", name="d.txt", content=content)
+    state = ProjectState(
+        config=ProjectConfig(
+            methodology=Methodology.THEMATIC_ANALYSIS,
+            extra={
+                "application_gold": [
+                    {
+                        "code_id": "AI_USE",
+                        "doc_id": doc.id,
+                        "start_char": 10,
+                        "end_char": 20,
+                    }
+                ],
+            },
+        ),
+        corpus=Corpus(documents=[doc]),
+        code_applications=[
+            CodeApplication(
+                code_id="AI_USE",
+                doc_id=doc.id,
+                quote_text=content[15:25],
+                start_char=15,
+                end_char=25,
+            )
+        ],
+    )
+
+    d3 = phase0_scorecard(state)["application_validity_d3"]
+
+    assert d3["true_positives"] == 0
+    assert d3["false_positives"] == 1
+    assert d3["false_negatives"] == 1
+    overlap = d3["span_overlap"]
+    assert overlap["status"] == "scored"
+    assert overlap["mean_best_gold_iou"] == pytest.approx(5 / 15)
+    assert overlap["mean_best_predicted_iou"] == pytest.approx(5 / 15)
+    assert overlap["gold_best_overlaps"] == [
+        {
+            "gold_key": "AI_USE|d1|10:20",
+            "best_predicted_key": "AI_USE|d1|15:25",
+            "best_iou": pytest.approx(5 / 15),
+        }
+    ]
+
+
+def test_scorecard_d3_span_overlap_counts_unscored_records():
+    content = "AI helped here."
+    doc = Document(id="d1", name="d.txt", content=content)
+    state = ProjectState(
+        config=ProjectConfig(
+            methodology=Methodology.THEMATIC_ANALYSIS,
+            extra={
+                "application_gold": [
+                    {
+                        "code_id": "AI_USE",
+                        "doc_id": doc.id,
+                        "start_char": 0,
+                        "end_char": len(content),
+                    },
+                    {"code_id": "AI_USE", "doc_id": doc.id, "segment_id": "seg-1"},
+                ],
+            },
+        ),
+        corpus=Corpus(documents=[doc]),
+        code_applications=[
+            CodeApplication(
+                code_id="AI_USE",
+                doc_id=doc.id,
+                quote_text=content,
+                start_char=0,
+                end_char=len(content),
+            ),
+            CodeApplication(
+                id="unanchored-app",
+                code_id="AI_USE",
+                doc_id=doc.id,
+                quote_text="AI somewhere",
+            ),
+        ],
+    )
+
+    overlap = phase0_scorecard(state)["application_validity_d3"]["span_overlap"]
+
+    assert overlap["status"] == "scored"
+    assert overlap["gold_span_count"] == 1
+    assert overlap["predicted_span_count"] == 1
+    assert overlap["unscored_gold_count"] == 1
+    assert overlap["unscored_predicted_count"] == 1
+    assert overlap["mean_best_gold_iou"] == 1.0
 
 
 def test_scorecard_invalid_d3_gold_fails_loud():

@@ -11,12 +11,12 @@ Deterministic and LLM-free so it can run in CI and be diffed across runs.
 from __future__ import annotations
 
 from collections import Counter
-from dataclasses import asdict
+from dataclasses import asdict, dataclass
 from math import sqrt
 from pathlib import Path
 from random import Random
 import sqlite3
-from typing import Any, Dict
+from typing import Any, Dict, Iterable
 
 from pydantic import BaseModel, Field, ValidationError, model_validator
 
@@ -36,6 +36,15 @@ _PROMPT_INJECTION_EXTRA_KEY = "prompt_injection_evaluations"
 _EXACT_BOOTSTRAP_EXTRA_KEY = "phase0_exact_bootstrap"
 DEFAULT_OBSERVABILITY_DB_PATH = Path.home() / "projects" / "data" / "llm_observability.db"
 _WILSON_Z_95 = 1.959963984540054
+
+
+@dataclass(frozen=True)
+class _ApplicationSpan:
+    code_id: str
+    doc_id: str
+    start_char: int
+    end_char: int
+    key: str
 
 
 class ExactScoreBootstrapConfig(BaseModel):
@@ -966,6 +975,7 @@ def application_validity_d3_scorecard(state: ProjectState) -> Dict[str, Any]:
     gold_provenance = _d3_gold_provenance(state)
     if gold_provenance is not None:
         card["gold_provenance"] = gold_provenance
+    card["span_overlap"] = _d3_span_overlap_score(gold, state)
     return card
 
 
@@ -1056,6 +1066,156 @@ def _gold_set_provenance(
         },
         count_key: anchor_count,
     }
+
+
+def _d3_span_overlap_score(
+    gold: list[ApplicationGoldAnchor],
+    state: ProjectState,
+) -> dict[str, Any]:
+    """Compute same-code/same-document D3 char-span IoU diagnostics."""
+    gold_spans = [_application_span_from_gold(anchor) for anchor in gold]
+    scoreable_gold_spans = [span for span in gold_spans if span is not None]
+    predicted_spans, unscored_predicted_count = _predicted_application_spans(state)
+    base: dict[str, Any] = {
+        "metric": "char_span_iou_same_code_doc",
+        "note": (
+            "Local span-overlap diagnostic for D3 exact-score outputs. It is not "
+            "a full application-validity, Hausdorff, or expert-parity metric."
+        ),
+        "gold_span_count": len(scoreable_gold_spans),
+        "predicted_span_count": len(predicted_spans),
+        "unscored_gold_count": len(gold) - len(scoreable_gold_spans),
+        "unscored_predicted_count": unscored_predicted_count,
+    }
+    if not scoreable_gold_spans:
+        return {
+            **base,
+            "status": "not_available",
+            "reason": "No D3 gold anchors with char-span offsets are available for IoU scoring.",
+        }
+    if not predicted_spans:
+        return {
+            **base,
+            "status": "not_available",
+            "reason": "No system code applications with char-span offsets are available for IoU scoring.",
+        }
+
+    gold_rows = [
+        _best_application_span_overlap_row(
+            source=span,
+            candidates=predicted_spans,
+            source_key="gold_key",
+            best_key="best_predicted_key",
+        )
+        for span in scoreable_gold_spans
+    ]
+    predicted_rows = [
+        _best_application_span_overlap_row(
+            source=span,
+            candidates=scoreable_gold_spans,
+            source_key="predicted_key",
+            best_key="best_gold_key",
+        )
+        for span in predicted_spans
+    ]
+    return {
+        **base,
+        "status": "scored",
+        "mean_best_gold_iou": _mean(row["best_iou"] for row in gold_rows),
+        "mean_best_predicted_iou": _mean(row["best_iou"] for row in predicted_rows),
+        "gold_best_overlaps": gold_rows,
+        "predicted_best_overlaps": predicted_rows,
+    }
+
+
+def _application_span_from_gold(anchor: ApplicationGoldAnchor) -> _ApplicationSpan | None:
+    """Convert a D3 gold anchor to a scoreable char span when offsets exist."""
+    if anchor.start_char is None or anchor.end_char is None:
+        return None
+    return _ApplicationSpan(
+        code_id=anchor.code_id,
+        doc_id=anchor.doc_id,
+        start_char=anchor.start_char,
+        end_char=anchor.end_char,
+        key=_key_for_application_gold(anchor),
+    )
+
+
+def _predicted_application_spans(state: ProjectState) -> tuple[list[_ApplicationSpan], int]:
+    """Return unique scoreable system application spans and unscored count."""
+    spans_by_key: dict[str, _ApplicationSpan] = {}
+    unscored_count = 0
+    for app in state.code_applications:
+        key = _key_for_application_anchor(
+            code_id=app.code_id,
+            doc_id=app.doc_id,
+            start_char=app.start_char,
+            end_char=app.end_char,
+            segment_id=None,
+        )
+        if key is None:
+            unscored_count += 1
+            continue
+        if app.start_char is None or app.end_char is None:
+            unscored_count += 1
+            continue
+        if app.start_char < 0 or app.end_char <= app.start_char:
+            raise ValueError(
+                "D3 system code application span offsets must satisfy "
+                "0 <= start_char < end_char"
+            )
+        spans_by_key.setdefault(
+            key,
+            _ApplicationSpan(
+                code_id=app.code_id,
+                doc_id=app.doc_id,
+                start_char=app.start_char,
+                end_char=app.end_char,
+                key=key,
+            ),
+        )
+    return [spans_by_key[key] for key in sorted(spans_by_key)], unscored_count
+
+
+def _best_application_span_overlap_row(
+    *,
+    source: _ApplicationSpan,
+    candidates: list[_ApplicationSpan],
+    source_key: str,
+    best_key: str,
+) -> dict[str, Any]:
+    """Find the best same-code/document IoU row for one source span."""
+    same_surface = [
+        candidate
+        for candidate in candidates
+        if candidate.code_id == source.code_id and candidate.doc_id == source.doc_id
+    ]
+    if not same_surface:
+        return {source_key: source.key, best_key: None, "best_iou": 0.0}
+    best = max(
+        same_surface,
+        key=lambda candidate: (_span_iou(source, candidate), candidate.key),
+    )
+    return {
+        source_key: source.key,
+        best_key: best.key,
+        "best_iou": _span_iou(source, best),
+    }
+
+
+def _span_iou(a: _ApplicationSpan, b: _ApplicationSpan) -> float:
+    """Compute intersection-over-union for two char spans."""
+    intersection = max(0, min(a.end_char, b.end_char) - max(a.start_char, b.start_char))
+    if intersection == 0:
+        return 0.0
+    union = max(a.end_char, b.end_char) - min(a.start_char, b.start_char)
+    return _safe_div(intersection, union)
+
+
+def _mean(values: Iterable[float]) -> float:
+    """Return zero for an empty mean."""
+    items = list(values)
+    return _safe_div(sum(items), len(items))
 
 
 def _predicted_application_keys(state: ProjectState) -> tuple[set[str], list[str]]:
