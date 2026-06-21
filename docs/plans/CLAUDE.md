@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 43 | INV-7 live fixture runner | High | Planned | `INV7_LIVE_FIXTURE_RUNNER.md` |
 
 ## Completed Plans
 
