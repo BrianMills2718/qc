@@ -1,10 +1,29 @@
 # Plan #10: INV-2 D7 Disconfirmation Scorecard
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** None
 **Blocks:** INV-2 hardened disconfirmation; D7 evaluation-harness disconfirmation metrics
+
+---
+
+## Outcome
+
+Completed 2026-06-21. `qc_clean/core/bench.py` now includes a deterministic
+`disconfirmation_d7` scorecard section. With no adjudicated gold annotations it
+reports `status="not_available"`; when
+`ProjectState.config.extra["disconfirmation_gold"]` contains anchored
+contrary-evidence gold records, it computes exact target-claim/source-anchor
+TP/FP/FN, recall, precision, and F1 from negative-case claim ledger anchors.
+
+This is a D7 scoring substrate only. It does not create a held-out gold set,
+confidence intervals, baselines, semantic retrieval, or methodological validity
+evidence. INV-2/INV-6 remain PARTIAL.
+
+Verification: `python -m pytest tests/test_bench_phase0.py tests/test_disconfirmation_retrieval_inv2.py -q`
+passed (`17 passed`) before the implementation commit. Final plan completion was
+verified with `make check`.
 
 ---
 

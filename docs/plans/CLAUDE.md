@@ -6,7 +6,9 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 10 | INV-2 D7 disconfirmation scorecard | High | Planned | `INV2_D7_DISCONFIRMATION_SCORECARD.md` |
+
+No active implementation plan is currently tracked here. Use the roadmap in
+`docs/PROJECT_THEORY_AND_GOALS.md` §18 to choose the next invariant lane.
 
 ## Completed Plans
 
@@ -21,6 +23,7 @@ Track all implementation work here.
 | INV-2 retrieval-first disconfirmation | INV-2 first slice: negative-case analysis retrieves anchored candidate passages before LLM interpretation | `completed/INV2_RETRIEVAL_FIRST_DISCONFIRMATION.md` |
 | INV-2 adversarial disconfirmation model routing | INV-2 follow-up: configurable disconfirmation model override and adversarial evidence-bound prompt stance | `completed/INV2_ADVERSARIAL_DISCONFIRMATION_MODEL.md` |
 | INV-7 derived-output prompt boundaries | INV-7 follow-up: downstream LLM/codebook artifacts are also line-prefixed as untrusted data | `completed/INV7_DERIVED_OUTPUT_PROMPT_BOUNDARIES.md` |
+| INV-2 D7 disconfirmation scorecard | Evaluation-harness follow-up: `make bench` reports exact-anchor D7 recall/precision/F1 when adjudicated contrary-evidence gold is supplied | `completed/INV2_D7_DISCONFIRMATION_SCORECARD.md` |
 
 ## Status Key
 
