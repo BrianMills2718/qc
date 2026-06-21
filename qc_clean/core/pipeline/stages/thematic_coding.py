@@ -13,6 +13,7 @@ from qc_clean.core.claims import (
     replace_claims_for_stage,
 )
 from qc_clean.core.grounding import MatchStatus, resolve_and_anchor, warn_unanchored as _warn_unanchored
+from qc_clean.core.prompting import format_untrusted_data_block, format_untrusted_documents
 from qc_clean.schemas.analysis_schemas import CodeHierarchy
 from qc_clean.schemas.adapters import code_hierarchy_to_codebook
 from qc_clean.schemas.domain import AnalysisMemo, CodeApplication, ProjectState, Provenance
@@ -230,9 +231,10 @@ def _build_exhaustive_prompt(segments) -> str:
     """Prompt for exhaustive coding: discover codes + decide EVERY segment."""
     lines = []
     for i, seg in enumerate(segments):
-        who = f"{seg.speaker}: " if seg.speaker else ""
-        lines.append(f"[SEGMENT {i}] {who}{seg.text}")
-    numbered = "\n".join(lines)
+        payload = f"Speaker: {seg.speaker}\nText:\n{seg.text}" if seg.speaker else seg.text
+        lines.append(f"[SEGMENT {i}]")
+        lines.append(format_untrusted_data_block(f"Segment {i}", payload))
+    numbered = "\n\n".join(lines)
     return f"""You are a qualitative researcher performing EXHAUSTIVE thematic coding. Every segment below must receive a decision — this is what makes the analysis defensible (no segment silently skipped).
 
 TASK:
@@ -247,12 +249,7 @@ SEGMENTS:
 Also write a brief analytical_memo (3-5 sentences) on key decisions, surprises, and uncertainties."""
 
 def _build_combined_text(state: ProjectState) -> str:
-    parts = []
-    for doc in state.corpus.documents:
-        parts.append(f"--- Interview: {doc.name} ---")
-        parts.append(doc.content)
-        parts.append("")
-    return "\n".join(parts)
+    return format_untrusted_documents(state.corpus.documents, label_prefix="Interview")
 
 
 def _build_phase1_prompt(combined_text: str, num_interviews: int) -> str:

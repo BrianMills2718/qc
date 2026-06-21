@@ -9,6 +9,7 @@ from pydantic import BaseModel, Field
 from typing import List
 
 from qc_clean.core.claims import claims_for_relationships, replace_claims_for_stage
+from qc_clean.core.prompting import format_untrusted_documents
 from qc_clean.schemas.gt_schemas import AxialRelationship
 from qc_clean.schemas.adapters import axial_relationships_to_code_relationships
 from qc_clean.schemas.domain import AnalysisMemo, ProjectState
@@ -119,12 +120,7 @@ ANALYTICAL MEMO: After completing the analysis above, write a brief analytical m
 
 
 def _build_combined_text(state: ProjectState) -> str:
-    parts = []
-    for doc in state.corpus.documents:
-        parts.append(f"--- Interview: {doc.name} ---")
-        parts.append(doc.content)
-        parts.append("")
-    return "\n".join(parts)
+    return format_untrusted_documents(state.corpus.documents, label_prefix="Interview")
 
 
 def _format_relationships(rels: list) -> str:

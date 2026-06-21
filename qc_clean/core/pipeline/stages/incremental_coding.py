@@ -11,6 +11,7 @@ import logging
 from typing import List
 
 from qc_clean.core.grounding import MatchStatus, resolve_and_anchor, warn_unanchored
+from qc_clean.core.prompting import format_untrusted_documents
 from qc_clean.core.pipeline.irr import normalize_code_name
 from qc_clean.core.pipeline.saturation import calculate_codebook_change
 from qc_clean.schemas.analysis_schemas import CodeHierarchy
@@ -171,12 +172,7 @@ def _format_codebook_for_prompt(codebook: Codebook) -> str:
 
 def _build_new_doc_text(docs: List[Document]) -> str:
     """Build combined text from new documents only."""
-    parts = []
-    for doc in docs:
-        parts.append(f"--- New Document: {doc.name} ---")
-        parts.append(doc.content)
-        parts.append("")
-    return "\n".join(parts)
+    return format_untrusted_documents(docs, label_prefix="New Document")
 
 
 def _build_incremental_thematic_prompt(

@@ -7,6 +7,7 @@ from __future__ import annotations
 import logging
 
 from qc_clean.core.claims import claims_for_relationships, replace_claims_for_stage
+from qc_clean.core.prompting import format_untrusted_documents
 from qc_clean.schemas.analysis_schemas import EntityMapping
 from qc_clean.schemas.adapters import entity_mapping_to_entities
 from qc_clean.schemas.domain import ProjectState
@@ -89,12 +90,7 @@ class RelationshipStage(PipelineStage):
 
 
 def _build_combined_text(state: ProjectState) -> str:
-    parts = []
-    for doc in state.corpus.documents:
-        parts.append(f"--- Interview: {doc.name} ---")
-        parts.append(doc.content)
-        parts.append("")
-    return "\n".join(parts)
+    return format_untrusted_documents(state.corpus.documents, label_prefix="Interview")
 
 
 def _build_phase3_prompt(

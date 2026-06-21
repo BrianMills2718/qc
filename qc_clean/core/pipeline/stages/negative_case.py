@@ -18,6 +18,7 @@ from qc_clean.core.claims import (
     format_disconfirmation_targets,
     replace_claims_for_stage,
 )
+from qc_clean.core.prompting import format_untrusted_documents
 from qc_clean.schemas.domain import AnalysisMemo, ProjectState, Provenance
 from ..pipeline_engine import PipelineContext, PipelineStage
 
@@ -166,12 +167,7 @@ ANALYTICAL MEMO: After completing the analysis above, write a brief analytical m
 
 
 def _build_combined_text(state: ProjectState) -> str:
-    parts = []
-    for doc in state.corpus.documents:
-        parts.append(f"--- Interview: {doc.name} ---")
-        parts.append(doc.content)
-        parts.append("")
-    return "\n".join(parts)
+    return format_untrusted_documents(state.corpus.documents, label_prefix="Interview")
 
 
 def _format_codebook(state: ProjectState) -> str:

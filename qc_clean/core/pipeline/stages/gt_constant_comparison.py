@@ -23,6 +23,7 @@ from qc_clean.core.claims import (
     claims_for_codes,
     replace_claims_for_stage,
 )
+from qc_clean.core.prompting import format_untrusted_data_block
 from qc_clean.core.pipeline.saturation import calculate_codebook_change
 from qc_clean.schemas.domain import (
     AnalysisMemo,
@@ -234,10 +235,11 @@ class GTConstantComparisonStage(PipelineStage):
             old_codebook = codebook.model_copy(deep=True)
 
             for seg_idx, segment in enumerate(segments):
+                protected_segment_text = _format_segment_data_block(segment, seg_idx)
                 if ctx.prompt_overrides.get("gt_constant_comparison"):
                     prompt = ctx.prompt_overrides["gt_constant_comparison"].format(
                         codebook_context=_format_codebook_context(codebook),
-                        segment_text=segment["text"],
+                        segment_text=protected_segment_text,
                         seg_idx=seg_idx,
                         total_segments=len(segments),
                         doc_name=segment["doc_name"],
@@ -331,13 +333,14 @@ def _build_comparison_prompt(
 ) -> str:
     """Build the constant comparison prompt for a single segment."""
     codebook_section = _format_codebook_context(codebook)
+    segment_block = _format_segment_data_block(segment, seg_idx)
 
     return f"""You are conducting grounded theory open coding using the constant comparison method.
 
 {codebook_section}
 
-DATA SEGMENT ({seg_idx + 1} of {total_segments}, from "{segment['doc_name']}"{_speaker_info(segment)}):
-\"\"\"{segment['text']}\"\"\"
+DATA SEGMENT ({seg_idx + 1} of {total_segments}):
+{segment_block}
 
 INSTRUCTIONS:
 1. Compare this segment against each existing code in the codebook
@@ -357,6 +360,18 @@ For new codes, follow grounded theory principles:
 ANALYTICAL MEMO: Write a brief note (1-2 sentences) about what you observed in this segment — patterns, surprises, connections to existing codes."""
 
 
+def _format_segment_data_block(segment: Dict, seg_idx: int) -> str:
+    """Format one segment as untrusted source data."""
+    payload = [
+        f"Document: {segment.get('doc_name', '')}",
+        f"Segment index: {seg_idx}",
+    ]
+    if segment.get("speaker"):
+        payload.append(f"Speaker: {segment['speaker']}")
+    payload.extend(["Text:", segment["text"]])
+    return format_untrusted_data_block(f"Segment {seg_idx}", "\n".join(payload))
+
+
 def _format_codebook_context(codebook: Codebook) -> str:
     """Format existing codebook for inclusion in prompt."""
     if not codebook.codes:
@@ -369,13 +384,6 @@ def _format_codebook_context(codebook: Codebook) -> str:
             line += f"\n    Properties: {', '.join(code.properties[:5])}"
         lines.append(line)
     return "\n".join(lines)
-
-
-def _speaker_info(segment: Dict) -> str:
-    """Format speaker info if available."""
-    if segment.get("speaker"):
-        return f', speaker: {segment["speaker"]}'
-    return ""
 
 
 # ---------------------------------------------------------------------------
