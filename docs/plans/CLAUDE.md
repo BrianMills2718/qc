@@ -6,7 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| _none_ | _No active plan_ | - | - | - |
+| 25 | D10 cost latency scorecard | High | Planned | `D10_COST_LATENCY_SCORECARD.md` |
 
 ## Completed Plans
 
