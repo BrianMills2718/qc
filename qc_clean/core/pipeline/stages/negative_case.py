@@ -99,11 +99,19 @@ class NegativeCaseStage(PipelineStage):
             state,
             target_claims,
             candidates_per_claim=ctx.disconfirmation_candidates_per_claim,
+            retrieval_mode=ctx.disconfirmation_retrieval_mode,
             bm25_k1=ctx.disconfirmation_bm25_k1,
             bm25_b=ctx.disconfirmation_bm25_b,
             contrary_cue_weight=ctx.disconfirmation_contrary_cue_weight,
             query_expansions=ctx.disconfirmation_query_expansions or None,
             expanded_term_weight=ctx.disconfirmation_expanded_term_weight,
+            embedding_model=ctx.disconfirmation_embedding_model,
+            embedding_dimensions=ctx.disconfirmation_embedding_dimensions,
+            semantic_weight=ctx.disconfirmation_semantic_weight,
+            min_semantic_similarity=ctx.disconfirmation_min_semantic_similarity,
+            task=f"{ctx.task_prefix}.{self.name()}.embedding_retrieval",
+            trace_id=ctx.trace_id,
+            max_budget=ctx.max_budget,
         )
         candidate_anchors = {
             candidate.id: anchor_for_candidate(candidate)
@@ -113,6 +121,8 @@ class NegativeCaseStage(PipelineStage):
         retrieval_summary = (
             f"Retrieved {len(candidates)} candidate passage(s) for "
             f"{len(target_claims)} claim target(s). "
+            f"Retrieval mode: {ctx.disconfirmation_retrieval_mode}. "
+            f"Embedding model: {ctx.disconfirmation_embedding_model or 'none'}. "
             f"Interpretation model: {disconfirmation_model}."
         )
 

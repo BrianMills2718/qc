@@ -77,6 +77,14 @@ class PipelineContext(BaseModel):
         default=5,
         description="Maximum retrieved source passages per claim target for disconfirmation.",
     )
+    disconfirmation_retrieval_mode: str = Field(
+        default="lexical_bm25",
+        description=(
+            "Disconfirmation retrieval mode. 'lexical_bm25' keeps deterministic "
+            "BM25/query-expansion retrieval; 'embedding_hybrid' adds embedding "
+            "cosine similarity and requires disconfirmation_embedding_model."
+        ),
+    )
     disconfirmation_bm25_k1: float = Field(
         default=1.2,
         gt=0,
@@ -106,6 +114,32 @@ class PipelineContext(BaseModel):
         description=(
             "BM25 weight multiplier for query-expansion term matches in "
             "disconfirmation retrieval; 0 disables expansion matches."
+        ),
+    )
+    disconfirmation_embedding_model: Optional[str] = Field(
+        default=None,
+        description=(
+            "Embedding model for opt-in embedding_hybrid disconfirmation retrieval. "
+            "Unset is valid for lexical_bm25 and fails loudly for embedding_hybrid."
+        ),
+    )
+    disconfirmation_embedding_dimensions: Optional[int] = Field(
+        default=None,
+        gt=0,
+        description="Optional embedding vector dimensions when the configured provider supports it.",
+    )
+    disconfirmation_semantic_weight: float = Field(
+        default=1.0,
+        ge=0,
+        description="Weight multiplier applied to embedding cosine similarity in hybrid retrieval.",
+    )
+    disconfirmation_min_semantic_similarity: float = Field(
+        default=0.0,
+        ge=-1.0,
+        le=1.0,
+        description=(
+            "Minimum cosine similarity for semantic-only candidates in "
+            "embedding_hybrid disconfirmation retrieval."
         ),
     )
 

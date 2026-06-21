@@ -11,8 +11,8 @@ from __future__ import annotations
 
 import re
 from collections import Counter
-from math import log
-from typing import Iterable, Mapping
+from math import log, sqrt
+from typing import Iterable, Mapping, Protocol
 
 from pydantic import BaseModel, Field
 
@@ -60,6 +60,30 @@ _DEFAULT_QUERY_EXPANSIONS: dict[str, list[str]] = {
     "used": ["abandoned", "avoided", "never", "stopped"],
 }
 
+_LEXICAL_RETRIEVAL_MODE = "lexical_bm25"
+_EMBEDDING_HYBRID_RETRIEVAL_MODE = "embedding_hybrid"
+_RETRIEVAL_MODES = {
+    _LEXICAL_RETRIEVAL_MODE,
+    _EMBEDDING_HYBRID_RETRIEVAL_MODE,
+}
+
+
+class EmbeddingProvider(Protocol):
+    """Callable that returns one embedding vector for each input text."""
+
+    def __call__(
+        self,
+        texts: list[str],
+        *,
+        model: str,
+        task: str,
+        trace_id: str,
+        max_budget: float,
+        dimensions: int | None = None,
+    ) -> list[list[float]]:
+        """Embed texts for disconfirmation retrieval."""
+        ...
+
 
 class DisconfirmationCandidate(BaseModel):
     """A retrieved source passage for disconfirmation interpretation."""
@@ -79,6 +103,14 @@ class DisconfirmationCandidate(BaseModel):
         description="Configured query-expansion terms found in the passage",
     )
     contrary_cues: list[str] = Field(description="Contradiction/exception cue terms found in the passage")
+    retrieval_mode: str = Field(
+        default=_LEXICAL_RETRIEVAL_MODE,
+        description="Retrieval mode that produced this candidate",
+    )
+    semantic_score: float | None = Field(
+        default=None,
+        description="Cosine similarity score when embedding-hybrid retrieval is used",
+    )
     score: float = Field(description="Deterministic retrieval score used for ranking")
 
 
@@ -92,8 +124,20 @@ def retrieve_disconfirmation_candidates(
     contrary_cue_weight: float = 1.25,
     query_expansions: Mapping[str, Iterable[str]] | None = None,
     expanded_term_weight: float = 0.5,
+    retrieval_mode: str = _LEXICAL_RETRIEVAL_MODE,
+    embedding_model: str | None = None,
+    embedding_dimensions: int | None = None,
+    semantic_weight: float = 1.0,
+    min_semantic_similarity: float = 0.0,
+    embedding_provider: EmbeddingProvider | None = None,
+    task: str = "qualitative_coding.disconfirmation_retrieval",
+    trace_id: str = "qualitative_coding/manual",
+    max_budget: float = 0.0,
 ) -> list[DisconfirmationCandidate]:
     """Return bounded retrieved source candidates for each target claim."""
+    if retrieval_mode not in _RETRIEVAL_MODES:
+        allowed = ", ".join(sorted(_RETRIEVAL_MODES))
+        raise ValueError(f"retrieval_mode must be one of {allowed}; got {retrieval_mode!r}")
     if bm25_k1 <= 0:
         raise ValueError("bm25_k1 must be greater than 0")
     if not 0 <= bm25_b <= 1:
@@ -102,6 +146,14 @@ def retrieve_disconfirmation_candidates(
         raise ValueError("contrary_cue_weight must be non-negative")
     if expanded_term_weight < 0:
         raise ValueError("expanded_term_weight must be non-negative")
+    if semantic_weight < 0:
+        raise ValueError("semantic_weight must be non-negative")
+    if not -1 <= min_semantic_similarity <= 1:
+        raise ValueError("min_semantic_similarity must be between -1 and 1")
+    if embedding_dimensions is not None and embedding_dimensions <= 0:
+        raise ValueError("embedding_dimensions must be greater than 0 when set")
+    if retrieval_mode == _EMBEDDING_HYBRID_RETRIEVAL_MODE and not embedding_model:
+        raise ValueError("embedding_model is required when retrieval_mode='embedding_hybrid'")
 
     if not state.segments:
         state.segments = segment_corpus(state.corpus.documents)
@@ -112,12 +164,28 @@ def retrieve_disconfirmation_candidates(
     if per_claim == 0:
         return candidates
 
+    target_claims = list(targets)
+    segments = list(state.segments)
     term_counts_by_segment, document_frequency, segment_lengths, average_segment_len = _bm25_index(
-        state.segments
+        segments
     )
-    segment_count = len(state.segments)
+    segment_count = len(segments)
+    semantic_claim_vectors: dict[int, list[float]] = {}
+    semantic_segment_vectors: dict[str, list[float]] = {}
+    if retrieval_mode == _EMBEDDING_HYBRID_RETRIEVAL_MODE:
+        semantic_claim_vectors, semantic_segment_vectors = _embedding_vectors_for_retrieval(
+            state,
+            target_claims,
+            segments,
+            embedding_model=embedding_model,
+            embedding_dimensions=embedding_dimensions,
+            embedding_provider=embedding_provider,
+            task=task,
+            trace_id=trace_id,
+            max_budget=max_budget,
+        )
 
-    for target_index, claim in enumerate(targets):
+    for target_index, claim in enumerate(target_claims):
         claim_terms = _claim_terms(state, claim)
         if not claim_terms:
             continue
@@ -126,16 +194,35 @@ def retrieve_disconfirmation_candidates(
             if expanded_term_weight > 0
             else set()
         )
-        scored: list[tuple[float, int, int, Segment, list[str], list[str], list[str]]] = []
-        for segment in state.segments:
+        scored: list[tuple[
+            float,
+            int,
+            int,
+            float | None,
+            Segment,
+            list[str],
+            list[str],
+            list[str],
+        ]] = []
+        claim_vector = semantic_claim_vectors.get(target_index)
+        for segment in segments:
             term_counts = term_counts_by_segment.get(segment.id, Counter())
             segment_terms = set(term_counts)
             matched = sorted(claim_terms & segment_terms)
             expanded = sorted(expanded_terms & segment_terms)
-            if not matched and not expanded:
+            semantic_score = (
+                _cosine_similarity(claim_vector, semantic_segment_vectors[segment.id])
+                if claim_vector is not None and segment.id in semantic_segment_vectors
+                else None
+            )
+            semantic_hit = (
+                semantic_score is not None
+                and semantic_score >= min_semantic_similarity
+            )
+            if not matched and not expanded and not semantic_hit:
                 continue
             cues = sorted(segment_terms & _CONTRARY_CUES)
-            score = _bm25_score(
+            lexical_score = _bm25_score(
                 matched,
                 term_counts,
                 segment_len=segment_lengths.get(segment.id, 0),
@@ -156,18 +243,31 @@ def retrieve_disconfirmation_candidates(
                     b=bm25_b,
                 )
             ) + (contrary_cue_weight * len(cues))
+            score = lexical_score
+            if semantic_score is not None and semantic_hit:
+                score += semantic_weight * semantic_score
             scored.append((
                 score,
                 len(cues),
                 len(matched) + len(expanded),
+                semantic_score,
                 segment,
                 matched,
                 expanded,
                 cues,
             ))
 
-        scored.sort(key=lambda item: (-item[0], -item[1], -item[2], item[3].doc_id, item[3].start_char))
-        for rank, (score, _cue_count, _match_count, segment, matched, expanded, cues) in enumerate(
+        scored.sort(
+            key=lambda item: (
+                -item[0],
+                -item[1],
+                -item[2],
+                -(item[3] if item[3] is not None else -1.0),
+                item[4].doc_id,
+                item[4].start_char,
+            )
+        )
+        for rank, (score, _cue_count, _match_count, semantic_score, segment, matched, expanded, cues) in enumerate(
             scored[:per_claim],
             start=1,
         ):
@@ -190,6 +290,8 @@ def retrieve_disconfirmation_candidates(
                 matched_terms=matched,
                 expanded_terms=expanded,
                 contrary_cues=cues,
+                retrieval_mode=retrieval_mode,
+                semantic_score=semantic_score,
                 score=score,
             ))
     return candidates
@@ -211,7 +313,9 @@ def format_disconfirmation_candidates(candidates: Iterable[DisconfirmationCandid
             f"- candidate_id={candidate.id} claim_id={candidate.target_claim_id} "
             f"doc_id={candidate.doc_id} segment_id={candidate.segment_id or ''} "
             f"span={candidate.start_char}:{candidate.end_char} "
+            f"mode={candidate.retrieval_mode} "
             f"score={candidate.score:.2f} "
+            f"semantic_score={_format_optional_score(candidate.semantic_score)} "
             f"matched_terms={','.join(candidate.matched_terms)} "
             f"expanded_terms={','.join(candidate.expanded_terms)} "
             f"contrary_cues={','.join(candidate.contrary_cues)}"
@@ -234,13 +338,23 @@ def anchor_for_candidate(candidate: DisconfirmationCandidate) -> ClaimAnchor:
 
 def _claim_terms(state: ProjectState, claim: AnalyticClaim) -> set[str]:
     """Terms from claim text plus scoped code names/descriptions."""
+    return _terms(" ".join(_claim_parts(state, claim)))
+
+
+def _claim_query_text(state: ProjectState, claim: AnalyticClaim) -> str:
+    """Text used to embed one target claim for semantic retrieval."""
+    return "\n".join(_claim_parts(state, claim))
+
+
+def _claim_parts(state: ProjectState, claim: AnalyticClaim) -> list[str]:
+    """Return claim text plus scoped code metadata for retrieval."""
     parts = [claim.claim_text, *claim.scope.participant_names]
     for code_id in claim.scope.code_ids:
         code = state.codebook.get_code(code_id)
         if code is None:
             continue
         parts.extend([code.name, code.description, code.definition])
-    return _terms(" ".join(parts))
+    return [part for part in parts if part]
 
 
 def _query_expansion_terms(
@@ -310,6 +424,124 @@ def _bm25_score(
         idf = log(1 + ((segment_count - df + 0.5) / (df + 0.5)))
         score += idf * ((tf * (k1 + 1)) / (tf + (k1 * length_norm)))
     return score
+
+
+def _embedding_vectors_for_retrieval(
+    state: ProjectState,
+    claims: list[AnalyticClaim],
+    segments: list[Segment],
+    *,
+    embedding_model: str | None,
+    embedding_dimensions: int | None,
+    embedding_provider: EmbeddingProvider | None,
+    task: str,
+    trace_id: str,
+    max_budget: float,
+) -> tuple[dict[int, list[float]], dict[str, list[float]]]:
+    """Embed claim queries and segment texts for hybrid retrieval."""
+    if not claims or not segments:
+        return {}, {}
+    if not embedding_model:
+        raise ValueError("embedding_model is required when retrieval_mode='embedding_hybrid'")
+
+    provider = embedding_provider or _llm_client_embedding_provider
+    claim_texts = [_claim_query_text(state, claim) for claim in claims]
+    segment_texts = [segment.text for segment in segments]
+    texts = [*claim_texts, *segment_texts]
+    raw_vectors = provider(
+        texts,
+        model=embedding_model,
+        dimensions=embedding_dimensions,
+        task=task,
+        trace_id=trace_id,
+        max_budget=max_budget,
+    )
+    vectors = _validated_embedding_vectors(raw_vectors, expected_count=len(texts))
+    claim_vectors = {
+        index: vectors[index]
+        for index in range(len(claims))
+    }
+    offset = len(claims)
+    segment_vectors = {
+        segment.id: vectors[offset + index]
+        for index, segment in enumerate(segments)
+    }
+    return claim_vectors, segment_vectors
+
+
+def _llm_client_embedding_provider(
+    texts: list[str],
+    *,
+    model: str,
+    task: str,
+    trace_id: str,
+    max_budget: float,
+    dimensions: int | None = None,
+) -> list[list[float]]:
+    """Embed texts through llm_client with pre-flight budget enforcement."""
+    try:
+        from llm_client import embed
+        from llm_client.execution.call_contracts import check_budget
+    except ImportError as exc:
+        raise RuntimeError(
+            "llm_client is required for embedding_hybrid disconfirmation retrieval"
+        ) from exc
+
+    check_budget(trace_id, max_budget)
+    result = embed(
+        model,
+        texts,
+        dimensions=dimensions,
+        task=task,
+        trace_id=trace_id,
+    )
+    return result.embeddings
+
+
+def _validated_embedding_vectors(
+    vectors: list[list[float]],
+    *,
+    expected_count: int,
+) -> list[list[float]]:
+    """Validate provider output before scoring candidates."""
+    if len(vectors) != expected_count:
+        raise RuntimeError(
+            f"Embedding provider returned {len(vectors)} vector(s) for {expected_count} text(s)"
+        )
+    normalized: list[list[float]] = []
+    width: int | None = None
+    for index, raw_vector in enumerate(vectors):
+        try:
+            vector = [float(value) for value in raw_vector]
+        except (TypeError, ValueError) as exc:
+            raise RuntimeError(f"Embedding vector {index} contains a non-numeric value") from exc
+        if not vector:
+            raise RuntimeError(f"Embedding vector {index} is empty")
+        if not any(value != 0.0 for value in vector):
+            raise RuntimeError(f"Embedding vector {index} is all zeros")
+        if width is None:
+            width = len(vector)
+        elif len(vector) != width:
+            raise RuntimeError(
+                f"Embedding vector {index} has dimension {len(vector)}; expected {width}"
+            )
+        normalized.append(vector)
+    return normalized
+
+
+def _cosine_similarity(left: list[float], right: list[float]) -> float:
+    """Return cosine similarity for validated non-zero vectors."""
+    dot = sum(a * b for a, b in zip(left, right))
+    left_norm = sqrt(sum(value * value for value in left))
+    right_norm = sqrt(sum(value * value for value in right))
+    if left_norm == 0 or right_norm == 0:
+        raise RuntimeError("Embedding vectors must be non-zero for cosine similarity")
+    return dot / (left_norm * right_norm)
+
+
+def _format_optional_score(value: float | None) -> str:
+    """Format an optional numeric candidate score for prompts."""
+    return "none" if value is None else f"{value:.3f}"
 
 
 def _terms(text: str) -> set[str]:

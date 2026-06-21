@@ -120,6 +120,96 @@ def test_query_expansion_can_be_disabled_with_zero_weight():
     assert candidates == []
 
 
+def test_embedding_hybrid_retrieves_semantic_candidate_without_lexical_overlap():
+    state = _state_with_segments("The participant preferred phone calls after long wait times.")
+    target = _claim("claim-service", "Automation improves service.")
+    captured: dict[str, object] = {}
+
+    def fake_embeddings(
+        texts,
+        *,
+        model,
+        task,
+        trace_id,
+        max_budget,
+        dimensions=None,
+    ):
+        captured.update({
+            "texts": texts,
+            "model": model,
+            "task": task,
+            "trace_id": trace_id,
+            "max_budget": max_budget,
+            "dimensions": dimensions,
+        })
+        return [
+            [1.0, 0.0],
+            [1.0, 0.0],
+        ]
+
+    candidates = retrieve_disconfirmation_candidates(
+        state,
+        [target],
+        candidates_per_claim=1,
+        retrieval_mode="embedding_hybrid",
+        embedding_model="fake-embedding-model",
+        embedding_dimensions=2,
+        expanded_term_weight=0.0,
+        semantic_weight=1.5,
+        embedding_provider=fake_embeddings,
+        task="qualitative_coding.test.embedding",
+        trace_id="qualitative_coding/test-trace",
+        max_budget=0.25,
+    )
+
+    assert len(candidates) == 1
+    candidate = candidates[0]
+    assert candidate.quote_text == "The participant preferred phone calls after long wait times."
+    assert candidate.matched_terms == []
+    assert candidate.expanded_terms == []
+    assert candidate.retrieval_mode == "embedding_hybrid"
+    assert candidate.semantic_score == pytest.approx(1.0)
+    assert candidate.score == pytest.approx(1.5)
+    assert verify_anchor(
+        state.corpus.documents[0].content,
+        candidate.start_char,
+        candidate.end_char,
+        candidate.quote_hash,
+    )
+    assert captured["model"] == "fake-embedding-model"
+    assert captured["task"] == "qualitative_coding.test.embedding"
+    assert captured["trace_id"] == "qualitative_coding/test-trace"
+    assert captured["max_budget"] == 0.25
+    assert captured["dimensions"] == 2
+    assert captured["texts"][0].startswith("Automation improves service.")
+    assert captured["texts"][1] == "The participant preferred phone calls after long wait times."
+
+
+def test_embedding_hybrid_requires_embedding_model():
+    state = _state_with_segments("The participant preferred phone calls after long wait times.")
+    target = _claim("claim-service", "Automation improves service.")
+
+    with pytest.raises(ValueError, match="embedding_model"):
+        retrieve_disconfirmation_candidates(
+            state,
+            [target],
+            retrieval_mode="embedding_hybrid",
+            embedding_provider=lambda *_args, **_kwargs: [[1.0], [1.0]],
+        )
+
+
+def test_unknown_disconfirmation_retrieval_mode_fails_loud():
+    state = _state_with_segments("AI failed for this team.")
+    target = _claim("claim-ai", "AI improves workflow across the corpus.")
+
+    with pytest.raises(ValueError, match="retrieval_mode"):
+        retrieve_disconfirmation_candidates(
+            state,
+            [target],
+            retrieval_mode="silent_fallback",
+        )
+
+
 def test_candidate_format_includes_ids_and_untrusted_data_boundaries():
     state = _state_with_segments("AI failed for this team.")
     target = _claim("claim-ai", "AI improves workflow across the corpus.")
@@ -338,6 +428,48 @@ def test_negative_case_passes_query_expansion_config():
         "improves": ["slower", "delays"],
     }
     assert mock_retrieve.call_args.kwargs["expanded_term_weight"] == 0.25
+
+
+def test_negative_case_passes_embedding_retrieval_config():
+    state = _state_with_segments("The participant preferred phone calls after long wait times.")
+    state.claims = [_claim("claim-service", "Automation improves service.")]
+    response = NegativeCaseResponse(
+        negative_cases=[],
+        overall_assessment="No retrieved candidate was sufficient.",
+    )
+
+    with (
+        patch("qc_clean.core.llm.llm_handler.LLMHandler") as MockLLM,
+        patch(
+            "qc_clean.core.pipeline.stages.negative_case.retrieve_disconfirmation_candidates",
+            return_value=[],
+        ) as mock_retrieve,
+    ):
+        MockLLM.return_value.extract_structured = AsyncMock(return_value=response)
+        asyncio.run(
+            NegativeCaseStage().execute(
+                state,
+                PipelineContext(
+                    task_prefix="qc-test",
+                    trace_id="qualitative_coding/test-trace",
+                    max_budget=0.75,
+                    disconfirmation_retrieval_mode="embedding_hybrid",
+                    disconfirmation_embedding_model="fake-embedding-model",
+                    disconfirmation_embedding_dimensions=128,
+                    disconfirmation_semantic_weight=1.25,
+                    disconfirmation_min_semantic_similarity=0.2,
+                ),
+            )
+        )
+
+    assert mock_retrieve.call_args.kwargs["retrieval_mode"] == "embedding_hybrid"
+    assert mock_retrieve.call_args.kwargs["embedding_model"] == "fake-embedding-model"
+    assert mock_retrieve.call_args.kwargs["embedding_dimensions"] == 128
+    assert mock_retrieve.call_args.kwargs["semantic_weight"] == 1.25
+    assert mock_retrieve.call_args.kwargs["min_semantic_similarity"] == 0.2
+    assert mock_retrieve.call_args.kwargs["task"] == "qc-test.negative_case_analysis.embedding_retrieval"
+    assert mock_retrieve.call_args.kwargs["trace_id"] == "qualitative_coding/test-trace"
+    assert mock_retrieve.call_args.kwargs["max_budget"] == 0.75
 
 
 def test_negative_case_prompt_uses_adversarial_reviewer_stance():
