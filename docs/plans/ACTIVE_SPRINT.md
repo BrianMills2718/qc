@@ -22,7 +22,9 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. D7 baseline comparison wiring for `make bench`.
-2. Next evaluation-harness slice chosen from the roadmap after the D7 baseline
-   checkpoint, likely prompt-eval handoff, live INV-7 fixture execution, or
-   held-out gold-set scaffolding depending on what the repo makes concrete.
+1. Next evaluation-harness slice chosen from the roadmap after the D7 baseline
+   checkpoint, likely prompt-eval handoff, live INV-7 fixture execution,
+   full wall-clock timing, or held-out gold-set scaffolding depending on what
+   the repo makes concrete.
+2. Continue through the ranked roadmap without pausing after each verified
+   commit unless a canonical stop condition is reached.

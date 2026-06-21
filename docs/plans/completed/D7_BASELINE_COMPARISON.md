@@ -1,10 +1,35 @@
 # Plan #26: D7 Baseline Comparison
 
-**Status:** In Progress
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Phase 0 D7 scorecard
 **Blocks:** held-out D7 evaluation; public benchmark baseline reporting
+
+---
+
+## Outcome
+
+`make bench` now supports D7 baseline comparison wiring. Baseline predictions
+can be supplied through `ProjectState.config.extra["disconfirmation_baselines"]`
+or externally with `BASELINES=baselines.json` / `--d7-baselines-file`; external
+baseline files are applied in memory and do not mutate saved project state.
+
+When D7 gold and baseline predictions are both present, `disconfirmation_d7`
+now includes a `baselines` section keyed by baseline name. Each baseline is
+scored with the same exact target-claim/source-anchor matching as the system and
+reports TP/FP/FN, recall, precision, F1, recall/precision Wilson intervals,
+matched/missed/extra keys, and `system_minus_baseline` point deltas for recall,
+precision, and F1. Invalid baseline metadata fails loudly. This is still
+baseline scorecard wiring only: no held-out D7 benchmark, live baseline run,
+interval-tested baseline delta, or superiority claim exists.
+
+**Verification:** `python -m pytest tests/test_bench_phase0.py
+tests/test_bench_phase0_script.py -q` passed (25 tests), and `python -m ruff
+check qc_clean/core/bench.py scripts/bench_phase0.py tests/test_bench_phase0.py
+tests/test_bench_phase0_script.py` passed. Final closeout gate: `make check`
+passed with 678 tests passing, 1 skipped, 8 deselected, Ruff passing, docs
+checks passing, and type checking reported as not configured.
 
 ---
 
@@ -121,23 +146,23 @@ create a cross-project callable capability.
 ## Acceptance Criteria
 
 > Feature-level criteria (what the plan accomplishes):
-- [ ] `disconfirmation_d7.baselines` appears when D7 gold and baseline
+- [x] `disconfirmation_d7.baselines` appears when D7 gold and baseline
   predictions are supplied.
-- [ ] Each baseline uses the same exact target-claim/source-anchor scoring as
+- [x] Each baseline uses the same exact target-claim/source-anchor scoring as
   the system.
-- [ ] Baseline output includes TP/FP/FN, recall, precision, F1,
+- [x] Baseline output includes TP/FP/FN, recall, precision, F1,
   recall/precision CIs, key lists, and deltas versus system point scores.
-- [ ] Invalid baseline JSON/metadata fails loudly.
-- [ ] `make bench ID=<project> BASELINES=baselines.json` forwards the file and
+- [x] Invalid baseline JSON/metadata fails loudly.
+- [x] `make bench ID=<project> BASELINES=baselines.json` forwards the file and
   does not mutate saved project state.
-- [ ] Docs say baseline wiring is not a held-out benchmark or superiority
+- [x] Docs say baseline wiring is not a held-out benchmark or superiority
   claim.
 
 > Process criteria (quality gates):
-- [ ] Required tests pass
-- [ ] Full test suite passes
-- [ ] Type check status is reported
-- [ ] Docs updated
+- [x] Required tests pass (`python -m pytest tests/test_bench_phase0.py tests/test_bench_phase0_script.py -q`: 25 passed)
+- [x] Full test suite passes (`make check`: 678 passed, 1 skipped, 8 deselected)
+- [x] Type check status is reported (`make check`: type checking not configured)
+- [x] Docs updated
 
 ---
 
