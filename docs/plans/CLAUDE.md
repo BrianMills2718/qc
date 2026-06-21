@@ -6,7 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| — | — | — | No active plan | — |
+| 35 | D7 retrieval comparison report | High | Planned | `D7_RETRIEVAL_COMPARISON_REPORT.md` |
 
 ## Completed Plans
 
