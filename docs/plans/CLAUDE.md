@@ -6,9 +6,9 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 8 | INV-2 adversarial disconfirmation model routing | High | Planned | `INV2_ADVERSARIAL_DISCONFIRMATION_MODEL.md` |
 
-No active implementation plan is currently tracked here. Use the roadmap in
-`docs/PROJECT_THEORY_AND_GOALS.md` §18 to choose the next invariant lane.
+Active implementation is currently focused on the roadmap's INV-2 adversarial disconfirmation follow-up.
 
 ## Completed Plans
 
