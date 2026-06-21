@@ -21,7 +21,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from qc_clean.core.bench import phase0_scorecard
+from qc_clean.core.bench import DEFAULT_OBSERVABILITY_DB_PATH, d10_cost_latency_scorecard, phase0_scorecard
 from qc_clean.core.persistence.project_store import ProjectStore
 
 
@@ -36,6 +36,16 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument(
         "--prompt-injection-file",
         help="Optional INV-7 prompt-injection fixture results JSON file; applied in memory only",
+    )
+    parser.add_argument(
+        "--observability-db",
+        type=Path,
+        default=DEFAULT_OBSERVABILITY_DB_PATH,
+        help="llm_client observability SQLite DB for D10 cost/latency",
+    )
+    parser.add_argument(
+        "--trace-id",
+        help="Optional exact trace_id for D10 cost/latency; default uses project trace prefix",
     )
     parser.add_argument("--output", help="Optional path to write the JSON scorecard")
     args = parser.parse_args(argv)
@@ -72,6 +82,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     except ValueError as exc:
         print(json.dumps({"error": str(exc)}))
         return 1
+    card["cost_latency_d10"] = d10_cost_latency_scorecard(
+        state,
+        args.observability_db,
+        trace_id=args.trace_id,
+    )
 
     text = json.dumps(card, indent=2)
     print(text)

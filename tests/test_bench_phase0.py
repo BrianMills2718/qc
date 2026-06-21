@@ -1,8 +1,10 @@
 """Tests for the evaluation-harness Phase 0 scorecard."""
 
+import sqlite3
+
 import pytest
 
-from qc_clean.core.bench import phase0_scorecard
+from qc_clean.core.bench import d10_cost_latency_scorecard, phase0_scorecard
 from qc_clean.core.grounding import resolve_span
 from qc_clean.schemas.domain import (
     AnalyticClaim,
@@ -162,6 +164,123 @@ def test_scorecard_reports_prompt_injection_unavailable_without_eval_data():
     assert inv7["status"] == "not_available"
     assert "prompt_injection_evaluations" in inv7["reason"]
     assert "not evidence" in inv7["note"]
+
+
+def test_d10_cost_latency_unavailable_when_db_missing(tmp_path):
+    state = ProjectState(id="project-cost", name="Cost")
+
+    d10 = d10_cost_latency_scorecard(state, tmp_path / "missing.db")
+
+    assert d10["status"] == "not_available"
+    assert "not found" in d10["reason"]
+    assert "estimate" in d10["note"]
+
+
+def test_d10_cost_latency_scores_matching_project_trace_rows(tmp_path):
+    db_path = tmp_path / "observability.db"
+    _create_llm_observability_db(db_path)
+    state = ProjectState(
+        id="project-cost",
+        name="Cost",
+        corpus=Corpus(documents=[
+            Document(name="a.txt", content="A"),
+            Document(name="b.txt", content="B"),
+        ]),
+    )
+    _insert_llm_call(
+        db_path,
+        project="qualitative_coding",
+        task="qualitative_coding.thematic_coding",
+        trace_id=f"qualitative_coding/project/{state.id}",
+        model="gpt-5-mini",
+        cost=0.10,
+        marginal_cost=0.08,
+        latency_s=1.5,
+        prompt_tokens=100,
+        completion_tokens=40,
+        total_tokens=140,
+    )
+    _insert_llm_call(
+        db_path,
+        project="qualitative_coding",
+        task="qualitative_coding.negative_case_analysis",
+        trace_id=f"qualitative_coding/project/{state.id}/recode/2",
+        model="gpt-5-mini",
+        cost=0.20,
+        marginal_cost=0.16,
+        latency_s=2.5,
+        prompt_tokens=200,
+        completion_tokens=60,
+        total_tokens=260,
+    )
+    _insert_llm_call(
+        db_path,
+        project="qualitative_coding",
+        task="qualitative_coding.other",
+        trace_id="qualitative_coding/project/other",
+        model="gpt-5-mini",
+        cost=9.99,
+        marginal_cost=9.99,
+        latency_s=9.0,
+        prompt_tokens=1,
+        completion_tokens=1,
+        total_tokens=2,
+    )
+
+    d10 = d10_cost_latency_scorecard(state, db_path)
+
+    assert d10["status"] == "scored"
+    assert d10["trace_match"]["mode"] == "prefix"
+    assert d10["call_count"] == 2
+    assert d10["errored_calls"] == 0
+    assert d10["total_cost_usd"] == pytest.approx(0.30)
+    assert d10["total_marginal_cost_usd"] == pytest.approx(0.24)
+    assert d10["total_tokens"] == 400
+    assert d10["prompt_tokens"] == 300
+    assert d10["completion_tokens"] == 100
+    assert d10["summed_latency_s"] == pytest.approx(4.0)
+    assert d10["mean_latency_s"] == pytest.approx(2.0)
+    assert d10["max_latency_s"] == pytest.approx(2.5)
+    assert d10["cost_per_document_usd"] == pytest.approx(0.15)
+    assert d10["latency_per_document_s"] == pytest.approx(2.0)
+    assert d10["models"] == {"gpt-5-mini": 2}
+    assert d10["tasks"] == {
+        "qualitative_coding.negative_case_analysis": 1,
+        "qualitative_coding.thematic_coding": 1,
+    }
+
+
+def test_d10_cost_latency_uses_explicit_trace_id(tmp_path):
+    db_path = tmp_path / "observability.db"
+    _create_llm_observability_db(db_path)
+    state = ProjectState(id="project-cost", name="Cost")
+    _insert_llm_call(
+        db_path,
+        project="qualitative_coding",
+        task="qualitative_coding.api",
+        trace_id="qualitative_coding/job/job-123",
+        model="gpt-5-mini",
+        cost=0.42,
+        marginal_cost=0.40,
+        latency_s=3.0,
+        prompt_tokens=10,
+        completion_tokens=5,
+        total_tokens=15,
+    )
+
+    d10 = d10_cost_latency_scorecard(
+        state,
+        db_path,
+        trace_id="qualitative_coding/job/job-123",
+    )
+
+    assert d10["status"] == "scored"
+    assert d10["trace_match"] == {
+        "mode": "exact",
+        "value": "qualitative_coding/job/job-123",
+    }
+    assert d10["call_count"] == 1
+    assert d10["total_cost_usd"] == pytest.approx(0.42)
 
 
 def test_scorecard_scores_prompt_injection_fixture_results():
@@ -437,3 +556,74 @@ def _negative_case_claim(target_claim_id: str, anchor: ClaimAnchor) -> AnalyticC
         origin_object_id=f"negative:{target_claim_id}:{anchor.start_char}",
         contrary_anchors=[anchor],
     )
+
+
+def _create_llm_observability_db(path) -> None:
+    conn = sqlite3.connect(path)
+    try:
+        conn.execute(
+            """
+            CREATE TABLE llm_calls (
+                timestamp TEXT,
+                project TEXT,
+                model TEXT,
+                prompt_tokens INTEGER,
+                completion_tokens INTEGER,
+                total_tokens INTEGER,
+                cost REAL,
+                latency_s REAL,
+                error TEXT,
+                task TEXT,
+                trace_id TEXT,
+                marginal_cost REAL
+            )
+            """
+        )
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def _insert_llm_call(
+    db_path,
+    *,
+    project: str,
+    task: str,
+    trace_id: str,
+    model: str,
+    cost: float,
+    marginal_cost: float,
+    latency_s: float,
+    prompt_tokens: int,
+    completion_tokens: int,
+    total_tokens: int,
+) -> None:
+    conn = sqlite3.connect(db_path)
+    try:
+        conn.execute(
+            """
+            INSERT INTO llm_calls (
+                timestamp, project, model, prompt_tokens, completion_tokens,
+                total_tokens, cost, latency_s, error, task, trace_id,
+                marginal_cost
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                "2026-06-21T00:00:00",
+                project,
+                model,
+                prompt_tokens,
+                completion_tokens,
+                total_tokens,
+                cost,
+                latency_s,
+                None,
+                task,
+                trace_id,
+                marginal_cost,
+            ),
+        )
+        conn.commit()
+    finally:
+        conn.close()

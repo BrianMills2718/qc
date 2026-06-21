@@ -10,8 +10,11 @@ Deterministic and LLM-free so it can run in CI and be diffed across runs.
 
 from __future__ import annotations
 
+from collections import Counter
 from dataclasses import asdict
 from math import sqrt
+from pathlib import Path
+import sqlite3
 from typing import Any, Dict
 
 from pydantic import BaseModel, Field, ValidationError, model_validator
@@ -24,6 +27,7 @@ from qc_clean.schemas.domain import ClaimAnchor, ClaimKind, ProjectState
 
 _D7_GOLD_EXTRA_KEY = "disconfirmation_gold"
 _PROMPT_INJECTION_EXTRA_KEY = "prompt_injection_evaluations"
+DEFAULT_OBSERVABILITY_DB_PATH = Path.home() / "projects" / "data" / "llm_observability.db"
 _WILSON_Z_95 = 1.959963984540054
 
 
@@ -147,9 +151,176 @@ def phase0_scorecard(state: ProjectState) -> Dict[str, Any]:
         "phase": 0,
         "claims": "capability only — not a SOTA/parity claim (needs gold + baselines; see EVALUATION_HARNESS.md §7)",
         "coverage_note": coverage_note,
-        "cost_note": "LLM cost is in the observability DB, not in ProjectState; queried separately",
+        "cost_note": "D10 cost/latency is populated by the bench CLI from llm_client observability rows; never estimate it from ProjectState.",
     }
     return card
+
+
+def d10_cost_latency_scorecard(
+    state: ProjectState,
+    db_path: Path | str = DEFAULT_OBSERVABILITY_DB_PATH,
+    *,
+    project: str = "qualitative_coding",
+    trace_id: str | None = None,
+) -> Dict[str, Any]:
+    """Score D10 LLM cost/latency from real llm_client observability rows."""
+    db_path = Path(db_path)
+    trace_match = _trace_match_for_state(state, trace_id)
+    if not db_path.exists():
+        return {
+            "status": "not_available",
+            "reason": f"Observability DB not found: {db_path}",
+            "source": str(db_path),
+            "project": project,
+            "trace_match": trace_match,
+            "note": "D10 cost/latency requires real llm_client observability rows; do not estimate from ProjectState.",
+        }
+
+    try:
+        rows = _fetch_d10_llm_rows(db_path, project=project, trace_match=trace_match)
+    except sqlite3.Error as exc:
+        return {
+            "status": "not_available",
+            "reason": f"Could not read llm_calls observability rows: {exc}",
+            "source": str(db_path),
+            "project": project,
+            "trace_match": trace_match,
+            "note": "D10 cost/latency requires real llm_client observability rows; do not estimate from ProjectState.",
+        }
+
+    if not rows:
+        return {
+            "status": "not_available",
+            "reason": "No llm_calls rows matched the project and trace selector.",
+            "source": str(db_path),
+            "project": project,
+            "trace_match": trace_match,
+            "note": "No D10 score is reported without matching real observability rows; do not estimate from ProjectState.",
+        }
+
+    call_count = len(rows)
+    total_cost = sum(_float_or_zero(row["cost"]) for row in rows)
+    marginal_cost = sum(_float_or_zero(row["marginal_cost"]) for row in rows)
+    prompt_tokens = sum(_int_or_zero(row["prompt_tokens"]) for row in rows)
+    completion_tokens = sum(_int_or_zero(row["completion_tokens"]) for row in rows)
+    total_tokens = sum(_int_or_zero(row["total_tokens"]) for row in rows)
+    latencies = [_float_or_zero(row["latency_s"]) for row in rows]
+    summed_latency = sum(latencies)
+    document_count = state.corpus.num_documents
+    errored_calls = sum(1 for row in rows if _row_has_error(row))
+
+    return {
+        "status": "scored",
+        "source": str(db_path),
+        "project": project,
+        "trace_match": trace_match,
+        "call_count": call_count,
+        "successful_calls": call_count - errored_calls,
+        "errored_calls": errored_calls,
+        "total_cost_usd": total_cost,
+        "total_marginal_cost_usd": marginal_cost,
+        "prompt_tokens": prompt_tokens,
+        "completion_tokens": completion_tokens,
+        "total_tokens": total_tokens,
+        "summed_latency_s": summed_latency,
+        "mean_latency_s": _safe_div(summed_latency, call_count),
+        "max_latency_s": max(latencies) if latencies else 0.0,
+        "document_count": document_count,
+        "cost_per_document_usd": _safe_div_or_none(total_cost, document_count),
+        "latency_per_document_s": _safe_div_or_none(summed_latency, document_count),
+        "first_timestamp": min(str(row["timestamp"]) for row in rows),
+        "last_timestamp": max(str(row["timestamp"]) for row in rows),
+        "models": dict(sorted(Counter(str(row["model"] or "") for row in rows).items())),
+        "tasks": dict(sorted(Counter(str(row["task"] or "") for row in rows).items())),
+        "note": (
+            "D10 uses summed observed LLM-call latency and real logged cost from "
+            "llm_client; it is not full pipeline wall-clock time and is not a "
+            "baseline comparison."
+        ),
+    }
+
+
+def _trace_match_for_state(state: ProjectState, trace_id: str | None) -> Dict[str, str]:
+    """Return the D10 trace selector."""
+    if trace_id:
+        return {"mode": "exact", "value": trace_id}
+    return {"mode": "prefix", "value": f"qualitative_coding/project/{state.id}"}
+
+
+def _fetch_d10_llm_rows(
+    db_path: Path,
+    *,
+    project: str,
+    trace_match: Dict[str, str],
+) -> list[sqlite3.Row]:
+    """Fetch D10 rows from the observability database."""
+    conn = sqlite3.connect(str(db_path))
+    conn.row_factory = sqlite3.Row
+    try:
+        required = {
+            "timestamp",
+            "project",
+            "model",
+            "prompt_tokens",
+            "completion_tokens",
+            "total_tokens",
+            "cost",
+            "latency_s",
+            "error",
+            "task",
+            "trace_id",
+            "marginal_cost",
+        }
+        columns = {str(row[1]) for row in conn.execute("PRAGMA table_info(llm_calls)").fetchall()}
+        missing = sorted(required - columns)
+        if missing:
+            raise sqlite3.OperationalError(
+                "llm_calls table missing required D10 column(s): " + ", ".join(missing)
+            )
+
+        error_select = "error"
+        if "error_type" in columns:
+            error_select += ", error_type"
+        if "validation_errors" in columns:
+            error_select += ", validation_errors"
+        trace_clause = "trace_id = ?" if trace_match["mode"] == "exact" else "trace_id LIKE ?"
+        trace_value = trace_match["value"] if trace_match["mode"] == "exact" else f"{trace_match['value']}%"
+        query = f"""
+            SELECT timestamp, model, prompt_tokens, completion_tokens, total_tokens,
+                   cost, latency_s, task, trace_id, marginal_cost, {error_select}
+            FROM llm_calls
+            WHERE project = ?
+              AND {trace_clause}
+            ORDER BY timestamp ASC
+        """
+        return list(conn.execute(query, (project, trace_value)).fetchall())
+    finally:
+        conn.close()
+
+
+def _row_has_error(row: sqlite3.Row) -> bool:
+    """Return true when an observability row records an error-like field."""
+    return any(
+        key in row.keys() and row[key]
+        for key in ("error", "error_type", "validation_errors")
+    )
+
+
+def _int_or_zero(value: Any) -> int:
+    """Convert nullable token counts to integers."""
+    return int(value or 0)
+
+
+def _float_or_zero(value: Any) -> float:
+    """Convert nullable numeric DB values to floats."""
+    return float(value or 0.0)
+
+
+def _safe_div_or_none(numerator: float, denominator: float) -> float | None:
+    """Return None for undefined reporting denominators."""
+    if denominator == 0:
+        return None
+    return numerator / denominator
 
 
 def prompt_injection_scorecard(state: ProjectState) -> Dict[str, Any]:

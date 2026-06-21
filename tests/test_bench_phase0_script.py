@@ -1,6 +1,7 @@
 """Tests for the Phase 0 bench CLI script."""
 
 import json
+import sqlite3
 
 from scripts import bench_phase0
 from qc_clean.core.persistence.project_store import ProjectStore
@@ -165,3 +166,116 @@ def test_bench_phase0_invalid_prompt_injection_file_fails_loud(
     output = json.loads(capsys.readouterr().out)
     assert "error" in output
     assert "Prompt injection file" in output["error"]
+
+
+def test_bench_phase0_includes_d10_from_observability_db(
+    tmp_path,
+    monkeypatch,
+    capsys,
+):
+    state = ProjectState(
+        id="project_d10",
+        name="D10 project",
+        corpus=Corpus(documents=[Document(name="a.txt", content="A")]),
+    )
+    store = ProjectStore(projects_dir=tmp_path / "projects")
+    store.save(state)
+    db_path = tmp_path / "observability.db"
+    _create_llm_observability_db(db_path)
+    _insert_llm_call(
+        db_path,
+        project="qualitative_coding",
+        task="qualitative_coding.thematic_coding",
+        trace_id=f"qualitative_coding/project/{state.id}",
+        model="gpt-5-mini",
+        cost=0.25,
+        marginal_cost=0.20,
+        latency_s=4.0,
+        prompt_tokens=100,
+        completion_tokens=25,
+        total_tokens=125,
+    )
+    monkeypatch.setattr(bench_phase0, "ProjectStore", lambda: store)
+
+    exit_code = bench_phase0.main([
+        state.id,
+        "--observability-db",
+        str(db_path),
+    ])
+
+    assert exit_code == 0
+    output = json.loads(capsys.readouterr().out)
+    assert output["cost_latency_d10"]["status"] == "scored"
+    assert output["cost_latency_d10"]["call_count"] == 1
+    assert output["cost_latency_d10"]["total_cost_usd"] == 0.25
+
+
+def _create_llm_observability_db(path) -> None:
+    conn = sqlite3.connect(path)
+    try:
+        conn.execute(
+            """
+            CREATE TABLE llm_calls (
+                timestamp TEXT,
+                project TEXT,
+                model TEXT,
+                prompt_tokens INTEGER,
+                completion_tokens INTEGER,
+                total_tokens INTEGER,
+                cost REAL,
+                latency_s REAL,
+                error TEXT,
+                task TEXT,
+                trace_id TEXT,
+                marginal_cost REAL
+            )
+            """
+        )
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def _insert_llm_call(
+    db_path,
+    *,
+    project: str,
+    task: str,
+    trace_id: str,
+    model: str,
+    cost: float,
+    marginal_cost: float,
+    latency_s: float,
+    prompt_tokens: int,
+    completion_tokens: int,
+    total_tokens: int,
+) -> None:
+    conn = sqlite3.connect(db_path)
+    try:
+        conn.execute(
+            """
+            INSERT INTO llm_calls (
+                timestamp, project, model, prompt_tokens, completion_tokens,
+                total_tokens, cost, latency_s, error, task, trace_id,
+                marginal_cost
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                "2026-06-21T00:00:00",
+                project,
+                model,
+                prompt_tokens,
+                completion_tokens,
+                total_tokens,
+                cost,
+                latency_s,
+                None,
+                task,
+                trace_id,
+                marginal_cost,
+            ),
+        )
+        conn.commit()
+    finally:
+        conn.close()
