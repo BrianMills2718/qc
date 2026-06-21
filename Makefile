@@ -1,4 +1,4 @@
-.PHONY: help test test-quick test-e2e test-all bench validate-d7-gold run-d7-retrieval compare-d7-retrieval run-inv7-fixtures check lint docs-check clean status cost errors
+.PHONY: help test test-quick test-e2e test-all bench validate-d3-gold validate-d7-gold run-d7-retrieval compare-d7-retrieval run-inv7-fixtures check lint docs-check clean status cost errors
 
 DAYS ?= 7
 PROJECT ?= qualitative_coding
@@ -21,6 +21,12 @@ test-all:  ## Run deterministic tests and live LLM E2E tests
 
 bench:  ## Evaluation-harness Phase 0 scorecard (ID=<project_id> [D3_GOLD=d3_gold.json] [GOLD=gold.json] [BASELINES=baselines.json] [PROMPT_INJECTION=inv7.json] [OBS_DB=path] [TRACE_ID=id] [ARTIFACT_DIR=benchmark_results])
 	python scripts/bench_phase0.py $(ID) $(if $(D3_GOLD),--d3-gold-file $(D3_GOLD),) $(if $(GOLD),--gold-file $(GOLD),) $(if $(BASELINES),--d7-baselines-file $(BASELINES),) $(if $(PROMPT_INJECTION),--prompt-injection-file $(PROMPT_INJECTION),) $(if $(OBS_DB),--observability-db $(OBS_DB),) $(if $(TRACE_ID),--trace-id $(TRACE_ID),) $(if $(ARTIFACT_DIR),--artifact-dir $(ARTIFACT_DIR),)
+
+validate-d3-gold:  ## Validate a versioned D3 application gold-set package (GOLD=gold_set.json)
+ifndef GOLD
+	$(error GOLD is required. Usage: make validate-d3-gold GOLD=gold_set.json)
+endif
+	python scripts/validate_d3_gold_set.py $(GOLD)
 
 validate-d7-gold:  ## Validate a versioned D7 gold-set package (GOLD=gold_set.json)
 ifndef GOLD

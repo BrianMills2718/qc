@@ -201,6 +201,71 @@ def test_bench_phase0_scores_d3_from_gold_file_without_mutating_state(
     assert "application_gold" not in reloaded.config.extra
 
 
+def test_bench_phase0_scores_d3_from_versioned_gold_package(
+    tmp_path,
+    monkeypatch,
+    capsys,
+):
+    content = "AI helped here."
+    doc = Document(id="d1", name="a.txt", content=content)
+    state = ProjectState(
+        id="project_d3_package",
+        name="D3 package project",
+        corpus=Corpus(documents=[doc]),
+        code_applications=[
+            CodeApplication(
+                code_id="AI_USE",
+                doc_id=doc.id,
+                quote_text=content,
+                start_char=0,
+                end_char=len(content),
+            )
+        ],
+    )
+    store = ProjectStore(projects_dir=tmp_path / "projects")
+    store.save(state)
+    d3_gold_file = tmp_path / "d3_gold_package.json"
+    d3_gold_file.write_text(
+        json.dumps({
+            "schema_version": 1,
+            "gold_set_id": "d3-heldout-v1",
+            "dataset_name": "Held-out D3 package",
+            "split": "held_out",
+            "corpus_sha256": "a" * 64,
+            "project_state_sha256": None,
+            "prompt_frozen": True,
+            "contamination_checked": True,
+            "adjudication": {
+                "coder_count": 2,
+                "adjudicator": "redacted",
+                "protocol": "Independent coding followed by adjudication.",
+                "human_human_agreement": None,
+                "notes": "",
+            },
+            "application_gold": [
+                {
+                    "code_id": "AI_USE",
+                    "doc_id": doc.id,
+                    "start_char": 0,
+                    "end_char": len(content),
+                }
+            ],
+        }),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(bench_phase0, "ProjectStore", lambda: store)
+
+    exit_code = bench_phase0.main([state.id, "--d3-gold-file", str(d3_gold_file)])
+
+    assert exit_code == 0
+    output = json.loads(capsys.readouterr().out)
+    assert output["application_validity_d3"]["status"] == "scored"
+    assert output["application_validity_d3"]["recall"] == 1.0
+    assert output["application_validity_d3"]["precision"] == 1.0
+    reloaded = store.load(state.id)
+    assert "application_gold" not in reloaded.config.extra
+
+
 def test_bench_phase0_writes_versioned_artifact_package(
     tmp_path,
     monkeypatch,
