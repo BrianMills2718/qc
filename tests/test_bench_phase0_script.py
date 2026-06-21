@@ -1,5 +1,6 @@
 """Tests for the Phase 0 bench CLI script."""
 
+import hashlib
 import json
 import sqlite3
 
@@ -15,6 +16,115 @@ from qc_clean.schemas.domain import (
     ProjectConfig,
     ProjectState,
 )
+
+
+def test_bench_phase0_includes_input_hashes_without_external_files(
+    tmp_path,
+    monkeypatch,
+    capsys,
+):
+    state = ProjectState(
+        id="project_hashes",
+        name="Hash project",
+        corpus=Corpus(documents=[Document(id="d1", name="a.txt", content="A")]),
+    )
+    store = ProjectStore(projects_dir=tmp_path / "projects")
+    store.save(state)
+    monkeypatch.setattr(bench_phase0, "ProjectStore", lambda: store)
+
+    exit_code = bench_phase0.main([state.id])
+
+    assert exit_code == 0
+    output = json.loads(capsys.readouterr().out)
+    hashes = output["_meta"]["input_hashes"]
+    persisted = store.load(state.id)
+    assert hashes["hash_algorithm"] == "sha256"
+    assert hashes["project_id"] == state.id
+    assert hashes["project_state_sha256"] == bench_phase0.sha256_jsonable(
+        persisted.model_dump(mode="json")
+    )
+    assert hashes["corpus_sha256"] == bench_phase0.sha256_jsonable(
+        bench_phase0.corpus_hash_payload(persisted)
+    )
+    assert hashes["gold_file_sha256"] is None
+    assert hashes["d7_baselines_file_sha256"] is None
+    assert hashes["prompt_injection_file_sha256"] is None
+    assert hashes["observability_db_sha256"] is None
+
+
+def test_bench_phase0_hashes_external_input_files(
+    tmp_path,
+    monkeypatch,
+    capsys,
+):
+    content = "AI failed here."
+    doc = Document(id="d1", name="a.txt", content=content)
+    state = ProjectState(id="project_external_hashes", name="External hashes", corpus=Corpus(documents=[doc]))
+    store = ProjectStore(projects_dir=tmp_path / "projects")
+    store.save(state)
+    gold_file = tmp_path / "gold.json"
+    gold_file.write_text(
+        json.dumps({
+            "contrary_evidence": [
+                {
+                    "target_claim_id": "claim-ai",
+                    "doc_id": doc.id,
+                    "start_char": 0,
+                    "end_char": len(content),
+                }
+            ],
+        }),
+        encoding="utf-8",
+    )
+    baselines_file = tmp_path / "baselines.json"
+    baselines_file.write_text(
+        json.dumps({
+            "disconfirmation_baselines": [
+                {"name": "empty_baseline", "contrary_evidence": []}
+            ]
+        }),
+        encoding="utf-8",
+    )
+    injection_file = tmp_path / "prompt_injection.json"
+    injection_file.write_text(
+        json.dumps({
+            "prompt_injection_evaluations": [
+                {
+                    "fixture_id": "direct",
+                    "surface": "thematic_coding",
+                    "attack_succeeded": False,
+                }
+            ]
+        }),
+        encoding="utf-8",
+    )
+    db_path = tmp_path / "observability.db"
+    _create_llm_observability_db(db_path)
+    monkeypatch.setattr(bench_phase0, "ProjectStore", lambda: store)
+
+    exit_code = bench_phase0.main([
+        state.id,
+        "--gold-file",
+        str(gold_file),
+        "--d7-baselines-file",
+        str(baselines_file),
+        "--prompt-injection-file",
+        str(injection_file),
+        "--observability-db",
+        str(db_path),
+    ])
+
+    assert exit_code == 0
+    output = json.loads(capsys.readouterr().out)
+    hashes = output["_meta"]["input_hashes"]
+    assert hashes["gold_file_sha256"] == _sha256_file(gold_file)
+    assert hashes["d7_baselines_file_sha256"] == _sha256_file(baselines_file)
+    assert hashes["prompt_injection_file_sha256"] == _sha256_file(injection_file)
+    assert hashes["observability_db_sha256"] == _sha256_file(db_path)
+    reloaded = store.load(state.id)
+    assert "disconfirmation_gold" not in reloaded.config.extra
+    assert "disconfirmation_baselines" not in reloaded.config.extra
+    assert "prompt_injection_evaluations" not in reloaded.config.extra
 
 
 def test_bench_phase0_scores_d7_from_gold_file_without_mutating_state(
@@ -410,3 +520,7 @@ def _insert_llm_call(
         conn.commit()
     finally:
         conn.close()
+
+
+def _sha256_file(path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
