@@ -6,7 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 20 | Missing corpus scope report warning | High | Planned | `CORPUS_SCOPE_MISSING_REPORT_WARNING.md` |
+| _none_ | _No active plan_ | - | - | - |
 
 ## Completed Plans
 
@@ -31,6 +31,7 @@ Track all implementation work here.
 | INV-2 query-expansion disconfirmation retrieval | INV-2 follow-up: BM25-style retrieval can use weighted deterministic query-expansion terms while preserving exact candidate anchors | `completed/INV2_QUERY_EXPANSION_DISCONFIRMATION_RETRIEVAL.md` |
 | D7 Wilson intervals | Evaluation-harness follow-up: gold-dependent D7 recall/precision now include 95% Wilson intervals in `make bench` | `completed/D7_WILSON_INTERVALS.md` |
 | Corpus scope CLI/API surfaces | Scope contract follow-up: `project scope` and `/projects/{id}/scope` read/update `ProjectState.corpus_scope` | `completed/CORPUS_SCOPE_CLI_API.md` |
+| Missing corpus scope report warning | Scope/report follow-up: Markdown claim reports without corpus scope now warn not to generalize beyond loaded documents | `completed/CORPUS_SCOPE_MISSING_REPORT_WARNING.md` |
 
 ## Status Key
 

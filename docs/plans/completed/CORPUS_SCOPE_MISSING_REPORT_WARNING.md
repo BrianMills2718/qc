@@ -1,10 +1,25 @@
 # Plan #20: Missing Corpus Scope Report Warning
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Plan #16 corpus scope contract; Plan #19 CLI/API scope surfaces
 **Blocks:** broader scope-aware claim/report phrasing checks
+
+---
+
+## Outcome
+
+Markdown report export now renders a `## Corpus Scope` warning when a report has
+claim-ledger rows but no recorded `ProjectState.corpus_scope`. Minimal reports
+without claims remain quiet, and populated corpus-scope rendering is unchanged.
+This is a report-boundary warning only; it does not validate sampling adequacy.
+
+**Verification:** `python -m pytest tests/test_claim_ledger_exports.py -q`
+passed (5 tests), and `python -m ruff check qc_clean/core/export/data_exporter.py
+tests/test_claim_ledger_exports.py` passed. Final `make check` passed (661
+passed, 1 skipped, 8 deselected; Ruff passed; docs-check passed). Type checking
+is not configured in this repo.
 
 ---
 
@@ -95,16 +110,16 @@ cross-project callable capability.
 ## Acceptance Criteria
 
 > Feature-level criteria (what the plan accomplishes):
-- [ ] Markdown reports with claims and no `corpus_scope` include a `## Corpus Scope` warning.
-- [ ] Populated `corpus_scope` rendering remains unchanged.
-- [ ] Markdown reports without claims and without `corpus_scope` omit the warning.
-- [ ] Docs state this is a report-safety warning only, not sampling-frame validation.
+- [x] Markdown reports with claims and no `corpus_scope` include a `## Corpus Scope` warning.
+- [x] Populated `corpus_scope` rendering remains unchanged.
+- [x] Markdown reports without claims and without `corpus_scope` omit the warning.
+- [x] Docs state this is a report-safety warning only, not sampling-frame validation.
 
 > Process criteria (quality gates):
-- [ ] Required tests pass
-- [ ] Full test suite passes
-- [ ] Type check status is reported
-- [ ] Docs updated
+- [x] Required tests pass (`python -m pytest tests/test_claim_ledger_exports.py -q`: 5 passed)
+- [x] Full test suite passes (`make check`: 661 passed, 1 skipped, 8 deselected; Ruff/docs-check passed)
+- [x] Type check status is reported (`make check`: type check not yet configured)
+- [x] Docs updated
 
 ---
 
