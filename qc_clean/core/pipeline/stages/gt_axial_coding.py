@@ -8,6 +8,7 @@ import logging
 from pydantic import BaseModel, Field
 from typing import List
 
+from qc_clean.core.claims import claims_for_relationships, replace_claims_for_stage
 from qc_clean.schemas.gt_schemas import AxialRelationship
 from qc_clean.schemas.adapters import axial_relationships_to_code_relationships
 from qc_clean.schemas.domain import AnalysisMemo, ProjectState
@@ -106,6 +107,12 @@ ANALYTICAL MEMO: After completing the analysis above, write a brief analytical m
         # Stash for downstream
         ctx.gt_axial_relationships = axial_rels
         ctx.gt_axial_text = _format_relationships(axial_rels)
+        replace_claims_for_stage(
+            state,
+            self.name(),
+            claims_for_relationships(state, self.name()),
+            no_claims_reason="GT axial coding produced no relationships",
+        )
 
         logger.info("GT axial coding complete: %d relationships", len(axial_rels))
         return state

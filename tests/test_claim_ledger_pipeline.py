@@ -22,6 +22,12 @@ from qc_clean.schemas.analysis_schemas import (
     ThematicCode,
     ThemeConfidence,
 )
+from qc_clean.schemas.gt_schemas import (
+    AxialRelationship,
+    CoreCategory,
+    OpenCode,
+    TheoreticalModel,
+)
 from qc_clean.schemas.domain import (
     ClaimKind,
     ClaimSupportStatus,
@@ -235,3 +241,142 @@ def test_negative_case_stage_emits_negative_case_claims():
     assert claim.claim_kind == ClaimKind.NEGATIVE_CASE
     assert claim.scope.code_ids == ["AI_USE"]
     assert claim.contrary_anchors
+
+
+def test_gt_constant_comparison_stage_emits_code_and_application_claims():
+    from qc_clean.core.pipeline.stages.gt_constant_comparison import (
+        GTConstantComparisonStage,
+        SegmentCodeApplication,
+        SegmentCodingResponse,
+    )
+
+    state = ProjectState(
+        corpus=Corpus(documents=[
+            Document(id="d1", name="d.txt", content="Jane: We use AI for everything now.")
+        ])
+    )
+    response = SegmentCodingResponse(
+        new_codes=[
+            OpenCode(
+                code_name="AI Use",
+                description="Use of AI tools",
+                properties=["automation"],
+                dimensions=["broad"],
+                supporting_quotes=["We use AI"],
+                frequency=1,
+                confidence=0.8,
+            )
+        ],
+        applications=[
+            SegmentCodeApplication(
+                code_name="AI Use",
+                quote="We use AI for everything now",
+            )
+        ],
+    )
+
+    with patch("qc_clean.core.llm.llm_handler.LLMHandler") as MockLLM:
+        instance = MockLLM.return_value
+        instance.extract_structured = AsyncMock(return_value=response)
+        result = asyncio.run(
+            GTConstantComparisonStage(max_iterations=1).execute(state, PipelineContext())
+        )
+
+    gt_claims = [claim for claim in result.claims if claim.source_stage == "gt_constant_comparison"]
+    assert {claim.claim_kind for claim in gt_claims} == {
+        ClaimKind.CODE,
+        ClaimKind.CODE_APPLICATION,
+    }
+    assert any(claim.supporting_anchors for claim in gt_claims)
+
+
+def test_gt_axial_selective_and_theory_stages_emit_claims():
+    from qc_clean.core.pipeline.stages.gt_axial_coding import (
+        AxialRelationshipsResponse,
+        GTAxialCodingStage,
+    )
+    from qc_clean.core.pipeline.stages.gt_selective_coding import (
+        CoreCategoriesResponse,
+        GTSelectiveCodingStage,
+    )
+    from qc_clean.core.pipeline.stages.gt_theory_integration import (
+        GTTheoryIntegrationStage,
+    )
+
+    state = ProjectState(
+        codebook=Codebook(codes=[
+            Code(id="AI_USE", name="AI Use"),
+            Code(id="WORKFLOW", name="Workflow"),
+        ]),
+        corpus=Corpus(documents=[Document(id="d1", name="d.txt", content="AI changed workflow.")]),
+    )
+
+    axial = AxialRelationshipsResponse(
+        axial_relationships=[
+            AxialRelationship(
+                central_category="AI Use",
+                related_category="Workflow",
+                relationship_type="changes",
+                conditions=[],
+                consequences=[],
+                supporting_evidence=["AI changed workflow"],
+                strength=0.8,
+            )
+        ]
+    )
+    with patch("qc_clean.core.llm.llm_handler.LLMHandler") as MockLLM:
+        instance = MockLLM.return_value
+        instance.extract_structured = AsyncMock(return_value=axial)
+        ctx = PipelineContext(gt_open_codes_text="codes")
+        state = asyncio.run(GTAxialCodingStage().execute(state, ctx))
+
+    assert any(
+        claim.source_stage == "gt_axial_coding"
+        and claim.claim_kind == ClaimKind.RELATIONSHIP
+        for claim in state.claims
+    )
+
+    selective = CoreCategoriesResponse(
+        core_categories=[
+            CoreCategory(
+                category_name="Managed adoption",
+                definition="AI use is managed through workflow change.",
+                central_phenomenon="Managed AI adoption",
+                related_categories=["AI_USE", "WORKFLOW"],
+                theoretical_properties=["pace"],
+                explanatory_power="Explains workflow changes",
+                integration_rationale="Connects AI and workflow",
+            )
+        ]
+    )
+    with patch("qc_clean.core.llm.llm_handler.LLMHandler") as MockLLM:
+        instance = MockLLM.return_value
+        instance.extract_structured = AsyncMock(return_value=selective)
+        state = asyncio.run(GTSelectiveCodingStage().execute(state, ctx))
+
+    assert any(
+        claim.source_stage == "gt_selective_coding"
+        and claim.claim_kind == ClaimKind.GT_CATEGORY
+        for claim in state.claims
+    )
+
+    theory = TheoreticalModel(
+        model_name="Managed adoption model",
+        core_categories=["Managed adoption"],
+        theoretical_framework="AI use changes workflow through managed adoption.",
+        propositions=["If training is strong, resistance falls."],
+        conceptual_relationships=["AI use -> workflow"],
+        scope_conditions=["Knowledge work"],
+        implications=["Invest in training"],
+        future_research=[],
+    )
+    with patch("qc_clean.core.llm.llm_handler.LLMHandler") as MockLLM:
+        instance = MockLLM.return_value
+        instance.extract_structured = AsyncMock(return_value=theory)
+        state = asyncio.run(GTTheoryIntegrationStage().execute(state, ctx))
+
+    assert any(
+        claim.source_stage == "gt_theory_integration"
+        and claim.claim_kind == ClaimKind.GT_PROPOSITION
+        for claim in state.claims
+    )

@@ -8,6 +8,7 @@ import logging
 from pydantic import BaseModel, Field
 from typing import List
 
+from qc_clean.core.claims import claims_for_gt_categories, replace_claims_for_stage
 from qc_clean.schemas.gt_schemas import CoreCategory
 from qc_clean.schemas.adapters import core_category_to_domain
 from qc_clean.schemas.domain import AnalysisMemo, ProjectState
@@ -100,6 +101,12 @@ ANALYTICAL MEMO: After completing the analysis above, write a brief analytical m
         ctx.gt_core_text = "\n".join(
             f"- {cc.category_name}: {cc.definition}"
             for cc in response.core_categories
+        )
+        replace_claims_for_stage(
+            state,
+            self.name(),
+            claims_for_gt_categories(state, self.name()),
+            no_claims_reason="GT selective coding produced no core categories",
         )
 
         logger.info(

@@ -18,6 +18,11 @@ from typing import Dict, List, Optional
 
 from pydantic import BaseModel, Field
 
+from qc_clean.core.claims import (
+    claims_for_code_applications,
+    claims_for_codes,
+    replace_claims_for_stage,
+)
 from qc_clean.core.pipeline.saturation import calculate_codebook_change
 from qc_clean.schemas.domain import (
     AnalysisMemo,
@@ -299,6 +304,13 @@ class GTConstantComparisonStage(PipelineStage):
         open_codes = codebook_to_open_codes(codebook)
         ctx.gt_open_codes = open_codes
         ctx.gt_open_codes_text = _format_codes_for_analysis(open_codes)
+        replace_claims_for_stage(
+            state,
+            self.name(),
+            claims_for_codes(state, self.name())
+            + claims_for_code_applications(state, self.name()),
+            no_claims_reason="GT constant comparison produced no codes or applications",
+        )
 
         logger.info(
             "Constant comparison complete: %d iterations, %d codes, %d applications",

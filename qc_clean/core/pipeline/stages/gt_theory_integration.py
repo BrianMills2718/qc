@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import logging
 
+from qc_clean.core.claims import claims_for_gt_theory, replace_claims_for_stage
 from qc_clean.schemas.gt_schemas import TheoreticalModel
 from qc_clean.schemas.adapters import theoretical_model_to_domain
 from qc_clean.schemas.domain import AnalysisMemo, ProjectState
@@ -78,6 +79,13 @@ ANALYTICAL MEMO: After completing the analysis above, write a brief analytical m
                 title="Theory Integration Memo",
                 content=response.analytical_memo,
             ))
+
+        replace_claims_for_stage(
+            state,
+            self.name(),
+            claims_for_gt_theory(state, self.name()),
+            no_claims_reason="GT theory integration produced no propositions, scope conditions, or implications",
+        )
 
         logger.info(
             "GT theory integration complete: %s",

@@ -177,7 +177,7 @@ highest-value independent phase.
 | 1 | Schema: `AnalyticClaim`, anchor, scope, adjudication/revision models, `ProjectState.claims`, pure summary helper | DONE: `tests/test_claims.py`; JSON round-trip/backward compatibility | `[Plan: INV9] Add claim ledger schema` |
 | 2 | Deterministic claim builders for codes, applications, perspectives, relationships, synthesis, cross-case, GT objects, and negative cases | DONE: `tests/test_claims.py` expanded with focused fixtures | `[Plan: INV9] Add claim builders` |
 | 3 | Wire default thematic pipeline stages; enforce no prose-only bypass for default path | DONE: `tests/test_claim_ledger_pipeline.py`, targeted stage tests | `[Plan: INV9] Wire default pipeline claims` |
-| 4 | Wire GT stages; explicitly reject/flag any GT claim class not yet representable | GT stage tests; no app-level IRR scope expansion | `[Plan: INV9] Wire GT claims` |
+| 4 | Wire GT stages; explicitly reject/flag any GT claim class not yet representable | DONE: GT stage tests; no app-level IRR scope expansion | `[Plan: INV9] Wire GT claims` |
 | 5 | Surface ledger in CSV/Markdown exports, CLI/API/MCP read paths | export/API/MCP/CLI tests | `[Plan: INV9] Expose claim ledger` |
 | 6 | Negative-case linkage: store negative cases as claims and attach contrary anchors/target refs where deterministic | `tests/test_negative_case_inv6.py` updated; no claim over full INV-6 | `[Plan: INV9] Link negative cases to claims` |
 | 7 | Docs and governance: update theory ledger, plan status, command docs, audit caveats | `make docs-check`; `make check` | `[Plan: INV9] Document claim ledger` |
@@ -275,3 +275,8 @@ pipeline stages (`thematic_coding`, `perspective`, `relationship`, `synthesis`,
 reruns do not duplicate a stage's claims. Verification: `tests/test_claim_ledger_pipeline.py`
 (6 passed), focused affected set (57 passed), and `make check` (597 passed,
 1 skipped, 8 deselected; Ruff/docs green).
+
+Phase 4 complete 2026-06-21: wired claim recording into GT constant comparison,
+axial coding, selective coding, and theory integration. Verification:
+`tests/test_claim_ledger_pipeline.py` (8 passed), focused affected set
+(79 passed), and `make check` (599 passed, 1 skipped, 8 deselected; Ruff/docs green).
