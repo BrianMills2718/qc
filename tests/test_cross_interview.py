@@ -208,3 +208,25 @@ class TestTheoreticalSampling:
             )
         suggestions = suggest_next_documents(multi_doc_state, max_suggestions=2)
         assert len(suggestions) <= 2
+
+    def test_sampling_uses_category_diagnostics_over_application_count(self):
+        state = ProjectState(
+            corpus=Corpus(documents=[
+                Document(id="d1", name="coded1.txt", content="Trust appeared once."),
+                Document(id="d2", name="coded2.txt", content="Trust appeared twice."),
+                Document(id="d3", name="candidate.txt", content="New candidate."),
+            ]),
+            codebook=Codebook(codes=[
+                Code(id="TRUST", name="Trust", description="Trust category"),
+            ]),
+            code_applications=[
+                CodeApplication(code_id="TRUST", doc_id="d1", quote_text="Trust appeared once."),
+                CodeApplication(code_id="TRUST", doc_id="d2", quote_text="Trust appeared twice."),
+            ],
+        )
+
+        suggestions = suggest_next_documents(state)
+
+        assert suggestions[0].doc_id == "d3"
+        assert suggestions[0].gap_codes == ["TRUST"]
+        assert "category-development" in suggestions[0].reason

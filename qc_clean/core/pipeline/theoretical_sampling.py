@@ -9,6 +9,7 @@ import logging
 from collections import defaultdict
 from typing import Dict, List
 
+from qc_clean.core.pipeline.saturation import assess_category_saturation
 from qc_clean.schemas.domain import ProjectState, SamplingSuggestion
 
 logger = logging.getLogger(__name__)
@@ -37,7 +38,15 @@ def suggest_next_documents(
     if not uncoded:
         return []
 
-    # Which codes have low coverage?
+    category_diagnostic = assess_category_saturation(state)
+    diagnostic_gap_codes = {
+        category.code_id
+        for category in category_diagnostic.categories
+        if category.status != "adequate"
+    }
+
+    # Which codes have low coverage? Used as fallback when the category
+    # diagnostic has no category-development gaps.
     code_doc_counts: Dict[str, int] = defaultdict(int)
     for app in state.code_applications:
         code_doc_counts[app.code_id] += 1
@@ -47,6 +56,12 @@ def suggest_next_documents(
         cid for cid in all_code_ids
         if code_doc_counts.get(cid, 0) <= 1
     }
+    gap_codes = diagnostic_gap_codes or low_coverage_codes
+    reason = (
+        "Uncoded document with potential to address category-development gaps"
+        if diagnostic_gap_codes
+        else "Uncoded document with potential to cover under-represented codes"
+    )
 
     suggestions = []
     for doc in uncoded:
@@ -57,8 +72,8 @@ def suggest_next_documents(
         suggestions.append(SamplingSuggestion(
             doc_id=doc.id,
             doc_name=doc.name,
-            reason="Uncoded document with potential to cover under-represented codes",
-            gap_codes=sorted(low_coverage_codes),
+            reason=reason,
+            gap_codes=sorted(gap_codes),
             priority_score=score,
         ))
 
