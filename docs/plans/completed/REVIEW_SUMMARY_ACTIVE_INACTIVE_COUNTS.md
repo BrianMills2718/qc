@@ -1,10 +1,27 @@
 # Plan #24: Review Summary Active Inactive Counts
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** Medium
 **Blocked By:** Plan #23 review-decision inactive metadata
 **Blocks:** review audit UX
+
+---
+
+## Outcome
+
+`ReviewSummary` now reports `active_decisions` and `inactive_decisions` while
+preserving `existing_decisions` as the total review-decision count.
+`ReviewManager.get_review_summary()` computes the counters from
+`HumanReviewDecision.is_active`, and the review CLI prints active and historical
+decision counts beneath the total.
+
+**Verification:** `python -m pytest tests/test_review.py tests/test_domain_model.py
+-q` passed (41 tests), and `python -m ruff check qc_clean/schemas/domain.py
+qc_clean/core/pipeline/review.py qc_clean/core/cli/commands/review.py
+tests/test_review.py` passed. Final `make check` passed (670 passed, 1 skipped,
+8 deselected; Ruff passed; docs-check passed). Type checking is not configured
+in this repo.
 
 ---
 
@@ -94,16 +111,16 @@ cross-project callable capability.
 ## Acceptance Criteria
 
 > Feature-level criteria (what the plan accomplishes):
-- [ ] `ReviewSummary` includes active and inactive decision counters.
-- [ ] `existing_decisions` remains the total decision count.
-- [ ] `ReviewManager.get_review_summary()` computes all three counts.
-- [ ] Review CLI prints active and inactive counts.
+- [x] `ReviewSummary` includes active and inactive decision counters.
+- [x] `existing_decisions` remains the total decision count.
+- [x] `ReviewManager.get_review_summary()` computes all three counts.
+- [x] Review CLI prints active and inactive counts.
 
 > Process criteria (quality gates):
-- [ ] Required tests pass
-- [ ] Full test suite passes
-- [ ] Type check status is reported
-- [ ] Docs updated
+- [x] Required tests pass (`python -m pytest tests/test_review.py tests/test_domain_model.py -q`: 41 passed)
+- [x] Full test suite passes (`make check`: 670 passed, 1 skipped, 8 deselected; Ruff/docs-check passed)
+- [x] Type check status is reported (`make check`: type check not yet configured)
+- [x] Docs updated
 
 ---
 
