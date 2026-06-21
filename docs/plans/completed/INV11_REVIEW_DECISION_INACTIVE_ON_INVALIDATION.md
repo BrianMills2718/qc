@@ -1,10 +1,33 @@
 # Plan #23: INV-11 Review Decisions Inactive On Claim Invalidation
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** Medium
 **Blocked By:** Plan #22 incremental hard invalidation
 **Blocks:** fuller active-vs-historical review audit UX
+
+---
+
+## Outcome
+
+`HumanReviewDecision` now has default-active metadata:
+`is_active`, `inactive_reason`, and `inactive_at`. Incremental stale-claim
+invalidation keeps review decisions as audit history, but marks claim review
+decisions inactive when their target claims are removed. Decisions for retained
+claims and non-claim targets remain active.
+
+The theory doc now records that active-vs-historical review-decision handling is
+implemented for removed claims; INV-11 remains partial because auto-recompute on
+corpus mutation is still not implemented.
+
+**Verification:** `python -m pytest
+tests/test_domain_model.py::TestHumanReviewDecision::test_create
+tests/test_incremental_staleness_inv11.py tests/test_review.py -q` passed (22
+tests), and `python -m ruff check qc_clean/schemas/domain.py
+qc_clean/core/pipeline/stages/incremental_coding.py tests/test_domain_model.py
+tests/test_incremental_staleness_inv11.py` passed. Final `make check` passed
+(669 passed, 1 skipped, 8 deselected; Ruff passed; docs-check passed). Type
+checking is not configured in this repo.
 
 ---
 
@@ -107,17 +130,17 @@ does not create a cross-project callable capability.
 ## Acceptance Criteria
 
 > Feature-level criteria (what the plan accomplishes):
-- [ ] `HumanReviewDecision` has default-active metadata.
-- [ ] Stale claim invalidation marks matching claim review decisions inactive.
-- [ ] Review decisions for retained claims remain active.
-- [ ] Non-claim review decisions remain active.
-- [ ] Docs no longer list active-vs-historical review-decision handling as an open INV-11 gap.
+- [x] `HumanReviewDecision` has default-active metadata.
+- [x] Stale claim invalidation marks matching claim review decisions inactive.
+- [x] Review decisions for retained claims remain active.
+- [x] Non-claim review decisions remain active.
+- [x] Docs no longer list active-vs-historical review-decision handling as an open INV-11 gap.
 
 > Process criteria (quality gates):
-- [ ] Required tests pass
-- [ ] Full test suite passes
-- [ ] Type check status is reported
-- [ ] Docs updated
+- [x] Required tests pass (`python -m pytest tests/test_domain_model.py::TestHumanReviewDecision::test_create tests/test_incremental_staleness_inv11.py tests/test_review.py -q`: 22 passed)
+- [x] Full test suite passes (`make check`: 669 passed, 1 skipped, 8 deselected; Ruff/docs-check passed)
+- [x] Type check status is reported (`make check`: type check not yet configured)
+- [x] Docs updated
 
 ---
 
