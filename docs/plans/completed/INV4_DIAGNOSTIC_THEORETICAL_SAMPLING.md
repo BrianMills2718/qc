@@ -1,10 +1,30 @@
 # Plan #15: INV-4 Diagnostic-Driven Theoretical Sampling
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** None
 **Blocks:** INV-4 theoretical sampling protocol
+
+---
+
+## Outcome
+
+Completed 2026-06-21. `suggest_next_documents()` now calls
+`assess_category_saturation()` and uses non-adequate category IDs as primary
+`SamplingSuggestion.gap_codes`, falling back to the previous low-coverage
+heuristic when no category-development gaps are present. Suggestion reasons now
+distinguish category-development gaps from generic under-represented-code
+coverage.
+
+This remains sampling guidance among already-loaded uncoded documents. It does
+not implement a full GT theoretical sampling protocol, persist sampling
+decisions, select/collect new external data, or prove category saturation.
+INV-4 remains PARTIAL.
+
+Verification: `python -m pytest tests/test_cross_interview.py tests/test_category_saturation_inv4.py -q`
+passed (`17 passed`) and Ruff passed on touched files before the implementation
+commit. Final plan completion was verified with `make check`.
 
 ---
 

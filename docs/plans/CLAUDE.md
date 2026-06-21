@@ -6,7 +6,9 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 15 | INV-4 diagnostic-driven theoretical sampling | High | Planned | `INV4_DIAGNOSTIC_THEORETICAL_SAMPLING.md` |
+
+No active implementation plan is currently tracked here. Use the roadmap in
+`docs/PROJECT_THEORY_AND_GOALS.md` §18 to choose the next invariant lane.
 
 ## Completed Plans
 
@@ -26,6 +28,7 @@ Track all implementation work here.
 | INV-2 D7 gold file bench input | Evaluation-harness follow-up: `make bench ID=<project> GOLD=gold.json` feeds external D7 gold without mutating project state | `completed/INV2_D7_GOLD_FILE_BENCH_INPUT.md` |
 | INV-7 prompt override guards | INV-7 follow-up: current prompt override surfaces fail loudly if required protected data placeholders are omitted | `completed/INV7_PROMPT_OVERRIDE_GUARDS.md` |
 | INV-4 category saturation diagnostic | INV-4 first slice: `make bench` reports diagnostic-only category property/dimension/support adequacy separately from codebook stability | `completed/INV4_CATEGORY_SATURATION_DIAGNOSTIC.md` |
+| INV-4 diagnostic-driven theoretical sampling | INV-4 follow-up: sampling suggestions use category adequacy gaps before falling back to low application coverage | `completed/INV4_DIAGNOSTIC_THEORETICAL_SAMPLING.md` |
 
 ## Status Key
 
