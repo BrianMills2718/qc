@@ -1,10 +1,36 @@
 # Plan #22: INV-11 Incremental Hard Invalidation
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** INV-11 warning surfacing
 **Blocks:** auto-recompute on corpus mutation
+
+---
+
+## Outcome
+
+Incremental recode now hard-invalidates higher-order outputs it cannot
+recompute: `synthesis`, `perspective_analysis`, `code_relationships`,
+`entities`, `entity_relationships`, `core_categories`, and `theoretical_model`.
+It also removes matching stale phase results and claim-ledger rows from
+`perspective`, `relationship`, `synthesis`, `gt_axial_coding`,
+`gt_selective_coding`, and `gt_theory_integration`. Coding outputs,
+cross-interview, and negative-case paths remain available for the incremental
+pipeline to update/rerun.
+
+The emitted warning now says the outputs were invalidated and that a full
+pipeline rerun is needed to regenerate them. This is still INV-11 partial:
+auto-recompute is not implemented, and review-decision history for removed
+claims remains a separate governance question.
+
+**Verification:** `python -m pytest tests/test_incremental_staleness_inv11.py
+tests/test_incremental.py tests/test_claims.py tests/test_claim_ledger_pipeline.py
+-q` passed (41 tests), and `python -m ruff check
+qc_clean/core/pipeline/stages/incremental_coding.py
+tests/test_incremental_staleness_inv11.py tests/test_incremental.py` passed.
+Final `make check` passed (668 passed, 1 skipped, 8 deselected; Ruff passed;
+docs-check passed). Type checking is not configured in this repo.
 
 ---
 
@@ -115,18 +141,18 @@ create a cross-project callable capability.
 ## Acceptance Criteria
 
 > Feature-level criteria (what the plan accomplishes):
-- [ ] Incremental recode hard-invalidates stale higher-order outputs it does not recompute.
-- [ ] Stale claim-ledger rows from invalidated source stages are removed.
-- [ ] Stale phase results from invalidated source stages are removed.
-- [ ] Coding outputs, cross-interview, and negative-case paths remain untouched.
-- [ ] Data warning says outputs were invalidated and full pipeline rerun is needed.
-- [ ] Docs state INV-11 is improved but still partial because auto-recompute is not implemented.
+- [x] Incremental recode hard-invalidates stale higher-order outputs it does not recompute.
+- [x] Stale claim-ledger rows from invalidated source stages are removed.
+- [x] Stale phase results from invalidated source stages are removed.
+- [x] Coding outputs, cross-interview, and negative-case paths remain untouched.
+- [x] Data warning says outputs were invalidated and full pipeline rerun is needed.
+- [x] Docs state INV-11 is improved but still partial because auto-recompute is not implemented.
 
 > Process criteria (quality gates):
-- [ ] Required tests pass
-- [ ] Full test suite passes
-- [ ] Type check status is reported
-- [ ] Docs updated
+- [x] Required tests pass (`python -m pytest tests/test_incremental_staleness_inv11.py tests/test_incremental.py tests/test_claims.py tests/test_claim_ledger_pipeline.py -q`: 41 passed)
+- [x] Full test suite passes (`make check`: 668 passed, 1 skipped, 8 deselected; Ruff/docs-check passed)
+- [x] Type check status is reported (`make check`: type check not yet configured)
+- [x] Docs updated
 
 ---
 
