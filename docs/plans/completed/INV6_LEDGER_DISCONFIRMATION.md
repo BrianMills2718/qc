@@ -1,12 +1,25 @@
 # Plan #5: INV-6 Ledger-Wide Disconfirmation and Claim Review
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** None
 **Blocks:** INV-6 full disconfirmation coverage; INV-10 claim adjudication; INV-2 retrieval-first disconfirmation hardening
 
 *Started: 2026-06-21. Owner: autonomous agent. Re-read after any compaction.*
+
+---
+
+## Completion Outcome
+
+Completed 2026-06-21. Negative-case analysis now receives bounded claim-ledger
+targets by ID, `NegativeCase` can return an exact `target_claim_id`, and
+disconfirmation coverage is summarized on CLI/API/MCP claim surfaces. Claim
+review decisions now support `target_type="claim"` for approve, reject/withdraw,
+and modify, preserving `ClaimRevision` history. This is a first slice for
+INV-6/INV-10: it does **not** claim retrieval-first disconfirmation (INV-2),
+methodological validity, browser-native claim review, or proof that every claim
+has been human-adjudicated.
 
 ---
 
@@ -101,7 +114,7 @@ These are internal project capabilities, not cross-project boundary APIs.
 | 2 | Negative-case schema/prompt wiring: include bounded claim targets and preserve explicit challenged claim IDs | DONE: `tests/test_negative_case_inv6.py`; prompt-target and builder tests | `[Plan: INV6] Target negative cases to ledger claims` |
 | 3 | Claim adjudication via `ReviewManager`: approve/reject/modify claim objects, append `ClaimRevision`, preserve fail-loud unknown targets | DONE: review manager tests | `[Plan: INV10] Add claim review decisions` |
 | 4 | Read surfaces for disconfirmation/adjudication summaries where useful: CLI/API/MCP bounded summary, no raw full-state dump | DONE: CLI/API/MCP tests | `[Plan: INV6] Expose disconfirmation coverage` |
-| 5 | Docs/governance: update INV-6/INV-10 statuses conservatively and move plan to completed records | `make docs-check`; `make check` | `[Plan: INV6] Document ledger disconfirmation` |
+| 5 | Docs/governance: update INV-6/INV-10 statuses conservatively and move plan to completed records | DONE: `make docs-check`; `make check` | `[Plan: INV6] Document ledger disconfirmation` |
 
 ---
 
@@ -137,15 +150,15 @@ Feature-level criteria:
 - [x] Disconfirmation coverage summary reports total targets, challenged targets, unchallenged targets, and challenged rate.
 - [x] Claim review decisions can approve, reject/withdraw, or modify an `AnalyticClaim` and append revision history.
 - [x] Unknown claim IDs and unsupported claim review actions fail loudly.
-- [ ] Docs update INV-6 and INV-10 only to the exact implemented scope, without marking INV-2 or methodological validity as met.
+- [x] Docs update INV-6 and INV-10 only to the exact implemented scope, without marking INV-2 or methodological validity as met.
 
 Process criteria:
 
-- [ ] New targeted tests pass after each phase.
-- [ ] `make check` passes before final completion.
-- [ ] Plan tracker is updated as phases complete.
-- [ ] Each verified phase is committed separately with `[Plan: INV6]` or `[Plan: INV10]`.
-- [ ] Pre-existing `.claude/hook_log.jsonl` dirt is not staged or committed.
+- [x] New targeted tests pass after each phase.
+- [x] `make check` passes before final completion.
+- [x] Plan tracker is updated as phases complete.
+- [x] Each verified phase is committed separately with `[Plan: INV6]` or `[Plan: INV10]`.
+- [x] Pre-existing `.claude/hook_log.jsonl` dirt is not staged or committed.
 
 ---
 
@@ -186,3 +199,8 @@ Phase 4 complete 2026-06-21: added `disconfirmation_summary` to the existing
 claim read surfaces: CLI `project claims`, API `/projects/{project_id}/claims`,
 and MCP `qc_get_claims`. Verification: focused surface tests (3 passed) and
 broader CLI/API/MCP suites (90 passed).
+
+Phase 5 complete 2026-06-21: updated `docs/PROJECT_THEORY_AND_GOALS.md`,
+`CLAUDE.md`, regenerated `AGENTS.md`, moved this plan to completed records, and
+updated `docs/plans/CLAUDE.md`. Verification: `make docs-check` and `make check`
+green at closure.

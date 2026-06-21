@@ -6,10 +6,9 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 5 | INV-6 ledger-wide disconfirmation and claim review | High | Planned | `INV6_LEDGER_DISCONFIRMATION.md` |
 
-Active implementation plan tracked. Execute `INV6_LEDGER_DISCONFIRMATION.md`
-phases in order.
+No active implementation plan is currently tracked here. Use the roadmap in
+`docs/PROJECT_THEORY_AND_GOALS.md` §18 to choose the next invariant lane.
 
 ## Completed Plans
 
@@ -19,6 +18,7 @@ phases in order.
 | INV-8 segment universe + exhaustive coding | INV-8 met in exhaustive mode (`--exhaustive`); coverage denominator | `completed/INV8_SEGMENT_UNIVERSE.md` |
 | Application-level IRR | `project irr --application-level` reports positive segment x code agreement plus segment-decision agreement | `completed/IRR_APPLICATION_LEVEL.md` |
 | INV-9 first-class claim ledger | INV-9 object layer mostly met; claims emitted/read across stages and surfaces | `completed/INV9_CLAIM_LEDGER.md` |
+| INV-6 ledger-wide disconfirmation and claim review | INV-6/INV-10 first slice: negative-case targets claim ledger IDs; claim review decisions supported | `completed/INV6_LEDGER_DISCONFIRMATION.md` |
 
 ## Status Key
 
