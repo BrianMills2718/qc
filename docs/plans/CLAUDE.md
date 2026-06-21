@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 39 | Exact-score F1 bootstrap intervals | High | Planned | `EXACT_SCORE_F1_BOOTSTRAP_INTERVALS.md` |
 
 ## Completed Plans
 
