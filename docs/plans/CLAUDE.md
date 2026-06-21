@@ -6,7 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| _none_ | _No active plan_ | - | - | - |
+| 28 | Phase 0 input hashes | High | Planned | `PHASE0_INPUT_HASHES.md` |
 
 ## Completed Plans
 
