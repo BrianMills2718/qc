@@ -6,7 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| — | — | — | No active plan | — |
+| 36 | D3 application validity scorecard | High | Planned | `D3_APPLICATION_VALIDITY_SCORECARD.md` |
 
 ## Completed Plans
 
