@@ -64,6 +64,14 @@ class PipelineContext(BaseModel):
         default_factory=dict,
         description="Stage-name -> prompt text. Overrides the default prompt for that stage.",
     )
+    disconfirmation_max_targets: int = Field(
+        default=50,
+        description="Maximum live claim-ledger targets shown to retrieval-first disconfirmation.",
+    )
+    disconfirmation_candidates_per_claim: int = Field(
+        default=5,
+        description="Maximum retrieved source passages per claim target for disconfirmation.",
+    )
 
     # --- Inter-stage: thematic pipeline ---
     phase1_json: Optional[str] = None

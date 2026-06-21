@@ -17,7 +17,17 @@ from qc_clean.core.prompting import (
     format_untrusted_documents,
 )
 from qc_clean.schemas.analysis_schemas import CodeHierarchy, ThematicCode
-from qc_clean.schemas.domain import Code, CodeApplication, Codebook, Corpus, Document, ProjectState
+from qc_clean.schemas.domain import (
+    AnalyticClaim,
+    ClaimKind,
+    ClaimScope,
+    Code,
+    CodeApplication,
+    Codebook,
+    Corpus,
+    Document,
+    ProjectState,
+)
 
 
 MALICIOUS_TRANSCRIPT = (
@@ -99,6 +109,17 @@ def test_negative_case_prompt_wraps_malicious_transcript_as_untrusted_data():
     state.codebook = Codebook(codes=[
         Code(id="SUPPORT", name="Support", description="Participant support"),
     ])
+    state.claims = [
+        AnalyticClaim(
+            id="claim-support",
+            claim_kind=ClaimKind.SYNTHESIS_FINDING,
+            source_stage="synthesis",
+            claim_text="The participant felt supported by the team.",
+            scope=ClaimScope(corpus_level=True, code_ids=["SUPPORT"]),
+            origin_object_type="synthesis",
+            origin_object_id="finding:0",
+        )
+    ]
     captured_prompt = ""
     response = NegativeCaseResponse(
         negative_cases=[],

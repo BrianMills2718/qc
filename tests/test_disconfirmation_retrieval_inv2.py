@@ -1,11 +1,23 @@
 """INV-2 regression tests for retrieval-first disconfirmation."""
 
+import asyncio
+from unittest.mock import AsyncMock, patch
+
+import pytest
+
+from qc_clean.core.claims import claims_for_negative_cases
 from qc_clean.core.disconfirmation import (
     anchor_for_candidate,
     format_disconfirmation_candidates,
     retrieve_disconfirmation_candidates,
 )
 from qc_clean.core.grounding import verify_anchor
+from qc_clean.core.pipeline.pipeline_engine import PipelineContext
+from qc_clean.core.pipeline.stages.negative_case import (
+    NegativeCase,
+    NegativeCaseResponse,
+    NegativeCaseStage,
+)
 from qc_clean.core.segmentation import segment_corpus
 from qc_clean.schemas.domain import (
     AnalyticClaim,
@@ -87,6 +99,85 @@ def test_anchor_for_candidate_preserves_exact_source_span():
     assert anchor.end_char == candidate.end_char
     assert anchor.quote_text == candidate.quote_text
     assert anchor.quote_hash == candidate.quote_hash
+
+
+def test_negative_case_prompt_uses_retrieved_candidates_not_full_corpus():
+    state = _state_with_segments(
+        "AI failed for this team after repeated errors.\n\n"
+        "This irrelevant paragraph should not be sent to the negative-case prompt."
+    )
+    state.claims = [_claim("claim-ai", "AI improves workflow across the corpus.")]
+    captured_prompt = ""
+    response = NegativeCaseResponse(
+        negative_cases=[],
+        overall_assessment="No retrieved candidate was sufficient.",
+    )
+
+    async def capture_prompt(prompt, *_args, **_kwargs):
+        nonlocal captured_prompt
+        captured_prompt = prompt
+        return response
+
+    with patch("qc_clean.core.llm.llm_handler.LLMHandler") as MockLLM:
+        MockLLM.return_value.extract_structured = AsyncMock(side_effect=capture_prompt)
+        result = asyncio.run(
+            NegativeCaseStage().execute(
+                state,
+                PipelineContext(disconfirmation_candidates_per_claim=1),
+            )
+        )
+
+    assert "RETRIEVAL-FIRST SOURCE CANDIDATES" in captured_prompt
+    assert "candidate_id=dc-0-1" in captured_prompt
+    assert "DATA> AI failed for this team after repeated errors." in captured_prompt
+    assert "irrelevant paragraph should not be sent" not in captured_prompt
+    assert "INTERVIEW DATA:" not in captured_prompt
+    assert result.memos[0].memo_type == "negative_case"
+    assert "Retrieval-First Candidate Search" in result.memos[0].content
+    assert "Retrieved 1 candidate passage(s) for 1 claim target(s)." in result.memos[0].content
+
+
+def test_negative_case_candidate_id_creates_exact_contrary_anchor():
+    state = _state_with_segments("AI failed for this team after repeated errors.")
+    target = _claim("claim-ai", "AI improves workflow across the corpus.")
+    state.claims = [target]
+    candidate = retrieve_disconfirmation_candidates(state, [target], candidates_per_claim=1)[0]
+    negative_case = NegativeCase(
+        code_name="AI Use",
+        target_claim_id="claim-ai",
+        candidate_id=candidate.id,
+        disconfirming_evidence="a paraphrase that does not appear literally",
+        explanation="The retrieved source says AI failed.",
+        implication="The improvement claim needs a failure boundary condition.",
+    )
+
+    claims = claims_for_negative_cases(
+        state,
+        [negative_case],
+        candidate_anchors={candidate.id: anchor_for_candidate(candidate)},
+    )
+
+    anchor = claims[0].contrary_anchors[0]
+    assert anchor.doc_id == candidate.doc_id
+    assert anchor.segment_id == candidate.segment_id
+    assert anchor.start_char == candidate.start_char
+    assert anchor.end_char == candidate.end_char
+    assert anchor.quote_text == candidate.quote_text
+    assert claims[0].scope.claim_ids == ["claim-ai"]
+
+
+def test_invalid_negative_case_candidate_id_fails_loud():
+    state = _state_with_segments("AI failed for this team after repeated errors.")
+    negative_case = NegativeCase(
+        code_name="AI Use",
+        candidate_id="missing-candidate",
+        disconfirming_evidence="AI failed",
+        explanation="The retrieved source says AI failed.",
+        implication="The claim needs a boundary condition.",
+    )
+
+    with pytest.raises(ValueError, match="missing-candidate"):
+        claims_for_negative_cases(state, [negative_case], candidate_anchors={})
 
 
 def _state_with_segments(content: str) -> ProjectState:

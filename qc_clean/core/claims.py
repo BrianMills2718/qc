@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections import Counter
-from typing import Any, Iterable
+from typing import Any, Iterable, Mapping
 
 from qc_clean.core.grounding import MatchStatus, resolve_against_docs
 from qc_clean.schemas.domain import (
@@ -351,12 +351,14 @@ def claims_for_negative_cases(
     state: ProjectState,
     negative_cases: Iterable[Any],
     source_stage: str = "negative_case_analysis",
+    *,
+    candidate_anchors: Mapping[str, ClaimAnchor] | None = None,
 ) -> list[AnalyticClaim]:
     """Create claims from negative-case objects and resolve contrary anchors."""
     claims: list[AnalyticClaim] = []
     for i, negative_case in enumerate(negative_cases):
         code_id = _code_id_by_name(state, negative_case.code_name)
-        anchor = _anchor_from_quote(state, negative_case.disconfirming_evidence)
+        anchor = _anchor_for_negative_case(state, negative_case, candidate_anchors)
         contrary_anchors = [anchor] if anchor else []
         target_claim_ids = _claim_ids_for_negative_case_target(
             state,
@@ -669,6 +671,22 @@ def _claim_ids_for_negative_case_target(
             )
         return [explicit_target]
     return _claim_ids_for_code_target(state, code_id, source_stage)
+
+
+def _anchor_for_negative_case(
+    state: ProjectState,
+    negative_case: Any,
+    candidate_anchors: Mapping[str, ClaimAnchor] | None,
+) -> ClaimAnchor | None:
+    """Resolve a negative-case anchor from candidate ID or evidence quote."""
+    candidate_id = getattr(negative_case, "candidate_id", None)
+    if candidate_id:
+        if candidate_anchors is None or candidate_id not in candidate_anchors:
+            raise ValueError(
+                f"Negative case candidate_id '{candidate_id}' is not a retrieved candidate"
+            )
+        return candidate_anchors[candidate_id]
+    return _anchor_from_quote(state, negative_case.disconfirming_evidence)
 
 
 def _anchor_from_quote(state: ProjectState, quote: str) -> ClaimAnchor | None:
