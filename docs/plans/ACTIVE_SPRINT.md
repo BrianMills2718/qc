@@ -32,11 +32,12 @@ highest-value documented lane.
 versioned `schema_version=1` gold-set packages, surface compact
 `gold_provenance` when package metadata is present, and report configurable local
 exact-key `f1_bootstrap_ci` intervals by default. D3 scorecards also report
-local same-code/doc char-span IoU diagnostics in `span_overlap`. D7 baseline
-comparisons report local paired exact-key `system_minus_baseline_ci` intervals
-for recall, precision, and F1 deltas. D3 packages are validated by
+local same-code/doc char-span IoU and discrete Modified Hausdorff diagnostics in
+`span_overlap`. D7 baseline comparisons report local paired exact-key
+`system_minus_baseline_ci` intervals for recall, precision, and F1 deltas. D3
+packages are validated by
 `make validate-d3-gold GOLD=gold_set.json`; D7 packages by
 `make validate-d7-gold GOLD=gold_set.json`. This remains a gold-dependent
 exact-score/provenance/uncertainty substrate, not a populated held-out benchmark,
-full D3/D7 validity, κ/α/AC1, Modified Hausdorff, held-out live-baseline result,
-or expert-parity/SOTA evidence.
+full D3/D7 validity, κ/α/AC1, human-ceiling agreement, held-out live-baseline
+result, or expert-parity/SOTA evidence.

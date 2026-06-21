@@ -1,12 +1,26 @@
 # Plan #42: D3 Modified Hausdorff Scorecard
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** None
 **Blocks:** LLMCode-style D3 span-alignment evaluation
 
 ---
+
+## Outcome
+
+Implemented and verified in commit `018de83`. D3 `span_overlap` rows now include
+`best_modified_hausdorff_distance`, and the overlap object reports aggregate
+mean best-gold and mean best-predicted Modified Hausdorff distances. The metric
+uses the documented discrete char-position definition over same-code/document
+best-overlap span pairs. This remains local span-distance scaffolding, not D3
+human agreement, human ceiling, or expert-parity evidence.
+
+Verification:
+- `python -m pytest tests/test_bench_phase0.py tests/test_bench_phase0_script.py -q` — 43 passed
+- `python -m ruff check qc_clean/core/bench.py tests/test_bench_phase0.py` — passed
+- `make check` — 724 passed, 1 skipped, 8 deselected; Ruff passed; docs checks passed; type check not yet configured
 
 ## Gap
 
@@ -59,9 +73,9 @@ Internal project capability only; no cross-project boundary is created.
 
 ### Capability Validation
 
-- [ ] Exact span matches report distance zero.
-- [ ] Partial-overlap spans report positive deterministic distance.
-- [ ] Aggregate mean best-gold and mean best-predicted distances are present.
+- [x] Exact span matches report distance zero.
+- [x] Partial-overlap spans report positive deterministic distance.
+- [x] Aggregate mean best-gold and mean best-predicted distances are present.
 
 ---
 
@@ -112,23 +126,23 @@ Internal project capability only; no cross-project boundary is created.
 ## Acceptance Criteria
 
 > Feature-level criteria (what the plan accomplishes):
-- [ ] `span_overlap` rows include `best_modified_hausdorff_distance`.
-- [ ] `span_overlap` includes mean best-gold and mean best-predicted Modified
+- [x] `span_overlap` rows include `best_modified_hausdorff_distance`.
+- [x] `span_overlap` includes mean best-gold and mean best-predicted Modified
   Hausdorff distances.
-- [ ] Docs identify this as local span-distance scaffolding only.
+- [x] Docs identify this as local span-distance scaffolding only.
 
 > Process criteria (quality gates):
-- [ ] Required tests pass
-- [ ] Full test suite passes
-- [ ] Type check status reported
-- [ ] Docs updated
-- [ ] Plan completed, committed, and pushed
+- [x] Required tests pass
+- [x] Full test suite passes
+- [x] Type check status reported
+- [x] Docs updated
+- [x] Plan completed, committed, and pushed
 
 ---
 
 ## Open Questions
 
-- [ ] Should this be replaced by a literal upstream LLMCode evaluator? — Status:
+- [x] Should this be replaced by a literal upstream LLMCode evaluator? — Status:
   DEFERRED | Why it matters: full compatibility should be a prompt_eval-backed
   evaluator lane. This slice keeps the local scorecard deterministic.
 
