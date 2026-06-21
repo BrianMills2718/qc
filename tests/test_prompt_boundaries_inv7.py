@@ -3,6 +3,8 @@
 import asyncio
 from unittest.mock import AsyncMock, patch
 
+import pytest
+
 from qc_clean.core.pipeline.pipeline_engine import PipelineContext
 from qc_clean.core.pipeline.stages.gt_constant_comparison import (
     GTConstantComparisonStage,
@@ -121,6 +123,20 @@ def test_thematic_prompt_override_receives_boundaried_combined_text():
     _assert_malicious_payload_is_data(captured_prompt)
 
 
+def test_thematic_prompt_override_missing_combined_text_fails_loud():
+    state = _state_with_malicious_doc()
+    ctx = PipelineContext(prompt_overrides={
+        "thematic_coding": "CUSTOM OVERRIDE WITHOUT DATA\nN={num_interviews}",
+    })
+
+    with patch("qc_clean.core.llm.llm_handler.LLMHandler") as MockLLM:
+        MockLLM.return_value.extract_structured = AsyncMock(return_value=_code_hierarchy_response())
+        with pytest.raises(ValueError, match="thematic_coding.*combined_text"):
+            asyncio.run(ThematicCodingStage().execute(state, ctx))
+
+    MockLLM.return_value.extract_structured.assert_not_called()
+
+
 def test_negative_case_prompt_wraps_malicious_transcript_as_untrusted_data():
     state = _state_with_malicious_doc()
     state.codebook = Codebook(codes=[
@@ -200,6 +216,25 @@ def test_gt_prompt_override_receives_boundaried_segment_text():
 
     assert captured_prompt.startswith("CUSTOM GT OVERRIDE")
     _assert_malicious_payload_is_data(captured_prompt)
+
+
+def test_gt_prompt_override_missing_segment_text_fails_loud():
+    state = _state_with_malicious_doc()
+    ctx = PipelineContext(prompt_overrides={
+        "gt_constant_comparison": "CUSTOM GT OVERRIDE WITHOUT DATA\n{codebook_context}",
+    })
+
+    with patch("qc_clean.core.llm.llm_handler.LLMHandler") as MockLLM:
+        MockLLM.return_value.extract_structured = AsyncMock(return_value=SegmentCodingResponse())
+        with pytest.raises(ValueError, match="gt_constant_comparison.*segment_text"):
+            asyncio.run(
+                GTConstantComparisonStage(max_iterations=1).execute(
+                    state,
+                    ctx,
+                )
+            )
+
+    MockLLM.return_value.extract_structured.assert_not_called()
 
 
 def test_incremental_recode_wraps_new_documents_as_untrusted_data():

@@ -7,7 +7,8 @@ LLM prompts by putting every corpus-provided line behind a stable data prefix.
 
 from __future__ import annotations
 
-from typing import Iterable, Protocol
+from string import Formatter
+from typing import Any, Iterable, Protocol
 
 DATA_LINE_PREFIX = "DATA> "
 
@@ -54,7 +55,51 @@ def format_untrusted_documents(
     return "\n\n".join(blocks)
 
 
+def render_prompt_override(
+    *,
+    stage_name: str,
+    template: str,
+    required_placeholders: Iterable[str],
+    values: dict[str, Any],
+) -> str:
+    """Render a custom prompt override after checking protected placeholders."""
+    field_names = _format_field_names(stage_name, template)
+    missing = sorted(set(required_placeholders) - field_names)
+    if missing:
+        raise ValueError(
+            f"Prompt override for {stage_name} must include protected placeholder(s): "
+            f"{', '.join(missing)}"
+        )
+    try:
+        return template.format(**values)
+    except KeyError as exc:
+        missing_name = str(exc.args[0])
+        raise ValueError(
+            f"Prompt override for {stage_name} references unknown placeholder: {missing_name}"
+        ) from exc
+    except (IndexError, ValueError) as exc:
+        raise ValueError(f"Prompt override for {stage_name} is not valid: {exc}") from exc
+
+
 def _one_line_label(label: str) -> str:
     """Keep user-controlled labels from adding unprefixed prompt lines."""
     compact = " ".join(str(label).replace("\r", " ").replace("\n", " ").split())
     return compact or "data"
+
+
+def _format_field_names(stage_name: str, template: str) -> set[str]:
+    """Return root field names used by a ``str.format`` template."""
+    try:
+        parsed = Formatter().parse(template)
+        return {
+            _root_field_name(field_name)
+            for _, field_name, _, _ in parsed
+            if field_name
+        }
+    except ValueError as exc:
+        raise ValueError(f"Prompt override for {stage_name} is not valid: {exc}") from exc
+
+
+def _root_field_name(field_name: str) -> str:
+    """Normalize format fields like ``foo.bar`` or ``foo[0]`` to ``foo``."""
+    return field_name.split(".", 1)[0].split("[", 1)[0]
