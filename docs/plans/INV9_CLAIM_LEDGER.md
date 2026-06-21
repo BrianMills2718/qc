@@ -174,7 +174,7 @@ highest-value independent phase.
 
 | Phase | Scope | Verification | Commit |
 |---|---|---|---|
-| 1 | Schema: `AnalyticClaim`, anchor, scope, adjudication/revision models, `ProjectState.claims`, pure summary helper | `tests/test_claims.py`; JSON round-trip/backward compatibility | `[Plan: INV9] Add claim ledger schema` |
+| 1 | Schema: `AnalyticClaim`, anchor, scope, adjudication/revision models, `ProjectState.claims`, pure summary helper | DONE: `tests/test_claims.py`; JSON round-trip/backward compatibility | `[Plan: INV9] Add claim ledger schema` |
 | 2 | Deterministic claim builders for codes, applications, perspectives, relationships, synthesis, cross-case, GT objects, and negative cases | `tests/test_claims.py` expanded with focused fixtures | `[Plan: INV9] Add claim builders` |
 | 3 | Wire default thematic pipeline stages; enforce no prose-only bypass for default path | `tests/test_claim_ledger_pipeline.py`, targeted stage tests | `[Plan: INV9] Wire default pipeline claims` |
 | 4 | Wire GT stages; explicitly reject/flag any GT claim class not yet representable | GT stage tests; no app-level IRR scope expansion | `[Plan: INV9] Wire GT claims` |
@@ -222,11 +222,11 @@ wiring if a deterministic stage test cannot cover an integration boundary.
 
 Feature-level criteria:
 
-- [ ] `ProjectState.claims` exists, is backward-compatible, and survives JSON round-trip.
-- [ ] Every claim records source stage, kind, text, scope, provenance, support status, and origin object linkage.
-- [ ] Evidence anchors can represent supporting and contrary spans with `doc_id`, offsets, quote hash, and optional segment/application refs.
+- [x] `ProjectState.claims` exists, is backward-compatible, and survives JSON round-trip.
+- [x] Every claim records source stage, kind, text, scope, provenance, support status, and origin object linkage.
+- [x] Evidence anchors can represent supporting and contrary spans with `doc_id`, offsets, quote hash, and optional segment/application refs.
 - [ ] Code, application, perspective, relationship, synthesis, cross-case, negative-case, and GT outputs are represented as claims or explicit no-claim events.
-- [ ] Claims without anchors are visible as unsupported/needs-anchor; they are never silently treated as grounded.
+- [x] Claims without anchors are visible as unsupported/needs-anchor; they are never silently treated as grounded.
 - [ ] Negative cases are first-class claims and can link to the claim/code target they challenge.
 - [ ] CLI/API/MCP/export surfaces expose claim counts by kind, stage, and adjudication/support status.
 - [ ] Markdown and CSV exports include the claim ledger summary/details.
@@ -234,7 +234,7 @@ Feature-level criteria:
 
 Process criteria:
 
-- [ ] New targeted tests pass after each phase.
+- [x] New targeted tests pass after each phase.
 - [ ] `make check` passes before final completion.
 - [ ] Plan tracker is updated as phases complete.
 - [ ] Each verified phase is committed separately with `[Plan: INV9]`.
@@ -256,3 +256,9 @@ This plan intentionally closes the object-layer gap first. It does not claim
 retrieval-first disconfirmation, expert validity, bias evaluation, or human
 adjudication beyond code labels. Those become tractable only after the ledger
 exists.
+
+Phase 1 complete 2026-06-21: added the claim ledger schema,
+`ProjectState.claims`, and a deterministic `summarize_claim_ledger()` helper.
+Verification: `tests/test_claims.py` (5 passed),
+`tests/test_domain_model.py tests/test_claims.py` (29 passed), and `make check`
+(586 passed, 1 skipped, 8 deselected; Ruff/docs green).

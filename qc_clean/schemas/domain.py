@@ -35,6 +35,38 @@ class ReviewAction(str, Enum):
     SPLIT = "split"
 
 
+class ClaimKind(str, Enum):
+    """Types of substantive analytic claims recorded in the INV-9 ledger."""
+    CODE = "code"
+    CODE_APPLICATION = "code_application"
+    PERSPECTIVE = "perspective"
+    RELATIONSHIP = "relationship"
+    SYNTHESIS_FINDING = "synthesis_finding"
+    CROSS_CASE = "cross_case"
+    NEGATIVE_CASE = "negative_case"
+    GT_CATEGORY = "gt_category"
+    GT_PROPOSITION = "gt_proposition"
+    NO_CLAIMS_EVENT = "no_claims_event"
+
+
+class ClaimSupportStatus(str, Enum):
+    """Whether a claim currently has adequate source support."""
+    SUPPORTED = "supported"
+    NEEDS_ANCHOR = "needs_anchor"
+    UNSUPPORTED = "unsupported"
+    MIXED = "mixed"
+    CONTRADICTED = "contradicted"
+
+
+class ClaimAdjudicationStatus(str, Enum):
+    """Human/agent adjudication state for an analytic claim."""
+    PENDING = "pending"
+    RETAINED = "retained"
+    REVISED = "revised"
+    WITHDRAWN = "withdrawn"
+    NEEDS_REVIEW = "needs_review"
+
+
 class PipelineStatus(str, Enum):
     """Status of a pipeline stage."""
     PENDING = "pending"
@@ -224,6 +256,58 @@ class AnalysisMemo(BaseModel):
     doc_refs: List[str] = Field(default_factory=list)
     created_by: Provenance = Provenance.LLM
     created_at: str = Field(default_factory=lambda: datetime.now().isoformat())
+
+
+class ClaimAnchor(BaseModel):
+    """A source-span reference supporting or contradicting an analytic claim."""
+    doc_id: str = Field(description="Document containing the anchored evidence span")
+    start_char: Optional[int] = Field(default=None, description="Start offset in the source document")
+    end_char: Optional[int] = Field(default=None, description="End offset in the source document")
+    quote_text: str = Field(default="", description="Evidence text for human inspection")
+    quote_hash: Optional[str] = Field(default=None, description="Hash of the anchored source span")
+    segment_id: Optional[str] = Field(default=None, description="Segment ID when the anchor maps to INV-8 segment universe")
+    code_application_id: Optional[str] = Field(default=None, description="CodeApplication ID when the anchor originates from a code application")
+
+
+class ClaimScope(BaseModel):
+    """The bounded analytic scope a claim applies to."""
+    corpus_level: bool = Field(default=False, description="True when the claim is scoped to the analyzed corpus as a whole")
+    doc_ids: List[str] = Field(default_factory=list, description="Document IDs the claim is scoped to")
+    code_ids: List[str] = Field(default_factory=list, description="Code IDs the claim refers to")
+    segment_ids: List[str] = Field(default_factory=list, description="Segment IDs the claim refers to")
+    application_ids: List[str] = Field(default_factory=list, description="CodeApplication IDs the claim refers to")
+    entity_ids: List[str] = Field(default_factory=list, description="Entity IDs the claim refers to")
+    relationship_ids: List[str] = Field(default_factory=list, description="Relationship IDs the claim refers to")
+    participant_names: List[str] = Field(default_factory=list, description="Participant names or labels the claim refers to")
+
+
+class ClaimRevision(BaseModel):
+    """One retained revision/adjudication event for an analytic claim."""
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()), description="System-assigned revision identifier")
+    actor: Provenance = Field(description="Who performed the revision or adjudication action")
+    action: str = Field(description="Action performed, such as approve, revise, withdraw, or challenge")
+    rationale: str = Field(default="", description="Reason the action was taken")
+    previous_claim_text: Optional[str] = Field(default=None, description="Claim text before the revision, if changed")
+    new_claim_text: Optional[str] = Field(default=None, description="Claim text after the revision, if changed")
+    created_at: str = Field(default_factory=lambda: datetime.now().isoformat(), description="Revision timestamp")
+
+
+class AnalyticClaim(BaseModel):
+    """A first-class substantive analytic assertion (INV-9)."""
+    id: str = Field(default_factory=lambda: f"claim_{uuid.uuid4()}", description="System-assigned claim identifier")
+    claim_kind: ClaimKind = Field(description="Type of claim being represented")
+    source_stage: str = Field(description="Pipeline stage or component that produced the claim")
+    claim_text: str = Field(description="Human-readable analytic assertion")
+    scope: ClaimScope = Field(default_factory=ClaimScope, description="Bounded scope of the claim")
+    origin_object_type: str = Field(description="Domain object type the claim was derived from")
+    origin_object_id: str = Field(description="Domain object ID or stable synthetic key the claim was derived from")
+    supporting_anchors: List[ClaimAnchor] = Field(default_factory=list, description="Source spans that support the claim")
+    contrary_anchors: List[ClaimAnchor] = Field(default_factory=list, description="Source spans that challenge or contradict the claim")
+    support_status: ClaimSupportStatus = Field(default=ClaimSupportStatus.NEEDS_ANCHOR, description="Current support state for the claim")
+    adjudication_status: ClaimAdjudicationStatus = Field(default=ClaimAdjudicationStatus.PENDING, description="Current adjudication state")
+    revision_history: List[ClaimRevision] = Field(default_factory=list, description="Chronological review/revision history")
+    created_by: Provenance = Field(default=Provenance.LLM, description="Who produced the initial claim")
+    created_at: str = Field(default_factory=lambda: datetime.now().isoformat(), description="Claim creation timestamp")
 
 
 class HumanReviewDecision(BaseModel):
@@ -500,6 +584,7 @@ class ProjectState(BaseModel):
 
     # Analytical artifacts
     memos: List[AnalysisMemo] = Field(default_factory=list)
+    claims: List[AnalyticClaim] = Field(default_factory=list)
     review_decisions: List[HumanReviewDecision] = Field(default_factory=list)
 
     # Pipeline tracking
