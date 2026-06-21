@@ -20,7 +20,7 @@ LLM-powered qualitative coding analysis for interview transcripts. Accepts .txt,
 - **Default/Thematic Analysis** - 7-stage pipeline: Ingest -> Thematic Coding -> Perspective Analysis -> Relationship Mapping -> Synthesis -> Cross-Interview Analysis -> Negative Case Analysis
 - **Grounded Theory** - 7-stage pipeline: Ingest -> Constant Comparison Coding -> Axial Coding -> Selective Coding -> Theory Integration -> Cross-Interview Analysis -> Negative Case Analysis
 
-  (Negative Case Analysis runs last and now sees bounded claim-ledger targets by claim ID, but it is still same-model, prompt-memory disconfirmation rather than retrieval-first adversarial evidence search. INV-6 remains PARTIAL and INV-2 remains UNMET. See `docs/PROJECT_THEORY_AND_GOALS.md`.)
+  (Negative Case Analysis runs last and now sees bounded claim-ledger targets by claim ID plus deterministic retrieval-first source candidates. It is still lexical, same-model by default, and not D7-evaluated. INV-6 remains PARTIAL and INV-2 is PARTIAL, not full credibility evidence. See `docs/PROJECT_THEORY_AND_GOALS.md`.)
 
 All stages use structured LLM output via Pydantic schemas + JSON mode. State is held in a single `ProjectState` Pydantic model that can be saved/loaded as JSON.
 
@@ -33,12 +33,12 @@ The software is **built and software-validated** (deterministic tests + live-LLM
 - **Span-anchored grounding** (INV-1, mostly met): quotes resolve to char offsets + hash or are dropped + warned; `verify_grounding`/`make bench` measure the rate.
 - **Segment universe + coverage** (INV-8): every doc split into char-anchored segments; `project run --exhaustive` codes *every* segment (examined-and-judged coverage, segment-anchored applications), else traversal coverage.
 - **First-class claim ledger** (INV-9 object layer): substantive stage outputs become `AnalyticClaim` objects or no-claims events, with source stage, kind, scope, support/adjudication status, anchors where available, and CLI/API/MCP/export read surfaces.
-- **Ledger-routed disconfirmation + claim review first slice** (INV-6/INV-10 partial): negative-case prompts include bounded claim targets by ID; coverage summaries report challenged/unchallenged targets; `ReviewManager` supports `target_type="claim"` approve/reject/modify decisions with revision history.
+- **Retrieval-first ledger disconfirmation + claim review first slices** (INV-2/INV-6/INV-10 partial): negative-case prompts include bounded claim targets by ID and deterministic source-candidate passages; valid `candidate_id`s attach exact contrary anchors; coverage summaries report challenged/unchallenged targets; `ReviewManager` supports `target_type="claim"` approve/reject/modify decisions with revision history.
 - **Instruction/data separation first slice** (INV-7 partial): raw transcript/document/segment prompt sections are rendered as untrusted `DATA>` lines via `qc_clean/core/prompting.py`, with deterministic prompt-injection regressions; derived LLM-output isolation and live adversarial evaluation remain.
 - Human review (CLI + browser), `project irr` (LLM-pass *codebook-discovery* agreement by default; **application-level** positive segment × code agreement plus segment-decision agreement via `--application-level`, using exhaustive coding), `project stability`.
 - Graph viz, JSON/CSV/Markdown/QDPX export, per-stage memos, per-code audit trail; typed `PipelineContext`/results, fail-loud inter-stage checks, `llm_client` observability.
 
-**Direction:** the end product is public and SOTA-targeting; the proven/measured/planned ledger, the architectural invariants, and the ranked roadmap are in `docs/PROJECT_THEORY_AND_GOALS.md` (§13/§13.1/§18). Recent structural work landed: span anchoring (INV-1), the segment universe + exhaustive coverage (INV-8), the first-class claim ledger object layer (INV-9), ledger-routed disconfirmation/claim review first slices (INV-6/INV-10 partial), and raw instruction/data separation (INV-7 partial). Next high-value lanes: hardened retrieval-first disconfirmation (INV-2), derived-output prompt-boundary hardening / live injection evaluation (INV-7 follow-up), and theoretical sampling/saturation (INV-4 when GT claims theory generation).
+**Direction:** the end product is public and SOTA-targeting; the proven/measured/planned ledger, the architectural invariants, and the ranked roadmap are in `docs/PROJECT_THEORY_AND_GOALS.md` (§13/§13.1/§18). Recent structural work landed: span anchoring (INV-1), the segment universe + exhaustive coverage (INV-8), the first-class claim ledger object layer (INV-9), retrieval-first ledger disconfirmation/claim review first slices (INV-2/INV-6/INV-10 partial), and raw instruction/data separation (INV-7 partial). Next high-value lanes: semantic/adversarial disconfirmation + D7 evaluation (INV-2 follow-up), derived-output prompt-boundary hardening / live injection evaluation (INV-7 follow-up), and theoretical sampling/saturation (INV-4 when GT claims theory generation).
 
 ## Architecture
 
@@ -294,11 +294,11 @@ Bugs found and fixed during E2E testing:
 
 ## Academic Standards & Honest State
 
-Superseded by the canonical theory doc: the proven/measured/planned **state ledger** is `docs/PROJECT_THEORY_AND_GOALS.md` §13, the **architectural invariants** (INV-0..11, each MET/PARTIAL/UNMET) are §13.1, and the academic references + prior art are §19. Do **not** re-introduce a 'Tier 2 complete / validated' ledger here — it contradicts the invariants (e.g. disconfirmation is INV-2 UNMET / INV-6 PARTIAL; `project irr` defaults to codebook-discovery agreement; `--application-level` gives positive segment x code application agreement and segment-decision agreement).
+Superseded by the canonical theory doc: the proven/measured/planned **state ledger** is `docs/PROJECT_THEORY_AND_GOALS.md` §13, the **architectural invariants** (INV-0..11, each MET/PARTIAL/UNMET) are §13.1, and the academic references + prior art are §19. Do **not** re-introduce a 'Tier 2 complete / validated' ledger here — it contradicts the invariants (e.g. disconfirmation is INV-2 PARTIAL / INV-6 PARTIAL and not credibility evidence; `project irr` defaults to codebook-discovery agreement; `--application-level` gives positive segment x code application agreement and segment-decision agreement).
 
 ## Next Steps
 
-The ranked roadmap (invariants before features) lives in `docs/PROJECT_THEORY_AND_GOALS.md` §18 — evaluation harness (keystone), span anchoring (done), segment universe + exhaustive coding (INV-8, done), claim ledger object layer (INV-9, mostly done), ledger-routed disconfirmation/adjudication first slice (INV-6/INV-10 partial), raw instruction/data separation first slice (INV-7 partial), hardened retrieval-first disconfirmation, derived-output prompt hardening, theoretical sampling/saturation, etc. Don't duplicate it here.
+The ranked roadmap (invariants before features) lives in `docs/PROJECT_THEORY_AND_GOALS.md` §18 — evaluation harness (keystone), span anchoring (done), segment universe + exhaustive coding (INV-8, done), claim ledger object layer (INV-9, mostly done), retrieval-first disconfirmation/adjudication first slices (INV-2/INV-6/INV-10 partial), raw instruction/data separation first slice (INV-7 partial), semantic/adversarial disconfirmation + D7 evaluation, derived-output prompt hardening, theoretical sampling/saturation, etc. Don't duplicate it here.
 
 ### Maintenance Follow-Ups (2026-06-19)
 - **Line endings**: Normalize mixed CRLF/LF files in one mechanical commit with no behavior changes, then run `make check`.

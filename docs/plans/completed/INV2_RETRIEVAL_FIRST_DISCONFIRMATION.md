@@ -1,10 +1,34 @@
 # Plan #7: INV-2 Retrieval-First Disconfirmation
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** None
 **Blocks:** INV-2 full disconfirmation hardening; INV-6 stronger final-claim coverage; D7 evaluation-harness disconfirmation metrics
+
+---
+
+## Completion Outcome
+
+Completed 2026-06-21. Negative-case analysis is now retrieval-first over
+bounded claim-ledger targets: `qc_clean/core/disconfirmation.py`
+deterministically retrieves char-anchored segment candidates, formats them as
+untrusted prompt data with `candidate_id`/`claim_id`/span metadata, and
+`NegativeCaseStage` asks the LLM to assess those retrieved candidates rather
+than dumping the full corpus into the prompt. `NegativeCase` can return a
+`candidate_id`; valid IDs attach exact `ClaimAnchor`s directly, and invalid IDs
+fail loud. The negative-case memo records how many candidate passages were
+retrieved for how many claim targets.
+
+This is an INV-2 first slice, not full hardened disconfirmation. Retrieval is
+lexical and deterministic, not semantic/BM25/embedding-based; interpretation is
+still same-model unless callers choose another model; no human adjudication or
+D7 recall/precision benchmark has run. Absence of retrieved negative cases is
+not evidence none exist.
+
+Verification: targeted affected suites passed (`41 passed`), and `make check`
+passed with `628 passed, 1 skipped, 8 deselected`; Ruff and docs checks were
+green.
 
 ---
 
@@ -153,21 +177,21 @@ These are internal project capabilities, not cross-project APIs.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] Negative-case analysis retrieves candidate passages before LLM interpretation.
-- [ ] Retrieved candidates are source-anchored to doc/segment offsets.
-- [ ] Negative-case prompts use retrieved candidate passages instead of dumping the full corpus.
-- [ ] The LLM schema can return exact `candidate_id` values.
-- [ ] Valid `candidate_id` values attach contrary anchors directly to negative-case claims.
-- [ ] Invalid `candidate_id` values fail loud.
-- [ ] Retrieval limits are configurable through `PipelineContext`.
-- [ ] Docs state the landed scope without claiming full INV-2, methodological validity, or D7 success.
+- [x] Negative-case analysis retrieves candidate passages before LLM interpretation.
+- [x] Retrieved candidates are source-anchored to doc/segment offsets.
+- [x] Negative-case prompts use retrieved candidate passages instead of dumping the full corpus.
+- [x] The LLM schema can return exact `candidate_id` values.
+- [x] Valid `candidate_id` values attach contrary anchors directly to negative-case claims.
+- [x] Invalid `candidate_id` values fail loud.
+- [x] Retrieval limits are configurable through `PipelineContext`.
+- [x] Docs state the landed scope without claiming full INV-2, methodological validity, or D7 success.
 
 > Process criteria:
-- [ ] Required targeted tests pass.
-- [ ] Full deterministic suite passes through `make check`.
-- [ ] Lint passes through `make check`.
-- [ ] Docs checks pass.
-- [ ] Verified work is committed and pushed.
+- [x] Required targeted tests pass.
+- [x] Full deterministic suite passes through `make check`.
+- [x] Lint passes through `make check`.
+- [x] Docs checks pass.
+- [x] Verified work is committed and pushed.
 
 ---
 
