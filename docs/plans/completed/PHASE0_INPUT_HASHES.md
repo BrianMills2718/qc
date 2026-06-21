@@ -1,10 +1,34 @@
 # Plan #28: Phase 0 Input Hashes
 
-**Status:** In Progress
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Phase 0 scorecard
 **Blocks:** versioned benchmark result artifacts; held-out benchmark provenance
+
+---
+
+## Outcome
+
+`make bench` / `scripts/bench_phase0.py` now adds `_meta.input_hashes` to Phase
+0 scorecards. The metadata includes the hash algorithm, project ID,
+project-state SHA-256, corpus SHA-256, and optional SHA-256 hashes for supplied
+`GOLD=`, `BASELINES=`, `PROMPT_INJECTION=`, and explicitly supplied `OBS_DB=`
+files. Project-state and corpus hashes use canonical compact JSON; file hashes
+use raw file bytes. Optional file hashes are `null` when no file is supplied.
+
+The implementation intentionally does not hash the default observability DB when
+`OBS_DB=` is omitted, because the default shared DB is not an explicit benchmark
+artifact and may be large/mutable. Hash metadata does not change scoring and
+does not mutate project state. It is provenance metadata only, not benchmark
+validity evidence.
+
+**Verification:** `python -m pytest tests/test_bench_phase0.py
+tests/test_bench_phase0_script.py -q` passed (29 tests), and `python -m ruff
+check scripts/bench_phase0.py tests/test_bench_phase0_script.py` passed. Final
+closeout gate: `make check` passed with 684 tests passing, 1 skipped, 8
+deselected, Ruff passing, docs checks passing, and type checking reported as
+not configured.
 
 ---
 
@@ -115,18 +139,18 @@ create a cross-project callable capability.
 ## Acceptance Criteria
 
 > Feature-level criteria (what the plan accomplishes):
-- [ ] Bench output includes `_meta.input_hashes`.
-- [ ] Project-state and corpus hashes are deterministic SHA-256 hashes.
-- [ ] Supplied external benchmark files are hashed by file bytes.
-- [ ] Missing optional files are represented as `null`, not omitted.
-- [ ] Hash metadata does not mutate project state or alter score calculations.
-- [ ] Docs state hashes are provenance metadata, not benchmark validity evidence.
+- [x] Bench output includes `_meta.input_hashes`.
+- [x] Project-state and corpus hashes are deterministic SHA-256 hashes.
+- [x] Supplied external benchmark files are hashed by file bytes.
+- [x] Missing optional files are represented as `null`, not omitted.
+- [x] Hash metadata does not mutate project state or alter score calculations.
+- [x] Docs state hashes are provenance metadata, not benchmark validity evidence.
 
 > Process criteria (quality gates):
-- [ ] Required tests pass
-- [ ] Full test suite passes
-- [ ] Type check status is reported
-- [ ] Docs updated
+- [x] Required tests pass (`python -m pytest tests/test_bench_phase0.py tests/test_bench_phase0_script.py -q`: 29 passed)
+- [x] Full test suite passes (`make check`: 684 passed, 1 skipped, 8 deselected)
+- [x] Type check status is reported (`make check`: type checking not configured)
+- [x] Docs updated
 
 ---
 
