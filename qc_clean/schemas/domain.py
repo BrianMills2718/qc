@@ -347,6 +347,18 @@ class HumanReviewDecision(BaseModel):
     action: ReviewAction
     rationale: str = ""
     new_value: Optional[Dict[str, Any]] = None
+    is_active: bool = Field(
+        default=True,
+        description="True when this decision applies to the current target object.",
+    )
+    inactive_reason: str = Field(
+        default="",
+        description="Reason this decision is historical-only when is_active is false.",
+    )
+    inactive_at: Optional[str] = Field(
+        default=None,
+        description="Timestamp when this decision became historical-only.",
+    )
     created_at: str = Field(default_factory=lambda: datetime.now().isoformat())
 
 

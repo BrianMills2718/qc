@@ -213,6 +213,9 @@ class TestHumanReviewDecision:
             rationale="Looks good",
         )
         assert decision.action == ReviewAction.APPROVE
+        assert decision.is_active is True
+        assert decision.inactive_reason == ""
+        assert decision.inactive_at is None
 
 
 class TestAnalysisPhaseResult:

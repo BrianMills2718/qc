@@ -26,6 +26,8 @@ from qc_clean.schemas.domain import (
     PipelineStatus,
     ProjectConfig,
     ProjectState,
+    HumanReviewDecision,
+    ReviewAction,
     Synthesis,
     TheoreticalModelResult,
 )
@@ -147,6 +149,47 @@ def test_invalidate_stale_higher_order_outputs_clears_outputs_phase_results_and_
     ]
 
 
+def test_invalidate_marks_review_decisions_for_removed_claims_inactive():
+    state = _state(
+        synthesis=Synthesis(executive_summary="stale"),
+        claims=[
+            _claim("synthesis", ClaimKind.SYNTHESIS_FINDING, claim_id="claim-stale"),
+            _claim("thematic_coding", ClaimKind.CODE, claim_id="claim-current"),
+        ],
+        review_decisions=[
+            HumanReviewDecision(
+                target_type="claim",
+                target_id="claim-stale",
+                action=ReviewAction.APPROVE,
+            ),
+            HumanReviewDecision(
+                target_type="claim",
+                target_id="claim-current",
+                action=ReviewAction.APPROVE,
+            ),
+            HumanReviewDecision(
+                target_type="code",
+                target_id="C1",
+                action=ReviewAction.APPROVE,
+            ),
+        ],
+    )
+
+    invalidate_stale_higher_order_outputs(state)
+
+    stale_decision = state.review_decisions[0]
+    current_claim_decision = state.review_decisions[1]
+    code_decision = state.review_decisions[2]
+    assert stale_decision.is_active is False
+    assert stale_decision.inactive_at is not None
+    assert "claim invalidated by incremental recode" in stale_decision.inactive_reason
+    assert current_claim_decision.is_active is True
+    assert current_claim_decision.inactive_reason == ""
+    assert current_claim_decision.inactive_at is None
+    assert code_decision.is_active is True
+    assert code_decision.inactive_reason == ""
+
+
 def test_markdown_export_surfaces_data_warnings(tmp_path):
     """data_warnings must be rendered in the Markdown report (INV-11)."""
     from qc_clean.core.export.data_exporter import ProjectExporter
@@ -161,8 +204,9 @@ def test_markdown_export_surfaces_data_warnings(tmp_path):
     assert "invalidated: synthesis" in text
 
 
-def _claim(source_stage: str, kind: ClaimKind) -> AnalyticClaim:
+def _claim(source_stage: str, kind: ClaimKind, *, claim_id: str | None = None) -> AnalyticClaim:
     return AnalyticClaim(
+        id=claim_id or f"claim-{source_stage}",
         claim_kind=kind,
         source_stage=source_stage,
         claim_text=f"{source_stage} claim",

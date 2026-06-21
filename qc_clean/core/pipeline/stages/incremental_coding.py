@@ -8,6 +8,7 @@ text to the LLM with the existing codebook as context, then merges results.
 from __future__ import annotations
 
 import logging
+from datetime import datetime
 from typing import List
 
 from qc_clean.core.grounding import MatchStatus, resolve_and_anchor, warn_unanchored
@@ -151,6 +152,12 @@ def invalidate_stale_higher_order_outputs(state: ProjectState) -> List[str]:
     if not stale:
         return []
 
+    removed_claim_ids = {
+        claim.id
+        for claim in state.claims
+        if claim.source_stage in _STALE_CLAIM_SOURCE_STAGES
+    }
+
     if "synthesis" in stale:
         state.synthesis = None
     if "perspective_analysis" in stale:
@@ -176,7 +183,24 @@ def invalidate_stale_higher_order_outputs(state: ProjectState) -> List[str]:
         for claim in state.claims
         if claim.source_stage not in _STALE_CLAIM_SOURCE_STAGES
     ]
+    _mark_review_decisions_for_invalidated_claims(state, removed_claim_ids)
     return stale
+
+
+def _mark_review_decisions_for_invalidated_claims(
+    state: ProjectState,
+    removed_claim_ids: set[str],
+) -> None:
+    """Mark claim review decisions as historical when their target claim is removed."""
+    if not removed_claim_ids:
+        return
+    inactive_at = datetime.now().isoformat()
+    for decision in state.review_decisions:
+        if decision.target_type != "claim" or decision.target_id not in removed_claim_ids:
+            continue
+        decision.is_active = False
+        decision.inactive_reason = "target claim invalidated by incremental recode"
+        decision.inactive_at = inactive_at
 
 
 def _stale_higher_order_outputs(state: ProjectState) -> List[str]:
