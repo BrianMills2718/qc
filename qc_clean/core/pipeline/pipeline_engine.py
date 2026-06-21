@@ -77,6 +77,22 @@ class PipelineContext(BaseModel):
         default=5,
         description="Maximum retrieved source passages per claim target for disconfirmation.",
     )
+    disconfirmation_bm25_k1: float = Field(
+        default=1.2,
+        gt=0,
+        description="BM25 k1 term-frequency saturation parameter for disconfirmation retrieval.",
+    )
+    disconfirmation_bm25_b: float = Field(
+        default=0.75,
+        ge=0,
+        le=1,
+        description="BM25 b length-normalization parameter for disconfirmation retrieval.",
+    )
+    disconfirmation_contrary_cue_weight: float = Field(
+        default=1.25,
+        ge=0,
+        description="Score boost per contradiction/exception cue in disconfirmation retrieval.",
+    )
 
     # --- Inter-stage: thematic pipeline ---
     phase1_json: Optional[str] = None

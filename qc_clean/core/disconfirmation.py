@@ -10,6 +10,8 @@ candidates for the LLM to assess.
 from __future__ import annotations
 
 import re
+from collections import Counter
+from math import log
 from typing import Iterable
 
 from pydantic import BaseModel, Field
@@ -58,8 +60,18 @@ def retrieve_disconfirmation_candidates(
     targets: Iterable[AnalyticClaim],
     *,
     candidates_per_claim: int = 5,
+    bm25_k1: float = 1.2,
+    bm25_b: float = 0.75,
+    contrary_cue_weight: float = 1.25,
 ) -> list[DisconfirmationCandidate]:
     """Return bounded retrieved source candidates for each target claim."""
+    if bm25_k1 <= 0:
+        raise ValueError("bm25_k1 must be greater than 0")
+    if not 0 <= bm25_b <= 1:
+        raise ValueError("bm25_b must be between 0 and 1")
+    if contrary_cue_weight < 0:
+        raise ValueError("contrary_cue_weight must be non-negative")
+
     if not state.segments:
         state.segments = segment_corpus(state.corpus.documents)
 
@@ -69,18 +81,33 @@ def retrieve_disconfirmation_candidates(
     if per_claim == 0:
         return candidates
 
+    term_counts_by_segment, document_frequency, segment_lengths, average_segment_len = _bm25_index(
+        state.segments
+    )
+    segment_count = len(state.segments)
+
     for target_index, claim in enumerate(targets):
         claim_terms = _claim_terms(state, claim)
         if not claim_terms:
             continue
         scored: list[tuple[float, int, int, Segment, list[str], list[str]]] = []
         for segment in state.segments:
-            segment_terms = _terms(segment.text)
+            term_counts = term_counts_by_segment.get(segment.id, Counter())
+            segment_terms = set(term_counts)
             matched = sorted(claim_terms & segment_terms)
             if not matched:
                 continue
             cues = sorted(segment_terms & _CONTRARY_CUES)
-            score = float(len(matched)) + (1.25 * len(cues))
+            score = _bm25_score(
+                matched,
+                term_counts,
+                segment_len=segment_lengths.get(segment.id, 0),
+                average_segment_len=average_segment_len,
+                segment_count=segment_count,
+                document_frequency=document_frequency,
+                k1=bm25_k1,
+                b=bm25_b,
+            ) + (contrary_cue_weight * len(cues))
             scored.append((score, len(cues), len(matched), segment, matched, cues))
 
         scored.sort(key=lambda item: (-item[0], -item[1], -item[2], item[3].doc_id, item[3].start_char))
@@ -158,12 +185,66 @@ def _claim_terms(state: ProjectState, claim: AnalyticClaim) -> set[str]:
     return _terms(" ".join(parts))
 
 
+def _bm25_index(
+    segments: Iterable[Segment],
+) -> tuple[dict[str, Counter[str]], Counter[str], dict[str, int], float]:
+    """Build term statistics for BM25-style segment scoring."""
+    term_counts_by_segment: dict[str, Counter[str]] = {}
+    document_frequency: Counter[str] = Counter()
+    segment_lengths: dict[str, int] = {}
+    total_terms = 0
+    segment_count = 0
+    for segment in segments:
+        terms = _term_sequence(segment.text)
+        counts: Counter[str] = Counter(terms)
+        term_counts_by_segment[segment.id] = counts
+        segment_lengths[segment.id] = len(terms)
+        total_terms += len(terms)
+        segment_count += 1
+        for term in counts:
+            document_frequency[term] += 1
+    average_segment_len = total_terms / segment_count if segment_count else 0.0
+    return term_counts_by_segment, document_frequency, segment_lengths, average_segment_len
+
+
+def _bm25_score(
+    query_terms: Iterable[str],
+    term_counts: Counter[str],
+    *,
+    segment_len: int,
+    average_segment_len: float,
+    segment_count: int,
+    document_frequency: Counter[str],
+    k1: float,
+    b: float,
+) -> float:
+    """Score one segment against query terms using the BM25 formula."""
+    if segment_count == 0 or segment_len == 0 or average_segment_len == 0:
+        return 0.0
+
+    score = 0.0
+    length_norm = 1 - b + (b * (segment_len / average_segment_len))
+    for term in query_terms:
+        tf = term_counts.get(term, 0)
+        if tf == 0:
+            continue
+        df = document_frequency.get(term, 0)
+        idf = log(1 + ((segment_count - df + 0.5) / (df + 0.5)))
+        score += idf * ((tf * (k1 + 1)) / (tf + (k1 * length_norm)))
+    return score
+
+
 def _terms(text: str) -> set[str]:
     """Normalize text to retrieval terms."""
-    terms: set[str] = set()
+    return set(_term_sequence(text))
+
+
+def _term_sequence(text: str) -> list[str]:
+    """Normalize text to an ordered retrieval term sequence."""
+    sequence: list[str] = []
     for raw in _TOKEN_RE.findall(text.casefold()):
         term = raw.strip("'_-")
         if len(term) < 2 or term in _STOPWORDS:
             continue
-        terms.add(term)
-    return terms
+        sequence.append(term)
+    return sequence

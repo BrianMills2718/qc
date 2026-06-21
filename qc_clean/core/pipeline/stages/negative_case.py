@@ -99,6 +99,9 @@ class NegativeCaseStage(PipelineStage):
             state,
             target_claims,
             candidates_per_claim=ctx.disconfirmation_candidates_per_claim,
+            bm25_k1=ctx.disconfirmation_bm25_k1,
+            bm25_b=ctx.disconfirmation_bm25_b,
+            contrary_cue_weight=ctx.disconfirmation_contrary_cue_weight,
         )
         candidate_anchors = {
             candidate.id: anchor_for_candidate(candidate)

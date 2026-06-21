@@ -72,6 +72,22 @@ def test_retrieval_scores_contrary_cues_above_plain_mentions():
     assert candidates[0].score > candidates[1].score
 
 
+def test_bm25_ranks_rare_specific_terms_above_repeated_generic_terms():
+    state = _state_with_segments(
+        "AI workflow updates improved speed.\n\n"
+        "AI workflow updates stayed stable.\n\n"
+        "AI workflow updates continued.\n\n"
+        "Trust collapsed after the rollout."
+    )
+    target = _claim("claim-trust", "AI workflow trust across the corpus.")
+
+    candidates = retrieve_disconfirmation_candidates(state, [target], candidates_per_claim=4)
+
+    assert candidates[0].quote_text == "Trust collapsed after the rollout."
+    assert candidates[0].matched_terms == ["trust"]
+    assert candidates[0].score > candidates[1].score
+
+
 def test_candidate_format_includes_ids_and_untrusted_data_boundaries():
     state = _state_with_segments("AI failed for this team.")
     target = _claim("claim-ai", "AI improves workflow across the corpus.")
@@ -222,6 +238,40 @@ def test_negative_case_defaults_to_pipeline_model_without_disconfirmation_overri
         )
 
     MockLLM.assert_called_once_with(model_name="primary-model")
+
+
+def test_negative_case_passes_bm25_retrieval_config():
+    state = _state_with_segments("Trust collapsed after the rollout.")
+    state.claims = [_claim("claim-trust", "AI workflow trust across the corpus.")]
+    response = NegativeCaseResponse(
+        negative_cases=[],
+        overall_assessment="No retrieved candidate was sufficient.",
+    )
+
+    with (
+        patch("qc_clean.core.llm.llm_handler.LLMHandler") as MockLLM,
+        patch(
+            "qc_clean.core.pipeline.stages.negative_case.retrieve_disconfirmation_candidates",
+            return_value=[],
+        ) as mock_retrieve,
+    ):
+        MockLLM.return_value.extract_structured = AsyncMock(return_value=response)
+        asyncio.run(
+            NegativeCaseStage().execute(
+                state,
+                PipelineContext(
+                    disconfirmation_candidates_per_claim=2,
+                    disconfirmation_bm25_k1=1.7,
+                    disconfirmation_bm25_b=0.55,
+                    disconfirmation_contrary_cue_weight=2.25,
+                ),
+            )
+        )
+
+    assert mock_retrieve.call_args.kwargs["candidates_per_claim"] == 2
+    assert mock_retrieve.call_args.kwargs["bm25_k1"] == 1.7
+    assert mock_retrieve.call_args.kwargs["bm25_b"] == 0.55
+    assert mock_retrieve.call_args.kwargs["contrary_cue_weight"] == 2.25
 
 
 def test_negative_case_prompt_uses_adversarial_reviewer_stance():
