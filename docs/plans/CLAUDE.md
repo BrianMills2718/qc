@@ -6,7 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| — | — | — | No active plan | — |
+| 33 | INV-2 embedding-hybrid disconfirmation retrieval | High | Planned | `INV2_EMBEDDING_HYBRID_DISCONFIRMATION_RETRIEVAL.md` |
 
 ## Completed Plans
 
