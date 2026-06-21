@@ -131,7 +131,7 @@ class QCAPIServer:
         
         from fastapi import HTTPException, BackgroundTasks
         from pydantic import BaseModel, ConfigDict, Field
-        from qc_clean.schemas.domain import ReviewAction
+        from qc_clean.schemas.domain import CorpusScope, ProjectState, ReviewAction
         
         # Health check endpoint
         @self._app.get("/health")
@@ -172,6 +172,45 @@ class QCAPIServer:
                 default_factory=list,
                 description="Review decisions to apply in order.",
             )
+
+        class CorpusScopeRequest(BaseModel):
+            """Partial corpus scope update request."""
+
+            model_config = ConfigDict(extra="forbid")
+
+            phenomenon: Optional[str] = Field(
+                default=None,
+                description="Phenomenon or topic the analysis is scoped to.",
+            )
+            population: Optional[str] = Field(
+                default=None,
+                description="Population or case universe claims may apply to.",
+            )
+            sampling_frame: Optional[str] = Field(
+                default=None,
+                description="How documents or participants were selected.",
+            )
+            inclusion_criteria: Optional[List[str]] = Field(
+                default=None,
+                description="Criteria that qualified documents or participants for inclusion.",
+            )
+            exclusion_criteria: Optional[List[str]] = Field(
+                default=None,
+                description="Criteria that ruled documents or participants out of scope.",
+            )
+            notes: Optional[str] = Field(
+                default=None,
+                description="Additional scope caveats or notes.",
+            )
+
+        def scope_payload(state: ProjectState) -> Dict[str, Any]:
+            """Build a stable JSON payload for project corpus scope."""
+            return {
+                "project_id": state.id,
+                "project": state.name,
+                "is_set": state.corpus_scope is not None,
+                "scope": (state.corpus_scope or CorpusScope()).model_dump(),
+            }
         
         # Analysis endpoint
         @self._app.post("/analyze")
@@ -534,6 +573,51 @@ class QCAPIServer:
                 "updated_at": state.updated_at,
             }
 
+        @self._app.get("/projects/{project_id}/scope")
+        async def get_project_scope(project_id: str):
+            """Get corpus scope for a project."""
+            from qc_clean.core.persistence.project_store import ProjectStore
+            store = ProjectStore()
+            try:
+                state = store.load(project_id)
+            except FileNotFoundError:
+                raise HTTPException(status_code=404, detail=f"Project not found: {project_id}")
+            return scope_payload(state)
+
+        @self._app.put("/projects/{project_id}/scope")
+        async def put_project_scope(project_id: str, body: CorpusScopeRequest):
+            """Update corpus scope for a project."""
+            from qc_clean.core.persistence.project_store import ProjectStore
+            store = ProjectStore()
+            try:
+                state = store.load(project_id)
+            except FileNotFoundError:
+                raise HTTPException(status_code=404, detail=f"Project not found: {project_id}")
+
+            current = state.corpus_scope or CorpusScope()
+            updates = {
+                key: value
+                for key, value in body.model_dump(exclude_unset=True).items()
+                if value is not None
+            }
+            state.corpus_scope = CorpusScope(
+                phenomenon=updates.get("phenomenon", current.phenomenon),
+                population=updates.get("population", current.population),
+                sampling_frame=updates.get("sampling_frame", current.sampling_frame),
+                inclusion_criteria=updates.get(
+                    "inclusion_criteria",
+                    list(current.inclusion_criteria),
+                ),
+                exclusion_criteria=updates.get(
+                    "exclusion_criteria",
+                    list(current.exclusion_criteria),
+                ),
+                notes=updates.get("notes", current.notes),
+            )
+            state.touch()
+            store.save(state)
+            return scope_payload(state)
+
         @self._app.get("/projects/{project_id}/claims")
         async def get_project_claims(project_id: str):
             """Get claim-ledger summary and bounded claim rows for a project."""
@@ -571,6 +655,8 @@ class QCAPIServer:
             {"method": "POST", "path": "/analyze", "description": "Start analysis"},
             {"method": "GET", "path": "/jobs/{job_id}", "description": "Get job status"},
             {"method": "GET", "path": "/projects/{project_id}", "description": "Get project status"},
+            {"method": "GET", "path": "/projects/{project_id}/scope", "description": "Get corpus scope"},
+            {"method": "PUT", "path": "/projects/{project_id}/scope", "description": "Update corpus scope"},
             {"method": "GET", "path": "/projects/{project_id}/claims", "description": "Get claim ledger"},
             {"method": "GET", "path": "/graph/{project_id}", "description": "Graph visualization UI"},
             {"method": "GET", "path": "/projects/{project_id}/graph/codes", "description": "Code graph data"},

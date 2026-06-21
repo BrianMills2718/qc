@@ -19,6 +19,7 @@ from qc_clean.schemas.domain import (
     CodeApplication,
     Codebook,
     Corpus,
+    CorpusScope,
     Document,
     PipelineStatus,
     ProjectState,
@@ -57,6 +58,14 @@ def review_project(tmp_store):
         id="test-project-123",
         name="Test Review Project",
         corpus=Corpus(documents=[Document(id="d1", name="interview1.txt", content="sample")]),
+        corpus_scope=CorpusScope(
+            phenomenon="AI workflow adoption",
+            population="Clinic staff",
+            sampling_frame="Pilot clinic interviewees",
+            inclusion_criteria=["Participated in the pilot"],
+            exclusion_criteria=["Vendors"],
+            notes="Scope fixture.",
+        ),
         codebook=Codebook(codes=codes),
         code_applications=apps,
         claims=[
@@ -115,6 +124,38 @@ class TestClaimLedgerEndpoint:
         assert data["claim_summary"]["total_claims"] == 1
         assert data["disconfirmation_summary"]["total_targets"] == 1
         assert data["disconfirmation_summary"]["unchallenged_targets"] == 1
+
+
+class TestCorpusScopeEndpoint:
+    def test_get_project_scope_returns_current_scope(self, client):
+        resp = client.get("/projects/test-project-123/scope")
+
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["project_id"] == "test-project-123"
+        assert data["is_set"] is True
+        assert data["scope"]["phenomenon"] == "AI workflow adoption"
+        assert data["scope"]["population"] == "Clinic staff"
+        assert data["scope"]["inclusion_criteria"] == ["Participated in the pilot"]
+
+    def test_put_project_scope_updates_scope(self, client, tmp_store):
+        resp = client.put("/projects/test-project-123/scope", json={
+            "phenomenon": "AI scheduling adoption",
+            "population": "Front desk staff",
+            "sampling_frame": "Two pilot clinics",
+            "inclusion_criteria": ["Used the scheduling tool"],
+            "exclusion_criteria": ["No direct scheduling work"],
+            "notes": "Updated through API.",
+        })
+
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["scope"]["phenomenon"] == "AI scheduling adoption"
+        assert data["scope"]["population"] == "Front desk staff"
+        loaded = tmp_store.load("test-project-123")
+        assert loaded.corpus_scope is not None
+        assert loaded.corpus_scope.sampling_frame == "Two pilot clinics"
+        assert loaded.corpus_scope.notes == "Updated through API."
 
 
 class TestReviewCodesEndpoint:

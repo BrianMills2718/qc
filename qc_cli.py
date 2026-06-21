@@ -171,6 +171,25 @@ Examples:
     proj_claims.add_argument('project_id', help='Project ID')
     proj_claims.add_argument('--limit', type=int, default=20, help='Maximum claims to show (default: 20)')
 
+    proj_scope = project_subparsers.add_parser('scope', help='Show or update project corpus scope')
+    proj_scope.add_argument('project_id', help='Project ID')
+    proj_scope.add_argument('--phenomenon', help='Phenomenon or topic the analysis is scoped to')
+    proj_scope.add_argument('--population', help='Population or case universe claims may apply to')
+    proj_scope.add_argument('--sampling-frame', dest='sampling_frame', help='How documents/participants were selected')
+    proj_scope.add_argument(
+        '--include',
+        dest='inclusion_criteria',
+        action='append',
+        help='Inclusion criterion; repeat for multiple criteria',
+    )
+    proj_scope.add_argument(
+        '--exclude',
+        dest='exclusion_criteria',
+        action='append',
+        help='Exclusion criterion; repeat for multiple criteria',
+    )
+    proj_scope.add_argument('--notes', help='Additional scope caveats or notes')
+
     proj_add = project_subparsers.add_parser('add-docs', help='Add documents to project')
     proj_add.add_argument('project_id', help='Project ID')
     proj_add.add_argument('--files', nargs='+', help='Files to add')

@@ -9,7 +9,13 @@ from pathlib import Path
 
 from qc_clean.core.claims import summarize_claim_ledger, summarize_disconfirmation_coverage
 from qc_clean.core.persistence.project_store import ProjectStore
-from qc_clean.schemas.domain import Methodology, PipelineStatus, ProjectConfig, ProjectState
+from qc_clean.schemas.domain import (
+    CorpusScope,
+    Methodology,
+    PipelineStatus,
+    ProjectConfig,
+    ProjectState,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -26,6 +32,8 @@ def handle_project_command(args) -> int:
         return _show_project(store, args)
     elif args.project_action == "claims":
         return _show_claims(store, args)
+    elif args.project_action == "scope":
+        return _show_or_update_scope(store, args)
     elif args.project_action == "add-docs":
         return _add_docs(store, args)
     elif args.project_action == "run":
@@ -403,6 +411,97 @@ def _show_claims(store: ProjectStore, args) -> int:
             print(f"    ... and {len(state.claims) - limit} more")
 
     return 0
+
+
+def _show_or_update_scope(store: ProjectStore, args) -> int:
+    """Show or update a project's corpus scope contract."""
+    project_id = args.project_id
+    try:
+        state = store.load(project_id)
+    except FileNotFoundError:
+        print(f"Project not found: {project_id}", file=sys.stderr)
+        return 1
+
+    if _scope_update_requested(args):
+        current = state.corpus_scope or CorpusScope()
+        state.corpus_scope = CorpusScope(
+            phenomenon=(
+                args.phenomenon
+                if getattr(args, "phenomenon", None) is not None
+                else current.phenomenon
+            ),
+            population=(
+                args.population
+                if getattr(args, "population", None) is not None
+                else current.population
+            ),
+            sampling_frame=(
+                args.sampling_frame
+                if getattr(args, "sampling_frame", None) is not None
+                else current.sampling_frame
+            ),
+            inclusion_criteria=(
+                list(args.inclusion_criteria)
+                if getattr(args, "inclusion_criteria", None) is not None
+                else list(current.inclusion_criteria)
+            ),
+            exclusion_criteria=(
+                list(args.exclusion_criteria)
+                if getattr(args, "exclusion_criteria", None) is not None
+                else list(current.exclusion_criteria)
+            ),
+            notes=(
+                args.notes
+                if getattr(args, "notes", None) is not None
+                else current.notes
+            ),
+        )
+        state.touch()
+        store.save(state)
+
+    _print_scope(state)
+    return 0
+
+
+def _scope_update_requested(args) -> bool:
+    """Return True when any scope update flag was supplied."""
+    return any(
+        getattr(args, field, None) is not None
+        for field in (
+            "phenomenon",
+            "population",
+            "sampling_frame",
+            "inclusion_criteria",
+            "exclusion_criteria",
+            "notes",
+        )
+    )
+
+
+def _print_scope(state: ProjectState) -> None:
+    """Print a human-readable corpus scope summary."""
+    print(f"Corpus Scope: {state.name}")
+    scope = state.corpus_scope
+    if scope is None:
+        print("  Not set.")
+        return
+
+    print(f"  Phenomenon: {scope.phenomenon or '(not specified)'}")
+    print(f"  Population: {scope.population or '(not specified)'}")
+    print(f"  Sampling frame: {scope.sampling_frame or '(not specified)'}")
+    if scope.inclusion_criteria:
+        print("  Inclusion criteria:")
+        for criterion in scope.inclusion_criteria:
+            print(f"    - {criterion}")
+    else:
+        print("  Inclusion criteria: (not specified)")
+    if scope.exclusion_criteria:
+        print("  Exclusion criteria:")
+        for criterion in scope.exclusion_criteria:
+            print(f"    - {criterion}")
+    else:
+        print("  Exclusion criteria: (not specified)")
+    print(f"  Notes: {scope.notes or '(not specified)'}")
 
 
 def _run_stability(store: ProjectStore, args) -> int:

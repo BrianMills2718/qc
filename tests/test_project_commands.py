@@ -20,6 +20,7 @@ from qc_clean.schemas.domain import (
     CodeApplication,
     Codebook,
     Corpus,
+    CorpusScope,
     Document,
     Entity,
     DomainEntityRelationship,
@@ -454,6 +455,43 @@ class TestCLIParsing:
         assert args.project_id == "pid"
         assert args.limit == 5
 
+    def test_scope_subparser(self):
+        from qc_cli import create_parser
+        parser = create_parser()
+
+        args = parser.parse_args([
+            "project",
+            "scope",
+            "pid",
+            "--phenomenon",
+            "AI adoption",
+            "--population",
+            "Clinic staff",
+            "--sampling-frame",
+            "Pilot clinics",
+            "--include",
+            "Pilot participant",
+            "--include",
+            "Direct workflow involvement",
+            "--exclude",
+            "Vendors",
+            "--notes",
+            "Bounded to early adopters.",
+        ])
+
+        assert args.command == "project"
+        assert args.project_action == "scope"
+        assert args.project_id == "pid"
+        assert args.phenomenon == "AI adoption"
+        assert args.population == "Clinic staff"
+        assert args.sampling_frame == "Pilot clinics"
+        assert args.inclusion_criteria == [
+            "Pilot participant",
+            "Direct workflow involvement",
+        ]
+        assert args.exclusion_criteria == ["Vendors"]
+        assert args.notes == "Bounded to early adopters."
+
 
 class TestProjectClaimsCommand:
     def test_project_claims_command_outputs_summary(self, tmp_store, capsys):
@@ -487,6 +525,42 @@ class TestProjectClaimsCommand:
         assert "0 challenged, 1 unchallenged" in out
         assert "thematic_coding" in out
         assert "Efficiency is a code." in out
+
+
+class TestProjectScopeCommand:
+    def test_project_scope_command_updates_and_outputs_scope(self, tmp_store, capsys):
+        from qc_clean.core.cli.commands.project import _show_or_update_scope
+
+        state = ProjectState(id="scope-proj", name="Scope Project")
+        tmp_store.save(state)
+        args = MagicMock(
+            project_id="scope-proj",
+            phenomenon="AI adoption",
+            population="Clinic staff",
+            sampling_frame="Pilot clinics",
+            inclusion_criteria=["Pilot participant"],
+            exclusion_criteria=["Vendors"],
+            notes="Bounded to early adopters.",
+        )
+
+        result = _show_or_update_scope(tmp_store, args)
+
+        assert result == 0
+        loaded = tmp_store.load("scope-proj")
+        assert loaded.corpus_scope == CorpusScope(
+            phenomenon="AI adoption",
+            population="Clinic staff",
+            sampling_frame="Pilot clinics",
+            inclusion_criteria=["Pilot participant"],
+            exclusion_criteria=["Vendors"],
+            notes="Bounded to early adopters.",
+        )
+        out = capsys.readouterr().out
+        assert "Corpus Scope: Scope Project" in out
+        assert "Phenomenon: AI adoption" in out
+        assert "Population: Clinic staff" in out
+        assert "Inclusion criteria:" in out
+        assert "Pilot participant" in out
 
 
 # ---------------------------------------------------------------------------
