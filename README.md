@@ -12,8 +12,8 @@ The local project workflow is the main path. The API server is only required for
 # Install dependencies
 pip install -r requirements.txt
 
-# Set an API key for your chosen provider
-export OPENAI_API_KEY=sk-...
+# Set the default API key (`gpt-5-mini` routes through OpenRouter)
+export OPENROUTER_API_KEY=...
 
 # Create a project
 python qc_cli.py project create --name "My Study" --methodology grounded_theory
@@ -66,7 +66,7 @@ Both methodologies use structured LLM output, fail-loud stage dependencies, and 
 - Incremental re-coding of newly added documents via `python qc_cli.py project recode <project_id>`
 - Human review in both CLI and browser flows
 - Span-anchored quote evidence (char offsets + hash; ambiguous/unresolvable quotes are dropped, not misattributed) and a grounding metric (`make bench`)
-- LLM-pass agreement via `project irr`: codebook-discovery agreement by default, or segment × code application-level agreement with `--application-level` (see theory doc §11); plus multi-run stability via `project stability`
+- LLM-pass agreement via `project irr`: codebook-discovery agreement by default, or positive segment × code application-level agreement with `--application-level` (see theory doc §11); plus multi-run stability via `project stability`
 - Interactive graph visualization in the browser
 - JSON, CSV, Markdown, and **QDPX** (REFI-QDA, for ATLAS.ti/NVivo) export from persisted project state
 - Analytical memos at every stage plus per-code reasoning and audit-trail output
@@ -98,6 +98,7 @@ python qc_cli.py project stability <project_id>
 python qc_cli.py project export <project_id> --format json --output-file results.json
 python qc_cli.py project export <project_id> --format csv --output-dir ./export
 python qc_cli.py project export <project_id> --format markdown --output-file report.md
+python qc_cli.py project export <project_id> --format qdpx --output-file export.qdpx
 
 # Review codes from the CLI
 python qc_cli.py review <project_id>
@@ -138,11 +139,17 @@ Projects are persisted locally as JSON via `ProjectState`; no database is requir
 ## Development
 
 ```bash
-# Run the full test suite
-python -m pytest tests/ -v
+# Deterministic suite, no live LLM calls
+make test
+
+# Live LLM E2E, uses the default OpenRouter route
+OPENROUTER_API_KEY=... make test-e2e
+
+# Deterministic plus live E2E
+OPENROUTER_API_KEY=... make test-all
 ```
 
-`tests/test_e2e.py` covers end-to-end flows and requires an API key for live model execution.
+`tests/test_e2e.py` covers end-to-end flows and gates on `OPENROUTER_API_KEY` for the default `gpt-5-mini` route. `OPENAI_API_KEY` is only needed when routing directly to OpenAI or an OpenAI-compatible endpoint.
 
 ## Architecture
 

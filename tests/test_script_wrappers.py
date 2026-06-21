@@ -42,6 +42,17 @@ def test_plan_status_check_is_green_and_meaningful() -> None:
     assert "consistent with the Completed Plans table" in result.stdout
 
 
+def test_meta_plan_status_wrapper_delegates_to_repo_local_checker() -> None:
+    """The legacy meta entrypoint must not return the old vacuous empty list."""
+    result = _run_script("scripts/meta/sync_plan_status.py", "--list")
+
+    assert result.returncode == 0, result.stderr
+    assert "completed/INV1_OVERNIGHT_SPRINT.md" in result.stdout
+    assert "completed/INV8_SEGMENT_UNIVERSE.md" in result.stdout
+    assert "completed/IRR_APPLICATION_LEVEL.md" in result.stdout
+    assert "Plan Statuses:" not in result.stdout
+
+
 def test_plan_status_check_fails_on_orphan_record() -> None:
     """An unlisted record file under completed/ must turn the check red.
 

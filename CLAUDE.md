@@ -26,13 +26,13 @@ All stages use structured LLM output via Pydantic schemas + JSON mode. State is 
 
 ## Current State
 
-The software is **built and software-validated** (570 deterministic tests + 6 live-LLM E2E; ruff + docs gates green) — "the program does what it's built to do," *not* evidence the analysis is methodologically valid. Implemented:
+The software is **built and software-validated** (deterministic tests + live-LLM E2E; ruff + docs gates green) — "the program does what it's built to do," *not* evidence the analysis is methodologically valid. Implemented:
 
 - Thematic and **GT-inspired** (not "full GT") pipelines; `NegativeCaseStage` runs **last** in both (INV-6), automatic cross-interview analysis for multi-doc corpora.
 - GT constant comparison; incremental re-coding via `project recode` (flags stale higher-order outputs, INV-11).
 - **Span-anchored grounding** (INV-1, mostly met): quotes resolve to char offsets + hash or are dropped + warned; `verify_grounding`/`make bench` measure the rate.
 - **Segment universe + coverage** (INV-8): every doc split into char-anchored segments; `project run --exhaustive` codes *every* segment (examined-and-judged coverage, segment-anchored applications), else traversal coverage.
-- Human review (CLI + browser), `project irr` (LLM-pass *codebook-discovery* agreement by default; **segment × code application-level** agreement via `--application-level`, using exhaustive coding), `project stability`.
+- Human review (CLI + browser), `project irr` (LLM-pass *codebook-discovery* agreement by default; **positive segment × code application-level** agreement via `--application-level`, using exhaustive coding), `project stability`.
 - Graph viz, JSON/CSV/Markdown/QDPX export, per-stage memos, per-code audit trail; typed `PipelineContext`/results, fail-loud inter-stage checks, `llm_client` observability.
 
 **Direction:** the end product is public and SOTA-targeting; the proven/measured/planned ledger, the architectural invariants, and the ranked roadmap are in `docs/PROJECT_THEORY_AND_GOALS.md` (§13/§13.1/§18). Recent structural work landed: span anchoring (INV-1), the segment universe + exhaustive coverage (INV-8). Next: the **first-class claim ledger** (INV-9).
@@ -99,7 +99,7 @@ start_server.py                              # Server startup script
 - `qc_clean/core/export/data_exporter.py` - ProjectExporter (JSON/CSV/Markdown/QDPX from ProjectState)
 - `qc_cli.py` - CLI interface (analyze, project, review, status, server)
 - `qc_mcp_server.py` - MCP server: 20 tools for project management, pipeline execution, codebook inspection, review, IRR/stability, export
-- `tests/` - 570 deterministic tests + 6 live LLM E2E tests (39 test files)
+- `tests/` - Deterministic tests plus live LLM E2E tests (`live_llm`, run separately with `make test-e2e`)
 
 ### How It Works
 - `project run` runs the pipeline locally (no server needed); `analyze` uses the API server
@@ -185,8 +185,11 @@ python qc_mcp_server.py                                                   # run 
 #   qc_get_memos, qc_get_synthesis, qc_review_summary, qc_approve_all_codes,
 #   qc_review_codes, qc_export_markdown, qc_export_json, qc_grounding_report
 
-# Run tests
-python -m pytest tests/ -v
+# Run deterministic tests (excludes paid live LLM E2E)
+make test
+
+# Run live LLM E2E (requires OPENROUTER_API_KEY for the default gpt-5-mini route)
+make test-e2e
 ```
 
 ## Configuration
@@ -238,9 +241,9 @@ Local models work for all pipeline stages but quality varies. For GT axial/selec
 
 Moved to the canonical theory doc: `docs/PROJECT_THEORY_AND_GOALS.md` §2 (granular feature matrix vs ATLAS.ti/MAXQDA/NVivo/QualCoder + the research prototypes) and §19 (prior art worth learning from). The honest positioning is an *auditable, methodology-aware integration* — **not** 'the only tool that does X' / SOTA (see claim discipline, §14).
 
-## E2E Validation (updated 2026-02-13)
+## E2E Validation (updated 2026-06-21)
 
-Pipeline validated end-to-end against real interview transcripts using gpt-5-mini. Automated E2E tests in `tests/test_e2e.py` (requires `OPENAI_API_KEY`):
+Pipeline validated end-to-end against real interview transcripts using gpt-5-mini. Automated E2E tests in `tests/test_e2e.py` (requires `OPENROUTER_API_KEY` for the default OpenRouter route):
 
 - **Default methodology, 1 document**: 14 codes, 17 applications, 2 speakers detected, 7 memos, negative case analysis
 - **Default methodology, 2 documents**: 14 codes, 30 applications across 2 docs, cross-interview analysis with consensus/divergent themes
@@ -248,6 +251,8 @@ Pipeline validated end-to-end against real interview transcripts using gpt-5-min
 - **Incremental coding**: Initial pipeline (12 codes, 19 apps) + add doc + recode = 17 codes, 32 apps, iteration 2
 - **Graph data**: 13 code nodes, 25 entity nodes, 12 entity relationships from completed state
 - **Export**: JSON, Markdown, CSV all produce valid output from real pipeline results
+- **Exhaustive coverage**: `exhaustive_coding=True` gives examined-and-judged coverage over the segment universe
+- **Application-level IRR**: `run_irr_analysis(application_level=True)` computes segment x code application agreement
 
 Previous manual E2E (2026-02-12):
 - Default 1-doc: 12 codes, 29 applications, 8 speakers (focus group)
@@ -282,7 +287,7 @@ Bugs found and fixed during E2E testing:
 
 ## Academic Standards & Honest State
 
-Superseded by the canonical theory doc: the proven/measured/planned **state ledger** is `docs/PROJECT_THEORY_AND_GOALS.md` §13, the **architectural invariants** (INV-0..11, each MET/PARTIAL/UNMET) are §13.1, and the academic references + prior art are §19. Do **not** re-introduce a 'Tier 2 complete / validated' ledger here — it contradicts the invariants (e.g. disconfirmation is INV-2 UNMET / INV-6 PARTIAL; `project irr` defaults to codebook-discovery agreement; `--application-level` gives segment x code agreement).
+Superseded by the canonical theory doc: the proven/measured/planned **state ledger** is `docs/PROJECT_THEORY_AND_GOALS.md` §13, the **architectural invariants** (INV-0..11, each MET/PARTIAL/UNMET) are §13.1, and the academic references + prior art are §19. Do **not** re-introduce a 'Tier 2 complete / validated' ledger here — it contradicts the invariants (e.g. disconfirmation is INV-2 UNMET / INV-6 PARTIAL; `project irr` defaults to codebook-discovery agreement; `--application-level` gives positive segment x code application agreement).
 
 ## Next Steps
 
@@ -373,8 +378,10 @@ Score the qualitative codebook on a scale of 0.0 to 1.0.
 ## Commands
 
 ```bash
-make test               # Run full test suite
+make test               # Run deterministic test suite (excludes live LLM E2E)
 make test-quick         # Run tests, minimal output
+make test-e2e           # Run live LLM E2E tests
+make test-all           # Run deterministic tests and live LLM E2E tests
 make lint               # Run Ruff fatal-error lint gate
 make docs-check         # Run documentation and governance checks
 make check              # Run deterministic tests + lint + docs checks

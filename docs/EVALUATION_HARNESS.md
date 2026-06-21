@@ -93,7 +93,7 @@ Each dimension maps to a SOTA claim and (where relevant) an invariant. The bar i
 
 - **`prompt_eval`** owns experiments, frozen case sets, evaluators, optimization (`instruction_search`), persistence, and stats. New QC-specific evaluators (grounding-rate, IoU/Hausdorff span alignment, coverage, counterfactual-swap, disconfirmation recall) are added as `prompt_eval` evaluator functions, not bespoke scripts.
 - **`llm_client`** owns the runs and observability (cost/tokens/latency per `task`/`trace_id`).
-- **QC surface:** a `make bench` target + a `qc bench` CLI/MCP path that runs a frozen suite against a dataset and writes a scored report. Agent-drivable end to end (no manual steps).
+- **QC surface:** current surface is `make bench ID=<project_id>` for the deterministic Phase 0 local scorecard. Target surface is a future `qc bench` CLI/MCP path that runs a frozen `prompt_eval` suite against a dataset and writes a scored report. Agent-drivable end to end (no manual steps).
 - **Outputs:** a versioned `benchmark_results/` with per-dimension scores, CIs, baseline deltas, dataset + prompt + model hashes, and a generated scorecard. These hashes are the artifact evidence the theory doc's claim discipline requires before any public SOTA statement.
 
 ## 7. Acceptance criteria (the SOTA gate)
@@ -107,7 +107,7 @@ Both require a held-out, prompt-frozen, contamination-checked dataset, recorded 
 
 ## 8. Phasing (smallest real slice first)
 
-- **Phase 0 — plumbing + cheap metrics (no new human coding). STARTED.** `make bench ID=<project>` (`qc_clean/core/bench.py` → `phase0_scorecard`) computes **D1 grounding** (now real: `verify_grounding` returns the fraction of applications whose span anchor verifies — INV-1 landed) and surfaces **D5** reliability/stability when present, deterministically. Remaining Phase 0: wire into `prompt_eval` for frozen case sets + CIs, add D10 cost from the observability DB, and run on reused public gold as a comparator.
+- **Phase 0 local scorecard — DONE.** `make bench ID=<project>` (`qc_clean/core/bench.py` → `phase0_scorecard`) computes **D1 grounding** (now real: `verify_grounding` returns the fraction of applications whose span anchor verifies — INV-1 landed), **D2 coverage** (including examined-and-judged coverage under `--exhaustive`), and surfaces **D5** reliability/stability when present, deterministically. Remaining harness work: wire into `prompt_eval` for frozen case sets + CIs, add D10 cost from the observability DB, and run on reused public gold as a comparator.
 - **Phase 1 — small adjudicated gold.** Build/borrow a small expert gold set; compute D3 (κ/α, IoU/Hausdorff), D4 (codebook quality), D7 (disconfirmation recall) vs the human ceiling.
 - **Phase 2 — full benchmark + public scorecard.** Add baselines (ChatGPT, commercial, prototypes), D6 (bias + counterfactual), confidence calibration, D8 (GT fidelity), D9 (interpretive-depth preference). Publish the scorecard with the SOTA gate (§7) applied per dimension.
 

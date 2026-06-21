@@ -24,6 +24,30 @@ couplings:
     docs: ["docs/PROJECT_THEORY_AND_GOALS.md"]
     description: "INV-6 disconfirmation scope (PARTIAL) — claim discipline depends on what this stage actually re-examines"
     soft: true
+  - sources:
+      - "qc_cli.py"
+      - "qc_clean/core/cli/commands/project.py"
+      - "qc_clean/core/export/data_exporter.py"
+      - "tests/test_qdpx_export.py"
+      - "tests/test_project_commands.py"
+    docs: ["README.md", "CLAUDE.md", "docs/PROJECT_THEORY_AND_GOALS.md"]
+    description: "CLI/project export surfaces and QDPX interoperability claims must stay aligned"
+    soft: true
+  - sources: ["tests/test_e2e.py"]
+    docs: ["README.md", "CLAUDE.md", "docs/PROJECT_THEORY_AND_GOALS.md"]
+    description: "Live E2E flow list, provider key, and software-validation claims must track the actual live_llm suite"
+    soft: true
+  - sources:
+      - "qc_clean/core/pipeline/irr.py"
+      - "tests/test_irr_application_level.py"
+      - "docs/plans/completed/IRR_APPLICATION_LEVEL.md"
+    docs: ["docs/PROJECT_THEORY_AND_GOALS.md", "docs/EVALUATION_HARNESS.md"]
+    description: "IRR implementation unit, denominator caveats, claim discipline, and roadmap must stay synchronized"
+    soft: true
+  - sources: ["Makefile"]
+    docs: ["README.md", "CLAUDE.md", "AGENTS.md"]
+    description: "Agent-facing command docs must match deterministic/live test target semantics"
+    soft: true
 
 architecture: []
 adrs: {}

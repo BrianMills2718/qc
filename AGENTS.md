@@ -4,7 +4,7 @@
 <!-- generated_by: scripts/meta/render_agents_md.py -->
 <!-- canonical_claude: CLAUDE.md -->
 <!-- canonical_relationships: scripts/relationships.yaml -->
-<!-- canonical_relationships_sha256: b97774a40764 -->
+<!-- canonical_relationships_sha256: a8aa2caf93cf -->
 <!-- sync_check: python scripts/meta/check_agents_sync.py --check -->
 
 This file is a generated Codex-oriented projection of repo governance.
@@ -32,8 +32,10 @@ Canonical governance sources:
 ## Commands
 
 ```bash
-make test               # Run full test suite
+make test               # Run deterministic test suite (excludes live LLM E2E)
 make test-quick         # Run tests, minimal output
+make test-e2e           # Run live LLM E2E tests
+make test-all           # Run deterministic tests and live LLM E2E tests
 make lint               # Run Ruff fatal-error lint gate
 make docs-check         # Run documentation and governance checks
 make check              # Run deterministic tests + lint + docs checks

@@ -70,7 +70,7 @@ exhaustive mode).
 | 6 | `compute_coverage` examined/coded rates; surface in bench; CLI opt-in + tests | DONE |
 | 7 | Docs: INV-8 → MET (exhaustive mode); roadmap; counts | DONE |
 
-**COMPLETE (all 7 phases).** INV-8 MET in exhaustive mode (`project run --exhaustive`): char-anchored segment universe, examined-and-judged coverage, segment-anchored applications. PARTIAL by default (traversal coverage). 563 tests, all gates green. Follow-ups: wire `project irr` to per-segment application-level agreement; decide if exhaustive becomes default after live validation.
+**COMPLETE (all 7 phases).** INV-8 MET in exhaustive mode (`project run --exhaustive`): char-anchored segment universe, examined-and-judged coverage, segment-anchored applications. PARTIAL by default (traversal coverage). Follow-up status: `project irr --application-level` shipped in `IRR_APPLICATION_LEVEL.md`; remaining decision is whether exhaustive becomes default after live validation.
 
 ## Notes / findings log
 - The exhaustive per-segment-coding half SHIPPED (Phases 5-7, `project run --exhaustive`). The earlier '~5-10x cost / deferred' worry was wrong: it is ONE batched call (more output tokens, not more calls). User approved it 2026-06-20.
