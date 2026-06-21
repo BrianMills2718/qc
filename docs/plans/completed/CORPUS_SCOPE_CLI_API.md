@@ -1,6 +1,24 @@
 # Plan #19: Corpus Scope CLI/API Surfaces
 
-**Status:** Planned
+**Outcome:** Complete. Added `qc_cli project scope <project_id>` for showing
+and partially updating `ProjectState.corpus_scope`, plus
+`GET /projects/{project_id}/scope` and `PUT /projects/{project_id}/scope` API
+surfaces. Updates validate through `CorpusScope`, preserve omitted fields, save
+through `ProjectStore`, and return a stable JSON payload.
+
+**Verification:** `python -m pytest
+tests/test_project_commands.py::TestCLIParsing::test_scope_subparser
+tests/test_project_commands.py::TestProjectScopeCommand::test_project_scope_command_updates_and_outputs_scope
+tests/test_review_api.py::TestCorpusScopeEndpoint::test_get_project_scope_returns_current_scope
+tests/test_review_api.py::TestCorpusScopeEndpoint::test_put_project_scope_updates_scope`
+passed; `python -m pytest tests/test_project_commands.py tests/test_review_api.py
+-q` passed with 45 tests; `python -m ruff check qc_cli.py
+qc_clean/core/cli/commands/project.py qc_clean/plugins/api/api_server.py
+tests/test_project_commands.py tests/test_review_api.py` passed. Final full
+gate: `make check` passed with 659 tests passed, 1 skipped, 8 deselected; Ruff
+and docs gates passed; type check is not yet configured.
+
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Plan #16 corpus scope contract
@@ -107,17 +125,17 @@ cross-project callable capability.
 ## Acceptance Criteria
 
 > Feature-level criteria (what the plan accomplishes):
-- [ ] CLI can show scope when absent and when present.
-- [ ] CLI can set phenomenon, population, sampling frame, inclusion criteria, exclusion criteria, and notes.
-- [ ] API `GET /projects/{project_id}/scope` returns a stable JSON shape.
-- [ ] API `PUT /projects/{project_id}/scope` validates and persists `CorpusScope`.
-- [ ] Docs state these are read/update surfaces only, not sampling-frame validation.
+- [x] CLI can show scope when absent and when present.
+- [x] CLI can set phenomenon, population, sampling frame, inclusion criteria, exclusion criteria, and notes.
+- [x] API `GET /projects/{project_id}/scope` returns a stable JSON shape.
+- [x] API `PUT /projects/{project_id}/scope` validates and persists `CorpusScope`.
+- [x] Docs state these are read/update surfaces only, not sampling-frame validation.
 
 > Process criteria (quality gates):
-- [ ] Required tests pass
-- [ ] Full test suite passes
-- [ ] Type check status is reported
-- [ ] Docs updated
+- [x] Required tests pass
+- [x] Full test suite passes
+- [x] Type check status is reported
+- [x] Docs updated
 
 ---
 

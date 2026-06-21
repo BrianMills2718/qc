@@ -48,6 +48,7 @@ make errors             # Show recent error breakdown
 # Pipeline (local run; `project run` needs no server, `analyze` needs the API server)
 python qc_cli.py project run <project_id>
 python qc_cli.py project run <project_id> --exhaustive   # code every segment (INV-8)
+python qc_cli.py project scope <project_id> --phenomenon "..."  # show/update corpus scope
 python qc_cli.py project claims <project_id>              # inspect first-class claim ledger (INV-9)
 ```
 
