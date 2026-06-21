@@ -31,9 +31,11 @@ highest-value documented lane.
 **Completed checkpoint:** D3 and D7 scorecard sections now accept raw gold or
 versioned `schema_version=1` gold-set packages, surface compact
 `gold_provenance` when package metadata is present, and report configurable local
-exact-key `f1_bootstrap_ci` intervals by default. D3 packages are validated by
+exact-key `f1_bootstrap_ci` intervals by default. D7 baseline comparisons also
+report local paired exact-key `system_minus_baseline_ci` intervals for recall,
+precision, and F1 deltas. D3 packages are validated by
 `make validate-d3-gold GOLD=gold_set.json`; D7 packages by
 `make validate-d7-gold GOLD=gold_set.json`. This remains a gold-dependent
 exact-score/provenance/uncertainty substrate, not a populated held-out benchmark,
-full D3/D7 validity, κ/α/AC1, IoU/Hausdorff, interval-tested baseline delta, or
+full D3/D7 validity, κ/α/AC1, IoU/Hausdorff, held-out live-baseline result, or
 expert-parity/SOTA evidence.

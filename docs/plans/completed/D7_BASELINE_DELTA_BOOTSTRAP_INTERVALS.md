@@ -1,12 +1,28 @@
 # Plan #40: D7 Baseline Delta Bootstrap Intervals
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** None
 **Blocks:** D7 retrieval-mode comparison reporting; future held-out baseline testing
 
 ---
+
+## Outcome
+
+Implemented and verified in commit `2eace3f`. D7 baseline sections now include
+`system_minus_baseline_ci` by default when bootstrap is enabled, using a
+deterministic paired exact-key bootstrap over gold/system/baseline key
+membership. The interval metadata includes method, confidence level, sample
+count, seed, bootstrap unit, population size, and per-metric recall, precision,
+and F1 lower/upper bounds. Disabling
+`ProjectState.config.extra["phase0_exact_bootstrap"].enabled` suppresses both
+F1 bootstrap intervals and baseline delta intervals.
+
+Verification:
+- `python -m pytest tests/test_bench_phase0.py tests/test_d7_retrieval.py -q` — 32 passed
+- `python -m ruff check qc_clean/core/bench.py tests/test_bench_phase0.py` — passed
+- `make check` — 722 passed, 1 skipped, 8 deselected; Ruff passed; docs checks passed; type check not yet configured
 
 ## Gap
 
@@ -58,10 +74,10 @@ Internal project capability only; no cross-project boundary is created.
 
 ### Capability Validation
 
-- [ ] D7 baseline sections include `system_minus_baseline_ci` when bootstrap is
+- [x] D7 baseline sections include `system_minus_baseline_ci` when bootstrap is
   enabled.
-- [ ] Delta CI covers recall, precision, and F1.
-- [ ] Disabling `phase0_exact_bootstrap.enabled` suppresses both F1 and delta
+- [x] Delta CI covers recall, precision, and F1.
+- [x] Disabling `phase0_exact_bootstrap.enabled` suppresses both F1 and delta
   bootstrap outputs.
 
 ---
@@ -113,25 +129,25 @@ Internal project capability only; no cross-project boundary is created.
 ## Acceptance Criteria
 
 > Feature-level criteria (what the plan accomplishes):
-- [ ] D7 baseline sections report `system_minus_baseline_ci` by default.
-- [ ] Delta CI metadata includes method, confidence, samples, seed, population
+- [x] D7 baseline sections report `system_minus_baseline_ci` by default.
+- [x] Delta CI metadata includes method, confidence, samples, seed, population
   size, and per-metric lower/upper bounds.
-- [ ] Bootstrap disabled mode suppresses F1 and delta bootstrap outputs.
-- [ ] Docs distinguish local paired bootstrap intervals from held-out
+- [x] Bootstrap disabled mode suppresses F1 and delta bootstrap outputs.
+- [x] Docs distinguish local paired bootstrap intervals from held-out
   superiority/non-inferiority testing.
 
 > Process criteria (quality gates):
-- [ ] Required tests pass
-- [ ] Full test suite passes
-- [ ] Type check status reported
-- [ ] Docs updated
-- [ ] Plan completed, committed, and pushed
+- [x] Required tests pass
+- [x] Full test suite passes
+- [x] Type check status reported
+- [x] Docs updated
+- [x] Plan completed, committed, and pushed
 
 ---
 
 ## Open Questions
 
-- [ ] Should delta intervals use document-level pairing in the future? — Status:
+- [x] Should delta intervals use document-level pairing in the future? — Status:
   DEFERRED | Why it matters: document-level pairing needs enough held-out
   documents and document-aware baseline packages. This slice remains exact-key
   local Phase 0 metadata.

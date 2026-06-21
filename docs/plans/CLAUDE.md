@@ -6,7 +6,6 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 40 | D7 baseline delta bootstrap intervals | High | Planned | `D7_BASELINE_DELTA_BOOTSTRAP_INTERVALS.md` |
 
 ## Completed Plans
 
@@ -51,6 +50,7 @@ Track all implementation work here.
 | D3 held-out gold-set scaffold | Evaluation-harness follow-up: versioned D3 gold-set packages can be validated and used as `--d3-gold-file` inputs without claiming held-out results | `completed/D3_HELD_OUT_GOLD_SET_SCAFFOLD.md` |
 | Gold-set provenance in scorecards | Evaluation-harness follow-up: versioned D3/D7 package metadata is surfaced as compact `gold_provenance` in Phase 0 scorecard sections | `completed/GOLD_SET_PROVENANCE_SCORECARD.md` |
 | Exact-score F1 bootstrap intervals | Evaluation-harness follow-up: D3/D7 exact-anchor scorecards now report configurable local F1 bootstrap intervals while baseline deltas remain point estimates | `completed/EXACT_SCORE_F1_BOOTSTRAP_INTERVALS.md` |
+| D7 baseline delta bootstrap intervals | Evaluation-harness follow-up: D7 baseline comparisons now report configurable local paired bootstrap intervals for system-minus-baseline recall/precision/F1 deltas | `completed/D7_BASELINE_DELTA_BOOTSTRAP_INTERVALS.md` |
 
 ## Status Key
 
