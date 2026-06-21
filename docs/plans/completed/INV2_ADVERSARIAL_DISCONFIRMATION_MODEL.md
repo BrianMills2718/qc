@@ -1,10 +1,30 @@
 # Plan #8: INV-2 Adversarial Disconfirmation Model Routing
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** None
 **Blocks:** INV-2 hardened disconfirmation; D7 evaluation-harness disconfirmation metrics
+
+---
+
+## Completion Outcome
+
+Completed 2026-06-21. `PipelineContext.disconfirmation_model_name` now lets
+negative-case interpretation route through a configured disconfirmation model,
+falling back to the normal pipeline `model_name` when unset. The negative-case
+prompt now frames the task as an adversarial qualitative methods review over
+retrieved candidates, explicitly requiring skeptical evidence-bound assessment
+without fabrication or overstatement. The negative-case memo records the
+interpretation model used.
+
+This removes the hard same-model coupling, but does not pick a validated default
+adversarial model, enforce provider/model-family diversity, or prove D7
+disconfirmation quality.
+
+Verification: targeted affected suites passed (`61 passed`), and `make check`
+passed with `631 passed, 1 skipped, 8 deselected`; Ruff and docs checks were
+green.
 
 ---
 
@@ -114,18 +134,18 @@ does not create a cross-project callable capability.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] `PipelineContext` exposes a configurable disconfirmation model override.
-- [ ] `NegativeCaseStage` uses the override for the LLM call and falls back to `model_name` when unset.
-- [ ] Negative-case prompts frame interpretation as skeptical/adversarial review of retrieved source candidates.
-- [ ] The selected disconfirmation model is recorded in the negative-case memo.
-- [ ] Docs do not claim full INV-2 or D7 success.
+- [x] `PipelineContext` exposes a configurable disconfirmation model override.
+- [x] `NegativeCaseStage` uses the override for the LLM call and falls back to `model_name` when unset.
+- [x] Negative-case prompts frame interpretation as skeptical/adversarial review of retrieved source candidates.
+- [x] The selected disconfirmation model is recorded in the negative-case memo.
+- [x] Docs do not claim full INV-2 or D7 success.
 
 > Process criteria:
-- [ ] Required targeted tests pass.
-- [ ] Full deterministic suite passes through `make check`.
-- [ ] Lint passes through `make check`.
-- [ ] Docs checks pass.
-- [ ] Verified work is committed and pushed.
+- [x] Required targeted tests pass.
+- [x] Full deterministic suite passes through `make check`.
+- [x] Lint passes through `make check`.
+- [x] Docs checks pass.
+- [x] Verified work is committed and pushed.
 
 ---
 
