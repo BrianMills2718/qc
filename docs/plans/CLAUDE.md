@@ -6,9 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-
-No active implementation plan is currently tracked here. Use the roadmap in
-`docs/PROJECT_THEORY_AND_GOALS.md` §18 to choose the next invariant lane.
+| 10 | INV-2 D7 disconfirmation scorecard | High | Planned | `INV2_D7_DISCONFIRMATION_SCORECARD.md` |
 
 ## Completed Plans
 
