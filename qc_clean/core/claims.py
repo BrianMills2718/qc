@@ -20,6 +20,14 @@ from qc_clean.schemas.domain import (
     Provenance,
 )
 
+NEGATIVE_CASE_TARGET_KINDS = {
+    ClaimKind.CODE,
+    ClaimKind.CROSS_CASE,
+    ClaimKind.SYNTHESIS_FINDING,
+    ClaimKind.GT_CATEGORY,
+    ClaimKind.GT_PROPOSITION,
+}
+
 
 def claim_anchor_from_application(app: CodeApplication) -> ClaimAnchor | None:
     """Build a claim anchor from an anchored code application, if possible."""
@@ -340,6 +348,7 @@ def claims_for_negative_cases(
         code_id = _code_id_by_name(state, negative_case.code_name)
         anchor = _anchor_from_quote(state, negative_case.disconfirming_evidence)
         contrary_anchors = [anchor] if anchor else []
+        target_claim_ids = _claim_ids_for_code_target(state, code_id, source_stage)
         claims.append(AnalyticClaim(
             claim_kind=ClaimKind.NEGATIVE_CASE,
             source_stage=source_stage,
@@ -350,6 +359,7 @@ def claims_for_negative_cases(
             scope=ClaimScope(
                 doc_ids=[anchor.doc_id] if anchor else [],
                 code_ids=[code_id] if code_id else [],
+                claim_ids=target_claim_ids,
             ),
             origin_object_type="negative_case",
             origin_object_id=f"negative_case:{i}:{negative_case.code_name}",
@@ -508,6 +518,26 @@ def _code_id_by_name(state: ProjectState, name: str) -> str | None:
         if code.name == name:
             return code.id
     return None
+
+
+def _claim_ids_for_code_target(
+    state: ProjectState,
+    code_id: str | None,
+    source_stage: str,
+) -> list[str]:
+    """Return existing high-level claim IDs challenged by a negative case."""
+    if not code_id:
+        return []
+
+    target_ids: list[str] = []
+    for claim in state.claims:
+        if claim.source_stage == source_stage or claim.claim_kind == ClaimKind.NEGATIVE_CASE:
+            continue
+        if claim.claim_kind not in NEGATIVE_CASE_TARGET_KINDS:
+            continue
+        if code_id in claim.scope.code_ids:
+            target_ids.append(claim.id)
+    return target_ids
 
 
 def _anchor_from_quote(state: ProjectState, quote: str) -> ClaimAnchor | None:

@@ -272,6 +272,7 @@ class ClaimAnchor(BaseModel):
 class ClaimScope(BaseModel):
     """The bounded analytic scope a claim applies to."""
     corpus_level: bool = Field(default=False, description="True when the claim is scoped to the analyzed corpus as a whole")
+    claim_ids: List[str] = Field(default_factory=list, description="AnalyticClaim IDs this claim refers to or challenges")
     doc_ids: List[str] = Field(default_factory=list, description="Document IDs the claim is scoped to")
     code_ids: List[str] = Field(default_factory=list, description="Code IDs the claim refers to")
     segment_ids: List[str] = Field(default_factory=list, description="Segment IDs the claim refers to")
