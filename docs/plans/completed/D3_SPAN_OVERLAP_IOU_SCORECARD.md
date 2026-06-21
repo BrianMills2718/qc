@@ -1,12 +1,26 @@
 # Plan #41: D3 Span-Overlap IoU Scorecard
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** None
 **Blocks:** Full D3 application-validity evaluation; LLMCode-style span alignment
 
 ---
+
+## Outcome
+
+Implemented and verified in commit `3af36b8`. D3 scored sections now include a
+`span_overlap` object that reports local same-code/same-document char-span IoU
+diagnostics: scoreable/unscored gold and predicted counts, mean best gold IoU,
+mean best predicted IoU, and per-gold/per-predicted best-overlap rows. This is a
+continuous local span-alignment diagnostic only; Modified Hausdorff,
+κ/α/AC1, human-ceiling comparison, and expert-parity claims remain future work.
+
+Verification:
+- `python -m pytest tests/test_bench_phase0.py tests/test_bench_phase0_script.py -q` — 43 passed
+- `python -m ruff check qc_clean/core/bench.py tests/test_bench_phase0.py` — passed
+- `make check` — 724 passed, 1 skipped, 8 deselected; Ruff passed; docs checks passed; type check not yet configured
 
 ## Gap
 
@@ -55,11 +69,11 @@ Internal project capability only; no cross-project boundary is created.
 
 ### Capability Validation
 
-- [ ] D3 scored sections include `span_overlap` when scoreable char-span gold is
+- [x] D3 scored sections include `span_overlap` when scoreable char-span gold is
   present.
-- [ ] Same-code/same-document best IoU is computed for gold→system and
+- [x] Same-code/same-document best IoU is computed for gold→system and
   system→gold directions.
-- [ ] Segment-only/unanchored records are counted as unscored for overlap, not
+- [x] Segment-only/unanchored records are counted as unscored for overlap, not
   silently treated as zero-overlap spans.
 
 ---
@@ -109,27 +123,27 @@ Internal project capability only; no cross-project boundary is created.
 ## Acceptance Criteria
 
 > Feature-level criteria (what the plan accomplishes):
-- [ ] D3 scorecard includes a `span_overlap` object for scored D3 sections.
-- [ ] The overlap object reports counts, mean best gold IoU, mean best predicted
+- [x] D3 scorecard includes a `span_overlap` object for scored D3 sections.
+- [x] The overlap object reports counts, mean best gold IoU, mean best predicted
   IoU, and per-gold/per-predicted best-overlap rows.
-- [ ] Unscoreable gold/predicted records are visible in counts.
-- [ ] Docs identify this as local IoU span-alignment scaffolding only.
+- [x] Unscoreable gold/predicted records are visible in counts.
+- [x] Docs identify this as local IoU span-alignment scaffolding only.
 
 > Process criteria (quality gates):
-- [ ] Required tests pass
-- [ ] Full test suite passes
-- [ ] Type check status reported
-- [ ] Docs updated
-- [ ] Plan completed, committed, and pushed
+- [x] Required tests pass
+- [x] Full test suite passes
+- [x] Type check status reported
+- [x] Docs updated
+- [x] Plan completed, committed, and pushed
 
 ---
 
 ## Open Questions
 
-- [ ] Should IoU use a threshold for matched/not-matched? — Status: DEFERRED |
+- [x] Should IoU use a threshold for matched/not-matched? — Status: DEFERRED |
   Why it matters: threshold choice belongs in a future benchmark protocol. This
   slice reports continuous IoU only.
-- [ ] Should Modified Hausdorff be added now? — Status: DEFERRED | Why it
+- [x] Should Modified Hausdorff be added now? — Status: DEFERRED | Why it
   matters: Hausdorff metric design should follow a reviewed LLMCode-compatible
   implementation lane.
 

@@ -6,7 +6,6 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 41 | D3 span-overlap IoU scorecard | High | Planned | `D3_SPAN_OVERLAP_IOU_SCORECARD.md` |
 
 ## Completed Plans
 
@@ -52,6 +51,7 @@ Track all implementation work here.
 | Gold-set provenance in scorecards | Evaluation-harness follow-up: versioned D3/D7 package metadata is surfaced as compact `gold_provenance` in Phase 0 scorecard sections | `completed/GOLD_SET_PROVENANCE_SCORECARD.md` |
 | Exact-score F1 bootstrap intervals | Evaluation-harness follow-up: D3/D7 exact-anchor scorecards now report configurable local F1 bootstrap intervals while baseline deltas remain point estimates | `completed/EXACT_SCORE_F1_BOOTSTRAP_INTERVALS.md` |
 | D7 baseline delta bootstrap intervals | Evaluation-harness follow-up: D7 baseline comparisons now report configurable local paired bootstrap intervals for system-minus-baseline recall/precision/F1 deltas | `completed/D7_BASELINE_DELTA_BOOTSTRAP_INTERVALS.md` |
+| D3 span-overlap IoU scorecard | Evaluation-harness follow-up: D3 scorecards now report local same-code/doc char-span IoU overlap diagnostics beside exact-anchor scores | `completed/D3_SPAN_OVERLAP_IOU_SCORECARD.md` |
 
 ## Status Key
 
