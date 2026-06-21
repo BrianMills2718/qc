@@ -6,7 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| — | No active implementation plan. | — | — | — |
+| 19 | Corpus scope CLI/API surfaces | High | Planned | `CORPUS_SCOPE_CLI_API.md` |
 
 ## Completed Plans
 
