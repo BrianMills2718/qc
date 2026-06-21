@@ -307,7 +307,7 @@ def _run_irr(store: ProjectStore, args) -> int:
     if models:
         print(f"  Model rotation: {', '.join(models)}")
     if application_level:
-        print("  Application-level: exhaustive per-segment coding (segment x code agreement)")
+        print("  Application-level: exhaustive per-segment coding")
     print()
 
     try:
@@ -337,15 +337,26 @@ def _run_irr(store: ProjectStore, args) -> int:
         print(f"  Fleiss' kappa: {result.fleiss_kappa:.3f}")
     print(f"  Interpretation: {result.interpretation} (codebook-discovery agreement)")
     if result.application_level:
-        print("\n  Application-level (segment x code) agreement — the stronger 'same code on the same text' number:")
-        print(f"    Units compared: {result.application_units} (segment, code) cells")
+        print("\n  Application-level agreement:")
+        print("    Positive code-application cells (segment x code):")
+        print(f"      Units compared: {result.application_units} positive (segment, code) cells")
         if result.application_percent_agreement is not None:
-            print(f"    Percent agreement: {result.application_percent_agreement:.1%}")
+            print(f"      Percent agreement: {result.application_percent_agreement:.1%}")
         if result.application_cohens_kappa is not None:
-            print(f"    Cohen's kappa: {result.application_cohens_kappa:.3f}")
+            print(f"      Cohen's kappa: {result.application_cohens_kappa:.3f}")
         if result.application_fleiss_kappa is not None:
-            print(f"    Fleiss' kappa: {result.application_fleiss_kappa:.3f}")
-        print(f"    Interpretation: {result.application_interpretation}")
+            print(f"      Fleiss' kappa: {result.application_fleiss_kappa:.3f}")
+        print(f"      Interpretation: {result.application_interpretation}")
+
+        print("    Segment decisions (coded / no_code / not_examined):")
+        print(f"      Units compared: {result.segment_decision_units} segments")
+        if result.segment_decision_percent_agreement is not None:
+            print(f"      Percent agreement: {result.segment_decision_percent_agreement:.1%}")
+        if result.segment_decision_cohens_kappa is not None:
+            print(f"      Cohen's kappa: {result.segment_decision_cohens_kappa:.3f}")
+        if result.segment_decision_fleiss_kappa is not None:
+            print(f"      Fleiss' kappa: {result.segment_decision_fleiss_kappa:.3f}")
+        print(f"      Interpretation: {result.segment_decision_interpretation}")
 
     return 0
 

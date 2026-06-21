@@ -123,6 +123,35 @@ def build_application_matrix(
     return matrix
 
 
+def normalize_segment_decision(decision: Optional[str]) -> str:
+    """Normalize exhaustive segment decisions for categorical agreement metrics."""
+    if decision in {"coded", "no_code"}:
+        return decision
+    return "not_examined"
+
+
+def build_segment_decision_matrix(
+    passes_segment_decisions: List[Dict[str, str]],
+) -> Dict[str, List[str]]:
+    """Categorical segment-decision matrix for coded/no_code/not_examined agreement.
+
+    ``passes_segment_decisions[i]`` is ``{seg_key: decision}`` for pass i. Missing
+    or ``None`` decisions are represented as ``not_examined`` so skipped segment
+    decisions are visible in the denominator instead of silently dropped.
+    """
+    segment_keys = set()
+    for sd in passes_segment_decisions:
+        segment_keys.update(sd.keys())
+
+    matrix: Dict[str, List[str]] = {}
+    for seg_key in sorted(segment_keys):
+        matrix[seg_key] = [
+            normalize_segment_decision(sd.get(seg_key))
+            for sd in passes_segment_decisions
+        ]
+    return matrix
+
+
 def compute_percent_agreement(matrix: Dict[str, List[int]]) -> float:
     """Proportion of codes where all passes agree (all 1 or all 0)."""
     if not matrix:
@@ -208,6 +237,66 @@ def compute_fleiss_kappa(matrix: Dict[str, List[int]]) -> float:
     return (p_bar - p_e) / (1 - p_e)
 
 
+def compute_categorical_percent_agreement(matrix: Dict[str, List[str]]) -> float:
+    """Proportion of categorical rows where all passes assign the same value."""
+    if not matrix:
+        return 0.0
+    unanimous = sum(1 for row in matrix.values() if all(v == row[0] for v in row))
+    return unanimous / len(matrix)
+
+
+def compute_categorical_cohens_kappa(matrix: Dict[str, List[str]]) -> float:
+    """Cohen's kappa for exactly 2 passes over categorical labels."""
+    if not matrix:
+        return 0.0
+    rows = list(matrix.values())
+    if len(rows[0]) != 2:
+        raise ValueError("Cohen's kappa requires exactly 2 passes")
+
+    n = len(rows)
+    po = sum(1 for row in rows if row[0] == row[1]) / n
+    categories = sorted({value for row in rows for value in row})
+    pe = 0.0
+    for cat in categories:
+        p1 = sum(1 for row in rows if row[0] == cat) / n
+        p2 = sum(1 for row in rows if row[1] == cat) / n
+        pe += p1 * p2
+
+    if pe == 1.0:
+        return 1.0
+    return (po - pe) / (1 - pe)
+
+
+def compute_categorical_fleiss_kappa(matrix: Dict[str, List[str]]) -> float:
+    """Fleiss' kappa for 2+ passes over categorical labels."""
+    if not matrix:
+        return 0.0
+    rows = list(matrix.values())
+    n = len(rows)
+    k = len(rows[0])
+    if n == 0 or k == 0:
+        return 0.0
+    if k == 1:
+        return 1.0
+
+    categories = sorted({value for row in rows for value in row})
+    p_bar = 0.0
+    category_totals = {cat: 0 for cat in categories}
+    for row in rows:
+        counts = {cat: row.count(cat) for cat in categories}
+        for cat, count in counts.items():
+            category_totals[cat] += count
+        p_i = sum(count * (count - 1) for count in counts.values()) / (k * (k - 1))
+        p_bar += p_i
+    p_bar /= n
+
+    total_ratings = n * k
+    p_e = sum((count / total_ratings) ** 2 for count in category_totals.values())
+    if p_e == 1.0:
+        return 1.0
+    return (p_bar - p_e) / (1 - p_e)
+
+
 def interpret_kappa(kappa: float) -> str:
     """Interpret kappa using Landis & Koch (1977) scale."""
     if kappa < 0.0:
@@ -258,7 +347,7 @@ async def run_irr_analysis(
     is_gt = state.config.methodology == Methodology.GROUNDED_THEORY
     from qc_clean.core.pipeline.pipeline_engine import PipelineContext
 
-    async def _run_one_pass(i: int) -> Tuple[IRRCodingPass, Dict[str, set]]:
+    async def _run_one_pass(i: int) -> Tuple[IRRCodingPass, Dict[str, set], Dict[str, str]]:
         suffix = PROMPT_SUFFIXES[i % len(PROMPT_SUFFIXES)]
         pass_model = model_name
         if models:
@@ -300,15 +389,19 @@ async def run_irr_analysis(
             for c in pass_state.codebook.codes
         ]
 
-        # For application-level IRR, derive {seg_key: {normalized code names}}
-        # from the exhaustively-coded applications (anchored to segment spans).
+        # For application-level IRR, derive:
+        # - {seg_key: {normalized code names}} from positive applications
+        # - {seg_key: coded/no_code/not_examined} from every segment decision
         seg_codes: Dict[str, set] = {}
+        seg_decisions: Dict[str, str] = {}
         if application_level:
             id_to_name = {c.id: normalize_code_name(c.name) for c in pass_state.codebook.codes}
             for app in pass_state.code_applications:
                 name = id_to_name.get(app.code_id)
                 if name:
                     seg_codes.setdefault(f"{app.doc_id}#{app.start_char}", set()).add(name)
+            for seg in pass_state.segments:
+                seg_decisions[f"{seg.doc_id}#{seg.start_char}"] = normalize_segment_decision(seg.decision)
 
         return IRRCodingPass(
             pass_index=i,
@@ -317,11 +410,12 @@ async def run_irr_analysis(
             codes_discovered=code_names,
             code_details=code_details,
             timestamp=datetime.now().isoformat(),
-        ), seg_codes
+        ), seg_codes, seg_decisions
 
     pass_results = list(await asyncio.gather(*[_run_one_pass(i) for i in range(num_passes)]))
     passes = [pr[0] for pr in pass_results]
     seg_code_maps = [pr[1] for pr in pass_results]
+    seg_decision_maps = [pr[2] for pr in pass_results]
 
     # Compute metrics
     all_pass_codes = [p.codes_discovered for p in passes]
@@ -342,18 +436,40 @@ async def run_irr_analysis(
     best_kappa = ck if ck is not None else fk
     interp = interpret_kappa(best_kappa) if best_kappa is not None else ""
 
-    # Application-level (segment × code) agreement — the stronger "same code on
-    # the same text" number, computed from the exhaustive per-segment decisions.
+    # Application-level metrics from exhaustive per-segment decisions:
+    # 1. Positive segment × code cells (where any pass applied a code)
+    # 2. Segment decision rows (coded/no_code/not_examined) over the segment universe
     app_matrix: Dict[str, List[int]] = {}
     app_pct = app_ck = app_fk = None
     app_interp = ""
+    seg_decision_matrix: Dict[str, List[str]] = {}
+    seg_decision_pct = seg_decision_ck = seg_decision_fk = None
+    seg_decision_interp = ""
     if application_level:
         app_matrix = build_application_matrix(seg_code_maps)
-        app_pct = compute_percent_agreement(app_matrix)
-        app_ck = compute_cohens_kappa(app_matrix) if num_passes == 2 else None
-        app_fk = compute_fleiss_kappa(app_matrix)
-        app_best = app_ck if app_ck is not None else app_fk
-        app_interp = interpret_kappa(app_best) if app_best is not None else ""
+        if app_matrix:
+            app_pct = compute_percent_agreement(app_matrix)
+            app_ck = compute_cohens_kappa(app_matrix) if num_passes == 2 else None
+            app_fk = compute_fleiss_kappa(app_matrix)
+            app_best = app_ck if app_ck is not None else app_fk
+            app_interp = interpret_kappa(app_best) if app_best is not None else ""
+        else:
+            app_interp = "no positive code applications compared"
+
+        seg_decision_matrix = build_segment_decision_matrix(seg_decision_maps)
+        if seg_decision_matrix:
+            seg_decision_pct = compute_categorical_percent_agreement(seg_decision_matrix)
+            seg_decision_ck = (
+                compute_categorical_cohens_kappa(seg_decision_matrix)
+                if num_passes == 2 else None
+            )
+            seg_decision_fk = compute_categorical_fleiss_kappa(seg_decision_matrix)
+            seg_decision_best = seg_decision_ck if seg_decision_ck is not None else seg_decision_fk
+            seg_decision_interp = (
+                interpret_kappa(seg_decision_best) if seg_decision_best is not None else ""
+            )
+        else:
+            seg_decision_interp = "no segment decisions compared"
 
     result = IRRResult(
         num_passes=num_passes,
@@ -372,6 +488,12 @@ async def run_irr_analysis(
         application_fleiss_kappa=app_fk,
         application_interpretation=app_interp,
         application_matrix=app_matrix,
+        segment_decision_units=len(seg_decision_matrix),
+        segment_decision_percent_agreement=seg_decision_pct,
+        segment_decision_cohens_kappa=seg_decision_ck,
+        segment_decision_fleiss_kappa=seg_decision_fk,
+        segment_decision_interpretation=seg_decision_interp,
+        segment_decision_matrix=seg_decision_matrix,
         timestamp=datetime.now().isoformat(),
     )
 

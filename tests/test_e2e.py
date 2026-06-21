@@ -473,8 +473,8 @@ class TestExhaustiveCoverageE2E:
 class TestApplicationLevelIRRE2E:
 
     def test_application_level_irr_compares_segment_code_cells(self, single_doc_state):
-        """`run_irr_analysis(application_level=True)` must produce segment x code
-        agreement (the stronger 'same code on the same text' number), not just
+        """`run_irr_analysis(application_level=True)` must produce positive
+        segment x code agreement plus segment-decision agreement, not just
         codebook-discovery agreement. Uses 2 passes to bound cost."""
         from qc_clean.core.pipeline.irr import run_irr_analysis
 
@@ -493,9 +493,19 @@ class TestApplicationLevelIRRE2E:
             "application-level percent agreement must be computed"
         )
         assert 0.0 <= result.application_percent_agreement <= 1.0
+        assert result.segment_decision_units >= 1, (
+            "expected segment decisions compared, including no_code decisions"
+        )
+        assert result.segment_decision_matrix, "segment_decision_matrix should be populated"
+        assert result.segment_decision_percent_agreement is not None, (
+            "segment decision percent agreement must be computed"
+        )
+        assert 0.0 <= result.segment_decision_percent_agreement <= 1.0
 
         print(
             f"\n  app-level units={result.application_units} "
             f"%agree={result.application_percent_agreement} "
-            f"kappa={result.application_cohens_kappa}"
+            f"kappa={result.application_cohens_kappa} "
+            f"segment_decision_units={result.segment_decision_units} "
+            f"segment_decision_%agree={result.segment_decision_percent_agreement}"
         )

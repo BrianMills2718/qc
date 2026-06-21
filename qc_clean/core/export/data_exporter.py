@@ -136,6 +136,30 @@ class ProjectExporter:
                     writer.writerow([code_name] + row + [agree])
             paths.append(str(irr_path))
 
+        if state.irr_result and state.irr_result.application_matrix:
+            irr = state.irr_result
+            app_path = out / "irr_application_matrix.csv"
+            with open(app_path, "w", newline="", encoding="utf-8") as f:
+                writer = csv.writer(f)
+                header = ["segment_code_cell"] + [f"pass_{i+1}" for i in range(irr.num_passes)] + ["agreement"]
+                writer.writerow(header)
+                for cell, row in sorted(irr.application_matrix.items()):
+                    agree = "yes" if all(v == row[0] for v in row) else "no"
+                    writer.writerow([cell] + row + [agree])
+            paths.append(str(app_path))
+
+        if state.irr_result and state.irr_result.segment_decision_matrix:
+            irr = state.irr_result
+            decision_path = out / "irr_segment_decisions.csv"
+            with open(decision_path, "w", newline="", encoding="utf-8") as f:
+                writer = csv.writer(f)
+                header = ["segment_key"] + [f"pass_{i+1}" for i in range(irr.num_passes)] + ["agreement"]
+                writer.writerow(header)
+                for seg_key, row in sorted(irr.segment_decision_matrix.items()):
+                    agree = "yes" if all(v == row[0] for v in row) else "no"
+                    writer.writerow([seg_key] + row + [agree])
+            paths.append(str(decision_path))
+
         # -- stability.csv (only if stability has been run) --
         if state.stability_result and state.stability_result.code_stability:
             sr = state.stability_result
@@ -349,6 +373,30 @@ class ProjectExporter:
                 label = irr.interpretation if irr.cohens_kappa is None else ""
                 _a(f"| Fleiss' kappa | {irr.fleiss_kappa:.3f} | {label} |")
             _a("")
+            if irr.application_level:
+                _a("### Application-Level Agreement")
+                _a("")
+                _a("Positive code-application cells compare only segment x code rows where at least one pass applied that code.")
+                _a("")
+                _a("| Metric | Value | Interpretation |")
+                _a("|--------|-------|----------------|")
+                _a(f"| Positive cell units | {irr.application_units} | |")
+                if irr.application_percent_agreement is not None:
+                    _a(f"| Positive cell percent agreement | {irr.application_percent_agreement:.1%} | |")
+                if irr.application_cohens_kappa is not None:
+                    _a(f"| Positive cell Cohen's kappa | {irr.application_cohens_kappa:.3f} | {irr.application_interpretation} |")
+                if irr.application_fleiss_kappa is not None:
+                    label = irr.application_interpretation if irr.application_cohens_kappa is None else ""
+                    _a(f"| Positive cell Fleiss' kappa | {irr.application_fleiss_kappa:.3f} | {label} |")
+                _a(f"| Segment decision units | {irr.segment_decision_units} | |")
+                if irr.segment_decision_percent_agreement is not None:
+                    _a(f"| Segment decision percent agreement | {irr.segment_decision_percent_agreement:.1%} | |")
+                if irr.segment_decision_cohens_kappa is not None:
+                    _a(f"| Segment decision Cohen's kappa | {irr.segment_decision_cohens_kappa:.3f} | {irr.segment_decision_interpretation} |")
+                if irr.segment_decision_fleiss_kappa is not None:
+                    label = irr.segment_decision_interpretation if irr.segment_decision_cohens_kappa is None else ""
+                    _a(f"| Segment decision Fleiss' kappa | {irr.segment_decision_fleiss_kappa:.3f} | {label} |")
+                _a("")
             if irr.coding_matrix:
                 _a("### Coding Matrix")
                 _a("")

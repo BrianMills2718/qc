@@ -321,9 +321,9 @@ class IRRResult(BaseModel):
     cohens_kappa: Optional[float] = None
     fleiss_kappa: Optional[float] = None
     interpretation: str = ""
-    # Application-level agreement (segment × code; requires exhaustive coding).
-    # Distinct from the codebook-discovery metrics above — this is the stronger
-    # "do passes code the same text the same way" number.
+    # Application-level agreement (requires exhaustive coding). Positive
+    # application metrics compare segment x code cells; segment-decision metrics
+    # compare coded/no_code/not_examined decisions over the segment universe.
     application_level: bool = False
     application_units: int = 0  # number of (segment, code) cells compared
     application_percent_agreement: Optional[float] = None
@@ -331,6 +331,12 @@ class IRRResult(BaseModel):
     application_fleiss_kappa: Optional[float] = None
     application_interpretation: str = ""
     application_matrix: Dict[str, List[int]] = Field(default_factory=dict)
+    segment_decision_units: int = 0  # number of segment decision rows compared
+    segment_decision_percent_agreement: Optional[float] = None
+    segment_decision_cohens_kappa: Optional[float] = None
+    segment_decision_fleiss_kappa: Optional[float] = None
+    segment_decision_interpretation: str = ""
+    segment_decision_matrix: Dict[str, List[str]] = Field(default_factory=dict)
     timestamp: str = ""
 
 

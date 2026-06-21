@@ -66,7 +66,7 @@ Both methodologies use structured LLM output, fail-loud stage dependencies, and 
 - Incremental re-coding of newly added documents via `python qc_cli.py project recode <project_id>`
 - Human review in both CLI and browser flows
 - Span-anchored quote evidence (char offsets + hash; ambiguous/unresolvable quotes are dropped, not misattributed) and a grounding metric (`make bench`)
-- LLM-pass agreement via `project irr`: codebook-discovery agreement by default, or positive segment × code application-level agreement with `--application-level` (see theory doc §11); plus multi-run stability via `project stability`
+- LLM-pass agreement via `project irr`: codebook-discovery agreement by default, or application-level positive segment × code agreement plus segment-decision agreement with `--application-level` (see theory doc §11); plus multi-run stability via `project stability`
 - Interactive graph visualization in the browser
 - JSON, CSV, Markdown, and **QDPX** (REFI-QDA, for ATLAS.ti/NVivo) export from persisted project state
 - Analytical memos at every stage plus per-code reasoning and audit-trail output

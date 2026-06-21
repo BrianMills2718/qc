@@ -39,10 +39,16 @@ couplings:
     soft: true
   - sources:
       - "qc_clean/core/pipeline/irr.py"
+      - "qc_clean/core/cli/commands/project.py"
+      - "qc_clean/core/export/data_exporter.py"
+      - "qc_mcp_server.py"
+      - "tests/test_irr.py"
       - "tests/test_irr_application_level.py"
+      - "tests/test_mcp_server.py"
+      - "tests/test_e2e.py"
       - "docs/plans/completed/IRR_APPLICATION_LEVEL.md"
-    docs: ["docs/PROJECT_THEORY_AND_GOALS.md", "docs/EVALUATION_HARNESS.md"]
-    description: "IRR implementation unit, denominator caveats, claim discipline, and roadmap must stay synchronized"
+    docs: ["docs/PROJECT_THEORY_AND_GOALS.md", "docs/EVALUATION_HARNESS.md", "CLAUDE.md", "README.md", "docs/plans/CLAUDE.md"]
+    description: "IRR implementation, CLI/export/MCP surfaces, denominator caveats, claim discipline, and roadmap must stay synchronized"
     soft: true
   - sources: ["Makefile"]
     docs: ["README.md", "CLAUDE.md", "AGENTS.md"]

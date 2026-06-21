@@ -392,6 +392,38 @@ class TestIRRStability:
             assert len(result["aligned_codes"]) == 2
 
     @pytest.mark.asyncio
+    async def test_run_irr_application_level(self, project_with_docs, tmp_store):
+        with patch("qc_mcp_server.run_irr_analysis", new_callable=AsyncMock) as mock_irr:
+            mock_irr.return_value = IRRResult(
+                num_passes=2,
+                percent_agreement=1.0,
+                cohens_kappa=1.0,
+                interpretation="almost perfect",
+                application_level=True,
+                application_units=0,
+                application_percent_agreement=None,
+                application_interpretation="no positive code applications compared",
+                segment_decision_units=2,
+                segment_decision_percent_agreement=1.0,
+                segment_decision_cohens_kappa=1.0,
+                segment_decision_interpretation="almost perfect",
+            )
+
+            result = json.loads(await qc_mcp_server.qc_run_irr(
+                "proj-docs", passes=2, application_level=True,
+            ))
+
+            assert result["application_level"] is True
+            assert result["application_units"] == 0
+            assert result["application_percent_agreement"] is None
+            assert result["application_interpretation"] == "no positive code applications compared"
+            assert result["segment_decision_units"] == 2
+            assert result["segment_decision_percent_agreement"] == 1.0
+            assert result["segment_decision_cohens_kappa"] == 1.0
+            mock_irr.assert_awaited_once()
+            assert mock_irr.await_args.kwargs["application_level"] is True
+
+    @pytest.mark.asyncio
     async def test_run_irr_no_docs(self, sample_project, tmp_store):
         result = json.loads(await qc_mcp_server.qc_run_irr("proj-1"))
         assert "error" in result

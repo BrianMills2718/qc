@@ -405,6 +405,25 @@ class TestExportIntegration:
             cohens_kappa=0.0,
             fleiss_kappa=0.0,
             interpretation="slight",
+            application_level=True,
+            application_units=2,
+            application_percent_agreement=0.5,
+            application_cohens_kappa=0.0,
+            application_fleiss_kappa=0.0,
+            application_interpretation="slight",
+            application_matrix={
+                "d1#0::theme a": [1, 1],
+                "d1#10::theme b": [1, 0],
+            },
+            segment_decision_units=2,
+            segment_decision_percent_agreement=1.0,
+            segment_decision_cohens_kappa=1.0,
+            segment_decision_fleiss_kappa=1.0,
+            segment_decision_interpretation="almost perfect",
+            segment_decision_matrix={
+                "d1#0": ["coded", "coded"],
+                "d1#10": ["no_code", "no_code"],
+            },
         )
         return state
 
@@ -419,6 +438,9 @@ class TestExportIntegration:
         assert "## Inter-Rater Reliability" in content
         assert "Percent agreement" in content
         assert "Cohen's kappa" in content
+        assert "Application-Level Agreement" in content
+        assert "Positive cell percent agreement" in content
+        assert "Segment decision percent agreement" in content
         assert "Coding Matrix" in content
 
     def test_markdown_omits_irr_when_absent(self, tmp_path):
@@ -447,6 +469,20 @@ class TestExportIntegration:
         # Header + 3 data rows
         assert len(rows) == 4
         assert rows[0] == ["code_name", "pass_1", "pass_2", "agreement"]
+
+        app_paths = [p for p in paths if Path(p).name == "irr_application_matrix.csv"]
+        assert len(app_paths) == 1
+        with open(app_paths[0], newline="", encoding="utf-8") as f:
+            app_rows = list(csv.reader(f))
+        assert app_rows[0] == ["segment_code_cell", "pass_1", "pass_2", "agreement"]
+        assert len(app_rows) == 3
+
+        decision_paths = [p for p in paths if Path(p).name == "irr_segment_decisions.csv"]
+        assert len(decision_paths) == 1
+        with open(decision_paths[0], newline="", encoding="utf-8") as f:
+            decision_rows = list(csv.reader(f))
+        assert decision_rows[0] == ["segment_key", "pass_1", "pass_2", "agreement"]
+        assert len(decision_rows) == 3
 
     def test_csv_no_irr_matrix_when_absent(self, tmp_path):
         from qc_clean.core.export.data_exporter import ProjectExporter

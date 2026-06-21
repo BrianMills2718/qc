@@ -32,7 +32,7 @@ The software is **built and software-validated** (deterministic tests + live-LLM
 - GT constant comparison; incremental re-coding via `project recode` (flags stale higher-order outputs, INV-11).
 - **Span-anchored grounding** (INV-1, mostly met): quotes resolve to char offsets + hash or are dropped + warned; `verify_grounding`/`make bench` measure the rate.
 - **Segment universe + coverage** (INV-8): every doc split into char-anchored segments; `project run --exhaustive` codes *every* segment (examined-and-judged coverage, segment-anchored applications), else traversal coverage.
-- Human review (CLI + browser), `project irr` (LLM-pass *codebook-discovery* agreement by default; **positive segment × code application-level** agreement via `--application-level`, using exhaustive coding), `project stability`.
+- Human review (CLI + browser), `project irr` (LLM-pass *codebook-discovery* agreement by default; **application-level** positive segment × code agreement plus segment-decision agreement via `--application-level`, using exhaustive coding), `project stability`.
 - Graph viz, JSON/CSV/Markdown/QDPX export, per-stage memos, per-code audit trail; typed `PipelineContext`/results, fail-loud inter-stage checks, `llm_client` observability.
 
 **Direction:** the end product is public and SOTA-targeting; the proven/measured/planned ledger, the architectural invariants, and the ranked roadmap are in `docs/PROJECT_THEORY_AND_GOALS.md` (§13/§13.1/§18). Recent structural work landed: span anchoring (INV-1), the segment universe + exhaustive coverage (INV-8). Next: the **first-class claim ledger** (INV-9).
@@ -252,7 +252,7 @@ Pipeline validated end-to-end against real interview transcripts using gpt-5-min
 - **Graph data**: 13 code nodes, 25 entity nodes, 12 entity relationships from completed state
 - **Export**: JSON, Markdown, CSV all produce valid output from real pipeline results
 - **Exhaustive coverage**: `exhaustive_coding=True` gives examined-and-judged coverage over the segment universe
-- **Application-level IRR**: `run_irr_analysis(application_level=True)` computes segment x code application agreement
+- **Application-level IRR**: `run_irr_analysis(application_level=True)` computes positive segment x code application agreement plus segment-decision agreement (`coded` / `no_code` / `not_examined`)
 
 Previous manual E2E (2026-02-12):
 - Default 1-doc: 12 codes, 29 applications, 8 speakers (focus group)
@@ -287,7 +287,7 @@ Bugs found and fixed during E2E testing:
 
 ## Academic Standards & Honest State
 
-Superseded by the canonical theory doc: the proven/measured/planned **state ledger** is `docs/PROJECT_THEORY_AND_GOALS.md` §13, the **architectural invariants** (INV-0..11, each MET/PARTIAL/UNMET) are §13.1, and the academic references + prior art are §19. Do **not** re-introduce a 'Tier 2 complete / validated' ledger here — it contradicts the invariants (e.g. disconfirmation is INV-2 UNMET / INV-6 PARTIAL; `project irr` defaults to codebook-discovery agreement; `--application-level` gives positive segment x code application agreement).
+Superseded by the canonical theory doc: the proven/measured/planned **state ledger** is `docs/PROJECT_THEORY_AND_GOALS.md` §13, the **architectural invariants** (INV-0..11, each MET/PARTIAL/UNMET) are §13.1, and the academic references + prior art are §19. Do **not** re-introduce a 'Tier 2 complete / validated' ledger here — it contradicts the invariants (e.g. disconfirmation is INV-2 UNMET / INV-6 PARTIAL; `project irr` defaults to codebook-discovery agreement; `--application-level` gives positive segment x code application agreement and segment-decision agreement).
 
 ## Next Steps
 

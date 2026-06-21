@@ -670,6 +670,7 @@ async def qc_run_irr(
     passes: int = 3,
     model: str | None = None,
     models: List[str] | None = None,
+    application_level: bool = False,
 ) -> str:
     """Run inter-rater reliability analysis on a project.
 
@@ -681,6 +682,8 @@ async def qc_run_irr(
         passes: Number of independent coding passes (default 3)
         model: Default model for all passes
         models: Per-pass model names (overrides model param, cycles if shorter)
+        application_level: Run exhaustive passes and report segment-level
+            application and coded/no_code decision agreement
     """
     try:
         state = store.load(project_id)
@@ -697,12 +700,13 @@ async def qc_run_irr(
         num_passes=passes,
         model_name=model_name,
         models=models,
+        application_level=application_level,
     )
 
     state.irr_result = result
     store.save(state)
 
-    return json.dumps({
+    payload = {
         "passes": result.num_passes,
         "aligned_codes": result.aligned_codes,
         "unmatched_codes": result.unmatched_codes,
@@ -710,7 +714,40 @@ async def qc_run_irr(
         "cohens_kappa": round(result.cohens_kappa, 3) if result.cohens_kappa is not None else None,
         "fleiss_kappa": round(result.fleiss_kappa, 3) if result.fleiss_kappa is not None else None,
         "interpretation": result.interpretation,
-    })
+    }
+    if result.application_level:
+        payload.update({
+            "application_level": True,
+            "application_units": result.application_units,
+            "application_percent_agreement": (
+                round(result.application_percent_agreement, 3)
+                if result.application_percent_agreement is not None else None
+            ),
+            "application_cohens_kappa": (
+                round(result.application_cohens_kappa, 3)
+                if result.application_cohens_kappa is not None else None
+            ),
+            "application_fleiss_kappa": (
+                round(result.application_fleiss_kappa, 3)
+                if result.application_fleiss_kappa is not None else None
+            ),
+            "application_interpretation": result.application_interpretation,
+            "segment_decision_units": result.segment_decision_units,
+            "segment_decision_percent_agreement": (
+                round(result.segment_decision_percent_agreement, 3)
+                if result.segment_decision_percent_agreement is not None else None
+            ),
+            "segment_decision_cohens_kappa": (
+                round(result.segment_decision_cohens_kappa, 3)
+                if result.segment_decision_cohens_kappa is not None else None
+            ),
+            "segment_decision_fleiss_kappa": (
+                round(result.segment_decision_fleiss_kappa, 3)
+                if result.segment_decision_fleiss_kappa is not None else None
+            ),
+            "segment_decision_interpretation": result.segment_decision_interpretation,
+        })
+    return json.dumps(payload)
 
 
 @mcp.tool()
