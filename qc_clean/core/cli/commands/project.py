@@ -7,7 +7,7 @@ import logging
 import sys
 from pathlib import Path
 
-from qc_clean.core.claims import summarize_claim_ledger
+from qc_clean.core.claims import summarize_claim_ledger, summarize_disconfirmation_coverage
 from qc_clean.core.persistence.project_store import ProjectStore
 from qc_clean.schemas.domain import Methodology, PipelineStatus, ProjectConfig, ProjectState
 
@@ -376,9 +376,17 @@ def _show_claims(store: ProjectStore, args) -> int:
 
     limit = max(0, int(getattr(args, "limit", 20)))
     summary = summarize_claim_ledger(state)
+    disconfirmation = summarize_disconfirmation_coverage(state)
     print(f"Claim Ledger: {state.name}")
     print(f"  Total claims: {summary['total_claims']}")
     print(f"  Unsupported or needing anchors: {summary['unsupported_or_needing_anchor']}")
+    print(
+        "  Disconfirmation targets: "
+        f"{disconfirmation['total_targets']} "
+        f"({disconfirmation['challenged_targets']} challenged, "
+        f"{disconfirmation['unchallenged_targets']} unchallenged, "
+        f"{disconfirmation['challenged_rate']:.0%} challenged)"
+    )
     print(f"  By kind: {summary['by_kind']}")
     print(f"  By stage: {summary['by_stage']}")
     print(f"  By adjudication: {summary['by_adjudication_status']}")

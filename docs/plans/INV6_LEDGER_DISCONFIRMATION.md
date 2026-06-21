@@ -100,7 +100,7 @@ These are internal project capabilities, not cross-project boundary APIs.
 | 1 | Ledger target enumeration and disconfirmation coverage summary over `ProjectState.claims` | DONE: `tests/test_claims.py` focused target/coverage tests | `[Plan: INV6] Add ledger disconfirmation helpers` |
 | 2 | Negative-case schema/prompt wiring: include bounded claim targets and preserve explicit challenged claim IDs | DONE: `tests/test_negative_case_inv6.py`; prompt-target and builder tests | `[Plan: INV6] Target negative cases to ledger claims` |
 | 3 | Claim adjudication via `ReviewManager`: approve/reject/modify claim objects, append `ClaimRevision`, preserve fail-loud unknown targets | DONE: review manager tests | `[Plan: INV10] Add claim review decisions` |
-| 4 | Read surfaces for disconfirmation/adjudication summaries where useful: CLI/API/MCP bounded summary, no raw full-state dump | CLI/API/MCP tests if surface added | `[Plan: INV6] Expose disconfirmation coverage` |
+| 4 | Read surfaces for disconfirmation/adjudication summaries where useful: CLI/API/MCP bounded summary, no raw full-state dump | DONE: CLI/API/MCP tests | `[Plan: INV6] Expose disconfirmation coverage` |
 | 5 | Docs/governance: update INV-6/INV-10 statuses conservatively and move plan to completed records | `make docs-check`; `make check` | `[Plan: INV6] Document ledger disconfirmation` |
 
 ---
@@ -181,3 +181,8 @@ Phase 3 complete 2026-06-21: added `ReviewManager.get_pending_claims()`,
 approve/reject/modify with `ClaimRevision` history. Unsupported claim actions
 and missing claim IDs fail loudly. Verification: focused claim-review tests
 (4 passed) and broader review/fail-loud/API surface tests (51 passed).
+
+Phase 4 complete 2026-06-21: added `disconfirmation_summary` to the existing
+claim read surfaces: CLI `project claims`, API `/projects/{project_id}/claims`,
+and MCP `qc_get_claims`. Verification: focused surface tests (3 passed) and
+broader CLI/API/MCP suites (90 passed).

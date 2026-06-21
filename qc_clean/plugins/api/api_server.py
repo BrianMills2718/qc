@@ -537,7 +537,10 @@ class QCAPIServer:
         @self._app.get("/projects/{project_id}/claims")
         async def get_project_claims(project_id: str):
             """Get claim-ledger summary and bounded claim rows for a project."""
-            from qc_clean.core.claims import summarize_claim_ledger
+            from qc_clean.core.claims import (
+                summarize_claim_ledger,
+                summarize_disconfirmation_coverage,
+            )
             from qc_clean.core.persistence.project_store import ProjectStore
             store = ProjectStore()
             try:
@@ -547,6 +550,7 @@ class QCAPIServer:
             return {
                 "project": state.name,
                 "claim_summary": summarize_claim_ledger(state),
+                "disconfirmation_summary": summarize_disconfirmation_coverage(state),
                 "claims": [
                     {
                         "id": claim.id,

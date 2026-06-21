@@ -25,7 +25,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from qc_clean.core.persistence.project_store import ProjectStore
 from qc_clean.core.export.data_exporter import ProjectExporter
-from qc_clean.core.claims import summarize_claim_ledger
+from qc_clean.core.claims import summarize_claim_ledger, summarize_disconfirmation_coverage
 from qc_clean.core.pipeline.review import ReviewManager
 from qc_clean.core.pipeline.pipeline_factory import create_pipeline, create_incremental_pipeline
 from qc_clean.core.pipeline.pipeline_engine import PipelineContext
@@ -188,6 +188,7 @@ def qc_get_claims(project_id: str, limit: int = 50) -> str:
     return json.dumps({
         "project": state.name,
         "claim_summary": summarize_claim_ledger(state),
+        "disconfirmation_summary": summarize_disconfirmation_coverage(state),
         "returned": len(rows),
         "claims": rows,
     }, indent=2)

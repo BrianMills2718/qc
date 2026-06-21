@@ -263,6 +263,8 @@ class TestInspection:
         result = json.loads(qc_mcp_server.qc_get_claims("proj-done"))
 
         assert result["claim_summary"]["total_claims"] == 1
+        assert result["disconfirmation_summary"]["total_targets"] == 1
+        assert result["disconfirmation_summary"]["unchallenged_targets"] == 1
         assert result["claims"][0]["claim_text"] == "AI Adoption is a code."
         assert result["claims"][0]["support_status"] == "supported"
 

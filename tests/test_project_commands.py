@@ -483,6 +483,8 @@ class TestProjectClaimsCommand:
         out = capsys.readouterr().out
         assert "Claim Ledger: Claims Project" in out
         assert "Total claims: 1" in out
+        assert "Disconfirmation targets: 1" in out
+        assert "0 challenged, 1 unchallenged" in out
         assert "thematic_coding" in out
         assert "Efficiency is a code." in out
 

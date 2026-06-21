@@ -12,6 +12,9 @@ from fastapi.testclient import TestClient
 from qc_clean.plugins.api.api_server import QCAPIServer
 from qc_clean.core.persistence.project_store import ProjectStore
 from qc_clean.schemas.domain import (
+    AnalyticClaim,
+    ClaimKind,
+    ClaimScope,
     Code,
     CodeApplication,
     Codebook,
@@ -56,6 +59,17 @@ def review_project(tmp_store):
         corpus=Corpus(documents=[Document(id="d1", name="interview1.txt", content="sample")]),
         codebook=Codebook(codes=codes),
         code_applications=apps,
+        claims=[
+            AnalyticClaim(
+                id="claim-review-api",
+                claim_kind=ClaimKind.CODE,
+                source_stage="thematic_coding",
+                claim_text="Theme A is a code.",
+                scope=ClaimScope(code_ids=["C1"]),
+                origin_object_type="code",
+                origin_object_id="C1",
+            )
+        ],
         pipeline_status=PipelineStatus.PAUSED_FOR_REVIEW,
         current_phase="thematic_coding",
     )
@@ -90,6 +104,17 @@ class TestReviewUIPage:
     def test_404_for_missing_project(self, client):
         resp = client.get("/review/nonexistent")
         assert resp.status_code == 404
+
+
+class TestClaimLedgerEndpoint:
+    def test_get_project_claims_includes_disconfirmation_summary(self, client):
+        resp = client.get("/projects/test-project-123/claims")
+
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["claim_summary"]["total_claims"] == 1
+        assert data["disconfirmation_summary"]["total_targets"] == 1
+        assert data["disconfirmation_summary"]["unchallenged_targets"] == 1
 
 
 class TestReviewCodesEndpoint:
