@@ -1,10 +1,34 @@
 # Plan #25: D10 Cost Latency Scorecard
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Phase 0 evaluation harness
 **Blocks:** public benchmark scorecard cost/latency reporting
+
+---
+
+## Outcome
+
+`make bench` now includes `cost_latency_d10`, computed from real `llm_client`
+`llm_calls` rows. Default matching uses the local project trace prefix
+`qualitative_coding/project/{state.id}` so local `project run` and recode traces
+are included; `TRACE_ID=` / `--trace-id` can force an exact trace. `OBS_DB=` /
+`--observability-db` can override the default observability DB path. Missing DBs,
+missing schema, or no matching rows report `not_available`; costs are never
+estimated from `ProjectState`.
+
+The score reports call counts, errored calls, cost, marginal cost, tokens,
+summed/mean/max observed LLM-call latency, per-document cost/latency, model/task
+counts, and first/last timestamps. It remains a Phase 0 substrate, not a
+baseline or full wall-clock benchmark.
+
+**Verification:** `python -m pytest tests/test_bench_phase0.py
+tests/test_bench_phase0_script.py -q` passed (21 tests), and `python -m ruff
+check qc_clean/core/bench.py scripts/bench_phase0.py tests/test_bench_phase0.py
+tests/test_bench_phase0_script.py` passed. Final closeout gate:
+`make check` passed with 674 tests passing, 1 skipped, 8 deselected, Ruff
+passing, docs checks passing, and type checking reported as not configured.
 
 ---
 
@@ -118,20 +142,20 @@ create a cross-project callable capability.
 ## Acceptance Criteria
 
 > Feature-level criteria (what the plan accomplishes):
-- [ ] Bench output includes `cost_latency_d10`.
-- [ ] Missing DB or no matching rows reports `not_available` and does not estimate.
-- [ ] Default matching uses local project trace prefix.
-- [ ] Explicit trace ID override is supported.
-- [ ] Reported cost/token/latency values are computed from actual DB rows.
-- [ ] `make bench` forwards `OBS_DB=` and `TRACE_ID=`.
-- [ ] Docs state D10 is now a Phase 0 scorecard substrate and still not a
+- [x] Bench output includes `cost_latency_d10`.
+- [x] Missing DB or no matching rows reports `not_available` and does not estimate.
+- [x] Default matching uses local project trace prefix.
+- [x] Explicit trace ID override is supported.
+- [x] Reported cost/token/latency values are computed from actual DB rows.
+- [x] `make bench` forwards `OBS_DB=` and `TRACE_ID=`.
+- [x] Docs state D10 is now a Phase 0 scorecard substrate and still not a
   benchmark/baseline result.
 
 > Process criteria (quality gates):
-- [ ] Required tests pass
-- [ ] Full test suite passes
-- [ ] Type check status is reported
-- [ ] Docs updated
+- [x] Required tests pass (`python -m pytest tests/test_bench_phase0.py tests/test_bench_phase0_script.py -q`: 21 passed)
+- [x] Full test suite passes (`make check`: 674 passed, 1 skipped, 8 deselected)
+- [x] Type check status is reported (`make check`: type checking not configured)
+- [x] Docs updated
 
 ---
 
