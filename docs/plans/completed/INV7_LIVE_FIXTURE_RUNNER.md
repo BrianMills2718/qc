@@ -1,10 +1,28 @@
 # Plan #43: INV-7 Live Fixture Runner
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** None
 **Blocks:** Live adversarial prompt-injection evaluation; INV-7 hardening
+
+---
+
+## Outcome
+
+Implemented an opt-in live INV-7 canary fixture runner. `make
+run-inv7-live-fixtures OUTPUT=... MODEL=...` writes `PROMPT_INJECTION=`
+compatible JSON with model, trace, budget, response excerpts, and deterministic
+canary-token failure modes. The deterministic structural runner remains
+compatible. Documentation now distinguishes structural checks, opt-in live
+canary outcomes, and the still-missing committed/scored adversarial benchmark.
+
+**Verification:** `python -m pytest tests/test_inv7_fixture_runner.py
+tests/test_bench_phase0.py tests/test_bench_phase0_script.py -q` (48 passed);
+`python -m ruff check qc_clean/core/inv7_fixtures.py
+scripts/run_inv7_live_fixtures.py tests/test_inv7_fixture_runner.py`; `make
+check` (726 passed, 1 skipped, 8 deselected; Ruff and docs checks passed; type
+check not yet configured).
 
 ---
 
@@ -57,11 +75,11 @@ Internal project capability only; no cross-project boundary is created.
 
 ### Capability Validation
 
-- [ ] Live runner emits scorecard-compatible prompt-injection evaluations.
-- [ ] Deterministic tests can inject fake call results without live LLM calls.
-- [ ] CLI/make target requires explicit output and exposes model, trace, and
+- [x] Live runner emits scorecard-compatible prompt-injection evaluations.
+- [x] Deterministic tests can inject fake call results without live LLM calls.
+- [x] CLI/make target requires explicit output and exposes model, trace, and
   budget controls.
-- [ ] Docs state live fixtures are a benchmark input, not proof of prompt-
+- [x] Docs state live fixtures are a benchmark input, not proof of prompt-
   injection robustness.
 
 ---
@@ -117,26 +135,26 @@ Internal project capability only; no cross-project boundary is created.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] `make run-inv7-live-fixtures OUTPUT=... MODEL=...` writes a
+- [x] `make run-inv7-live-fixtures OUTPUT=... MODEL=...` writes a
   `PROMPT_INJECTION=` compatible JSON file.
-- [ ] Live outputs include model, trace ID, max budget, response excerpts, and
+- [x] Live outputs include model, trace ID, max budget, response excerpts, and
   deterministic canary-token failure modes.
-- [ ] Live fixture tests do not make network/LLM calls.
-- [ ] Docs distinguish structural checks, live fixture outcomes, and robustness
+- [x] Live fixture tests do not make network/LLM calls.
+- [x] Docs distinguish structural checks, live fixture outcomes, and robustness
   claims.
 
 > Process criteria:
-- [ ] Required tests pass
-- [ ] Full test suite passes
-- [ ] Type check status reported
-- [ ] Docs updated
-- [ ] Plan completed, committed, and pushed
+- [x] Required tests pass
+- [x] Full test suite passes
+- [x] Type check status reported
+- [x] Docs updated
+- [x] Plan completed, committed, and pushed
 
 ---
 
 ## Open Questions
 
-- [ ] Should live fixture pass/fail eventually be judged by a second evaluator
+- [x] Should live fixture pass/fail eventually be judged by a second evaluator
   model? — Status: DEFERRED | Why it matters: evaluator-model adjudication is
   itself prompt-injection sensitive and belongs in a future adversarial benchmark
   protocol.

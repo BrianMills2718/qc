@@ -37,7 +37,11 @@ local same-code/doc char-span IoU and discrete Modified Hausdorff diagnostics in
 `system_minus_baseline_ci` intervals for recall, precision, and F1 deltas. D3
 packages are validated by
 `make validate-d3-gold GOLD=gold_set.json`; D7 packages by
-`make validate-d7-gold GOLD=gold_set.json`. This remains a gold-dependent
-exact-score/provenance/uncertainty substrate, not a populated held-out benchmark,
-full D3/D7 validity, κ/α/AC1, human-ceiling agreement, held-out live-baseline
-result, or expert-parity/SOTA evidence.
+`make validate-d7-gold GOLD=gold_set.json`. INV-7 now has both deterministic
+structural fixture export (`make run-inv7-fixtures`) and opt-in live model
+canary fixture export (`make run-inv7-live-fixtures`) for the `PROMPT_INJECTION=`
+scorecard path. This remains a gold-dependent exact-score/provenance/uncertainty
+and canary-fixture substrate, not a populated held-out benchmark, full D3/D7
+validity, κ/α/AC1, human-ceiling agreement, held-out live-baseline result,
+committed/scored live adversarial prompt-injection benchmark, or
+expert-parity/SOTA evidence.
