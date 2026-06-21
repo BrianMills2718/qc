@@ -196,6 +196,8 @@ def test_scorecard_scores_d3_application_gold_exact_span_and_code():
     assert d3["f1_bootstrap_ci"]["seed"] == 0
     assert d3["f1_bootstrap_ci"]["population_size"] == 4
     assert d3["f1_bootstrap_ci"]["lower"] <= d3["f1_bootstrap_ci"]["upper"]
+    assert d3["human_ceiling_comparison"]["status"] == "not_available"
+    assert "versioned gold-set package" in d3["human_ceiling_comparison"]["reason"]
     overlap = d3["span_overlap"]
     assert overlap["status"] == "scored"
     assert overlap["metric"] == "char_span_iou_same_code_doc"
@@ -208,6 +210,105 @@ def test_scorecard_scores_d3_application_gold_exact_span_and_code():
     assert overlap["gold_best_overlaps"][0]["best_modified_hausdorff_distance"] == 0.0
     assert overlap["mean_best_gold_modified_hausdorff_distance"] is not None
     assert overlap["mean_best_predicted_modified_hausdorff_distance"] is not None
+
+
+def test_scorecard_d3_compares_exact_metrics_to_human_ceiling_package():
+    content = "AI helped here."
+    doc = Document(id="d1", name="d.txt", content=content)
+    state = ProjectState(
+        config=ProjectConfig(
+            methodology=Methodology.THEMATIC_ANALYSIS,
+            extra={
+                "application_gold": _versioned_d3_package(
+                    [
+                        {
+                            "code_id": "AI_USE",
+                            "doc_id": doc.id,
+                            "start_char": 0,
+                            "end_char": len(content),
+                        }
+                    ],
+                    {
+                        "recall": 0.9,
+                        "precision": 0.8,
+                        "f1": 0.85,
+                        "cohens_kappa": 0.72,
+                    },
+                )
+            },
+        ),
+        corpus=Corpus(documents=[doc]),
+        code_applications=[
+            CodeApplication(
+                code_id="AI_USE",
+                doc_id=doc.id,
+                quote_text=content,
+                start_char=0,
+                end_char=len(content),
+            )
+        ],
+    )
+
+    comparison = phase0_scorecard(state)["application_validity_d3"]["human_ceiling_comparison"]
+
+    assert comparison["status"] == "scored"
+    assert comparison["gold_split"] == "held_out"
+    assert comparison["prompt_frozen"] is True
+    assert comparison["contamination_checked"] is True
+    assert comparison["system_meets_all_comparable_metrics"] is True
+    assert comparison["metrics"]["recall"] == {
+        "system_value": 1.0,
+        "human_value": 0.9,
+        "system_minus_human": pytest.approx(0.1),
+        "meets_or_exceeds_human": True,
+    }
+    assert comparison["metrics"]["precision"]["system_minus_human"] == pytest.approx(0.2)
+    assert comparison["metrics"]["f1"]["system_minus_human"] == pytest.approx(0.15)
+    assert comparison["non_comparable_human_metrics"] == ["cohens_kappa"]
+    assert "not expert-parity evidence" in comparison["note"]
+
+
+def test_scorecard_human_ceiling_noncomparable_metrics_are_not_scored():
+    content = "AI helped here."
+    doc = Document(id="d1", name="d.txt", content=content)
+    state = ProjectState(
+        config=ProjectConfig(
+            methodology=Methodology.THEMATIC_ANALYSIS,
+            extra={
+                "application_gold": _versioned_d3_package(
+                    [
+                        {
+                            "code_id": "AI_USE",
+                            "doc_id": doc.id,
+                            "start_char": 0,
+                            "end_char": len(content),
+                        }
+                    ],
+                    {"cohens_kappa": 0.72, "notes": "No exact-score ceiling."},
+                )
+            },
+        ),
+        corpus=Corpus(documents=[doc]),
+        code_applications=[
+            CodeApplication(
+                code_id="AI_USE",
+                doc_id=doc.id,
+                quote_text=content,
+                start_char=0,
+                end_char=len(content),
+            )
+        ],
+    )
+
+    comparison = phase0_scorecard(state)["application_validity_d3"]["human_ceiling_comparison"]
+
+    assert comparison["status"] == "not_available"
+    assert "no numeric recall, precision, or f1" in comparison["reason"]
+    assert comparison["human_metrics"] == {
+        "cohens_kappa": 0.72,
+        "notes": "No exact-score ceiling.",
+    }
+    assert comparison["non_comparable_human_metrics"] == ["cohens_kappa", "notes"]
 
 
 def test_scorecard_d3_f1_bootstrap_configurable_and_disableable():
@@ -710,6 +811,47 @@ def test_scorecard_computes_d7_perfect_match_against_gold():
     assert d7["extra_predicted_keys"] == []
 
 
+def test_scorecard_d7_compares_exact_metrics_to_human_ceiling_package():
+    content = "AI improved delivery. AI failed for this team."
+    doc = Document(id="d1", name="d.txt", content=content)
+    start = content.index("AI failed")
+    end = len(content)
+    state = ProjectState(
+        config=ProjectConfig(
+            methodology=Methodology.THEMATIC_ANALYSIS,
+            extra={
+                "disconfirmation_gold": _versioned_d7_package(
+                    [
+                        {
+                            "target_claim_id": "claim-ai",
+                            "doc_id": doc.id,
+                            "start_char": start,
+                            "end_char": end,
+                        }
+                    ],
+                    {"recall": 0.8, "precision": 0.8, "f1": 0.8},
+                )
+            },
+        ),
+        corpus=Corpus(documents=[doc]),
+        claims=[],
+    )
+
+    comparison = phase0_scorecard(state)["disconfirmation_d7"]["human_ceiling_comparison"]
+
+    assert comparison["status"] == "scored"
+    assert comparison["system_meets_all_comparable_metrics"] is False
+    assert comparison["metrics"]["recall"] == {
+        "system_value": 0.0,
+        "human_value": 0.8,
+        "system_minus_human": -0.8,
+        "meets_or_exceeds_human": False,
+    }
+    assert comparison["metrics"]["precision"]["system_value"] == 0.0
+    assert comparison["metrics"]["f1"]["system_minus_human"] == -0.8
+    assert comparison["non_comparable_human_metrics"] == []
+
+
 def test_scorecard_computes_d7_false_positive_and_false_negative():
     content = "AI failed here. AI also failed later. AI only succeeded elsewhere."
     doc = Document(id="d1", name="d.txt", content=content)
@@ -1046,6 +1188,48 @@ def _negative_case_claim(target_claim_id: str, anchor: ClaimAnchor) -> AnalyticC
         origin_object_id=f"negative:{target_claim_id}:{anchor.start_char}",
         contrary_anchors=[anchor],
     )
+
+
+def _versioned_d3_package(application_gold, human_human_agreement):
+    return {
+        "schema_version": 1,
+        "gold_set_id": "d3-heldout-v1",
+        "dataset_name": "Held-out application gold",
+        "split": "held_out",
+        "corpus_sha256": "a" * 64,
+        "project_state_sha256": None,
+        "prompt_frozen": True,
+        "contamination_checked": True,
+        "adjudication": {
+            "coder_count": 2,
+            "adjudicator": "redacted",
+            "protocol": "Independent coding followed by adjudication.",
+            "human_human_agreement": human_human_agreement,
+            "notes": "",
+        },
+        "application_gold": application_gold,
+    }
+
+
+def _versioned_d7_package(contrary_evidence, human_human_agreement):
+    return {
+        "schema_version": 1,
+        "gold_set_id": "d7-heldout-v1",
+        "dataset_name": "Held-out contrary-evidence gold",
+        "split": "held_out",
+        "corpus_sha256": "a" * 64,
+        "project_state_sha256": None,
+        "prompt_frozen": True,
+        "contamination_checked": True,
+        "adjudication": {
+            "coder_count": 2,
+            "adjudicator": "redacted",
+            "protocol": "Independent coding followed by adjudication.",
+            "human_human_agreement": human_human_agreement,
+            "notes": "",
+        },
+        "contrary_evidence": contrary_evidence,
+    }
 
 
 def _create_llm_observability_db(path) -> None:

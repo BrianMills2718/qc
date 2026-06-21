@@ -11,6 +11,7 @@ Deterministic and LLM-free so it can run in CI and be diffed across runs.
 from __future__ import annotations
 
 from collections import Counter
+from collections.abc import Mapping
 from dataclasses import asdict, dataclass
 from math import sqrt
 from pathlib import Path
@@ -36,6 +37,7 @@ _PROMPT_INJECTION_EXTRA_KEY = "prompt_injection_evaluations"
 _EXACT_BOOTSTRAP_EXTRA_KEY = "phase0_exact_bootstrap"
 DEFAULT_OBSERVABILITY_DB_PATH = Path.home() / "projects" / "data" / "llm_observability.db"
 _WILSON_Z_95 = 1.959963984540054
+_HUMAN_CEILING_EXACT_METRICS = ("recall", "precision", "f1")
 
 
 @dataclass(frozen=True)
@@ -557,6 +559,11 @@ def disconfirmation_d7_scorecard(state: ProjectState) -> Dict[str, Any]:
     gold_provenance = _d7_gold_provenance(state)
     if gold_provenance is not None:
         card["gold_provenance"] = gold_provenance
+    card["human_ceiling_comparison"] = _human_ceiling_comparison(
+        system_score,
+        gold_provenance,
+        dimension="D7",
+    )
 
     baselines = _d7_baselines(state)
     if baselines:
@@ -975,8 +982,104 @@ def application_validity_d3_scorecard(state: ProjectState) -> Dict[str, Any]:
     gold_provenance = _d3_gold_provenance(state)
     if gold_provenance is not None:
         card["gold_provenance"] = gold_provenance
+    card["human_ceiling_comparison"] = _human_ceiling_comparison(
+        score,
+        gold_provenance,
+        dimension="D3",
+    )
     card["span_overlap"] = _d3_span_overlap_score(gold, state)
     return card
+
+
+def _human_ceiling_comparison(
+    system_score: Mapping[str, Any],
+    gold_provenance: Mapping[str, Any] | None,
+    *,
+    dimension: str,
+) -> dict[str, Any]:
+    """Compare system exact-score metrics to supplied human-ceiling metrics."""
+    base: dict[str, Any] = {
+        "metric_source": "gold_provenance.adjudication.human_human_agreement",
+        "comparable_metric_keys": list(_HUMAN_CEILING_EXACT_METRICS),
+        "note": (
+            f"{dimension} human-ceiling comparison over exact-score metrics only. "
+            "This is not expert-parity evidence unless the gold package is held-out, "
+            "prompt-frozen, contamination-checked, and human-adjudicated."
+        ),
+    }
+    if gold_provenance is None:
+        return {
+            **base,
+            "status": "not_available",
+            "reason": "No versioned gold-set package provenance is available.",
+        }
+
+    base.update(
+        {
+            "gold_set_id": gold_provenance.get("gold_set_id"),
+            "gold_split": gold_provenance.get("split"),
+            "prompt_frozen": gold_provenance.get("prompt_frozen"),
+            "contamination_checked": gold_provenance.get("contamination_checked"),
+        }
+    )
+    adjudication = gold_provenance.get("adjudication")
+    human_metrics = (
+        adjudication.get("human_human_agreement")
+        if isinstance(adjudication, Mapping)
+        else None
+    )
+    if not isinstance(human_metrics, Mapping) or not human_metrics:
+        return {
+            **base,
+            "status": "not_available",
+            "reason": "Gold-set adjudication has no human_human_agreement metrics.",
+        }
+
+    comparable: dict[str, dict[str, Any]] = {}
+    non_comparable = []
+    for key, human_value in sorted(human_metrics.items()):
+        if key not in _HUMAN_CEILING_EXACT_METRICS:
+            non_comparable.append(key)
+            continue
+        if not _is_numeric_metric(human_value) or not _is_numeric_metric(system_score.get(key)):
+            non_comparable.append(key)
+            continue
+        system_value = float(system_score[key])
+        human_float = float(human_value)
+        comparable[key] = {
+            "system_value": system_value,
+            "human_value": human_float,
+            "system_minus_human": system_value - human_float,
+            "meets_or_exceeds_human": system_value >= human_float,
+        }
+
+    if not comparable:
+        return {
+            **base,
+            "status": "not_available",
+            "reason": (
+                "human_human_agreement has no numeric recall, precision, or f1 "
+                "metrics comparable to the exact-anchor scorecard."
+            ),
+            "human_metrics": dict(human_metrics),
+            "non_comparable_human_metrics": non_comparable,
+        }
+
+    return {
+        **base,
+        "status": "scored",
+        "human_metrics": dict(human_metrics),
+        "metrics": comparable,
+        "non_comparable_human_metrics": non_comparable,
+        "system_meets_all_comparable_metrics": all(
+            item["meets_or_exceeds_human"] for item in comparable.values()
+        ),
+    }
+
+
+def _is_numeric_metric(value: Any) -> bool:
+    """Return true for real numeric metric values, excluding booleans."""
+    return isinstance(value, (int, float)) and not isinstance(value, bool)
 
 
 def _d3_application_gold_annotations(state: ProjectState) -> list[ApplicationGoldAnchor]:
