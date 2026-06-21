@@ -34,10 +34,11 @@ The software is **built and software-validated** (deterministic tests + live-LLM
 - **Segment universe + coverage** (INV-8): every doc split into char-anchored segments; `project run --exhaustive` codes *every* segment (examined-and-judged coverage, segment-anchored applications), else traversal coverage.
 - **First-class claim ledger** (INV-9 object layer): substantive stage outputs become `AnalyticClaim` objects or no-claims events, with source stage, kind, scope, support/adjudication status, anchors where available, and CLI/API/MCP/export read surfaces.
 - **Ledger-routed disconfirmation + claim review first slice** (INV-6/INV-10 partial): negative-case prompts include bounded claim targets by ID; coverage summaries report challenged/unchallenged targets; `ReviewManager` supports `target_type="claim"` approve/reject/modify decisions with revision history.
+- **Instruction/data separation first slice** (INV-7 partial): raw transcript/document/segment prompt sections are rendered as untrusted `DATA>` lines via `qc_clean/core/prompting.py`, with deterministic prompt-injection regressions; derived LLM-output isolation and live adversarial evaluation remain.
 - Human review (CLI + browser), `project irr` (LLM-pass *codebook-discovery* agreement by default; **application-level** positive segment × code agreement plus segment-decision agreement via `--application-level`, using exhaustive coding), `project stability`.
 - Graph viz, JSON/CSV/Markdown/QDPX export, per-stage memos, per-code audit trail; typed `PipelineContext`/results, fail-loud inter-stage checks, `llm_client` observability.
 
-**Direction:** the end product is public and SOTA-targeting; the proven/measured/planned ledger, the architectural invariants, and the ranked roadmap are in `docs/PROJECT_THEORY_AND_GOALS.md` (§13/§13.1/§18). Recent structural work landed: span anchoring (INV-1), the segment universe + exhaustive coverage (INV-8), the first-class claim ledger object layer (INV-9), and ledger-routed disconfirmation/claim review first slices (INV-6/INV-10 partial). Next high-value lanes: hardened retrieval-first disconfirmation (INV-2) and instruction/data separation (INV-7).
+**Direction:** the end product is public and SOTA-targeting; the proven/measured/planned ledger, the architectural invariants, and the ranked roadmap are in `docs/PROJECT_THEORY_AND_GOALS.md` (§13/§13.1/§18). Recent structural work landed: span anchoring (INV-1), the segment universe + exhaustive coverage (INV-8), the first-class claim ledger object layer (INV-9), ledger-routed disconfirmation/claim review first slices (INV-6/INV-10 partial), and raw instruction/data separation (INV-7 partial). Next high-value lanes: hardened retrieval-first disconfirmation (INV-2), derived-output prompt-boundary hardening / live injection evaluation (INV-7 follow-up), and theoretical sampling/saturation (INV-4 when GT claims theory generation).
 
 ## Architecture
 
@@ -297,7 +298,7 @@ Superseded by the canonical theory doc: the proven/measured/planned **state ledg
 
 ## Next Steps
 
-The ranked roadmap (invariants before features) lives in `docs/PROJECT_THEORY_AND_GOALS.md` §18 — evaluation harness (keystone), span anchoring (done), segment universe + exhaustive coding (INV-8, done), claim ledger object layer (INV-9, mostly done), ledger-routed disconfirmation/adjudication first slice (INV-6/INV-10 partial), hardened retrieval-first disconfirmation, instruction/data separation, theoretical sampling/saturation, etc. Don't duplicate it here.
+The ranked roadmap (invariants before features) lives in `docs/PROJECT_THEORY_AND_GOALS.md` §18 — evaluation harness (keystone), span anchoring (done), segment universe + exhaustive coding (INV-8, done), claim ledger object layer (INV-9, mostly done), ledger-routed disconfirmation/adjudication first slice (INV-6/INV-10 partial), raw instruction/data separation first slice (INV-7 partial), hardened retrieval-first disconfirmation, derived-output prompt hardening, theoretical sampling/saturation, etc. Don't duplicate it here.
 
 ### Maintenance Follow-Ups (2026-06-19)
 - **Line endings**: Normalize mixed CRLF/LF files in one mechanical commit with no behavior changes, then run `make check`.

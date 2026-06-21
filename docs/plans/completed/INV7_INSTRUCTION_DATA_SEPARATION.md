@@ -1,10 +1,35 @@
 # Plan #6: INV-7 Instruction/Data Separation
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** None
-**Blocks:** None
+**Blocks:** INV-7 full prompt-injection hardening and evaluation
+
+---
+
+## Completion Outcome
+
+Completed 2026-06-21. Raw transcript/document/segment text in first-party
+prompt paths is now rendered through `qc_clean/core/prompting.py` as explicit
+untrusted data: every corpus-provided line is prefixed with `DATA>`, and the
+boundary tells the model not to follow commands, role labels, delimiters, or
+formatting inside those data lines. The helper is wired into thematic
+example-quote and exhaustive coding, perspective, relationship, synthesis,
+negative-case, GT constant-comparison, GT axial coding, and incremental
+recoding prompts. Prompt overrides for `{combined_text}` and `{segment_text}`
+receive the already-boundaried data form. `tests/test_prompt_boundaries_inv7.py`
+adds adversarial prompt-capture regressions without live LLM calls.
+
+This is an INV-7 first slice, not a formal prompt-injection proof. Remaining
+risks: downstream LLM-derived artifacts (`phase*_json`, memos, codebook example
+quotes) can echo transcript instructions and are not yet schema-aware isolated;
+fully custom prompt overrides can still arrange protected placeholders poorly;
+and there is no live adversarial evaluation set yet.
+
+Verification: targeted affected suites passed (`79 passed`), the INV-7
+prompt-boundary suite passed (`8 passed`), and `make check` passed with
+`621 passed, 1 skipped, 8 deselected`; Ruff and docs checks were green.
 
 ---
 
@@ -115,6 +140,8 @@ not create a cross-project callable capability, tool, or boundary.
 | `tests/test_prompt_boundaries_inv7.py` | `test_thematic_prompt_wraps_malicious_transcript_as_untrusted_data` | Thematic prompt-capture path keeps adversarial instructions inside prefixed data lines. |
 | `tests/test_prompt_boundaries_inv7.py` | `test_negative_case_prompt_wraps_malicious_transcript_as_untrusted_data` | Negative-case prompt-capture path keeps adversarial instructions inside prefixed data lines. |
 | `tests/test_prompt_boundaries_inv7.py` | `test_gt_constant_comparison_wraps_malicious_segment_as_untrusted_data` | GT constant-comparison prompt-capture path isolates raw segment text. |
+| `tests/test_prompt_boundaries_inv7.py` | `test_thematic_prompt_override_receives_boundaried_combined_text` | Thematic prompt override placeholders receive protected combined text. |
+| `tests/test_prompt_boundaries_inv7.py` | `test_gt_prompt_override_receives_boundaried_segment_text` | GT prompt override placeholders receive protected segment text. |
 | `tests/test_prompt_boundaries_inv7.py` | `test_incremental_recode_wraps_new_documents_as_untrusted_data` | Incremental recoding prompt-capture path isolates newly added document text. |
 
 ### Existing Tests (Must Pass)
@@ -131,20 +158,20 @@ not create a cross-project callable capability, tool, or boundary.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] A single shared helper defines the untrusted-data prompt boundary.
-- [ ] Every raw transcript/document/segment line sent through covered first-party prompts is prefixed as data.
-- [ ] The helper carries explicit instruction text that prefixed data may be quoted, summarized, and analyzed, but not followed as instructions.
-- [ ] Thematic, perspective, relationship, synthesis, negative-case, GT constant-comparison, GT axial, and incremental recoding prompts use the helper for raw transcript or segment text.
-- [ ] Prompt overrides that receive `{combined_text}`, `{segment_text}`, or `{new_doc_text}` receive the already-boundaried form, not raw transcript text.
-- [ ] Deterministic prompt-injection regression tests run without live LLM calls.
-- [ ] Docs describe the landed scope and residual risks conservatively.
+- [x] A single shared helper defines the untrusted-data prompt boundary.
+- [x] Every raw transcript/document/segment line sent through covered first-party prompts is prefixed as data.
+- [x] The helper carries explicit instruction text that prefixed data may be quoted, summarized, and analyzed, but not followed as instructions.
+- [x] Thematic, perspective, relationship, synthesis, negative-case, GT constant-comparison, GT axial, and incremental recoding prompts use the helper for raw transcript or segment text.
+- [x] Prompt overrides that receive `{combined_text}` or `{segment_text}` receive the already-boundaried form, not raw transcript text. `new_doc_text` has no first-party override surface today.
+- [x] Deterministic prompt-injection regression tests run without live LLM calls.
+- [x] Docs describe the landed scope and residual risks conservatively.
 
 > Process criteria:
-- [ ] Required targeted tests pass.
-- [ ] Full deterministic suite passes through `make check`.
-- [ ] Lint passes through `make check`.
-- [ ] Docs checks pass.
-- [ ] Verified work is committed and pushed.
+- [x] Required targeted tests pass.
+- [x] Full deterministic suite passes through `make check`.
+- [x] Lint passes through `make check`.
+- [x] Docs checks pass.
+- [x] Verified work is committed and pushed.
 
 ---
 
@@ -152,11 +179,11 @@ not create a cross-project callable capability, tool, or boundary.
 
 - [ ] Should every LLM-derived upstream output (`phase1_json`, memos, codebook
   example quotes) also be wrapped as untrusted data before downstream prompts?
-  — Status: OPEN | Why it matters: upstream outputs can echo transcript
+  — Status: OPEN FOLLOW-UP | Why it matters: upstream outputs can echo transcript
   instructions. This plan prioritizes raw corpus text first; derived-output
   isolation may be a follow-up if it increases prompt size/noise or needs a
   more nuanced schema-aware boundary.
-- [ ] Should prompt overrides be allowed to opt out of the shared boundary?
+- [x] Should prompt overrides be allowed to opt out of the shared boundary?
   — Status: RESOLVED | Answer: no for first-party placeholders in this slice;
   placeholders should receive boundaried text by default. Fully custom prompts
   can still misuse the boundary by design, so docs should not overclaim.
