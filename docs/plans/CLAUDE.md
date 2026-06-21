@@ -6,7 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| _none_ | _No active plan_ | - | - | - |
+| 21 | INV-7 prompt injection scorecard | High | Planned | `INV7_PROMPT_INJECTION_SCORECARD.md` |
 
 ## Completed Plans
 
