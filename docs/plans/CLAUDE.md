@@ -6,7 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| — | — | — | No active plan | — |
+| 37 | D3 held-out gold-set scaffold | High | Planned | `D3_HELD_OUT_GOLD_SET_SCAFFOLD.md` |
 
 ## Completed Plans
 
