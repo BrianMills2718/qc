@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 40 | D7 baseline delta bootstrap intervals | High | Planned | `D7_BASELINE_DELTA_BOOTSTRAP_INTERVALS.md` |
 
 ## Completed Plans
 
