@@ -26,6 +26,7 @@ from qc_clean.schemas.domain import ClaimAnchor, ClaimKind, ProjectState
 
 
 _D7_GOLD_EXTRA_KEY = "disconfirmation_gold"
+_D7_BASELINES_EXTRA_KEY = "disconfirmation_baselines"
 _PROMPT_INJECTION_EXTRA_KEY = "prompt_injection_evaluations"
 DEFAULT_OBSERVABILITY_DB_PATH = Path.home() / "projects" / "data" / "llm_observability.db"
 _WILSON_Z_95 = 1.959963984540054
@@ -91,6 +92,24 @@ class PromptInjectionEvaluation(BaseModel):
             raise ValueError("prompt injection fixture_id must be non-empty")
         if not self.surface.strip():
             raise ValueError("prompt injection surface must be non-empty")
+        return self
+
+
+class DisconfirmationBaselinePrediction(BaseModel):
+    """Baseline contrary-evidence predictions used for D7 comparison."""
+
+    name: str = Field(description="Stable baseline name, such as single_prompt_chatgpt")
+    description: str = Field(default="", description="Optional human-readable baseline description")
+    contrary_evidence: list[DisconfirmationGoldAnchor] = Field(
+        description="Baseline-predicted contrary-evidence anchors using the D7 exact anchor schema"
+    )
+
+    @model_validator(mode="after")
+    def require_nonempty_name(self) -> "DisconfirmationBaselinePrediction":
+        """Require a stable baseline key for scorecard output."""
+        if not self.name.strip():
+            raise ValueError("D7 baseline name must be non-empty")
+        self.name = self.name.strip()
         return self
 
 
@@ -425,6 +444,34 @@ def disconfirmation_d7_scorecard(state: ProjectState) -> Dict[str, Any]:
     gold_keys = {_key_for_gold(anchor) for anchor in gold}
     predicted_keys, unscored_predicted = _predicted_disconfirmation_keys(state)
 
+    system_score = _d7_exact_score(gold_keys, predicted_keys, unscored_predicted)
+    card: Dict[str, Any] = {
+        "status": "scored",
+        "gold_source": f"ProjectState.config.extra['{_D7_GOLD_EXTRA_KEY}']",
+        "note": (
+            "Exact target-claim/source-anchor D7 score. This is a measurement substrate, "
+            "not a SOTA/parity claim without a held-out adjudicated benchmark."
+        ),
+    }
+    card.update(system_score)
+
+    baselines = _d7_baselines(state)
+    if baselines:
+        card["baselines"] = _score_d7_baselines(gold_keys, baselines, system_score)
+        card["baseline_note"] = (
+            "Baseline scores use the same exact D7 anchor matching as the system. "
+            "System deltas are point estimates only; superiority still requires "
+            "held-out data and interval testing."
+        )
+    return card
+
+
+def _d7_exact_score(
+    gold_keys: set[str],
+    predicted_keys: set[str],
+    unscored_predicted: list[str],
+) -> Dict[str, Any]:
+    """Score exact D7 prediction keys against gold keys."""
     matched = sorted(gold_keys & predicted_keys)
     missed = sorted(gold_keys - predicted_keys)
     extra = sorted(predicted_keys - gold_keys)
@@ -438,8 +485,6 @@ def disconfirmation_d7_scorecard(state: ProjectState) -> Dict[str, Any]:
     precision_denominator = true_positives + false_positives
 
     return {
-        "status": "scored",
-        "gold_source": f"ProjectState.config.extra['{_D7_GOLD_EXTRA_KEY}']",
         "gold_count": len(gold_keys),
         "predicted_count": len(predicted_keys) + len(unscored_predicted),
         "true_positives": true_positives,
@@ -454,11 +499,27 @@ def disconfirmation_d7_scorecard(state: ProjectState) -> Dict[str, Any]:
         "missed_gold_keys": missed,
         "extra_predicted_keys": extra,
         "unscored_predicted_anchors": unscored_predicted,
-        "note": (
-            "Exact target-claim/source-anchor D7 score. This is a measurement substrate, "
-            "not a SOTA/parity claim without a held-out adjudicated benchmark."
-        ),
     }
+
+
+def _score_d7_baselines(
+    gold_keys: set[str],
+    baselines: list[DisconfirmationBaselinePrediction],
+    system_score: Dict[str, Any],
+) -> Dict[str, Dict[str, Any]]:
+    """Score D7 baselines and include point deltas versus the system."""
+    scored: Dict[str, Dict[str, Any]] = {}
+    for baseline in baselines:
+        predicted_keys = {_key_for_gold(anchor) for anchor in baseline.contrary_evidence}
+        baseline_score = _d7_exact_score(gold_keys, predicted_keys, [])
+        baseline_score["description"] = baseline.description
+        baseline_score["system_minus_baseline"] = {
+            "recall": system_score["recall"] - baseline_score["recall"],
+            "precision": system_score["precision"] - baseline_score["precision"],
+            "f1": system_score["f1"] - baseline_score["f1"],
+        }
+        scored[baseline.name] = baseline_score
+    return dict(sorted(scored.items()))
 
 
 def _d7_gold_annotations(state: ProjectState) -> list[DisconfirmationGoldAnchor]:
@@ -476,6 +537,29 @@ def _d7_gold_annotations(state: ProjectState) -> list[DisconfirmationGoldAnchor]
         return [DisconfirmationGoldAnchor.model_validate(item) for item in raw]
     except ValidationError as exc:
         raise ValueError(f"Invalid D7 disconfirmation gold annotations: {exc}") from exc
+
+
+def _d7_baselines(state: ProjectState) -> list[DisconfirmationBaselinePrediction]:
+    """Load D7 baseline predictions from project config metadata."""
+    raw = state.config.extra.get(_D7_BASELINES_EXTRA_KEY)
+    if raw is None:
+        return []
+    if isinstance(raw, dict) and _D7_BASELINES_EXTRA_KEY in raw:
+        raw = raw[_D7_BASELINES_EXTRA_KEY]
+    if not isinstance(raw, list):
+        raise ValueError(
+            f"ProjectState.config.extra['{_D7_BASELINES_EXTRA_KEY}'] must be a list "
+            "of D7 baseline prediction records"
+        )
+    try:
+        baselines = [DisconfirmationBaselinePrediction.model_validate(item) for item in raw]
+    except ValidationError as exc:
+        raise ValueError(f"Invalid D7 baseline prediction metadata: {exc}") from exc
+    names = [baseline.name for baseline in baselines]
+    duplicates = sorted(name for name, count in Counter(names).items() if count > 1)
+    if duplicates:
+        raise ValueError("Duplicate D7 baseline name(s): " + ", ".join(duplicates))
+    return baselines
 
 
 def _predicted_disconfirmation_keys(state: ProjectState) -> tuple[set[str], list[str]]:

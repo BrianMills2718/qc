@@ -6,7 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 26 | D7 baseline comparison | High | Planned | `D7_BASELINE_COMPARISON.md` |
+| 26 | D7 baseline comparison | High | In Progress | `D7_BASELINE_COMPARISON.md` |
 
 ## Completed Plans
 

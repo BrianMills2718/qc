@@ -19,8 +19,8 @@ test-e2e:  ## Run live LLM E2E tests
 test-all:  ## Run deterministic tests and live LLM E2E tests
 	python -m pytest tests/ -v
 
-bench:  ## Evaluation-harness Phase 0 scorecard (ID=<project_id> [GOLD=gold.json] [PROMPT_INJECTION=inv7.json] [OBS_DB=path] [TRACE_ID=id])
-	python scripts/bench_phase0.py $(ID) $(if $(GOLD),--gold-file $(GOLD),) $(if $(PROMPT_INJECTION),--prompt-injection-file $(PROMPT_INJECTION),) $(if $(OBS_DB),--observability-db $(OBS_DB),) $(if $(TRACE_ID),--trace-id $(TRACE_ID),)
+bench:  ## Evaluation-harness Phase 0 scorecard (ID=<project_id> [GOLD=gold.json] [BASELINES=baselines.json] [PROMPT_INJECTION=inv7.json] [OBS_DB=path] [TRACE_ID=id])
+	python scripts/bench_phase0.py $(ID) $(if $(GOLD),--gold-file $(GOLD),) $(if $(BASELINES),--d7-baselines-file $(BASELINES),) $(if $(PROMPT_INJECTION),--prompt-injection-file $(PROMPT_INJECTION),) $(if $(OBS_DB),--observability-db $(OBS_DB),) $(if $(TRACE_ID),--trace-id $(TRACE_ID),)
 
 check:  ## Run deterministic tests + lint + docs checks
 	python -m pytest tests/ -m "not live_llm" -x -q

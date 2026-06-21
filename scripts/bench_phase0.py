@@ -3,7 +3,8 @@
 
 Usage:
     python scripts/bench_phase0.py <project_id> [--gold-file gold.json]
-        [--prompt-injection-file inv7.json] [--output scorecard.json]
+        [--d7-baselines-file baselines.json] [--prompt-injection-file inv7.json]
+        [--output scorecard.json]
 
 Agent-drivable: emits JSON to stdout (and optionally a file). See
 docs/EVALUATION_HARNESS.md (Phase 0). Deterministic, no LLM calls.
@@ -32,6 +33,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument(
         "--gold-file",
         help="Optional D7 disconfirmation gold JSON file; applied in memory only",
+    )
+    parser.add_argument(
+        "--d7-baselines-file",
+        help="Optional D7 baseline prediction JSON file; applied in memory only",
     )
     parser.add_argument(
         "--prompt-injection-file",
@@ -66,6 +71,16 @@ def main(argv: Sequence[str] | None = None) -> int:
         state = state.model_copy(deep=True)
         state.config.extra = dict(state.config.extra)
         state.config.extra["disconfirmation_gold"] = gold
+
+    if args.d7_baselines_file:
+        try:
+            baselines = load_d7_baselines_file(Path(args.d7_baselines_file))
+        except ValueError as exc:
+            print(json.dumps({"error": str(exc)}))
+            return 1
+        state = state.model_copy(deep=True)
+        state.config.extra = dict(state.config.extra)
+        state.config.extra["disconfirmation_baselines"] = baselines
 
     if args.prompt_injection_file:
         try:
@@ -111,6 +126,25 @@ def load_d7_gold_file(path: Path) -> Any:
     raise ValueError(
         "D7 gold file must be a JSON list of anchors or an object with a "
         "'contrary_evidence' list"
+    )
+
+
+def load_d7_baselines_file(path: Path) -> Any:
+    """Load and shape-check an external D7 baseline prediction file."""
+    try:
+        raw = json.loads(path.read_text(encoding="utf-8"))
+    except OSError as exc:
+        raise ValueError(f"D7 baselines file '{path}' could not be read: {exc}") from exc
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"D7 baselines file '{path}' is not valid JSON: {exc}") from exc
+
+    if isinstance(raw, list):
+        return raw
+    if isinstance(raw, dict) and isinstance(raw.get("disconfirmation_baselines"), list):
+        return raw["disconfirmation_baselines"]
+    raise ValueError(
+        "D7 baselines file must be a JSON list of baseline predictions or an "
+        "object with a 'disconfirmation_baselines' list"
     )
 
 

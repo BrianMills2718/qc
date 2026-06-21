@@ -77,6 +77,98 @@ def test_bench_phase0_scores_d7_from_gold_file_without_mutating_state(
     assert "disconfirmation_gold" not in reloaded.config.extra
 
 
+def test_bench_phase0_scores_d7_baselines_from_file_without_mutating_state(
+    tmp_path,
+    monkeypatch,
+    capsys,
+):
+    content = "AI helped delivery. AI failed in the pilot. AI only worked later."
+    doc = Document(id="d1", name="interview.txt", content=content)
+    gold_start = content.index("AI failed")
+    gold_end = gold_start + len("AI failed in the pilot.")
+    extra_start = content.index("AI only")
+    extra_end = len(content)
+    state = ProjectState(
+        id="project_d7_baseline",
+        name="D7 baseline project",
+        config=ProjectConfig(extra={}),
+        corpus=Corpus(documents=[doc]),
+        claims=[
+            AnalyticClaim(
+                claim_kind=ClaimKind.NEGATIVE_CASE,
+                source_stage="negative_case_analysis",
+                claim_text="Contrary evidence was found.",
+                scope=ClaimScope(claim_ids=["claim-ai"]),
+                origin_object_type="negative_case",
+                origin_object_id="negative:claim-ai",
+                contrary_anchors=[
+                    ClaimAnchor(
+                        doc_id=doc.id,
+                        start_char=gold_start,
+                        end_char=gold_end,
+                        quote_text=content[gold_start:gold_end],
+                    ),
+                ],
+            )
+        ],
+    )
+    store = ProjectStore(projects_dir=tmp_path / "projects")
+    store.save(state)
+    gold_file = tmp_path / "gold.json"
+    gold_file.write_text(
+        json.dumps({
+            "contrary_evidence": [
+                {
+                    "target_claim_id": "claim-ai",
+                    "doc_id": doc.id,
+                    "start_char": gold_start,
+                    "end_char": gold_end,
+                }
+            ],
+        }),
+        encoding="utf-8",
+    )
+    baselines_file = tmp_path / "baselines.json"
+    baselines_file.write_text(
+        json.dumps({
+            "disconfirmation_baselines": [
+                {
+                    "name": "single_prompt",
+                    "contrary_evidence": [
+                        {
+                            "target_claim_id": "claim-ai",
+                            "doc_id": doc.id,
+                            "start_char": extra_start,
+                            "end_char": extra_end,
+                        }
+                    ],
+                }
+            ],
+        }),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(bench_phase0, "ProjectStore", lambda: store)
+
+    exit_code = bench_phase0.main([
+        state.id,
+        "--gold-file",
+        str(gold_file),
+        "--d7-baselines-file",
+        str(baselines_file),
+    ])
+
+    assert exit_code == 0
+    output = json.loads(capsys.readouterr().out)
+    baseline = output["disconfirmation_d7"]["baselines"]["single_prompt"]
+    assert baseline["true_positives"] == 0
+    assert baseline["false_positives"] == 1
+    assert baseline["false_negatives"] == 1
+    assert baseline["system_minus_baseline"]["recall"] == 1.0
+    reloaded = store.load(state.id)
+    assert "disconfirmation_gold" not in reloaded.config.extra
+    assert "disconfirmation_baselines" not in reloaded.config.extra
+
+
 def test_bench_phase0_invalid_gold_file_fails_loud(tmp_path, monkeypatch, capsys):
     state = ProjectState(id="project_bad_gold", name="Bad gold")
     store = ProjectStore(projects_dir=tmp_path / "projects")
@@ -91,6 +183,26 @@ def test_bench_phase0_invalid_gold_file_fails_loud(tmp_path, monkeypatch, capsys
     output = json.loads(capsys.readouterr().out)
     assert "error" in output
     assert "D7 gold file" in output["error"]
+
+
+def test_bench_phase0_invalid_d7_baselines_file_fails_loud(tmp_path, monkeypatch, capsys):
+    state = ProjectState(id="project_bad_baselines", name="Bad baselines")
+    store = ProjectStore(projects_dir=tmp_path / "projects")
+    store.save(state)
+    baselines_file = tmp_path / "baselines.json"
+    baselines_file.write_text(json.dumps({"unexpected": []}), encoding="utf-8")
+    monkeypatch.setattr(bench_phase0, "ProjectStore", lambda: store)
+
+    exit_code = bench_phase0.main([
+        state.id,
+        "--d7-baselines-file",
+        str(baselines_file),
+    ])
+
+    assert exit_code == 1
+    output = json.loads(capsys.readouterr().out)
+    assert "error" in output
+    assert "D7 baselines file" in output["error"]
 
 
 def test_bench_phase0_scores_prompt_injection_from_file_without_mutating_state(

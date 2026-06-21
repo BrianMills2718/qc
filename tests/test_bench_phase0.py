@@ -546,6 +546,111 @@ def test_scorecard_reports_d7_wilson_intervals_for_mixed_counts():
     assert d7["precision_ci"]["lower"] < d7["precision"] < d7["precision_ci"]["upper"]
 
 
+def test_scorecard_scores_d7_baselines_against_same_gold():
+    content = "AI failed here. AI also failed later. AI only succeeded elsewhere."
+    doc = Document(id="d1", name="d.txt", content=content)
+    first_start = content.index("AI failed")
+    first_end = first_start + len("AI failed here.")
+    second_start = content.index("AI also")
+    second_end = second_start + len("AI also failed later.")
+    extra_start = content.index("AI only")
+    extra_end = len(content)
+    state = ProjectState(
+        config=ProjectConfig(
+            methodology=Methodology.THEMATIC_ANALYSIS,
+            extra={
+                "disconfirmation_gold": [
+                    {
+                        "target_claim_id": "claim-ai",
+                        "doc_id": doc.id,
+                        "start_char": first_start,
+                        "end_char": first_end,
+                    },
+                    {
+                        "target_claim_id": "claim-ai",
+                        "doc_id": doc.id,
+                        "start_char": second_start,
+                        "end_char": second_end,
+                    },
+                ],
+                "disconfirmation_baselines": [
+                    {
+                        "name": "single_prompt",
+                        "description": "Generic one-shot baseline.",
+                        "contrary_evidence": [
+                            {
+                                "target_claim_id": "claim-ai",
+                                "doc_id": doc.id,
+                                "start_char": second_start,
+                                "end_char": second_end,
+                            },
+                            {
+                                "target_claim_id": "claim-ai",
+                                "doc_id": doc.id,
+                                "start_char": extra_start,
+                                "end_char": extra_end,
+                            },
+                        ],
+                    }
+                ],
+            },
+        ),
+        corpus=Corpus(documents=[doc]),
+        claims=[
+            _negative_case_claim(
+                "claim-ai",
+                ClaimAnchor(doc_id=doc.id, start_char=first_start, end_char=first_end),
+            ),
+        ],
+    )
+
+    d7 = phase0_scorecard(state)["disconfirmation_d7"]
+
+    baseline = d7["baselines"]["single_prompt"]
+    assert d7["recall"] == 0.5
+    assert d7["precision"] == 1.0
+    assert d7["f1"] == pytest.approx(2 / 3)
+    assert baseline["description"] == "Generic one-shot baseline."
+    assert baseline["true_positives"] == 1
+    assert baseline["false_positives"] == 1
+    assert baseline["false_negatives"] == 1
+    assert baseline["recall"] == 0.5
+    assert baseline["precision"] == 0.5
+    assert baseline["f1"] == 0.5
+    assert baseline["recall_ci"]["method"] == "wilson"
+    assert baseline["precision_ci"]["method"] == "wilson"
+    assert baseline["matched_gold_keys"] == [f"claim-ai|{doc.id}|{second_start}:{second_end}"]
+    assert baseline["missed_gold_keys"] == [f"claim-ai|{doc.id}|{first_start}:{first_end}"]
+    assert baseline["extra_predicted_keys"] == [f"claim-ai|{doc.id}|{extra_start}:{extra_end}"]
+    assert baseline["system_minus_baseline"]["recall"] == 0.0
+    assert baseline["system_minus_baseline"]["precision"] == 0.5
+    assert baseline["system_minus_baseline"]["f1"] == pytest.approx(1 / 6)
+    assert "point estimates only" in d7["baseline_note"]
+
+
+def test_scorecard_invalid_d7_baseline_metadata_fails_loud():
+    state = ProjectState(
+        config=ProjectConfig(
+            extra={
+                "disconfirmation_gold": [
+                    {
+                        "target_claim_id": "claim-ai",
+                        "doc_id": "d1",
+                        "segment_id": "s1",
+                    }
+                ],
+                "disconfirmation_baselines": [
+                    {"name": "duplicate", "contrary_evidence": []},
+                    {"name": "duplicate", "contrary_evidence": []},
+                ],
+            }
+        )
+    )
+
+    with pytest.raises(ValueError, match="Duplicate D7 baseline"):
+        phase0_scorecard(state)
+
+
 def _negative_case_claim(target_claim_id: str, anchor: ClaimAnchor) -> AnalyticClaim:
     return AnalyticClaim(
         claim_kind=ClaimKind.NEGATIVE_CASE,
