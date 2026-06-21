@@ -181,8 +181,8 @@ Examples:
 
     proj_export = project_subparsers.add_parser('export', help='Export project results')
     proj_export.add_argument('project_id', help='Project ID')
-    proj_export.add_argument('--format', choices=['json', 'csv', 'markdown'], default='json', help='Export format (default: json)')
-    proj_export.add_argument('--output-file', help='Output file path (for json/markdown)')
+    proj_export.add_argument('--format', choices=['json', 'csv', 'markdown', 'qdpx'], default='json', help='Export format (default: json)')
+    proj_export.add_argument('--output-file', help='Output file path (for json/markdown/qdpx)')
     proj_export.add_argument('--output-dir', help='Output directory (for csv)')
 
     proj_irr = project_subparsers.add_parser('irr', help='Run inter-rater reliability analysis')

@@ -7,6 +7,7 @@ import asyncio
 import csv
 import json
 import pytest
+import zipfile
 from pathlib import Path
 from unittest.mock import patch, MagicMock
 
@@ -364,6 +365,26 @@ class TestProjectExporter:
         assert "## Executive Summary" not in content
         assert "## Recommendations" not in content
 
+    def test_project_export_command_qdpx(self, tmp_path, tmp_store, sample_state, capsys):
+        """The documented project export CLI path must reach QDPX export."""
+        from qc_clean.core.cli.commands.project import _export_project
+
+        tmp_store.save(sample_state)
+        out = tmp_path / "export.qdpx"
+        args = MagicMock(
+            project_id=sample_state.id,
+            format="qdpx",
+            output_file=str(out),
+            output_dir=None,
+        )
+
+        result = _export_project(tmp_store, args)
+
+        assert result == 0
+        assert out.exists()
+        assert zipfile.is_zipfile(out)
+        assert "Exported QDPX" in capsys.readouterr().out
+
 
 # ---------------------------------------------------------------------------
 # Tests: CLI argument parsing
@@ -407,6 +428,17 @@ class TestCLIParsing:
         args = parser.parse_args(["project", "export", "pid", "--format", "json", "--output-file", "out.json"])
         assert args.format == "json"
         assert args.output_file == "out.json"
+
+    def test_export_subparser_qdpx(self):
+        from qc_cli import create_parser
+        parser = create_parser()
+
+        args = parser.parse_args(["project", "export", "pid", "--format", "qdpx", "--output-file", "out.qdpx"])
+        assert args.command == "project"
+        assert args.project_action == "export"
+        assert args.project_id == "pid"
+        assert args.format == "qdpx"
+        assert args.output_file == "out.qdpx"
 
 
 # ---------------------------------------------------------------------------
