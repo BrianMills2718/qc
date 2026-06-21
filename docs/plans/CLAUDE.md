@@ -6,7 +6,6 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 38 | Gold-set provenance in scorecards | High | Planned | `GOLD_SET_PROVENANCE_SCORECARD.md` |
 
 ## Completed Plans
 
@@ -49,6 +48,7 @@ Track all implementation work here.
 | D7 retrieval comparison report | Evaluation-harness follow-up: `make compare-d7-retrieval` scores multiple retrieval prediction packages against one D7 gold file with the existing exact-span scorer | `completed/D7_RETRIEVAL_COMPARISON_REPORT.md` |
 | D3 application validity scorecard | Evaluation-harness follow-up: `make bench D3_GOLD=...` reports exact code/source-anchor application-validity scores when adjudicated D3 gold is supplied | `completed/D3_APPLICATION_VALIDITY_SCORECARD.md` |
 | D3 held-out gold-set scaffold | Evaluation-harness follow-up: versioned D3 gold-set packages can be validated and used as `--d3-gold-file` inputs without claiming held-out results | `completed/D3_HELD_OUT_GOLD_SET_SCAFFOLD.md` |
+| Gold-set provenance in scorecards | Evaluation-harness follow-up: versioned D3/D7 package metadata is surfaced as compact `gold_provenance` in Phase 0 scorecard sections | `completed/GOLD_SET_PROVENANCE_SCORECARD.md` |
 
 ## Status Key
 

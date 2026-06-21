@@ -1,12 +1,28 @@
 # Plan #38: Gold-Set Provenance in Scorecards
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** None
 **Blocks:** Benchmark artifact review; held-out D3/D7 evaluation reporting
 
 ---
+
+## Outcome
+
+Implemented and verified in commit `24ba049`. Versioned
+`schema_version=1` D3 and D7 gold-set packages now add compact
+`gold_provenance` metadata to the corresponding Phase 0 scorecard section,
+including gold-set ID, dataset, split, corpus/project-state hashes,
+prompt-freeze and contamination-check flags, adjudication metadata, and anchor
+counts. Raw/list/simple-object gold inputs still score without invented package
+provenance. This improves artifact inspectability only; it does not create or
+score a held-out D3/D7 package, compute human-human agreement, or license
+validity/SOTA claims.
+
+Verification:
+- `python -m pytest tests/test_bench_phase0_script.py tests/test_bench_phase0.py tests/test_d3_gold_set.py tests/test_d7_gold_set.py -q` — 48 passed
+- `make check` — 720 passed, 1 skipped, 8 deselected; Ruff passed; docs checks passed; type check not yet configured
 
 ## Gap
 
@@ -57,10 +73,10 @@ Internal project capability only; no cross-project boundary is created.
 
 ### Capability Validation
 
-- [ ] Versioned D3 packages add `gold_provenance` to
+- [x] Versioned D3 packages add `gold_provenance` to
   `application_validity_d3`.
-- [ ] Versioned D7 packages add `gold_provenance` to `disconfirmation_d7`.
-- [ ] Raw/list gold inputs still score without package provenance.
+- [x] Versioned D7 packages add `gold_provenance` to `disconfirmation_d7`.
+- [x] Raw/list gold inputs still score without package provenance.
 
 ---
 
@@ -112,25 +128,25 @@ Internal project capability only; no cross-project boundary is created.
 ## Acceptance Criteria
 
 > Feature-level criteria (what the plan accomplishes):
-- [ ] D3 scorecard sections fed by schema_version=1 packages include compact
+- [x] D3 scorecard sections fed by schema_version=1 packages include compact
   gold provenance.
-- [ ] D7 scorecard sections fed by schema_version=1 packages include compact
+- [x] D7 scorecard sections fed by schema_version=1 packages include compact
   gold provenance.
-- [ ] Raw gold inputs remain accepted and do not claim package provenance.
-- [ ] Docs explain this as artifact provenance only, not validity evidence.
+- [x] Raw gold inputs remain accepted and do not claim package provenance.
+- [x] Docs explain this as artifact provenance only, not validity evidence.
 
 > Process criteria (quality gates):
-- [ ] Required tests pass
-- [ ] Full test suite passes
-- [ ] Type check status reported
-- [ ] Docs updated
-- [ ] Plan completed, committed, and pushed
+- [x] Required tests pass
+- [x] Full test suite passes
+- [x] Type check status reported
+- [x] Docs updated
+- [x] Plan completed, committed, and pushed
 
 ---
 
 ## Open Questions
 
-- [ ] Should benchmark manifest duplicate per-section gold provenance? — Status:
+- [x] Should benchmark manifest duplicate per-section gold provenance? — Status:
   DEFERRED | Why it matters: the scorecard already lives inside the artifact
   package, and manifest schema changes should be a separate artifact-versioning
   decision.

@@ -28,10 +28,11 @@ highest-value documented lane.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Completed checkpoint:** D3 application-validity scoring now accepts raw or
-versioned `schema_version=1` gold-set packages through
-`make bench ID=<project> D3_GOLD=d3_gold.json`, and
-`make validate-d3-gold GOLD=gold_set.json` validates held-out provenance,
-adjudication metadata, corpus hashes, and exact-key uniqueness. It remains a
-gold-dependent exact-score/provenance substrate, not a populated held-out D3
-benchmark, full D3 validity, κ/α/AC1, IoU/Hausdorff, or expert-parity evidence.
+**Completed checkpoint:** D3 and D7 scorecard sections now accept raw gold or
+versioned `schema_version=1` gold-set packages and surface compact
+`gold_provenance` when package metadata is present. D3 packages are validated by
+`make validate-d3-gold GOLD=gold_set.json`; D7 packages by
+`make validate-d7-gold GOLD=gold_set.json`. This remains a gold-dependent
+exact-score/provenance substrate, not a populated held-out benchmark, full
+D3/D7 validity, κ/α/AC1, IoU/Hausdorff, interval-tested baseline delta, or
+expert-parity/SOTA evidence.
