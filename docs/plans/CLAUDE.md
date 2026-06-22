@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 172 | D7 comparison metric success criteria | High | Planned | `D7_COMPARISON_METRIC_SUCCESS_CRITERIA.md` |
 
 ## Completed Plans
 
