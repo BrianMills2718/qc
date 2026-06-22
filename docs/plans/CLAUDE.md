@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 199 | Negative case review anchor details | High | In Progress | `NEGATIVE_CASE_REVIEW_ANCHOR_DETAILS.md` |
 
 ## Completed Plans
 
