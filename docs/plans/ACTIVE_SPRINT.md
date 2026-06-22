@@ -22,13 +22,17 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Select the next highest-value roadmap lane with deterministic acceptance
-   criteria and no live/external evidence dependency.
+1. Execute Plan #163: add a confined optional SQLite audit event mirror to MCP
+   JSON and Markdown export tools.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Selecting next deterministic roadmap lane after Plan
-#162 closeout.
+**Active checkpoint:** Plan #163
+(`docs/plans/MCP_EXPORT_AUDIT_SQLITE_MIRROR.md`) extends the SQLite audit mirror
+to MCP exports while preserving MCP path confinement. `audit_event_db=True`
+requires `audit_event_log=True`, and the DB is a confined mirror of the JSONL
+event log, not a standalone source of truth, not append-only storage, and not
+full tamper-evidence.
 
 **Completed checkpoint:** Local export-audit scripts, Make targets, and
 `project export` can now update the optional SQLite event mirror whenever JSONL

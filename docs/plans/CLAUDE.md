@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 163 | MCP export audit SQLite mirror | High | Planned | `MCP_EXPORT_AUDIT_SQLITE_MIRROR.md` |
 
 ## Completed Plans
 
