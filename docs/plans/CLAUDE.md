@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 149 | INV-7 validation CLI surfaces | Medium | In progress | `INV7_VALIDATION_CLI_SURFACES.md` |
 
 ## Completed Plans
 
