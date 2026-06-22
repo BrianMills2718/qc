@@ -26,8 +26,13 @@ highest-value documented lane.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** No implementation plan is active. Select and plan the
-next deterministic roadmap lane before editing code.
+**Active checkpoint:** Plan #197
+`completed/PROJECT_EXPORT_PUBLISH_PREFLIGHT_GATE.md` is active. This slice adds
+explicit opt-in `qc_cli.py project export --publish-preflight [--scope-lint]`
+flags so one-command exports can run the local publish/handoff gate immediately
+after writing the export manifest. It does not change default export behavior,
+make preflight mandatory, validate sampling adequacy, sign artifacts, make logs
+append-only, create external tamper evidence, or produce SOTA claims.
 
 **Completed checkpoint:** Plan #196
 `completed/EXPORT_PUBLISH_PREFLIGHT_SCOPE_LINT.md` added an explicit opt-in
