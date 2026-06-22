@@ -6,7 +6,6 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 51 | D9 interpretive preference scorecard | High | Planned | `D9_INTERPRETIVE_PREFERENCE_SCORECARD.md` |
 
 ## Completed Plans
 
@@ -62,6 +61,7 @@ Track all implementation work here.
 | D6 counterfactual bias scorecard | Evaluation-harness follow-up: `make bench BIAS_COUNTERFACTUAL=...` scores externally supplied identity-swap outcomes without claiming a populated bias audit | `completed/D6_COUNTERFACTUAL_BIAS_SCORECARD.md` |
 | Human agreement metadata scorecard | Evaluation-harness follow-up: D3/D7 human-ceiling sections now surface supplied human-human κ/α/AC1 metadata without claiming system agreement-vs-gold | `completed/HUMAN_AGREEMENT_METADATA_SCORECARD.md` |
 | D4 codebook quality scorecard | Evaluation-harness follow-up: `make bench CODEBOOK_QUALITY=...` scores externally supplied rubric outcomes without claiming blind expert-panel evidence | `completed/D4_CODEBOOK_QUALITY_SCORECARD.md` |
+| D9 interpretive preference scorecard | Evaluation-harness follow-up: `make bench PREFERENCE=...` scores externally supplied forced-choice preference outcomes without claiming blind expert-parity evidence | `completed/D9_INTERPRETIVE_PREFERENCE_SCORECARD.md` |
 
 ## Status Key
 

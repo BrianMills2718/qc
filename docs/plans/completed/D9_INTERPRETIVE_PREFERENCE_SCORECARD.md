@@ -1,10 +1,31 @@
 # Plan #51: D9 Interpretive Preference Scorecard
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** None
 **Blocks:** D9 interpretive-depth measurement substrate
+
+---
+
+## Outcome
+
+Implemented the deterministic Phase 0 `interpretive_preference_d9` scorecard
+for externally supplied forced-choice preference outcomes. The bench surface now
+accepts `PREFERENCE=preference.json` / `--interpretive-preference-file`, hashes
+the D9 file in `_meta.input_hashes`, records it in artifact command provenance,
+and keeps the file input in memory without mutating saved project state. The
+scorecard reports system wins, human wins, ties, tie rate, non-tie system
+preference rate, a Wilson interval, and evaluator/criterion summaries. Docs
+state that this is not blind expert-parity or SOTA evidence.
+
+## Verification
+
+- `python -m pytest tests/test_bench_phase0.py tests/test_bench_phase0_script.py tests/test_qc_cli_bench.py -q` - 66 passed.
+- `python -m ruff check qc_clean/core/bench.py scripts/bench_phase0.py qc_cli.py tests/test_bench_phase0.py tests/test_bench_phase0_script.py tests/test_qc_cli_bench.py` - passed.
+- `python scripts/check_markdown_links.py` - passed.
+- `python scripts/sync_plan_status.py --check` - passed.
+- `make check` - 747 passed, 1 skipped, 8 deselected; Ruff and docs checks passed; type check not yet configured.
 
 ---
 
@@ -66,10 +87,10 @@ Internal scorecard capability only; no cross-project boundary is created.
 
 ### Capability Validation
 
-- [ ] Preference outcomes are Pydantic-validated and fail loudly when malformed.
-- [ ] Allowed preferences are exactly `system`, `human`, and `tie`.
-- [ ] System preference rate and Wilson interval are computed over non-tie cases.
-- [ ] External files are hashed in `_meta.input_hashes` and recorded in artifact command provenance.
+- [x] Preference outcomes are Pydantic-validated and fail loudly when malformed.
+- [x] Allowed preferences are exactly `system`, `human`, and `tie`.
+- [x] System preference rate and Wilson interval are computed over non-tie cases.
+- [x] External files are hashed in `_meta.input_hashes` and recorded in artifact command provenance.
 
 ---
 
@@ -134,23 +155,23 @@ Internal scorecard capability only; no cross-project boundary is created.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] Scorecard has `interpretive_preference_d9` with explicit unavailable state
+- [x] Scorecard has `interpretive_preference_d9` with explicit unavailable state
   when no forced-choice outcomes exist.
-- [ ] Scored output reports total cases, system wins, human wins, ties, tie
+- [x] Scored output reports total cases, system wins, human wins, ties, tie
   rate, system preference rate among non-ties, and Wilson interval.
-- [ ] External D9 JSON file can be supplied through Make, script, and `qc_cli`
+- [x] External D9 JSON file can be supplied through Make, script, and `qc_cli`
   without mutating saved project state.
-- [ ] Phase 0 input hashes and artifact command provenance include the D9
+- [x] Phase 0 input hashes and artifact command provenance include the D9
   external file.
-- [ ] Docs preserve the caveat that this is not blind expert-parity or SOTA
+- [x] Docs preserve the caveat that this is not blind expert-parity or SOTA
   evidence.
 
 > Process criteria:
-- [ ] Required tests pass
-- [ ] Full test suite passes
-- [ ] Type check status reported
-- [ ] Docs updated
-- [ ] Plan completed, committed, and pushed
+- [x] Required tests pass
+- [x] Full test suite passes
+- [x] Type check status reported
+- [x] Docs updated
+- [x] Plan completed, committed, and pushed
 
 ---
 
