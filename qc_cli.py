@@ -131,6 +131,10 @@ Examples:
         help='Optional D3 application-validity gold JSON file; applied in memory only'
     )
     bench_parser.add_argument(
+        '--d3-baselines-file',
+        help='Optional D3 baseline prediction JSON file; applied in memory only'
+    )
+    bench_parser.add_argument(
         '--gold-file',
         help='Optional D7 disconfirmation gold JSON file; applied in memory only'
     )
@@ -143,12 +147,28 @@ Examples:
         help='Optional INV-7 prompt-injection fixture results JSON file; applied in memory only'
     )
     bench_parser.add_argument(
+        '--d6-bias-protocol-file',
+        help='Optional D6 bias protocol JSON file; preflights supplied D6 rows before scoring'
+    )
+    bench_parser.add_argument(
         '--bias-counterfactual-file',
         help='Optional D6 counterfactual identity-swap outcome JSON file; applied in memory only'
     )
     bench_parser.add_argument(
+        '--bias-stratified-file',
+        help='Optional D6 stratified correctness/error JSON file; applied in memory only'
+    )
+    bench_parser.add_argument(
+        '--d4-codebook-quality-protocol-file',
+        help='Optional D4 codebook-quality protocol JSON file; preflights supplied D4 rows before scoring'
+    )
+    bench_parser.add_argument(
         '--codebook-quality-file',
         help='Optional D4 codebook-quality rubric outcome JSON file; applied in memory only'
+    )
+    bench_parser.add_argument(
+        '--d8-gt-fidelity-protocol-file',
+        help='Optional D8 GT-fidelity protocol JSON file; preflights supplied D8 rows before scoring'
     )
     bench_parser.add_argument(
         '--gt-fidelity-file',
@@ -159,8 +179,16 @@ Examples:
         help='Optional D9 blind forced-choice preference outcome JSON file; applied in memory only'
     )
     bench_parser.add_argument(
+        '--d9-interpretive-preference-protocol-file',
+        help='Optional D9 interpretive-preference protocol JSON file; preflights supplied D9 rows before scoring'
+    )
+    bench_parser.add_argument(
         '--confidence-calibration-file',
         help='Optional confidence/correctness calibration JSON file; applied in memory only'
+    )
+    bench_parser.add_argument(
+        '--confidence-calibration-protocol-file',
+        help='Optional confidence-calibration protocol JSON file; preflights supplied calibration rows before scoring'
     )
     bench_parser.add_argument(
         '--observability-db',
@@ -409,22 +437,45 @@ def handle_bench_command(args) -> int:
     argv = [args.project_id]
     if args.d3_gold_file:
         argv.extend(["--d3-gold-file", args.d3_gold_file])
+    if args.d3_baselines_file:
+        argv.extend(["--d3-baselines-file", args.d3_baselines_file])
     if args.gold_file:
         argv.extend(["--gold-file", args.gold_file])
     if args.d7_baselines_file:
         argv.extend(["--d7-baselines-file", args.d7_baselines_file])
     if args.prompt_injection_file:
         argv.extend(["--prompt-injection-file", args.prompt_injection_file])
+    if args.d6_bias_protocol_file:
+        argv.extend(["--d6-bias-protocol-file", args.d6_bias_protocol_file])
     if args.bias_counterfactual_file:
         argv.extend(["--bias-counterfactual-file", args.bias_counterfactual_file])
+    if args.bias_stratified_file:
+        argv.extend(["--bias-stratified-file", args.bias_stratified_file])
+    if args.d4_codebook_quality_protocol_file:
+        argv.extend([
+            "--d4-codebook-quality-protocol-file",
+            args.d4_codebook_quality_protocol_file,
+        ])
     if args.codebook_quality_file:
         argv.extend(["--codebook-quality-file", args.codebook_quality_file])
+    if args.d8_gt_fidelity_protocol_file:
+        argv.extend(["--d8-gt-fidelity-protocol-file", args.d8_gt_fidelity_protocol_file])
     if args.gt_fidelity_file:
         argv.extend(["--gt-fidelity-file", args.gt_fidelity_file])
     if args.interpretive_preference_file:
         argv.extend(["--interpretive-preference-file", args.interpretive_preference_file])
+    if args.d9_interpretive_preference_protocol_file:
+        argv.extend([
+            "--d9-interpretive-preference-protocol-file",
+            args.d9_interpretive_preference_protocol_file,
+        ])
     if args.confidence_calibration_file:
         argv.extend(["--confidence-calibration-file", args.confidence_calibration_file])
+    if args.confidence_calibration_protocol_file:
+        argv.extend([
+            "--confidence-calibration-protocol-file",
+            args.confidence_calibration_protocol_file,
+        ])
     if args.observability_db:
         argv.extend(["--observability-db", args.observability_db])
     if args.trace_id:

@@ -30,6 +30,110 @@ def test_qc_cli_bench_emits_phase0_scorecard(tmp_path, monkeypatch, capsys):
     assert output["_meta"]["input_hashes"]["project_id"] == state.id
 
 
+def test_qc_cli_bench_forwards_all_phase0_flags(monkeypatch):
+    captured = {}
+
+    def fake_main(argv):
+        captured["argv"] = argv
+        return 0
+
+    monkeypatch.setattr(bench_phase0, "main", fake_main)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "qc_cli.py",
+            "bench",
+            "cli_project",
+            "--d3-gold-file",
+            "d3_gold.json",
+            "--d3-baselines-file",
+            "d3_baselines.json",
+            "--gold-file",
+            "d7_gold.json",
+            "--d7-baselines-file",
+            "d7_baselines.json",
+            "--prompt-injection-file",
+            "inv7.json",
+            "--d6-bias-protocol-file",
+            "d6_protocol.json",
+            "--bias-counterfactual-file",
+            "bias_counterfactual.json",
+            "--bias-stratified-file",
+            "bias_stratified.json",
+            "--d4-codebook-quality-protocol-file",
+            "d4_protocol.json",
+            "--codebook-quality-file",
+            "codebook_quality.json",
+            "--d8-gt-fidelity-protocol-file",
+            "d8_protocol.json",
+            "--gt-fidelity-file",
+            "gt_fidelity.json",
+            "--interpretive-preference-file",
+            "preference.json",
+            "--d9-interpretive-preference-protocol-file",
+            "d9_protocol.json",
+            "--confidence-calibration-file",
+            "calibration.json",
+            "--confidence-calibration-protocol-file",
+            "confidence_protocol.json",
+            "--observability-db",
+            "observability.db",
+            "--trace-id",
+            "trace-123",
+            "--output",
+            "scorecard.json",
+            "--artifact-dir",
+            "artifacts",
+        ],
+    )
+
+    assert qc_cli.main() == 0
+    assert captured["argv"] == [
+        "cli_project",
+        "--d3-gold-file",
+        "d3_gold.json",
+        "--d3-baselines-file",
+        "d3_baselines.json",
+        "--gold-file",
+        "d7_gold.json",
+        "--d7-baselines-file",
+        "d7_baselines.json",
+        "--prompt-injection-file",
+        "inv7.json",
+        "--d6-bias-protocol-file",
+        "d6_protocol.json",
+        "--bias-counterfactual-file",
+        "bias_counterfactual.json",
+        "--bias-stratified-file",
+        "bias_stratified.json",
+        "--d4-codebook-quality-protocol-file",
+        "d4_protocol.json",
+        "--codebook-quality-file",
+        "codebook_quality.json",
+        "--d8-gt-fidelity-protocol-file",
+        "d8_protocol.json",
+        "--gt-fidelity-file",
+        "gt_fidelity.json",
+        "--interpretive-preference-file",
+        "preference.json",
+        "--d9-interpretive-preference-protocol-file",
+        "d9_protocol.json",
+        "--confidence-calibration-file",
+        "calibration.json",
+        "--confidence-calibration-protocol-file",
+        "confidence_protocol.json",
+        "--observability-db",
+        "observability.db",
+        "--trace-id",
+        "trace-123",
+        "--output",
+        "scorecard.json",
+        "--artifact-dir",
+        "artifacts",
+    ]
+
+
 def test_qc_cli_bench_forwards_files_and_output(tmp_path, monkeypatch, capsys):
     content = "AI failed here."
     doc = Document(id="d1", name="a.txt", content=content)
