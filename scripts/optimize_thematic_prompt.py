@@ -471,7 +471,7 @@ async def main() -> None:
 
     if all_significant:
         print(f"  -> {best_name} is significantly better than all others.")
-        print(f"  -> Consider updating thematic_coding.py with this prompt.")
+        print("  -> Consider updating thematic_coding.py with this prompt.")
     else:
         print("  -> No variant is significantly better than all others.")
         print("  -> Inspect per-dimension scores to identify specific strengths.")

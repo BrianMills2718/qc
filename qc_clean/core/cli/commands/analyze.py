@@ -69,7 +69,7 @@ def handle_analyze_command(args) -> int:
         output("📤 Submitting files for analysis...")
         try:
             job_id = api_client.start_analysis(validated_files)
-            output(f"✅ Analysis submitted successfully")
+            output("✅ Analysis submitted successfully")
             output(f"🆔 Job ID: {job_id}")
             output("")
             

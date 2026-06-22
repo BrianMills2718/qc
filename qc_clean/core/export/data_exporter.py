@@ -497,8 +497,8 @@ class ProjectExporter:
         if state.codebook.codes:
             _a("## Codebook")
             _a("")
-            _a(f"| Code | Description | Mentions | Confidence |")
-            _a(f"|------|-------------|----------|------------|")
+            _a("| Code | Description | Mentions | Confidence |")
+            _a("|------|-------------|----------|------------|")
             for code in sorted(state.codebook.codes, key=lambda c: c.mention_count, reverse=True):
                 desc = code.description[:80] + "..." if len(code.description) > 80 else code.description
                 _a(f"| {code.name} | {desc} | {code.mention_count} | {code.confidence:.2f} |")
@@ -555,7 +555,7 @@ class ProjectExporter:
                 code_name = code_names.get(app.code_id, app.code_id)
                 speaker = f" ({app.speaker})" if app.speaker else ""
                 _a(f"> {app.quote_text}")
-                _a(f">")
+                _a(">")
                 _a(f"> -- **{code_name}**{speaker}")
                 _a("")
                 shown += 1

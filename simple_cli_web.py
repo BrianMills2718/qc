@@ -164,7 +164,7 @@ def upload_files():
         format_choice = request.form.get('format', 'human')
         
         if not files or all(f.filename == '' for f in files):
-            return f'''
+            return '''
             <div class="error">No files selected</div>
             <a href="/">← Back to upload</a>
             '''
@@ -181,7 +181,7 @@ def upload_files():
                 file_paths.append(str(file_path))
         
         if not file_paths:
-            return f'''
+            return '''
             <div class="error">No valid files uploaded</div>
             <a href="/">← Back to upload</a>
             '''
