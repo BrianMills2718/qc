@@ -62,6 +62,7 @@ make validate-d7-gold GOLD=gold_set.json  # Validate versioned held-out D7 gold-
 make run-inv7-fixtures OUTPUT=inv7.json  # Write structural INV-7 fixture package for PROMPT_INJECTION=
 make run-inv7-live-fixtures OUTPUT=inv7_live.json MODEL=<model>  # Write opt-in live canary package for PROMPT_INJECTION=
 make validate-inv7-live-protocol PROTOCOL=inv7_live_protocol.json  # Validate pre-run live protocol metadata
+make inv7-live-preflight PROTOCOL=inv7_live_protocol.json PACKAGE=inv7_live.json  # Preflight live result against protocol before scoring
 make validate-inv7-package PACKAGE=inv7.json  # Validate schema_version=1 INV-7 package metadata
 make cost               # Show LLM spend (DAYS=7)
 make errors             # Show recent error breakdown

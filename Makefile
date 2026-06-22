@@ -1,4 +1,4 @@
-.PHONY: help test test-quick test-e2e test-all bench bench-package write-phase0-adjudication-package validate-d3-gold validate-d7-gold validate-inv7-package validate-inv7-live-protocol validate-adjudication-responses validate-adjudication-protocol adjudication-protocol-preflight adjudication-response-preflight import-adjudication-responses lint-scope-phrasing export-audit-manifest verify-export-audit-manifest export-publish-preflight verify-export-audit-log run-d7-retrieval compare-d7-retrieval run-inv7-fixtures run-inv7-live-fixtures adjudication-sample check lint docs-check clean status cost errors
+.PHONY: help test test-quick test-e2e test-all bench bench-package write-phase0-adjudication-package validate-d3-gold validate-d7-gold validate-inv7-package validate-inv7-live-protocol inv7-live-preflight validate-adjudication-responses validate-adjudication-protocol adjudication-protocol-preflight adjudication-response-preflight import-adjudication-responses lint-scope-phrasing export-audit-manifest verify-export-audit-manifest export-publish-preflight verify-export-audit-log run-d7-retrieval compare-d7-retrieval run-inv7-fixtures run-inv7-live-fixtures adjudication-sample check lint docs-check clean status cost errors
 
 DAYS ?= 7
 PROJECT ?= qualitative_coding
@@ -64,6 +64,15 @@ ifndef PROTOCOL
 	$(error PROTOCOL is required. Usage: make validate-inv7-live-protocol PROTOCOL=protocol.json)
 endif
 	python scripts/validate_inv7_live_protocol.py $(PROTOCOL)
+
+inv7-live-preflight:  ## Preflight INV-7 live result package against protocol (PROTOCOL=protocol.json PACKAGE=inv7.json)
+ifndef PROTOCOL
+	$(error PROTOCOL is required. Usage: make inv7-live-preflight PROTOCOL=protocol.json PACKAGE=inv7.json)
+endif
+ifndef PACKAGE
+	$(error PACKAGE is required. Usage: make inv7-live-preflight PROTOCOL=protocol.json PACKAGE=inv7.json)
+endif
+	python scripts/preflight_inv7_live_package.py $(PROTOCOL) $(PACKAGE)
 
 validate-adjudication-responses:  ## Validate completed adjudication sample responses (PACKAGE=sample.json)
 ifndef PACKAGE
