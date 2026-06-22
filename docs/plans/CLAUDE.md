@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 140 | INV-1 deterministic fuzzy grounding | High | In Progress | `INV1_DETERMINISTIC_FUZZY_GROUNDING.md` |
 
 ## Completed Plans
 
