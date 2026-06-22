@@ -1,10 +1,40 @@
 # Plan #117: D4 Codebook Quality Protocol Package
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Phase 0 D4 scorecard substrate
 **Blocks:** Populated D4 blind expert / LLM-judge evaluation workflow
+
+---
+
+## Outcome
+
+Implemented and verified the schema_version=1 D4 codebook-quality protocol
+validator, importable validation API, JSON CLI, and Make target. The package
+checks held-out gates, codebook/corpus/state hashes, blinding, evaluator plans,
+required rubric metrics, and per-metric success criteria while preserving the
+claim-discipline caveat that protocol metadata is not blind expert-panel
+evidence, codebook-quality evidence, methodological-validity evidence, or SOTA
+evidence.
+
+Verification evidence:
+
+- TDD red: `python -m pytest tests/test_d4_codebook_quality_protocol.py -q`
+  initially failed with missing `qc_clean.core.d4_codebook_quality_protocol`.
+- Focused tests: `python -m pytest tests/test_d4_codebook_quality_protocol.py -q`
+  passed (`6 passed`).
+- Focused Ruff:
+  `python -m ruff check qc_clean/core/d4_codebook_quality_protocol.py scripts/validate_d4_codebook_quality_protocol.py tests/test_d4_codebook_quality_protocol.py`
+  passed.
+- Make dry-run:
+  `make -n validate-d4-codebook-quality-protocol PROTOCOL=protocol.json`
+  emitted `python scripts/validate_d4_codebook_quality_protocol.py protocol.json`.
+- Docs gate: `make docs-check` passed.
+- Full gate: `make check` passed (`966 passed, 1 skipped, 8 deselected`;
+  Ruff and docs checks clean; type check not configured).
+- Implementation commit pushed: `e24b300`
+  `[Plan: D4_CODEBOOK_QUALITY_PROTOCOL_PACKAGE] Add D4 protocol validator`.
 
 ---
 
@@ -73,16 +103,16 @@ created.
 
 ### Capability Validation
 
-- [ ] Valid held-out D4 protocol packages are accepted.
-- [ ] Held-out protocols require prompt/model freeze, contamination check,
+- [x] Valid held-out D4 protocol packages are accepted.
+- [x] Held-out protocols require prompt/model freeze, contamination check,
   pre-evaluation registration, project-state hash, and codebook artifact hash.
-- [ ] Protocols require blind evaluation metadata.
-- [ ] Protocols require non-empty evaluator plan and at least one evaluator.
-- [ ] Protocols require the D4 rubric metrics: clarity, specificity,
+- [x] Protocols require blind evaluation metadata.
+- [x] Protocols require non-empty evaluator plan and at least one evaluator.
+- [x] Protocols require the D4 rubric metrics: clarity, specificity,
   usefulness, and grounding.
-- [ ] Success criteria are required for every configured rubric metric.
-- [ ] Malformed hashes and duplicate metric/evaluator entries fail loud.
-- [ ] CLI emits machine-readable JSON for valid and invalid packages.
+- [x] Success criteria are required for every configured rubric metric.
+- [x] Malformed hashes and duplicate metric/evaluator entries fail loud.
+- [x] CLI emits machine-readable JSON for valid and invalid packages.
 
 ---
 
@@ -156,6 +186,7 @@ Deferred by design:
 | `tests/test_d4_codebook_quality_protocol.py` | `test_validate_d4_codebook_quality_protocol_requires_held_out_gates` | Held-out freeze/contamination/registration/state/codebook gates fail loud. |
 | `tests/test_d4_codebook_quality_protocol.py` | `test_validate_d4_codebook_quality_protocol_requires_blinding_and_evaluators` | Blinding/evaluator plan fail loud when absent. |
 | `tests/test_d4_codebook_quality_protocol.py` | `test_validate_d4_codebook_quality_protocol_rejects_missing_metrics_and_bad_hashes` | Required metrics and hashes are enforced. |
+| `tests/test_d4_codebook_quality_protocol.py` | `test_validate_d4_codebook_quality_protocol_requires_success_criteria_for_each_metric` | Success criteria must cover every D4 metric. |
 | `tests/test_d4_codebook_quality_protocol.py` | `test_validate_d4_codebook_quality_protocol_script_outputs_json` | CLI emits machine-readable valid/invalid results. |
 
 ### Existing Tests (Must Pass)
@@ -173,30 +204,30 @@ Deferred by design:
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] A schema_version=1 D4 codebook-quality protocol JSON can be validated by
+- [x] A schema_version=1 D4 codebook-quality protocol JSON can be validated by
   importable code.
-- [ ] `make validate-d4-codebook-quality-protocol PROTOCOL=protocol.json` emits
+- [x] `make validate-d4-codebook-quality-protocol PROTOCOL=protocol.json` emits
   JSON and returns non-zero on invalid packages.
-- [ ] Held-out protocols require prompt freeze, contamination check,
+- [x] Held-out protocols require prompt freeze, contamination check,
   pre-evaluation registration, project-state hash, and codebook artifact hash.
-- [ ] Blinding and evaluator-plan metadata are required.
-- [ ] All four D4 rubric metrics are required.
-- [ ] Success criteria cover every configured metric.
-- [ ] Docs state protocol validation is process/provenance only.
+- [x] Blinding and evaluator-plan metadata are required.
+- [x] All four D4 rubric metrics are required.
+- [x] Success criteria cover every configured metric.
+- [x] Docs state protocol validation is process/provenance only.
 
 > Process criteria:
-- [ ] Required focused tests pass.
-- [ ] Focused Ruff check passes.
-- [ ] `make docs-check` passes.
-- [ ] Full `make check` passes or any failure is documented with evidence.
-- [ ] Type-check status is reported.
-- [ ] Verified work is committed and pushed.
+- [x] Required focused tests pass.
+- [x] Focused Ruff check passes.
+- [x] `make docs-check` passes.
+- [x] Full `make check` passes or any failure is documented with evidence.
+- [x] Type-check status is reported.
+- [x] Verified work is committed and pushed.
 
 ---
 
 ## Open Questions
 
-- [ ] Should D4 protocol/result preflight and score-time guard follow
+- [x] Should D4 protocol/result preflight and score-time guard follow
   immediately? — Status: DEFERRED | This plan validates protocol metadata first;
   concrete-result preflight/guard can follow the D6 pattern in a later slice.
 

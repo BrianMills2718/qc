@@ -22,11 +22,18 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #117 (`D4_CODEBOOK_QUALITY_PROTOCOL_PACKAGE.md`): add a
-   pre-registered D4 codebook-quality protocol validator before populated D4
-   rubric rows are treated as benchmark evidence.
-2. Continue through the ranked roadmap without pausing after each verified
+1. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
+
+**Completed checkpoint:** D4 codebook-quality protocols can now be validated
+with `make validate-d4-codebook-quality-protocol PROTOCOL=...` /
+`scripts/validate_d4_codebook_quality_protocol.py`. The validator checks
+schema_version=1 protocol metadata, held-out prompt/model freeze,
+contamination, pre-evaluation registration, corpus/project-state/codebook hashes,
+blinding, evaluator plan, required rubric metrics, target scopes, and
+per-metric success criteria. This is process/provenance metadata only, not blind
+expert-panel evidence, LLM-judge evidence, codebook-quality evidence,
+methodological-validity evidence, or SOTA evidence.
 
 **Completed checkpoint:** `make bench` now accepts `D6_PROTOCOL=...` and
 `scripts/bench_phase0.py --d6-bias-protocol-file ...` to enforce D6
