@@ -717,6 +717,106 @@ def test_scorecard_invalid_interpretive_preference_metadata_fails_loud():
         phase0_scorecard(state)
 
 
+def test_scorecard_reports_confidence_calibration_unavailable_without_eval_data():
+    state = ProjectState(
+        name="no-calibration-eval",
+        config=ProjectConfig(methodology=Methodology.THEMATIC_ANALYSIS),
+        corpus=Corpus(documents=[Document(name="d.txt", content="Participant text.")]),
+    )
+
+    calibration = phase0_scorecard(state)["confidence_calibration"]
+
+    assert calibration["status"] == "not_available"
+    assert "confidence_calibration_evaluations" in calibration["reason"]
+    assert "not evidence" in calibration["note"]
+
+
+def test_scorecard_scores_confidence_calibration_outcomes():
+    state = ProjectState(
+        name="calibration-eval",
+        config=ProjectConfig(
+            methodology=Methodology.THEMATIC_ANALYSIS,
+            extra={
+                "confidence_calibration_evaluations": [
+                    {
+                        "item_id": "theme-correct",
+                        "surface": "thematic_coding",
+                        "confidence": 0.9,
+                        "correct": True,
+                    },
+                    {
+                        "item_id": "theme-wrong",
+                        "surface": "thematic_coding",
+                        "confidence": 0.8,
+                        "correct": False,
+                    },
+                    {
+                        "item_id": "negative-correct-rejection",
+                        "surface": "negative_case",
+                        "confidence": 0.2,
+                        "correct": False,
+                    },
+                    {
+                        "item_id": "negative-correct",
+                        "surface": "negative_case",
+                        "confidence": 0.4,
+                        "correct": True,
+                    },
+                ],
+            },
+        ),
+    )
+
+    calibration = phase0_scorecard(state)["confidence_calibration"]
+
+    assert calibration["status"] == "scored"
+    assert calibration["total_records"] == 4
+    assert calibration["correct_records"] == 2
+    assert calibration["incorrect_records"] == 2
+    assert calibration["accuracy"] == pytest.approx(0.5)
+    assert calibration["mean_confidence"] == pytest.approx(0.575)
+    assert calibration["brier_score"] == pytest.approx(0.2625)
+    assert calibration["expected_calibration_error"] == pytest.approx(0.425)
+    assert calibration["bin_count"] == 10
+    bins = calibration["calibration_bins"]
+    assert len(bins) == 10
+    assert bins[2]["count"] == 1
+    assert bins[2]["accuracy"] == 0.0
+    assert bins[2]["mean_confidence"] == pytest.approx(0.2)
+    assert bins[2]["calibration_gap"] == pytest.approx(0.2)
+    assert bins[9]["upper_inclusive"] is True
+    assert bins[9]["count"] == 1
+    assert bins[9]["accuracy"] == 1.0
+    assert bins[9]["mean_confidence"] == pytest.approx(0.9)
+    thematic = calibration["by_surface"]["thematic_coding"]
+    assert thematic["total_records"] == 2
+    assert thematic["accuracy"] == pytest.approx(0.5)
+    assert thematic["mean_confidence"] == pytest.approx(0.85)
+    assert thematic["brier_score"] == pytest.approx(0.325)
+    assert thematic["expected_calibration_error"] == pytest.approx(0.45)
+    assert "not evidence that system confidence is calibrated" in calibration["note"]
+
+
+def test_scorecard_invalid_confidence_calibration_metadata_fails_loud():
+    state = ProjectState(
+        config=ProjectConfig(
+            extra={
+                "confidence_calibration_evaluations": [
+                    {
+                        "item_id": "theme-correct",
+                        "surface": "thematic_coding",
+                        "confidence": 1.2,
+                        "correct": True,
+                    }
+                ]
+            }
+        ),
+    )
+
+    with pytest.raises(ValueError, match="confidence_calibration_evaluations"):
+        phase0_scorecard(state)
+
+
 def test_scorecard_d3_f1_bootstrap_configurable_and_disableable():
     content = "AI helped here."
     doc = Document(id="d1", name="d.txt", content=content)

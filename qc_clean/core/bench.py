@@ -44,6 +44,7 @@ _BIAS_COUNTERFACTUAL_EXTRA_KEY = "bias_counterfactual_evaluations"
 _CODEBOOK_QUALITY_EXTRA_KEY = "codebook_quality_evaluations"
 _GT_FIDELITY_EXTRA_KEY = "gt_fidelity_evaluations"
 _INTERPRETIVE_PREFERENCE_EXTRA_KEY = "interpretive_preference_evaluations"
+_CONFIDENCE_CALIBRATION_EXTRA_KEY = "confidence_calibration_evaluations"
 _EXACT_BOOTSTRAP_EXTRA_KEY = "phase0_exact_bootstrap"
 _RELIABILITY_BOOTSTRAP_EXTRA_KEY = "phase0_reliability_bootstrap"
 DEFAULT_OBSERVABILITY_DB_PATH = Path.home() / "projects" / "data" / "llm_observability.db"
@@ -56,6 +57,7 @@ _GT_FIDELITY_METRICS = (
     "memo_quality",
     "saturation_justification",
 )
+_CALIBRATION_BIN_COUNT = 10
 _HUMAN_CEILING_AGREEMENT_METRIC_ALIASES = {
     "cohen_kappa": "cohens_kappa",
     "cohens_kappa": "cohens_kappa",
@@ -340,6 +342,45 @@ class InterpretivePreferenceEvaluation(BaseModel):
         return self
 
 
+class ConfidenceCalibrationEvaluation(BaseModel):
+    """External confidence/correctness record used for calibration scoring."""
+
+    item_id: str = Field(description="Stable ID for the scored prediction or decision")
+    surface: str = Field(
+        default="unspecified",
+        description="Prediction surface, such as thematic_coding or negative_case",
+    )
+    confidence: float = Field(description="Reported confidence value from 0 to 1")
+    correct: bool = Field(description="Whether the prediction was correct against gold/adjudication")
+    evaluator: str = Field(
+        default="unspecified",
+        description="Evaluator or gold source that produced the correctness label",
+    )
+    target_id: str | None = Field(
+        default=None,
+        description="Optional target object ID, such as code/application/claim ID",
+    )
+    notes: str = Field(default="", description="Optional human-readable notes")
+
+    @model_validator(mode="after")
+    def require_valid_calibration_record(self) -> "ConfidenceCalibrationEvaluation":
+        """Normalize stable keys and reject out-of-range confidence values."""
+        self.item_id = self.item_id.strip()
+        if not self.item_id:
+            raise ValueError("confidence calibration item_id must be non-empty")
+        self.surface = self.surface.strip() or "unspecified"
+        self.evaluator = self.evaluator.strip() or "unspecified"
+        if self.target_id is not None:
+            self.target_id = self.target_id.strip()
+            if not self.target_id:
+                raise ValueError(
+                    "confidence calibration target_id must be non-empty when supplied"
+                )
+        if not 0 <= self.confidence <= 1:
+            raise ValueError("confidence calibration confidence must be between 0 and 1")
+        return self
+
+
 class DisconfirmationBaselinePrediction(BaseModel):
     """Baseline contrary-evidence predictions used for D7 comparison."""
 
@@ -415,6 +456,8 @@ def phase0_scorecard(state: ProjectState) -> Dict[str, Any]:
         "prompt_injection_inv7": prompt_injection_scorecard(state),
         # D6 — externally supplied counterfactual identity-cue swap diagnostics.
         "bias_counterfactual_d6": bias_counterfactual_scorecard(state),
+        # Calibration — externally supplied confidence/correctness records.
+        "confidence_calibration": confidence_calibration_scorecard(state),
         "data_warnings": list(state.data_warnings),
     }
 
@@ -1195,6 +1238,141 @@ def _interpretive_preference_grouped_summary(
     return {
         group_key: _interpretive_preference_summary(group)
         for group_key, group in sorted(grouped.items())
+    }
+
+
+def confidence_calibration_scorecard(state: ProjectState) -> Dict[str, Any]:
+    """Score externally supplied confidence/correctness calibration records."""
+    evaluations = _confidence_calibration_evaluations(state)
+    if not evaluations:
+        return {
+            "status": "not_available",
+            "reason": (
+                "No confidence-calibration records found at "
+                f"ProjectState.config.extra['{_CONFIDENCE_CALIBRATION_EXTRA_KEY}']; "
+                "scoring requires externally supplied correctness labels."
+            ),
+            "note": (
+                "Absence of calibration records is not evidence that confidence "
+                "values are calibrated; confidence remains an ordinal self-report "
+                "until scored against held-out correctness labels."
+            ),
+        }
+
+    return {
+        "status": "scored",
+        "source": f"ProjectState.config.extra['{_CONFIDENCE_CALIBRATION_EXTRA_KEY}']",
+        **_confidence_calibration_summary(evaluations),
+        "by_surface": _confidence_calibration_by_surface(evaluations),
+        "note": (
+            "Scores externally supplied confidence/correctness records. This is "
+            "a measurement substrate, not evidence that system confidence is "
+            "calibrated outside the supplied labeled records."
+        ),
+    }
+
+
+def _confidence_calibration_evaluations(
+    state: ProjectState,
+) -> list[ConfidenceCalibrationEvaluation]:
+    """Load confidence-calibration records from project config metadata."""
+    raw = state.config.extra.get(_CONFIDENCE_CALIBRATION_EXTRA_KEY)
+    if raw is None:
+        return []
+    if isinstance(raw, dict) and _CONFIDENCE_CALIBRATION_EXTRA_KEY in raw:
+        raw = raw[_CONFIDENCE_CALIBRATION_EXTRA_KEY]
+    if not isinstance(raw, list):
+        raise ValueError(
+            f"ProjectState.config.extra['{_CONFIDENCE_CALIBRATION_EXTRA_KEY}'] "
+            "must be a list of confidence-calibration records"
+        )
+    try:
+        return [ConfidenceCalibrationEvaluation.model_validate(item) for item in raw]
+    except ValidationError as exc:
+        raise ValueError(f"Invalid confidence_calibration_evaluations metadata: {exc}") from exc
+
+
+def _confidence_calibration_summary(
+    evaluations: list[ConfidenceCalibrationEvaluation],
+) -> dict[str, Any]:
+    """Return deterministic calibration metrics for confidence/correctness records."""
+    total = len(evaluations)
+    correct_count = sum(1 for evaluation in evaluations if evaluation.correct)
+    brier_values = [
+        (evaluation.confidence - float(evaluation.correct)) ** 2
+        for evaluation in evaluations
+    ]
+    bins = _calibration_bins(evaluations)
+    expected_calibration_error = sum(bin_data["weighted_gap"] for bin_data in bins)
+    return {
+        "total_records": total,
+        "correct_records": correct_count,
+        "incorrect_records": total - correct_count,
+        "accuracy": _safe_div(correct_count, total),
+        "mean_confidence": _mean_or_none([
+            evaluation.confidence for evaluation in evaluations
+        ]),
+        "brier_score": _mean_or_none(brier_values),
+        "expected_calibration_error": expected_calibration_error,
+        "bin_count": _CALIBRATION_BIN_COUNT,
+        "calibration_bins": bins,
+    }
+
+
+def _calibration_bins(
+    evaluations: list[ConfidenceCalibrationEvaluation],
+) -> list[dict[str, Any]]:
+    """Return fixed-width calibration bins and weighted absolute calibration gaps."""
+    total = len(evaluations)
+    grouped: list[list[ConfidenceCalibrationEvaluation]] = [
+        [] for _ in range(_CALIBRATION_BIN_COUNT)
+    ]
+    for evaluation in evaluations:
+        bin_index = min(
+            int(evaluation.confidence * _CALIBRATION_BIN_COUNT),
+            _CALIBRATION_BIN_COUNT - 1,
+        )
+        grouped[bin_index].append(evaluation)
+
+    bins: list[dict[str, Any]] = []
+    for index, group in enumerate(grouped):
+        lower = index / _CALIBRATION_BIN_COUNT
+        upper = (index + 1) / _CALIBRATION_BIN_COUNT
+        accuracy = None
+        mean_confidence = None
+        gap = None
+        weighted_gap = 0.0
+        if group:
+            accuracy = _safe_div(sum(1 for evaluation in group if evaluation.correct), len(group))
+            mean_confidence = _mean_or_none([
+                evaluation.confidence for evaluation in group
+            ])
+            gap = abs(accuracy - mean_confidence)
+            weighted_gap = (len(group) / total) * gap
+        bins.append({
+            "index": index,
+            "lower": lower,
+            "upper": upper,
+            "upper_inclusive": index == _CALIBRATION_BIN_COUNT - 1,
+            "count": len(group),
+            "accuracy": accuracy,
+            "mean_confidence": mean_confidence,
+            "calibration_gap": gap,
+            "weighted_gap": weighted_gap,
+        })
+    return bins
+
+
+def _confidence_calibration_by_surface(
+    evaluations: list[ConfidenceCalibrationEvaluation],
+) -> dict[str, dict[str, Any]]:
+    """Summarize confidence calibration records by prediction surface."""
+    grouped: dict[str, list[ConfidenceCalibrationEvaluation]] = {}
+    for evaluation in evaluations:
+        grouped.setdefault(evaluation.surface, []).append(evaluation)
+    return {
+        surface: _confidence_calibration_summary(group)
+        for surface, group in sorted(grouped.items())
     }
 
 

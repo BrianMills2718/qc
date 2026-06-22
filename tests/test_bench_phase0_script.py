@@ -59,6 +59,7 @@ def test_bench_phase0_includes_input_hashes_without_external_files(
     assert hashes["codebook_quality_file_sha256"] is None
     assert hashes["gt_fidelity_file_sha256"] is None
     assert hashes["interpretive_preference_file_sha256"] is None
+    assert hashes["confidence_calibration_file_sha256"] is None
     assert hashes["observability_db_sha256"] is None
 
 
@@ -181,6 +182,20 @@ def test_bench_phase0_hashes_external_input_files(
         }),
         encoding="utf-8",
     )
+    calibration_file = tmp_path / "confidence_calibration.json"
+    calibration_file.write_text(
+        json.dumps({
+            "confidence_calibration_evaluations": [
+                {
+                    "item_id": "theme-correct",
+                    "surface": "thematic_coding",
+                    "confidence": 0.9,
+                    "correct": True,
+                }
+            ]
+        }),
+        encoding="utf-8",
+    )
     db_path = tmp_path / "observability.db"
     _create_llm_observability_db(db_path)
     monkeypatch.setattr(bench_phase0, "ProjectStore", lambda: store)
@@ -203,6 +218,8 @@ def test_bench_phase0_hashes_external_input_files(
         str(gt_fidelity_file),
         "--interpretive-preference-file",
         str(preference_file),
+        "--confidence-calibration-file",
+        str(calibration_file),
         "--observability-db",
         str(db_path),
     ])
@@ -218,6 +235,7 @@ def test_bench_phase0_hashes_external_input_files(
     assert hashes["codebook_quality_file_sha256"] == _sha256_file(quality_file)
     assert hashes["gt_fidelity_file_sha256"] == _sha256_file(gt_fidelity_file)
     assert hashes["interpretive_preference_file_sha256"] == _sha256_file(preference_file)
+    assert hashes["confidence_calibration_file_sha256"] == _sha256_file(calibration_file)
     assert hashes["observability_db_sha256"] == _sha256_file(db_path)
     reloaded = store.load(state.id)
     assert "application_gold" not in reloaded.config.extra
@@ -228,6 +246,7 @@ def test_bench_phase0_hashes_external_input_files(
     assert "codebook_quality_evaluations" not in reloaded.config.extra
     assert "gt_fidelity_evaluations" not in reloaded.config.extra
     assert "interpretive_preference_evaluations" not in reloaded.config.extra
+    assert "confidence_calibration_evaluations" not in reloaded.config.extra
 
 
 def test_bench_phase0_scores_d3_from_gold_file_without_mutating_state(
@@ -503,6 +522,20 @@ def test_bench_phase0_artifact_manifest_records_external_inputs(
         }),
         encoding="utf-8",
     )
+    calibration_file = tmp_path / "confidence_calibration.json"
+    calibration_file.write_text(
+        json.dumps({
+            "confidence_calibration_evaluations": [
+                {
+                    "item_id": "theme-correct",
+                    "surface": "thematic_coding",
+                    "confidence": 0.9,
+                    "correct": True,
+                }
+            ]
+        }),
+        encoding="utf-8",
+    )
     db_path = tmp_path / "observability.db"
     _create_llm_observability_db(db_path)
     artifact_root = tmp_path / "benchmark_results"
@@ -524,6 +557,8 @@ def test_bench_phase0_artifact_manifest_records_external_inputs(
         str(gt_fidelity_file),
         "--interpretive-preference-file",
         str(preference_file),
+        "--confidence-calibration-file",
+        str(calibration_file),
         "--observability-db",
         str(db_path),
         "--trace-id",
@@ -547,6 +582,9 @@ def test_bench_phase0_artifact_manifest_records_external_inputs(
     assert manifest["input_hashes"]["interpretive_preference_file_sha256"] == (
         _sha256_file(preference_file)
     )
+    assert manifest["input_hashes"]["confidence_calibration_file_sha256"] == (
+        _sha256_file(calibration_file)
+    )
     assert manifest["input_hashes"]["observability_db_sha256"] == _sha256_file(db_path)
     assert manifest["command"]["gold_file"] == str(gold_file)
     assert manifest["command"]["d7_baselines_file"] == str(baselines_file)
@@ -555,6 +593,7 @@ def test_bench_phase0_artifact_manifest_records_external_inputs(
     assert manifest["command"]["codebook_quality_file"] == str(quality_file)
     assert manifest["command"]["gt_fidelity_file"] == str(gt_fidelity_file)
     assert manifest["command"]["interpretive_preference_file"] == str(preference_file)
+    assert manifest["command"]["confidence_calibration_file"] == str(calibration_file)
     assert manifest["command"]["observability_db"] == str(db_path)
     assert manifest["command"]["trace_id"] == "trace-123"
 
@@ -1263,6 +1302,81 @@ def test_bench_phase0_invalid_interpretive_preference_file_fails_loud(
     output = json.loads(capsys.readouterr().out)
     assert "error" in output
     assert "Interpretive preference file" in output["error"]
+
+
+def test_bench_phase0_scores_confidence_calibration_from_file_without_mutating_state(
+    tmp_path,
+    monkeypatch,
+    capsys,
+):
+    state = ProjectState(
+        id="project_calibration",
+        name="Calibration project",
+        config=ProjectConfig(extra={}),
+    )
+    store = ProjectStore(projects_dir=tmp_path / "projects")
+    store.save(state)
+    calibration_file = tmp_path / "confidence_calibration.json"
+    calibration_file.write_text(
+        json.dumps({
+            "confidence_calibration_evaluations": [
+                {
+                    "item_id": "theme-correct",
+                    "surface": "thematic_coding",
+                    "confidence": 0.9,
+                    "correct": True,
+                },
+                {
+                    "item_id": "theme-wrong",
+                    "surface": "thematic_coding",
+                    "confidence": 0.8,
+                    "correct": False,
+                },
+            ],
+        }),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(bench_phase0, "ProjectStore", lambda: store)
+
+    exit_code = bench_phase0.main([
+        state.id,
+        "--confidence-calibration-file",
+        str(calibration_file),
+    ])
+
+    assert exit_code == 0
+    output = json.loads(capsys.readouterr().out)
+    calibration = output["confidence_calibration"]
+    assert calibration["status"] == "scored"
+    assert calibration["total_records"] == 2
+    assert calibration["accuracy"] == pytest.approx(0.5)
+    assert calibration["brier_score"] == pytest.approx(0.325)
+    reloaded = store.load(state.id)
+    assert "confidence_calibration_evaluations" not in reloaded.config.extra
+
+
+def test_bench_phase0_invalid_confidence_calibration_file_fails_loud(
+    tmp_path,
+    monkeypatch,
+    capsys,
+):
+    state = ProjectState(id="project_bad_calibration", name="Bad calibration")
+    store = ProjectStore(projects_dir=tmp_path / "projects")
+    store.save(state)
+    calibration_file = tmp_path / "confidence_calibration.json"
+    calibration_file.write_text(json.dumps({"unexpected": []}), encoding="utf-8")
+    monkeypatch.setattr(bench_phase0, "ProjectStore", lambda: store)
+
+    exit_code = bench_phase0.main([
+        state.id,
+        "--confidence-calibration-file",
+        str(calibration_file),
+    ])
+
+    assert exit_code == 1
+    output = json.loads(capsys.readouterr().out)
+    assert "error" in output
+    assert "Confidence calibration file" in output["error"]
 
 
 def test_bench_phase0_includes_d10_from_observability_db(

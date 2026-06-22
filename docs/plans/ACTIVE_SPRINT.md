@@ -53,14 +53,17 @@ outcomes through `BIAS_COUNTERFACTUAL=` / `--bias-counterfactual-file`. Phase 0
 now scores externally supplied D8 GT-fidelity rubric outcomes through
 `GT_FIDELITY=` / `--gt-fidelity-file`. Phase 0
 now scores externally supplied D9 forced-choice interpretive-preference outcomes
-through `PREFERENCE=` / `--interpretive-preference-file`. This remains a
+through `PREFERENCE=` / `--interpretive-preference-file`. Phase 0 now scores
+externally supplied confidence/correctness calibration records through
+`CALIBRATION=` / `--confidence-calibration-file`. This remains a
 gold-dependent exact-score/provenance/uncertainty, human-ceiling-comparison, and
-canary-fixture/counterfactual/GT-fidelity/preference-accounting substrate, not a populated held-out
+canary-fixture/counterfactual/GT-fidelity/preference/calibration-accounting substrate, not a populated held-out
 benchmark, full D3/D7 validity, populated D4 LLM-judge/blind-expert evaluation,
 populated D6 bias audit, populated D8 expert GT-fidelity benchmark,
 populated κ/α/AC1 human agreement benchmark,
 populated human-ceiling agreement,
 populated D9 blind expert preference benchmark,
+populated confidence-calibration benchmark,
 held-out live-baseline result,
 committed/scored live adversarial prompt-injection benchmark, or expert-parity/SOTA
 evidence.

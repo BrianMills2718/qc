@@ -159,6 +159,10 @@ Examples:
         help='Optional D9 blind forced-choice preference outcome JSON file; applied in memory only'
     )
     bench_parser.add_argument(
+        '--confidence-calibration-file',
+        help='Optional confidence/correctness calibration JSON file; applied in memory only'
+    )
+    bench_parser.add_argument(
         '--observability-db',
         help='Optional llm_client observability SQLite DB for D10 cost/latency'
     )
@@ -373,6 +377,8 @@ def handle_bench_command(args) -> int:
         argv.extend(["--gt-fidelity-file", args.gt_fidelity_file])
     if args.interpretive_preference_file:
         argv.extend(["--interpretive-preference-file", args.interpretive_preference_file])
+    if args.confidence_calibration_file:
+        argv.extend(["--confidence-calibration-file", args.confidence_calibration_file])
     if args.observability_db:
         argv.extend(["--observability-db", args.observability_db])
     if args.trace_id:

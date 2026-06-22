@@ -8,6 +8,7 @@ Usage:
         [--codebook-quality-file quality.json]
         [--gt-fidelity-file gt_fidelity.json]
         [--interpretive-preference-file preference.json]
+        [--confidence-calibration-file calibration.json]
         [--output scorecard.json]
 
 Agent-drivable: emits JSON to stdout (and optionally a file). See
@@ -75,6 +76,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument(
         "--interpretive-preference-file",
         help="Optional D9 blind forced-choice preference outcome JSON file; applied in memory only",
+    )
+    parser.add_argument(
+        "--confidence-calibration-file",
+        help="Optional confidence/correctness calibration JSON file; applied in memory only",
     )
     parser.add_argument(
         "--observability-db",
@@ -193,6 +198,20 @@ def main(argv: Sequence[str] | None = None) -> int:
             interpretive_preference_results
         )
 
+    if args.confidence_calibration_file:
+        try:
+            confidence_calibration_results = load_confidence_calibration_file(
+                Path(args.confidence_calibration_file)
+            )
+        except ValueError as exc:
+            print(json.dumps({"error": str(exc)}))
+            return 1
+        state = state.model_copy(deep=True)
+        state.config.extra = dict(state.config.extra)
+        state.config.extra["confidence_calibration_evaluations"] = (
+            confidence_calibration_results
+        )
+
     try:
         card = phase0_scorecard(state)
     except ValueError as exc:
@@ -214,6 +233,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         interpretive_preference_file=(
             Path(args.interpretive_preference_file)
             if args.interpretive_preference_file
+            else None
+        ),
+        confidence_calibration_file=(
+            Path(args.confidence_calibration_file)
+            if args.confidence_calibration_file
             else None
         ),
         observability_db=args.observability_db,
@@ -346,6 +370,11 @@ def phase0_command_provenance(args: argparse.Namespace) -> dict[str, Any]:
             if args.interpretive_preference_file
             else None
         ),
+        "confidence_calibration_file": (
+            str(Path(args.confidence_calibration_file))
+            if args.confidence_calibration_file
+            else None
+        ),
         "observability_db": str(args.observability_db) if args.observability_db else None,
         "trace_id": args.trace_id,
         "output": args.output,
@@ -390,6 +419,7 @@ def phase0_input_hashes(
     codebook_quality_file: Path | None,
     gt_fidelity_file: Path | None,
     interpretive_preference_file: Path | None,
+    confidence_calibration_file: Path | None,
     observability_db: Path | None,
 ) -> dict[str, Any]:
     """Return deterministic SHA-256 input hashes for Phase 0 bench output."""
@@ -420,6 +450,11 @@ def phase0_input_hashes(
         "interpretive_preference_file_sha256": (
             sha256_file(interpretive_preference_file)
             if interpretive_preference_file
+            else None
+        ),
+        "confidence_calibration_file_sha256": (
+            sha256_file(confidence_calibration_file)
+            if confidence_calibration_file
             else None
         ),
         "observability_db_sha256": sha256_file(observability_db),
@@ -602,6 +637,29 @@ def load_interpretive_preference_file(path: Path) -> Any:
     raise ValueError(
         "Interpretive preference file must be a JSON list of forced-choice outcomes "
         "or an object with an 'interpretive_preference_evaluations' list"
+    )
+
+
+def load_confidence_calibration_file(path: Path) -> Any:
+    """Load and shape-check an external confidence-calibration result file."""
+    try:
+        raw = json.loads(path.read_text(encoding="utf-8"))
+    except OSError as exc:
+        raise ValueError(
+            f"Confidence calibration file '{path}' could not be read: {exc}"
+        ) from exc
+    except json.JSONDecodeError as exc:
+        raise ValueError(
+            f"Confidence calibration file '{path}' is not valid JSON: {exc}"
+        ) from exc
+
+    if isinstance(raw, list):
+        return raw
+    if isinstance(raw, dict) and isinstance(raw.get("confidence_calibration_evaluations"), list):
+        return raw["confidence_calibration_evaluations"]
+    raise ValueError(
+        "Confidence calibration file must be a JSON list of confidence/correctness "
+        "records or an object with a 'confidence_calibration_evaluations' list"
     )
 
 
