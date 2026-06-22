@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 54 | D3 system-gold agreement scorecard | High | Planned | `D3_SYSTEM_GOLD_AGREEMENT_SCORECARD.md` |
 
 ## Completed Plans
 
