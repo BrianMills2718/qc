@@ -22,10 +22,18 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #132 (`D7_RETRIEVAL_EXPORT_SCRIPT_TESTS.md`): add direct tests
-   for the D7 retrieval export script boundary.
+1. Select and execute the next highest-value unblocked evaluation-harness lane
+   from `docs/PROJECT_THEORY_AND_GOALS.md` and `docs/EVALUATION_HARNESS.md`.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
+
+**Completed checkpoint:** `scripts/run_d7_retrieval.py` now has direct
+script-boundary tests for successful stdout/`--output` parity, missing-project
+JSON errors, and typed option forwarding into the core D7 retrieval exporter.
+The script behavior already satisfied those tests, so no runtime change was
+required. This is test coverage for D7 orchestration only, not held-out D7
+evidence, live-baseline evidence, methodological-validity evidence, or SOTA
+evidence.
 
 **Completed checkpoint:** D7 retrieval export and guarded retrieval comparison
 can now be run through canonical local CLI commands:

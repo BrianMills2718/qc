@@ -1,10 +1,37 @@
 # Plan #132: D7 Retrieval Export Script Tests
 
-**Status:** In Progress
+**Status:** Complete
 **Type:** testing
 **Priority:** High
 **Blocked By:** Existing D7 retrieval export script
 **Blocks:** Confidence in canonical CLI wrappers and Make D7 retrieval export workflows
+
+---
+
+## Outcome
+
+Completed in implementation commit `2b90c11`. Added direct tests for
+`scripts/run_d7_retrieval.py` covering successful stdout/`--output` parity,
+missing-project JSON error behavior, and typed option forwarding into
+`export_d7_retrieval_baseline`. The tests passed against existing runtime
+behavior, so no script changes were required. This is test coverage only; it
+does not run held-out D7 comparisons, add live baselines, or change evidentiary
+claim status.
+
+Verification:
+
+- New script-boundary tests: `python -m pytest tests/test_run_d7_retrieval_script.py -q`
+  passed (`3 passed`).
+- Focused combined tests:
+  `python -m pytest tests/test_run_d7_retrieval_script.py tests/test_d7_retrieval.py tests/test_qc_cli_d7_retrieval.py -q`
+  passed (`13 passed`).
+- Focused lint: `python -m ruff check tests/test_run_d7_retrieval_script.py`
+  passed.
+- Docs: `make docs-check` passed.
+- Full gate: `make check` passed (`1021 passed, 1 skipped, 8 deselected`);
+  Ruff and docs checks passed inside the gate.
+- Type check: not configured.
+- Verified test increment was committed and pushed.
 
 ---
 
@@ -59,9 +86,9 @@ created.
 
 ### Capability Validation
 
-- [ ] Script stdout/output behavior is covered.
-- [ ] Missing-project JSON error behavior is covered.
-- [ ] Script option forwarding to the core exporter is covered.
+- [x] Script stdout/output behavior is covered.
+- [x] Missing-project JSON error behavior is covered.
+- [x] Script option forwarding to the core exporter is covered.
 
 ---
 
@@ -110,17 +137,17 @@ created.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] Direct script tests cover success, JSON error, and option forwarding.
-- [ ] No runtime behavior changes are required unless tests expose a bug.
-- [ ] D7 claim caveats remain unchanged.
+- [x] Direct script tests cover success, JSON error, and option forwarding.
+- [x] No runtime behavior changes are required unless tests expose a bug.
+- [x] D7 claim caveats remain unchanged.
 
 > Process criteria:
-- [ ] Required focused tests pass.
-- [ ] Focused Ruff check passes.
-- [ ] `make docs-check` passes.
-- [ ] Full `make check` passes or any failure is documented with evidence.
-- [ ] Type-check status is reported.
-- [ ] Verified work is committed and pushed.
+- [x] Required focused tests pass.
+- [x] Focused Ruff check passes.
+- [x] `make docs-check` passes.
+- [x] Full `make check` passes or any failure is documented with evidence.
+- [x] Type-check status is reported.
+- [x] Verified work is committed and pushed.
 
 ---
 
