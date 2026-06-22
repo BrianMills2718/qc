@@ -1,10 +1,47 @@
 # Plan #194: QC CLI Export Audit Surfaces
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Existing export-audit scripts and Make targets
 **Blocks:** Top-level CLI parity for export manifest and local audit workflows
+
+---
+
+## Outcome
+
+Implementation commit: `b22540f2`
+
+`qc_cli.py` now exposes six top-level export-audit wrappers:
+
+- `export-audit-manifest <project_id> --format <format> --artifact <path>... --output <manifest>`
+- `verify-export-audit-manifest <manifest>`
+- `export-publish-preflight --manifest <manifest>`
+- `verify-export-audit-log <log>`
+- `mirror-export-audit-db <log> --db <sqlite>`
+- `verify-export-audit-db <sqlite>`
+
+Each wrapper delegates directly to the matching canonical script `main()` and
+forwards positional paths, repeated artifacts, and optional audit/project flags
+without reimplementing manifest, event-log, or SQLite verification logic.
+Documentation identifies these as local integrity/provenance surfaces only,
+not signing, append-only storage, external tamper evidence, methodological
+validity, or SOTA support.
+
+Verification:
+
+- TDD red state observed: the new wrapper test failed six cases with
+  invalid-command parser errors before implementation.
+- Focused tests:
+  `python -m pytest tests/test_qc_cli_export_audit_surfaces.py tests/test_export_audit_manifest.py tests/test_export_audit_event_log.py tests/test_export_audit_event_db.py -q`
+  -> `23 passed`.
+- Focused Ruff:
+  `python -m ruff check qc_cli.py tests/test_qc_cli_export_audit_surfaces.py`
+  -> passed.
+- `make docs-check` -> passed.
+- `git diff --check` -> passed.
+- `make check` -> `1243 passed, 1 skipped, 8 deselected`; Ruff and docs gates
+  passed; type check is still not configured.
 
 ---
 
@@ -96,11 +133,11 @@ Internal CLI delegation only; no cross-project boundary is created.
 
 ### Capability Validation
 
-- [ ] Each command parses through `qc_cli.py`.
-- [ ] Each handler delegates to the matching script `main()`.
-- [ ] Repeated `--artifact` paths are forwarded in order.
-- [ ] Optional path flags are forwarded only when supplied.
-- [ ] Docs state these are local provenance/integrity surfaces only, not a full
+- [x] Each command parses through `qc_cli.py`.
+- [x] Each handler delegates to the matching script `main()`.
+- [x] Repeated `--artifact` paths are forwarded in order.
+- [x] Optional path flags are forwarded only when supplied.
+- [x] Docs state these are local provenance/integrity surfaces only, not a full
   tamper-evident audit log.
 
 ---
@@ -121,14 +158,14 @@ Internal CLI delegation only; no cross-project boundary is created.
 
 ### Steps
 
-1. Add failing wrapper tests that monkeypatch each canonical script `main()` and
+1. [x] Add failing wrapper tests that monkeypatch each canonical script `main()` and
    assert exact argv forwarding.
-2. Add parser, dispatch, and handler entries in `qc_cli.py`.
-3. Update docs/CLAUDE with the top-level CLI surfaces and local-only caveats.
-4. Regenerate `AGENTS.md`.
-5. Run focused tests, focused Ruff, docs checks, whitespace checks, and full
+2. [x] Add parser, dispatch, and handler entries in `qc_cli.py`.
+3. [x] Update docs/CLAUDE with the top-level CLI surfaces and local-only caveats.
+4. [x] Regenerate `AGENTS.md`.
+5. [x] Run focused tests, focused Ruff, docs checks, whitespace checks, and full
    `make check`.
-6. Commit/push implementation, then close this plan.
+6. [x] Commit/push implementation, then close this plan.
 
 ---
 
@@ -155,24 +192,24 @@ Internal CLI delegation only; no cross-project boundary is created.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] All six `qc_cli.py` commands parse successfully.
-- [ ] Each handler calls the matching canonical script `main()`.
-- [ ] Supplied arguments are forwarded exactly in canonical script form.
-- [ ] Repeated artifact paths preserve order.
-- [ ] Existing Make/script behavior is unchanged.
-- [ ] Docs/CLAUDE mention the top-level CLI aliases without implying full
+- [x] All six `qc_cli.py` commands parse successfully.
+- [x] Each handler calls the matching canonical script `main()`.
+- [x] Supplied arguments are forwarded exactly in canonical script form.
+- [x] Repeated artifact paths preserve order.
+- [x] Existing Make/script behavior is unchanged.
+- [x] Docs/CLAUDE mention the top-level CLI aliases without implying full
   tamper-evident storage, signing, append-only guarantees, methodological
   validity, or SOTA.
 
 > Process criteria:
-- [ ] TDD red state observed before implementation.
-- [ ] Focused tests pass.
-- [ ] Focused Ruff check passes.
-- [ ] `make docs-check` passes.
-- [ ] `git diff --check` passes.
-- [ ] `make check` passes.
-- [ ] Plan is moved to completed with verification evidence.
-- [ ] Verified implementation is committed and pushed.
+- [x] TDD red state observed before implementation.
+- [x] Focused tests pass.
+- [x] Focused Ruff check passes.
+- [x] `make docs-check` passes.
+- [x] `git diff --check` passes.
+- [x] `make check` passes.
+- [x] Plan is moved to completed with verification evidence.
+- [x] Verified implementation is committed and pushed.
 
 ---
 

@@ -6,12 +6,12 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 194 | QC CLI export audit surfaces | High | Planned | `QC_CLI_EXPORT_AUDIT_SURFACES.md` |
 
 ## Completed Plans
 
 | Name | Outcome | Record |
 |------|---------|--------|
+| QC CLI export audit surfaces | `qc_cli.py` now wraps export-audit manifest writing, manifest verification, publish preflight, event-log verification, SQLite mirroring, and SQLite mirror verification scripts through top-level commands without duplicating local audit logic or claiming signing/append-only/external tamper evidence | `completed/QC_CLI_EXPORT_AUDIT_SURFACES.md` |
 | QC CLI D3/D7 comparison protocol surfaces | `qc_cli.py` now wraps D3/D7 comparison protocol validation and comparison-preflight scripts through top-level commands that preserve protocol, gold, and ordered prediction paths without duplicating protocol/preflight logic or claiming held-out D3/D7 evidence | `completed/QC_CLI_D3_D7_COMPARISON_PROTOCOL_SURFACES.md` |
 | INV-11 recode refresh policy config | `ProjectConfig.auto_refresh_higher_order_on_recode` now gives projects a durable recode refresh default, with CLI create/policy surfaces plus one-run force-on/force-off overrides while preserving hard-invalidation defaults for existing projects | `completed/INV11_RECODE_REFRESH_POLICY_CONFIG.md` |
 | QC CLI evaluation protocol surfaces | `qc_cli.py` now wraps D4/D6/D8/D9/confidence protocol validation and result-preflight scripts through top-level commands that delegate exact argv to canonical scripts without duplicating protocol/preflight logic or claiming populated labels/evidence | `completed/QC_CLI_EVALUATION_PROTOCOL_SURFACES.md` |
