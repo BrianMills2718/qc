@@ -22,11 +22,10 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #78, claim-review API listing, without claiming completed
-   browser-native or expert adjudication.
-2. Choose the next highest-value unmet evaluation-harness or scope-discipline
-   lane that can be advanced without pretending held-out expert data exists.
-3. Continue through the ranked roadmap without pausing after each verified
+1. Choose the next highest-value unmet evaluation-harness, review, or
+   scope-discipline lane that can be advanced without pretending held-out expert
+   data exists.
+2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
 **Completed checkpoint:** Corpus-scope warning propagation now covers Markdown,
@@ -35,7 +34,10 @@ exports without recorded scope, and CLI/MCP project creation can now persist
 corpus scope when supplied while leaving no-scope creation compatible.
 Claim-bearing exports now also warn on empty scope records and
 population-without-sampling-frame metadata; this remains report discipline, not
-sampling adequacy evidence. Phase 0 scorecards and artifact manifests now include
+sampling adequacy evidence. Claim-review now has a bounded API listing at
+`/projects/{id}/review/claims` plus review-decision regression coverage, but no
+browser-native claim-review workflow or expert adjudication protocol is claimed.
+Phase 0 scorecards and artifact manifests now include
 run-configuration hashes for persisted methodology/model/config metadata while
 marking prompt hashes as not-run. D10 cost/latency now preserves LLM-only fields
 and adds optional observed tool-call accounting plus combined local totals when

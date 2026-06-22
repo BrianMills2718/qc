@@ -1,6 +1,6 @@
 # Plan #78: Claim Review API Listing
 
-**Status:** Implemented
+**Status:** Completed
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Plan #4 first-class claim ledger; Plan #5 claim review decisions
@@ -128,6 +128,14 @@ capability or claim expert adjudication.
 - `python -m pytest tests/test_review_api.py::TestReviewClaimsEndpoint tests/test_review_api.py::TestReviewDecisionsEndpoint::test_claim_decision_persists tests/test_project_commands.py::TestAPIEndpoints::test_get_project_endpoint_registered -q` — 4 passed.
 - `python -m pytest tests/test_review_api.py tests/test_review.py -q` — 41 passed.
 - `make check` — 794 passed, 1 skipped, 8 deselected; lint/docs passed; type check not yet configured.
+
+## Outcome
+
+`GET /projects/{project_id}/review/claims` now returns bounded claim review
+targets with status, scope, anchor counts, revision counts, project metadata,
+and review summary. The existing review-decision endpoint now has regression
+coverage for claim decisions. This is an API substrate for INV-10, not a
+completed browser-native claim-review workflow or expert adjudication protocol.
 
 ---
 
