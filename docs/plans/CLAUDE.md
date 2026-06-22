@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 95 | Export audit manifest verification | High | Planned | `EXPORT_AUDIT_MANIFEST_VERIFICATION.md` |
 
 ## Completed Plans
 

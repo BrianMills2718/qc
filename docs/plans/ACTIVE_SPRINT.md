@@ -22,9 +22,9 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Create and execute the next high-value lane: export-audit manifest
-   verification, so generated hash manifests can be checked against artifact
-   bytes without claiming a signed or append-only audit log.
+1. Execute Plan #95 (`EXPORT_AUDIT_MANIFEST_VERIFICATION.md`): verify generated
+   export-audit manifests against artifact bytes and optional project-state
+   hashes without claiming a signed or append-only audit log.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
