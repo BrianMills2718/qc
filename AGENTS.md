@@ -100,6 +100,7 @@ python qc_cli.py project run <project_id>
 python qc_cli.py project run <project_id> --exhaustive   # code every segment (INV-8)
 python qc_cli.py project scope <project_id> --phenomenon "..."  # show/update corpus scope
 python qc_cli.py project claims <project_id>              # inspect first-class claim ledger (INV-9)
+python qc_cli.py project add-docs <project_id> --files new.txt --recode  # add then incremental recode
 ```
 
 ## Operating Rules

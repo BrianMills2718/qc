@@ -8,6 +8,7 @@ import sys
 from datetime import datetime
 from pathlib import Path
 from time import perf_counter
+from types import SimpleNamespace
 
 from qc_clean.core.claims import summarize_claim_ledger, summarize_disconfirmation_coverage
 from qc_clean.core.persistence.project_store import ProjectStore
@@ -152,6 +153,17 @@ def _add_docs(store: ProjectStore, args) -> int:
 
     store.save(state)
     print(f"\nAdded {added} documents to project {state.name}")
+    if added == 0:
+        return 1
+
+    if getattr(args, "recode", False):
+        print("\nRunning incremental recode for newly added documents...")
+        recode_args = SimpleNamespace(
+            project_id=project_id,
+            model=getattr(args, "model", None),
+        )
+        return _recode_project(store, recode_args)
+
     return 0
 
 

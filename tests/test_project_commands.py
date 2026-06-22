@@ -150,6 +150,124 @@ class MockReviewStage(PipelineStage):
 
 
 # ---------------------------------------------------------------------------
+# Tests: _add_docs logic
+# ---------------------------------------------------------------------------
+
+class TestProjectAddDocs:
+    def test_add_docs_without_recode_preserves_existing_behavior(
+        self,
+        tmp_path,
+        tmp_store,
+        monkeypatch,
+    ):
+        """Plain add-docs adds and saves documents without invoking recode."""
+        state = ProjectState(id="add-no-recode", name="Add No Recode")
+        tmp_store.save(state)
+        doc_path = tmp_path / "interview.txt"
+        doc_path.write_text("Participant: New text.", encoding="utf-8")
+
+        def fail_if_called(store, args):
+            raise AssertionError("recode should not be invoked")
+
+        monkeypatch.setattr(project_commands, "_recode_project", fail_if_called)
+
+        result = project_commands._add_docs(
+            tmp_store,
+            SimpleNamespace(
+                project_id=state.id,
+                files=[str(doc_path)],
+                directory=None,
+                recode=False,
+                model=None,
+            ),
+        )
+
+        saved = tmp_store.load(state.id)
+        assert result == 0
+        assert saved.corpus.num_documents == 1
+        assert saved.corpus.documents[0].name == "interview.txt"
+
+    def test_add_docs_with_recode_invokes_incremental_recode(
+        self,
+        tmp_path,
+        tmp_store,
+        monkeypatch,
+    ):
+        """add-docs --recode saves the mutation, forwards model, then delegates."""
+        state = ProjectState(
+            id="add-recode",
+            name="Add Recode",
+            codebook=Codebook(codes=[Code(id="C1", name="Existing")]),
+        )
+        tmp_store.save(state)
+        doc_path = tmp_path / "new_interview.txt"
+        doc_path.write_text("Participant: More material.", encoding="utf-8")
+        seen = {}
+
+        def fake_recode(store, args):
+            saved = store.load(args.project_id)
+            seen["project_id"] = args.project_id
+            seen["model"] = args.model
+            seen["documents"] = saved.corpus.num_documents
+            return 0
+
+        monkeypatch.setattr(project_commands, "_recode_project", fake_recode)
+
+        result = project_commands._add_docs(
+            tmp_store,
+            SimpleNamespace(
+                project_id=state.id,
+                files=[str(doc_path)],
+                directory=None,
+                recode=True,
+                model="gpt-test",
+            ),
+        )
+
+        assert result == 0
+        assert seen == {
+            "project_id": state.id,
+            "model": "gpt-test",
+            "documents": 1,
+        }
+
+    def test_add_docs_with_recode_does_not_recode_when_no_documents_added(
+        self,
+        tmp_path,
+        tmp_store,
+        monkeypatch,
+    ):
+        """Failed additions fail loudly and do not trigger an incremental run."""
+        state = ProjectState(id="add-recode-none", name="Add Recode None")
+        tmp_store.save(state)
+        missing_path = tmp_path / "missing.txt"
+        called = False
+
+        def fake_recode(store, args):
+            nonlocal called
+            called = True
+            return 0
+
+        monkeypatch.setattr(project_commands, "_recode_project", fake_recode)
+
+        result = project_commands._add_docs(
+            tmp_store,
+            SimpleNamespace(
+                project_id=state.id,
+                files=[str(missing_path)],
+                directory=None,
+                recode=True,
+                model="gpt-test",
+            ),
+        )
+
+        saved = tmp_store.load(state.id)
+        assert result == 1
+        assert called is False
+        assert saved.corpus.num_documents == 0
+
+
+# ---------------------------------------------------------------------------
 # Tests: _run_project logic
 # ---------------------------------------------------------------------------
 
@@ -691,6 +809,28 @@ class TestCLIParsing:
         args = parser.parse_args(["project", "run", "pid", "--model", "gpt-5", "--review"])
         assert args.model == "gpt-5"
         assert args.review is True
+
+    def test_add_docs_subparser_accepts_recode_options(self):
+        from qc_cli import create_parser
+        parser = create_parser()
+
+        args = parser.parse_args([
+            "project",
+            "add-docs",
+            "pid",
+            "--files",
+            "interview.txt",
+            "--recode",
+            "--model",
+            "gpt-test",
+        ])
+
+        assert args.command == "project"
+        assert args.project_action == "add-docs"
+        assert args.project_id == "pid"
+        assert args.files == ["interview.txt"]
+        assert args.recode is True
+        assert args.model == "gpt-test"
 
     def test_export_subparser(self):
         from qc_cli import create_parser

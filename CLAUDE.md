@@ -29,7 +29,7 @@ All stages use structured LLM output via Pydantic schemas + JSON mode. State is 
 The software is **built and software-validated** (deterministic tests + live-LLM E2E; ruff + docs gates green) — "the program does what it's built to do," *not* evidence the analysis is methodologically valid. Implemented:
 
 - Thematic and **GT-inspired** (not "full GT") pipelines; `NegativeCaseStage` runs **last** in both (INV-6), automatic cross-interview analysis for multi-doc corpora.
-- GT constant comparison; category-saturation diagnostics, diagnostic-driven sampling suggestions, theoretical-sampling protocol validation/preflight, and candidate/result package export separate from codebook stability (INV-4 partial); incremental re-coding via `project recode` (hard-invalidates stale higher-order outputs it cannot recompute, INV-11 partial).
+- GT constant comparison; category-saturation diagnostics, diagnostic-driven sampling suggestions, theoretical-sampling protocol validation/preflight, and candidate/result package export separate from codebook stability (INV-4 partial); incremental re-coding via `project recode` or explicit `project add-docs --recode` (hard-invalidates stale higher-order outputs it cannot recompute, INV-11 partial).
 - **Span-anchored grounding** (INV-1, mostly met): quotes resolve to char offsets + hash via normalized exact matching plus conservative deterministic fuzzy recovery for long near-verbatim spans, speaker is derived from containing segments or explicit same-line `Speaker:` source prefixes where available, otherwise quotes are dropped + warned; `verify_grounding`/`make bench` measure the rate.
 - **Segment universe + coverage** (INV-8): every doc split into char-anchored segments; `project run --exhaustive` codes *every* segment (examined-and-judged coverage, segment-anchored applications), else traversal coverage.
 - **First-class claim ledger** (INV-9 object layer): substantive stage outputs become `AnalyticClaim` objects or no-claims events, with source stage, kind, scope, support/adjudication status, anchors where available, and CLI/API/MCP/export read surfaces.
@@ -139,7 +139,7 @@ start_server.py                              # Server startup script
 - `analysis_schemas.py` defines LLM output shapes; `adapters.py` converts them to domain objects
 - Every stage produces an analytical memo (LLM reasoning trail) saved to `state.memos`
 - GT constant comparison: segments documents by speaker turns or paragraph chunks, iteratively codes each segment against an evolving codebook, stops when saturation reached
-- Incremental coding: `project recode` codes only uncoded documents against the existing codebook, then re-runs downstream stages
+- Incremental coding: `project recode` codes only uncoded documents against the existing codebook, then re-runs downstream state-driven stages; `project add-docs --recode` adds documents and invokes that same recode path in one explicit opt-in command
 - Graph visualization: `/graph/{project_id}` serves interactive Cytoscape.js graphs (code hierarchy, relationships, entity map)
 - Fail-loud: downstream stages raise `RuntimeError` via `ctx.require()` if upstream data is missing (no silent empty-data fallbacks). Review raises `ValueError` on unknown target types.
 - Observability: LLMHandler logs model/schema/prompt_len on call, cost/usage on response. All stages log entry context (doc/code counts, model). Pipeline engine logs state context on failure.
@@ -160,6 +160,7 @@ python qc_cli.py project list
 python qc_cli.py project show <project_id>
 python qc_cli.py project claims <project_id> --limit 20
 python qc_cli.py project add-docs <project_id> --files interview1.docx interview2.docx
+python qc_cli.py project add-docs <project_id> --files interview3.docx --recode --model gpt-5-mini
 python qc_cli.py project adjudication-sample <project_id> --output-file sample.json
 make validate-adjudication-protocol PROTOCOL=protocol.json
 make adjudication-protocol-preflight PROTOCOL=protocol.json SAMPLE=sample.json
@@ -212,6 +213,7 @@ python qc_cli.py project stability <project_id> --model gpt-5-mini            # 
 # Incremental coding (add new docs then re-code without starting over)
 python qc_cli.py project recode <project_id>                                  # recode with defaults
 python qc_cli.py project recode <project_id> --model gpt-5                    # specify model
+python qc_cli.py project add-docs <project_id> --files new.docx --recode       # add then recode explicitly
 
 # Review codes (CLI)
 python qc_cli.py review <project_id>
@@ -498,6 +500,7 @@ python qc_cli.py project run <project_id>
 python qc_cli.py project run <project_id> --exhaustive   # code every segment (INV-8)
 python qc_cli.py project scope <project_id> --phenomenon "..."  # show/update corpus scope
 python qc_cli.py project claims <project_id>              # inspect first-class claim ledger (INV-9)
+python qc_cli.py project add-docs <project_id> --files new.txt --recode  # add then incremental recode
 ```
 
 ## Principles

@@ -424,6 +424,16 @@ Examples:
     proj_add.add_argument('project_id', help='Project ID')
     proj_add.add_argument('--files', nargs='+', help='Files to add')
     proj_add.add_argument('--directory', help='Directory of files to add')
+    proj_add.add_argument(
+        '--recode',
+        action='store_true',
+        help='After adding documents, incrementally code the new documents',
+    )
+    proj_add.add_argument(
+        '--model',
+        default=None,
+        help='LLM model to use when --recode is supplied (default: project config)',
+    )
 
     proj_run = project_subparsers.add_parser('run', help='Run analysis pipeline on project')
     proj_run.add_argument('project_id', help='Project ID')
