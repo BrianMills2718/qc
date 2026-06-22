@@ -1,10 +1,41 @@
 # Plan #90: Negative Case Review Surfaces
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Claim review API listing; Relationship review browser UI
 **Blocks:** INV-10 negative-case-specific adjudication UX
+
+---
+
+## Outcome
+
+Implemented negative-case-specific review listings without creating a parallel
+negative-case object model. API, MCP, and browser surfaces now filter existing
+`AnalyticClaim` rows to `ClaimKind.NEGATIVE_CASE`, render them with the shared
+claim-review row contract, and keep decisions on `target_type="claim"`.
+
+This narrows INV-10 review coverage but does not add expert adjudication,
+held-out D7 validity evidence, exhaustive disconfirmation, or candidate-level
+adjudication.
+
+## Verification
+
+- Initial focused TDD run failed as expected: missing browser Negative Cases
+  mode, missing `/projects/{project_id}/review/negative-cases`, and missing
+  `qc_review_negative_cases`.
+- Focused verification passed:
+  `python -m pytest tests/test_review_api.py tests/test_mcp_server.py -q`
+  (`96 passed`).
+- Focused Ruff passed:
+  `python -m ruff check qc_clean/plugins/api/api_server.py qc_mcp_server.py qc_clean/plugins/api/review_ui.py tests/test_review_api.py tests/test_mcp_server.py`.
+- Docs gate passed: `make docs-check`.
+- Full gate passed: `make check` (`835 passed, 1 skipped, 8 deselected`;
+  Ruff and docs checks passed).
+- Type check remains not configured; `make check` still reports
+  `Type check not yet configured`.
+- Implementation commit pushed:
+  `7f50945 [Plan: NEGATIVE_CASE_REVIEW_SURFACES] Add negative-case review surfaces`.
 
 ---
 
@@ -129,19 +160,19 @@ cross-project callable boundary.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] API exposes bounded negative-case review rows.
-- [ ] MCP exposes bounded negative-case review rows.
-- [ ] Browser review page has a Negative Cases mode.
-- [ ] Negative-case decisions still submit `target_type="claim"`.
-- [ ] Non-negative-case claims are excluded from negative-case-specific listing.
-- [ ] Docs state this narrows INV-10 but does not add expert adjudication or
+- [x] API exposes bounded negative-case review rows.
+- [x] MCP exposes bounded negative-case review rows.
+- [x] Browser review page has a Negative Cases mode.
+- [x] Negative-case decisions still submit `target_type="claim"`.
+- [x] Non-negative-case claims are excluded from negative-case-specific listing.
+- [x] Docs state this narrows INV-10 but does not add expert adjudication or
   held-out D7 validity evidence.
 
 > Process criteria:
-- [ ] Required focused tests pass.
-- [ ] Full `make check` passes or any failure is documented with evidence.
-- [ ] Type-check status is reported.
-- [ ] Verified work is committed and pushed.
+- [x] Required focused tests pass.
+- [x] Full `make check` passes or any failure is documented with evidence.
+- [x] Type-check status is reported.
+- [x] Verified work is committed and pushed.
 
 ---
 

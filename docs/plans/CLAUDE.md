@@ -6,7 +6,6 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 90 | Negative case review surfaces | High | Planned | `NEGATIVE_CASE_REVIEW_SURFACES.md` |
 
 ## Completed Plans
 
@@ -46,6 +45,7 @@ Track all implementation work here.
 | MCP claim review listing | INV-10 follow-up: `qc_review_claims` exposes bounded claim review targets for agent-driven review workflows | `completed/MCP_CLAIM_REVIEW_LISTING.md` |
 | MCP relationship review | INV-10 follow-up: `qc_review_relationships` exposes bounded code/entity relationship review targets for agent-driven review workflows | `completed/MCP_RELATIONSHIP_REVIEW.md` |
 | Relationship review browser UI | INV-10 follow-up: browser review page now has a Relationships mode for code/entity relationship decisions | `completed/RELATIONSHIP_REVIEW_BROWSER_UI.md` |
+| Negative case review surfaces | INV-10 follow-up: API/MCP/browser surfaces expose bounded negative-case claim rows while decisions keep `target_type="claim"` | `completed/NEGATIVE_CASE_REVIEW_SURFACES.md` |
 | INV-7 prompt injection scorecard | Evaluation-harness follow-up: `make bench` can score externally supplied prompt-injection fixture outcomes without mutating project state | `completed/INV7_PROMPT_INJECTION_SCORECARD.md` |
 | INV-11 incremental hard invalidation | Incremental recode now clears stale higher-order outputs, stale phase results, and stale claim rows it cannot recompute | `completed/INV11_INCREMENTAL_HARD_INVALIDATION.md` |
 | INV-11 review decisions inactive on invalidation | Review decisions targeting claims removed by incremental invalidation are retained as inactive audit history | `completed/INV11_REVIEW_DECISION_INACTIVE_ON_INVALIDATION.md` |

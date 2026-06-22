@@ -22,14 +22,10 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #90 (`NEGATIVE_CASE_REVIEW_SURFACES.md`): add
-   negative-case-specific API/MCP/browser review listing over existing
-   `ClaimKind.NEGATIVE_CASE` rows without claiming expert adjudication or D7
-   validity evidence.
-2. Choose the next highest-value unmet evaluation-harness, review, grounding, or
+1. Choose the next highest-value unmet evaluation-harness, review, grounding, or
    scope-discipline lane that can be advanced without pretending held-out expert
    data exists.
-3. Continue through the ranked roadmap without pausing after each verified
+2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
 **Completed checkpoint:** Corpus-scope warning propagation now covers Markdown,
@@ -48,7 +44,10 @@ now expose code/entity relationship review rows and `code_relationship` /
 `entity_relationship` approve/reject/modify decisions; MCP now exposes
 `qc_review_relationships` for bounded agent-side relationship review target
 listing; the browser review page now has a Relationships mode for relationship
-decisions; negative-case-specific review UX remains future work.
+decisions; API/MCP/browser surfaces now also expose negative-case-specific
+review listing over existing `ClaimKind.NEGATIVE_CASE` claim rows while keeping
+review decisions on `target_type="claim"`. This is review accessibility, not
+expert adjudication or D7 validity evidence.
 MCP now exposes `qc_review_decisions` for agent-driven review decisions,
 including claim targets with rationale preservation, while keeping the old
 `qc_review_codes` tool compatible. MCP also exposes `qc_review_claims` as a
