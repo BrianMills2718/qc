@@ -6,12 +6,12 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 181 | D7 comparison artifact verifier | High | Planned | `D7_COMPARISON_ARTIFACT_VERIFIER.md` |
 
 ## Completed Plans
 
 | Name | Outcome | Record |
 |------|---------|--------|
+| D7 comparison artifact verifier | D7 comparison artifact directories or manifests can now be verified through script, Make, and `qc_cli.py` surfaces for report hash, copied metadata, prompt-eval status, and claim-caveat consistency without claiming benchmark evidence | `completed/D7_COMPARISON_ARTIFACT_VERIFIER.md` |
 | D7 comparison artifact package | Successful D7 retrieval/live-baseline comparison reports can now write optional versioned artifact directories with `report.json` and `manifest.json` hashes, command provenance, input hashes, and claim caveats while preserving preflight, output, and metric-criteria semantics | `completed/D7_COMPARISON_ARTIFACT_PACKAGE.md` |
 | D7 comparison report provenance | Successful D7 retrieval/live-baseline comparison reports now include additive `_meta.input_hashes` and `_meta.command` provenance for loaded state/corpus, gold, ordered prediction files, optional protocol files, and command paths without changing scoring, preflight, or metric-criteria semantics | `completed/D7_COMPARISON_REPORT_PROVENANCE.md` |
 | D3 comparison metric success criteria | Guarded D3 comparison scorecards now include additive pre-registered metric-criteria pass/fail/missing accounting for exact baseline metrics and local span-overlap diagnostics when configured, without changing D3 scoring or preflight semantics | `completed/D3_COMPARISON_METRIC_SUCCESS_CRITERIA.md` |

@@ -1,10 +1,50 @@
 # Plan #181: D7 Comparison Artifact Verifier
 
-**Status:** Planned
+**Status:** Completed
 **Type:** implementation
 **Priority:** High
 **Blocked By:** #180
 **Blocks:** Reproducible held-out D7 retrieval/live-baseline comparison artifacts
+
+---
+
+## Outcome
+
+Implemented and pushed in commit `758183d`.
+
+Added `scripts/verify_d7_comparison_artifact.py`, `make
+verify-d7-comparison-artifact ARTIFACT=...`, and `qc_cli.py
+verify-d7-comparison-artifact ...`. The verifier accepts either a D7 comparison
+artifact directory or its `manifest.json`, reads the local manifest/report
+pair, checks report bytes against `report_sha256`, checks report
+`_meta.input_hashes` and `_meta.command` against manifest metadata, checks
+prompt-eval-not-run and claim-caveat presence, emits structured JSON failures,
+and exits `0` only for `status="verified"`.
+
+Verification evidence:
+
+- TDD red:
+  `python -m pytest tests/test_d7_comparison_artifact_verifier.py tests/test_qc_cli_d7_retrieval.py -q`
+  initially failed during collection because `scripts.verify_d7_comparison_artifact`
+  did not exist.
+- Focused tests:
+  `python -m pytest tests/test_d7_comparison_artifact_verifier.py tests/test_qc_cli_d7_retrieval.py -q`
+  passed: 12 passed.
+- Focused Ruff:
+  `python -m ruff check scripts/verify_d7_comparison_artifact.py tests/test_d7_comparison_artifact_verifier.py tests/test_qc_cli_d7_retrieval.py qc_cli.py`
+  passed.
+- Make dry-run:
+  `make -n verify-d7-comparison-artifact ARTIFACT=benchmark_results/run-dir`
+  emitted `python scripts/verify_d7_comparison_artifact.py
+  benchmark_results/run-dir`.
+- Docs gate: `make docs-check` passed.
+- Diff whitespace: `git diff --check` passed.
+- Full gate: `make check` passed: 1182 passed, 1 skipped, 8 deselected; Ruff
+  passed; docs-check passed; type check remains not configured.
+
+This is local D7 comparison artifact integrity/provenance checking only. It is
+not held-out D7 evidence, live-baseline evidence, superiority evidence,
+methodological-validity evidence, or SOTA evidence.
 
 ---
 
@@ -84,11 +124,11 @@ created.
 
 ### Capability Validation
 
-- [ ] Verified artifact reports `status="verified"` and exit code `0`.
-- [ ] Report-hash mismatch reports `status="invalid"` and exit code `1`.
-- [ ] Report/manifest metadata mismatches produce stable failure codes.
-- [ ] Missing report file produces a stable failure code.
-- [ ] Verifier caveat states this is provenance only.
+- [x] Verified artifact reports `status="verified"` and exit code `0`.
+- [x] Report-hash mismatch reports `status="invalid"` and exit code `1`.
+- [x] Report/manifest metadata mismatches produce stable failure codes.
+- [x] Missing report file produces a stable failure code.
+- [x] Verifier caveat states this is provenance only.
 
 ---
 
@@ -152,29 +192,29 @@ created.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] Valid D7 comparison artifacts verify with status `verified`, exit code
+- [x] Valid D7 comparison artifacts verify with status `verified`, exit code
   `0`, zero failures, and checked report count `1`.
-- [ ] Report hash mismatch verifies with status `invalid`, exit code `1`, and a
+- [x] Report hash mismatch verifies with status `invalid`, exit code `1`, and a
   stable `report_sha256_mismatch` failure.
-- [ ] Manifest/report `_meta.input_hashes` mismatch produces a stable failure.
-- [ ] Manifest/report `_meta.command` mismatch produces a stable failure.
-- [ ] Missing `report.json` produces a stable failure.
-- [ ] Verifier accepts either artifact directory path or manifest file path.
-- [ ] Make and `qc_cli.py` surfaces delegate to the canonical verifier.
-- [ ] Docs state this verifier is local provenance/integrity checking only, not
+- [x] Manifest/report `_meta.input_hashes` mismatch produces a stable failure.
+- [x] Manifest/report `_meta.command` mismatch produces a stable failure.
+- [x] Missing `report.json` produces a stable failure.
+- [x] Verifier accepts either artifact directory path or manifest file path.
+- [x] Make and `qc_cli.py` surfaces delegate to the canonical verifier.
+- [x] Docs state this verifier is local provenance/integrity checking only, not
   held-out D7 evidence, live-baseline evidence, superiority evidence,
   methodological-validity evidence, or SOTA.
 
 > Process criteria:
-- [ ] TDD red state observed before implementation.
-- [ ] Focused tests pass.
-- [ ] Focused Ruff check passes.
-- [ ] Make dry-run passes.
-- [ ] `make docs-check` passes.
-- [ ] `git diff --check` passes.
-- [ ] `make check` passes.
-- [ ] Plan is moved to completed with verification evidence.
-- [ ] Verified implementation is committed and pushed.
+- [x] TDD red state observed before implementation.
+- [x] Focused tests pass.
+- [x] Focused Ruff check passes.
+- [x] Make dry-run passes.
+- [x] `make docs-check` passes.
+- [x] `git diff --check` passes.
+- [x] `make check` passes.
+- [x] Plan is moved to completed with verification evidence.
+- [x] Verified implementation is committed and pushed.
 
 ---
 

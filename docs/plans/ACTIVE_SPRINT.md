@@ -26,14 +26,22 @@ highest-value documented lane.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Plan #181 is active: add a deterministic verifier for
-versioned D7 comparison artifact directories/manifests. This slice should check
-`manifest.json` against local `report.json` bytes and report `_meta` metadata,
-with stable JSON verification failures and Make/`qc_cli.py` surfaces. It must
-not add manifest signing, rerun comparison scoring, verify original input files,
-run live baselines, generate held-out gold labels, choose retrieval/model
-policy, or claim held-out D7 evidence, live-baseline evidence, superiority
-evidence, methodological-validity evidence, or SOTA.
+**Active checkpoint:** Select and plan the next deterministic, high-value
+roadmap lane. The current best next lane remains an INV-2/D7 follow-up around
+held-out comparison readiness, while preserving the rule that no held-out D7,
+live-baseline, superiority, methodological-validity, or SOTA claim is licensed
+without actual frozen gold, baseline, and scored benchmark artifacts.
+
+**Completed checkpoint:** D7 comparison artifact directories/manifests can now
+be verified through `scripts/verify_d7_comparison_artifact.py`, `make
+verify-d7-comparison-artifact ARTIFACT=...`, and `qc_cli.py
+verify-d7-comparison-artifact ...`. The verifier checks local `report.json`
+bytes against manifest `report_sha256`, compares report `_meta.input_hashes`
+and `_meta.command` against manifest metadata, checks prompt-eval-not-run and
+claim-caveat presence, emits structured failures, and exits `0` only for
+`status="verified"`. This is local integrity/provenance checking only; it is
+not held-out D7 evidence, live-baseline evidence, superiority evidence,
+methodological-validity evidence, or SOTA.
 
 **Completed checkpoint:** Successful D7 retrieval/live-baseline comparison
 reports can now write optional versioned artifact directories when
