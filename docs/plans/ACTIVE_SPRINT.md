@@ -22,14 +22,15 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #72, corpus-scope machine-readable warnings, without claiming
-   sampling adequacy or population-validity evidence.
-2. Choose the next highest-value unmet evaluation-harness or scope-discipline
+1. Choose the next highest-value unmet evaluation-harness or scope-discipline
    lane that can be advanced without pretending held-out expert data exists.
-3. Continue through the ranked roadmap without pausing after each verified
+2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Completed checkpoint:** D1 grounding and D2 coverage/examined rates now report
+**Completed checkpoint:** Corpus-scope warning propagation now covers Markdown,
+JSON `export_warnings` metadata, and CSV `export_warnings.csv` for claim-bearing
+exports without recorded scope; this remains report discipline, not sampling
+adequacy evidence. D1 grounding and D2 coverage/examined rates now report
 local Wilson intervals in the Phase 0 scorecard. D3 and D7 scorecard sections now accept raw gold or
 versioned `schema_version=1` gold-set packages, surface compact
 `gold_provenance` when package metadata is present, and report configurable local

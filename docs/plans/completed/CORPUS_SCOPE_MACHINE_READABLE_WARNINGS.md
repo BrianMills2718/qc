@@ -1,10 +1,28 @@
 # Plan #72: Corpus Scope Machine-Readable Warnings
 
-**Status:** In Progress
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Plan #16 corpus scope contract; Plan #19 CLI/API scope surfaces; Plan #20 missing corpus scope report warning
 **Blocks:** broader scope-aware claim/report phrasing checks
+
+---
+
+## Outcome
+
+JSON exports now add structured `export_warnings` metadata when a project has
+claim-ledger rows but no recorded `ProjectState.corpus_scope`; CSV exports now
+write `export_warnings.csv` in the same condition. Minimal no-claim exports stay
+quiet, and Markdown uses the same shared warning message as the machine-readable
+exports. This is report-boundary metadata only; it does not validate sampling
+adequacy or support population generalization.
+
+**Verification:** `python -m pytest tests/test_claim_ledger_exports.py
+tests/test_project_commands.py::TestProjectExporter -q` passed (18 tests);
+`python -m ruff check qc_clean/core/export/data_exporter.py
+tests/test_claim_ledger_exports.py` passed; final `make check` passed (780
+passed, 1 skipped, 8 deselected; Ruff/docs-check passed). Type checking is not
+configured in this repo.
 
 ---
 
