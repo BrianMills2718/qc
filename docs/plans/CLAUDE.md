@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 201 | Claim ledger scope read surfaces | High | In Progress | `CLAIM_LEDGER_SCOPE_READ_SURFACES.md` |
 
 ## Completed Plans
 
