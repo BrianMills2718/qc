@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| #69 | INV-7 attack-type scorecard | High | Planned | `INV7_ATTACK_TYPE_SCORECARD.md` |
 
 ## Completed Plans
 
