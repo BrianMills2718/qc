@@ -26,11 +26,16 @@ highest-value documented lane.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Select and plan the next deterministic, high-value
-roadmap lane. The current best next lane remains an INV-2/D7 follow-up around
-held-out comparison readiness, while preserving the rule that no held-out D7,
-live-baseline, superiority, methodological-validity, or SOTA claim is licensed
-without actual frozen gold, baseline, and scored benchmark artifacts.
+**Active checkpoint:** Plan #180 is active: add optional D7 comparison artifact
+packaging for successful `make compare-d7-retrieval` /
+`scripts/compare_d7_retrieval.py` reports. This slice should write a versioned
+run directory with `report.json` and `manifest.json` hashes when
+`ARTIFACT_DIR=` / `--artifact-dir` is supplied, while preserving stdout,
+`--output`, preflight, metric-criteria, and provenance semantics. It must not
+run live baselines, generate held-out gold labels, create benchmark data, choose
+a default embedding/adversarial retrieval policy, change D7 scores, or claim
+held-out D7 evidence, live-baseline evidence, superiority evidence,
+methodological-validity evidence, or SOTA.
 
 **Completed checkpoint:** Successful D7 retrieval/live-baseline comparison
 reports now include additive `_meta.input_hashes` and `_meta.command`

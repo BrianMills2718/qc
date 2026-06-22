@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 180 | D7 comparison artifact package | High | Planned | `D7_COMPARISON_ARTIFACT_PACKAGE.md` |
 
 ## Completed Plans
 
