@@ -113,6 +113,10 @@ Each dimension maps to a SOTA claim and (where relevant) an invariant. The bar i
   strict Phase 0 adjudication package writer as
   `make write-phase0-adjudication-package`; this is CLI parity for manifest
   assembly only, not populated adjudication evidence.
+- `qc_cli.py import-adjudication-responses ...` delegates to the same
+  adjudication response import script as `make import-adjudication-responses`;
+  this is CLI parity for creating D3/D7 package inputs from completed response
+  packages only, not expert-label, correctness, validity, or benchmark evidence.
 - `qc_cli.py validate-adjudication-protocol ...`,
   `qc_cli.py adjudication-protocol-preflight ...`,
   `qc_cli.py validate-adjudication-responses ...`, and

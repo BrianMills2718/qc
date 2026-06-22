@@ -48,6 +48,7 @@ Examples:
   qc_cli adjudication-protocol-preflight adjudication_protocol.json sample.json
   qc_cli validate-adjudication-responses responses.json
   qc_cli adjudication-response-preflight adjudication_protocol.json sample.json responses.json
+  qc_cli import-adjudication-responses responses.json --gold-set-id gold-001 --dataset-name "Study" --coder-count 2 --adjudicator expert --protocol "Expert consensus" --output-d3 d3_gold.json
   qc_cli verify-phase0-benchmark-artifact benchmark_results/run/manifest.json
   qc_cli validate-d3-gold d3_gold.json
   qc_cli validate-d7-gold d7_gold.json
@@ -336,6 +337,77 @@ Examples:
     adjudication_response_preflight_parser.add_argument(
         'responses',
         help='Path to a completed adjudication response JSON package',
+    )
+
+    adjudication_import_parser = subparsers.add_parser(
+        'import-adjudication-responses',
+        help='Import adjudication responses into D3/D7 gold packages',
+        description='Import completed adjudication responses through the canonical script',
+    )
+    adjudication_import_parser.add_argument(
+        'package',
+        help='Path to a completed adjudication response JSON package',
+    )
+    adjudication_import_parser.add_argument(
+        '--output-d3',
+        help='Optional D3 gold package output path',
+    )
+    adjudication_import_parser.add_argument(
+        '--output-d7',
+        help='Optional D7 gold package output path',
+    )
+    adjudication_import_parser.add_argument(
+        '--gold-set-id',
+        required=True,
+        help='Stable gold-set ID',
+    )
+    adjudication_import_parser.add_argument(
+        '--dataset-name',
+        required=True,
+        help='Human-readable dataset name',
+    )
+    adjudication_import_parser.add_argument(
+        '--split',
+        choices=['held_out', 'dev', 'public_comparator'],
+        help='Evaluation split represented by generated packages',
+    )
+    adjudication_import_parser.add_argument(
+        '--coder-count',
+        required=True,
+        type=int,
+        help='Number of coders',
+    )
+    adjudication_import_parser.add_argument(
+        '--adjudicator',
+        required=True,
+        help='Adjudicator identifier',
+    )
+    adjudication_import_parser.add_argument(
+        '--protocol',
+        required=True,
+        help='Adjudication protocol summary',
+    )
+    adjudication_import_parser.add_argument(
+        '--protocol-package',
+        help='Optional adjudication protocol package used to preflight before import',
+    )
+    adjudication_import_parser.add_argument(
+        '--sample-package',
+        help='Optional adjudication sample package used to preflight before import',
+    )
+    adjudication_import_parser.add_argument(
+        '--prompt-frozen',
+        action='store_true',
+        help='Mark prompts/models as frozen before scoring this split',
+    )
+    adjudication_import_parser.add_argument(
+        '--contamination-checked',
+        action='store_true',
+        help='Mark train/test contamination as checked for this split',
+    )
+    adjudication_import_parser.add_argument(
+        '--notes',
+        help='Optional adjudication notes',
     )
 
     phase0_artifact_verifier_parser = subparsers.add_parser(
@@ -827,6 +899,8 @@ def main() -> int:
             return handle_validate_adjudication_responses_command(args)
         elif args.command == 'adjudication-response-preflight':
             return handle_adjudication_response_preflight_command(args)
+        elif args.command == 'import-adjudication-responses':
+            return handle_import_adjudication_responses_command(args)
         elif args.command == 'verify-phase0-benchmark-artifact':
             return handle_verify_phase0_benchmark_artifact_command(args)
         elif args.command == 'run-d7-retrieval':
@@ -1006,6 +1080,50 @@ def handle_adjudication_response_preflight_command(args) -> int:
         args.sample,
         args.responses,
     ])
+
+
+def handle_import_adjudication_responses_command(args) -> int:
+    """Import adjudication responses through the canonical CLI."""
+    from scripts import import_adjudication_responses
+
+    argv = [args.package]
+    for attr, flag in [
+        ("output_d3", "--output-d3"),
+        ("output_d7", "--output-d7"),
+    ]:
+        value = getattr(args, attr)
+        if value is not None:
+            argv.extend([flag, str(value)])
+    argv.extend([
+        "--gold-set-id",
+        args.gold_set_id,
+        "--dataset-name",
+        args.dataset_name,
+    ])
+    if args.split is not None:
+        argv.extend(["--split", args.split])
+    argv.extend([
+        "--coder-count",
+        str(args.coder_count),
+        "--adjudicator",
+        args.adjudicator,
+        "--protocol",
+        args.protocol,
+    ])
+    for attr, flag in [
+        ("protocol_package", "--protocol-package"),
+        ("sample_package", "--sample-package"),
+    ]:
+        value = getattr(args, attr)
+        if value is not None:
+            argv.extend([flag, str(value)])
+    if args.prompt_frozen:
+        argv.append("--prompt-frozen")
+    if args.contamination_checked:
+        argv.append("--contamination-checked")
+    if args.notes is not None:
+        argv.extend(["--notes", args.notes])
+    return import_adjudication_responses.main(argv)
 
 
 def handle_verify_phase0_benchmark_artifact_command(args) -> int:

@@ -4,6 +4,7 @@ import sys
 
 import qc_cli
 from scripts import (
+    import_adjudication_responses,
     preflight_adjudication_protocol_sample,
     preflight_adjudication_responses,
     validate_adjudication_protocol,
@@ -92,3 +93,75 @@ def test_qc_cli_adjudication_response_preflight_forwards_paths(monkeypatch):
 
     assert qc_cli.main() == 0
     assert captured["argv"] == ["protocol.json", "sample.json", "responses.json"]
+
+
+def test_qc_cli_import_adjudication_responses_forwards_args(monkeypatch):
+    captured = {}
+
+    def fake_main(argv):
+        captured["argv"] = argv
+        return 0
+
+    monkeypatch.setattr(import_adjudication_responses, "main", fake_main)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "qc_cli.py",
+            "import-adjudication-responses",
+            "responses.json",
+            "--output-d3",
+            "d3_gold.json",
+            "--output-d7",
+            "d7_gold.json",
+            "--gold-set-id",
+            "gold-001",
+            "--dataset-name",
+            "Adjudicated Study",
+            "--split",
+            "held_out",
+            "--coder-count",
+            "2",
+            "--adjudicator",
+            "expert-3",
+            "--protocol",
+            "Expert consensus protocol",
+            "--protocol-package",
+            "protocol.json",
+            "--sample-package",
+            "sample.json",
+            "--prompt-frozen",
+            "--contamination-checked",
+            "--notes",
+            "guarded import",
+        ],
+    )
+
+    assert qc_cli.main() == 0
+    assert captured["argv"] == [
+        "responses.json",
+        "--output-d3",
+        "d3_gold.json",
+        "--output-d7",
+        "d7_gold.json",
+        "--gold-set-id",
+        "gold-001",
+        "--dataset-name",
+        "Adjudicated Study",
+        "--split",
+        "held_out",
+        "--coder-count",
+        "2",
+        "--adjudicator",
+        "expert-3",
+        "--protocol",
+        "Expert consensus protocol",
+        "--protocol-package",
+        "protocol.json",
+        "--sample-package",
+        "sample.json",
+        "--prompt-frozen",
+        "--contamination-checked",
+        "--notes",
+        "guarded import",
+    ]

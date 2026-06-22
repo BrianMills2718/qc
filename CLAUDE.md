@@ -169,6 +169,7 @@ make adjudication-protocol-preflight PROTOCOL=protocol.json SAMPLE=sample.json
 make validate-adjudication-responses PACKAGE=sample.json
 make adjudication-response-preflight PROTOCOL=protocol.json SAMPLE=sample.json RESPONSES=responses.json
 make import-adjudication-responses PACKAGE=sample.json GOLD_SET_ID=study-v1 DATASET_NAME="Study dev labels" CODER_COUNT=1 ADJUDICATOR=coder-1 PROTOCOL="Single adjudicator review" PREFLIGHT_PROTOCOL=protocol.json PREFLIGHT_SAMPLE=sample.json D3_OUTPUT=d3_gold.json D7_OUTPUT=d7_gold.json
+python qc_cli.py import-adjudication-responses sample.json --gold-set-id study-v1 --dataset-name "Study dev labels" --coder-count 1 --adjudicator coder-1 --protocol "Single adjudicator review" --protocol-package protocol.json --sample-package sample.json --output-d3 d3_gold.json --output-d7 d7_gold.json
 python qc_cli.py validate-d3-gold d3_gold.json
 python qc_cli.py validate-d7-gold d7_gold.json
 make write-phase0-adjudication-package ID=<project_id> OUTPUT=phase0_package.json D3_GOLD=d3_gold.json GOLD=d7_gold.json
@@ -197,6 +198,7 @@ python qc_cli.py validate-adjudication-protocol protocol.json           # Valida
 python qc_cli.py adjudication-protocol-preflight protocol.json sample.json  # Preflight protocol/sample package match
 python qc_cli.py validate-adjudication-responses responses.json         # Validate completed adjudication response package
 python qc_cli.py adjudication-response-preflight protocol.json sample.json responses.json  # Preflight completed responses before import
+python qc_cli.py import-adjudication-responses responses.json --gold-set-id study-v1 --dataset-name "Study dev labels" --coder-count 1 --adjudicator coder-1 --protocol "Single adjudicator review" --protocol-package protocol.json --sample-package sample.json --output-d3 d3_gold.json --output-d7 d7_gold.json  # Convert valid responses to D3/D7 gold package inputs
 python qc_cli.py verify-phase0-benchmark-artifact benchmark_results/run-dir/manifest.json  # Verify Phase 0 artifact hashes/metadata
 
 # Run pipeline on a project (local, no server needed)
@@ -476,6 +478,7 @@ python qc_cli.py validate-adjudication-responses responses.json  # Canonical CLI
 make adjudication-response-preflight PROTOCOL=protocol.json SAMPLE=sample.json RESPONSES=responses.json  # Preflight completed responses against protocol/sample provenance before import
 python qc_cli.py adjudication-response-preflight protocol.json sample.json responses.json  # Canonical CLI wrapper for response preflight
 make import-adjudication-responses PACKAGE=sample.json GOLD_SET_ID=study-v1 DATASET_NAME="Study dev labels" CODER_COUNT=1 ADJUDICATOR=coder-1 PROTOCOL="Single adjudicator review" PREFLIGHT_PROTOCOL=protocol.json PREFLIGHT_SAMPLE=sample.json D3_OUTPUT=d3_gold.json D7_OUTPUT=d7_gold.json  # Convert valid responses to D3/D7 gold package inputs with an import-time provenance guard
+python qc_cli.py import-adjudication-responses responses.json --gold-set-id study-v1 --dataset-name "Study dev labels" --coder-count 1 --adjudicator coder-1 --protocol "Single adjudicator review" --protocol-package protocol.json --sample-package sample.json --output-d3 d3_gold.json --output-d7 d7_gold.json  # Canonical CLI wrapper for guarded response import
 make write-phase0-adjudication-package ID=<project_id> OUTPUT=phase0_package.json D3_GOLD=d3_gold.json GOLD=d7_gold.json  # Write strict Phase 0 package manifest for imported D3/D7 gold
 python qc_cli.py write-phase0-adjudication-package <project_id> --output phase0_package.json --d3-gold-file d3_gold.json --gold-file d7_gold.json  # Canonical CLI wrapper for Phase 0 adjudication package manifests
 make lint-scope-phrasing ID=<project_id> INPUT=report.md  # Lint arbitrary text for unsafe population-generalizing scope phrasing
