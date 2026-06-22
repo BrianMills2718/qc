@@ -6,12 +6,12 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 190 | QC CLI theoretical sampling surfaces | High | Planned | `QC_CLI_THEORETICAL_SAMPLING_SURFACES.md` |
 
 ## Completed Plans
 
 | Name | Outcome | Record |
 |------|---------|--------|
+| QC CLI theoretical sampling surfaces | `qc_cli.py` now wraps theoretical-sampling protocol validation, candidate/result preflight, candidate export, and result export scripts through top-level commands that preserve repeated arguments and boolean flags without duplicating package logic or claiming saturation/evidence | `completed/QC_CLI_THEORETICAL_SAMPLING_SURFACES.md` |
 | QC CLI adjudication import surface | `qc_cli.py import-adjudication-responses` now delegates to the canonical response import script, forwarding required metadata, optional D3/D7 outputs, optional protocol/sample preflight guards, boolean provenance flags, and notes without duplicating import logic or claiming labels/evidence | `completed/QC_CLI_ADJUDICATION_IMPORT_SURFACE.md` |
 | QC CLI adjudication validation surfaces | `qc_cli.py` now wraps adjudication protocol validation, protocol/sample preflight, response validation, and response preflight scripts through top-level commands that delegate positional paths without duplicating validation logic or claiming labels/evidence | `completed/QC_CLI_ADJUDICATION_VALIDATION_SURFACES.md` |
 | QC CLI Phase 0 adjudication package writer | `qc_cli.py write-phase0-adjudication-package` now delegates to the canonical Phase 0 adjudication package writer, forwarding supplied package/output/provenance arguments without duplicating validation logic or claiming adjudication evidence | `completed/QC_CLI_PHASE0_ADJUDICATION_PACKAGE_WRITER.md` |

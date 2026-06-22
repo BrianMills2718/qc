@@ -1,6 +1,6 @@
 # Plan #190: QC CLI Theoretical Sampling Surfaces
 
-**Status:** Planned
+**Status:** Completed
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Theoretical-sampling scripts and Make targets
@@ -84,14 +84,14 @@ Internal CLI delegation only; no cross-project boundary is created.
 
 ### Capability Validation
 
-- [ ] Each command parses through `qc_cli.py`.
-- [ ] Each handler delegates to the matching script `main()`.
-- [ ] Required arguments are forwarded exactly.
-- [ ] Optional arguments are forwarded only when supplied.
-- [ ] Repeated `--candidate-name`, `--selected-candidate-id`, and
+- [x] Each command parses through `qc_cli.py`.
+- [x] Each handler delegates to the matching script `main()`.
+- [x] Required arguments are forwarded exactly.
+- [x] Optional arguments are forwarded only when supplied.
+- [x] Repeated `--candidate-name`, `--selected-candidate-id`, and
   `--success-criterion-met` values preserve order.
-- [ ] Boolean `--stopped-by-rule` forwards only when true.
-- [ ] Docs state these are package/provenance workflow surfaces only, not
+- [x] Boolean `--stopped-by-rule` forwards only when true.
+- [x] Docs state these are package/provenance workflow surfaces only, not
   sampling execution, saturation proof, GT-fidelity evidence, or benchmark
   evidence.
 
@@ -151,31 +151,31 @@ Internal CLI delegation only; no cross-project boundary is created.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] `qc_cli.py validate-theoretical-sampling-protocol protocol.json`
+- [x] `qc_cli.py validate-theoretical-sampling-protocol protocol.json`
   delegates to `scripts.validate_theoretical_sampling_protocol.main(...)`.
-- [ ] `qc_cli.py theoretical-sampling-preflight protocol.json --candidates-file
+- [x] `qc_cli.py theoretical-sampling-preflight protocol.json --candidates-file
   candidates.json [--results-file results.json]` delegates to
   `scripts.preflight_theoretical_sampling_protocol.main(...)`.
-- [ ] `qc_cli.py export-theoretical-sampling-candidates <project_id>
+- [x] `qc_cli.py export-theoretical-sampling-candidates <project_id>
   --protocol protocol.json ...` delegates to
   `scripts.export_theoretical_sampling_candidates.main(...)`.
-- [ ] `qc_cli.py export-theoretical-sampling-results protocol.json
+- [x] `qc_cli.py export-theoretical-sampling-results protocol.json
   --candidates-file candidates.json ...` delegates to
   `scripts.export_theoretical_sampling_results.main(...)`.
-- [ ] Existing Make/script behavior is unchanged.
-- [ ] Docs/CLAUDE mention the top-level CLI aliases without implying sampling
+- [x] Existing Make/script behavior is unchanged.
+- [x] Docs/CLAUDE mention the top-level CLI aliases without implying sampling
   execution, saturation proof, GT-fidelity evidence, validity evidence, or
   benchmark results.
 
 > Process criteria:
-- [ ] TDD red state observed before implementation.
-- [ ] Focused tests pass.
-- [ ] Focused Ruff check passes.
-- [ ] `make docs-check` passes.
-- [ ] `git diff --check` passes.
-- [ ] `make check` passes.
-- [ ] Plan is moved to completed with verification evidence.
-- [ ] Verified implementation is committed and pushed.
+- [x] TDD red state observed before implementation.
+- [x] Focused tests pass.
+- [x] Focused Ruff check passes.
+- [x] `make docs-check` passes.
+- [x] `git diff --check` passes.
+- [x] `make check` passes.
+- [x] Plan is moved to completed with verification evidence.
+- [x] Verified implementation is committed and pushed.
 
 ---
 
@@ -189,3 +189,37 @@ Internal CLI delegation only; no cross-project boundary is created.
 | Optional args forwarded as `None` strings | Handler blindly forwards fields | Forward optional flags only when non-null. |
 | Repeated args collapse or reorder | Parser/handler uses scalar rather than append/list | Use `action="append"` and extend in received order. |
 | Docs overclaim | Package workflow sounds like saturation evidence | Keep INV-4 caveats: package/provenance only, not sampling execution or saturation proof. |
+
+---
+
+## Outcome
+
+Implemented in commit `49cb5aa9` and pushed to `main`.
+
+`qc_cli.py` now exposes top-level wrappers for theoretical-sampling protocol
+validation, candidate/result preflight, candidate package export, and result
+package export. Each wrapper delegates to the matching canonical script
+`main()` without duplicating validation, preflight, export, ProjectStore, or
+package-building logic.
+
+Verification evidence:
+
+- TDD red state: focused tests initially failed with argparse rejecting all
+  four theoretical-sampling commands as invalid choices.
+- `python -m pytest tests/test_qc_cli_theoretical_sampling_surfaces.py tests/test_theoretical_sampling_protocol.py tests/test_theoretical_sampling_preflight.py tests/test_export_theoretical_sampling_candidates_script.py tests/test_export_theoretical_sampling_results_script.py -q`:
+  17 passed.
+- `python -m ruff check qc_cli.py tests/test_qc_cli_theoretical_sampling_surfaces.py`:
+  passed.
+- `make docs-check`: passed.
+- `git diff --check`: passed.
+- `make check`: 1212 passed, 1 skipped, 8 deselected; Ruff and docs-check
+  passed; type check remains not configured.
+- `python qc_cli.py validate-theoretical-sampling-protocol --help` and
+  `python qc_cli.py export-theoretical-sampling-results --help`: command help
+  rendered with expected arguments.
+
+Claim discipline: these are top-level CLI aliases for INV-4 package/provenance
+workflow surfaces only. They do not execute theoretical sampling, collect new
+data, prove category saturation, prove GT fidelity, create methodological
+validity evidence, create benchmark results, establish parity/superiority, or
+support SOTA claims.
