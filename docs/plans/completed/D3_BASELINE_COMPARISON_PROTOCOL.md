@@ -1,12 +1,48 @@
 # Plan #175: D3 Baseline Comparison Protocol
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** D3 gold-set packages, D3 baseline packages, D3 baseline
 scorecard diagnostics
 **Blocks:** D3 comparison preflight and eventual score-time guard for held-out
 baseline comparisons
+
+---
+
+## Outcome
+
+Implemented and pushed in `c46f94e`
+(`[Plan: D3_BASELINE_COMPARISON_PROTOCOL] Add D3 comparison protocol
+validator`). The repo now has a schema_version=1 D3 baseline comparison
+protocol contract, a JSON-emitting validator script, and
+`make validate-d3-comparison-protocol PROTOCOL=...`. The protocol can register
+expected D3 baselines, held-out freeze/provenance flags, hash locks, success
+criteria, and optional exact/span metric criteria. D3 comparison preflight,
+score-time enforcement, and criteria evaluation against scorecard output remain
+deferred follow-up lanes.
+
+Verification:
+
+- TDD red state observed: `python -m pytest tests/test_d3_comparison_protocol.py -q`
+  failed during collection because `qc_clean.core.d3_comparison_protocol` did
+  not exist.
+- `python -m pytest tests/test_d3_comparison_protocol.py -q` passed: 9 passed.
+- `python -m pytest tests/test_d3_comparison_protocol.py tests/test_d3_baseline_package.py tests/test_bench_phase0.py -k "d3" -q`
+  passed: 26 passed, 64 deselected.
+- `python -m ruff check qc_clean/core/d3_comparison_protocol.py scripts/validate_d3_comparison_protocol.py tests/test_d3_comparison_protocol.py`
+  passed.
+- `make -n validate-d3-comparison-protocol PROTOCOL=protocol.json` showed
+  `python scripts/validate_d3_comparison_protocol.py protocol.json`.
+- `make docs-check` passed.
+- `git diff --check` passed.
+- `make check` passed: 1160 passed, 1 skipped, 8 deselected; Ruff and
+  docs-check passed; type check is not configured.
+
+Claim discipline: this is protocol/provenance metadata only. It does not run or
+preflight baseline packages, enforce score-time guards, populate held-out D3
+evidence, establish expert parity, demonstrate superiority/non-inferiority,
+prove methodological validity, or support any SOTA claim.
 
 ---
 
@@ -83,13 +119,13 @@ Protocol validation only; no scorecard or cross-project boundary is created.
 
 ### Capability Validation
 
-- [ ] Valid held-out D3 comparison protocol packages validate through core and
+- [x] Valid held-out D3 comparison protocol packages validate through core and
   script surfaces.
-- [ ] Held-out protocols require prompt/model freeze, contamination check,
+- [x] Held-out protocols require prompt/model freeze, contamination check,
   pre-run registration, and project-state hash.
-- [ ] Expected baseline names are non-empty and unique.
-- [ ] Optional file hash locks must be SHA-256.
-- [ ] Optional metric criteria validate duplicate IDs, unknown baseline names,
+- [x] Expected baseline names are non-empty and unique.
+- [x] Optional file hash locks must be SHA-256.
+- [x] Optional metric criteria validate duplicate IDs, unknown baseline names,
   supported operators, finite thresholds, metric-specific threshold ranges, and
   non-empty rationale.
 
@@ -155,28 +191,28 @@ Protocol validation only; no scorecard or cross-project boundary is created.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] `qc_clean/core/d3_comparison_protocol.py` validates schema_version=1 D3
+- [x] `qc_clean/core/d3_comparison_protocol.py` validates schema_version=1 D3
   comparison protocol packages.
-- [ ] `scripts/validate_d3_comparison_protocol.py` emits JSON `valid` /
+- [x] `scripts/validate_d3_comparison_protocol.py` emits JSON `valid` /
   `invalid` reports and exit codes.
-- [ ] `make validate-d3-comparison-protocol PROTOCOL=...` is available.
-- [ ] Held-out protocols require freeze/contamination/registration/project-state
+- [x] `make validate-d3-comparison-protocol PROTOCOL=...` is available.
+- [x] Held-out protocols require freeze/contamination/registration/project-state
   metadata.
-- [ ] Optional structured metric criteria are supported for exact and local
+- [x] Optional structured metric criteria are supported for exact and local
   span-overlap metrics.
-- [ ] Docs state this is protocol/provenance metadata only and does not run a
+- [x] Docs state this is protocol/provenance metadata only and does not run a
   baseline, compare packages, enforce score-time guards, prove held-out D3
   evidence, expert parity, superiority, methodological validity, or SOTA.
 
 > Process criteria:
-- [ ] TDD red state observed before implementation.
-- [ ] Focused tests pass.
-- [ ] Focused Ruff check passes.
-- [ ] Make dry-run confirms target wiring.
-- [ ] `make docs-check` passes.
-- [ ] `make check` passes.
-- [ ] Plan is moved to completed with verification evidence.
-- [ ] Verified implementation is committed and pushed.
+- [x] TDD red state observed before implementation.
+- [x] Focused tests pass.
+- [x] Focused Ruff check passes.
+- [x] Make dry-run confirms target wiring.
+- [x] `make docs-check` passes.
+- [x] `make check` passes.
+- [x] Plan is moved to completed with verification evidence.
+- [x] Verified implementation is committed and pushed.
 
 ---
 

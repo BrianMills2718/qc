@@ -26,11 +26,18 @@ highest-value documented lane.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Plan #175 is active: add a schema_version=1 D3 baseline
-comparison protocol validator plus Make/script surface. This slice is
-protocol/provenance only; it must not add D3 comparison preflight, score-time
-guards, package comparison execution, held-out D3 evidence, expert parity,
-superiority evidence, methodological-validity evidence, or SOTA claims.
+**Active checkpoint:** Select and plan the next deterministic, high-value
+roadmap lane. No implementation plan is currently active.
+
+**Completed checkpoint:** D3 baseline comparison protocols can now be validated
+through `qc_clean/core/d3_comparison_protocol.py`,
+`scripts/validate_d3_comparison_protocol.py`, and
+`make validate-d3-comparison-protocol PROTOCOL=...`. The schema records expected
+D3 baselines, held-out freeze/provenance flags, hash locks, success criteria,
+and optional exact/span metric criteria. This is protocol/provenance metadata
+only; it does not run or preflight baseline packages, enforce score-time guards,
+populate held-out D3 evidence, establish expert parity, demonstrate
+superiority/non-inferiority, prove methodological validity, or support SOTA.
 
 **Completed checkpoint:** D3 baseline rows now include diagnostic-only
 `span_overlap` metadata under `application_validity_d3.baselines.<name>`. The
