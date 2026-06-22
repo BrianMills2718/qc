@@ -292,33 +292,89 @@ def _export_project(store: ProjectStore, args) -> int:
     fmt = getattr(args, "format", "json")
     output_file = getattr(args, "output_file", None)
     output_dir = getattr(args, "output_dir", None)
+    audit_manifest = vars(args).get("audit_manifest")
+    verify_audit_manifest = bool(vars(args).get("verify_audit_manifest", False))
+    if verify_audit_manifest and not audit_manifest:
+        print("--verify-audit-manifest requires --audit-manifest", file=sys.stderr)
+        return 1
 
     try:
         exporter = ProjectExporter()
+        artifact_paths: list[str] = []
 
         if fmt == "json":
             path = exporter.export_json(state, output_file)
+            artifact_paths = [path]
             print(f"Exported JSON to: {path}")
         elif fmt == "csv":
             paths = exporter.export_csv(state, output_dir)
+            artifact_paths = paths
             print("Exported CSV files:")
             for p in paths:
                 print(f"  {p}")
         elif fmt == "markdown":
             path = exporter.export_markdown(state, output_file)
+            artifact_paths = [path]
             print(f"Exported Markdown to: {path}")
         elif fmt == "qdpx":
             path = exporter.export_qdpx(state, output_file)
+            artifact_paths = [path]
             print(f"Exported QDPX to: {path}")
             print("  Compatible with ATLAS.ti, NVivo, MAXQDA")
         else:
             print(f"Unsupported format: {fmt}", file=sys.stderr)
             return 1
+
+        if audit_manifest:
+            _write_and_optionally_verify_export_manifest(
+                state,
+                fmt,
+                artifact_paths,
+                audit_manifest,
+                verify_audit_manifest,
+            )
     except Exception as e:
         print(f"Export failed: {e}", file=sys.stderr)
         return 1
 
     return 0
+
+
+def _write_and_optionally_verify_export_manifest(
+    state: ProjectState,
+    export_format: str,
+    artifact_paths: list[str],
+    manifest_output: str,
+    verify: bool,
+) -> None:
+    """Write an export audit manifest and optionally verify it immediately."""
+    from qc_clean.core.export.audit_manifest import (
+        build_export_audit_manifest,
+        verify_export_audit_manifest_payload,
+        write_export_audit_manifest,
+    )
+
+    manifest_path = Path(manifest_output)
+    base_dir = manifest_path.parent if str(manifest_path.parent) else Path(".")
+    manifest = build_export_audit_manifest(
+        state,
+        export_format=export_format,  # type: ignore[arg-type]
+        artifact_paths=artifact_paths,
+        base_dir=base_dir,
+    )
+    written = write_export_audit_manifest(manifest, manifest_path)
+    print(f"Export audit manifest: {written}")
+
+    if verify:
+        report = verify_export_audit_manifest_payload(
+            manifest,
+            base_dir=base_dir,
+            state=state,
+        )
+        if report.status != "verified":
+            messages = "; ".join(failure.message for failure in report.failures)
+            raise RuntimeError(f"Export audit manifest verification failed: {messages}")
+        print("Verified export audit manifest")
 
 
 def _export_adjudication_sample(store: ProjectStore, args) -> int:

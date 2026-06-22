@@ -483,6 +483,118 @@ class TestProjectExporter:
         assert zipfile.is_zipfile(out)
         assert "Exported QDPX" in capsys.readouterr().out
 
+    def test_project_export_command_writes_audit_manifest_for_json(
+        self,
+        tmp_path,
+        tmp_store,
+        sample_state,
+    ):
+        from qc_clean.core.cli.commands.project import _export_project
+
+        tmp_store.save(sample_state)
+        out = tmp_path / "export.json"
+        manifest = tmp_path / "export.manifest.json"
+        args = MagicMock(
+            project_id=sample_state.id,
+            format="json",
+            output_file=str(out),
+            output_dir=None,
+            audit_manifest=str(manifest),
+            verify_audit_manifest=False,
+        )
+
+        result = _export_project(tmp_store, args)
+        payload = json.loads(manifest.read_text(encoding="utf-8"))
+
+        assert result == 0
+        assert out.exists()
+        assert payload["package_type"] == "export_audit_manifest"
+        assert payload["export_format"] == "json"
+        assert payload["artifact_count"] == 1
+        assert payload["artifacts"][0]["path"] == "export.json"
+
+    def test_project_export_command_writes_audit_manifest_for_csv(
+        self,
+        tmp_path,
+        tmp_store,
+        sample_state,
+    ):
+        from qc_clean.core.cli.commands.project import _export_project
+
+        tmp_store.save(sample_state)
+        out_dir = tmp_path / "csv"
+        manifest = out_dir / "export.manifest.json"
+        args = MagicMock(
+            project_id=sample_state.id,
+            format="csv",
+            output_file=None,
+            output_dir=str(out_dir),
+            audit_manifest=str(manifest),
+            verify_audit_manifest=False,
+        )
+
+        result = _export_project(tmp_store, args)
+        payload = json.loads(manifest.read_text(encoding="utf-8"))
+
+        assert result == 0
+        assert payload["export_format"] == "csv"
+        assert payload["artifact_count"] == 2
+        assert [artifact["path"] for artifact in payload["artifacts"]] == [
+            "applications.csv",
+            "codes.csv",
+        ]
+
+    def test_project_export_command_rejects_verify_without_manifest(
+        self,
+        tmp_store,
+        sample_state,
+        capsys,
+    ):
+        from qc_clean.core.cli.commands.project import _export_project
+
+        tmp_store.save(sample_state)
+        args = MagicMock(
+            project_id=sample_state.id,
+            format="json",
+            output_file=None,
+            output_dir=None,
+            audit_manifest=None,
+            verify_audit_manifest=True,
+        )
+
+        result = _export_project(tmp_store, args)
+
+        assert result == 1
+        assert "--verify-audit-manifest requires --audit-manifest" in capsys.readouterr().err
+
+    def test_project_export_command_verifies_audit_manifest(
+        self,
+        tmp_path,
+        tmp_store,
+        sample_state,
+        capsys,
+    ):
+        from qc_clean.core.cli.commands.project import _export_project
+
+        tmp_store.save(sample_state)
+        out = tmp_path / "report.md"
+        manifest = tmp_path / "report.manifest.json"
+        args = MagicMock(
+            project_id=sample_state.id,
+            format="markdown",
+            output_file=str(out),
+            output_dir=None,
+            audit_manifest=str(manifest),
+            verify_audit_manifest=True,
+        )
+
+        result = _export_project(tmp_store, args)
+        output = capsys.readouterr().out
+
+        assert result == 0
+        assert manifest.exists()
+        assert "Verified export audit manifest" in output
+
 
 # ---------------------------------------------------------------------------
 # Tests: CLI argument parsing
@@ -526,6 +638,29 @@ class TestCLIParsing:
         args = parser.parse_args(["project", "export", "pid", "--format", "json", "--output-file", "out.json"])
         assert args.format == "json"
         assert args.output_file == "out.json"
+
+    def test_export_subparser_audit_manifest_flags(self):
+        from qc_cli import create_parser
+
+        parser = create_parser()
+
+        args = parser.parse_args(
+            [
+                "project",
+                "export",
+                "pid",
+                "--format",
+                "markdown",
+                "--output-file",
+                "report.md",
+                "--audit-manifest",
+                "manifest.json",
+                "--verify-audit-manifest",
+            ]
+        )
+
+        assert args.audit_manifest == "manifest.json"
+        assert args.verify_audit_manifest is True
 
     def test_export_subparser_qdpx(self):
         from qc_cli import create_parser
