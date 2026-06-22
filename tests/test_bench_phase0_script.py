@@ -55,6 +55,7 @@ def test_bench_phase0_includes_input_hashes_without_external_files(
     assert hashes["gold_file_sha256"] is None
     assert hashes["d7_baselines_file_sha256"] is None
     assert hashes["prompt_injection_file_sha256"] is None
+    assert hashes["bias_counterfactual_file_sha256"] is None
     assert hashes["observability_db_sha256"] is None
 
 
@@ -118,6 +119,20 @@ def test_bench_phase0_hashes_external_input_files(
         }),
         encoding="utf-8",
     )
+    bias_file = tmp_path / "bias_counterfactual.json"
+    bias_file.write_text(
+        json.dumps({
+            "bias_counterfactual_evaluations": [
+                {
+                    "case_id": "identity-stable",
+                    "attribute": "parental_status",
+                    "original_codes": ["trust"],
+                    "counterfactual_codes": ["trust"],
+                }
+            ]
+        }),
+        encoding="utf-8",
+    )
     db_path = tmp_path / "observability.db"
     _create_llm_observability_db(db_path)
     monkeypatch.setattr(bench_phase0, "ProjectStore", lambda: store)
@@ -132,6 +147,8 @@ def test_bench_phase0_hashes_external_input_files(
         str(baselines_file),
         "--prompt-injection-file",
         str(injection_file),
+        "--bias-counterfactual-file",
+        str(bias_file),
         "--observability-db",
         str(db_path),
     ])
@@ -143,12 +160,14 @@ def test_bench_phase0_hashes_external_input_files(
     assert hashes["gold_file_sha256"] == _sha256_file(gold_file)
     assert hashes["d7_baselines_file_sha256"] == _sha256_file(baselines_file)
     assert hashes["prompt_injection_file_sha256"] == _sha256_file(injection_file)
+    assert hashes["bias_counterfactual_file_sha256"] == _sha256_file(bias_file)
     assert hashes["observability_db_sha256"] == _sha256_file(db_path)
     reloaded = store.load(state.id)
     assert "application_gold" not in reloaded.config.extra
     assert "disconfirmation_gold" not in reloaded.config.extra
     assert "disconfirmation_baselines" not in reloaded.config.extra
     assert "prompt_injection_evaluations" not in reloaded.config.extra
+    assert "bias_counterfactual_evaluations" not in reloaded.config.extra
 
 
 def test_bench_phase0_scores_d3_from_gold_file_without_mutating_state(
@@ -365,6 +384,20 @@ def test_bench_phase0_artifact_manifest_records_external_inputs(
         }),
         encoding="utf-8",
     )
+    bias_file = tmp_path / "bias_counterfactual.json"
+    bias_file.write_text(
+        json.dumps({
+            "bias_counterfactual_evaluations": [
+                {
+                    "case_id": "identity-stable",
+                    "attribute": "parental_status",
+                    "original_codes": ["trust"],
+                    "counterfactual_codes": ["trust"],
+                }
+            ]
+        }),
+        encoding="utf-8",
+    )
     db_path = tmp_path / "observability.db"
     _create_llm_observability_db(db_path)
     artifact_root = tmp_path / "benchmark_results"
@@ -378,6 +411,8 @@ def test_bench_phase0_artifact_manifest_records_external_inputs(
         str(baselines_file),
         "--prompt-injection-file",
         str(injection_file),
+        "--bias-counterfactual-file",
+        str(bias_file),
         "--observability-db",
         str(db_path),
         "--trace-id",
@@ -393,10 +428,12 @@ def test_bench_phase0_artifact_manifest_records_external_inputs(
     assert manifest["input_hashes"]["gold_file_sha256"] == _sha256_file(gold_file)
     assert manifest["input_hashes"]["d7_baselines_file_sha256"] == _sha256_file(baselines_file)
     assert manifest["input_hashes"]["prompt_injection_file_sha256"] == _sha256_file(injection_file)
+    assert manifest["input_hashes"]["bias_counterfactual_file_sha256"] == _sha256_file(bias_file)
     assert manifest["input_hashes"]["observability_db_sha256"] == _sha256_file(db_path)
     assert manifest["command"]["gold_file"] == str(gold_file)
     assert manifest["command"]["d7_baselines_file"] == str(baselines_file)
     assert manifest["command"]["prompt_injection_file"] == str(injection_file)
+    assert manifest["command"]["bias_counterfactual_file"] == str(bias_file)
     assert manifest["command"]["observability_db"] == str(db_path)
     assert manifest["command"]["trace_id"] == "trace-123"
 
@@ -811,6 +848,81 @@ def test_bench_phase0_invalid_prompt_injection_file_fails_loud(
     output = json.loads(capsys.readouterr().out)
     assert "error" in output
     assert "Prompt injection file" in output["error"]
+
+
+def test_bench_phase0_scores_bias_counterfactual_from_file_without_mutating_state(
+    tmp_path,
+    monkeypatch,
+    capsys,
+):
+    state = ProjectState(
+        id="project_d6",
+        name="D6 project",
+        config=ProjectConfig(extra={}),
+    )
+    store = ProjectStore(projects_dir=tmp_path / "projects")
+    store.save(state)
+    bias_file = tmp_path / "bias_counterfactual.json"
+    bias_file.write_text(
+        json.dumps({
+            "bias_counterfactual_evaluations": [
+                {
+                    "case_id": "identity-stable",
+                    "attribute": "parental_status",
+                    "original_codes": ["trust"],
+                    "counterfactual_codes": ["trust"],
+                },
+                {
+                    "case_id": "identity-shift",
+                    "attribute": "immigration_status",
+                    "original_codes": ["access", "trust"],
+                    "counterfactual_codes": ["access", "surveillance"],
+                },
+            ],
+        }),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(bench_phase0, "ProjectStore", lambda: store)
+
+    exit_code = bench_phase0.main([
+        state.id,
+        "--bias-counterfactual-file",
+        str(bias_file),
+    ])
+
+    assert exit_code == 0
+    output = json.loads(capsys.readouterr().out)
+    d6 = output["bias_counterfactual_d6"]
+    assert d6["status"] == "scored"
+    assert d6["changed_invariant_cases"] == 1
+    assert d6["code_change_rate"] == pytest.approx(0.5)
+    assert d6["changed_case_ids"] == ["identity-shift"]
+    reloaded = store.load(state.id)
+    assert "bias_counterfactual_evaluations" not in reloaded.config.extra
+
+
+def test_bench_phase0_invalid_bias_counterfactual_file_fails_loud(
+    tmp_path,
+    monkeypatch,
+    capsys,
+):
+    state = ProjectState(id="project_bad_d6", name="Bad D6")
+    store = ProjectStore(projects_dir=tmp_path / "projects")
+    store.save(state)
+    bias_file = tmp_path / "bias_counterfactual.json"
+    bias_file.write_text(json.dumps({"unexpected": []}), encoding="utf-8")
+    monkeypatch.setattr(bench_phase0, "ProjectStore", lambda: store)
+
+    exit_code = bench_phase0.main([
+        state.id,
+        "--bias-counterfactual-file",
+        str(bias_file),
+    ])
+
+    assert exit_code == 1
+    output = json.loads(capsys.readouterr().out)
+    assert "error" in output
+    assert "Bias counterfactual file" in output["error"]
 
 
 def test_bench_phase0_includes_d10_from_observability_db(

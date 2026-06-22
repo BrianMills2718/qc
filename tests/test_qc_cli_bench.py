@@ -64,6 +64,20 @@ def test_qc_cli_bench_forwards_files_and_output(tmp_path, monkeypatch, capsys):
         }),
         encoding="utf-8",
     )
+    bias_file = tmp_path / "bias_counterfactual.json"
+    bias_file.write_text(
+        json.dumps({
+            "bias_counterfactual_evaluations": [
+                {
+                    "case_id": "identity-stable",
+                    "attribute": "parental_status",
+                    "original_codes": ["trust"],
+                    "counterfactual_codes": ["trust"],
+                }
+            ]
+        }),
+        encoding="utf-8",
+    )
     output_file = tmp_path / "scorecard.json"
     monkeypatch.setattr(bench_phase0, "ProjectStore", lambda: store)
     monkeypatch.setattr(
@@ -77,6 +91,8 @@ def test_qc_cli_bench_forwards_files_and_output(tmp_path, monkeypatch, capsys):
             str(d3_gold_file),
             "--gold-file",
             str(gold_file),
+            "--bias-counterfactual-file",
+            str(bias_file),
             "--output",
             str(output_file),
         ],
@@ -90,10 +106,13 @@ def test_qc_cli_bench_forwards_files_and_output(tmp_path, monkeypatch, capsys):
     assert stdout_scorecard == file_scorecard
     assert stdout_scorecard["application_validity_d3"]["status"] == "scored"
     assert stdout_scorecard["disconfirmation_d7"]["status"] == "scored"
+    assert stdout_scorecard["bias_counterfactual_d6"]["status"] == "scored"
     expected_d3_hash = hashlib.sha256(d3_gold_file.read_bytes()).hexdigest()
     expected_hash = hashlib.sha256(gold_file.read_bytes()).hexdigest()
+    expected_bias_hash = hashlib.sha256(bias_file.read_bytes()).hexdigest()
     assert stdout_scorecard["_meta"]["input_hashes"]["d3_gold_file_sha256"] == expected_d3_hash
     assert stdout_scorecard["_meta"]["input_hashes"]["gold_file_sha256"] == expected_hash
+    assert stdout_scorecard["_meta"]["input_hashes"]["bias_counterfactual_file_sha256"] == expected_bias_hash
 
 
 def test_qc_cli_bench_forwards_artifact_dir(tmp_path, monkeypatch, capsys):

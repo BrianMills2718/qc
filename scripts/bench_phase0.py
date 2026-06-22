@@ -4,6 +4,7 @@
 Usage:
     python scripts/bench_phase0.py <project_id> [--d3-gold-file d3_gold.json] [--gold-file gold.json]
         [--d7-baselines-file baselines.json] [--prompt-injection-file inv7.json]
+        [--bias-counterfactual-file bias.json]
         [--output scorecard.json]
 
 Agent-drivable: emits JSON to stdout (and optionally a file). See
@@ -55,6 +56,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument(
         "--prompt-injection-file",
         help="Optional INV-7 prompt-injection fixture results JSON file; applied in memory only",
+    )
+    parser.add_argument(
+        "--bias-counterfactual-file",
+        help="Optional D6 counterfactual identity-swap outcome JSON file; applied in memory only",
     )
     parser.add_argument(
         "--observability-db",
@@ -125,6 +130,18 @@ def main(argv: Sequence[str] | None = None) -> int:
         state.config.extra = dict(state.config.extra)
         state.config.extra["prompt_injection_evaluations"] = prompt_injection_results
 
+    if args.bias_counterfactual_file:
+        try:
+            bias_counterfactual_results = load_bias_counterfactual_file(
+                Path(args.bias_counterfactual_file)
+            )
+        except ValueError as exc:
+            print(json.dumps({"error": str(exc)}))
+            return 1
+        state = state.model_copy(deep=True)
+        state.config.extra = dict(state.config.extra)
+        state.config.extra["bias_counterfactual_evaluations"] = bias_counterfactual_results
+
     try:
         card = phase0_scorecard(state)
     except ValueError as exc:
@@ -136,6 +153,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         gold_file=Path(args.gold_file) if args.gold_file else None,
         d7_baselines_file=Path(args.d7_baselines_file) if args.d7_baselines_file else None,
         prompt_injection_file=Path(args.prompt_injection_file) if args.prompt_injection_file else None,
+        bias_counterfactual_file=(
+            Path(args.bias_counterfactual_file) if args.bias_counterfactual_file else None
+        ),
         observability_db=args.observability_db,
     )
     observability_db = args.observability_db or DEFAULT_OBSERVABILITY_DB_PATH
@@ -250,6 +270,11 @@ def phase0_command_provenance(args: argparse.Namespace) -> dict[str, Any]:
         "prompt_injection_file": (
             str(Path(args.prompt_injection_file)) if args.prompt_injection_file else None
         ),
+        "bias_counterfactual_file": (
+            str(Path(args.bias_counterfactual_file))
+            if args.bias_counterfactual_file
+            else None
+        ),
         "observability_db": str(args.observability_db) if args.observability_db else None,
         "trace_id": args.trace_id,
         "output": args.output,
@@ -290,6 +315,7 @@ def phase0_input_hashes(
     gold_file: Path | None,
     d7_baselines_file: Path | None,
     prompt_injection_file: Path | None,
+    bias_counterfactual_file: Path | None,
     observability_db: Path | None,
 ) -> dict[str, Any]:
     """Return deterministic SHA-256 input hashes for Phase 0 bench output."""
@@ -307,6 +333,9 @@ def phase0_input_hashes(
         ),
         "prompt_injection_file_sha256": (
             sha256_file(prompt_injection_file) if prompt_injection_file else None
+        ),
+        "bias_counterfactual_file_sha256": (
+            sha256_file(bias_counterfactual_file) if bias_counterfactual_file else None
         ),
         "observability_db_sha256": sha256_file(observability_db),
     }
@@ -408,6 +437,27 @@ def load_prompt_injection_file(path: Path) -> Any:
     raise ValueError(
         "Prompt injection file must be a JSON list of fixture outcomes or an "
         "object with a 'prompt_injection_evaluations' list"
+    )
+
+
+def load_bias_counterfactual_file(path: Path) -> Any:
+    """Load and shape-check an external D6 counterfactual result file."""
+    try:
+        raw = json.loads(path.read_text(encoding="utf-8"))
+    except OSError as exc:
+        raise ValueError(f"Bias counterfactual file '{path}' could not be read: {exc}") from exc
+    except json.JSONDecodeError as exc:
+        raise ValueError(
+            f"Bias counterfactual file '{path}' is not valid JSON: {exc}"
+        ) from exc
+
+    if isinstance(raw, list):
+        return raw
+    if isinstance(raw, dict) and isinstance(raw.get("bias_counterfactual_evaluations"), list):
+        return raw["bias_counterfactual_evaluations"]
+    raise ValueError(
+        "Bias counterfactual file must be a JSON list of counterfactual outcomes "
+        "or an object with a 'bias_counterfactual_evaluations' list"
     )
 
 

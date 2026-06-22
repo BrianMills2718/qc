@@ -663,6 +663,20 @@ def test_scorecard_reports_prompt_injection_unavailable_without_eval_data():
     assert "not evidence" in inv7["note"]
 
 
+def test_scorecard_reports_bias_counterfactual_unavailable_without_eval_data():
+    state = ProjectState(
+        name="no-bias-eval",
+        config=ProjectConfig(methodology=Methodology.THEMATIC_ANALYSIS),
+        corpus=Corpus(documents=[Document(name="d.txt", content="Participant text.")]),
+    )
+
+    d6 = phase0_scorecard(state)["bias_counterfactual_d6"]
+
+    assert d6["status"] == "not_available"
+    assert "bias_counterfactual_evaluations" in d6["reason"]
+    assert "not evidence" in d6["note"]
+
+
 def test_d10_cost_latency_unavailable_when_db_missing(tmp_path):
     state = ProjectState(id="project-cost", name="Cost")
 
@@ -886,6 +900,64 @@ def test_scorecard_invalid_prompt_injection_metadata_fails_loud():
     )
 
     with pytest.raises(ValueError, match="prompt_injection_evaluations"):
+        phase0_scorecard(state)
+
+
+def test_scorecard_scores_bias_counterfactual_outcomes():
+    state = ProjectState(
+        name="bias-eval",
+        config=ProjectConfig(
+            methodology=Methodology.THEMATIC_ANALYSIS,
+            extra={
+                "bias_counterfactual_evaluations": [
+                    {
+                        "case_id": "parental-status-stable",
+                        "attribute": "parental_status",
+                        "original_codes": ["trust", "cost"],
+                        "counterfactual_codes": ["trust", "cost"],
+                    },
+                    {
+                        "case_id": "immigration-shift",
+                        "attribute": "immigration_status",
+                        "original_codes": ["access", "trust"],
+                        "counterfactual_codes": ["access", "surveillance"],
+                    },
+                    {
+                        "case_id": "non-invariant-control",
+                        "attribute": "topic_control",
+                        "original_codes": ["access"],
+                        "counterfactual_codes": ["transport"],
+                        "expected_invariant": False,
+                    },
+                ],
+            },
+        ),
+    )
+
+    d6 = phase0_scorecard(state)["bias_counterfactual_d6"]
+
+    assert d6["status"] == "scored"
+    assert d6["total_cases"] == 3
+    assert d6["invariant_cases"] == 2
+    assert d6["excluded_non_invariant_cases"] == 1
+    assert d6["changed_invariant_cases"] == 1
+    assert d6["unchanged_invariant_cases"] == 1
+    assert d6["code_change_rate"] == pytest.approx(0.5)
+    assert d6["mean_jaccard_distance"] == pytest.approx(1 / 3)
+    assert d6["changed_case_ids"] == ["immigration-shift"]
+    assert d6["by_attribute"]["immigration_status"]["code_change_rate"] == 1.0
+    assert d6["by_attribute"]["immigration_status"]["mean_jaccard_distance"] == pytest.approx(2 / 3)
+    assert d6["by_attribute"]["immigration_status"]["changed_case_ids"] == ["immigration-shift"]
+    assert d6["by_attribute"]["parental_status"]["code_change_rate"] == 0.0
+    assert "not causal proof" in d6["note"]
+
+
+def test_scorecard_invalid_bias_counterfactual_metadata_fails_loud():
+    state = ProjectState(
+        config=ProjectConfig(extra={"bias_counterfactual_evaluations": {"unexpected": []}}),
+    )
+
+    with pytest.raises(ValueError, match="bias_counterfactual_evaluations"):
         phase0_scorecard(state)
 
 

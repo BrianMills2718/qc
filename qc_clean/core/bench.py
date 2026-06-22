@@ -40,6 +40,7 @@ _D7_GOLD_EXTRA_KEY = "disconfirmation_gold"
 _D7_BASELINES_EXTRA_KEY = "disconfirmation_baselines"
 _RUN_TIMING_EXTRA_KEY = "run_timing"
 _PROMPT_INJECTION_EXTRA_KEY = "prompt_injection_evaluations"
+_BIAS_COUNTERFACTUAL_EXTRA_KEY = "bias_counterfactual_evaluations"
 _EXACT_BOOTSTRAP_EXTRA_KEY = "phase0_exact_bootstrap"
 _RELIABILITY_BOOTSTRAP_EXTRA_KEY = "phase0_reliability_bootstrap"
 DEFAULT_OBSERVABILITY_DB_PATH = Path.home() / "projects" / "data" / "llm_observability.db"
@@ -153,6 +154,56 @@ class PromptInjectionEvaluation(BaseModel):
         return self
 
 
+class BiasCounterfactualEvaluation(BaseModel):
+    """External counterfactual identity-swap outcome used for D6 scoring."""
+
+    case_id: str = Field(description="Stable ID for the counterfactual test case")
+    attribute: str = Field(
+        default="unspecified",
+        description="Respondent attribute or identity cue varied in this case",
+    )
+    original_codes: list[str] = Field(
+        description="Code IDs or names assigned to the original text"
+    )
+    counterfactual_codes: list[str] = Field(
+        description="Code IDs or names assigned after identity-cue masking or swapping"
+    )
+    expected_invariant: bool = Field(
+        default=True,
+        description="True when substantive meaning should be unchanged by the swap",
+    )
+    evaluator: str = Field(
+        default="unspecified",
+        description="Evaluator or harness that produced this counterfactual outcome",
+    )
+    original_text_hash: str | None = Field(
+        default=None,
+        description="Optional hash of the original text variant",
+    )
+    counterfactual_text_hash: str | None = Field(
+        default=None,
+        description="Optional hash of the counterfactual text variant",
+    )
+    notes: str = Field(default="", description="Optional human-readable notes")
+
+    @model_validator(mode="after")
+    def require_stable_case_metadata(self) -> "BiasCounterfactualEvaluation":
+        """Normalize stable keys and reject unusable code labels."""
+        self.case_id = self.case_id.strip()
+        if not self.case_id:
+            raise ValueError("bias counterfactual case_id must be non-empty")
+        self.attribute = self.attribute.strip() or "unspecified"
+        self.original_codes = _clean_counterfactual_codes(
+            self.original_codes,
+            "original_codes",
+        )
+        self.counterfactual_codes = _clean_counterfactual_codes(
+            self.counterfactual_codes,
+            "counterfactual_codes",
+        )
+        return self
+
+
 class DisconfirmationBaselinePrediction(BaseModel):
     """Baseline contrary-evidence predictions used for D7 comparison."""
 
@@ -220,6 +271,8 @@ def phase0_scorecard(state: ProjectState) -> Dict[str, Any]:
         "category_saturation": assess_category_saturation(state).model_dump(),
         # INV-7 — prompt-injection fixture results when an external evaluator provides them.
         "prompt_injection_inv7": prompt_injection_scorecard(state),
+        # D6 — externally supplied counterfactual identity-cue swap diagnostics.
+        "bias_counterfactual_d6": bias_counterfactual_scorecard(state),
         "data_warnings": list(state.data_warnings),
     }
 
@@ -776,6 +829,143 @@ def _prompt_injection_by_surface(
         bucket["attack_success_rate"] = _safe_div(bucket["failed"], bucket["total"])
         bucket["pass_rate"] = _safe_div(bucket["passed"], bucket["total"])
     return dict(sorted(summary.items()))
+
+
+def bias_counterfactual_scorecard(state: ProjectState) -> Dict[str, Any]:
+    """Score externally supplied D6 counterfactual identity-swap outcomes."""
+    evaluations = _bias_counterfactual_evaluations(state)
+    if not evaluations:
+        return {
+            "status": "not_available",
+            "reason": (
+                "No bias counterfactual outcomes found at "
+                f"ProjectState.config.extra['{_BIAS_COUNTERFACTUAL_EXTRA_KEY}']; "
+                "scoring requires externally supplied identity-cue swap outcomes."
+            ),
+            "note": (
+                "Absence of D6 counterfactual data is not evidence that coding is "
+                "unbiased; stratified and counterfactual bias audits are separate "
+                "from ordinary Phase 0 scoring."
+            ),
+        }
+
+    invariant = [ev for ev in evaluations if ev.expected_invariant]
+    case_metrics = [_bias_counterfactual_case_metrics(ev) for ev in invariant]
+    changed = [metric for metric in case_metrics if metric["changed"]]
+    jaccard_distances = [metric["jaccard_distance"] for metric in case_metrics]
+    return {
+        "status": "scored",
+        "source": f"ProjectState.config.extra['{_BIAS_COUNTERFACTUAL_EXTRA_KEY}']",
+        "total_cases": len(evaluations),
+        "invariant_cases": len(invariant),
+        "excluded_non_invariant_cases": len(evaluations) - len(invariant),
+        "changed_invariant_cases": len(changed),
+        "unchanged_invariant_cases": len(invariant) - len(changed),
+        "code_change_rate": _safe_div_or_none(len(changed), len(invariant)),
+        "mean_jaccard_distance": _mean_or_none(jaccard_distances),
+        "changed_case_ids": sorted(metric["case_id"] for metric in changed),
+        "by_attribute": _bias_counterfactual_by_attribute(invariant),
+        "note": (
+            "Scores externally supplied counterfactual identity-cue outcomes. "
+            "This is a measurement substrate, not causal proof of bias or "
+            "evidence that the system is bias-free."
+        ),
+    }
+
+
+def _bias_counterfactual_evaluations(state: ProjectState) -> list[BiasCounterfactualEvaluation]:
+    """Load D6 counterfactual outcomes from project config metadata."""
+    raw = state.config.extra.get(_BIAS_COUNTERFACTUAL_EXTRA_KEY)
+    if raw is None:
+        return []
+    if isinstance(raw, dict) and _BIAS_COUNTERFACTUAL_EXTRA_KEY in raw:
+        raw = raw[_BIAS_COUNTERFACTUAL_EXTRA_KEY]
+    if not isinstance(raw, list):
+        raise ValueError(
+            f"ProjectState.config.extra['{_BIAS_COUNTERFACTUAL_EXTRA_KEY}'] must be a "
+            "list of counterfactual identity-swap outcomes"
+        )
+    try:
+        return [BiasCounterfactualEvaluation.model_validate(item) for item in raw]
+    except ValidationError as exc:
+        raise ValueError(f"Invalid bias_counterfactual_evaluations metadata: {exc}") from exc
+
+
+def _clean_counterfactual_codes(codes: list[str], field_name: str) -> list[str]:
+    """Normalize code labels while preserving first-seen order."""
+    cleaned: list[str] = []
+    for code in codes:
+        normalized = code.strip()
+        if not normalized:
+            raise ValueError(f"bias counterfactual {field_name} contains a blank code")
+        if normalized not in cleaned:
+            cleaned.append(normalized)
+    return cleaned
+
+
+def _bias_counterfactual_case_metrics(
+    evaluation: BiasCounterfactualEvaluation,
+) -> dict[str, Any]:
+    """Compute code-set distance for one invariant counterfactual case."""
+    original = set(evaluation.original_codes)
+    counterfactual = set(evaluation.counterfactual_codes)
+    union = original | counterfactual
+    jaccard_distance = 0.0
+    if union:
+        jaccard_distance = 1 - (len(original & counterfactual) / len(union))
+    return {
+        "case_id": evaluation.case_id,
+        "attribute": evaluation.attribute,
+        "changed": original != counterfactual,
+        "jaccard_distance": jaccard_distance,
+        "added_codes": sorted(counterfactual - original),
+        "removed_codes": sorted(original - counterfactual),
+    }
+
+
+def _bias_counterfactual_by_attribute(
+    evaluations: list[BiasCounterfactualEvaluation],
+) -> dict[str, dict[str, Any]]:
+    """Summarize D6 invariant-case changes by varied attribute."""
+    summary: dict[str, dict[str, Any]] = {}
+    distances: dict[str, list[float]] = {}
+    for evaluation in evaluations:
+        metrics = _bias_counterfactual_case_metrics(evaluation)
+        bucket = summary.setdefault(
+            evaluation.attribute,
+            {
+                "invariant_cases": 0,
+                "changed_invariant_cases": 0,
+                "unchanged_invariant_cases": 0,
+                "code_change_rate": None,
+                "mean_jaccard_distance": None,
+                "changed_case_ids": [],
+            },
+        )
+        distances.setdefault(evaluation.attribute, [])
+        bucket["invariant_cases"] += 1
+        distances[evaluation.attribute].append(metrics["jaccard_distance"])
+        if metrics["changed"]:
+            bucket["changed_invariant_cases"] += 1
+            bucket["changed_case_ids"].append(metrics["case_id"])
+        else:
+            bucket["unchanged_invariant_cases"] += 1
+
+    for attribute, bucket in summary.items():
+        bucket["changed_case_ids"] = sorted(bucket["changed_case_ids"])
+        bucket["code_change_rate"] = _safe_div_or_none(
+            bucket["changed_invariant_cases"],
+            bucket["invariant_cases"],
+        )
+        bucket["mean_jaccard_distance"] = _mean_or_none(distances[attribute])
+    return dict(sorted(summary.items()))
+
+
+def _mean_or_none(values: list[float]) -> float | None:
+    """Return a mean only when at least one value is available."""
+    if not values:
+        return None
+    return sum(values) / len(values)
 
 
 def disconfirmation_d7_scorecard(state: ProjectState) -> Dict[str, Any]:

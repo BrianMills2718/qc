@@ -143,6 +143,10 @@ Examples:
         help='Optional INV-7 prompt-injection fixture results JSON file; applied in memory only'
     )
     bench_parser.add_argument(
+        '--bias-counterfactual-file',
+        help='Optional D6 counterfactual identity-swap outcome JSON file; applied in memory only'
+    )
+    bench_parser.add_argument(
         '--observability-db',
         help='Optional llm_client observability SQLite DB for D10 cost/latency'
     )
@@ -349,6 +353,8 @@ def handle_bench_command(args) -> int:
         argv.extend(["--d7-baselines-file", args.d7_baselines_file])
     if args.prompt_injection_file:
         argv.extend(["--prompt-injection-file", args.prompt_injection_file])
+    if args.bias_counterfactual_file:
+        argv.extend(["--bias-counterfactual-file", args.bias_counterfactual_file])
     if args.observability_db:
         argv.extend(["--observability-db", args.observability_db])
     if args.trace_id:
