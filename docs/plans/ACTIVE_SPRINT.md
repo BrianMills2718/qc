@@ -22,9 +22,9 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #92 (`INV3_ADJUDICATION_RESPONSE_VALIDATOR.md`): validate
-   completed adjudication sample responses without importing them as gold,
-   scoring correctness, or claiming expert evidence.
+1. Create and execute the next high-value lane: corpus-scope phrasing lint
+   beyond export warnings, so agent/human-authored summaries can be checked for
+   population-generalizing language when scope is absent or under-specified.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
@@ -51,7 +51,11 @@ expert adjudication or D7 validity evidence. `make adjudication-sample` and
 `qc_cli.py project adjudication-sample` now export unlabeled schema_version=1
 sample packets over applications, claims, negative cases, and relationships for
 human/expert review inputs with hashes and source context; these packets are
-not labels, gold data, correctness estimates, or validity evidence.
+not labels, gold data, correctness estimates, or validity evidence. Completed
+adjudication response packages can now be shape/completeness-validated through
+`make validate-adjudication-responses PACKAGE=sample.json`; this is a protocol
+gate only and still does not import labels, create gold, score correctness, or
+provide expert evidence.
 MCP now exposes `qc_review_decisions` for agent-driven review decisions,
 including claim targets with rationale preservation, while keeping the old
 `qc_review_codes` tool compatible. MCP also exposes `qc_review_claims` as a

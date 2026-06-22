@@ -1,10 +1,42 @@
 # Plan #92: INV-3 Adjudication Response Validator
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Plan #91 adjudication sample export
 **Blocks:** Safe label import from adjudication packets; D3/D7 gold conversion workflows
+
+---
+
+## Outcome
+
+Implemented a deterministic completed-response validator for schema_version=1
+adjudication sample packets. The validator accepts item-level `response` objects
+or filled `response_template` objects, reports complete/invalid status with
+item-level errors and validity-label counts, rejects duplicate item IDs, and
+preserves the caveat that response validation is not expert evidence or a gold
+set. Added the agent-drivable script and Make target:
+
+- `scripts/validate_adjudication_responses.py sample.json`
+- `make validate-adjudication-responses PACKAGE=sample.json`
+
+Implementation commit: `4c547ed`
+
+## Verification
+
+- TDD red check: `python -m pytest tests/test_adjudication_sample.py -q`
+  initially failed with `ImportError` for the missing
+  `validate_adjudication_response_payload`.
+- Focused pass: `python -m pytest tests/test_adjudication_sample.py -q` →
+  `6 passed`.
+- Focused lint: `python -m ruff check qc_clean/core/adjudication_sample.py scripts/validate_adjudication_responses.py tests/test_adjudication_sample.py` →
+  `All checks passed!`
+- Make target discovery: `make help` lists
+  `validate-adjudication-responses`.
+- Docs gate: `make docs-check` passed.
+- Full gate: `make check` → `844 passed, 1 skipped, 8 deselected`; Ruff and
+  docs checks passed.
+- Type-check status: `make check` reports `Type check not yet configured`.
 
 ---
 
@@ -136,27 +168,27 @@ local sample package format.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] Completed sample packets can be validated without mutating project state.
-- [ ] Missing/blank responses, bad labels, missing required rationales, and
+- [x] Completed sample packets can be validated without mutating project state.
+- [x] Missing/blank responses, bad labels, missing required rationales, and
   duplicate item IDs produce item-level errors.
-- [ ] Validator script emits compact JSON and exits nonzero on invalid packets.
-- [ ] Make target exposes response validation for agents.
-- [ ] Docs state response validation is a protocol check, not expert evidence.
+- [x] Validator script emits compact JSON and exits nonzero on invalid packets.
+- [x] Make target exposes response validation for agents.
+- [x] Docs state response validation is a protocol check, not expert evidence.
 
 > Process criteria:
-- [ ] Required focused tests pass.
-- [ ] Full `make check` passes or any failure is documented with evidence.
-- [ ] Type-check status is reported.
-- [ ] Verified work is committed and pushed.
+- [x] Required focused tests pass.
+- [x] Full `make check` passes or any failure is documented with evidence.
+- [x] Type-check status is reported.
+- [x] Verified work is committed and pushed.
 
 ---
 
 ## Open Questions
 
-- [ ] Should valid responses with `corrected_value` be normalized into typed
+- [x] Should valid responses with `corrected_value` be normalized into typed
   review decisions? - Status: DEFERRED | Why it matters: that belongs to a
   future import/apply workflow, not response validation.
-- [ ] Should validated responses be convertible to D3/D7 gold packages? -
+- [x] Should validated responses be convertible to D3/D7 gold packages? -
   Status: DEFERRED | Why it matters: gold conversion must preserve metric-
   specific semantics and not treat arbitrary responses as scorecard truth.
 
