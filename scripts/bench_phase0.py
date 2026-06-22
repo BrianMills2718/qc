@@ -10,6 +10,7 @@ Usage:
         [--bias-stratified-file bias_stratified.json]
         [--d4-codebook-quality-protocol-file protocol.json]
         [--codebook-quality-file quality.json]
+        [--d8-gt-fidelity-protocol-file protocol.json]
         [--gt-fidelity-file gt_fidelity.json]
         [--interpretive-preference-file preference.json]
         [--confidence-calibration-file calibration.json]
@@ -46,6 +47,7 @@ from qc_clean.core.d4_codebook_quality_preflight import (
     preflight_d4_codebook_quality_payloads,
 )
 from qc_clean.core.d6_bias_preflight import preflight_d6_bias_payloads
+from qc_clean.core.d8_gt_fidelity_preflight import preflight_d8_gt_fidelity_payloads
 from qc_clean.core.d3_gold import application_gold_payload_for_scorecard
 from qc_clean.core.d7_gold import d7_gold_payload_for_scorecard
 from qc_clean.core.inv7_package import prompt_injection_payload_for_scorecard
@@ -100,6 +102,13 @@ def main(argv: Sequence[str] | None = None) -> int:
         help="Optional D4 codebook-quality rubric outcome JSON file; applied in memory only",
     )
     parser.add_argument(
+        "--d8-gt-fidelity-protocol-file",
+        help=(
+            "Optional D8 GT-fidelity protocol JSON file; preflights supplied "
+            "D8 rows before scoring"
+        ),
+    )
+    parser.add_argument(
         "--gt-fidelity-file",
         help="Optional D8 GT-fidelity rubric outcome JSON file; applied in memory only",
     )
@@ -142,6 +151,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     bias_counterfactual_results: Any | None = None
     bias_stratified_results: Any | None = None
     codebook_quality_results: Any | None = None
+    gt_fidelity_results: Any | None = None
 
     if args.d3_gold_file:
         try:
@@ -297,6 +307,33 @@ def main(argv: Sequence[str] | None = None) -> int:
         state.config.extra = dict(state.config.extra)
         state.config.extra["gt_fidelity_evaluations"] = gt_fidelity_results
 
+    d8_gt_fidelity_preflight_report = None
+    if args.d8_gt_fidelity_protocol_file:
+        try:
+            d8_gt_fidelity_protocol = load_d8_gt_fidelity_protocol_file(
+                Path(args.d8_gt_fidelity_protocol_file)
+            )
+        except ValueError as exc:
+            print(json.dumps({"error": str(exc)}))
+            return 1
+        d8_gt_fidelity_preflight_report = preflight_d8_gt_fidelity_payloads(
+            d8_gt_fidelity_protocol,
+            gt_fidelity_results,
+            gt_fidelity_file_sha256=(
+                sha256_file(Path(args.gt_fidelity_file))
+                if args.gt_fidelity_file
+                else None
+            ),
+        )
+        if d8_gt_fidelity_preflight_report.status != "pass":
+            print(json.dumps({
+                "error": "D8 GT-fidelity preflight failed",
+                "preflight_report": d8_gt_fidelity_preflight_report.model_dump(
+                    mode="json"
+                ),
+            }))
+            return 1
+
     if args.interpretive_preference_file:
         try:
             interpretive_preference_results = load_interpretive_preference_file(
@@ -338,6 +375,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         card.setdefault("_meta", {}).setdefault("preflight_reports", {})[
             "d4_codebook_quality"
         ] = d4_codebook_quality_preflight_report.model_dump(mode="json")
+    if d8_gt_fidelity_preflight_report is not None:
+        card.setdefault("_meta", {}).setdefault("preflight_reports", {})[
+            "d8_gt_fidelity"
+        ] = d8_gt_fidelity_preflight_report.model_dump(mode="json")
     card.setdefault("_meta", {})["input_hashes"] = phase0_input_hashes(
         loaded_state,
         d3_gold_file=Path(args.d3_gold_file) if args.d3_gold_file else None,
@@ -353,6 +394,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         d4_codebook_quality_protocol_file=(
             Path(args.d4_codebook_quality_protocol_file)
             if args.d4_codebook_quality_protocol_file
+            else None
+        ),
+        d8_gt_fidelity_protocol_file=(
+            Path(args.d8_gt_fidelity_protocol_file)
+            if args.d8_gt_fidelity_protocol_file
             else None
         ),
         bias_counterfactual_file=(
@@ -567,6 +613,11 @@ def phase0_command_provenance(args: argparse.Namespace) -> dict[str, Any]:
             if args.d4_codebook_quality_protocol_file
             else None
         ),
+        "d8_gt_fidelity_protocol_file": (
+            str(Path(args.d8_gt_fidelity_protocol_file))
+            if args.d8_gt_fidelity_protocol_file
+            else None
+        ),
         "bias_counterfactual_file": (
             str(Path(args.bias_counterfactual_file))
             if args.bias_counterfactual_file
@@ -634,6 +685,7 @@ def phase0_input_hashes(
     prompt_injection_file: Path | None,
     d6_bias_protocol_file: Path | None,
     d4_codebook_quality_protocol_file: Path | None,
+    d8_gt_fidelity_protocol_file: Path | None,
     bias_counterfactual_file: Path | None,
     bias_stratified_file: Path | None,
     codebook_quality_file: Path | None,
@@ -667,6 +719,11 @@ def phase0_input_hashes(
         "d4_codebook_quality_protocol_file_sha256": (
             sha256_file(d4_codebook_quality_protocol_file)
             if d4_codebook_quality_protocol_file
+            else None
+        ),
+        "d8_gt_fidelity_protocol_file_sha256": (
+            sha256_file(d8_gt_fidelity_protocol_file)
+            if d8_gt_fidelity_protocol_file
             else None
         ),
         "bias_counterfactual_file_sha256": (
@@ -885,6 +942,23 @@ def load_d4_codebook_quality_protocol_file(path: Path) -> Any:
         ) from exc
     if not isinstance(raw, dict):
         raise ValueError("D4 codebook-quality protocol file must be a JSON object")
+    return raw
+
+
+def load_d8_gt_fidelity_protocol_file(path: Path) -> Any:
+    """Load a D8 GT-fidelity protocol file for score-time preflight."""
+    try:
+        raw = json.loads(path.read_text(encoding="utf-8"))
+    except OSError as exc:
+        raise ValueError(
+            f"D8 GT-fidelity protocol file '{path}' could not be read: {exc}"
+        ) from exc
+    except json.JSONDecodeError as exc:
+        raise ValueError(
+            f"D8 GT-fidelity protocol file '{path}' is not valid JSON: {exc}"
+        ) from exc
+    if not isinstance(raw, dict):
+        raise ValueError("D8 GT-fidelity protocol file must be a JSON object")
     return raw
 
 

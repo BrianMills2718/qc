@@ -26,6 +26,7 @@ _PATH_FLAGS = {
     "prompt_injection_file": "--prompt-injection-file",
     "d6_bias_protocol_file": "--d6-bias-protocol-file",
     "d4_codebook_quality_protocol_file": "--d4-codebook-quality-protocol-file",
+    "d8_gt_fidelity_protocol_file": "--d8-gt-fidelity-protocol-file",
     "bias_counterfactual_file": "--bias-counterfactual-file",
     "bias_stratified_file": "--bias-stratified-file",
     "codebook_quality_file": "--codebook-quality-file",
@@ -66,6 +67,10 @@ class Phase0BenchmarkPackage(BaseModel):
     d4_codebook_quality_protocol_file: str | None = Field(
         default=None,
         description="Optional D4 codebook-quality protocol JSON path",
+    )
+    d8_gt_fidelity_protocol_file: str | None = Field(
+        default=None,
+        description="Optional D8 GT-fidelity protocol JSON path",
     )
     bias_counterfactual_file: str | None = Field(
         default=None,
