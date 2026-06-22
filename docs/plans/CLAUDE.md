@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 129 | QC bench CLI flag parity | High | In Progress | `QC_BENCH_CLI_FLAG_PARITY.md` |
 
 ## Completed Plans
 

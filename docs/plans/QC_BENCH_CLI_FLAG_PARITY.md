@@ -1,6 +1,6 @@
 # Plan #129: QC Bench CLI Flag Parity
 
-**Status:** Planned
+**Status:** In Progress
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Phase 0 guard/input surfaces already implemented in `scripts/bench_phase0.py`
