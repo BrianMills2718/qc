@@ -75,6 +75,7 @@ make mirror-export-audit-db LOG=export_audit_events.jsonl DB=export_audit_events
 make verify-export-audit-db DB=export_audit_events.sqlite  # Verify local SQLite export audit event mirror
 make validate-d3-baseline-package PACKAGE=d3_baseline.json  # Validate versioned D3 application baseline package
 make validate-d3-comparison-protocol PROTOCOL=d3_protocol.json  # Validate pre-run D3 baseline comparison protocol, including optional metric criteria
+make d3-comparison-preflight PROTOCOL=d3_protocol.json GOLD=d3_gold.json PREDICTIONS="baseline.json"  # Preflight D3 comparison inputs before scoring
 python qc_cli.py validate-d3-baseline-package d3_baseline.json  # Canonical CLI wrapper for D3 baseline package validation
 make validate-d7-gold GOLD=gold_set.json  # Validate versioned held-out D7 gold-set package
 make validate-d7-baseline-package PACKAGE=d7_baseline.json  # Validate versioned D7 retrieval/live baseline package
