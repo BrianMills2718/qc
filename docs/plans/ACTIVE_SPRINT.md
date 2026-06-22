@@ -22,9 +22,9 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Create and execute the next validity-infrastructure slice:
-   response-to-protocol preflight, checking completed adjudication responses
-   against the registered protocol and sample package before import.
+1. Execute Plan #105 (`ADJUDICATION_RESPONSE_PREFLIGHT.md`): check completed
+   adjudication responses against the registered protocol and sample package
+   before import.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
