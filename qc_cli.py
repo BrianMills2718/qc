@@ -219,6 +219,22 @@ Examples:
         default='default',
         help='Analysis methodology (default: default)'
     )
+    proj_create.add_argument('--phenomenon', help='Phenomenon or topic the analysis is scoped to')
+    proj_create.add_argument('--population', help='Population or case universe claims may apply to')
+    proj_create.add_argument('--sampling-frame', dest='sampling_frame', help='How documents/participants were selected')
+    proj_create.add_argument(
+        '--include',
+        dest='inclusion_criteria',
+        action='append',
+        help='Inclusion criterion; repeat for multiple criteria',
+    )
+    proj_create.add_argument(
+        '--exclude',
+        dest='exclusion_criteria',
+        action='append',
+        help='Exclusion criterion; repeat for multiple criteria',
+    )
+    proj_create.add_argument('--notes', help='Additional scope caveats or notes')
 
     proj_list = project_subparsers.add_parser('list', help='List all projects')
 

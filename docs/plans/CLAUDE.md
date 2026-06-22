@@ -6,7 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| #76 | Corpus Scope Create Surfaces | High | Planned | `CORPUS_SCOPE_CREATE_SURFACES.md` |
+| #76 | Corpus Scope Create Surfaces | High | Implemented | `CORPUS_SCOPE_CREATE_SURFACES.md` |
 
 ## Completed Plans
 

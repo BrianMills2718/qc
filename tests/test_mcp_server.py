@@ -23,6 +23,7 @@ from qc_clean.schemas.domain import (
     CodeApplication,
     Codebook,
     Corpus,
+    CorpusScope,
     Document,
     Entity,
     IRRResult,
@@ -132,6 +133,42 @@ class TestProjectManagement:
         assert result["name"] == "My Study"
         assert result["methodology"] == "grounded_theory"
         assert "project_id" in result
+        assert result["corpus_scope"] is None
+        assert result["corpus_scope_set"] is False
+
+    def test_create_project_with_scope(self, tmp_store):
+        result = json.loads(
+            qc_mcp_server.qc_create_project(
+                "Scoped Study",
+                "thematic_analysis",
+                phenomenon="AI adoption",
+                population="Clinic staff",
+                sampling_frame="Pilot clinics",
+                inclusion_criteria=["Pilot participant"],
+                exclusion_criteria=["Vendors"],
+                notes="Bounded to early adopters.",
+            )
+        )
+
+        assert result["name"] == "Scoped Study"
+        assert result["corpus_scope_set"] is True
+        assert result["corpus_scope"] == {
+            "phenomenon": "AI adoption",
+            "population": "Clinic staff",
+            "sampling_frame": "Pilot clinics",
+            "inclusion_criteria": ["Pilot participant"],
+            "exclusion_criteria": ["Vendors"],
+            "notes": "Bounded to early adopters.",
+        }
+        loaded = tmp_store.load(result["project_id"])
+        assert loaded.corpus_scope == CorpusScope(
+            phenomenon="AI adoption",
+            population="Clinic staff",
+            sampling_frame="Pilot clinics",
+            inclusion_criteria=["Pilot participant"],
+            exclusion_criteria=["Vendors"],
+            notes="Bounded to early adopters.",
+        )
 
     def test_create_project_invalid_methodology(self, tmp_store):
         result = json.loads(qc_mcp_server.qc_create_project("Bad", "invalid"))

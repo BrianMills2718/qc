@@ -584,6 +584,47 @@ class TestCLIParsing:
         assert args.exclusion_criteria == ["Vendors"]
         assert args.notes == "Bounded to early adopters."
 
+    def test_create_subparser_accepts_scope_fields(self):
+        from qc_cli import create_parser
+        parser = create_parser()
+
+        args = parser.parse_args([
+            "project",
+            "create",
+            "--name",
+            "Scoped Project",
+            "--methodology",
+            "thematic_analysis",
+            "--phenomenon",
+            "AI adoption",
+            "--population",
+            "Clinic staff",
+            "--sampling-frame",
+            "Pilot clinics",
+            "--include",
+            "Pilot participant",
+            "--include",
+            "Direct workflow involvement",
+            "--exclude",
+            "Vendors",
+            "--notes",
+            "Bounded to early adopters.",
+        ])
+
+        assert args.command == "project"
+        assert args.project_action == "create"
+        assert args.name == "Scoped Project"
+        assert args.methodology == "thematic_analysis"
+        assert args.phenomenon == "AI adoption"
+        assert args.population == "Clinic staff"
+        assert args.sampling_frame == "Pilot clinics"
+        assert args.inclusion_criteria == [
+            "Pilot participant",
+            "Direct workflow involvement",
+        ]
+        assert args.exclusion_criteria == ["Vendors"]
+        assert args.notes == "Bounded to early adopters."
+
 
 class TestProjectClaimsCommand:
     def test_project_claims_command_outputs_summary(self, tmp_store, capsys):
@@ -620,6 +661,61 @@ class TestProjectClaimsCommand:
 
 
 class TestProjectScopeCommand:
+    def test_project_create_command_leaves_scope_unset_when_omitted(self, tmp_store, capsys):
+        from qc_clean.core.cli.commands.project import _create_project
+
+        args = SimpleNamespace(
+            name="Unscoped Project",
+            methodology="thematic_analysis",
+        )
+
+        result = _create_project(tmp_store, args)
+
+        assert result == 0
+        out = capsys.readouterr().out
+        project_id = next(
+            line.split(": ", 1)[1]
+            for line in out.splitlines()
+            if line.startswith("Created project:")
+        )
+        loaded = tmp_store.load(project_id)
+        assert loaded.corpus_scope is None
+        assert "Corpus scope: set" not in out
+
+    def test_project_create_command_saves_scope_when_supplied(self, tmp_store, capsys):
+        from qc_clean.core.cli.commands.project import _create_project
+
+        args = SimpleNamespace(
+            name="Scoped Project",
+            methodology="thematic_analysis",
+            phenomenon="AI adoption",
+            population="Clinic staff",
+            sampling_frame="Pilot clinics",
+            inclusion_criteria=["Pilot participant"],
+            exclusion_criteria=["Vendors"],
+            notes="Bounded to early adopters.",
+        )
+
+        result = _create_project(tmp_store, args)
+
+        assert result == 0
+        out = capsys.readouterr().out
+        project_id = next(
+            line.split(": ", 1)[1]
+            for line in out.splitlines()
+            if line.startswith("Created project:")
+        )
+        loaded = tmp_store.load(project_id)
+        assert loaded.corpus_scope == CorpusScope(
+            phenomenon="AI adoption",
+            population="Clinic staff",
+            sampling_frame="Pilot clinics",
+            inclusion_criteria=["Pilot participant"],
+            exclusion_criteria=["Vendors"],
+            notes="Bounded to early adopters.",
+        )
+        assert "Corpus scope: set" in out
+
     def test_project_scope_command_updates_and_outputs_scope(self, tmp_store, capsys):
         from qc_clean.core.cli.commands.project import _show_or_update_scope
 

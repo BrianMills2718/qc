@@ -31,6 +31,7 @@ from qc_clean.core.pipeline.pipeline_factory import create_pipeline, create_incr
 from qc_clean.core.pipeline.pipeline_engine import PipelineContext
 from qc_clean.core.pipeline.irr import run_irr_analysis, run_stability_analysis
 from qc_clean.schemas.domain import (
+    CorpusScope,
     Document,
     HumanReviewDecision,
     Methodology,
@@ -96,12 +97,24 @@ def qc_list_projects() -> str:
 def qc_create_project(
     name: str,
     methodology: str = "thematic_analysis",
+    phenomenon: Optional[str] = None,
+    population: Optional[str] = None,
+    sampling_frame: Optional[str] = None,
+    inclusion_criteria: Optional[List[str]] = None,
+    exclusion_criteria: Optional[List[str]] = None,
+    notes: Optional[str] = None,
 ) -> str:
     """Create a new qualitative coding project.
 
     Args:
         name: Project name (e.g. "Interview Study 2026")
         methodology: "thematic_analysis" (default) or "grounded_theory"
+        phenomenon: Optional phenomenon, topic, or research question scope.
+        population: Optional population or case universe for claims.
+        sampling_frame: Optional description of how sources were selected.
+        inclusion_criteria: Optional criteria that qualified sources.
+        exclusion_criteria: Optional criteria that ruled sources out of scope.
+        notes: Optional caveats or scope-condition notes.
     """
     try:
         meth = Methodology(methodology)
@@ -112,11 +125,35 @@ def qc_create_project(
 
     config = ProjectConfig(methodology=meth)
     state = ProjectState(name=name, config=config)
+    scope_requested = any(
+        value is not None
+        for value in (
+            phenomenon,
+            population,
+            sampling_frame,
+            inclusion_criteria,
+            exclusion_criteria,
+            notes,
+        )
+    )
+    if scope_requested:
+        state.corpus_scope = CorpusScope(
+            phenomenon=phenomenon or "",
+            population=population or "",
+            sampling_frame=sampling_frame or "",
+            inclusion_criteria=list(inclusion_criteria or []),
+            exclusion_criteria=list(exclusion_criteria or []),
+            notes=notes or "",
+        )
     path = store.save(state)
     return json.dumps({
         "project_id": state.id,
         "name": state.name,
         "methodology": meth.value,
+        "corpus_scope": (
+            state.corpus_scope.model_dump() if state.corpus_scope is not None else None
+        ),
+        "corpus_scope_set": state.corpus_scope is not None,
         "saved_to": str(path),
     })
 

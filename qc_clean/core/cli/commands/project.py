@@ -66,10 +66,13 @@ def _create_project(store: ProjectStore, args) -> int:
         name=name,
         config=ProjectConfig(methodology=meth),
     )
+    state.corpus_scope = _scope_from_create_args(args)
     path = store.save(state)
     print(f"Created project: {state.id}")
     print(f"  Name: {state.name}")
     print(f"  Methodology: {meth.value}")
+    if state.corpus_scope is not None:
+        print("  Corpus scope: set")
     print(f"  Saved to: {path}")
     return 0
 
@@ -533,6 +536,21 @@ def _scope_update_requested(args) -> bool:
             "exclusion_criteria",
             "notes",
         )
+    )
+
+
+def _scope_from_create_args(args) -> CorpusScope | None:
+    """Build a corpus scope for project creation when scope fields are supplied."""
+    if not _scope_update_requested(args):
+        return None
+
+    return CorpusScope(
+        phenomenon=getattr(args, "phenomenon", None) or "",
+        population=getattr(args, "population", None) or "",
+        sampling_frame=getattr(args, "sampling_frame", None) or "",
+        inclusion_criteria=list(getattr(args, "inclusion_criteria", None) or []),
+        exclusion_criteria=list(getattr(args, "exclusion_criteria", None) or []),
+        notes=getattr(args, "notes", None) or "",
     )
 
 

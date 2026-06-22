@@ -1,6 +1,6 @@
 # Plan #76: Corpus Scope Create Surfaces
 
-**Status:** Planned
+**Status:** Implemented
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Plan #16 corpus scope contract; Plan #19 CLI/API scope surfaces
@@ -112,21 +112,26 @@ cross-project callable capability.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] CLI `project create` accepts optional `--phenomenon`, `--population`,
+- [x] CLI `project create` accepts optional `--phenomenon`, `--population`,
   `--sampling-frame`, repeated `--include`, repeated `--exclude`, and `--notes`.
-- [ ] CLI creation persists `corpus_scope` only when at least one scope field is
+- [x] CLI creation persists `corpus_scope` only when at least one scope field is
   supplied.
-- [ ] MCP `qc_create_project` accepts equivalent optional scope parameters,
+- [x] MCP `qc_create_project` accepts equivalent optional scope parameters,
   persists `corpus_scope`, and returns scope metadata.
-- [ ] Existing no-scope creation behavior remains compatible.
-- [ ] Docs state create-time scope is report discipline, not sampling-frame
+- [x] Existing no-scope creation behavior remains compatible.
+- [x] Docs state create-time scope is report discipline, not sampling-frame
   validation.
 
 > Process criteria:
-- [ ] Required tests pass
-- [ ] Full test suite passes
-- [ ] Type check status is reported
-- [ ] Docs updated
+- [x] Required tests pass
+- [x] Full test suite passes
+- [x] Type check status is reported
+- [x] Docs updated
+
+## Verification
+
+- `python -m pytest tests/test_project_commands.py::TestCLIParsing::test_create_subparser_accepts_scope_fields tests/test_project_commands.py::TestProjectScopeCommand::test_project_create_command_leaves_scope_unset_when_omitted tests/test_project_commands.py::TestProjectScopeCommand::test_project_create_command_saves_scope_when_supplied tests/test_project_commands.py::TestProjectScopeCommand::test_project_scope_command_updates_and_outputs_scope tests/test_mcp_server.py::TestProjectManagement::test_create_project tests/test_mcp_server.py::TestProjectManagement::test_create_project_with_scope -q` — 6 passed.
+- `make check` — 787 passed, 1 skipped, 8 deselected; lint/docs passed; type check not yet configured.
 
 ---
 
