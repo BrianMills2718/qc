@@ -35,6 +35,7 @@ _PATH_FLAGS = {
         "--d9-interpretive-preference-protocol-file"
     ),
     "interpretive_preference_file": "--interpretive-preference-file",
+    "confidence_calibration_protocol_file": "--confidence-calibration-protocol-file",
     "confidence_calibration_file": "--confidence-calibration-file",
     "observability_db": "--observability-db",
     "output": "--output",
@@ -98,6 +99,10 @@ class Phase0BenchmarkPackage(BaseModel):
     interpretive_preference_file: str | None = Field(
         default=None,
         description="Optional D9 preference JSON path",
+    )
+    confidence_calibration_protocol_file: str | None = Field(
+        default=None,
+        description="Optional confidence-calibration protocol JSON path",
     )
     confidence_calibration_file: str | None = Field(
         default=None,

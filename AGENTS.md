@@ -51,6 +51,7 @@ make bench ID=<project_id> D6_PROTOCOL=protocol.json BIAS_STRATIFIED=bias_strati
 make bench ID=<project_id> D9_PROTOCOL=protocol.json PREFERENCE=preference.json  # Guard D9 scoring with protocol preflight
 make validate-confidence-calibration-protocol PROTOCOL=protocol.json  # Validate pre-evaluation confidence-calibration protocol metadata
 make confidence-calibration-preflight PROTOCOL=protocol.json CALIBRATION=calibration.json  # Preflight calibration result file against protocol
+make bench ID=<project_id> CONFIDENCE_PROTOCOL=protocol.json CALIBRATION=calibration.json  # Guard calibration scoring with protocol preflight
 make bench ID=<project_id> GOLD=gold.json BASELINES=baselines.json  # Add external D7 gold/baselines without mutating project state
 make bench ID=<project_id> BIAS_STRATIFIED=bias_stratified.json  # Add external D6 stratified correctness rows without mutating state
 make bench ID=<project_id> PROMPT_INJECTION=inv7.json  # Add external INV-7 fixture results without mutating state

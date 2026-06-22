@@ -14,6 +14,7 @@ Usage:
         [--gt-fidelity-file gt_fidelity.json]
         [--d9-interpretive-preference-protocol-file protocol.json]
         [--interpretive-preference-file preference.json]
+        [--confidence-calibration-protocol-file protocol.json]
         [--confidence-calibration-file calibration.json]
         [--output scorecard.json]
 
@@ -51,6 +52,9 @@ from qc_clean.core.d6_bias_preflight import preflight_d6_bias_payloads
 from qc_clean.core.d8_gt_fidelity_preflight import preflight_d8_gt_fidelity_payloads
 from qc_clean.core.d9_interpretive_preference_preflight import (
     preflight_d9_interpretive_preference_payloads,
+)
+from qc_clean.core.confidence_calibration_preflight import (
+    preflight_confidence_calibration_payloads,
 )
 from qc_clean.core.d3_gold import application_gold_payload_for_scorecard
 from qc_clean.core.d7_gold import d7_gold_payload_for_scorecard
@@ -132,6 +136,13 @@ def main(argv: Sequence[str] | None = None) -> int:
         help="Optional confidence/correctness calibration JSON file; applied in memory only",
     )
     parser.add_argument(
+        "--confidence-calibration-protocol-file",
+        help=(
+            "Optional confidence-calibration protocol JSON file; preflights "
+            "supplied calibration rows before scoring"
+        ),
+    )
+    parser.add_argument(
         "--observability-db",
         type=Path,
         default=None,
@@ -164,6 +175,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     codebook_quality_results: Any | None = None
     gt_fidelity_results: Any | None = None
     interpretive_preference_results: Any | None = None
+    confidence_calibration_results: Any | None = None
 
     if args.d3_gold_file:
         try:
@@ -411,6 +423,39 @@ def main(argv: Sequence[str] | None = None) -> int:
         except ValueError as exc:
             print(json.dumps({"error": str(exc)}))
             return 1
+
+    confidence_calibration_preflight_report = None
+    if args.confidence_calibration_protocol_file:
+        try:
+            confidence_calibration_protocol = load_confidence_calibration_protocol_file(
+                Path(args.confidence_calibration_protocol_file)
+            )
+        except ValueError as exc:
+            print(json.dumps({"error": str(exc)}))
+            return 1
+        confidence_calibration_preflight_report = (
+            preflight_confidence_calibration_payloads(
+                confidence_calibration_protocol,
+                confidence_calibration_results,
+                calibration_file_sha256=(
+                    sha256_file(Path(args.confidence_calibration_file))
+                    if args.confidence_calibration_file
+                    else None
+                ),
+            )
+        )
+        if confidence_calibration_preflight_report.status != "pass":
+            print(json.dumps({
+                "error": "Confidence-calibration preflight failed",
+                "preflight_report": (
+                    confidence_calibration_preflight_report.model_dump(
+                        mode="json"
+                    )
+                ),
+            }))
+            return 1
+
+    if confidence_calibration_results is not None:
         state = state.model_copy(deep=True)
         state.config.extra = dict(state.config.extra)
         state.config.extra["confidence_calibration_evaluations"] = (
@@ -438,6 +483,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         card.setdefault("_meta", {}).setdefault("preflight_reports", {})[
             "d9_interpretive_preference"
         ] = d9_interpretive_preference_preflight_report.model_dump(mode="json")
+    if confidence_calibration_preflight_report is not None:
+        card.setdefault("_meta", {}).setdefault("preflight_reports", {})[
+            "confidence_calibration"
+        ] = confidence_calibration_preflight_report.model_dump(mode="json")
     card.setdefault("_meta", {})["input_hashes"] = phase0_input_hashes(
         loaded_state,
         d3_gold_file=Path(args.d3_gold_file) if args.d3_gold_file else None,
@@ -463,6 +512,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         d9_interpretive_preference_protocol_file=(
             Path(args.d9_interpretive_preference_protocol_file)
             if args.d9_interpretive_preference_protocol_file
+            else None
+        ),
+        confidence_calibration_protocol_file=(
+            Path(args.confidence_calibration_protocol_file)
+            if args.confidence_calibration_protocol_file
             else None
         ),
         bias_counterfactual_file=(
@@ -687,6 +741,11 @@ def phase0_command_provenance(args: argparse.Namespace) -> dict[str, Any]:
             if args.d9_interpretive_preference_protocol_file
             else None
         ),
+        "confidence_calibration_protocol_file": (
+            str(Path(args.confidence_calibration_protocol_file))
+            if args.confidence_calibration_protocol_file
+            else None
+        ),
         "bias_counterfactual_file": (
             str(Path(args.bias_counterfactual_file))
             if args.bias_counterfactual_file
@@ -756,6 +815,7 @@ def phase0_input_hashes(
     d4_codebook_quality_protocol_file: Path | None,
     d8_gt_fidelity_protocol_file: Path | None,
     d9_interpretive_preference_protocol_file: Path | None,
+    confidence_calibration_protocol_file: Path | None,
     bias_counterfactual_file: Path | None,
     bias_stratified_file: Path | None,
     codebook_quality_file: Path | None,
@@ -799,6 +859,11 @@ def phase0_input_hashes(
         "d9_interpretive_preference_protocol_file_sha256": (
             sha256_file(d9_interpretive_preference_protocol_file)
             if d9_interpretive_preference_protocol_file
+            else None
+        ),
+        "confidence_calibration_protocol_file_sha256": (
+            sha256_file(confidence_calibration_protocol_file)
+            if confidence_calibration_protocol_file
             else None
         ),
         "bias_counterfactual_file_sha256": (
@@ -1051,6 +1116,23 @@ def load_d9_interpretive_preference_protocol_file(path: Path) -> Any:
         ) from exc
     if not isinstance(raw, dict):
         raise ValueError("D9 interpretive-preference protocol file must be a JSON object")
+    return raw
+
+
+def load_confidence_calibration_protocol_file(path: Path) -> Any:
+    """Load a confidence-calibration protocol file for score-time preflight."""
+    try:
+        raw = json.loads(path.read_text(encoding="utf-8"))
+    except OSError as exc:
+        raise ValueError(
+            f"Confidence-calibration protocol file '{path}' could not be read: {exc}"
+        ) from exc
+    except json.JSONDecodeError as exc:
+        raise ValueError(
+            f"Confidence-calibration protocol file '{path}' is not valid JSON: {exc}"
+        ) from exc
+    if not isinstance(raw, dict):
+        raise ValueError("Confidence-calibration protocol file must be a JSON object")
     return raw
 
 

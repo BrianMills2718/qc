@@ -332,6 +332,75 @@ def test_phase0_benchmark_package_forwards_relative_inputs(
         }),
         encoding="utf-8",
     )
+    calibration = package_dir / "confidence_calibration.json"
+    calibration.write_text(
+        json.dumps({
+            "confidence_calibration_evaluations": [
+                {
+                    "item_id": "calibration-1",
+                    "surface": "thematic_coding",
+                    "confidence": 0.9,
+                    "correct": True,
+                    "evaluator": "expert_adjudication",
+                },
+                {
+                    "item_id": "calibration-2",
+                    "surface": "negative_case",
+                    "confidence": 0.2,
+                    "correct": False,
+                    "evaluator": "expert_adjudication",
+                },
+            ]
+        }),
+        encoding="utf-8",
+    )
+    confidence_protocol = package_dir / "confidence_protocol.json"
+    confidence_protocol.write_text(
+        json.dumps({
+            "schema_version": 1,
+            "package_type": "qualitative_coding.confidence_calibration_protocol",
+            "protocol_id": "confidence-package-protocol-v1",
+            "project_id": state.id,
+            "dataset_name": "Confidence package protocol v1",
+            "split": "held_out",
+            "corpus_sha256": "a" * 64,
+            "project_state_sha256": "b" * 64,
+            "prediction_artifact_sha256": "c" * 64,
+            "prompt_frozen": True,
+            "contamination_checked": True,
+            "registered_before_evaluation": True,
+            "label_plan": {
+                "label_sources": ["expert_adjudication"],
+                "planned_labeler_count": 2,
+                "qualification": "Package fixture expert adjudicators.",
+            },
+            "target_surfaces": ["thematic_coding", "negative_case"],
+            "confidence_source": "system_confidence_field",
+            "planned_item_count": 2,
+            "outcome_metrics": [
+                "accuracy",
+                "brier_score",
+                "expected_calibration_error",
+            ],
+            "outcome_file": "confidence_calibration.json",
+            "outcome_file_sha256": bench_phase0.sha256_file(calibration),
+            "success_criteria": [
+                {
+                    "metric": "accuracy",
+                    "pass_condition": "Report accuracy before any claim.",
+                },
+                {
+                    "metric": "brier_score",
+                    "pass_condition": "Report Brier score before any claim.",
+                },
+                {
+                    "metric": "expected_calibration_error",
+                    "pass_condition": "Report ECE before any claim.",
+                },
+            ],
+        }),
+        encoding="utf-8",
+    )
     package_file = package_dir / "phase0_package.json"
     package_file.write_text(
         json.dumps({
@@ -347,6 +416,8 @@ def test_phase0_benchmark_package_forwards_relative_inputs(
             "gt_fidelity_file": "gt_fidelity.json",
             "d9_interpretive_preference_protocol_file": "d9_protocol.json",
             "interpretive_preference_file": "interpretive_preference.json",
+            "confidence_calibration_protocol_file": "confidence_protocol.json",
+            "confidence_calibration_file": "confidence_calibration.json",
         }),
         encoding="utf-8",
     )
@@ -366,11 +437,16 @@ def test_phase0_benchmark_package_forwards_relative_inputs(
     assert output["bias_stratified_d6"]["incorrect_cases"] == 1
     assert output["gt_fidelity_d8"]["status"] == "scored"
     assert output["interpretive_preference_d9"]["status"] == "scored"
+    assert output["confidence_calibration"]["status"] == "scored"
     assert output["_meta"]["preflight_reports"]["d6_bias"]["status"] == "pass"
     assert output["_meta"]["preflight_reports"]["d4_codebook_quality"]["status"] == "pass"
     assert output["_meta"]["preflight_reports"]["d8_gt_fidelity"]["status"] == "pass"
     assert (
         output["_meta"]["preflight_reports"]["d9_interpretive_preference"]["status"]
+        == "pass"
+    )
+    assert (
+        output["_meta"]["preflight_reports"]["confidence_calibration"]["status"]
         == "pass"
     )
     hashes = output["_meta"]["input_hashes"]
@@ -392,6 +468,12 @@ def test_phase0_benchmark_package_forwards_relative_inputs(
     assert hashes["interpretive_preference_file_sha256"] == (
         bench_phase0.sha256_file(preference)
     )
+    assert hashes["confidence_calibration_protocol_file_sha256"] == (
+        bench_phase0.sha256_file(confidence_protocol)
+    )
+    assert hashes["confidence_calibration_file_sha256"] == (
+        bench_phase0.sha256_file(calibration)
+    )
     reloaded = store.load(state.id)
     assert "application_gold" not in reloaded.config.extra
     assert "application_baselines" not in reloaded.config.extra
@@ -399,6 +481,7 @@ def test_phase0_benchmark_package_forwards_relative_inputs(
     assert "codebook_quality_evaluations" not in reloaded.config.extra
     assert "gt_fidelity_evaluations" not in reloaded.config.extra
     assert "interpretive_preference_evaluations" not in reloaded.config.extra
+    assert "confidence_calibration_evaluations" not in reloaded.config.extra
 
 
 def test_phase0_benchmark_package_rejects_unknown_keys(tmp_path, capsys):
@@ -472,6 +555,8 @@ def test_phase0_package_to_bench_argv_resolves_relative_paths(tmp_path):
         gt_fidelity_file="rubrics/d8.json",
         d9_interpretive_preference_protocol_file="protocols/d9.json",
         interpretive_preference_file="rubrics/d9.json",
+        confidence_calibration_protocol_file="protocols/confidence.json",
+        confidence_calibration_file="rubrics/confidence.json",
         trace_id="trace-123",
     )
 
@@ -491,6 +576,10 @@ def test_phase0_package_to_bench_argv_resolves_relative_paths(tmp_path):
         str(tmp_path / "protocols" / "d9.json"),
         "--interpretive-preference-file",
         str(tmp_path / "rubrics" / "d9.json"),
+        "--confidence-calibration-protocol-file",
+        str(tmp_path / "protocols" / "confidence.json"),
+        "--confidence-calibration-file",
+        str(tmp_path / "rubrics" / "confidence.json"),
         "--trace-id",
         "trace-123",
     ]
