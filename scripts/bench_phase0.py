@@ -5,6 +5,7 @@ Usage:
     python scripts/bench_phase0.py <project_id> [--d3-gold-file d3_gold.json] [--gold-file gold.json]
         [--d7-baselines-file baselines.json] [--prompt-injection-file inv7.json]
         [--bias-counterfactual-file bias.json]
+        [--codebook-quality-file quality.json]
         [--output scorecard.json]
 
 Agent-drivable: emits JSON to stdout (and optionally a file). See
@@ -60,6 +61,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument(
         "--bias-counterfactual-file",
         help="Optional D6 counterfactual identity-swap outcome JSON file; applied in memory only",
+    )
+    parser.add_argument(
+        "--codebook-quality-file",
+        help="Optional D4 codebook-quality rubric outcome JSON file; applied in memory only",
     )
     parser.add_argument(
         "--observability-db",
@@ -142,6 +147,18 @@ def main(argv: Sequence[str] | None = None) -> int:
         state.config.extra = dict(state.config.extra)
         state.config.extra["bias_counterfactual_evaluations"] = bias_counterfactual_results
 
+    if args.codebook_quality_file:
+        try:
+            codebook_quality_results = load_codebook_quality_file(
+                Path(args.codebook_quality_file)
+            )
+        except ValueError as exc:
+            print(json.dumps({"error": str(exc)}))
+            return 1
+        state = state.model_copy(deep=True)
+        state.config.extra = dict(state.config.extra)
+        state.config.extra["codebook_quality_evaluations"] = codebook_quality_results
+
     try:
         card = phase0_scorecard(state)
     except ValueError as exc:
@@ -155,6 +172,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         prompt_injection_file=Path(args.prompt_injection_file) if args.prompt_injection_file else None,
         bias_counterfactual_file=(
             Path(args.bias_counterfactual_file) if args.bias_counterfactual_file else None
+        ),
+        codebook_quality_file=(
+            Path(args.codebook_quality_file) if args.codebook_quality_file else None
         ),
         observability_db=args.observability_db,
     )
@@ -275,6 +295,9 @@ def phase0_command_provenance(args: argparse.Namespace) -> dict[str, Any]:
             if args.bias_counterfactual_file
             else None
         ),
+        "codebook_quality_file": (
+            str(Path(args.codebook_quality_file)) if args.codebook_quality_file else None
+        ),
         "observability_db": str(args.observability_db) if args.observability_db else None,
         "trace_id": args.trace_id,
         "output": args.output,
@@ -316,6 +339,7 @@ def phase0_input_hashes(
     d7_baselines_file: Path | None,
     prompt_injection_file: Path | None,
     bias_counterfactual_file: Path | None,
+    codebook_quality_file: Path | None,
     observability_db: Path | None,
 ) -> dict[str, Any]:
     """Return deterministic SHA-256 input hashes for Phase 0 bench output."""
@@ -336,6 +360,9 @@ def phase0_input_hashes(
         ),
         "bias_counterfactual_file_sha256": (
             sha256_file(bias_counterfactual_file) if bias_counterfactual_file else None
+        ),
+        "codebook_quality_file_sha256": (
+            sha256_file(codebook_quality_file) if codebook_quality_file else None
         ),
         "observability_db_sha256": sha256_file(observability_db),
     }
@@ -458,6 +485,25 @@ def load_bias_counterfactual_file(path: Path) -> Any:
     raise ValueError(
         "Bias counterfactual file must be a JSON list of counterfactual outcomes "
         "or an object with a 'bias_counterfactual_evaluations' list"
+    )
+
+
+def load_codebook_quality_file(path: Path) -> Any:
+    """Load and shape-check an external D4 codebook-quality result file."""
+    try:
+        raw = json.loads(path.read_text(encoding="utf-8"))
+    except OSError as exc:
+        raise ValueError(f"Codebook quality file '{path}' could not be read: {exc}") from exc
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"Codebook quality file '{path}' is not valid JSON: {exc}") from exc
+
+    if isinstance(raw, list):
+        return raw
+    if isinstance(raw, dict) and isinstance(raw.get("codebook_quality_evaluations"), list):
+        return raw["codebook_quality_evaluations"]
+    raise ValueError(
+        "Codebook quality file must be a JSON list of rubric outcomes or an "
+        "object with a 'codebook_quality_evaluations' list"
     )
 
 

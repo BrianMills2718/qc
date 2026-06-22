@@ -41,11 +41,13 @@ _D7_BASELINES_EXTRA_KEY = "disconfirmation_baselines"
 _RUN_TIMING_EXTRA_KEY = "run_timing"
 _PROMPT_INJECTION_EXTRA_KEY = "prompt_injection_evaluations"
 _BIAS_COUNTERFACTUAL_EXTRA_KEY = "bias_counterfactual_evaluations"
+_CODEBOOK_QUALITY_EXTRA_KEY = "codebook_quality_evaluations"
 _EXACT_BOOTSTRAP_EXTRA_KEY = "phase0_exact_bootstrap"
 _RELIABILITY_BOOTSTRAP_EXTRA_KEY = "phase0_reliability_bootstrap"
 DEFAULT_OBSERVABILITY_DB_PATH = Path.home() / "projects" / "data" / "llm_observability.db"
 _WILSON_Z_95 = 1.959963984540054
 _HUMAN_CEILING_EXACT_METRICS = ("recall", "precision", "f1")
+_CODEBOOK_QUALITY_METRICS = ("clarity", "specificity", "usefulness", "grounding")
 _HUMAN_CEILING_AGREEMENT_METRIC_ALIASES = {
     "cohen_kappa": "cohens_kappa",
     "cohens_kappa": "cohens_kappa",
@@ -213,6 +215,47 @@ class BiasCounterfactualEvaluation(BaseModel):
         return self
 
 
+class CodebookQualityEvaluation(BaseModel):
+    """External D4 codebook-quality rubric outcome."""
+
+    evaluator: str = Field(description="Evaluator identifier or redacted label")
+    evaluator_type: str = Field(
+        default="unspecified",
+        description="Evaluator type, such as llm_judge or human_expert",
+    )
+    clarity: float = Field(description="0-1 score for codebook clarity")
+    specificity: float = Field(description="0-1 score for code specificity")
+    usefulness: float = Field(description="0-1 score for analytic usefulness")
+    grounding: float = Field(description="0-1 score for grounding in source data")
+    scope: str = Field(
+        default="codebook",
+        description="Rubric scope, such as codebook or individual_code",
+    )
+    code_id: str | None = Field(
+        default=None,
+        description="Optional code ID when the rubric outcome targets one code",
+    )
+    notes: str = Field(default="", description="Optional human-readable notes")
+
+    @model_validator(mode="after")
+    def require_valid_rubric_outcome(self) -> "CodebookQualityEvaluation":
+        """Normalize grouping keys and reject out-of-range rubric scores."""
+        self.evaluator = self.evaluator.strip()
+        if not self.evaluator:
+            raise ValueError("codebook quality evaluator must be non-empty")
+        self.evaluator_type = self.evaluator_type.strip() or "unspecified"
+        self.scope = self.scope.strip() or "codebook"
+        if self.code_id is not None:
+            self.code_id = self.code_id.strip()
+            if not self.code_id:
+                raise ValueError("codebook quality code_id must be non-empty when supplied")
+        for metric_name in _CODEBOOK_QUALITY_METRICS:
+            metric_value = getattr(self, metric_name)
+            if not 0 <= metric_value <= 1:
+                raise ValueError(f"codebook quality {metric_name} must be between 0 and 1")
+        return self
+
+
 class DisconfirmationBaselinePrediction(BaseModel):
     """Baseline contrary-evidence predictions used for D7 comparison."""
 
@@ -274,6 +317,8 @@ def phase0_scorecard(state: ProjectState) -> Dict[str, Any]:
         "coverage": asdict(compute_coverage(state)),
         # D3 — application validity when human/adjudicated gold is present.
         "application_validity_d3": application_validity_d3_scorecard(state),
+        # D4 — externally supplied codebook-quality rubric outcomes.
+        "codebook_quality_d4": codebook_quality_scorecard(state),
         # D7 — disconfirmation quality when human/adjudicated gold is present.
         "disconfirmation_d7": disconfirmation_d7_scorecard(state),
         # INV-4 — category adequacy diagnostic, not proof of GT saturation.
@@ -753,6 +798,109 @@ def _safe_div_or_none(numerator: float, denominator: float) -> float | None:
     if denominator == 0:
         return None
     return numerator / denominator
+
+
+def codebook_quality_scorecard(state: ProjectState) -> Dict[str, Any]:
+    """Score externally supplied D4 codebook-quality rubric outcomes."""
+    evaluations = _codebook_quality_evaluations(state)
+    if not evaluations:
+        return {
+            "status": "not_available",
+            "reason": (
+                "No codebook-quality rubric outcomes found at "
+                f"ProjectState.config.extra['{_CODEBOOK_QUALITY_EXTRA_KEY}']; "
+                "scoring requires externally supplied LLM-judge or expert rubric outcomes."
+            ),
+            "note": (
+                "Absence of D4 rubric data is not evidence of codebook quality; "
+                "blind expert-panel and LLM-judge evaluations are separate from "
+                "ordinary Phase 0 scoring."
+            ),
+        }
+
+    return {
+        "status": "scored",
+        "source": f"ProjectState.config.extra['{_CODEBOOK_QUALITY_EXTRA_KEY}']",
+        "total_evaluations": len(evaluations),
+        "evaluator_types": dict(sorted(Counter(ev.evaluator_type for ev in evaluations).items())),
+        "metric_summary": _codebook_quality_metric_summary(evaluations),
+        "overall_mean": _mean_or_none([
+            _codebook_quality_overall_score(ev) for ev in evaluations
+        ]),
+        "by_evaluator_type": _codebook_quality_by_evaluator_type(evaluations),
+        "note": (
+            "Scores externally supplied codebook-quality rubric outcomes. This is "
+            "a measurement substrate, not blind expert-panel evidence or proof "
+            "of codebook validity."
+        ),
+    }
+
+
+def _codebook_quality_evaluations(state: ProjectState) -> list[CodebookQualityEvaluation]:
+    """Load D4 codebook-quality rubric outcomes from project config metadata."""
+    raw = state.config.extra.get(_CODEBOOK_QUALITY_EXTRA_KEY)
+    if raw is None:
+        return []
+    if isinstance(raw, dict) and _CODEBOOK_QUALITY_EXTRA_KEY in raw:
+        raw = raw[_CODEBOOK_QUALITY_EXTRA_KEY]
+    if not isinstance(raw, list):
+        raise ValueError(
+            f"ProjectState.config.extra['{_CODEBOOK_QUALITY_EXTRA_KEY}'] must be a "
+            "list of codebook-quality rubric outcomes"
+        )
+    try:
+        return [CodebookQualityEvaluation.model_validate(item) for item in raw]
+    except ValidationError as exc:
+        raise ValueError(f"Invalid codebook_quality_evaluations metadata: {exc}") from exc
+
+
+def _codebook_quality_metric_summary(
+    evaluations: list[CodebookQualityEvaluation],
+) -> dict[str, dict[str, float | None]]:
+    """Summarize each D4 rubric metric over all evaluations."""
+    return {
+        metric_name: _numeric_summary([
+            getattr(evaluation, metric_name) for evaluation in evaluations
+        ])
+        for metric_name in _CODEBOOK_QUALITY_METRICS
+    }
+
+
+def _codebook_quality_by_evaluator_type(
+    evaluations: list[CodebookQualityEvaluation],
+) -> dict[str, dict[str, Any]]:
+    """Summarize D4 rubric outcomes by evaluator type."""
+    grouped: dict[str, list[CodebookQualityEvaluation]] = {}
+    for evaluation in evaluations:
+        grouped.setdefault(evaluation.evaluator_type, []).append(evaluation)
+    return {
+        evaluator_type: {
+            "count": len(group),
+            "metric_summary": _codebook_quality_metric_summary(group),
+            "overall_mean": _mean_or_none([
+                _codebook_quality_overall_score(evaluation) for evaluation in group
+            ]),
+        }
+        for evaluator_type, group in sorted(grouped.items())
+    }
+
+
+def _codebook_quality_overall_score(evaluation: CodebookQualityEvaluation) -> float:
+    """Return the average rubric score for one D4 outcome."""
+    return sum(getattr(evaluation, metric) for metric in _CODEBOOK_QUALITY_METRICS) / len(
+        _CODEBOOK_QUALITY_METRICS
+    )
+
+
+def _numeric_summary(values: list[float]) -> dict[str, float | None]:
+    """Return deterministic mean/min/max for numeric scorecard values."""
+    if not values:
+        return {"mean": None, "min": None, "max": None}
+    return {
+        "mean": sum(values) / len(values),
+        "min": min(values),
+        "max": max(values),
+    }
 
 
 def prompt_injection_scorecard(state: ProjectState) -> Dict[str, Any]:

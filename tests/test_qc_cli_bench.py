@@ -78,6 +78,22 @@ def test_qc_cli_bench_forwards_files_and_output(tmp_path, monkeypatch, capsys):
         }),
         encoding="utf-8",
     )
+    quality_file = tmp_path / "codebook_quality.json"
+    quality_file.write_text(
+        json.dumps({
+            "codebook_quality_evaluations": [
+                {
+                    "evaluator": "judge-a",
+                    "evaluator_type": "llm_judge",
+                    "clarity": 0.8,
+                    "specificity": 0.7,
+                    "usefulness": 0.9,
+                    "grounding": 1.0,
+                }
+            ]
+        }),
+        encoding="utf-8",
+    )
     output_file = tmp_path / "scorecard.json"
     monkeypatch.setattr(bench_phase0, "ProjectStore", lambda: store)
     monkeypatch.setattr(
@@ -93,6 +109,8 @@ def test_qc_cli_bench_forwards_files_and_output(tmp_path, monkeypatch, capsys):
             str(gold_file),
             "--bias-counterfactual-file",
             str(bias_file),
+            "--codebook-quality-file",
+            str(quality_file),
             "--output",
             str(output_file),
         ],
@@ -107,12 +125,15 @@ def test_qc_cli_bench_forwards_files_and_output(tmp_path, monkeypatch, capsys):
     assert stdout_scorecard["application_validity_d3"]["status"] == "scored"
     assert stdout_scorecard["disconfirmation_d7"]["status"] == "scored"
     assert stdout_scorecard["bias_counterfactual_d6"]["status"] == "scored"
+    assert stdout_scorecard["codebook_quality_d4"]["status"] == "scored"
     expected_d3_hash = hashlib.sha256(d3_gold_file.read_bytes()).hexdigest()
     expected_hash = hashlib.sha256(gold_file.read_bytes()).hexdigest()
     expected_bias_hash = hashlib.sha256(bias_file.read_bytes()).hexdigest()
+    expected_quality_hash = hashlib.sha256(quality_file.read_bytes()).hexdigest()
     assert stdout_scorecard["_meta"]["input_hashes"]["d3_gold_file_sha256"] == expected_d3_hash
     assert stdout_scorecard["_meta"]["input_hashes"]["gold_file_sha256"] == expected_hash
     assert stdout_scorecard["_meta"]["input_hashes"]["bias_counterfactual_file_sha256"] == expected_bias_hash
+    assert stdout_scorecard["_meta"]["input_hashes"]["codebook_quality_file_sha256"] == expected_quality_hash
 
 
 def test_qc_cli_bench_forwards_artifact_dir(tmp_path, monkeypatch, capsys):

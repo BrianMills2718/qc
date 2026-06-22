@@ -465,6 +465,88 @@ def test_scorecard_human_ceiling_noncomparable_metrics_are_not_scored():
     assert comparison["non_comparable_human_metrics"] == ["notes"]
 
 
+def test_scorecard_reports_codebook_quality_unavailable_without_eval_data():
+    state = ProjectState(
+        name="no-quality-eval",
+        config=ProjectConfig(methodology=Methodology.THEMATIC_ANALYSIS),
+        corpus=Corpus(documents=[Document(name="d.txt", content="Participant text.")]),
+    )
+
+    d4 = phase0_scorecard(state)["codebook_quality_d4"]
+
+    assert d4["status"] == "not_available"
+    assert "codebook_quality_evaluations" in d4["reason"]
+    assert "not evidence" in d4["note"]
+
+
+def test_scorecard_scores_codebook_quality_rubric_outcomes():
+    state = ProjectState(
+        name="quality-eval",
+        config=ProjectConfig(
+            methodology=Methodology.THEMATIC_ANALYSIS,
+            extra={
+                "codebook_quality_evaluations": [
+                    {
+                        "evaluator": "judge-a",
+                        "evaluator_type": "llm_judge",
+                        "clarity": 0.8,
+                        "specificity": 0.7,
+                        "usefulness": 0.9,
+                        "grounding": 1.0,
+                    },
+                    {
+                        "evaluator": "expert-1",
+                        "evaluator_type": "human_expert",
+                        "scope": "individual_code",
+                        "code_id": "C1",
+                        "clarity": 0.6,
+                        "specificity": 0.9,
+                        "usefulness": 0.7,
+                        "grounding": 0.8,
+                    },
+                ],
+            },
+        ),
+    )
+
+    d4 = phase0_scorecard(state)["codebook_quality_d4"]
+
+    assert d4["status"] == "scored"
+    assert d4["total_evaluations"] == 2
+    assert d4["evaluator_types"] == {"human_expert": 1, "llm_judge": 1}
+    assert d4["overall_mean"] == pytest.approx(0.8)
+    assert d4["metric_summary"]["clarity"] == {
+        "mean": pytest.approx(0.7),
+        "min": 0.6,
+        "max": 0.8,
+    }
+    assert d4["metric_summary"]["specificity"]["mean"] == pytest.approx(0.8)
+    assert d4["by_evaluator_type"]["llm_judge"]["overall_mean"] == pytest.approx(0.85)
+    assert d4["by_evaluator_type"]["human_expert"]["overall_mean"] == pytest.approx(0.75)
+    assert "not blind expert-panel evidence" in d4["note"]
+
+
+def test_scorecard_invalid_codebook_quality_metadata_fails_loud():
+    state = ProjectState(
+        config=ProjectConfig(
+            extra={
+                "codebook_quality_evaluations": [
+                    {
+                        "evaluator": "judge-a",
+                        "clarity": 1.2,
+                        "specificity": 0.7,
+                        "usefulness": 0.9,
+                        "grounding": 1.0,
+                    }
+                ]
+            }
+        ),
+    )
+
+    with pytest.raises(ValueError, match="codebook_quality_evaluations"):
+        phase0_scorecard(state)
+
+
 def test_scorecard_d3_f1_bootstrap_configurable_and_disableable():
     content = "AI helped here."
     doc = Document(id="d1", name="d.txt", content=content)

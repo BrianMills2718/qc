@@ -147,6 +147,10 @@ Examples:
         help='Optional D6 counterfactual identity-swap outcome JSON file; applied in memory only'
     )
     bench_parser.add_argument(
+        '--codebook-quality-file',
+        help='Optional D4 codebook-quality rubric outcome JSON file; applied in memory only'
+    )
+    bench_parser.add_argument(
         '--observability-db',
         help='Optional llm_client observability SQLite DB for D10 cost/latency'
     )
@@ -355,6 +359,8 @@ def handle_bench_command(args) -> int:
         argv.extend(["--prompt-injection-file", args.prompt_injection_file])
     if args.bias_counterfactual_file:
         argv.extend(["--bias-counterfactual-file", args.bias_counterfactual_file])
+    if args.codebook_quality_file:
+        argv.extend(["--codebook-quality-file", args.codebook_quality_file])
     if args.observability_db:
         argv.extend(["--observability-db", args.observability_db])
     if args.trace_id:
