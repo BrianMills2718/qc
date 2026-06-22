@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 60 | Confidence calibration Wilson intervals | High | Planned | `CONFIDENCE_CALIBRATION_WILSON_INTERVALS.md` |
 
 ## Completed Plans
 
