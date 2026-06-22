@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 183 | D7 comparison package writer | High | Planned | `D7_COMPARISON_PACKAGE_WRITER.md` |
 
 ## Completed Plans
 

@@ -26,11 +26,16 @@ highest-value documented lane.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Select and plan the next deterministic, high-value
-roadmap lane from `docs/PROJECT_THEORY_AND_GOALS.md` / `docs/EVALUATION_HARNESS.md`.
-Prefer lanes that reduce manual coordination before held-out evaluation or
-make existing benchmark/provenance surfaces more agent-drivable, without
-claiming evidence that has not been produced.
+**Active checkpoint:** Plan #183 is active: add a D7 comparison package writer
+for manifest-driven standalone D7 retrieval/live-baseline comparisons. This
+slice should validate versioned D7 gold and retrieval/live-baseline prediction
+packages, optionally run existing D7 comparison preflight when a protocol is
+supplied, preserve ordered prediction files, write package-relative manifest
+paths when possible, and expose Make/`qc_cli.py` surfaces. It must not create
+held-out data, run retrieval/live baselines, choose retrieval/model policy, add
+artifact signing, verify post-run artifact contents, or claim held-out D7
+evidence, live-baseline evidence, superiority evidence, methodological-validity
+evidence, or SOTA.
 
 **Completed checkpoint:** D7 retrieval/live-baseline comparisons can now run
 from strict `schema_version=1` package manifests through
