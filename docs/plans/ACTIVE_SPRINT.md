@@ -22,10 +22,10 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Create and execute the next validity-infrastructure slice:
-   `INV3_ADJUDICATION_RESPONSE_IMPORT.md`, converting shape-validated
-   adjudication response packages into reusable D3/D7 gold inputs without
-   claiming expert evidence unless labels are actually supplied.
+1. Execute Plan #101 (`INV3_ADJUDICATION_RESPONSE_IMPORT.md`): convert
+   shape-validated adjudication response packages into reusable D3/D7 gold
+   inputs without claiming expert evidence unless labels are actually supplied
+   under a documented protocol.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
