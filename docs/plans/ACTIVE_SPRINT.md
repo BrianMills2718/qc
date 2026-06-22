@@ -26,12 +26,25 @@ highest-value documented lane.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Plan #191 is active: add top-level `qc_cli.py` wrappers
-for D4/D6/D8/D9/confidence protocol validation and result preflight scripts.
-This slice should forward arguments to the canonical scripts without duplicating
-protocol/preflight logic or claiming populated labels, evaluation evidence,
-methodological-validity evidence, benchmark results, parity/superiority
-evidence, or SOTA.
+**Active checkpoint:** No implementation plan is currently active. Select the
+next deterministic, high-value roadmap lane, write its plan with acceptance
+criteria, then proceed without pausing unless a canonical stop condition is
+reached.
+
+**Completed checkpoint:** `qc_cli.py` now wraps the D4/D6/D8/D9/confidence
+protocol validation and result-preflight scripts through top-level commands:
+`validate-d4-codebook-quality-protocol`, `d4-codebook-quality-preflight`,
+`validate-d6-bias-protocol`, `d6-bias-preflight`,
+`validate-d8-gt-fidelity-protocol`, `d8-gt-fidelity-preflight`,
+`validate-d9-interpretive-preference-protocol`,
+`d9-interpretive-preference-preflight`,
+`validate-confidence-calibration-protocol`, and
+`confidence-calibration-preflight`. Each wrapper delegates exact argv to the
+canonical script and forwards optional result-file arguments only when supplied.
+These are protocol/preflight/accounting CLI parity surfaces only; they do not
+create populated labels, evaluation outcomes, expert ratings, bias-audit
+evidence, calibration evidence, parity/superiority evidence,
+methodological-validity evidence, or SOTA claims.
 
 **Completed checkpoint:** `qc_cli.py` now wraps the theoretical-sampling
 protocol validation, candidate/result preflight, candidate package export, and

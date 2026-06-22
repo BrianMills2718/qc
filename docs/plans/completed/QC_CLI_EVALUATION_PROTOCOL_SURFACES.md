@@ -1,10 +1,49 @@
 # Plan #191: QC CLI Evaluation Protocol Surfaces
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** D4/D6/D8/D9/confidence protocol scripts and Make targets
 **Blocks:** Top-level CLI parity for Phase 0 evaluator protocol/preflight workflows
+
+---
+
+## Outcome
+
+Implemented in commit `fe904034`.
+
+`qc_cli.py` now exposes ten top-level wrappers for existing D4/D6/D8/D9 and
+confidence protocol validation/result-preflight scripts:
+`validate-d4-codebook-quality-protocol`, `d4-codebook-quality-preflight`,
+`validate-d6-bias-protocol`, `d6-bias-preflight`,
+`validate-d8-gt-fidelity-protocol`, `d8-gt-fidelity-preflight`,
+`validate-d9-interpretive-preference-protocol`,
+`d9-interpretive-preference-preflight`,
+`validate-confidence-calibration-protocol`, and
+`confidence-calibration-preflight`. Each wrapper delegates to the matching
+canonical script `main()` and forwards optional result-file arguments only when
+supplied.
+
+Verification evidence:
+
+- TDD red state observed before implementation:
+  `python -m pytest tests/test_qc_cli_evaluation_protocol_surfaces.py -q`
+  failed with ten argparse invalid-choice failures.
+- Focused tests:
+  `python -m pytest tests/test_qc_cli_evaluation_protocol_surfaces.py tests/test_d4_codebook_quality_protocol.py tests/test_d4_codebook_quality_preflight.py tests/test_d6_bias_protocol.py tests/test_d6_bias_preflight.py tests/test_d8_gt_fidelity_protocol.py tests/test_d8_gt_fidelity_preflight.py tests/test_d9_interpretive_preference_protocol.py tests/test_d9_interpretive_preference_preflight.py tests/test_confidence_calibration_protocol.py tests/test_confidence_calibration_preflight.py -q`
+  passed with `67 passed`.
+- Focused Ruff:
+  `python -m ruff check qc_cli.py tests/test_qc_cli_evaluation_protocol_surfaces.py`
+  passed.
+- `make docs-check` passed.
+- `git diff --check` passed.
+- `make check` passed with `1222 passed, 1 skipped, 8 deselected`; type check
+  remains not configured.
+
+Claim discipline: these are protocol/preflight/accounting CLI parity surfaces
+only. They do not create populated labels, evaluation outcomes, expert ratings,
+bias-audit evidence, calibration evidence, parity/superiority evidence,
+methodological-validity evidence, or SOTA evidence.
 
 ---
 
@@ -90,13 +129,13 @@ Internal CLI delegation only; no cross-project boundary is created.
 
 ### Capability Validation
 
-- [ ] Each command parses through `qc_cli.py`.
-- [ ] Each handler delegates to the matching script `main()`.
-- [ ] Positional protocol paths are forwarded exactly.
-- [ ] Optional result-file arguments are forwarded only when supplied.
-- [ ] D6 preflight preserves both optional `--stratified-file` and
+- [x] Each command parses through `qc_cli.py`.
+- [x] Each handler delegates to the matching script `main()`.
+- [x] Positional protocol paths are forwarded exactly.
+- [x] Optional result-file arguments are forwarded only when supplied.
+- [x] D6 preflight preserves both optional `--stratified-file` and
   `--counterfactual-file` arguments.
-- [ ] Docs state these are protocol/preflight/accounting surfaces only, not
+- [x] Docs state these are protocol/preflight/accounting surfaces only, not
   populated label/evaluation evidence or SOTA support.
 
 ---
@@ -152,23 +191,23 @@ Internal CLI delegation only; no cross-project boundary is created.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] All ten `qc_cli.py` commands parse successfully.
-- [ ] Each handler calls the matching canonical script `main()`.
-- [ ] Supplied arguments are forwarded exactly in canonical script form.
-- [ ] Omitted optional result-file arguments are not forwarded.
-- [ ] Existing Make/script behavior is unchanged.
-- [ ] Docs/CLAUDE mention the top-level CLI aliases without implying populated
+- [x] All ten `qc_cli.py` commands parse successfully.
+- [x] Each handler calls the matching canonical script `main()`.
+- [x] Supplied arguments are forwarded exactly in canonical script form.
+- [x] Omitted optional result-file arguments are not forwarded.
+- [x] Existing Make/script behavior is unchanged.
+- [x] Docs/CLAUDE mention the top-level CLI aliases without implying populated
   evidence, validity evidence, parity/superiority evidence, or SOTA.
 
 > Process criteria:
-- [ ] TDD red state observed before implementation.
-- [ ] Focused tests pass.
-- [ ] Focused Ruff check passes.
-- [ ] `make docs-check` passes.
-- [ ] `git diff --check` passes.
-- [ ] `make check` passes.
-- [ ] Plan is moved to completed with verification evidence.
-- [ ] Verified implementation is committed and pushed.
+- [x] TDD red state observed before implementation.
+- [x] Focused tests pass.
+- [x] Focused Ruff check passes.
+- [x] `make docs-check` passes.
+- [x] `git diff --check` passes.
+- [x] `make check` passes.
+- [x] Plan is moved to completed with verification evidence.
+- [x] Verified implementation is committed and pushed.
 
 ---
 
