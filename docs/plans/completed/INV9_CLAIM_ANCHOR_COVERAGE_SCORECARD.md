@@ -68,4 +68,27 @@ Fails when:
 
 ## Closeout Notes
 
-To be filled after implementation and verification.
+Completed in commits:
+
+- Plan checkpoint: `f1ae2fa`
+- Implementation checkpoint: `a96d823`
+
+Implemented `claim_anchor_coverage` in `phase0_scorecard` with total claim
+counts, supporting/contrary anchor counts, anchored/unanchored claim counts,
+anchored-rate Wilson interval metadata, and deterministic breakdowns by claim
+kind, source stage, and support status. The scorecard treats supporting or
+contrary anchors as source-anchor coverage and keeps no-claims events visible
+as ledger rows.
+
+Verification:
+
+- `python -m pytest tests/test_bench_phase0.py -k claim_anchor_coverage -v`
+- `python -m pytest tests/test_claims.py -q`
+- `python -m pytest tests/test_bench_phase0.py -q`
+- `ruff check qc_clean/core/bench.py tests/test_bench_phase0.py`
+- `make docs-check`
+- `make check` (`1086 passed, 1 skipped, 8 deselected`)
+
+Claim discipline: this is deterministic structural accounting only. It does not
+prove claim truth, human adjudication, full disconfirmation coverage,
+methodological validity, or SOTA evidence.

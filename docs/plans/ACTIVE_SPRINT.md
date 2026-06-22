@@ -22,19 +22,19 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #150: add deterministic Phase 0 claim-anchor coverage accounting
-   for INV-9 ledger entries without turning anchor presence into validity
-   evidence.
+1. Select the next highest-value documented roadmap lane from
+   `docs/PROJECT_THEORY_AND_GOALS.md` and `docs/EVALUATION_HARNESS.md`.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Plan #150 (`docs/plans/INV9_CLAIM_ANCHOR_COVERAGE_SCORECARD.md`)
-targets the INV-9 blind spot where higher-order claims can remain
-`needs_anchor` while the Phase 0 scorecard does not quantify that state. The
-slice is deterministic scorecard accounting only: it must report
-anchored/unanchored claim counts and breakdowns, and it must preserve the claim
-discipline that source anchors are not truth, human adjudication,
-disconfirmation coverage, methodological validity, or SOTA evidence.
+**Completed checkpoint:** Phase 0 now reports deterministic
+`claim_anchor_coverage` for INV-9 ledger rows: total claims,
+supporting/contrary anchor counts, anchored/unanchored counts, anchored-rate
+Wilson interval metadata, and breakdowns by claim kind, source stage, and
+support status. Contrary anchors count as source-anchor coverage and
+no-claims events remain visible as ledger rows. This is structural accounting
+only, not claim truth, human adjudication, full disconfirmation coverage,
+methodological validity, or SOTA evidence.
 
 **Completed checkpoint:** `qc_cli.py validate-inv7-package`,
 `qc_cli.py validate-inv7-live-protocol`, and `qc_cli.py inv7-live-preflight`

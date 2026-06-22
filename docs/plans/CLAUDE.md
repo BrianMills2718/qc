@@ -6,12 +6,12 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 150 | INV-9 claim-anchor coverage scorecard | High | Planned | `INV9_CLAIM_ANCHOR_COVERAGE_SCORECARD.md` |
 
 ## Completed Plans
 
 | Name | Outcome | Record |
 |------|---------|--------|
+| INV-9 claim-anchor coverage scorecard | Phase 0 now reports deterministic claim-anchor coverage counts/rates/breakdowns for first-class ledger rows without claiming validity or adjudication evidence | `completed/INV9_CLAIM_ANCHOR_COVERAGE_SCORECARD.md` |
 | INV-1 span anchoring + harness Phase 0 | INV-1 mostly met; `make bench` Phase 0 stood up | `completed/INV1_OVERNIGHT_SPRINT.md` |
 | INV-1 deterministic fuzzy grounding | INV-1 follow-up: normalized exact grounding now has a conservative deterministic fuzzy fallback for long near-verbatim spans while preserving ambiguity drops and hash-verifiable original offsets | `completed/INV1_DETERMINISTIC_FUZZY_GROUNDING.md` |
 | INV-1 source-prefix speaker fallback | INV-1 follow-up: anchored quotes now derive speaker from explicit same-line `Speaker:` source prefixes when no containing segment speaker exists, without making speaker part of anchor verification | `completed/INV1_SOURCE_PREFIX_SPEAKER_FALLBACK.md` |
