@@ -1,10 +1,50 @@
 # Plan #180: D7 Comparison Artifact Package
 
-**Status:** Planned
+**Status:** Completed
 **Type:** implementation
 **Priority:** High
 **Blocked By:** #179
 **Blocks:** Reproducible held-out D7 retrieval/live-baseline comparison artifacts
+
+---
+
+## Outcome
+
+Implemented and pushed in commit `2245d09`.
+
+Successful `scripts/compare_d7_retrieval.py --artifact-dir ...` runs now write
+one timestamped D7 comparison artifact directory containing `report.json` and
+`manifest.json`. The manifest records schema version, artifact type, generated
+UTC timestamp, project ID/name, report SHA-256, report `_meta.input_hashes`,
+report `_meta.command`, a prompt-eval-not-run block, and an explicit
+claim-discipline caveat. `make compare-d7-retrieval ARTIFACT_DIR=...` and
+`qc_cli.py compare-d7-retrieval --artifact-dir ...` forward to the canonical
+script. Existing stdout and `--output` JSON behavior remain compatible, and
+failed preflight still writes no output report and no artifact directory.
+
+Verification evidence:
+
+- TDD red:
+  `python -m pytest tests/test_d7_comparison_guard.py -q` initially failed with
+  `SystemExit: 2` because `--artifact-dir` was not yet accepted.
+- Focused D7 tests:
+  `python -m pytest tests/test_d7_comparison_guard.py tests/test_qc_cli_d7_retrieval.py -q`
+  passed: 15 passed.
+- Focused Ruff:
+  `python -m ruff check scripts/compare_d7_retrieval.py tests/test_d7_comparison_guard.py tests/test_qc_cli_d7_retrieval.py qc_cli.py`
+  passed.
+- Make dry-run:
+  `make -n compare-d7-retrieval ... ARTIFACT_DIR=benchmark_results` emitted
+  the canonical `scripts/compare_d7_retrieval.py ... --artifact-dir
+  benchmark_results` command.
+- Docs gate: `make docs-check` passed.
+- Diff whitespace: `git diff --check` passed.
+- Full gate: `make check` passed: 1176 passed, 1 skipped, 8 deselected; Ruff
+  passed; docs-check passed; type check remains not configured.
+
+This is artifact/provenance/accounting infrastructure only. It is not held-out
+D7 evidence, live-baseline evidence, superiority evidence,
+methodological-validity evidence, or SOTA evidence.
 
 ---
 
@@ -87,11 +127,11 @@ created.
 
 ### Capability Validation
 
-- [ ] Artifact directory contains `report.json` and `manifest.json`.
-- [ ] Manifest report hash matches `report.json`.
-- [ ] Manifest input hashes and command match report `_meta`.
-- [ ] Existing stdout and `--output` behavior remains compatible.
-- [ ] Failed preflight writes no artifact directory.
+- [x] Artifact directory contains `report.json` and `manifest.json`.
+- [x] Manifest report hash matches `report.json`.
+- [x] Manifest input hashes and command match report `_meta`.
+- [x] Existing stdout and `--output` behavior remains compatible.
+- [x] Failed preflight writes no artifact directory.
 
 ---
 
@@ -153,31 +193,31 @@ created.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] `--artifact-dir` writes exactly one timestamped D7 comparison run directory
+- [x] `--artifact-dir` writes exactly one timestamped D7 comparison run directory
   per successful invocation.
-- [ ] Artifact `report.json` is byte-equivalent to stdout JSON.
-- [ ] Artifact `manifest.json` records the report SHA-256.
-- [ ] Manifest `input_hashes` equals report `_meta.input_hashes`.
-- [ ] Manifest `command` equals report `_meta.command`.
-- [ ] Manifest records explicit prompt-eval-not-run and claim-discipline
+- [x] Artifact `report.json` matches stdout JSON.
+- [x] Artifact `manifest.json` records the report SHA-256.
+- [x] Manifest `input_hashes` equals report `_meta.input_hashes`.
+- [x] Manifest `command` equals report `_meta.command`.
+- [x] Manifest records explicit prompt-eval-not-run and claim-discipline
   caveats.
-- [ ] `--output` remains compatible when `--artifact-dir` is also supplied.
-- [ ] Failed preflight and validation errors write no artifact directory.
-- [ ] Make and `qc_cli.py` forward artifact-dir arguments to the canonical
+- [x] `--output` remains compatible when `--artifact-dir` is also supplied.
+- [x] Failed preflight writes no artifact directory.
+- [x] Make and `qc_cli.py` forward artifact-dir arguments to the canonical
   script.
-- [ ] Docs state this is artifact/provenance infrastructure only, not held-out
+- [x] Docs state this is artifact/provenance infrastructure only, not held-out
   D7 evidence, live-baseline evidence, superiority evidence,
   methodological-validity evidence, or SOTA.
 
 > Process criteria:
-- [ ] TDD red state observed before implementation.
-- [ ] Focused tests pass.
-- [ ] Focused Ruff check passes.
-- [ ] `make docs-check` passes.
-- [ ] `git diff --check` passes.
-- [ ] `make check` passes.
-- [ ] Plan is moved to completed with verification evidence.
-- [ ] Verified implementation is committed and pushed.
+- [x] TDD red state observed before implementation.
+- [x] Focused tests pass.
+- [x] Focused Ruff check passes.
+- [x] `make docs-check` passes.
+- [x] `git diff --check` passes.
+- [x] `make check` passes.
+- [x] Plan is moved to completed with verification evidence.
+- [x] Verified implementation is committed and pushed.
 
 ---
 
