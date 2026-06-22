@@ -21,6 +21,7 @@ from scripts import bench_phase0
 _PATH_FLAGS = {
     "d3_gold_file": "--d3-gold-file",
     "d3_baselines_file": "--d3-baselines-file",
+    "d3_comparison_protocol_file": "--d3-comparison-protocol-file",
     "gold_file": "--gold-file",
     "d7_baselines_file": "--d7-baselines-file",
     "prompt_injection_file": "--prompt-injection-file",
@@ -54,6 +55,10 @@ class Phase0BenchmarkPackage(BaseModel):
     d3_baselines_file: str | None = Field(
         default=None,
         description="Optional D3 baseline predictions JSON path",
+    )
+    d3_comparison_protocol_file: str | None = Field(
+        default=None,
+        description="Optional D3 comparison protocol JSON path",
     )
     gold_file: str | None = Field(default=None, description="Optional D7 gold JSON path")
     d7_baselines_file: str | None = Field(

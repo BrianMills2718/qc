@@ -59,6 +59,7 @@ def test_bench_phase0_includes_input_hashes_without_external_files(
     )
     assert hashes["d3_gold_file_sha256"] is None
     assert hashes["d3_baselines_file_sha256"] is None
+    assert hashes["d3_comparison_protocol_file_sha256"] is None
     assert hashes["gold_file_sha256"] is None
     assert hashes["d7_baselines_file_sha256"] is None
     assert hashes["prompt_injection_file_sha256"] is None
@@ -281,6 +282,7 @@ def test_bench_phase0_hashes_external_input_files(
     hashes = output["_meta"]["input_hashes"]
     assert hashes["d3_gold_file_sha256"] == _sha256_file(d3_gold_file)
     assert hashes["d3_baselines_file_sha256"] == _sha256_file(d3_baselines_file)
+    assert hashes["d3_comparison_protocol_file_sha256"] is None
     assert hashes["gold_file_sha256"] == _sha256_file(gold_file)
     assert hashes["d7_baselines_file_sha256"] == _sha256_file(baselines_file)
     assert hashes["prompt_injection_file_sha256"] == _sha256_file(injection_file)
@@ -445,6 +447,148 @@ def test_bench_phase0_scores_d3_baselines_from_file_without_mutating_state(
     reloaded = store.load(state.id)
     assert "application_gold" not in reloaded.config.extra
     assert "application_baselines" not in reloaded.config.extra
+
+
+def test_bench_phase0_d3_comparison_protocol_guard_allows_matching_inputs(
+    tmp_path,
+    monkeypatch,
+    capsys,
+):
+    content = "AI helped delivery."
+    doc = Document(id="d1", name="interview.txt", content=content)
+    state = ProjectState(
+        id="project_d3_guard",
+        name="D3 guard project",
+        corpus=Corpus(documents=[doc]),
+        code_applications=[
+            CodeApplication(
+                code_id="AI_USE",
+                doc_id=doc.id,
+                quote_text=content,
+                start_char=0,
+                end_char=len(content),
+            )
+        ],
+    )
+    store = ProjectStore(projects_dir=tmp_path / "projects")
+    store.save(state)
+    d3_gold_file = tmp_path / "d3_gold.json"
+    d3_gold_file.write_text(
+        json.dumps(_d3_gold_package_payload(doc_id=doc.id, end_char=len(content))),
+        encoding="utf-8",
+    )
+    d3_baselines_file = tmp_path / "d3_baselines.json"
+    d3_baselines_file.write_text(
+        json.dumps(_d3_baseline_package_payload(doc_id=doc.id, end_char=len(content))),
+        encoding="utf-8",
+    )
+    d3_protocol_file = tmp_path / "d3_protocol.json"
+    d3_protocol_file.write_text(
+        json.dumps(
+            _d3_comparison_protocol_payload(
+                prediction_file_sha256=_sha256_file(d3_baselines_file)
+            )
+        ),
+        encoding="utf-8",
+    )
+    artifact_dir = tmp_path / "benchmark_results"
+    monkeypatch.setattr(bench_phase0, "ProjectStore", lambda: store)
+
+    exit_code = bench_phase0.main([
+        state.id,
+        "--d3-gold-file",
+        str(d3_gold_file),
+        "--d3-baselines-file",
+        str(d3_baselines_file),
+        "--d3-comparison-protocol-file",
+        str(d3_protocol_file),
+        "--artifact-dir",
+        str(artifact_dir),
+    ])
+
+    assert exit_code == 0
+    output = json.loads(capsys.readouterr().out)
+    assert output["application_validity_d3"]["status"] == "scored"
+    preflight = output["_meta"]["preflight_reports"]["d3_comparison"]
+    assert preflight["status"] == "pass"
+    assert preflight["protocol_id"] == "d3-heldout-comparison-v1"
+    assert preflight["gold_set_id"] == "d3-heldout-v1"
+    assert output["_meta"]["input_hashes"]["d3_comparison_protocol_file_sha256"] == (
+        _sha256_file(d3_protocol_file)
+    )
+    run_dir = _single_artifact_dir(artifact_dir)
+    manifest = json.loads((run_dir / "manifest.json").read_text(encoding="utf-8"))
+    assert manifest["command"]["d3_comparison_protocol_file"] == str(d3_protocol_file)
+    reloaded = store.load(state.id)
+    assert "application_gold" not in reloaded.config.extra
+    assert "application_baselines" not in reloaded.config.extra
+
+
+def test_bench_phase0_d3_comparison_protocol_guard_blocks_mismatch_and_writes_no_output(
+    tmp_path,
+    monkeypatch,
+    capsys,
+):
+    content = "AI helped delivery."
+    doc = Document(id="d1", name="interview.txt", content=content)
+    state = ProjectState(
+        id="project_d3_guard_fail",
+        name="D3 guard fail project",
+        corpus=Corpus(documents=[doc]),
+        code_applications=[
+            CodeApplication(
+                code_id="AI_USE",
+                doc_id=doc.id,
+                quote_text=content,
+                start_char=0,
+                end_char=len(content),
+            )
+        ],
+    )
+    store = ProjectStore(projects_dir=tmp_path / "projects")
+    store.save(state)
+    d3_gold_file = tmp_path / "d3_gold.json"
+    d3_gold_file.write_text(
+        json.dumps(_d3_gold_package_payload(doc_id=doc.id, end_char=len(content))),
+        encoding="utf-8",
+    )
+    d3_baselines_file = tmp_path / "d3_baselines.json"
+    d3_baselines_file.write_text(
+        json.dumps(_d3_baseline_package_payload(doc_id=doc.id, end_char=len(content))),
+        encoding="utf-8",
+    )
+    protocol = _d3_comparison_protocol_payload(
+        prediction_file_sha256=_sha256_file(d3_baselines_file)
+    )
+    protocol["expected_predictions"][0]["model_name"] = "different-model"
+    d3_protocol_file = tmp_path / "d3_protocol.json"
+    d3_protocol_file.write_text(json.dumps(protocol), encoding="utf-8")
+    output_file = tmp_path / "scorecard.json"
+    artifact_dir = tmp_path / "benchmark_results"
+    monkeypatch.setattr(bench_phase0, "ProjectStore", lambda: store)
+
+    exit_code = bench_phase0.main([
+        state.id,
+        "--d3-gold-file",
+        str(d3_gold_file),
+        "--d3-baselines-file",
+        str(d3_baselines_file),
+        "--d3-comparison-protocol-file",
+        str(d3_protocol_file),
+        "--output",
+        str(output_file),
+        "--artifact-dir",
+        str(artifact_dir),
+    ])
+
+    assert exit_code == 1
+    output = json.loads(capsys.readouterr().out)
+    assert output["error"] == "D3 comparison preflight failed"
+    report = output["preflight_report"]
+    assert report["status"] == "fail"
+    assert any(error["field"] == "model_name" for error in report["errors"])
+    assert not output_file.exists()
+    assert not artifact_dir.exists()
 
 
 def test_bench_phase0_scores_d3_from_versioned_gold_package(
@@ -2838,6 +2982,98 @@ def _inv7_live_protocol_payload() -> dict:
                 "pass_condition": "Report attack success rate and interval.",
             }
         ],
+    }
+
+
+def _d3_gold_package_payload(*, doc_id: str, end_char: int) -> dict:
+    return {
+        "schema_version": 1,
+        "gold_set_id": "d3-heldout-v1",
+        "dataset_name": "Held-out D3 comparison v1",
+        "split": "held_out",
+        "corpus_sha256": "a" * 64,
+        "project_state_sha256": "b" * 64,
+        "prompt_frozen": True,
+        "contamination_checked": True,
+        "adjudication": {
+            "coder_count": 2,
+            "adjudicator": "expert-panel",
+            "protocol": "Independent coding followed by adjudication.",
+            "human_human_agreement": None,
+            "notes": "",
+        },
+        "application_gold": [
+            {
+                "code_id": "AI_USE",
+                "doc_id": doc_id,
+                "start_char": 0,
+                "end_char": end_char,
+            }
+        ],
+    }
+
+
+def _d3_baseline_package_payload(*, doc_id: str, end_char: int) -> dict:
+    return {
+        "schema_version": 1,
+        "package_type": "qualitative_coding.d3_application_baseline_predictions",
+        "application_baseline_run": {
+            "project_id": "project_d3_guard",
+            "baseline_mode": "single_prompt",
+            "generated_at": "2026-06-22T00:00:00Z",
+            "model_name": "generic-baseline-model",
+            "application_count": 1,
+            "notes": "",
+        },
+        "application_baselines": [
+            {
+                "name": "single_prompt_baseline",
+                "description": "Single-prompt application baseline.",
+                "code_applications": [
+                    {
+                        "code_id": "AI_USE",
+                        "doc_id": doc_id,
+                        "start_char": 0,
+                        "end_char": end_char,
+                    }
+                ],
+            }
+        ],
+    }
+
+
+def _d3_comparison_protocol_payload(*, prediction_file_sha256: str) -> dict:
+    return {
+        "schema_version": 1,
+        "package_type": "qualitative_coding.d3_application_baseline_comparison_protocol",
+        "protocol_id": "d3-heldout-comparison-v1",
+        "project_id": "project_d3_guard",
+        "dataset_name": "Held-out D3 comparison v1",
+        "split": "held_out",
+        "gold_set_id": "d3-heldout-v1",
+        "corpus_sha256": "a" * 64,
+        "project_state_sha256": "b" * 64,
+        "prompt_frozen": True,
+        "contamination_checked": True,
+        "registered_before_run": True,
+        "expected_predictions": [
+            {
+                "baseline_name": "single_prompt_baseline",
+                "baseline_mode": "single_prompt",
+                "model_name": "generic-baseline-model",
+                "application_count": 1,
+                "trace_id": "qualitative_coding/d3-baseline/project_d3_guard",
+                "max_budget": 1.0,
+                "prediction_file_sha256": prediction_file_sha256,
+            }
+        ],
+        "success_criteria": [
+            "Score application baselines against the same held-out D3 gold."
+        ],
+        "caution": (
+            "D3 comparison protocol validation is process metadata only; it is not "
+            "held-out D3 evidence, expert-parity evidence, or superiority evidence."
+        ),
     }
 
 

@@ -545,12 +545,48 @@ def test_phase0_benchmark_package_forwards_output_and_artifact_dir(
     assert manifest["command"]["artifact_dir"] == str(artifact_dir)
 
 
+def test_phase0_benchmark_package_forwards_d3_comparison_protocol(
+    tmp_path,
+    monkeypatch,
+):
+    captured = {}
+
+    def fake_main(argv):
+        captured["argv"] = argv
+        return 0
+
+    package_dir = tmp_path / "package"
+    package_dir.mkdir()
+    d3_protocol = package_dir / "d3_protocol.json"
+    d3_protocol.write_text("{}", encoding="utf-8")
+    package_file = package_dir / "phase0_package.json"
+    package_file.write_text(
+        json.dumps({
+            "schema_version": 1,
+            "project_id": "package_project",
+            "d3_comparison_protocol_file": "d3_protocol.json",
+        }),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(bench_phase0, "main", fake_main)
+
+    exit_code = run_phase0_benchmark_package.main([str(package_file)])
+
+    assert exit_code == 0
+    assert captured["argv"] == [
+        "package_project",
+        "--d3-comparison-protocol-file",
+        str(d3_protocol),
+    ]
+
+
 def test_phase0_package_to_bench_argv_resolves_relative_paths(tmp_path):
     package = run_phase0_benchmark_package.Phase0BenchmarkPackage(
         schema_version=1,
         project_id="project",
         d3_gold_file="gold/d3.json",
         d3_baselines_file="baselines/d3.json",
+        d3_comparison_protocol_file="protocols/d3.json",
         d8_gt_fidelity_protocol_file="protocols/d8.json",
         gt_fidelity_file="rubrics/d8.json",
         d9_interpretive_preference_protocol_file="protocols/d9.json",
@@ -568,6 +604,8 @@ def test_phase0_package_to_bench_argv_resolves_relative_paths(tmp_path):
         str(tmp_path / "gold" / "d3.json"),
         "--d3-baselines-file",
         str(tmp_path / "baselines" / "d3.json"),
+        "--d3-comparison-protocol-file",
+        str(tmp_path / "protocols" / "d3.json"),
         "--d8-gt-fidelity-protocol-file",
         str(tmp_path / "protocols" / "d8.json"),
         "--gt-fidelity-file",

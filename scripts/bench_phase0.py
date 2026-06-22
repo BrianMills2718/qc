@@ -58,6 +58,7 @@ from qc_clean.core.confidence_calibration_preflight import (
     preflight_confidence_calibration_payloads,
 )
 from qc_clean.core.d3_baseline_package import d3_baselines_payload_for_scorecard
+from qc_clean.core.d3_comparison_preflight import preflight_d3_comparison_payloads
 from qc_clean.core.d3_gold import application_gold_payload_for_scorecard
 from qc_clean.core.d7_baseline_package import d7_baselines_payload_for_scorecard
 from qc_clean.core.d7_gold import d7_gold_payload_for_scorecard
@@ -77,6 +78,13 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument(
         "--d3-baselines-file",
         help="Optional D3 baseline prediction JSON file; applied in memory only",
+    )
+    parser.add_argument(
+        "--d3-comparison-protocol-file",
+        help=(
+            "Optional D3 comparison protocol JSON file; preflights supplied "
+            "D3 gold/baseline packages before scoring"
+        ),
     )
     parser.add_argument(
         "--gold-file",
@@ -194,26 +202,76 @@ def main(argv: Sequence[str] | None = None) -> int:
     interpretive_preference_results: Any | None = None
     confidence_calibration_results: Any | None = None
     prompt_injection_package_payload: Any | None = None
+    d3_gold_payload: Any | None = None
+    d3_baselines_payload: Any | None = None
 
     if args.d3_gold_file:
+        d3_gold_path = Path(args.d3_gold_file)
         try:
-            d3_gold = load_d3_gold_file(Path(args.d3_gold_file))
+            d3_gold_payload = load_d3_gold_payload_file(d3_gold_path)
         except ValueError as exc:
             print(json.dumps({"error": str(exc)}))
+            return 1
+        try:
+            d3_gold = application_gold_payload_for_scorecard(d3_gold_payload)
+        except ValueError as exc:
+            print(json.dumps({"error": f"D3 gold file '{d3_gold_path}' is invalid: {exc}"}))
             return 1
         state = state.model_copy(deep=True)
         state.config.extra = dict(state.config.extra)
         state.config.extra["application_gold"] = d3_gold
 
     if args.d3_baselines_file:
+        d3_baselines_path = Path(args.d3_baselines_file)
         try:
-            d3_baselines = load_d3_baselines_file(Path(args.d3_baselines_file))
+            d3_baselines_payload = load_d3_baselines_payload_file(
+                d3_baselines_path
+            )
         except ValueError as exc:
             print(json.dumps({"error": str(exc)}))
+            return 1
+        try:
+            d3_baselines = d3_baselines_payload_for_scorecard(d3_baselines_payload)
+        except ValueError as exc:
+            print(json.dumps({
+                "error": f"D3 baselines file '{d3_baselines_path}' is invalid: {exc}"
+            }))
             return 1
         state = state.model_copy(deep=True)
         state.config.extra = dict(state.config.extra)
         state.config.extra["application_baselines"] = d3_baselines
+
+    d3_comparison_preflight_report = None
+    if args.d3_comparison_protocol_file:
+        try:
+            d3_comparison_protocol = load_d3_comparison_protocol_file(
+                Path(args.d3_comparison_protocol_file)
+            )
+        except ValueError as exc:
+            print(json.dumps({"error": str(exc)}))
+            return 1
+        d3_baseline_payloads = (
+            [d3_baselines_payload] if d3_baselines_payload is not None else []
+        )
+        d3_comparison_preflight_report = preflight_d3_comparison_payloads(
+            d3_comparison_protocol,
+            d3_gold_payload,
+            d3_baseline_payloads,
+            prediction_file_sha256_by_baseline=(
+                d3_prediction_file_hashes_by_baseline(
+                    d3_baselines_payload,
+                    Path(args.d3_baselines_file) if args.d3_baselines_file else None,
+                )
+            ),
+        )
+        if d3_comparison_preflight_report.status != "pass":
+            print(json.dumps({
+                "error": "D3 comparison preflight failed",
+                "preflight_report": d3_comparison_preflight_report.model_dump(
+                    mode="json"
+                ),
+            }))
+            return 1
 
     if args.gold_file:
         try:
@@ -532,6 +590,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         card.setdefault("_meta", {}).setdefault("preflight_reports", {})[
             "confidence_calibration"
         ] = confidence_calibration_preflight_report.model_dump(mode="json")
+    if d3_comparison_preflight_report is not None:
+        card.setdefault("_meta", {}).setdefault("preflight_reports", {})[
+            "d3_comparison"
+        ] = d3_comparison_preflight_report.model_dump(mode="json")
     if inv7_live_preflight_report is not None:
         card.setdefault("_meta", {}).setdefault("preflight_reports", {})[
             "inv7_live"
@@ -541,6 +603,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         d3_gold_file=Path(args.d3_gold_file) if args.d3_gold_file else None,
         d3_baselines_file=(
             Path(args.d3_baselines_file) if args.d3_baselines_file else None
+        ),
+        d3_comparison_protocol_file=(
+            Path(args.d3_comparison_protocol_file)
+            if args.d3_comparison_protocol_file
+            else None
         ),
         gold_file=Path(args.gold_file) if args.gold_file else None,
         d7_baselines_file=Path(args.d7_baselines_file) if args.d7_baselines_file else None,
@@ -768,6 +835,11 @@ def phase0_command_provenance(args: argparse.Namespace) -> dict[str, Any]:
         "d3_baselines_file": (
             str(Path(args.d3_baselines_file)) if args.d3_baselines_file else None
         ),
+        "d3_comparison_protocol_file": (
+            str(Path(args.d3_comparison_protocol_file))
+            if args.d3_comparison_protocol_file
+            else None
+        ),
         "gold_file": str(Path(args.gold_file)) if args.gold_file else None,
         "d7_baselines_file": (
             str(Path(args.d7_baselines_file)) if args.d7_baselines_file else None
@@ -868,6 +940,7 @@ def phase0_input_hashes(
     *,
     d3_gold_file: Path | None,
     d3_baselines_file: Path | None,
+    d3_comparison_protocol_file: Path | None,
     gold_file: Path | None,
     d7_baselines_file: Path | None,
     prompt_injection_file: Path | None,
@@ -896,6 +969,11 @@ def phase0_input_hashes(
         ),
         "d3_baselines_file_sha256": (
             sha256_file(d3_baselines_file) if d3_baselines_file else None
+        ),
+        "d3_comparison_protocol_file_sha256": (
+            sha256_file(d3_comparison_protocol_file)
+            if d3_comparison_protocol_file
+            else None
         ),
         "gold_file_sha256": sha256_file(gold_file) if gold_file else None,
         "d7_baselines_file_sha256": (
@@ -1033,32 +1111,40 @@ def load_d7_gold_file(path: Path) -> Any:
 
 def load_d3_gold_file(path: Path) -> Any:
     """Load and shape-check an external D3 application gold file."""
-    try:
-        raw = json.loads(path.read_text(encoding="utf-8"))
-    except OSError as exc:
-        raise ValueError(f"D3 gold file '{path}' could not be read: {exc}") from exc
-    except json.JSONDecodeError as exc:
-        raise ValueError(f"D3 gold file '{path}' is not valid JSON: {exc}") from exc
-
+    raw = load_d3_gold_payload_file(path)
     try:
         return application_gold_payload_for_scorecard(raw)
     except ValueError as exc:
         raise ValueError(f"D3 gold file '{path}' is invalid: {exc}") from exc
 
 
+def load_d3_gold_payload_file(path: Path) -> Any:
+    """Load raw external D3 application gold JSON for scoring or preflight."""
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except OSError as exc:
+        raise ValueError(f"D3 gold file '{path}' could not be read: {exc}") from exc
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"D3 gold file '{path}' is not valid JSON: {exc}") from exc
+
+
 def load_d3_baselines_file(path: Path) -> Any:
     """Load and shape-check an external D3 baseline prediction file."""
-    try:
-        raw = json.loads(path.read_text(encoding="utf-8"))
-    except OSError as exc:
-        raise ValueError(f"D3 baselines file '{path}' could not be read: {exc}") from exc
-    except json.JSONDecodeError as exc:
-        raise ValueError(f"D3 baselines file '{path}' is not valid JSON: {exc}") from exc
-
+    raw = load_d3_baselines_payload_file(path)
     try:
         return d3_baselines_payload_for_scorecard(raw)
     except ValueError as exc:
         raise ValueError(f"D3 baselines file '{path}' is invalid: {exc}") from exc
+
+
+def load_d3_baselines_payload_file(path: Path) -> Any:
+    """Load raw external D3 baseline prediction JSON for scoring or preflight."""
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except OSError as exc:
+        raise ValueError(f"D3 baselines file '{path}' could not be read: {exc}") from exc
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"D3 baselines file '{path}' is not valid JSON: {exc}") from exc
 
 
 def load_d7_baselines_file(path: Path) -> Any:
@@ -1139,6 +1225,41 @@ def load_d6_bias_protocol_file(path: Path) -> Any:
     if not isinstance(raw, dict):
         raise ValueError("D6 bias protocol file must be a JSON object")
     return raw
+
+
+def load_d3_comparison_protocol_file(path: Path) -> Any:
+    """Load a D3 comparison protocol file for score-time preflight."""
+    try:
+        raw = json.loads(path.read_text(encoding="utf-8"))
+    except OSError as exc:
+        raise ValueError(
+            f"D3 comparison protocol file '{path}' could not be read: {exc}"
+        ) from exc
+    except json.JSONDecodeError as exc:
+        raise ValueError(
+            f"D3 comparison protocol file '{path}' is not valid JSON: {exc}"
+        ) from exc
+    if not isinstance(raw, dict):
+        raise ValueError("D3 comparison protocol file must be a JSON object")
+    return raw
+
+
+def d3_prediction_file_hashes_by_baseline(
+    payload: Any,
+    path: Path | None,
+) -> dict[str, str]:
+    """Map each D3 baseline name in a package payload to its source file hash."""
+    file_hash = sha256_file(path)
+    if file_hash is None or not isinstance(payload, dict):
+        return {}
+    raw_baselines = payload.get("application_baselines")
+    if not isinstance(raw_baselines, list):
+        return {}
+    hashes: dict[str, str] = {}
+    for raw_baseline in raw_baselines:
+        if isinstance(raw_baseline, dict) and isinstance(raw_baseline.get("name"), str):
+            hashes[raw_baseline["name"]] = file_hash
+    return hashes
 
 
 def load_d4_codebook_quality_protocol_file(path: Path) -> Any:

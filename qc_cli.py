@@ -148,6 +148,10 @@ Examples:
         help='Optional D3 baseline prediction JSON file; applied in memory only'
     )
     bench_parser.add_argument(
+        '--d3-comparison-protocol-file',
+        help='Optional D3 comparison protocol JSON file; preflights supplied D3 packages before scoring'
+    )
+    bench_parser.add_argument(
         '--gold-file',
         help='Optional D7 disconfirmation gold JSON file; applied in memory only'
     )
@@ -697,6 +701,11 @@ def handle_bench_command(args) -> int:
         argv.extend(["--d3-gold-file", args.d3_gold_file])
     if args.d3_baselines_file:
         argv.extend(["--d3-baselines-file", args.d3_baselines_file])
+    if args.d3_comparison_protocol_file:
+        argv.extend([
+            "--d3-comparison-protocol-file",
+            args.d3_comparison_protocol_file,
+        ])
     if args.gold_file:
         argv.extend(["--gold-file", args.gold_file])
     if args.d7_baselines_file:
