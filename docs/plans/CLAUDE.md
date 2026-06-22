@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 155 | Cost observability target verification | Medium | Planned | `COST_OBSERVABILITY_TARGET_VERIFICATION.md` |
 
 ## Completed Plans
 
