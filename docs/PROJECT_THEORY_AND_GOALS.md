@@ -357,8 +357,11 @@ evidence, or SOTA evidence.
 `scripts/bench_phase0.py --d3-baselines-file` can score externally supplied
 `application_baselines` against the same exact code/source-anchor key universe
 as the system and report system-minus-baseline deltas with local paired
-bootstrap intervals. This is not a live baseline run, held-out D3 result, or
-expert-parity claim.
+bootstrap intervals. Versioned schema_version=1 D3 baseline packages validate
+through `make validate-d3-baseline-package PACKAGE=...`, and recognized
+versioned packages validate before scoring while legacy raw inputs remain
+supported. This is package/provenance validation and local accounting, not a
+live baseline run, held-out D3 result, or expert-parity claim.
 
 **Exact-key alpha metadata:** D3 and D7 `system_gold_agreement` sections now
 report exact-key binary Krippendorff's α beside percent agreement, Cohen's κ,

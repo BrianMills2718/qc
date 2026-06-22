@@ -56,6 +56,7 @@ from qc_clean.core.d9_interpretive_preference_preflight import (
 from qc_clean.core.confidence_calibration_preflight import (
     preflight_confidence_calibration_payloads,
 )
+from qc_clean.core.d3_baseline_package import d3_baselines_payload_for_scorecard
 from qc_clean.core.d3_gold import application_gold_payload_for_scorecard
 from qc_clean.core.d7_baseline_package import d7_baselines_payload_for_scorecard
 from qc_clean.core.d7_gold import d7_gold_payload_for_scorecard
@@ -992,14 +993,10 @@ def load_d3_baselines_file(path: Path) -> Any:
     except json.JSONDecodeError as exc:
         raise ValueError(f"D3 baselines file '{path}' is not valid JSON: {exc}") from exc
 
-    if isinstance(raw, list):
-        return raw
-    if isinstance(raw, dict) and isinstance(raw.get("application_baselines"), list):
-        return raw["application_baselines"]
-    raise ValueError(
-        "D3 baselines file must be a JSON list of baseline predictions or an "
-        "object with an 'application_baselines' list"
-    )
+    try:
+        return d3_baselines_payload_for_scorecard(raw)
+    except ValueError as exc:
+        raise ValueError(f"D3 baselines file '{path}' is invalid: {exc}") from exc
 
 
 def load_d7_baselines_file(path: Path) -> Any:
