@@ -20,7 +20,7 @@ LLM-powered qualitative coding analysis for interview transcripts. Accepts .txt,
 - **Default/Thematic Analysis** - 7-stage pipeline: Ingest -> Thematic Coding -> Perspective Analysis -> Relationship Mapping -> Synthesis -> Cross-Interview Analysis -> Negative Case Analysis
 - **Grounded Theory** - 7-stage pipeline: Ingest -> Constant Comparison Coding -> Axial Coding -> Selective Coding -> Theory Integration -> Cross-Interview Analysis -> Negative Case Analysis
 
-  (Negative Case Analysis runs last and now sees bounded claim-ledger targets by claim ID plus BM25-style lexical/query-expanded retrieval-first source candidates. It has adversarial prompt framing and configurable `disconfirmation_model_name`, but remains non-embedding retrieval and not held-out D7-evaluated. INV-6 remains PARTIAL and INV-2 is PARTIAL, not full credibility evidence. See `docs/PROJECT_THEORY_AND_GOALS.md`.)
+  (Negative Case Analysis runs last and now sees bounded claim-ledger targets by claim ID plus BM25-style lexical/query-expanded retrieval-first source candidates. It has adversarial prompt framing, configurable `disconfirmation_model_name`, and opt-in unvalidated `embedding_hybrid` retrieval, but it is not held-out D7-evaluated and has no validated default embedding/reviewer policy. INV-6 remains PARTIAL and INV-2 is PARTIAL, not full credibility evidence. See `docs/PROJECT_THEORY_AND_GOALS.md`.)
 
 All stages use structured LLM output via Pydantic schemas + JSON mode. State is held in a single `ProjectState` Pydantic model that can be saved/loaded as JSON.
 
