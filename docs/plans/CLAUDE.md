@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 50 | D4 codebook quality scorecard | High | Planned | `D4_CODEBOOK_QUALITY_SCORECARD.md` |
 
 ## Completed Plans
 
