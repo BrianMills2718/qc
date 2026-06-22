@@ -6,12 +6,12 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 151 | Corpus-scope adequacy scorecard | High | Planned | `CORPUS_SCOPE_ADEQUACY_SCORECARD.md` |
 
 ## Completed Plans
 
 | Name | Outcome | Record |
 |------|---------|--------|
+| Corpus-scope adequacy scorecard | Phase 0 now reports deterministic corpus-scope status, field completeness, document/claim counts, and status warnings without claiming sampling validity | `completed/CORPUS_SCOPE_ADEQUACY_SCORECARD.md` |
 | INV-9 claim-anchor coverage scorecard | Phase 0 now reports deterministic claim-anchor coverage counts/rates/breakdowns for first-class ledger rows without claiming validity or adjudication evidence | `completed/INV9_CLAIM_ANCHOR_COVERAGE_SCORECARD.md` |
 | INV-1 span anchoring + harness Phase 0 | INV-1 mostly met; `make bench` Phase 0 stood up | `completed/INV1_OVERNIGHT_SPRINT.md` |
 | INV-1 deterministic fuzzy grounding | INV-1 follow-up: normalized exact grounding now has a conservative deterministic fuzzy fallback for long near-verbatim spans while preserving ambiguity drops and hash-verifiable original offsets | `completed/INV1_DETERMINISTIC_FUZZY_GROUNDING.md` |

@@ -69,4 +69,25 @@ Fails when:
 
 ## Closeout Notes
 
-To be filled after implementation and verification.
+Completed in commits:
+
+- Plan checkpoint: `821eb2d`
+- Implementation checkpoint: `dc95bad`
+
+Implemented `corpus_scope_adequacy` in `phase0_scorecard` with deterministic
+scope status (`missing`, `empty`, `missing_sampling_frame`, `complete`),
+field-level completeness, document count, claim count, and status-specific
+warnings. The scorecard reuses the existing scope-lint classifier for policy
+alignment and keeps the output framed as scope-record accounting only.
+
+Verification:
+
+- `python -m pytest tests/test_bench_phase0.py -k corpus_scope_adequacy -v`
+- `python -m pytest tests/test_scope_phrasing_lint.py -q`
+- `python -m pytest tests/test_bench_phase0.py -q`
+- `ruff check qc_clean/core/bench.py tests/test_bench_phase0.py`
+- `make docs-check`
+- `make check` (`1090 passed, 1 skipped, 8 deselected`)
+
+Claim discipline: this does not validate sampling-frame adequacy, population
+generalization, methodological validity, or SOTA evidence.
