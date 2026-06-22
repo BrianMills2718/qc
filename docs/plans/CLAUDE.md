@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 65 | INV-7 prompt-injection Wilson intervals | High | Planned | `INV7_PROMPT_INJECTION_WILSON_INTERVALS.md` |
 
 ## Completed Plans
 
