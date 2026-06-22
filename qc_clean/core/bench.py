@@ -27,6 +27,7 @@ from qc_clean.core.grounding import verify_grounding
 from qc_clean.core.pipeline.irr import (
     compute_categorical_gwet_ac1,
     compute_categorical_percent_agreement,
+    compute_cohens_kappa,
     compute_gwet_ac1,
     compute_percent_agreement,
 )
@@ -2057,6 +2058,10 @@ def application_validity_d3_scorecard(state: ProjectState) -> Dict[str, Any]:
     gold_provenance = _d3_gold_provenance(state)
     if gold_provenance is not None:
         card["gold_provenance"] = gold_provenance
+    card["system_gold_agreement"] = _d3_system_gold_agreement(
+        gold_keys,
+        predicted_keys,
+    )
     card["human_ceiling_comparison"] = _human_ceiling_comparison(
         score,
         gold_provenance,
@@ -2193,8 +2198,8 @@ def _chance_corrected_agreement_metadata(
             "metric_keys": sorted(metrics),
             "note": (
                 "Human-human chance-corrected agreement metadata from the gold "
-                "package only; the system scorecard does not compute system "
-                "kappa/alpha/AC1 agreement here."
+                "package only; this section does not compare system "
+                "chance-corrected agreement to the human ceiling."
             ),
         }
     if non_numeric:
@@ -2255,6 +2260,48 @@ def _d3_gold_provenance(state: ProjectState) -> dict[str, Any] | None:
         count_key="application_gold_count",
         anchor_count=len(package.application_gold),
     )
+
+
+def _d3_system_gold_agreement(
+    gold_keys: set[str],
+    predicted_keys: set[str],
+) -> dict[str, Any]:
+    """Compute exact-key binary agreement between D3 gold and system predictions."""
+    key_universe = sorted(gold_keys | predicted_keys)
+    if not key_universe:
+        return {
+            "status": "not_available",
+            "reason": "No D3 exact-key gold/predicted universe is available.",
+            "note": (
+                "D3 system-gold agreement is exact-key binary metadata, not "
+                "full D3 validity or expert-parity evidence."
+            ),
+        }
+
+    matrix = {
+        key: [
+            1 if key in gold_keys else 0,
+            1 if key in predicted_keys else 0,
+        ]
+        for key in key_universe
+    }
+    return {
+        "status": "scored",
+        "unit": "exact code/source-anchor key",
+        "raters": ["gold", "system"],
+        "row_count": len(key_universe),
+        "gold_positive_count": len(gold_keys),
+        "system_positive_count": len(predicted_keys),
+        "percent_agreement": compute_percent_agreement(matrix),
+        "cohens_kappa": compute_cohens_kappa(matrix),
+        "gwet_ac1": compute_gwet_ac1(matrix),
+        "prevalence": _binary_matrix_prevalence(matrix),
+        "note": (
+            "Binary agreement over the exact D3 key universe only. This is "
+            "prevalence-aware agreement metadata, not semantic equivalence, "
+            "Krippendorff's alpha, full D3 validity, or expert-parity evidence."
+        ),
+    }
 
 
 def _gold_set_provenance(

@@ -40,8 +40,10 @@ packages are validated by
 `make validate-d7-gold GOLD=gold_set.json`. INV-7 now has both deterministic
 structural fixture export (`make run-inv7-fixtures`) and opt-in live model
 canary fixture export (`make run-inv7-live-fixtures`) for the `PROMPT_INJECTION=`
-scorecard path. D3/D7 scorecards also compare exact recall/precision/F1 against
-supplied versioned-package human-human metrics when present and surface supplied
+scorecard path. D3 scorecards now report exact-key binary system-vs-gold
+percent agreement, Cohen's κ, Gwet's AC1, and prevalence metadata. D3/D7
+scorecards also compare exact recall/precision/F1 against supplied
+versioned-package human-human metrics when present and surface supplied
 human-human κ/α/AC1 metadata separately. Phase 0 now also scores externally
 supplied D4 codebook-quality rubric outcomes through `CODEBOOK_QUALITY=` /
 `--codebook-quality-file`. D5 reliability now

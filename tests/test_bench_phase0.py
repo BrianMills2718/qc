@@ -326,6 +326,26 @@ def test_scorecard_scores_d3_application_gold_exact_span_and_code():
     assert d3["f1_bootstrap_ci"]["seed"] == 0
     assert d3["f1_bootstrap_ci"]["population_size"] == 4
     assert d3["f1_bootstrap_ci"]["lower"] <= d3["f1_bootstrap_ci"]["upper"]
+    agreement = d3["system_gold_agreement"]
+    assert agreement["status"] == "scored"
+    assert agreement["unit"] == "exact code/source-anchor key"
+    assert agreement["raters"] == ["gold", "system"]
+    assert agreement["row_count"] == 3
+    assert agreement["gold_positive_count"] == 2
+    assert agreement["system_positive_count"] == 2
+    assert agreement["percent_agreement"] == pytest.approx(1 / 3)
+    assert agreement["cohens_kappa"] == pytest.approx(-0.5)
+    assert agreement["gwet_ac1"] == pytest.approx(-0.2)
+    assert agreement["prevalence"]["row_count"] == 3
+    assert agreement["prevalence"]["rating_count"] == 6
+    assert agreement["prevalence"]["categories"]["present"]["count"] == 4
+    assert agreement["prevalence"]["categories"]["present"]["rate"] == pytest.approx(2 / 3)
+    assert agreement["prevalence"]["row_patterns"] == {
+        "all_absent": 0,
+        "all_present": 1,
+        "mixed": 2,
+    }
+    assert "not semantic equivalence" in agreement["note"]
     assert d3["human_ceiling_comparison"]["status"] == "not_available"
     assert "versioned gold-set package" in d3["human_ceiling_comparison"]["reason"]
     overlap = d3["span_overlap"]
@@ -381,6 +401,7 @@ def test_scorecard_d3_compares_exact_metrics_to_human_ceiling_package():
     )
 
     comparison = phase0_scorecard(state)["application_validity_d3"]["human_ceiling_comparison"]
+    agreement = phase0_scorecard(state)["application_validity_d3"]["system_gold_agreement"]
 
     assert comparison["status"] == "scored"
     assert comparison["gold_split"] == "held_out"
@@ -400,6 +421,10 @@ def test_scorecard_d3_compares_exact_metrics_to_human_ceiling_package():
         "cohens_kappa": 0.72,
         "gwet_ac1": 0.81,
     }
+    assert agreement["percent_agreement"] == 1.0
+    assert agreement["cohens_kappa"] == 1.0
+    assert agreement["gwet_ac1"] == 1.0
+    assert agreement["prevalence"]["row_patterns"]["all_present"] == 1
     assert comparison["non_comparable_human_metrics"] == []
     assert "not expert-parity evidence" in comparison["note"]
 
@@ -459,7 +484,7 @@ def test_scorecard_human_ceiling_noncomparable_metrics_are_not_scored():
     assert comparison["chance_corrected_agreement"]["non_numeric_metrics"] == [
         "fleiss_kappa"
     ]
-    assert "system scorecard does not compute system" in (
+    assert "does not compare system chance-corrected agreement" in (
         comparison["chance_corrected_agreement"]["note"]
     )
     assert comparison["non_comparable_human_metrics"] == ["notes"]
