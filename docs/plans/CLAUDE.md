@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 51 | D9 interpretive preference scorecard | High | Planned | `D9_INTERPRETIVE_PREFERENCE_SCORECARD.md` |
 
 ## Completed Plans
 
