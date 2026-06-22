@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 86 | Scope-bound claim export rows | High | Planned | `SCOPE_BOUND_CLAIM_EXPORT_ROWS.md` |
 
 ## Completed Plans
 
