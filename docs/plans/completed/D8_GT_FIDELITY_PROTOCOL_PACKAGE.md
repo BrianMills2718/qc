@@ -1,6 +1,6 @@
 # Plan #120: D8 GT Fidelity Protocol Package
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Phase 0 D8 GT-fidelity scorecard substrate
@@ -74,16 +74,16 @@ created.
 
 ### Capability Validation
 
-- [ ] Valid held-out D8 protocol packages are accepted.
-- [ ] Held-out protocols require prompt/model freeze, contamination check,
+- [x] Valid held-out D8 protocol packages are accepted.
+- [x] Held-out protocols require prompt/model freeze, contamination check,
   pre-evaluation registration, project-state hash, and GT artifact hash.
-- [ ] Protocols require non-empty evaluator plan and at least one evaluator.
-- [ ] Protocols require the D8 rubric metrics: constant comparison, category
+- [x] Protocols require non-empty evaluator plan and at least one evaluator.
+- [x] Protocols require the D8 rubric metrics: constant comparison, category
   development, memo quality, and saturation justification.
-- [ ] Protocols require non-empty target scopes.
-- [ ] Success criteria are required for every configured rubric metric.
-- [ ] Malformed hashes and duplicate metric/evaluator/scope entries fail loud.
-- [ ] CLI emits machine-readable JSON for valid and invalid packages.
+- [x] Protocols require non-empty target scopes.
+- [x] Success criteria are required for every configured rubric metric.
+- [x] Malformed hashes and duplicate metric/evaluator/scope entries fail loud.
+- [x] CLI emits machine-readable JSON for valid and invalid packages.
 
 ---
 
@@ -176,30 +176,30 @@ Deferred by design:
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] A schema_version=1 D8 GT-fidelity protocol JSON can be validated by
+- [x] A schema_version=1 D8 GT-fidelity protocol JSON can be validated by
   importable code.
-- [ ] `make validate-d8-gt-fidelity-protocol PROTOCOL=protocol.json` emits JSON
+- [x] `make validate-d8-gt-fidelity-protocol PROTOCOL=protocol.json` emits JSON
   and returns non-zero on invalid packages.
-- [ ] Held-out protocols require prompt freeze, contamination check,
+- [x] Held-out protocols require prompt freeze, contamination check,
   pre-evaluation registration, project-state hash, and GT artifact hash.
-- [ ] Evaluator-plan metadata and target scopes are required.
-- [ ] All four D8 rubric metrics are required.
-- [ ] Success criteria cover every configured metric.
-- [ ] Docs state protocol validation is process/provenance only.
+- [x] Evaluator-plan metadata and target scopes are required.
+- [x] All four D8 rubric metrics are required.
+- [x] Success criteria cover every configured metric.
+- [x] Docs state protocol validation is process/provenance only.
 
 > Process criteria:
-- [ ] Required focused tests pass.
-- [ ] Focused Ruff check passes.
-- [ ] `make docs-check` passes.
-- [ ] Full `make check` passes or any failure is documented with evidence.
-- [ ] Type-check status is reported.
-- [ ] Verified work is committed and pushed.
+- [x] Required focused tests pass.
+- [x] Focused Ruff check passes.
+- [x] `make docs-check` passes.
+- [x] Full `make check` passes or any failure is documented with evidence.
+- [x] Type-check status is reported.
+- [x] Verified work is committed and pushed.
 
 ---
 
 ## Open Questions
 
-- [ ] Should D8 protocol/result preflight and score-time guard follow
+- [x] Should D8 protocol/result preflight and score-time guard follow
   immediately? — Status: DEFERRED | This plan validates protocol metadata first;
   concrete-result preflight/guard can follow the D4/D6 patterns in later
   slices.
@@ -211,3 +211,25 @@ Deferred by design:
 This plan creates a protocol validator. It does not collect expert ratings, run
 LLM judges, validate rubric labels, prove methodological saturation, prove full
 grounded theory, or license a SOTA claim.
+
+---
+
+## Outcome
+
+Implemented in commit `5daaaae`
+(`[Plan: D8_GT_FIDELITY_PROTOCOL_PACKAGE] Add D8 protocol validator`) and
+pushed to `main`.
+
+Verification evidence:
+
+- TDD red: focused D8 tests initially failed with
+  `ModuleNotFoundError: No module named 'qc_clean.core.d8_gt_fidelity_protocol'`.
+- `python -m pytest tests/test_d8_gt_fidelity_protocol.py -q`: 6 passed.
+- `python -m ruff check qc_clean/core/d8_gt_fidelity_protocol.py scripts/validate_d8_gt_fidelity_protocol.py tests/test_d8_gt_fidelity_protocol.py`: passed.
+- `make -n validate-d8-gt-fidelity-protocol PROTOCOL=protocol.json`: emitted
+  `python scripts/validate_d8_gt_fidelity_protocol.py protocol.json`.
+- `make docs-check`: Markdown links, doc coupling, plan status, and AGENTS sync
+  passed.
+- `make check`: 979 passed, 1 skipped, 8 deselected; Ruff passed; docs-check
+  passed.
+- Type check status: not configured.

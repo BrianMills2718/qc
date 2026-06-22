@@ -22,11 +22,21 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #120 (`D8_GT_FIDELITY_PROTOCOL_PACKAGE.md`): add a
-   pre-registered D8 GT-fidelity protocol validator before populated D8 rubric
-   rows are treated as benchmark evidence.
+1. Select the next unambiguous evaluation-harness protocol/preflight/guard lane
+   from `docs/plans/CLAUDE.md` and the roadmap.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
+
+**Completed checkpoint:** D8 GT-fidelity protocols can now be validated with
+`make validate-d8-gt-fidelity-protocol PROTOCOL=...` /
+`scripts/validate_d8_gt_fidelity_protocol.py`. The validator checks
+schema_version=1 protocol metadata, held-out prompt/model freeze,
+contamination, pre-evaluation registration, corpus/project-state/GT-artifact
+hashes, evaluator plan, required rubric metrics, target scopes, optional
+outcome-file hash locks, and per-metric success criteria. This is
+process/provenance metadata only, not expert-rubric acceptance,
+methodological-saturation evidence, full grounded-theory evidence, or SOTA
+evidence.
 
 **Completed checkpoint:** `make bench` now accepts `D4_PROTOCOL=...` and
 `scripts/bench_phase0.py --d4-codebook-quality-protocol-file ...` to enforce
