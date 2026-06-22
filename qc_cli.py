@@ -70,6 +70,8 @@ Examples:
   qc_cli verify-export-audit-log events.jsonl
   qc_cli mirror-export-audit-db events.jsonl --db events.sqlite
   qc_cli verify-export-audit-db events.sqlite
+  qc_cli lint-scope-phrasing <project_id> --input-file report.md
+  qc_cli lint-prompt-overrides --root qc_clean
   qc_cli validate-d3-gold d3_gold.json
   qc_cli validate-d7-gold d7_gold.json
   qc_cli validate-d3-baseline-package d3_baseline.json
@@ -804,6 +806,39 @@ Examples:
         help='SQLite audit event database path',
     )
 
+    scope_lint_parser = subparsers.add_parser(
+        'lint-scope-phrasing',
+        help='Lint report text for unsafe scope phrasing',
+        description='Lint text or Markdown for corpus-scope-sensitive phrasing',
+    )
+    scope_lint_parser.add_argument(
+        'project_id',
+        help='Project ID whose corpus scope should govern linting',
+    )
+    scope_lint_input_group = scope_lint_parser.add_mutually_exclusive_group(required=True)
+    scope_lint_input_group.add_argument(
+        '--input-file',
+        help='Text or Markdown file to lint',
+    )
+    scope_lint_input_group.add_argument(
+        '--text',
+        help='Inline text to lint',
+    )
+    scope_lint_parser.add_argument(
+        '--projects-dir',
+        help='Optional project store directory',
+    )
+
+    prompt_override_lint_parser = subparsers.add_parser(
+        'lint-prompt-overrides',
+        help='Check prompt override registry consistency',
+        description='Check prompt override source uses against the central registry',
+    )
+    prompt_override_lint_parser.add_argument(
+        '--root',
+        help='Python source root to scan',
+    )
+
     # D7 retrieval export command
     d7_retrieval_parser = subparsers.add_parser(
         'run-d7-retrieval',
@@ -1425,6 +1460,10 @@ def main() -> int:
             return handle_mirror_export_audit_db_command(args)
         elif args.command == 'verify-export-audit-db':
             return handle_verify_export_audit_db_command(args)
+        elif args.command == 'lint-scope-phrasing':
+            return handle_lint_scope_phrasing_command(args)
+        elif args.command == 'lint-prompt-overrides':
+            return handle_lint_prompt_overrides_command(args)
         elif args.command == 'run-d7-retrieval':
             return handle_run_d7_retrieval_command(args)
         elif args.command == 'run-d7-live-baseline':
@@ -1872,6 +1911,30 @@ def handle_verify_export_audit_db_command(args) -> int:
     from scripts import verify_export_audit_event_db
 
     return verify_export_audit_event_db.main([args.db])
+
+
+def handle_lint_scope_phrasing_command(args) -> int:
+    """Lint scope-sensitive phrasing through the canonical CLI."""
+    from scripts import lint_scope_phrasing
+
+    argv = [args.project_id]
+    if args.input_file is not None:
+        argv.extend(["--input-file", args.input_file])
+    if args.text is not None:
+        argv.extend(["--text", args.text])
+    if args.projects_dir is not None:
+        argv.extend(["--projects-dir", args.projects_dir])
+    return lint_scope_phrasing.main(argv)
+
+
+def handle_lint_prompt_overrides_command(args) -> int:
+    """Lint prompt override registry consistency through the canonical CLI."""
+    from scripts import check_prompt_override_registry
+
+    argv = []
+    if args.root is not None:
+        argv.extend(["--root", args.root])
+    return check_prompt_override_registry.main(argv)
 
 
 def handle_run_d7_retrieval_command(args) -> int:

@@ -89,6 +89,7 @@ python qc_cli.py import-adjudication-responses responses.json --gold-set-id stud
 make write-phase0-adjudication-package ID=<project_id> OUTPUT=phase0_package.json D3_GOLD=d3_gold.json GOLD=d7_gold.json  # Write strict Phase 0 package manifest for imported D3/D7 gold
 python qc_cli.py write-phase0-adjudication-package <project_id> --output phase0_package.json --d3-gold-file d3_gold.json --gold-file d7_gold.json  # Canonical CLI wrapper for Phase 0 adjudication package manifests
 make lint-scope-phrasing ID=<project_id> INPUT=report.md  # Lint arbitrary text for unsafe population-generalizing scope phrasing
+python qc_cli.py lint-scope-phrasing <project_id> --input-file report.md  # Canonical CLI wrapper for scope phrasing lint
 make export-audit-manifest ID=<project_id> FORMAT=markdown ARTIFACTS="report.md" OUTPUT=manifest.json AUDIT_LOG=events.jsonl AUDIT_DB=events.sqlite  # Write export artifact hash manifest and optional audit event mirror
 make verify-export-audit-manifest MANIFEST=manifest.json BASE_DIR=. ID=<project_id> AUDIT_LOG=events.jsonl AUDIT_DB=events.sqlite  # Verify manifest and optionally mirror the verification event
 make export-publish-preflight MANIFEST=manifest.json BASE_DIR=. ID=<project_id> AUDIT_LOG=events.jsonl AUDIT_DB=events.sqlite  # Strict local publish/handoff preflight with optional mirrored event
@@ -147,6 +148,7 @@ python qc_cli.py inv7-live-preflight inv7_live_protocol.json inv7_live.json  # C
 python qc_cli.py validate-d3-gold d3_gold.json  # Canonical CLI wrapper for D3 gold package validation
 python qc_cli.py validate-d7-gold d7_gold.json  # Canonical CLI wrapper for D7 gold package validation
 make lint-prompt-overrides  # Check prompt override source uses against registry declarations
+python qc_cli.py lint-prompt-overrides --root qc_clean  # Canonical CLI wrapper for prompt override registry lint
 make cost               # Show LLM spend (DAYS=7)
 make errors             # Show recent error breakdown
 
