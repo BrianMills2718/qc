@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 49 | Human agreement metadata scorecard | High | Planned | `HUMAN_AGREEMENT_METADATA_SCORECARD.md` |
 
 ## Completed Plans
 
