@@ -1,6 +1,6 @@
 # Plan #122: D8 GT Fidelity Scorecard Preflight Guard
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Plan #121 D8 GT-fidelity protocol/result preflight
@@ -69,15 +69,15 @@ Internal score-boundary guard only; no cross-project boundary is created.
 
 ### Capability Validation
 
-- [ ] `make bench D8_PROTOCOL=... GT_FIDELITY=...` runs D8 preflight before
+- [x] `make bench D8_PROTOCOL=... GT_FIDELITY=...` runs D8 preflight before
   scorecard generation.
-- [ ] Passing guarded scorecards include
+- [x] Passing guarded scorecards include
   `_meta.preflight_reports.d8_gt_fidelity`.
-- [ ] Protocol file SHA-256 is included in `_meta.input_hashes`.
-- [ ] Command metadata and artifact manifests include the protocol path.
-- [ ] Mismatched D8 protocol/result inputs return JSON failure and do not write
+- [x] Protocol file SHA-256 is included in `_meta.input_hashes`.
+- [x] Command metadata and artifact manifests include the protocol path.
+- [x] Mismatched D8 protocol/result inputs return JSON failure and do not write
   `--output` or `--artifact-dir` artifacts.
-- [ ] Package manifests can pass `d8_gt_fidelity_protocol_file` through to the
+- [x] Package manifests can pass `d8_gt_fidelity_protocol_file` through to the
   canonical bench path.
 
 ---
@@ -140,20 +140,20 @@ Internal score-boundary guard only; no cross-project boundary is created.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] D8 protocol/result preflight can be enforced at `make bench` score time.
-- [ ] Passing guarded scorecards include a D8 preflight report in `_meta`.
-- [ ] Failing guarded runs block scorecard/output/artifact writes.
-- [ ] D8 protocol file hashes/paths are carried through scorecards, manifests,
+- [x] D8 protocol/result preflight can be enforced at `make bench` score time.
+- [x] Passing guarded scorecards include a D8 preflight report in `_meta`.
+- [x] Failing guarded runs block scorecard/output/artifact writes.
+- [x] D8 protocol file hashes/paths are carried through scorecards, manifests,
   and package runner command mapping.
-- [ ] Docs state the guard is process/provenance only.
+- [x] Docs state the guard is process/provenance only.
 
 > Process criteria:
-- [ ] Required focused tests pass.
-- [ ] Focused Ruff check passes.
-- [ ] `make docs-check` passes.
-- [ ] Full `make check` passes or any failure is documented with evidence.
-- [ ] Type-check status is reported.
-- [ ] Verified work is committed and pushed.
+- [x] Required focused tests pass.
+- [x] Focused Ruff check passes.
+- [x] `make docs-check` passes.
+- [x] Full `make check` passes or any failure is documented with evidence.
+- [x] Type-check status is reported.
+- [x] Verified work is committed and pushed.
 
 ---
 
@@ -164,6 +164,34 @@ Internal score-boundary guard only; no cross-project boundary is created.
   lands.
 
 ---
+
+## Outcome
+
+Implemented in `d196f02`
+(`[Plan: D8_GT_FIDELITY_SCORECARD_PREFLIGHT_GUARD] Add D8 score-time guard`).
+`scripts/bench_phase0.py` now accepts
+`--d8-gt-fidelity-protocol-file`; `make bench` exposes it as
+`D8_PROTOCOL=...`; and strict Phase 0 package manifests can carry
+`d8_gt_fidelity_protocol_file`. Passing guarded runs include
+`_meta.preflight_reports.d8_gt_fidelity`, protocol/result input hashes, and
+command provenance. Failing preflights emit machine-readable JSON and return
+before scorecard, output file, or artifact writes.
+
+Verification evidence:
+
+- TDD red before implementation: focused tests failed on missing
+  `d8_gt_fidelity_protocol_file_sha256`, missing
+  `--d8-gt-fidelity-protocol-file`, and strict package-manifest rejection of
+  `d8_gt_fidelity_protocol_file`.
+- `python -m pytest tests/test_bench_phase0_script.py tests/test_phase0_benchmark_package.py tests/test_d8_gt_fidelity_preflight.py -q`
+  - 46 passed.
+- `python -m ruff check scripts/bench_phase0.py scripts/run_phase0_benchmark_package.py tests/test_bench_phase0_script.py tests/test_phase0_benchmark_package.py`
+  - all checks passed.
+- `make -n bench ID=project D8_PROTOCOL=protocol.json GT_FIDELITY=gt_fidelity.json`
+  - routed to `scripts/bench_phase0.py --d8-gt-fidelity-protocol-file protocol.json --gt-fidelity-file gt_fidelity.json`.
+- `make docs-check` - passed.
+- `make check` - 987 passed, 1 skipped, 8 deselected; Ruff and docs checks
+  passed; type check is not yet configured.
 
 ## Notes
 

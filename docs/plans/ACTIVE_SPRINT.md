@@ -22,10 +22,20 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #122 (`D8_GT_FIDELITY_SCORECARD_PREFLIGHT_GUARD.md`): enforce
-   D8 protocol/result preflight at the Phase 0 scorecard boundary.
+1. Select and create the next highest-value evaluation-harness or invariant
+   lane from `docs/PROJECT_THEORY_AND_GOALS.md` and `docs/EVALUATION_HARNESS.md`.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
+
+**Completed checkpoint:** `make bench` now accepts `D8_PROTOCOL=...` and
+`scripts/bench_phase0.py --d8-gt-fidelity-protocol-file ...` to enforce D8
+protocol/result preflight at score time. Failed preflight returns JSON with the
+preflight report and blocks scorecard/output/artifact writes; passing guarded
+scorecards include `_meta.preflight_reports.d8_gt_fidelity`, and input hashes,
+command provenance, and package manifests include the protocol file. This is
+score-time provenance only, not expert-rubric acceptance,
+methodological-saturation evidence, full grounded-theory evidence, or SOTA
+evidence.
 
 **Completed checkpoint:** D8 GT-fidelity result files can now be preflighted
 against registered D8 protocols with
