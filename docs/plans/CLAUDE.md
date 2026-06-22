@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 132 | D7 retrieval export script tests | High | In Progress | `D7_RETRIEVAL_EXPORT_SCRIPT_TESTS.md` |
 
 ## Completed Plans
 
