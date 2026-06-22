@@ -1,6 +1,6 @@
 # Plan #76: Corpus Scope Create Surfaces
 
-**Status:** Implemented
+**Status:** Completed
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Plan #16 corpus scope contract; Plan #19 CLI/API scope surfaces
@@ -132,6 +132,13 @@ cross-project callable capability.
 
 - `python -m pytest tests/test_project_commands.py::TestCLIParsing::test_create_subparser_accepts_scope_fields tests/test_project_commands.py::TestProjectScopeCommand::test_project_create_command_leaves_scope_unset_when_omitted tests/test_project_commands.py::TestProjectScopeCommand::test_project_create_command_saves_scope_when_supplied tests/test_project_commands.py::TestProjectScopeCommand::test_project_scope_command_updates_and_outputs_scope tests/test_mcp_server.py::TestProjectManagement::test_create_project tests/test_mcp_server.py::TestProjectManagement::test_create_project_with_scope -q` — 6 passed.
 - `make check` — 787 passed, 1 skipped, 8 deselected; lint/docs passed; type check not yet configured.
+
+## Outcome
+
+CLI `project create` and MCP `qc_create_project` can now set
+`ProjectState.corpus_scope` at project creation time. No-scope creation remains
+compatible and leaves `corpus_scope` unset. Documentation records that this is
+report-boundary discipline, not sampling-frame validation.
 
 ---
 

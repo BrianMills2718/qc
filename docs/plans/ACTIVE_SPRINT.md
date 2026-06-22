@@ -22,17 +22,17 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #76, corpus-scope create surfaces, without treating recorded
-   scope as sampling-frame validation.
-2. Choose the next highest-value unmet evaluation-harness or scope-discipline
+1. Choose the next highest-value unmet evaluation-harness or scope-discipline
    lane that can be advanced without pretending held-out expert data exists.
-3. Continue through the ranked roadmap without pausing after each verified
+2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
 **Completed checkpoint:** Corpus-scope warning propagation now covers Markdown,
 JSON `export_warnings` metadata, and CSV `export_warnings.csv` for claim-bearing
-exports without recorded scope; this remains report discipline, not sampling
-adequacy evidence. Phase 0 scorecards and artifact manifests now include
+exports without recorded scope, and CLI/MCP project creation can now persist
+corpus scope when supplied while leaving no-scope creation compatible; this
+remains report discipline, not sampling adequacy evidence. Phase 0 scorecards
+and artifact manifests now include
 run-configuration hashes for persisted methodology/model/config metadata while
 marking prompt hashes as not-run. D10 cost/latency now preserves LLM-only fields
 and adds optional observed tool-call accounting plus combined local totals when

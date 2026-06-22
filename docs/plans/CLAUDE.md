@@ -6,7 +6,6 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| #76 | Corpus Scope Create Surfaces | High | Implemented | `CORPUS_SCOPE_CREATE_SURFACES.md` |
 
 ## Completed Plans
 
@@ -34,6 +33,7 @@ Track all implementation work here.
 | Corpus scope CLI/API surfaces | Scope contract follow-up: `project scope` and `/projects/{id}/scope` read/update `ProjectState.corpus_scope` | `completed/CORPUS_SCOPE_CLI_API.md` |
 | Missing corpus scope report warning | Scope/report follow-up: Markdown claim reports without corpus scope now warn not to generalize beyond loaded documents | `completed/CORPUS_SCOPE_MISSING_REPORT_WARNING.md` |
 | Corpus scope machine-readable warnings | Scope/report follow-up: JSON/CSV claim exports without corpus scope now carry missing-scope warning metadata | `completed/CORPUS_SCOPE_MACHINE_READABLE_WARNINGS.md` |
+| Corpus scope create surfaces | Scope contract follow-up: CLI/MCP project creation can persist corpus scope when supplied while no-scope creation remains compatible | `completed/CORPUS_SCOPE_CREATE_SURFACES.md` |
 | INV-7 prompt injection scorecard | Evaluation-harness follow-up: `make bench` can score externally supplied prompt-injection fixture outcomes without mutating project state | `completed/INV7_PROMPT_INJECTION_SCORECARD.md` |
 | INV-11 incremental hard invalidation | Incremental recode now clears stale higher-order outputs, stale phase results, and stale claim rows it cannot recompute | `completed/INV11_INCREMENTAL_HARD_INVALIDATION.md` |
 | INV-11 review decisions inactive on invalidation | Review decisions targeting claims removed by incremental invalidation are retained as inactive audit history | `completed/INV11_REVIEW_DECISION_INACTIVE_ON_INVALIDATION.md` |
