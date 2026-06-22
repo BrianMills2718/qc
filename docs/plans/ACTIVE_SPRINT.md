@@ -26,12 +26,14 @@ highest-value documented lane.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Select and plan the next deterministic roadmap lane.
-The current best next lane is D3 metric-criteria evaluation against guarded
-scorecards: evaluate pre-registered D3 comparison protocol `metric_criteria`
-after score-time preflight passes, report pass/fail/missing rows, and preserve
-claim discipline. This next slice must not run or create baselines, collect
-held-out labels, add full semantic/multi-label D3 agreement, or claim held-out
+**Active checkpoint:** Plan #178 is active: evaluate pre-registered D3
+comparison protocol `metric_criteria` against guarded Phase 0 scorecards after
+`make bench D3_PROTOCOL=...` preflight passes. This slice should add a
+machine-readable D3 metric-criteria report with pass/fail/missing rows for
+exact baseline metrics and local span-overlap diagnostics while preserving
+existing D3 scoring, preflight, output, artifact, and unguarded behavior. It
+must not run or create baselines, collect held-out labels, add full semantic/
+multi-label D3 agreement, choose default success thresholds, or claim held-out
 D3 evidence, expert parity, superiority evidence, methodological-validity
 evidence, or SOTA.
 
