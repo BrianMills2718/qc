@@ -1,10 +1,45 @@
 # Plan #171: D7 Baseline Span-Overlap Diagnostics
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Plan #170: D7 span-overlap diagnostics
 **Blocks:** richer D7 retrieval-mode comparison error analysis
+
+---
+
+## Outcome
+
+Each scored D7 baseline row now includes diagnostic-only
+`span_overlap` metadata. The diagnostic compares baseline contrary-evidence
+anchors against D7 gold using the same same-`target_claim_id`/same-`doc_id`
+character-span IoU and Modified Hausdorff logic as the system D7 overlap
+section. Segment-only baseline anchors are counted as unscored for overlap
+rather than converted into guessed spans.
+
+`compare_d7_retrieval_predictions()` and `make compare-d7-retrieval` surface
+the diagnostics through the existing `disconfirmation_d7.baselines.<name>`
+payload because the report reuses Phase 0 D7 scoring. Exact D7 baseline
+TP/FP/FN, recall, precision, F1, bootstrap intervals, and
+system-minus-baseline deltas remain unchanged except for the additive
+diagnostic section. This is local error-analysis metadata only; it is not
+semantic disconfirmation validity, held-out evidence, expert parity,
+superiority evidence, or SOTA evidence.
+
+Implementation commit: `6c2c094` (`Add D7 baseline span-overlap diagnostics`).
+
+Verification:
+
+- Initial focused TDD run failed as expected because baseline rows did not yet
+  expose `span_overlap`.
+- `python -m pytest tests/test_bench_phase0.py tests/test_d7_retrieval.py -k "d7 or span_overlap or comparison" -q`
+  -> 25 passed, 58 deselected.
+- `python -m ruff check qc_clean/core/bench.py qc_clean/core/d7_retrieval.py tests/test_bench_phase0.py tests/test_d7_retrieval.py`
+  -> passed.
+- `make docs-check` -> passed.
+- `git diff --check` -> passed.
+- `make check` -> 1141 passed, 1 skipped, 8 deselected; Ruff and docs gates
+  passed. Type check remains unconfigured by the repo.
 
 ---
 
@@ -75,12 +110,12 @@ Internal scorecard/report capability only; no cross-project boundary is created.
 
 ### Capability Validation
 
-- [ ] Baseline overlap rows use the same same-target/document matching rule as
+- [x] Baseline overlap rows use the same same-target/document matching rule as
   the system D7 overlap diagnostic.
-- [ ] Exact baseline metrics and system-minus-baseline deltas are unchanged.
-- [ ] Segment-only baseline anchors are counted as unscored for overlap
+- [x] Exact baseline metrics and system-minus-baseline deltas are unchanged.
+- [x] Segment-only baseline anchors are counted as unscored for overlap
   diagnostics rather than guessed.
-- [ ] Notes preserve that the section is local diagnostic metadata, not semantic
+- [x] Notes preserve that the section is local diagnostic metadata, not semantic
   disconfirmation validity, held-out evidence, expert parity, or superiority
   evidence.
 
@@ -140,22 +175,22 @@ Internal scorecard/report capability only; no cross-project boundary is created.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] Every scored D7 baseline row includes `span_overlap`.
-- [ ] Baseline overlap diagnostics compare only same-target/document character
+- [x] Every scored D7 baseline row includes `span_overlap`.
+- [x] Baseline overlap diagnostics compare only same-target/document character
   spans.
-- [ ] Near-boundary baseline predictions report non-zero IoU/Modified Hausdorff
+- [x] Near-boundary baseline predictions report non-zero IoU/Modified Hausdorff
   diagnostics while exact baseline TP/FP/FN remain unchanged.
-- [ ] Retrieval comparison reports surface the baseline overlap diagnostics
+- [x] Retrieval comparison reports surface the baseline overlap diagnostics
   through the existing `disconfirmation_d7.baselines` payload.
-- [ ] Docs preserve the caveat that overlap diagnostics are local error
+- [x] Docs preserve the caveat that overlap diagnostics are local error
   analysis only, not semantic disconfirmation validity, held-out evidence,
   expert parity, superiority evidence, or SOTA evidence.
 
 > Process criteria:
-- [ ] Required tests pass
-- [ ] Full test suite passes
-- [ ] Docs updated
-- [ ] Plan completed, committed, and pushed
+- [x] Required tests pass
+- [x] Full test suite passes
+- [x] Docs updated
+- [x] Plan completed, committed, and pushed
 
 ---
 

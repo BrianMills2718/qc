@@ -6,12 +6,12 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 171 | D7 baseline span-overlap diagnostics | High | Planned | `D7_BASELINE_SPAN_OVERLAP_DIAGNOSTICS.md` |
 
 ## Completed Plans
 
 | Name | Outcome | Record |
 |------|---------|--------|
+| D7 baseline span-overlap diagnostics | D7 baseline rows and retrieval comparison reports now include diagnostic-only same-target/document span-IoU and Modified Hausdorff metadata without changing exact baseline scores or deltas | `completed/D7_BASELINE_SPAN_OVERLAP_DIAGNOSTICS.md` |
 | D7 span-overlap diagnostics | D7 scorecards now include diagnostic-only same-target/document span-IoU and Modified Hausdorff overlap metadata for contrary-evidence anchors without changing exact D7 scores or claims | `completed/D7_SPAN_OVERLAP_DIAGNOSTICS.md` |
 | INV-7 committed live canary v2 | A protocol-guarded built-in fixture-set v2 live canary artifact is now committed and scorecarded with five fixtures, including custom prompt override surfaces, while remaining explicitly non-evidentiary for robustness, validity, held-out, model-obedience, or SOTA claims | `completed/INV7_COMMITTED_LIVE_CANARY_V2.md` |
 | INV-7 custom prompt override fixtures | Built-in INV-7 structural and opt-in live fixture sets now include custom prompt override canaries for thematic and GT constant-comparison override surfaces rendered through the production override wrapper | `completed/INV7_CUSTOM_PROMPT_OVERRIDE_FIXTURES.md` |

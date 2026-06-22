@@ -22,17 +22,28 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #171: D7 baseline span-overlap diagnostics.
+1. Select and plan the next deterministic, high-value roadmap lane.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Plan #171 is active. Add diagnostic-only D7
-baseline-level span-overlap metadata so `disconfirmation_d7.baselines.<name>`
-and retrieval comparison reports expose same-target/document char-span IoU and
-Modified Hausdorff diagnostics for baseline contrary-evidence anchors. Exact
-baseline scores and system-minus-baseline deltas must remain unchanged; this is
-local error-analysis metadata only, not semantic disconfirmation validity,
-held-out evidence, expert parity, superiority evidence, or SOTA evidence.
+**Active checkpoint:** Select the next deterministic roadmap lane from the
+remaining documented gaps. Candidate lanes include semantic/embedding D7
+evaluation-policy scaffolding that does not fabricate gold labels, broader
+held-out live INV-7 protocol/accounting that can be populated later, populated
+theoretical-sampling protocol/result evidence if concrete inputs exist, or
+another protocol/accounting lane that can be verified without external
+evidence.
+
+**Completed checkpoint:** D7 baseline rows now include diagnostic-only
+`span_overlap` metadata. The diagnostic compares baseline contrary-evidence
+anchors against D7 gold using the same same-target/document character-span IoU
+and Modified Hausdorff logic as the system D7 overlap section, and
+retrieval-comparison reports surface it through
+`disconfirmation_d7.baselines.<name>`. Exact D7 baseline scores and
+system-minus-baseline deltas remain unchanged except for this additive
+diagnostic. This is local error-analysis metadata only, not semantic
+disconfirmation validity, held-out evidence, expert parity, superiority
+evidence, or SOTA evidence.
 
 **Completed checkpoint:** D7 scorecards now include a diagnostic-only
 `disconfirmation_d7.span_overlap` section when D7 gold is scored. It compares
