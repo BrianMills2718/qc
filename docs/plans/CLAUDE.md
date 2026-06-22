@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| #79 | MCP Claim Review Decisions | High | Planned | `MCP_CLAIM_REVIEW_DECISIONS.md` |
 
 ## Completed Plans
 
