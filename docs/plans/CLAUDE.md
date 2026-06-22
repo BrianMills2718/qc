@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 182 | D7 comparison package runner | High | Planned | `D7_COMPARISON_PACKAGE_RUNNER.md` |
 
 ## Completed Plans
 
