@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 181 | D7 comparison artifact verifier | High | Planned | `D7_COMPARISON_ARTIFACT_VERIFIER.md` |
 
 ## Completed Plans
 
