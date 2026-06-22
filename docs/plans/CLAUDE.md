@@ -6,12 +6,12 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 189 | QC CLI adjudication import surface | High | Planned | `QC_CLI_ADJUDICATION_IMPORT_SURFACE.md` |
 
 ## Completed Plans
 
 | Name | Outcome | Record |
 |------|---------|--------|
+| QC CLI adjudication import surface | `qc_cli.py import-adjudication-responses` now delegates to the canonical response import script, forwarding required metadata, optional D3/D7 outputs, optional protocol/sample preflight guards, boolean provenance flags, and notes without duplicating import logic or claiming labels/evidence | `completed/QC_CLI_ADJUDICATION_IMPORT_SURFACE.md` |
 | QC CLI adjudication validation surfaces | `qc_cli.py` now wraps adjudication protocol validation, protocol/sample preflight, response validation, and response preflight scripts through top-level commands that delegate positional paths without duplicating validation logic or claiming labels/evidence | `completed/QC_CLI_ADJUDICATION_VALIDATION_SURFACES.md` |
 | QC CLI Phase 0 adjudication package writer | `qc_cli.py write-phase0-adjudication-package` now delegates to the canonical Phase 0 adjudication package writer, forwarding supplied package/output/provenance arguments without duplicating validation logic or claiming adjudication evidence | `completed/QC_CLI_PHASE0_ADJUDICATION_PACKAGE_WRITER.md` |
 | Phase 0 package projects dir support | Strict Phase 0 package manifests can now carry `projects_dir`, resolving it relative to the manifest and forwarding `--projects-dir` so package-driven runs can score package-local or non-default project stores without claiming benchmark evidence | `completed/PHASE0_PACKAGE_PROJECTS_DIR_SUPPORT.md` |
