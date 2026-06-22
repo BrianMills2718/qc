@@ -1,10 +1,35 @@
 # Plan #147: D3 Baseline Package Validator
 
-**Status:** In Progress
+**Status:** Complete
 **Type:** implementation
 **Priority:** Medium
 **Blocked By:** D3 baseline comparison scorecard
 **Blocks:** safer held-out D3 baseline comparison package workflows
+
+---
+
+## Outcome
+
+Versioned D3 application-baseline packages now validate through
+`qc_clean/core/d3_baseline_package.py`, `scripts/validate_d3_baseline_package.py`,
+and `make validate-d3-baseline-package PACKAGE=...`. The Phase 0
+`D3_BASELINES=` loader validates recognized versioned packages before scoring
+while preserving legacy raw-list and legacy `{"application_baselines": [...]}`
+compatibility.
+
+The validation report includes package type, project ID, baseline mode, baseline
+count, baseline names, predicted application count, and a claim-discipline
+caveat. This is package/provenance validation only, not live-baseline evidence,
+held-out D3 evidence, methodological-validity evidence, or superiority evidence.
+
+**Verification:** `python -m pytest tests/test_d3_baseline_package.py
+tests/test_bench_phase0.py tests/test_bench_phase0_script.py
+tests/test_phase0_benchmark_package.py -q` passed (112 tests), targeted Ruff
+passed, `make -n validate-d3-baseline-package
+PACKAGE=/tmp/d3_baseline.json` showed the expected script invocation, and
+`make docs-check` passed. Final `make check` passed (1080 passed, 1 skipped, 8
+deselected; Ruff/docs-check passed). Type checking is not configured in this
+repo.
 
 ---
 
@@ -120,18 +145,18 @@ shared capability.
 ## Acceptance Criteria
 
 > Feature-level criteria (what the plan accomplishes):
-- [ ] Versioned D3 baseline packages have schema_version=1 and a stable package type.
-- [ ] Standalone validation reports package type, project ID, baseline mode, baseline count, baseline names, and claim-discipline caveat.
-- [ ] Standalone validation rejects malformed recognized packages with non-zero exit and JSON error.
-- [ ] `make validate-d3-baseline-package PACKAGE=...` is available.
-- [ ] `D3_BASELINES=` validates recognized versioned packages before scoring while preserving legacy raw-list/object compatibility.
-- [ ] Docs say this is package/provenance validation only, not live-baseline or held-out D3 evidence.
+- [x] Versioned D3 baseline packages have schema_version=1 and a stable package type.
+- [x] Standalone validation reports package type, project ID, baseline mode, baseline count, baseline names, and claim-discipline caveat.
+- [x] Standalone validation rejects malformed recognized packages with non-zero exit and JSON error.
+- [x] `make validate-d3-baseline-package PACKAGE=...` is available.
+- [x] `D3_BASELINES=` validates recognized versioned packages before scoring while preserving legacy raw-list/object compatibility.
+- [x] Docs say this is package/provenance validation only, not live-baseline or held-out D3 evidence.
 
 > Process criteria (quality gates):
-- [ ] Required focused tests pass.
-- [ ] Full test suite passes (`make check`).
-- [ ] Type check status is reported.
-- [ ] Docs updated.
+- [x] Required focused tests pass (`python -m pytest tests/test_d3_baseline_package.py tests/test_bench_phase0.py tests/test_bench_phase0_script.py tests/test_phase0_benchmark_package.py -q`: 112 passed).
+- [x] Full test suite passes (`make check`: 1080 passed, 1 skipped, 8 deselected; Ruff/docs-check passed).
+- [x] Type check status is reported (`make check`: type check not yet configured).
+- [x] Docs updated.
 
 ---
 

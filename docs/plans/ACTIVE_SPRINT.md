@@ -22,10 +22,19 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Plan #147: add versioned D3 baseline package validation and guarded
-   `D3_BASELINES=` loading.
+1. Select the next highest-value documented roadmap lane from
+   `docs/PROJECT_THEORY_AND_GOALS.md` and `docs/EVALUATION_HARNESS.md`.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
+
+**Completed checkpoint:** Versioned D3 application-baseline packages now
+validate through `qc_clean/core/d3_baseline_package.py`,
+`scripts/validate_d3_baseline_package.py`, and
+`make validate-d3-baseline-package PACKAGE=...`. The Phase 0 `D3_BASELINES=`
+loader validates recognized versioned packages before scoring while preserving
+legacy raw-list/object compatibility. This is package/provenance validation
+only, not live-baseline evidence, held-out D3 evidence, methodological-validity
+evidence, or superiority evidence.
 
 **Completed checkpoint:** `qc_cli.py validate-d3-gold <gold_set>` and
 `qc_cli.py validate-d7-gold <gold_set>` now delegate to the canonical D3/D7
