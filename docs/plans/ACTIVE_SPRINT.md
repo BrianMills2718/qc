@@ -22,12 +22,10 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #80, MCP claim-review listing, without exposing unbounded claim
-   state or treating agent-driven review as expert adjudication.
-2. Choose the next highest-value unmet evaluation-harness, review, or
+1. Choose the next highest-value unmet evaluation-harness, review, or
    scope-discipline lane that can be advanced without pretending held-out expert
    data exists.
-3. Continue through the ranked roadmap without pausing after each verified
+2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
 **Completed checkpoint:** Corpus-scope warning propagation now covers Markdown,
@@ -41,7 +39,8 @@ sampling adequacy evidence. Claim-review now has a bounded API listing at
 browser-native claim-review workflow or expert adjudication protocol is claimed.
 MCP now exposes `qc_review_decisions` for agent-driven review decisions,
 including claim targets with rationale preservation, while keeping the old
-`qc_review_codes` tool compatible.
+`qc_review_codes` tool compatible. MCP also exposes `qc_review_claims` as a
+bounded claim-review target listing for agent workflows.
 Phase 0 scorecards and artifact manifests now include
 run-configuration hashes for persisted methodology/model/config metadata while
 marking prompt hashes as not-run. D10 cost/latency now preserves LLM-only fields

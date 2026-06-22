@@ -1,6 +1,6 @@
 # Plan #80: MCP Claim Review Listing
 
-**Status:** Implemented
+**Status:** Completed
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Plan #78 claim review API listing; Plan #79 MCP claim review decisions
@@ -119,6 +119,14 @@ capability or claim expert adjudication.
 
 - `python -m pytest tests/test_mcp_server.py::TestReview::test_review_claims tests/test_mcp_server.py::TestReview::test_review_claims_limit tests/test_mcp_server.py::TestReview::test_review_claims_not_found tests/test_mcp_server.py::TestReview::test_review_decisions_claim -q` — 4 passed.
 - `make check` — 799 passed, 1 skipped, 8 deselected; lint/docs passed; type check not yet configured.
+
+## Outcome
+
+MCP now exposes `qc_review_claims`, a bounded claim-review target listing with
+project metadata, pipeline status, review summary, total/returned counts,
+resumability, scope metadata, anchor counts, revision counts, and creation
+metadata. `qc_get_claims` remains the compact ledger-summary surface. This is
+agent-drivable review plumbing, not expert-reviewed validity evidence.
 
 ---
 
