@@ -2,9 +2,11 @@
 
 Resolves an LLM-produced quote to an exact, verifiable location in the source
 documents: original-document character offsets plus a content hash of the
-resolved span. Matching is robust to smart quotes, whitespace, and case, but the
-offsets and hash always index the *original* ``Document.content`` so the evidence
-link can be re-verified.
+resolved span. Matching first uses normalized exact substrings robust to smart
+quotes, whitespace, and case. If exact matching finds no occurrences, a
+conservative token-window fuzzy fallback may recover one long near-verbatim span.
+Offsets and hashes always index the *original* ``Document.content`` so the
+evidence link can be re-verified.
 
 Uniqueness rule (the "three people said 'I felt ignored'" problem): a quote is
 only anchorable when it occurs **exactly once across the whole corpus**. Zero
@@ -16,8 +18,10 @@ evidence link is worse than a missing one.
 from __future__ import annotations
 
 import hashlib
+import re
 import unicodedata
 from dataclasses import dataclass
+from difflib import SequenceMatcher
 from enum import Enum
 from typing import List, Optional, Sequence
 
@@ -28,6 +32,11 @@ _CHAR_FOLD = {
     "–": "-", "—": "-", "―": "-",
     " ": " ", "…": "...",
 }
+
+DEFAULT_FUZZY_MIN_RATIO = 0.9
+DEFAULT_FUZZY_MIN_TOKENS = 4
+DEFAULT_FUZZY_MIN_TOKEN_RATIO = 0.75
+DEFAULT_FUZZY_MAX_TOKEN_RATIO = 1.35
 
 
 class MatchStatus(str, Enum):
@@ -110,7 +119,7 @@ def resolve_span(quote: str, content: str) -> SpanMatch:
         pos = norm_doc.find(norm_quote, pos + 1)
 
     if not starts:
-        return SpanMatch(status=MatchStatus.NONE, occurrences=0)
+        return _resolve_fuzzy_span(norm_quote, norm_doc, index_map, content)
     if len(starts) > 1:
         return SpanMatch(status=MatchStatus.AMBIGUOUS, occurrences=len(starts))
 
@@ -127,6 +136,109 @@ def resolve_span(quote: str, content: str) -> SpanMatch:
         quote_hash=_sha256(matched),
         occurrences=1,
     )
+
+
+@dataclass(frozen=True)
+class _FuzzyCandidate:
+    """One normalized token-window fuzzy candidate."""
+
+    ratio: float
+    token_start: int
+    token_end: int
+    norm_start: int
+    norm_end: int
+
+
+def _resolve_fuzzy_span(
+    norm_quote: str,
+    norm_doc: str,
+    index_map: List[int],
+    content: str,
+    *,
+    min_ratio: float = DEFAULT_FUZZY_MIN_RATIO,
+    min_tokens: int = DEFAULT_FUZZY_MIN_TOKENS,
+) -> SpanMatch:
+    """Resolve a near-verbatim quote with conservative fuzzy token windows."""
+    quote_tokens = _token_spans(norm_quote)
+    doc_tokens = _token_spans(norm_doc)
+    if len(quote_tokens) < min_tokens or not doc_tokens:
+        return SpanMatch(status=MatchStatus.NONE, occurrences=0)
+
+    candidates = _fuzzy_candidates(norm_quote, quote_tokens, doc_tokens, min_ratio)
+    selected = _select_non_overlapping_fuzzy_candidates(candidates)
+    if not selected:
+        return SpanMatch(status=MatchStatus.NONE, occurrences=0)
+    if len(selected) > 1:
+        return SpanMatch(status=MatchStatus.AMBIGUOUS, occurrences=len(selected))
+
+    candidate = selected[0]
+    start = index_map[candidate.norm_start]
+    end = index_map[candidate.norm_end - 1] + 1
+    matched = content[start:end]
+    return SpanMatch(
+        status=MatchStatus.UNIQUE,
+        start_char=start,
+        end_char=end,
+        matched_text=matched,
+        quote_hash=_sha256(matched),
+        occurrences=1,
+    )
+
+
+def _token_spans(text: str) -> list[tuple[str, int, int]]:
+    """Return normalized word-like token spans."""
+    return [(match.group(0), match.start(), match.end()) for match in re.finditer(r"[\w']+", text)]
+
+
+def _fuzzy_candidates(
+    norm_quote: str,
+    quote_tokens: list[tuple[str, int, int]],
+    doc_tokens: list[tuple[str, int, int]],
+    min_ratio: float,
+) -> list[_FuzzyCandidate]:
+    """Return best fuzzy token window per start position above threshold."""
+    min_len = max(1, int(len(quote_tokens) * DEFAULT_FUZZY_MIN_TOKEN_RATIO))
+    max_len = max(min_len, int(len(quote_tokens) * DEFAULT_FUZZY_MAX_TOKEN_RATIO + 0.999))
+    candidates: list[_FuzzyCandidate] = []
+    for token_start in range(len(doc_tokens)):
+        best: _FuzzyCandidate | None = None
+        for window_len in range(min_len, max_len + 1):
+            token_end = token_start + window_len
+            if token_end > len(doc_tokens):
+                continue
+            candidate_text = " ".join(token for token, _, _ in doc_tokens[token_start:token_end])
+            ratio = SequenceMatcher(None, norm_quote, candidate_text).ratio()
+            if ratio < min_ratio:
+                continue
+            candidate = _FuzzyCandidate(
+                ratio=ratio,
+                token_start=token_start,
+                token_end=token_end,
+                norm_start=doc_tokens[token_start][1],
+                norm_end=doc_tokens[token_end - 1][2],
+            )
+            if best is None or candidate.ratio > best.ratio:
+                best = candidate
+        if best is not None:
+            candidates.append(best)
+    return candidates
+
+
+def _select_non_overlapping_fuzzy_candidates(
+    candidates: list[_FuzzyCandidate],
+) -> list[_FuzzyCandidate]:
+    """Keep the highest-ratio non-overlapping fuzzy candidate regions."""
+    selected: list[_FuzzyCandidate] = []
+    for candidate in sorted(candidates, key=lambda item: item.ratio, reverse=True):
+        if any(_token_ranges_overlap(candidate, existing) for existing in selected):
+            continue
+        selected.append(candidate)
+    return sorted(selected, key=lambda item: item.token_start)
+
+
+def _token_ranges_overlap(left: _FuzzyCandidate, right: _FuzzyCandidate) -> bool:
+    """Return whether two fuzzy token ranges overlap."""
+    return left.token_start < right.token_end and right.token_start < left.token_end
 
 
 def resolve_against_docs(quote: str, documents: Sequence) -> DocSpanMatch:

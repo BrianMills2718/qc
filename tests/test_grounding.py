@@ -55,6 +55,50 @@ def test_no_match_is_none():
     assert resolve_span("a paraphrase the model invented", content).status == MatchStatus.NONE
 
 
+def test_fuzzy_match_recovers_near_verbatim_elision():
+    content = (
+        "Alex: I do my best work when no one is hovering nearby during planning. "
+        "It matters."
+    )
+
+    m = resolve_span("I do best work when no one hovering nearby during planning", content)
+
+    assert m.status == MatchStatus.UNIQUE
+    assert content[m.start_char:m.end_char] == (
+        "I do my best work when no one is hovering nearby during planning"
+    )
+    assert verify_anchor(content, m.start_char, m.end_char, m.quote_hash)
+
+
+def test_fuzzy_match_does_not_override_exact_ambiguity():
+    content = "I felt ignored. Later, I felt ignored again."
+
+    m = resolve_span("I felt ignored", content)
+
+    assert m.status == MatchStatus.AMBIGUOUS
+    assert m.occurrences == 2
+
+
+def test_fuzzy_match_repeated_near_matches_are_ambiguous():
+    content = (
+        "I do my best work when no one is hovering. "
+        "Later, I do my best work when no one is hovering again."
+    )
+
+    m = resolve_span("I do best work when no one hovering", content)
+
+    assert m.status == MatchStatus.AMBIGUOUS
+    assert m.occurrences == 2
+
+
+def test_fuzzy_match_rejects_short_vague_quote():
+    content = "Trust matters a lot in this process."
+
+    m = resolve_span("trst", content)
+
+    assert m.status == MatchStatus.NONE
+
+
 def test_repeated_phrase_in_one_doc_is_ambiguous():
     content = "I felt ignored. Later, I felt ignored again."
     m = resolve_span("I felt ignored", content)
