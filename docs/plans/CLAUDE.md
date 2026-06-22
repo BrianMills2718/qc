@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 63 | D8 GT-fidelity bootstrap intervals | High | Planned | `D8_GT_FIDELITY_BOOTSTRAP_INTERVALS.md` |
 
 ## Completed Plans
 
