@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 110 | INV-7 live protocol result preflight | High | Planned | `INV7_LIVE_PROTOCOL_RESULT_PREFLIGHT.md` |
 
 ## Completed Plans
 

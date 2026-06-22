@@ -22,7 +22,9 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Continue through the ranked roadmap without pausing after each verified
+1. Execute Plan #110 (`INV7_LIVE_PROTOCOL_RESULT_PREFLIGHT.md`): preflight live
+   INV-7 result packages against registered live protocols before scoring.
+2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
 **Completed checkpoint:** Pre-run live INV-7 protocol packages can now be
