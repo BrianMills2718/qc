@@ -6,7 +6,6 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 64 | D9 tie-rate Wilson intervals | High | Planned | `D9_TIE_RATE_WILSON_INTERVALS.md` |
 
 ## Completed Plans
 
@@ -75,6 +74,7 @@ Track all implementation work here.
 | D6 counterfactual change-rate Wilson intervals | Evaluation-harness follow-up: D6 counterfactual-bias scorecards report Wilson intervals for code-change rates overall and by attribute without claiming a populated bias audit | `completed/D6_COUNTERFACTUAL_CHANGE_RATE_WILSON_INTERVALS.md` |
 | D4 codebook-quality bootstrap intervals | Evaluation-harness follow-up: D4 codebook-quality scorecards report deterministic local bootstrap intervals for rubric means without claiming blind expert-panel evidence | `completed/D4_CODEBOOK_QUALITY_BOOTSTRAP_INTERVALS.md` |
 | D8 GT-fidelity bootstrap intervals | Evaluation-harness follow-up: D8 GT-fidelity scorecards report deterministic local bootstrap intervals for rubric means without claiming expert-rubric acceptance or full GT evidence | `completed/D8_GT_FIDELITY_BOOTSTRAP_INTERVALS.md` |
+| D9 tie-rate Wilson intervals | Evaluation-harness follow-up: D9 interpretive-preference scorecards report Wilson intervals for tie rates without claiming blind expert parity | `completed/D9_TIE_RATE_WILSON_INTERVALS.md` |
 
 ## Status Key
 

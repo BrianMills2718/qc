@@ -1,12 +1,29 @@
 # Plan #64: D9 Tie-Rate Wilson Intervals
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** None
 **Blocks:** D9 preference scorecard uncertainty metadata
 
 ---
+
+## Outcome
+
+D9 interpretive-preference scorecards now report Wilson `tie_rate_ci` metadata
+wherever `_interpretive_preference_summary` is used: the overall summary,
+by-evaluator summaries, and by-criterion summaries. The interval uses ties as
+successes and total cases as denominator. Existing non-tie system-preference
+and non-inferiority fields are unchanged. This remains local uncertainty
+metadata, not blind expert-parity evidence.
+
+## Verification
+
+- `python -m pytest tests/test_bench_phase0.py -q` - 54 passed
+- `python -m ruff check qc_clean/core/bench.py tests/test_bench_phase0.py` - clean
+- `python scripts/check_markdown_links.py` - clean
+- `python scripts/sync_plan_status.py --check` - clean
+- `make check` - 773 passed, 1 skipped, 8 deselected; lint and docs checks clean; type check not configured
 
 ## Gap
 
@@ -56,12 +73,12 @@ Internal scorecard capability only; no cross-project boundary is created.
 
 ### Capability Validation
 
-- [ ] Overall D9 summary includes `tie_rate_ci`.
-- [ ] D9 by-evaluator summaries include `tie_rate_ci`.
-- [ ] D9 by-criterion summaries include `tie_rate_ci`.
-- [ ] Interval counts match ties and total-case denominators.
-- [ ] Existing D9 preference and non-inferiority fields are unchanged.
-- [ ] Docs preserve the caveat that this is local uncertainty metadata, not parity evidence.
+- [x] Overall D9 summary includes `tie_rate_ci`.
+- [x] D9 by-evaluator summaries include `tie_rate_ci`.
+- [x] D9 by-criterion summaries include `tie_rate_ci`.
+- [x] Interval counts match ties and total-case denominators.
+- [x] Existing D9 preference and non-inferiority fields are unchanged.
+- [x] Docs preserve the caveat that this is local uncertainty metadata, not parity evidence.
 
 ---
 
@@ -106,18 +123,18 @@ Internal scorecard capability only; no cross-project boundary is created.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] Overall D9 tie rate has Wilson interval metadata.
-- [ ] D9 grouped tie rates have Wilson interval metadata.
-- [ ] Existing D9 point metrics are unchanged.
-- [ ] Existing D9 non-inferiority assessment is unchanged.
-- [ ] Docs preserve the caveat that this is local metadata only.
+- [x] Overall D9 tie rate has Wilson interval metadata.
+- [x] D9 grouped tie rates have Wilson interval metadata.
+- [x] Existing D9 point metrics are unchanged.
+- [x] Existing D9 non-inferiority assessment is unchanged.
+- [x] Docs preserve the caveat that this is local metadata only.
 
 > Process criteria:
-- [ ] Required tests pass
-- [ ] Full test suite passes
-- [ ] Type check status reported
-- [ ] Docs updated
-- [ ] Plan completed, committed, and pushed
+- [x] Required tests pass
+- [x] Full test suite passes
+- [x] Type check status reported
+- [x] Docs updated
+- [x] Plan completed, committed, and pushed
 
 ---
 
