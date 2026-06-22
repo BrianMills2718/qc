@@ -1,6 +1,6 @@
 # Plan #77: Corpus Scope Completeness Warnings
 
-**Status:** Implemented
+**Status:** Completed
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Plan #16 corpus scope contract; Plan #72 corpus scope machine-readable warnings; Plan #76 corpus scope create surfaces
@@ -127,6 +127,14 @@ cross-project callable capability.
 
 - `python -m pytest tests/test_claim_ledger_exports.py -q` — 13 passed.
 - `make check` — 791 passed, 1 skipped, 8 deselected; lint/docs passed; type check not yet configured.
+
+## Outcome
+
+Claim-bearing JSON, CSV, and Markdown exports now warn when a corpus scope
+record exists but is empty, and when a population is recorded without a sampling
+frame. The existing missing-scope warning remains unchanged. Complete scope
+records do not emit scope warnings. These warnings are report-boundary metadata,
+not sampling-adequacy validation.
 
 ---
 
