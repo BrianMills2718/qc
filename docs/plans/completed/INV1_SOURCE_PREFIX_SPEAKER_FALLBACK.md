@@ -1,10 +1,35 @@
 # Plan #141: INV-1 Source-Prefix Speaker Fallback
 
-**Status:** In Progress
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** None
 **Blocks:** Narrower INV-1 speaker-attribution caveat
+
+---
+
+## Outcome
+
+Implemented in `0939f03` (`[Plan: INV1_SOURCE_PREFIX_SPEAKER_FALLBACK] Add speaker prefix fallback`).
+`resolve_and_anchor()` now prefers a containing segment speaker when available,
+then falls back to an explicit same-line `Speaker:` source prefix before the
+anchored span. It does not infer speakers from ordinary prose or previous lines,
+and speaker remains outside hash-based anchor verification.
+
+This narrows the speaker-attribution caveat for common transcript-prefix cases.
+It is not diarization, not speaker verification, and not methodological-validity
+evidence.
+
+Verification:
+
+- TDD red captured: explicit same-line `Alex:` prefix produced `speaker=None`
+  before implementation.
+- `python -m pytest tests/test_grounding.py -q` passed (`22 passed`).
+- `python -m ruff check qc_clean/core/grounding.py tests/test_grounding.py`
+  passed.
+- `make docs-check` passed.
+- `make check` passed (`1058 passed, 1 skipped, 8 deselected`); type check is
+  not yet configured in this repo.
 
 ---
 
@@ -66,10 +91,10 @@ fills `CodeApplication.speaker` for explicit same-line source prefixes.
 
 ### Capability Validation
 
-- [ ] Segment speaker remains authoritative when present.
-- [ ] Same-line `Speaker:` prefix fills speaker when no segment speaker exists.
-- [ ] Non-prefix prose before a quote does not fill speaker.
-- [ ] Existing grounding/speaker tests remain unchanged.
+- [x] Segment speaker remains authoritative when present.
+- [x] Same-line `Speaker:` prefix fills speaker when no segment speaker exists.
+- [x] Non-prefix prose before a quote does not fill speaker.
+- [x] Existing grounding/speaker tests remain unchanged.
 
 ---
 
@@ -121,19 +146,19 @@ fills `CodeApplication.speaker` for explicit same-line source prefixes.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] Source-prefix fallback fills speakers only for explicit same-line labels.
-- [ ] Segment-derived speaker remains authoritative.
-- [ ] No speaker is inferred from ordinary prose.
-- [ ] Docs preserve that speaker attribution remains best-effort and is not part
+- [x] Source-prefix fallback fills speakers only for explicit same-line labels.
+- [x] Segment-derived speaker remains authoritative.
+- [x] No speaker is inferred from ordinary prose.
+- [x] Docs preserve that speaker attribution remains best-effort and is not part
   of anchor verification.
 
 > Process criteria:
-- [ ] Required focused tests pass.
-- [ ] Focused Ruff check passes.
-- [ ] `make docs-check` passes.
-- [ ] Full `make check` passes or any failure is documented with evidence.
-- [ ] Type-check status is reported.
-- [ ] Verified work is committed and pushed.
+- [x] Required focused tests pass.
+- [x] Focused Ruff check passes.
+- [x] `make docs-check` passes.
+- [x] Full `make check` passes or any failure is documented with evidence.
+- [x] Type-check status is reported.
+- [x] Verified work is committed and pushed.
 
 ---
 
