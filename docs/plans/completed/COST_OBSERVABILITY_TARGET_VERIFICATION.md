@@ -120,3 +120,25 @@ Process criteria:
 
 This is a verification lane. It should be code-free unless an observability
 target is actually unavailable or ambiguous.
+
+## Closeout Notes
+
+Completed 2026-06-22.
+
+Outcome: `make cost` and `make errors` are verified working in the current
+environment. `make cost` returned real `llm_client` observability tables for
+LLM calls and embeddings instead of the fallback path; `make errors` exited 0
+with `No recent errors found.` No code changes were needed.
+
+Checkpoints:
+
+- Plan checkpoint: `b199823`
+- Verification/docs checkpoint: `fce8f02`
+
+Verification:
+
+- `make cost` (reported qualitative_coding LLM calls, embedding calls, and a
+  grand total)
+- `make errors` (`No recent errors found.`)
+- `make docs-check`
+- `make check` (`1103 passed, 1 skipped, 8 deselected`)

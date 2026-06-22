@@ -22,17 +22,17 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #155: verify `make cost` and `make errors`; only patch
-   observability targets if verification exposes unavailable or ambiguous
-   behavior.
+1. Select the next highest-value documented roadmap lane from
+   `docs/PROJECT_THEORY_AND_GOALS.md`, `docs/EVALUATION_HARNESS.md`, and the
+   remaining `CLAUDE.md` maintenance follow-ups.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Plan #155
-(`docs/plans/COST_OBSERVABILITY_TARGET_VERIFICATION.md`) targets the documented
-cost-observability maintenance item. The lane should stay code-free if
-`make cost` reports real llm_client cost output and `make errors` reports a
-clear error summary.
+**Completed checkpoint:** Cost observability targets are verified in the
+current environment. `make cost` returns real `llm_client` LLM-call and
+embedding cost tables instead of the fallback path, and `make errors` exits 0
+with a clear recent-error summary. No Makefile or helper-code changes were
+needed.
 
 **Completed checkpoint:** Ruff now gates `F541`, and the seven existing
 no-placeholder f-strings were mechanically rewritten without intended runtime

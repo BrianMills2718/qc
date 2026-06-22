@@ -6,12 +6,12 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 155 | Cost observability target verification | Medium | Planned | `COST_OBSERVABILITY_TARGET_VERIFICATION.md` |
 
 ## Completed Plans
 
 | Name | Outcome | Record |
 |------|---------|--------|
+| Cost observability target verification | `make cost` returns real llm_client cost/embedding tables and `make errors` returns a clear recent-error summary, so no fallback replacement was needed | `completed/COST_OBSERVABILITY_TARGET_VERIFICATION.md` |
 | Ruff F541 expansion | Ruff now gates `F541`, and the existing no-placeholder f-strings were mechanically removed without intended runtime behavior changes | `completed/RUFF_F541_EXPANSION.md` |
 | Boundary invalid project ID tests | API/MCP regression tests now prove invalid/traversal-like project IDs return explicit not-found/error responses without aliasing to or deleting existing project files | `completed/BOUNDARY_INVALID_PROJECT_ID_TESTS.md` |
 | Explicit export overwrite policy | Project exports now keep default overwrite behavior for compatibility while supporting `--no-overwrite` / `overwrite=False` guards that fail before clobbering existing JSON/CSV/Markdown/QDPX artifacts | `completed/EXPORT_OVERWRITE_POLICY.md` |
