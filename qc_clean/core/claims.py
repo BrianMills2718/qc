@@ -437,6 +437,26 @@ def summarize_claim_ledger(state: ProjectState) -> dict[str, Any]:
     }
 
 
+def format_claim_scope_summary(scope: ClaimScope) -> str:
+    """Return a compact, deterministic claim scope summary."""
+    parts: list[str] = []
+    if scope.corpus_level:
+        parts.append("corpus")
+    for label, values in (
+        ("claims", scope.claim_ids),
+        ("docs", scope.doc_ids),
+        ("codes", scope.code_ids),
+        ("segments", scope.segment_ids),
+        ("apps", scope.application_ids),
+        ("entities", scope.entity_ids),
+        ("relationships", scope.relationship_ids),
+        ("participants", scope.participant_names),
+    ):
+        if values:
+            parts.append(f"{label}={','.join(values)}")
+    return ";".join(parts) if parts else "unspecified"
+
+
 def disconfirmation_targets(
     state: ProjectState,
     limit: int | None = None,
@@ -534,22 +554,7 @@ def _support_status(anchors: list[ClaimAnchor]) -> ClaimSupportStatus:
 
 def _format_scope_summary(scope: ClaimScope) -> str:
     """Return a compact, deterministic claim scope summary."""
-    parts: list[str] = []
-    if scope.corpus_level:
-        parts.append("corpus")
-    for label, values in (
-        ("claims", scope.claim_ids),
-        ("docs", scope.doc_ids),
-        ("codes", scope.code_ids),
-        ("segments", scope.segment_ids),
-        ("apps", scope.application_ids),
-        ("entities", scope.entity_ids),
-        ("relationships", scope.relationship_ids),
-        ("participants", scope.participant_names),
-    ):
-        if values:
-            parts.append(f"{label}={','.join(values)}")
-    return ";".join(parts) if parts else "unspecified"
+    return format_claim_scope_summary(scope)
 
 
 def _needs_anchor_claim(

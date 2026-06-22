@@ -18,7 +18,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 from xml.etree.ElementTree import Element, SubElement, ElementTree
 
-from qc_clean.core.claims import summarize_claim_ledger
+from qc_clean.core.claims import format_claim_scope_summary, summarize_claim_ledger
 from qc_clean.schemas.domain import ProjectState
 
 logger = logging.getLogger(__name__)
@@ -100,6 +100,65 @@ def _corpus_scope_export_warnings(
             }
         )
     return warnings
+
+
+def _documents_count_phrase(state: ProjectState) -> str:
+    """Return a compact document-count phrase for scope-bound report text."""
+    count = state.corpus.num_documents
+    noun = "document" if count == 1 else "documents"
+    return f"{count} {noun}"
+
+
+def _corpus_scope_boundary_for_export(state: ProjectState) -> str:
+    """Return deterministic per-row corpus boundary context for claim exports."""
+    if state.corpus_scope is None:
+        return (
+            f"Loaded document corpus only ({_documents_count_phrase(state)}); "
+            "no CorpusScope recorded."
+        )
+
+    scope = state.corpus_scope
+    has_detail = any(
+        [
+            scope.phenomenon,
+            scope.population,
+            scope.sampling_frame,
+            scope.inclusion_criteria,
+            scope.exclusion_criteria,
+            scope.notes,
+        ]
+    )
+    if not has_detail:
+        return (
+            f"Loaded document corpus only ({_documents_count_phrase(state)}); "
+            "CorpusScope has no details."
+        )
+
+    if scope.population and not scope.sampling_frame:
+        return (
+            f"Unvalidated population boundary: {scope.population}; "
+            "sampling frame not recorded."
+        )
+
+    parts: list[str] = []
+    if scope.phenomenon:
+        parts.append(f"phenomenon={scope.phenomenon}")
+    if scope.population:
+        parts.append(f"population={scope.population}")
+    if scope.sampling_frame:
+        parts.append(f"sampling_frame={scope.sampling_frame}")
+    if scope.inclusion_criteria:
+        parts.append(f"inclusion={', '.join(scope.inclusion_criteria)}")
+    if scope.exclusion_criteria:
+        parts.append(f"exclusion={', '.join(scope.exclusion_criteria)}")
+    if scope.notes:
+        parts.append(f"notes={scope.notes}")
+    return "; ".join(parts)
+
+
+def _markdown_table_cell(value: str) -> str:
+    """Escape one value for a Markdown table cell."""
+    return value.replace("\n", " ").replace("|", "\\|")
 
 
 # ---------------------------------------------------------------------------
@@ -194,13 +253,15 @@ class ProjectExporter:
 
         # -- claims.csv (only if claim ledger exists) --
         if state.claims:
+            corpus_scope_boundary = _corpus_scope_boundary_for_export(state)
             claims_path = out / "claims.csv"
             with open(claims_path, "w", newline="", encoding="utf-8") as f:
                 writer = csv.writer(f)
                 writer.writerow([
                     "claim_id", "kind", "source_stage", "adjudication_status",
                     "support_status", "origin_object_type", "origin_object_id",
-                    "claim_text", "supporting_anchors", "contrary_anchors",
+                    "claim_scope", "corpus_scope_boundary", "claim_text",
+                    "supporting_anchors", "contrary_anchors",
                 ])
                 for claim in state.claims:
                     writer.writerow([
@@ -211,6 +272,8 @@ class ProjectExporter:
                         claim.support_status.value,
                         claim.origin_object_type,
                         claim.origin_object_id,
+                        format_claim_scope_summary(claim.scope),
+                        corpus_scope_boundary,
                         claim.claim_text,
                         json.dumps([
                             a.model_dump(mode="json") for a in claim.supporting_anchors
@@ -476,15 +539,19 @@ class ProjectExporter:
             _a("")
             _a("### Claims")
             _a("")
-            _a("| Kind | Stage | Support | Adjudication | Claim |")
-            _a("|------|-------|---------|--------------|-------|")
+            corpus_scope_boundary = _corpus_scope_boundary_for_export(state)
+            _a("| Kind | Stage | Scope | Corpus boundary | Support | Adjudication | Claim |")
+            _a("|------|-------|-------|-----------------|---------|--------------|-------|")
             for claim in state.claims[:50]:
-                text = claim.claim_text.replace("|", "\\|")
+                text = _markdown_table_cell(claim.claim_text)
                 if len(text) > 120:
                     text = text[:117] + "..."
+                scope_summary = _markdown_table_cell(format_claim_scope_summary(claim.scope))
+                boundary = _markdown_table_cell(corpus_scope_boundary)
                 _a(
                     f"| {claim.claim_kind.value} | {claim.source_stage} | "
-                    f"{claim.support_status.value} | {claim.adjudication_status.value} | {text} |"
+                    f"{scope_summary} | {boundary} | {claim.support_status.value} | "
+                    f"{claim.adjudication_status.value} | {text} |"
                 )
             if len(state.claims) > 50:
                 _a("")

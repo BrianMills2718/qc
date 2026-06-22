@@ -47,6 +47,60 @@ def test_csv_export_writes_claims_file(tmp_path):
     assert rows[0]["claim_text"] == "AI changes workflow."
 
 
+def test_csv_claim_rows_include_scope_and_loaded_document_boundary(tmp_path):
+    from qc_clean.core.export.data_exporter import ProjectExporter
+
+    ProjectExporter().export_csv(_claim_state(), str(tmp_path))
+
+    with open(tmp_path / "claims.csv", newline="", encoding="utf-8") as f:
+        rows = list(csv.DictReader(f))
+    assert rows[0]["claim_scope"] == "corpus"
+    assert "Loaded document corpus only" in rows[0]["corpus_scope_boundary"]
+    assert "no CorpusScope recorded" in rows[0]["corpus_scope_boundary"]
+
+
+def test_csv_claim_rows_include_recorded_scope_boundary(tmp_path):
+    from qc_clean.core.export.data_exporter import ProjectExporter
+
+    state = _claim_state()
+    state.corpus_scope = CorpusScope(
+        phenomenon="AI-assisted workflow change",
+        population="Operations teams in the pilot clinics",
+        sampling_frame="Volunteer interviewees from two pilot clinics",
+        inclusion_criteria=["Participated in the AI workflow pilot"],
+        exclusion_criteria=["No direct workflow involvement"],
+        notes="Bounded to the loaded transcript corpus.",
+    )
+
+    ProjectExporter().export_csv(state, str(tmp_path))
+
+    with open(tmp_path / "claims.csv", newline="", encoding="utf-8") as f:
+        rows = list(csv.DictReader(f))
+    boundary = rows[0]["corpus_scope_boundary"]
+    assert "phenomenon=AI-assisted workflow change" in boundary
+    assert "population=Operations teams in the pilot clinics" in boundary
+    assert "sampling_frame=Volunteer interviewees from two pilot clinics" in boundary
+    assert "inclusion=Participated in the AI workflow pilot" in boundary
+    assert "exclusion=No direct workflow involvement" in boundary
+    assert "notes=Bounded to the loaded transcript corpus." in boundary
+
+
+def test_csv_claim_rows_flag_population_without_sampling_frame(tmp_path):
+    from qc_clean.core.export.data_exporter import ProjectExporter
+
+    state = _claim_state()
+    state.corpus_scope = CorpusScope(population="Operations teams in pilot clinics")
+
+    ProjectExporter().export_csv(state, str(tmp_path))
+
+    with open(tmp_path / "claims.csv", newline="", encoding="utf-8") as f:
+        rows = list(csv.DictReader(f))
+    assert rows[0]["corpus_scope_boundary"] == (
+        "Unvalidated population boundary: Operations teams in pilot clinics; "
+        "sampling frame not recorded."
+    )
+
+
 def test_csv_export_writes_scope_warning_file_when_claims_have_no_scope(tmp_path):
     from qc_clean.core.export.data_exporter import ProjectExporter
 
@@ -164,6 +218,34 @@ def test_markdown_export_includes_claim_ledger_summary(tmp_path):
     assert "**Total claims**: 1" in content
     assert "synthesis_finding" in content
     assert "AI changes workflow." in content
+
+
+def test_markdown_claim_rows_include_scope_and_boundary_columns(tmp_path):
+    from qc_clean.core.export.data_exporter import ProjectExporter
+
+    out = tmp_path / "claims.md"
+    ProjectExporter().export_markdown(_claim_state(), str(out))
+
+    content = Path(out).read_text()
+    assert "| Kind | Stage | Scope | Corpus boundary | Support | Adjudication | Claim |" in content
+    assert "| synthesis_finding | synthesis | corpus |" in content
+    assert "Loaded document corpus only" in content
+    assert "no CorpusScope recorded" in content
+
+
+def test_markdown_claim_rows_do_not_rewrite_claim_text(tmp_path):
+    from qc_clean.core.export.data_exporter import ProjectExporter
+
+    state = _claim_state()
+    original_text = state.claims[0].claim_text
+    out = tmp_path / "claims.md"
+
+    ProjectExporter().export_markdown(state, str(out))
+
+    content = Path(out).read_text()
+    assert state.claims[0].claim_text == original_text
+    assert "| AI changes workflow. |" in content
+    assert "Loaded document corpus only: AI changes workflow." not in content
 
 
 def test_markdown_export_warns_when_claims_have_no_corpus_scope(tmp_path):
