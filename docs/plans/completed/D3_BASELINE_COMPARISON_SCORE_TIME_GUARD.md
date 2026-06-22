@@ -1,6 +1,6 @@
 # Plan #177: D3 Baseline Comparison Score-Time Guard
 
-**Status:** Planned
+**Status:** Completed
 **Type:** implementation
 **Priority:** High
 **Blocked By:** D3 baseline comparison preflight
@@ -109,15 +109,15 @@ created.
 
 ### Capability Validation
 
-- [ ] Matching protocol/gold/baseline packages score successfully.
-- [ ] Passing preflight report is recorded in
+- [x] Matching protocol/gold/baseline packages score successfully.
+- [x] Passing preflight report is recorded in
   `_meta.preflight_reports.d3_comparison`.
-- [ ] D3 protocol file hash is recorded in `_meta.input_hashes`.
-- [ ] D3 protocol file path is recorded in artifact command provenance.
-- [ ] Failed preflight blocks stdout scorecard success, output writes, and
+- [x] D3 protocol file hash is recorded in `_meta.input_hashes`.
+- [x] D3 protocol file path is recorded in artifact command provenance.
+- [x] Failed preflight blocks stdout scorecard success, output writes, and
   artifact writes.
-- [ ] Phase 0 package manifests forward `d3_comparison_protocol_file`.
-- [ ] Existing unguarded D3 scoring remains compatible.
+- [x] Phase 0 package manifests forward `d3_comparison_protocol_file`.
+- [x] Existing unguarded D3 scoring remains compatible.
 
 ---
 
@@ -189,32 +189,70 @@ created.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] `scripts/bench_phase0.py` exposes `--d3-comparison-protocol-file`.
-- [ ] `make bench D3_PROTOCOL=... D3_GOLD=... D3_BASELINES=...` forwards the
+- [x] `scripts/bench_phase0.py` exposes `--d3-comparison-protocol-file`.
+- [x] `make bench D3_PROTOCOL=... D3_GOLD=... D3_BASELINES=...` forwards the
   protocol to the scorecard script.
-- [ ] `qc_cli.py bench --d3-comparison-protocol-file ...` forwards the protocol
+- [x] `qc_cli.py bench --d3-comparison-protocol-file ...` forwards the protocol
   to the scorecard script.
-- [ ] Phase 0 package manifests accept and forward
+- [x] Phase 0 package manifests accept and forward
   `d3_comparison_protocol_file`.
-- [ ] Passing D3 preflight is recorded under
+- [x] Passing D3 preflight is recorded under
   `_meta.preflight_reports.d3_comparison`.
-- [ ] Failed D3 preflight blocks scorecard, output, and artifact writes.
-- [ ] `_meta.input_hashes` includes `d3_comparison_protocol_file_sha256`.
-- [ ] Artifact command provenance includes `d3_comparison_protocol_file`.
-- [ ] Existing unguarded D3 gold/baseline scoring remains compatible.
-- [ ] Docs state this is score-time provenance only, not held-out D3 evidence,
+- [x] Failed D3 preflight blocks scorecard, output, and artifact writes.
+- [x] `_meta.input_hashes` includes `d3_comparison_protocol_file_sha256`.
+- [x] Artifact command provenance includes `d3_comparison_protocol_file`.
+- [x] Existing unguarded D3 gold/baseline scoring remains compatible.
+- [x] Docs state this is score-time provenance only, not held-out D3 evidence,
   live baseline evidence, expert parity, superiority, methodological-validity
   evidence, or SOTA.
 
 > Process criteria:
-- [ ] TDD red state observed before implementation.
-- [ ] Focused tests pass.
-- [ ] Focused Ruff check passes.
-- [ ] Make dry-run confirms flag forwarding.
-- [ ] `make docs-check` passes.
-- [ ] `make check` passes.
-- [ ] Plan is moved to completed with verification evidence.
-- [ ] Verified implementation is committed and pushed.
+- [x] TDD red state observed before implementation.
+- [x] Focused tests pass.
+- [x] Focused Ruff check passes.
+- [x] Make dry-run confirms flag forwarding.
+- [x] `make docs-check` passes.
+- [x] `make check` passes.
+- [x] Plan is moved to completed with verification evidence.
+- [x] Verified implementation is committed and pushed.
+
+---
+
+## Outcome
+
+Implemented and pushed in commit `cb53316`:
+
+- `scripts/bench_phase0.py` accepts `--d3-comparison-protocol-file`, loads raw
+  versioned D3 gold/baseline payloads for preflight, runs
+  `preflight_d3_comparison_payloads()` before scorecard/output/artifact writes,
+  emits machine-readable failure reports, records passing reports under
+  `_meta.preflight_reports.d3_comparison`, and records the protocol file in
+  input hashes and artifact command provenance.
+- `make bench`, `qc_cli.py bench`, and Phase 0 benchmark package manifests now
+  forward the D3 protocol file.
+- Tests cover matching guarded scoring, mismatch blocking with no output or
+  artifact writes, package-manifest forwarding, and top-level CLI forwarding.
+- Docs and generated `AGENTS.md` describe this as score-time provenance
+  infrastructure only, not held-out D3 evidence, live baseline evidence, expert
+  parity, superiority evidence, methodological-validity evidence, or SOTA.
+
+Verification:
+
+- TDD red state observed: focused D3/bench/CLI/package test selection failed
+  before implementation with unrecognized `--d3-comparison-protocol-file` and
+  strict package-manifest field rejection.
+- `python -m pytest tests/test_bench_phase0_script.py tests/test_qc_cli_bench.py tests/test_phase0_benchmark_package.py tests/test_d3_comparison_preflight.py -k "d3_comparison or d3_baseline or forwards_all_phase0_flags or phase0_benchmark_package" -q`
+  passed: 16 passed, 45 deselected.
+- `python -m pytest tests/test_bench_phase0_script.py tests/test_qc_cli_bench.py tests/test_phase0_benchmark_package.py tests/test_d3_comparison_preflight.py -q`
+  passed: 61 passed.
+- `python -m ruff check scripts/bench_phase0.py scripts/run_phase0_benchmark_package.py qc_cli.py tests/test_bench_phase0_script.py tests/test_qc_cli_bench.py tests/test_phase0_benchmark_package.py`
+  passed.
+- `make -n bench ID=project D3_GOLD=d3_gold.json D3_BASELINES=d3_baselines.json D3_PROTOCOL=protocol.json`
+  confirmed forwarding to `--d3-comparison-protocol-file protocol.json`.
+- `make docs-check` passed.
+- `git diff --check` passed.
+- `make check` passed: 1169 passed, 1 skipped, 8 deselected; Ruff passed;
+  docs-check passed; type check remains not configured.
 
 ---
 

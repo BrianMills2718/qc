@@ -26,15 +26,27 @@ highest-value documented lane.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Plan #177 is active: add an optional D3 score-time
-preflight guard that threads the completed D3 comparison preflight through
-`make bench D3_PROTOCOL=...`, `scripts/bench_phase0.py
+**Active checkpoint:** Select and plan the next deterministic roadmap lane.
+The current best next lane is D3 metric-criteria evaluation against guarded
+scorecards: evaluate pre-registered D3 comparison protocol `metric_criteria`
+after score-time preflight passes, report pass/fail/missing rows, and preserve
+claim discipline. This next slice must not run or create baselines, collect
+held-out labels, add full semantic/multi-label D3 agreement, or claim held-out
+D3 evidence, expert parity, superiority evidence, methodological-validity
+evidence, or SOTA.
+
+**Completed checkpoint:** `make bench D3_PROTOCOL=... D3_GOLD=...
+D3_BASELINES=...`, `scripts/bench_phase0.py
 --d3-comparison-protocol-file`, `qc_cli.py bench`, and Phase 0 package
-manifests. This slice is score-time provenance only; it must not run or create
-baselines, evaluate D3 structured metric criteria against scorecard output,
-collect held-out labels, add full semantic/multi-label D3 agreement, or claim
-held-out D3 evidence, expert parity, superiority evidence,
-methodological-validity evidence, or SOTA.
+manifests can now enforce the completed D3 comparison preflight at the scoring
+boundary. Failed preflight blocks scorecard, output, and artifact writes;
+passing preflight is recorded at `_meta.preflight_reports.d3_comparison`, and
+the D3 protocol file hash/path is included in scorecard and artifact
+provenance. Existing unguarded D3 gold/baseline scoring remains compatible.
+This is protocol/accounting/score-time guard infrastructure only; it does not
+run or create baselines, evaluate D3 structured metric criteria, collect
+held-out D3 evidence, establish expert parity, demonstrate superiority, prove
+methodological validity, or support SOTA claims.
 
 **Completed checkpoint:** D3 comparison preflight now cross-checks registered
 D3 comparison protocols, versioned D3 gold packages, and versioned D3 baseline
