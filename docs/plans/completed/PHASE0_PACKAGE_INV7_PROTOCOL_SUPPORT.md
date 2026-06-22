@@ -1,6 +1,6 @@
 # Plan #185: Phase 0 Package INV-7 Protocol Support
 
-**Status:** Planned
+**Status:** Completed
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Phase 0 benchmark package runner; INV-7 live protocol guard
@@ -66,12 +66,12 @@ created.
 
 ### Capability Validation
 
-- [ ] Package manifests accept `inv7_live_protocol_file`.
-- [ ] Relative `inv7_live_protocol_file` paths resolve from the manifest
+- [x] Package manifests accept `inv7_live_protocol_file`.
+- [x] Relative `inv7_live_protocol_file` paths resolve from the manifest
   directory.
-- [ ] Package-to-bench argv includes `--inv7-live-protocol-file`.
-- [ ] Existing unknown-key rejection remains in place for unsupported fields.
-- [ ] Documentation states this only preserves local protocol/preflight
+- [x] Package-to-bench argv includes `--inv7-live-protocol-file`.
+- [x] Existing unknown-key rejection remains in place for unsupported fields.
+- [x] Documentation states this only preserves local protocol/preflight
   enforcement and does not create robustness evidence.
 
 ---
@@ -128,24 +128,24 @@ created.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] `Phase0BenchmarkPackage` accepts optional `inv7_live_protocol_file`.
-- [ ] `phase0_package_to_bench_argv()` resolves that path relative to the
+- [x] `Phase0BenchmarkPackage` accepts optional `inv7_live_protocol_file`.
+- [x] `phase0_package_to_bench_argv()` resolves that path relative to the
   package manifest directory.
-- [ ] `phase0_package_to_bench_argv()` forwards the canonical
+- [x] `phase0_package_to_bench_argv()` forwards the canonical
   `--inv7-live-protocol-file` flag.
-- [ ] Existing strict unknown-key behavior remains unchanged.
-- [ ] Docs/CLAUDE describe package support without implying evidence beyond
+- [x] Existing strict unknown-key behavior remains unchanged.
+- [x] Docs/CLAUDE describe package support without implying evidence beyond
   local guard preservation.
 
 > Process criteria:
-- [ ] TDD red state observed before implementation.
-- [ ] Focused tests pass.
-- [ ] Focused Ruff check passes.
-- [ ] `make docs-check` passes.
-- [ ] `git diff --check` passes.
-- [ ] `make check` passes.
-- [ ] Plan is moved to completed with verification evidence.
-- [ ] Verified implementation is committed and pushed.
+- [x] TDD red state observed before implementation.
+- [x] Focused tests pass.
+- [x] Focused Ruff check passes.
+- [x] `make docs-check` passes.
+- [x] `git diff --check` passes.
+- [x] `make check` passes.
+- [x] Plan is moved to completed with verification evidence.
+- [x] Verified implementation is committed and pushed.
 
 ---
 
@@ -157,3 +157,35 @@ created.
 | Field accepted but ignored | `_PATH_FLAGS` lacks the mapping | Add `inv7_live_protocol_file: --inv7-live-protocol-file`. |
 | Relative path resolves from cwd | Path conversion bypasses `_resolve_manifest_path` | Route through existing `_PATH_FLAGS` path handling. |
 | Docs overclaim | Package support sounds like robustness evidence | Keep caveats: local guard preservation only, not held-out INV-7 evidence. |
+
+---
+
+## Outcome
+
+Implemented in commit `271d9260` and pushed to `main`.
+
+`Phase0BenchmarkPackage` now accepts optional `inv7_live_protocol_file`, and
+`phase0_package_to_bench_argv()` resolves that path relative to the manifest
+directory before forwarding the canonical `--inv7-live-protocol-file` flag to
+`bench_phase0`. Existing strict unknown-key rejection remains unchanged for
+unsupported manifest fields.
+
+Verification evidence:
+
+- TDD red state: `python -m pytest tests/test_phase0_benchmark_package.py -q`
+  initially failed because `inv7_live_protocol_file` was rejected with
+  `extra_forbidden`.
+- `python -m pytest tests/test_phase0_benchmark_package.py tests/test_qc_cli_bench.py -q`:
+  12 passed.
+- `python -m ruff check scripts/run_phase0_benchmark_package.py tests/test_phase0_benchmark_package.py`:
+  passed.
+- `make docs-check`: passed.
+- `git diff --check`: passed.
+- `make check`: 1200 passed, 1 skipped, 8 deselected; Ruff and docs-check
+  passed; type check remains not configured.
+
+Claim discipline: this preserves an existing local INV-7 protocol/result
+preflight guard when using package-driven Phase 0 runs. It does not run live
+fixtures, create held-out adversarial data, call an LLM, change scoring, or
+license prompt-injection robustness, model-obedience, methodological-validity,
+or SOTA claims.

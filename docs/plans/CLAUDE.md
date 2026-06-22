@@ -6,12 +6,12 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 185 | Phase 0 package INV-7 protocol support | High | Planned | `PHASE0_PACKAGE_INV7_PROTOCOL_SUPPORT.md` |
 
 ## Completed Plans
 
 | Name | Outcome | Record |
 |------|---------|--------|
+| Phase 0 package INV-7 protocol support | Strict Phase 0 package manifests can now carry `inv7_live_protocol_file`, resolving it relative to the manifest and forwarding `--inv7-live-protocol-file` so package-driven runs preserve the existing INV-7 live preflight guard without claiming robustness evidence | `completed/PHASE0_PACKAGE_INV7_PROTOCOL_SUPPORT.md` |
 | Phase 0 benchmark artifact verifier | Phase 0 scorecard/timing/manifest artifact packages can now be verified through script, Make, and `qc_cli.py` for local hashes, copied metadata, prompt-eval status, and caveat consistency without claiming benchmark evidence | `completed/PHASE0_BENCHMARK_ARTIFACT_VERIFIER.md` |
 | D7 comparison package writer | D7 retrieval/live-baseline comparison manifests can now be written through script, Make, and `qc_cli.py` after validating versioned gold and prediction packages plus optional protocol preflight, preserving prediction order and package-relative paths without claiming benchmark evidence | `completed/D7_COMPARISON_PACKAGE_WRITER.md` |
 | D7 comparison package runner | D7 retrieval/live-baseline comparisons can now run from a strict schema_version=1 manifest through script, Make, and `qc_cli.py`, resolving paths relative to the package, preserving prediction order, optionally verifying the artifact created by the invocation, and remaining reproducibility/provenance infrastructure only | `completed/D7_COMPARISON_PACKAGE_RUNNER.md` |
