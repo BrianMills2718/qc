@@ -26,14 +26,22 @@ highest-value documented lane.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Plan #182 is active: add a strict D7 comparison package
-runner for manifest-driven standalone D7 retrieval/live-baseline comparisons.
-This slice should resolve package-relative paths, preserve ordered prediction
-files, delegate to `scripts/compare_d7_retrieval.py`, optionally verify the
-artifact created by that invocation, and expose Make/`qc_cli.py` surfaces. It
-must not create held-out data, run live baselines, choose retrieval/model
-policy, add artifact signing, or claim held-out D7 evidence, live-baseline
-evidence, superiority evidence, methodological-validity evidence, or SOTA.
+**Active checkpoint:** Select and plan the next deterministic, high-value
+roadmap lane from `docs/PROJECT_THEORY_AND_GOALS.md` / `docs/EVALUATION_HARNESS.md`.
+Prefer lanes that reduce manual coordination before held-out evaluation or
+make existing benchmark/provenance surfaces more agent-drivable, without
+claiming evidence that has not been produced.
+
+**Completed checkpoint:** D7 retrieval/live-baseline comparisons can now run
+from strict `schema_version=1` package manifests through
+`scripts/run_d7_comparison_package.py`, `make compare-d7-package PACKAGE=...`,
+and `qc_cli.py compare-d7-package ...`. The runner resolves relative paths from
+the manifest directory, preserves ordered prediction files, delegates to the
+canonical comparison script, and can verify the one artifact directory created
+by that invocation when `verify_artifact=true`. This is reproducibility and
+local provenance infrastructure only; it does not create held-out D7 data, run
+live baselines, choose retrieval/model policy, prove semantic disconfirmation
+validity, establish superiority, or support SOTA claims.
 
 **Completed checkpoint:** D7 comparison artifact directories/manifests can now
 be verified through `scripts/verify_d7_comparison_artifact.py`, `make
