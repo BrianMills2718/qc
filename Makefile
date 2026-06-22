@@ -1,4 +1,4 @@
-.PHONY: help test test-quick test-e2e test-all bench bench-package write-phase0-adjudication-package validate-d3-gold validate-d7-gold validate-inv7-package validate-adjudication-responses validate-adjudication-protocol adjudication-protocol-preflight adjudication-response-preflight import-adjudication-responses lint-scope-phrasing export-audit-manifest verify-export-audit-manifest export-publish-preflight verify-export-audit-log run-d7-retrieval compare-d7-retrieval run-inv7-fixtures run-inv7-live-fixtures adjudication-sample check lint docs-check clean status cost errors
+.PHONY: help test test-quick test-e2e test-all bench bench-package write-phase0-adjudication-package validate-d3-gold validate-d7-gold validate-inv7-package validate-inv7-live-protocol validate-adjudication-responses validate-adjudication-protocol adjudication-protocol-preflight adjudication-response-preflight import-adjudication-responses lint-scope-phrasing export-audit-manifest verify-export-audit-manifest export-publish-preflight verify-export-audit-log run-d7-retrieval compare-d7-retrieval run-inv7-fixtures run-inv7-live-fixtures adjudication-sample check lint docs-check clean status cost errors
 
 DAYS ?= 7
 PROJECT ?= qualitative_coding
@@ -58,6 +58,12 @@ ifndef PACKAGE
 	$(error PACKAGE is required. Usage: make validate-inv7-package PACKAGE=inv7_package.json)
 endif
 	python scripts/validate_inv7_prompt_injection_package.py $(PACKAGE)
+
+validate-inv7-live-protocol:  ## Validate a pre-run INV-7 live benchmark protocol (PROTOCOL=protocol.json)
+ifndef PROTOCOL
+	$(error PROTOCOL is required. Usage: make validate-inv7-live-protocol PROTOCOL=protocol.json)
+endif
+	python scripts/validate_inv7_live_protocol.py $(PROTOCOL)
 
 validate-adjudication-responses:  ## Validate completed adjudication sample responses (PACKAGE=sample.json)
 ifndef PACKAGE
