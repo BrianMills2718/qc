@@ -12,6 +12,7 @@ from types import SimpleNamespace
 
 from qc_clean.core.claims import (
     format_claim_anchor_details,
+    format_claim_scope_summary,
     summarize_claim_ledger,
     summarize_disconfirmation_coverage,
 )
@@ -687,11 +688,14 @@ def _show_claims(store: ProjectStore, args) -> int:
     if state.claims and limit:
         print("\n  Claims:")
         show_anchors = getattr(args, "show_anchors", False) is True
+        show_scope = getattr(args, "show_scope", False) is True
         for claim in state.claims[:limit]:
             print(
                 f"    - [{claim.claim_kind.value}/{claim.source_stage}/"
                 f"{claim.support_status.value}] {claim.claim_text}"
             )
+            if show_scope:
+                print(f"      scope: {format_claim_scope_summary(claim.scope)}")
             if show_anchors:
                 _print_claim_anchor_details("supporting", claim.supporting_anchors)
                 _print_claim_anchor_details("contrary", claim.contrary_anchors)

@@ -231,6 +231,14 @@ class TestClaimLedgerEndpoint:
         }
         assert claim["contrary_anchor_details"][0]["quote_text"] == "contrary text"
 
+    def test_get_project_claims_includes_scope(self, client):
+        resp = client.get("/projects/test-project-123/claims")
+
+        assert resp.status_code == 200
+        claim = resp.json()["claims"][0]
+        assert claim["scope"]["code_ids"] == ["C1"]
+        assert claim["scope"]["corpus_level"] is False
+
 
 class TestInvalidProjectIDBoundaries:
     @pytest.mark.parametrize("invalid_id", ["test-project-123!", "%2E%2E%2Ftest-project-123"])

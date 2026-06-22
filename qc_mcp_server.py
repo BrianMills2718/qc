@@ -341,6 +341,7 @@ def qc_get_claims(project_id: str, limit: int = 50) -> str:
             "support_status": claim.support_status.value,
             "adjudication_status": claim.adjudication_status.value,
             "claim_text": claim.claim_text,
+            "scope": claim.scope.model_dump(mode="json"),
             "origin_object_type": claim.origin_object_type,
             "origin_object_id": claim.origin_object_id,
             "supporting_anchors": len(claim.supporting_anchors),

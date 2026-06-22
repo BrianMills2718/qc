@@ -159,7 +159,7 @@ make errors             # Show recent error breakdown
 python qc_cli.py project run <project_id>
 python qc_cli.py project run <project_id> --exhaustive   # code every segment (INV-8)
 python qc_cli.py project scope <project_id> --phenomenon "..."  # show/update corpus scope
-python qc_cli.py project claims <project_id> --show-anchors  # inspect first-class claim ledger evidence anchors (INV-9)
+python qc_cli.py project claims <project_id> --show-scope --show-anchors  # inspect first-class claim ledger scope/anchors (INV-9)
 python qc_cli.py project add-docs <project_id> --files new.txt --recode  # add then incremental recode
 ```
 

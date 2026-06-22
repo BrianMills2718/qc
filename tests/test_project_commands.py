@@ -1695,6 +1695,7 @@ class TestCLIParsing:
         assert args.project_id == "pid"
         assert args.limit == 5
         assert args.show_anchors is False
+        assert args.show_scope is False
 
     def test_claims_subparser_accepts_show_anchors(self):
         from qc_cli import create_parser
@@ -1706,6 +1707,18 @@ class TestCLIParsing:
         assert args.project_action == "claims"
         assert args.project_id == "pid"
         assert args.show_anchors is True
+        assert args.show_scope is False
+
+    def test_claims_subparser_accepts_show_scope(self):
+        from qc_cli import create_parser
+        parser = create_parser()
+
+        args = parser.parse_args(["project", "claims", "pid", "--show-scope"])
+
+        assert args.command == "project"
+        assert args.project_action == "claims"
+        assert args.project_id == "pid"
+        assert args.show_scope is True
 
     def test_scope_subparser(self):
         from qc_cli import create_parser
@@ -1821,7 +1834,7 @@ class TestProjectClaimsCommand:
                     claim_kind=ClaimKind.CODE,
                     source_stage="thematic_coding",
                     claim_text="Efficiency is a code.",
-                    scope=ClaimScope(code_ids=["C1"]),
+                    scope=ClaimScope(corpus_level=True, doc_ids=["d1"], code_ids=["C1"]),
                     origin_object_type="code",
                     origin_object_id="C1",
                     support_status=ClaimSupportStatus.SUPPORTED,
@@ -1852,6 +1865,41 @@ class TestProjectClaimsCommand:
         assert "thematic_coding" in out
         assert "Efficiency is a code." in out
         assert "claim-cli-hash" not in out
+        assert "scope: " not in out
+
+    def test_project_claims_command_outputs_scope_when_requested(
+        self, tmp_store, capsys
+    ):
+        from qc_clean.core.cli.commands.project import _show_claims
+
+        state = ProjectState(
+            id="claims-scope-proj",
+            name="Claims Scope Project",
+            claims=[
+                AnalyticClaim(
+                    claim_kind=ClaimKind.CODE,
+                    source_stage="thematic_coding",
+                    claim_text="Efficiency is a scoped code.",
+                    scope=ClaimScope(corpus_level=True, doc_ids=["d1"], code_ids=["C1"]),
+                    origin_object_type="code",
+                    origin_object_id="C1",
+                    support_status=ClaimSupportStatus.SUPPORTED,
+                )
+            ],
+        )
+        tmp_store.save(state)
+        args = MagicMock(
+            project_id="claims-scope-proj",
+            limit=10,
+            show_anchors=False,
+            show_scope=True,
+        )
+
+        result = _show_claims(tmp_store, args)
+
+        assert result == 0
+        out = capsys.readouterr().out
+        assert "scope: corpus;docs=d1;codes=C1" in out
 
     def test_project_claims_command_outputs_anchor_details_when_requested(
         self, tmp_store, capsys

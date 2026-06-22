@@ -1221,6 +1221,11 @@ Examples:
         action='store_true',
         help='Show bounded supporting/contrary anchor details for each displayed claim',
     )
+    proj_claims.add_argument(
+        '--show-scope',
+        action='store_true',
+        help='Show compact scope details for each displayed claim',
+    )
 
     proj_scope = project_subparsers.add_parser('scope', help='Show or update project corpus scope')
     proj_scope.add_argument('project_id', help='Project ID')

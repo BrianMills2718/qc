@@ -377,6 +377,8 @@ class TestInspection:
         assert result["disconfirmation_summary"]["unchallenged_targets"] == 1
         assert result["claims"][0]["claim_text"] == "AI Adoption is a code."
         assert result["claims"][0]["support_status"] == "supported"
+        assert result["claims"][0]["scope"]["code_ids"] == ["C1"]
+        assert result["claims"][0]["scope"]["corpus_level"] is False
         assert result["claims"][0]["supporting_anchors"] == 1
         assert result["claims"][0]["contrary_anchors"] == 1
         assert result["claims"][0]["supporting_anchor_details"][0] == {
