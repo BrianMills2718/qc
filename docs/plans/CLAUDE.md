@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 89 | Relationship review browser UI | High | Planned | `RELATIONSHIP_REVIEW_BROWSER_UI.md` |
 
 ## Completed Plans
 
