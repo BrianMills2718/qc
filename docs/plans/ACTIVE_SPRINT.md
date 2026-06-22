@@ -26,12 +26,17 @@ highest-value documented lane.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Plan #199
-`NEGATIVE_CASE_REVIEW_ANCHOR_DETAILS.md` is active. Add bounded
+**Active checkpoint:** No implementation plan is active. Select and plan the
+next deterministic roadmap lane before editing code.
+
+**Completed checkpoint:** Plan #199
+`completed/NEGATIVE_CASE_REVIEW_ANCHOR_DETAILS.md` added bounded
 supporting/contrary anchor-detail payloads to existing API/MCP/browser claim
-review rows so negative-case review exposes the anchored contrary evidence
-without changing claim-decision semantics or claiming expert adjudication,
-held-out D7 evidence, candidate-score adjudication, or disconfirmation validity.
+review rows so negative-case review exposes anchored contrary evidence for
+inspection. It does not change claim-decision semantics, propagate
+negative-case decisions to challenged claims, add expert adjudication, expose
+candidate scores, create held-out D7 evidence, prove disconfirmation validity,
+or produce SOTA claims.
 
 **Completed checkpoint:** Plan #198
 `completed/MCP_EXPORT_PUBLISH_PREFLIGHT_GATE.md` added explicit opt-in

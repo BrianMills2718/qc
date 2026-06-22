@@ -6,12 +6,12 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 199 | Negative case review anchor details | High | In Progress | `NEGATIVE_CASE_REVIEW_ANCHOR_DETAILS.md` |
 
 ## Completed Plans
 
 | Name | Outcome | Record |
 |------|---------|--------|
+| Negative case review anchor details | API/MCP/browser claim-review rows now expose bounded supporting/contrary anchor details so negative-case review can inspect anchored contrary evidence without changing claim-decision semantics or claiming expert adjudication/D7 validity | `completed/NEGATIVE_CASE_REVIEW_ANCHOR_DETAILS.md` |
 | QC CLI governance lint surfaces | `qc_cli.py` now wraps scope-phrasing and prompt-override governance lint scripts through top-level commands without changing lint semantics or claiming sampling adequacy/prompt-injection robustness/model-obedience evidence | `completed/QC_CLI_GOVERNANCE_LINT_SURFACES.md` |
 | QC CLI export audit surfaces | `qc_cli.py` now wraps export-audit manifest writing, manifest verification, publish preflight, event-log verification, SQLite mirroring, and SQLite mirror verification scripts through top-level commands without duplicating local audit logic or claiming signing/append-only/external tamper evidence | `completed/QC_CLI_EXPORT_AUDIT_SURFACES.md` |
 | QC CLI D3/D7 comparison protocol surfaces | `qc_cli.py` now wraps D3/D7 comparison protocol validation and comparison-preflight scripts through top-level commands that preserve protocol, gold, and ordered prediction paths without duplicating protocol/preflight logic or claiming held-out D3/D7 evidence | `completed/QC_CLI_D3_D7_COMPARISON_PROTOCOL_SURFACES.md` |
