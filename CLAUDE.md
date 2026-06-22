@@ -29,7 +29,7 @@ All stages use structured LLM output via Pydantic schemas + JSON mode. State is 
 The software is **built and software-validated** (deterministic tests + live-LLM E2E; ruff + docs gates green) — "the program does what it's built to do," *not* evidence the analysis is methodologically valid. Implemented:
 
 - Thematic and **GT-inspired** (not "full GT") pipelines; `NegativeCaseStage` runs **last** in both (INV-6), automatic cross-interview analysis for multi-doc corpora.
-- GT constant comparison; category-saturation diagnostics and diagnostic-driven sampling suggestions separate from codebook stability (INV-4 partial); incremental re-coding via `project recode` (hard-invalidates stale higher-order outputs it cannot recompute, INV-11 partial).
+- GT constant comparison; category-saturation diagnostics, diagnostic-driven sampling suggestions, and theoretical-sampling protocol validation separate from codebook stability (INV-4 partial); incremental re-coding via `project recode` (hard-invalidates stale higher-order outputs it cannot recompute, INV-11 partial).
 - **Span-anchored grounding** (INV-1, mostly met): quotes resolve to char offsets + hash or are dropped + warned; `verify_grounding`/`make bench` measure the rate.
 - **Segment universe + coverage** (INV-8): every doc split into char-anchored segments; `project run --exhaustive` codes *every* segment (examined-and-judged coverage, segment-anchored applications), else traversal coverage.
 - **First-class claim ledger** (INV-9 object layer): substantive stage outputs become `AnalyticClaim` objects or no-claims events, with source stage, kind, scope, support/adjudication status, anchors where available, and CLI/API/MCP/export read surfaces.
@@ -469,6 +469,7 @@ make verify-export-audit-manifest MANIFEST=manifest.json BASE_DIR=. ID=<project_
 make export-publish-preflight MANIFEST=manifest.json BASE_DIR=. ID=<project_id>  # Strict local publish/handoff preflight requiring a verified export manifest
 make verify-export-audit-log LOG=export_audit_events.jsonl  # Verify opt-in local hash-linked export audit event log
 make validate-d7-gold GOLD=gold_set.json  # Validate versioned held-out D7 gold-set package
+make validate-theoretical-sampling-protocol PROTOCOL=theoretical_sampling_protocol.json  # Validate pre-run theoretical-sampling protocol metadata
 make validate-d7-comparison-protocol PROTOCOL=d7_protocol.json  # Validate pre-run D7 retrieval comparison protocol
 make d7-comparison-preflight PROTOCOL=d7_protocol.json GOLD=d7_gold.json PREDICTIONS="lexical.json embedding.json"  # Preflight D7 comparison inputs before scoring
 make compare-d7-retrieval ID=<project_id> GOLD=d7_gold.json PREDICTIONS="lexical.json embedding.json" PROTOCOL=d7_protocol.json  # Score D7 retrieval predictions with preflight guard

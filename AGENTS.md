@@ -71,6 +71,7 @@ make verify-export-audit-manifest MANIFEST=manifest.json BASE_DIR=. ID=<project_
 make export-publish-preflight MANIFEST=manifest.json BASE_DIR=. ID=<project_id>  # Strict local publish/handoff preflight requiring a verified export manifest
 make verify-export-audit-log LOG=export_audit_events.jsonl  # Verify opt-in local hash-linked export audit event log
 make validate-d7-gold GOLD=gold_set.json  # Validate versioned held-out D7 gold-set package
+make validate-theoretical-sampling-protocol PROTOCOL=theoretical_sampling_protocol.json  # Validate pre-run theoretical-sampling protocol metadata
 make validate-d7-comparison-protocol PROTOCOL=d7_protocol.json  # Validate pre-run D7 retrieval comparison protocol
 make d7-comparison-preflight PROTOCOL=d7_protocol.json GOLD=d7_gold.json PREDICTIONS="lexical.json embedding.json"  # Preflight D7 comparison inputs before scoring
 make compare-d7-retrieval ID=<project_id> GOLD=d7_gold.json PREDICTIONS="lexical.json embedding.json" PROTOCOL=d7_protocol.json  # Score D7 retrieval predictions with preflight guard
