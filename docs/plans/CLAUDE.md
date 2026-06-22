@@ -6,7 +6,6 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 47 | D5 reliability bootstrap intervals | High | Planned | `D5_RELIABILITY_BOOTSTRAP_INTERVALS.md` |
 
 ## Completed Plans
 
@@ -58,6 +57,7 @@ Track all implementation work here.
 | Human-ceiling comparison scorecard | Evaluation-harness follow-up: D3/D7 scorecards compare exact recall/precision/F1 to supplied human-human package metrics when available without claiming expert parity | `completed/HUMAN_CEILING_COMPARISON_SCORECARD.md` |
 | D5 Gwet AC1 reliability scorecard | Evaluation-harness follow-up: `project irr`, Markdown export, and `make bench` surface Gwet's AC1 for LLM-pass consistency without claiming human IRR | `completed/D5_GWET_AC1_RELIABILITY_SCORECARD.md` |
 | D5 reliability prevalence tables | Evaluation-harness follow-up: `make bench` surfaces rating prevalence tables beside D5 κ/AC1 reliability metrics | `completed/D5_RELIABILITY_PREVALENCE_TABLES.md` |
+| D5 reliability bootstrap intervals | Evaluation-harness follow-up: `make bench` surfaces deterministic local row-bootstrap intervals for D5 LLM-pass percent agreement and AC1 without claiming human IRR | `completed/D5_RELIABILITY_BOOTSTRAP_INTERVALS.md` |
 
 ## Status Key
 
