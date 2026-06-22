@@ -22,17 +22,18 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #157: require prompt override data-placeholder values to be
-   untrusted-data blocks before rendering custom prompts.
+1. Select the next highest-value documented roadmap lane from
+   `docs/PROJECT_THEORY_AND_GOALS.md` and `docs/EVALUATION_HARNESS.md`.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Plan #157
-(`docs/plans/INV7_PROMPT_OVERRIDE_DATA_VALUE_BOUNDARY.md`) targets a deterministic
-INV-7 custom-prompt hardening gap. Prompt override templates already have to
-include protected data placeholders as bare fields; this slice makes the shared
-renderer reject raw/unwrapped values supplied for required or optional data
-placeholders before any LLM call.
+**Completed checkpoint:** Prompt override rendering now rejects raw/unwrapped
+values supplied for declared required or optional data placeholders before any
+LLM call. Templates already had to include protected data placeholders as bare
+fields; the renderer now also checks that the corresponding values carry
+untrusted-data block structure. This is structural custom-prompt boundary
+hardening only, not model-obedience or live prompt-injection robustness
+evidence.
 
 **Completed checkpoint:** Tracked text files are now LF-normalized and
 `.gitattributes` records an LF text policy. CRLF scans over tracked text files
