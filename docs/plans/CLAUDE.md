@@ -6,12 +6,12 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 169 | INV-7 committed live canary v2 | High | Planned | `INV7_COMMITTED_LIVE_CANARY_V2.md` |
 
 ## Completed Plans
 
 | Name | Outcome | Record |
 |------|---------|--------|
+| INV-7 committed live canary v2 | A protocol-guarded built-in fixture-set v2 live canary artifact is now committed and scorecarded with five fixtures, including custom prompt override surfaces, while remaining explicitly non-evidentiary for robustness, validity, held-out, model-obedience, or SOTA claims | `completed/INV7_COMMITTED_LIVE_CANARY_V2.md` |
 | INV-7 custom prompt override fixtures | Built-in INV-7 structural and opt-in live fixture sets now include custom prompt override canaries for thematic and GT constant-comparison override surfaces rendered through the production override wrapper | `completed/INV7_CUSTOM_PROMPT_OVERRIDE_FIXTURES.md` |
 | INV-11 GT recode higher-order refresh | Grounded-theory projects can now opt into `--refresh-higher-order` after incremental recode to rebuild GT open-code context and rerun Axial, Selective, and Theory Integration before Cross-Interview and Negative Case | `completed/INV11_GT_RECODE_HIGHER_ORDER_REFRESH.md` |
 | INV-11 thematic recode higher-order refresh | Default/thematic projects can now opt into `--refresh-higher-order` after incremental recode to rebuild Phase 1 context and rerun Perspective, Relationship, and Synthesis before Cross-Interview and Negative Case; GT refresh was deferred to a later slice | `completed/INV11_THEMATIC_RECODE_HIGHER_ORDER_REFRESH.md` |

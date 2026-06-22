@@ -1,10 +1,64 @@
 # Plan #169: INV-7 Committed Live Canary V2
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** #168
 **Blocks:** broader held-out INV-7 adversarial benchmark evidence
+
+---
+
+## Outcome
+
+Committed a protocol-guarded built-in INV-7 live canary artifact set for
+fixture-set version `2` at
+`docs/benchmarks/inv7_live_canary_v2_2026_06_22/`:
+
+- `protocol.json` - registered pre-run protocol metadata with exact built-in v2
+  fixture prompt hashes.
+- `result.json` - strict `schema_version=1` live result package for
+  `gpt-5-mini`, split `canary`, trace
+  `qualitative_coding/inv7-live-canary-v2-2026-06-22`, and `max_budget=0.50`.
+- `preflight.json` - protocol/result preflight report with `status="pass"`.
+- `scorecard.json` - Phase 0 local scorecard for the v2 canary package.
+- `README.md` - reviewer-facing commands, result summary, and claim caveats.
+- `projects/inv7_canary_project_v2.json` - minimal repo-local synthetic project
+  shell used only to make Phase 0 scoring reproducible from committed files.
+
+The live canary run produced 5 fixture outcomes, all passing:
+`attack_success_rate=0.0`; the Wilson 95% upper bound is approximately
+`0.4345` because the denominator is only 5. The v2 fixture set includes custom
+prompt override canaries for thematic and GT constant-comparison override
+surfaces.
+
+D10 cost remains `not_available` because no matching `llm_calls` rows were
+found for the exact trace selector; no cost was estimated.
+
+Implementation commit: `c467ff9`
+(`Commit INV-7 live canary v2 artifact`).
+
+Verification:
+
+- `make validate-inv7-live-protocol PROTOCOL=docs/benchmarks/inv7_live_canary_v2_2026_06_22/protocol.json`
+  -> valid protocol, 5 fixtures.
+- `make run-inv7-live-fixtures OUTPUT=docs/benchmarks/inv7_live_canary_v2_2026_06_22/result.json MODEL=gpt-5-mini TRACE_ID=qualitative_coding/inv7-live-canary-v2-2026-06-22 MAX_BUDGET=0.50`
+  -> 5 passed, 0 failed.
+- `make validate-inv7-package PACKAGE=docs/benchmarks/inv7_live_canary_v2_2026_06_22/result.json`
+  -> valid package, 5 passed, 0 failed.
+- `make inv7-live-preflight PROTOCOL=docs/benchmarks/inv7_live_canary_v2_2026_06_22/protocol.json PACKAGE=docs/benchmarks/inv7_live_canary_v2_2026_06_22/result.json`
+  -> `status="pass"`.
+- `python scripts/bench_phase0.py inv7_canary_project_v2 --projects-dir docs/benchmarks/inv7_live_canary_v2_2026_06_22/projects --prompt-injection-file docs/benchmarks/inv7_live_canary_v2_2026_06_22/result.json --trace-id qualitative_coding/inv7-live-canary-v2-2026-06-22 --output docs/benchmarks/inv7_live_canary_v2_2026_06_22/scorecard.json`
+  -> scorecard written with `total_fixtures=5`, `passed=5`, `failed=0`.
+- `python -m pytest tests/test_inv7_fixture_runner.py tests/test_inv7_prompt_injection_package.py tests/test_inv7_live_protocol.py tests/test_inv7_live_preflight.py tests/test_bench_phase0_script.py -k "inv7 or prompt_injection or projects_dir" -q`
+  -> 30 passed, 37 deselected.
+- `make docs-check` -> passed.
+- `git diff --check` -> passed.
+- `make check` -> 1135 passed, 1 skipped, 8 deselected; Ruff and docs gates
+  passed.
+
+This is a small built-in canary artifact only. It is not held-out adversarial
+benchmark evidence, prompt-injection robustness evidence, model-obedience
+proof, methodological-validity evidence, or a SOTA claim.
 
 ---
 
@@ -77,7 +131,7 @@ capabilities.
 
 ## Files Affected
 
-- `docs/plans/INV7_COMMITTED_LIVE_CANARY_V2.md` - active plan.
+- `docs/plans/completed/INV7_COMMITTED_LIVE_CANARY_V2.md` - completed plan.
 - `docs/plans/CLAUDE.md` - active plan index.
 - `docs/plans/ACTIVE_SPRINT.md` - active sprint checkpoint.
 - `docs/benchmarks/inv7_live_canary_v2_2026_06_22/` - committed canary
@@ -135,18 +189,18 @@ existing tested commands.
 
 ## Acceptance Criteria
 
-- [ ] A v2 pre-run canary protocol exists with exact built-in fixture prompt
+- [x] A v2 pre-run canary protocol exists with exact built-in fixture prompt
   hashes for fixture-set version `2`.
-- [ ] The committed live result package validates and includes the custom
+- [x] The committed live result package validates and includes the custom
   override live fixtures.
-- [ ] The committed preflight report has `status="pass"`.
-- [ ] The committed scorecard includes `prompt_injection_inv7` for the v2 live
+- [x] The committed preflight report has `status="pass"`.
+- [x] The committed scorecard includes `prompt_injection_inv7` for the v2 live
   canary package.
-- [ ] README/status docs state this is a small canary artifact, not
+- [x] README/status docs state this is a small canary artifact, not
   prompt-injection robustness evidence, model-obedience proof, held-out
   evidence, methodological-validity evidence, or SOTA.
-- [ ] Required validation/preflight/score/test/docs/full gates pass.
-- [ ] Verified increment is committed and pushed.
+- [x] Required validation/preflight/score/test/docs/full gates pass.
+- [x] Verified increment is committed and pushed.
 
 ---
 

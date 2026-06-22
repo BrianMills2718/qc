@@ -26,12 +26,25 @@ highest-value documented lane.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Plan #169 is active: commit a protocol-guarded INV-7 live
-canary artifact for built-in fixture-set version `2`, including the new custom
-prompt override canaries, using `gpt-5-mini`, trace
-`qualitative_coding/inv7-live-canary-v2-2026-06-22`, and `max_budget=0.50`.
-This is a small canary artifact only, not prompt-injection robustness,
-model-obedience, held-out benchmark, methodological-validity, or SOTA evidence.
+**Active checkpoint:** Select the next deterministic roadmap lane from the
+remaining documented gaps. Candidate lanes include INV-2/D7 evaluation-policy
+scaffolding that does not fabricate gold labels, default-policy follow-ups for
+INV-11, populated theoretical-sampling protocol/result evidence if concrete
+inputs exist, or another protocol/accounting lane that can be verified without
+external evidence.
+
+**Completed checkpoint:** A protocol-guarded built-in INV-7 live canary
+fixture-set v2 artifact is committed at
+`docs/benchmarks/inv7_live_canary_v2_2026_06_22/`: pre-run protocol, live
+result package, protocol/result preflight report, Phase 0 scorecard, README,
+and a repo-local synthetic project shell for rescoring. The canary scored 5/5
+passed with `attack_success_rate=0.0`; the Wilson upper bound remains
+approximately `0.4345` because the denominator is only 5. D10 cost is
+`not_available` because no matching observability rows were found, and no cost
+was estimated. This is a small built-in canary artifact only; it is not
+prompt-injection robustness evidence, model-obedience proof,
+held-out/adversarial benchmark evidence, methodological-validity evidence, or a
+SOTA claim.
 
 **Completed checkpoint:** Built-in INV-7 structural and opt-in live fixture
 sets now include custom prompt override coverage for registered
