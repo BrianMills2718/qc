@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 194 | QC CLI export audit surfaces | High | Planned | `QC_CLI_EXPORT_AUDIT_SURFACES.md` |
 
 ## Completed Plans
 

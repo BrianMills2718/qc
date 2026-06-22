@@ -26,8 +26,12 @@ highest-value documented lane.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** No implementation plan is active. Select and plan the
-next deterministic roadmap lane before editing code.
+**Active checkpoint:** Plan #194 is active: add top-level `qc_cli.py` wrappers
+for export-audit manifest writing, manifest verification, publish preflight,
+event-log verification, SQLite mirroring, and SQLite mirror verification. This
+slice should forward arguments to the canonical scripts without duplicating
+audit-manifest/event-log/DB logic or claiming signing, append-only storage,
+external tamper evidence, methodological-validity evidence, or SOTA.
 
 **Completed checkpoint:** `qc_cli.py` now wraps D3/D7 comparison protocol
 validation and comparison-preflight scripts through top-level commands:
