@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 159 | INV-9 code-scoped higher-order claim anchors | High | Planned | `INV9_CODE_SCOPED_HIGHER_ORDER_CLAIM_ANCHORS.md` |
 
 ## Completed Plans
 

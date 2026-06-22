@@ -22,10 +22,16 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Select the next highest-value documented roadmap lane from
-   `docs/PROJECT_THEORY_AND_GOALS.md` and `docs/EVALUATION_HARNESS.md`.
+1. Execute Plan #159: propagate existing code-application anchors onto
+   higher-order claims that explicitly scope themselves to those code IDs.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
+
+**Active checkpoint:** Plan #159
+(`docs/plans/INV9_CODE_SCOPED_HIGHER_ORDER_CLAIM_ANCHORS.md`) targets INV-9's
+remaining higher-order anchoring gap. The scope is conservative: reuse exact
+code-application anchors for higher-order claims that already name code IDs;
+leave corpus-level/no-code-scope claims visibly unanchored.
 
 **Completed checkpoint:** Prompt override rendering now rejects structured
 metadata values and string metadata values containing CR/LF before rendering.
