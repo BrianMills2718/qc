@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 137 | Theoretical sampling protocol preflight | High | In Progress | `THEORETICAL_SAMPLING_PROTOCOL_PREFLIGHT.md` |
 
 ## Completed Plans
 
