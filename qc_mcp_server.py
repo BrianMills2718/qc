@@ -24,7 +24,10 @@ import sys
 sys.path.insert(0, str(Path(__file__).parent))
 
 from qc_clean.core.persistence.project_store import ProjectStore
-from qc_clean.core.export.audit_event_log import append_export_audit_event
+from qc_clean.core.export.audit_event_log import (
+    append_export_audit_event,
+    mirror_export_audit_event_log_to_sqlite,
+)
 from qc_clean.core.export.audit_manifest import (
     build_export_audit_manifest,
     verify_export_audit_manifest_payload,
@@ -102,6 +105,13 @@ def _event_log_path_for_export(export_path: str) -> str:
     return _confine_export_path(f"{stem}.audit_events.jsonl", "export.audit_events.jsonl")
 
 
+def _event_db_path_for_export(export_path: str) -> str:
+    """Return a confined export-audit SQLite mirror path for one artifact."""
+    export_name = Path(export_path).name
+    stem = Path(export_name).stem or "export"
+    return _confine_export_path(f"{stem}.audit_events.sqlite", "export.audit_events.sqlite")
+
+
 def _with_optional_export_audit(
     payload: dict[str, Any],
     state: ProjectState,
@@ -111,17 +121,21 @@ def _with_optional_export_audit(
     audit_manifest: bool,
     verify_audit_manifest: bool,
     audit_event_log: bool,
+    audit_event_db: bool,
 ) -> dict[str, Any]:
     """Add optional export-audit manifest and verification fields to an MCP payload."""
     if verify_audit_manifest and not audit_manifest:
         return {"error": "verify_audit_manifest=True requires audit_manifest=True"}
     if audit_event_log and not audit_manifest:
         return {"error": "audit_event_log=True requires audit_manifest=True"}
+    if audit_event_db and not audit_event_log:
+        return {"error": "audit_event_db=True requires audit_event_log=True"}
     if not audit_manifest:
         return payload
 
     manifest_path = _manifest_path_for_export(artifact_path)
     event_log_path = _event_log_path_for_export(artifact_path) if audit_event_log else None
+    event_db_path = _event_db_path_for_export(artifact_path) if audit_event_db else None
     manifest = build_export_audit_manifest(
         state,
         export_format=export_format,  # type: ignore[arg-type]
@@ -157,6 +171,9 @@ def _with_optional_export_audit(
         payload["audit_verification"] = report.model_dump(mode="json")
         if report.status != "verified":
             payload["error"] = "Export audit manifest verification failed"
+    if event_log_path and event_db_path:
+        mirror_export_audit_event_log_to_sqlite(event_log_path, event_db_path)
+        payload["audit_event_db"] = event_db_path
     return payload
 
 
@@ -605,6 +622,7 @@ def qc_export_markdown(
     audit_manifest: bool = False,
     verify_audit_manifest: bool = False,
     audit_event_log: bool = False,
+    audit_event_db: bool = False,
 ) -> str:
     """Export a project as a human-readable Markdown report.
 
@@ -617,6 +635,7 @@ def qc_export_markdown(
         audit_manifest: Whether to write a confined export-audit manifest sidecar
         verify_audit_manifest: Whether to verify the sidecar immediately
         audit_event_log: Whether to append confined export-audit event-log records
+        audit_event_db: Whether to mirror confined event-log records into SQLite
     """
     try:
         state = store.load(project_id)
@@ -633,6 +652,7 @@ def qc_export_markdown(
         audit_manifest=audit_manifest,
         verify_audit_manifest=verify_audit_manifest,
         audit_event_log=audit_event_log,
+        audit_event_db=audit_event_db,
     )
     return json.dumps(payload)
 
@@ -644,6 +664,7 @@ def qc_export_json(
     audit_manifest: bool = False,
     verify_audit_manifest: bool = False,
     audit_event_log: bool = False,
+    audit_event_db: bool = False,
 ) -> str:
     """Export a project's full state as JSON.
 
@@ -653,6 +674,7 @@ def qc_export_json(
         audit_manifest: Whether to write a confined export-audit manifest sidecar
         verify_audit_manifest: Whether to verify the sidecar immediately
         audit_event_log: Whether to append confined export-audit event-log records
+        audit_event_db: Whether to mirror confined event-log records into SQLite
     """
     try:
         state = store.load(project_id)
@@ -669,6 +691,7 @@ def qc_export_json(
         audit_manifest=audit_manifest,
         verify_audit_manifest=verify_audit_manifest,
         audit_event_log=audit_event_log,
+        audit_event_db=audit_event_db,
     )
     return json.dumps(payload)
 
