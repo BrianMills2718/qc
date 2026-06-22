@@ -1,6 +1,6 @@
 # Plan #68: D6 Counterfactual Jaccard Bootstrap Intervals
 
-**Status:** Planned
+**Status:** In Progress
 **Type:** implementation
 **Priority:** High
 **Blocked By:** None
@@ -63,9 +63,9 @@ pattern.
 
 - [x] Input records already use `BiasCounterfactualEvaluation` with Pydantic
   field descriptions.
-- [ ] Bootstrap config defined as a Pydantic model with field descriptions.
-- [ ] Scorecard output is covered by focused tests and full docs checks.
-- [ ] No new cross-project callable boundary is introduced.
+- [x] Bootstrap config defined as a Pydantic model with field descriptions.
+- [x] Scorecard output is covered by focused tests and full docs checks.
+- [x] No new cross-project callable boundary is introduced.
 
 ---
 
@@ -123,22 +123,22 @@ pattern.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] Overall D6 score includes `mean_jaccard_distance_ci` by default when
+- [x] Overall D6 score includes `mean_jaccard_distance_ci` by default when
   invariant cases are present.
-- [ ] Each per-attribute D6 summary includes `mean_jaccard_distance_ci` by
+- [x] Each per-attribute D6 summary includes `mean_jaccard_distance_ci` by
   default when invariant cases are present.
-- [ ] `phase0_counterfactual_bootstrap.enabled=false` suppresses interval fields
+- [x] `phase0_counterfactual_bootstrap.enabled=false` suppresses interval fields
   without changing point metrics or Wilson code-change intervals.
-- [ ] Invalid `phase0_counterfactual_bootstrap` config fails loudly.
-- [ ] Existing D6 no-data and external-file behaviors remain unchanged.
-- [ ] Docs preserve the claim boundary: this is local uncertainty metadata, not
+- [x] Invalid `phase0_counterfactual_bootstrap` config fails loudly.
+- [x] Existing D6 no-data and external-file behaviors remain unchanged.
+- [x] Docs preserve the claim boundary: this is local uncertainty metadata, not
   a populated bias audit or causal proof.
 
 > Process criteria:
-- [ ] Focused tests pass.
-- [ ] Plan sync passes.
-- [ ] Markdown link check passes.
-- [ ] Full `make check` passes, or any non-codebase failure is recorded.
+- [x] Focused tests pass.
+- [x] Plan sync passes.
+- [x] Markdown link check passes.
+- [x] Full `make check` passes, or any non-codebase failure is recorded.
 - [ ] Verified implementation is committed and pushed.
 
 ---

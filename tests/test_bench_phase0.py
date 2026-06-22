@@ -1781,6 +1781,13 @@ def test_scorecard_scores_bias_counterfactual_outcomes():
     assert d6["code_change_rate_ci"]["successes"] == 1
     assert d6["code_change_rate_ci"]["denominator"] == 2
     assert d6["mean_jaccard_distance"] == pytest.approx(1 / 3)
+    assert d6["mean_jaccard_distance_ci"]["method"] == (
+        "counterfactual_jaccard_mean_bootstrap"
+    )
+    assert d6["mean_jaccard_distance_ci"]["metric"] == "mean_jaccard_distance"
+    assert d6["mean_jaccard_distance_ci"]["population_size"] == 2
+    assert d6["mean_jaccard_distance_ci"]["lower"] <= d6["mean_jaccard_distance"]
+    assert d6["mean_jaccard_distance_ci"]["upper"] >= d6["mean_jaccard_distance"]
     assert d6["changed_case_ids"] == ["immigration-shift"]
     assert d6["by_attribute"]["immigration_status"]["code_change_rate"] == 1.0
     assert d6["by_attribute"]["immigration_status"]["code_change_rate_ci"][
@@ -1790,6 +1797,12 @@ def test_scorecard_scores_bias_counterfactual_outcomes():
         "denominator"
     ] == 1
     assert d6["by_attribute"]["immigration_status"]["mean_jaccard_distance"] == pytest.approx(2 / 3)
+    assert d6["by_attribute"]["immigration_status"]["mean_jaccard_distance_ci"][
+        "lower"
+    ] == pytest.approx(2 / 3)
+    assert d6["by_attribute"]["immigration_status"]["mean_jaccard_distance_ci"][
+        "upper"
+    ] == pytest.approx(2 / 3)
     assert d6["by_attribute"]["immigration_status"]["changed_case_ids"] == ["immigration-shift"]
     assert d6["by_attribute"]["parental_status"]["code_change_rate"] == 0.0
     assert d6["by_attribute"]["parental_status"]["code_change_rate_ci"][
@@ -1798,7 +1811,51 @@ def test_scorecard_scores_bias_counterfactual_outcomes():
     assert d6["by_attribute"]["parental_status"]["code_change_rate_ci"][
         "denominator"
     ] == 1
+    assert d6["by_attribute"]["parental_status"]["mean_jaccard_distance_ci"][
+        "lower"
+    ] == pytest.approx(0.0)
+    assert d6["by_attribute"]["parental_status"]["mean_jaccard_distance_ci"][
+        "upper"
+    ] == pytest.approx(0.0)
     assert "not causal proof" in d6["note"]
+
+
+def test_scorecard_can_disable_bias_counterfactual_bootstrap_intervals():
+    state = ProjectState(
+        name="bias-eval-no-bootstrap",
+        config=ProjectConfig(
+            methodology=Methodology.THEMATIC_ANALYSIS,
+            extra={
+                "phase0_counterfactual_bootstrap": {"enabled": False},
+                "bias_counterfactual_evaluations": [
+                    {
+                        "case_id": "identity-stable",
+                        "attribute": "parental_status",
+                        "original_codes": ["trust"],
+                        "counterfactual_codes": ["trust"],
+                    },
+                    {
+                        "case_id": "identity-shift",
+                        "attribute": "immigration_status",
+                        "original_codes": ["access", "trust"],
+                        "counterfactual_codes": ["access", "surveillance"],
+                    },
+                ],
+            },
+        ),
+    )
+
+    d6 = phase0_scorecard(state)["bias_counterfactual_d6"]
+
+    assert d6["status"] == "scored"
+    assert d6["code_change_rate_ci"]["method"] == "wilson"
+    assert d6["mean_jaccard_distance"] == pytest.approx(1 / 3)
+    assert "mean_jaccard_distance_ci" not in d6
+    assert (
+        "mean_jaccard_distance_ci"
+        not in d6["by_attribute"]["immigration_status"]
+    )
+    assert "mean_jaccard_distance_ci" not in d6["by_attribute"]["parental_status"]
 
 
 def test_scorecard_invalid_bias_counterfactual_metadata_fails_loud():
@@ -1807,6 +1864,27 @@ def test_scorecard_invalid_bias_counterfactual_metadata_fails_loud():
     )
 
     with pytest.raises(ValueError, match="bias_counterfactual_evaluations"):
+        phase0_scorecard(state)
+
+
+def test_scorecard_invalid_bias_counterfactual_bootstrap_config_fails_loud():
+    state = ProjectState(
+        config=ProjectConfig(
+            extra={
+                "phase0_counterfactual_bootstrap": {"samples": 0},
+                "bias_counterfactual_evaluations": [
+                    {
+                        "case_id": "identity-stable",
+                        "attribute": "parental_status",
+                        "original_codes": ["trust"],
+                        "counterfactual_codes": ["trust"],
+                    },
+                ],
+            },
+        ),
+    )
+
+    with pytest.raises(ValueError, match="phase0_counterfactual_bootstrap"):
         phase0_scorecard(state)
 
 

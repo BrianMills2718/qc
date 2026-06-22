@@ -52,6 +52,7 @@ _EXACT_BOOTSTRAP_EXTRA_KEY = "phase0_exact_bootstrap"
 _RELIABILITY_BOOTSTRAP_EXTRA_KEY = "phase0_reliability_bootstrap"
 _RUBRIC_BOOTSTRAP_EXTRA_KEY = "phase0_rubric_bootstrap"
 _CALIBRATION_BOOTSTRAP_EXTRA_KEY = "phase0_calibration_bootstrap"
+_COUNTERFACTUAL_BOOTSTRAP_EXTRA_KEY = "phase0_counterfactual_bootstrap"
 DEFAULT_OBSERVABILITY_DB_PATH = Path.home() / "projects" / "data" / "llm_observability.db"
 _WILSON_Z_95 = 1.959963984540054
 _HUMAN_CEILING_EXACT_METRICS = ("recall", "precision", "f1")
@@ -205,6 +206,38 @@ class CalibrationBootstrapConfig(BaseModel):
         if not 0 < self.confidence_level < 1:
             raise ValueError(
                 "phase0_calibration_bootstrap.confidence_level must be between 0 and 1"
+            )
+        return self
+
+
+class CounterfactualBootstrapConfig(BaseModel):
+    """Config for deterministic D6 counterfactual-distance bootstrap intervals."""
+
+    enabled: bool = Field(
+        default=True,
+        description="Whether D6 counterfactual scorecards should include bootstrap intervals",
+    )
+    samples: int = Field(
+        default=1000,
+        description="Number of bootstrap resamples to draw over invariant counterfactual rows",
+    )
+    confidence_level: float = Field(
+        default=0.95,
+        description="Two-sided confidence level for the bootstrap interval",
+    )
+    seed: int = Field(
+        default=0,
+        description="Deterministic random seed for counterfactual bootstrap resampling",
+    )
+
+    @model_validator(mode="after")
+    def require_valid_settings(self) -> "CounterfactualBootstrapConfig":
+        """Reject malformed counterfactual bootstrap settings."""
+        if self.samples < 1:
+            raise ValueError("phase0_counterfactual_bootstrap.samples must be at least 1")
+        if not 0 < self.confidence_level < 1:
+            raise ValueError(
+                "phase0_counterfactual_bootstrap.confidence_level must be between 0 and 1"
             )
         return self
 
@@ -1982,7 +2015,8 @@ def bias_counterfactual_scorecard(state: ProjectState) -> Dict[str, Any]:
     case_metrics = [_bias_counterfactual_case_metrics(ev) for ev in invariant]
     changed = [metric for metric in case_metrics if metric["changed"]]
     jaccard_distances = [metric["jaccard_distance"] for metric in case_metrics]
-    return {
+    bootstrap_config = _counterfactual_bootstrap_config(state)
+    scorecard = {
         "status": "scored",
         "source": f"ProjectState.config.extra['{_BIAS_COUNTERFACTUAL_EXTRA_KEY}']",
         "total_cases": len(evaluations),
@@ -1994,13 +2028,23 @@ def bias_counterfactual_scorecard(state: ProjectState) -> Dict[str, Any]:
         "code_change_rate_ci": _wilson_interval(len(changed), len(invariant)),
         "mean_jaccard_distance": _mean_or_none(jaccard_distances),
         "changed_case_ids": sorted(metric["case_id"] for metric in changed),
-        "by_attribute": _bias_counterfactual_by_attribute(invariant),
+        "by_attribute": _bias_counterfactual_by_attribute(
+            invariant,
+            bootstrap_config,
+        ),
         "note": (
             "Scores externally supplied counterfactual identity-cue outcomes. "
             "This is a measurement substrate, not causal proof of bias or "
             "evidence that the system is bias-free."
         ),
     }
+    if bootstrap_config.enabled:
+        scorecard["mean_jaccard_distance_ci"] = _counterfactual_jaccard_bootstrap_ci(
+            jaccard_distances,
+            bootstrap_config,
+            unit="invariant counterfactual case",
+        )
+    return scorecard
 
 
 def _bias_counterfactual_evaluations(state: ProjectState) -> list[BiasCounterfactualEvaluation]:
@@ -2019,6 +2063,22 @@ def _bias_counterfactual_evaluations(state: ProjectState) -> list[BiasCounterfac
         return [BiasCounterfactualEvaluation.model_validate(item) for item in raw]
     except ValidationError as exc:
         raise ValueError(f"Invalid bias_counterfactual_evaluations metadata: {exc}") from exc
+
+
+def _counterfactual_bootstrap_config(state: ProjectState) -> CounterfactualBootstrapConfig:
+    """Load Phase 0 D6 counterfactual bootstrap config from project metadata."""
+    raw = state.config.extra.get(_COUNTERFACTUAL_BOOTSTRAP_EXTRA_KEY)
+    if raw is None:
+        return CounterfactualBootstrapConfig()
+    if not isinstance(raw, dict):
+        raise ValueError(
+            f"ProjectState.config.extra['{_COUNTERFACTUAL_BOOTSTRAP_EXTRA_KEY}'] "
+            "must be an object"
+        )
+    try:
+        return CounterfactualBootstrapConfig.model_validate(raw)
+    except ValidationError as exc:
+        raise ValueError(f"Invalid phase0_counterfactual_bootstrap config: {exc}") from exc
 
 
 def _clean_counterfactual_codes(codes: list[str], field_name: str) -> list[str]:
@@ -2055,6 +2115,7 @@ def _bias_counterfactual_case_metrics(
 
 def _bias_counterfactual_by_attribute(
     evaluations: list[BiasCounterfactualEvaluation],
+    bootstrap_config: CounterfactualBootstrapConfig,
 ) -> dict[str, dict[str, Any]]:
     """Summarize D6 invariant-case changes by varied attribute."""
     summary: dict[str, dict[str, Any]] = {}
@@ -2093,7 +2154,60 @@ def _bias_counterfactual_by_attribute(
             bucket["invariant_cases"],
         )
         bucket["mean_jaccard_distance"] = _mean_or_none(distances[attribute])
+        if bootstrap_config.enabled:
+            bucket["mean_jaccard_distance_ci"] = _counterfactual_jaccard_bootstrap_ci(
+                distances[attribute],
+                bootstrap_config,
+                unit=f"invariant counterfactual case for attribute {attribute}",
+            )
     return dict(sorted(summary.items()))
+
+
+def _counterfactual_jaccard_bootstrap_ci(
+    values: list[float],
+    bootstrap_config: CounterfactualBootstrapConfig,
+    *,
+    unit: str,
+) -> dict[str, Any]:
+    """Return deterministic local bootstrap intervals for D6 Jaccard means."""
+    base: dict[str, Any] = {
+        "method": "counterfactual_jaccard_mean_bootstrap",
+        "metric": "mean_jaccard_distance",
+        "confidence_level": bootstrap_config.confidence_level,
+        "samples": bootstrap_config.samples,
+        "seed": bootstrap_config.seed,
+        "unit": unit,
+        "population_size": len(values),
+        "note": (
+            "Deterministic local bootstrap over supplied invariant counterfactual "
+            "rows. This is uncertainty metadata, not causal proof of bias or "
+            "evidence that the system is bias-free."
+        ),
+    }
+    if not values:
+        return {
+            **base,
+            "status": "not_available",
+            "lower": None,
+            "upper": None,
+            "reason": "No invariant counterfactual rows available for bootstrap.",
+        }
+
+    rng = Random(bootstrap_config.seed)
+    sample_size = len(values)
+    bootstrapped_means = []
+    for _ in range(bootstrap_config.samples):
+        sample = [values[rng.randrange(sample_size)] for _ in range(sample_size)]
+        bootstrapped_means.append(sum(sample) / sample_size)
+
+    bootstrapped_means.sort()
+    alpha = (1 - bootstrap_config.confidence_level) / 2
+    return {
+        **base,
+        "status": "scored",
+        "lower": _percentile(bootstrapped_means, alpha),
+        "upper": _percentile(bootstrapped_means, 1 - alpha),
+    }
 
 
 def _mean_or_none(values: list[float]) -> float | None:

@@ -6,7 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| #68 | D6 counterfactual Jaccard bootstrap intervals | High | Planned | `D6_COUNTERFACTUAL_JACCARD_BOOTSTRAP_INTERVALS.md` |
+| #68 | D6 counterfactual Jaccard bootstrap intervals | High | In Progress | `D6_COUNTERFACTUAL_JACCARD_BOOTSTRAP_INTERVALS.md` |
 
 ## Completed Plans
 

@@ -1193,9 +1193,16 @@ def test_bench_phase0_scores_bias_counterfactual_from_file_without_mutating_stat
     assert d6["code_change_rate"] == pytest.approx(0.5)
     assert d6["code_change_rate_ci"]["successes"] == 1
     assert d6["code_change_rate_ci"]["denominator"] == 2
+    assert d6["mean_jaccard_distance_ci"]["method"] == (
+        "counterfactual_jaccard_mean_bootstrap"
+    )
+    assert d6["mean_jaccard_distance_ci"]["population_size"] == 2
     assert d6["by_attribute"]["immigration_status"]["code_change_rate_ci"][
         "successes"
     ] == 1
+    assert d6["by_attribute"]["immigration_status"]["mean_jaccard_distance_ci"][
+        "status"
+    ] == "scored"
     assert d6["by_attribute"]["parental_status"]["code_change_rate_ci"][
         "successes"
     ] == 0
