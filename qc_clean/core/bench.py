@@ -516,9 +516,9 @@ def phase0_scorecard(state: ProjectState) -> Dict[str, Any]:
         "codes": len(state.codebook.codes),
         "code_applications": len(state.code_applications),
         # D1 — grounding (the headline structural-rigor metric).
-        "grounding": asdict(verify_grounding(state)),
+        "grounding": grounding_scorecard(state),
         # D2 — coverage over the segment universe (INV-8 denominator).
-        "coverage": asdict(compute_coverage(state)),
+        "coverage": coverage_scorecard(state),
         # D3 — application validity when human/adjudicated gold is present.
         "application_validity_d3": application_validity_d3_scorecard(state),
         # D4 — externally supplied codebook-quality rubric outcomes.
@@ -629,6 +629,30 @@ def phase0_scorecard(state: ProjectState) -> Dict[str, Any]:
         "cost_note": "D10 cost/latency is populated by the bench CLI from llm_client observability rows; never estimate it from ProjectState.",
     }
     return card
+
+
+def grounding_scorecard(state: ProjectState) -> dict[str, Any]:
+    """Serialize D1 grounding with local Wilson interval metadata."""
+    report = asdict(verify_grounding(state))
+    report["grounding_rate_ci"] = _wilson_interval(
+        report["anchored_verified"],
+        report["total_applications"],
+    )
+    return report
+
+
+def coverage_scorecard(state: ProjectState) -> dict[str, Any]:
+    """Serialize D2 coverage with local Wilson interval metadata."""
+    report = asdict(compute_coverage(state))
+    report["coverage_rate_ci"] = _wilson_interval(
+        report["covered_segments"],
+        report["total_segments"],
+    )
+    report["examined_rate_ci"] = _wilson_interval(
+        report["examined_segments"],
+        report["total_segments"],
+    )
+    return report
 
 
 def _binary_matrix_prevalence(matrix: Mapping[str, list[int]]) -> dict[str, Any]:

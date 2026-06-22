@@ -48,6 +48,8 @@ def test_scorecard_grounding_rate_reflects_anchors():
     assert card["grounding"]["anchored_verified"] == 1
     assert card["grounding"]["anchored_no_hash"] == 1
     assert abs(card["grounding"]["grounding_rate"] - 0.5) < 1e-9
+    assert card["grounding"]["grounding_rate_ci"]["successes"] == 1
+    assert card["grounding"]["grounding_rate_ci"]["denominator"] == 2
     assert "coverage" in card and "coverage_rate" in card["coverage"]
     assert card["_meta"]["phase"] == 0
 
@@ -215,14 +217,22 @@ def test_coverage_note_is_conditional_on_exhaustive_mode():
         segments=[Segment(id="S1", doc_id=doc.id, index=0, start_char=0,
                           end_char=len(content), text=content, decision=None)],
     )
-    note_t = phase0_scorecard(traversal)["_meta"]["coverage_note"]
+    traversal_card = phase0_scorecard(traversal)
+    note_t = traversal_card["_meta"]["coverage_note"]
+    assert traversal_card["coverage"]["coverage_rate_ci"]["successes"] == 0
+    assert traversal_card["coverage"]["coverage_rate_ci"]["denominator"] == 1
+    assert traversal_card["coverage"]["examined_rate_ci"]["successes"] == 0
+    assert traversal_card["coverage"]["examined_rate_ci"]["denominator"] == 1
     assert "traversal coverage only" in note_t
     assert "examined-and-judged coverage available" not in note_t
 
     # Examined mode: the segment carries a decision.
     examined = traversal.model_copy(deep=True)
     examined.segments[0].decision = "no_code"
-    note_e = phase0_scorecard(examined)["_meta"]["coverage_note"]
+    examined_card = phase0_scorecard(examined)
+    note_e = examined_card["_meta"]["coverage_note"]
+    assert examined_card["coverage"]["examined_rate_ci"]["successes"] == 1
+    assert examined_card["coverage"]["examined_rate_ci"]["denominator"] == 1
     assert "examined-and-judged coverage available" in note_e
     assert "traversal coverage only" not in note_e
 
@@ -233,7 +243,10 @@ def test_scorecard_grounding_rate_one_when_no_applications():
         config=ProjectConfig(methodology=Methodology.THEMATIC_ANALYSIS),
         corpus=Corpus(documents=[]),
     )
-    assert phase0_scorecard(state)["grounding"]["grounding_rate"] == 1.0
+    grounding = phase0_scorecard(state)["grounding"]
+    assert grounding["grounding_rate"] == 1.0
+    assert grounding["grounding_rate_ci"]["denominator"] == 0
+    assert grounding["grounding_rate_ci"]["lower"] is None
 
 
 def test_scorecard_reports_d3_not_available_without_application_gold():

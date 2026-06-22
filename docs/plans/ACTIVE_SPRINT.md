@@ -28,7 +28,8 @@ highest-value documented lane.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Completed checkpoint:** D3 and D7 scorecard sections now accept raw gold or
+**Completed checkpoint:** D1 grounding and D2 coverage/examined rates now report
+local Wilson intervals in the Phase 0 scorecard. D3 and D7 scorecard sections now accept raw gold or
 versioned `schema_version=1` gold-set packages, surface compact
 `gold_provenance` when package metadata is present, and report configurable local
 exact-key `f1_bootstrap_ci` intervals by default. D3 scorecards also report
