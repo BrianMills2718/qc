@@ -1,6 +1,6 @@
 # Plan #187: QC CLI Phase 0 Adjudication Package Writer
 
-**Status:** Planned
+**Status:** Completed
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Phase 0 adjudication package writer script
@@ -58,14 +58,14 @@ Internal CLI delegation only; no cross-project boundary is created.
 
 ### Capability Validation
 
-- [ ] Parser accepts `write-phase0-adjudication-package`.
-- [ ] Required `project_id` and `--output` are forwarded.
-- [ ] Optional `--d3-gold-file`, `--d7-gold-file` / `--gold-file`,
+- [x] Parser accepts `write-phase0-adjudication-package`.
+- [x] Required `project_id` and `--output` are forwarded.
+- [x] Optional `--d3-gold-file`, `--d7-gold-file` / `--gold-file`,
   `--scorecard-output`, `--artifact-dir`, `--observability-db`, and
   `--trace-id` are forwarded only when supplied.
-- [ ] The wrapper delegates to `scripts.write_phase0_adjudication_package.main`
+- [x] The wrapper delegates to `scripts.write_phase0_adjudication_package.main`
   without duplicating validation logic.
-- [ ] Docs state this is CLI parity/provenance only, not adjudication evidence.
+- [x] Docs state this is CLI parity/provenance only, not adjudication evidence.
 
 ---
 
@@ -120,23 +120,23 @@ Internal CLI delegation only; no cross-project boundary is created.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] `qc_cli.py write-phase0-adjudication-package ...` parses successfully.
-- [ ] The handler calls `scripts.write_phase0_adjudication_package.main()`.
-- [ ] Supplied arguments are forwarded exactly in canonical script form.
-- [ ] Omitted optional arguments are not forwarded.
-- [ ] Existing Make/script behavior is unchanged.
-- [ ] Docs/CLAUDE mention the top-level CLI alias without implying labels or
+- [x] `qc_cli.py write-phase0-adjudication-package ...` parses successfully.
+- [x] The handler calls `scripts.write_phase0_adjudication_package.main()`.
+- [x] Supplied arguments are forwarded exactly in canonical script form.
+- [x] Omitted optional arguments are not forwarded.
+- [x] Existing Make/script behavior is unchanged.
+- [x] Docs/CLAUDE mention the top-level CLI alias without implying labels or
   validity evidence exist.
 
 > Process criteria:
-- [ ] TDD red state observed before implementation.
-- [ ] Focused tests pass.
-- [ ] Focused Ruff check passes.
-- [ ] `make docs-check` passes.
-- [ ] `git diff --check` passes.
-- [ ] `make check` passes.
-- [ ] Plan is moved to completed with verification evidence.
-- [ ] Verified implementation is committed and pushed.
+- [x] TDD red state observed before implementation.
+- [x] Focused tests pass.
+- [x] Focused Ruff check passes.
+- [x] `make docs-check` passes.
+- [x] `git diff --check` passes.
+- [x] `make check` passes.
+- [x] Plan is moved to completed with verification evidence.
+- [x] Verified implementation is committed and pushed.
 
 ---
 
@@ -149,3 +149,32 @@ Internal CLI delegation only; no cross-project boundary is created.
 | Validation duplicated in `qc_cli.py` | Wrapper reimplements script logic | Keep handler as argv delegation only. |
 | Optional args forwarded as `None` strings | Handler blindly forwards all fields | Forward optional flags only when non-null. |
 | Docs overclaim | CLI alias sounds like expert-label evidence | Keep caveats: package assembly only, not populated adjudication evidence. |
+
+---
+
+## Outcome
+
+Implemented in commit `709f696e` and pushed to `main`.
+
+`qc_cli.py write-phase0-adjudication-package` now parses the same core arguments
+as the existing Make/script surface and delegates to
+`scripts.write_phase0_adjudication_package.main()` without duplicating package
+validation logic. `--gold-file` remains an alias for canonical forwarded
+`--d7-gold-file`.
+
+Verification evidence:
+
+- TDD red state: focused tests initially failed with argparse rejecting
+  `write-phase0-adjudication-package` as an invalid command.
+- `python -m pytest tests/test_qc_cli_bench.py tests/test_phase0_adjudication_package.py -q`:
+  11 passed.
+- `python -m ruff check qc_cli.py tests/test_qc_cli_bench.py`: passed.
+- `make docs-check`: passed.
+- `git diff --check`: passed.
+- `make check`: 1203 passed, 1 skipped, 8 deselected; Ruff and docs-check
+  passed; type check remains not configured.
+
+Claim discipline: this is top-level CLI parity for strict manifest assembly
+only. It does not create expert labels, change adjudication import semantics,
+run benchmarks, or license validity, parity, superiority, timing, or SOTA
+claims.

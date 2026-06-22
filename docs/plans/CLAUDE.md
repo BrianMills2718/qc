@@ -6,12 +6,12 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 187 | QC CLI Phase 0 adjudication package writer | High | Planned | `QC_CLI_PHASE0_ADJUDICATION_PACKAGE_WRITER.md` |
 
 ## Completed Plans
 
 | Name | Outcome | Record |
 |------|---------|--------|
+| QC CLI Phase 0 adjudication package writer | `qc_cli.py write-phase0-adjudication-package` now delegates to the canonical Phase 0 adjudication package writer, forwarding supplied package/output/provenance arguments without duplicating validation logic or claiming adjudication evidence | `completed/QC_CLI_PHASE0_ADJUDICATION_PACKAGE_WRITER.md` |
 | Phase 0 package projects dir support | Strict Phase 0 package manifests can now carry `projects_dir`, resolving it relative to the manifest and forwarding `--projects-dir` so package-driven runs can score package-local or non-default project stores without claiming benchmark evidence | `completed/PHASE0_PACKAGE_PROJECTS_DIR_SUPPORT.md` |
 | Phase 0 package INV-7 protocol support | Strict Phase 0 package manifests can now carry `inv7_live_protocol_file`, resolving it relative to the manifest and forwarding `--inv7-live-protocol-file` so package-driven runs preserve the existing INV-7 live preflight guard without claiming robustness evidence | `completed/PHASE0_PACKAGE_INV7_PROTOCOL_SUPPORT.md` |
 | Phase 0 benchmark artifact verifier | Phase 0 scorecard/timing/manifest artifact packages can now be verified through script, Make, and `qc_cli.py` for local hashes, copied metadata, prompt-eval status, and caveat consistency without claiming benchmark evidence | `completed/PHASE0_BENCHMARK_ARTIFACT_VERIFIER.md` |
