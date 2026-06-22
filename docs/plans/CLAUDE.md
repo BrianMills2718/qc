@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 184 | Phase 0 benchmark artifact verifier | High | Planned | `PHASE0_BENCHMARK_ARTIFACT_VERIFIER.md` |
 
 ## Completed Plans
 

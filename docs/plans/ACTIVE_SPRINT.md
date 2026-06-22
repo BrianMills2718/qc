@@ -26,11 +26,15 @@ highest-value documented lane.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Select and plan the next deterministic, high-value
-roadmap lane from `docs/PROJECT_THEORY_AND_GOALS.md` / `docs/EVALUATION_HARNESS.md`.
-Prefer lanes that reduce manual coordination before held-out evaluation or
-make existing benchmark/provenance surfaces more agent-drivable, without
-claiming evidence that has not been produced.
+**Active checkpoint:** Plan #184 is active: add a Phase 0 benchmark artifact
+verifier for local `scorecard.json` / `timing_d10.json` / `manifest.json`
+packages. This slice should accept a run directory or manifest path, verify
+scorecard and timing hashes, check manifest metadata copied from scorecard
+`_meta`, check timing D10 sections against the scorecard, require
+prompt-eval-not-run and non-evidentiary caveats, and expose Make/`qc_cli.py`
+surfaces. It must not run benchmarks, create held-out data, call
+`prompt_eval`, sign artifacts, provide append-only storage, or claim
+methodological-validity, superiority, parity, timing, or SOTA evidence.
 
 **Completed checkpoint:** D7 retrieval/live-baseline comparison manifests can
 now be written through `scripts/write_d7_comparison_package.py`, `make
