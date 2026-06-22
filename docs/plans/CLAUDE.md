@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 48 | D6 counterfactual bias scorecard | High | Planned | `D6_COUNTERFACTUAL_BIAS_SCORECARD.md` |
 
 ## Completed Plans
 
