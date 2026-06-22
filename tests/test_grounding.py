@@ -246,11 +246,82 @@ def test_resolve_and_anchor_derives_speaker_from_containing_segment():
     assert app.speaker == "Alex"
 
 
+def test_resolve_and_anchor_derives_speaker_from_source_prefix_without_segments():
+    from qc_clean.core.grounding import MatchStatus, resolve_and_anchor
+
+    content = "Alex: values autonomy.\nSam: felt rushed."
+    docs = [_Doc("d1", content)]
+
+    app, status = resolve_and_anchor(
+        "values autonomy",
+        docs,
+        code_id="C1",
+        codebook_version=1,
+        confidence=0.8,
+    )
+
+    assert status is MatchStatus.UNIQUE
+    assert app is not None
+    assert app.speaker == "Alex"
+
+
+def test_resolve_and_anchor_prefers_containing_segment_speaker_over_prefix():
+    from qc_clean.core.grounding import MatchStatus, resolve_and_anchor
+    from qc_clean.schemas.domain import Segment
+
+    content = "Source Label: values autonomy."
+    docs = [_Doc("d1", content)]
+    start = content.index("values autonomy")
+    end = start + len("values autonomy")
+    segments = [
+        Segment(
+            doc_id="d1",
+            index=0,
+            start_char=start,
+            end_char=end,
+            speaker="Segment Speaker",
+            text="values autonomy",
+        )
+    ]
+
+    app, status = resolve_and_anchor(
+        "values autonomy",
+        docs,
+        code_id="C1",
+        codebook_version=1,
+        confidence=0.8,
+        segments=segments,
+    )
+
+    assert status is MatchStatus.UNIQUE
+    assert app is not None
+    assert app.speaker == "Segment Speaker"
+
+
+def test_resolve_and_anchor_does_not_infer_speaker_from_plain_prefix_text():
+    from qc_clean.core.grounding import MatchStatus, resolve_and_anchor
+
+    content = "The interviewer notes values autonomy as important."
+    docs = [_Doc("d1", content)]
+
+    app, status = resolve_and_anchor(
+        "values autonomy",
+        docs,
+        code_id="C1",
+        codebook_version=1,
+        confidence=0.8,
+    )
+
+    assert status is MatchStatus.UNIQUE
+    assert app is not None
+    assert app.speaker is None
+
+
 def test_resolve_and_anchor_leaves_speaker_empty_without_containing_segment():
     from qc_clean.core.grounding import MatchStatus, resolve_and_anchor
     from qc_clean.schemas.domain import Segment
 
-    content = "Alex: values autonomy."
+    content = "Speakerless values autonomy."
     docs = [_Doc("d1", content)]
     segments = [
         Segment(

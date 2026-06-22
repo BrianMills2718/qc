@@ -37,6 +37,7 @@ DEFAULT_FUZZY_MIN_RATIO = 0.9
 DEFAULT_FUZZY_MIN_TOKENS = 4
 DEFAULT_FUZZY_MIN_TOKEN_RATIO = 0.75
 DEFAULT_FUZZY_MAX_TOKEN_RATIO = 1.35
+_SOURCE_PREFIX_SPEAKER_RE = re.compile(r"\s*([A-Z][A-Za-z0-9 ._'\-]{0,60}?):\s*")
 
 
 class MatchStatus(str, Enum):
@@ -288,6 +289,30 @@ def _speaker_for_containing_segment(
     return None
 
 
+def _document_content(doc_id: str, documents: Sequence) -> Optional[str]:
+    """Return document content for *doc_id* from a document-like sequence."""
+    for doc in documents:
+        if getattr(doc, "id", None) == doc_id:
+            return getattr(doc, "content", None)
+    return None
+
+
+def _speaker_from_source_prefix(
+    content: str | None,
+    start_char: int,
+) -> Optional[str]:
+    """Return explicit same-line ``Speaker:`` prefix before an anchored span."""
+    if content is None or start_char < 0 or start_char > len(content):
+        return None
+    line_start = content.rfind("\n", 0, start_char) + 1
+    prefix = content[line_start:start_char]
+    match = _SOURCE_PREFIX_SPEAKER_RE.fullmatch(prefix)
+    if match is None:
+        return None
+    speaker = match.group(1).strip()
+    return speaker or None
+
+
 def resolve_and_anchor(
     quote,
     documents,
@@ -309,16 +334,18 @@ def resolve_and_anchor(
     m = resolve_against_docs(quote, documents)
     if m.status is not MatchStatus.UNIQUE:
         return None, m.status
+    segment_speaker = _speaker_for_containing_segment(
+        m.doc_id,
+        m.start_char,
+        m.end_char,
+        segments,
+    )
     return CodeApplication(
         code_id=code_id,
         doc_id=m.doc_id,
         quote_text=quote,
-        speaker=_speaker_for_containing_segment(
-            m.doc_id,
-            m.start_char,
-            m.end_char,
-            segments,
-        ),
+        speaker=segment_speaker
+        or _speaker_from_source_prefix(_document_content(m.doc_id, documents), m.start_char),
         start_char=m.start_char,
         end_char=m.end_char,
         quote_hash=m.quote_hash,
