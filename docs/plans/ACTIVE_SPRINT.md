@@ -22,17 +22,18 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #153: add API/MCP invalid project-ID boundary regression tests
-   and only patch production behavior if a boundary leak is exposed.
+1. Select the next highest-value documented roadmap lane from
+   `docs/PROJECT_THEORY_AND_GOALS.md`, `docs/EVALUATION_HARNESS.md`, and the
+   remaining `CLAUDE.md` maintenance follow-ups.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Plan #153
-(`docs/plans/BOUNDARY_INVALID_PROJECT_ID_TESTS.md`) targets the documented
-maintenance gap for invalid project-ID API/MCP boundary tests. The persistence
-store already rejects traversal-like IDs; this slice locks representative
-agent-facing API and MCP surfaces to explicit 404/error responses without
-sanitizing invalid IDs into existing project files.
+**Completed checkpoint:** Representative API and MCP project-ID boundaries now
+have regression tests for invalid/traversal-like IDs. API read/mutation
+surfaces return 404 without aliasing to an existing project, MCP read/export
+tools return JSON error payloads, and MCP delete does not delete valid projects
+when given invalid IDs. Existing production behavior already satisfied the
+tests, so no boundary implementation change was needed.
 
 **Completed checkpoint:** Project exports now have an explicit overwrite
 policy: default overwrite remains for compatibility, while

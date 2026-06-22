@@ -6,12 +6,12 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 153 | Boundary invalid project ID tests | Medium | Planned | `BOUNDARY_INVALID_PROJECT_ID_TESTS.md` |
 
 ## Completed Plans
 
 | Name | Outcome | Record |
 |------|---------|--------|
+| Boundary invalid project ID tests | API/MCP regression tests now prove invalid/traversal-like project IDs return explicit not-found/error responses without aliasing to or deleting existing project files | `completed/BOUNDARY_INVALID_PROJECT_ID_TESTS.md` |
 | Explicit export overwrite policy | Project exports now keep default overwrite behavior for compatibility while supporting `--no-overwrite` / `overwrite=False` guards that fail before clobbering existing JSON/CSV/Markdown/QDPX artifacts | `completed/EXPORT_OVERWRITE_POLICY.md` |
 | Corpus-scope adequacy scorecard | Phase 0 now reports deterministic corpus-scope status, field completeness, document/claim counts, and status warnings without claiming sampling validity | `completed/CORPUS_SCOPE_ADEQUACY_SCORECARD.md` |
 | INV-9 claim-anchor coverage scorecard | Phase 0 now reports deterministic claim-anchor coverage counts/rates/breakdowns for first-class ledger rows without claiming validity or adjudication evidence | `completed/INV9_CLAIM_ANCHOR_COVERAGE_SCORECARD.md` |

@@ -135,3 +135,31 @@ Process criteria:
 
 This slice is coverage-first. It should not change project-ID syntax unless a
 surface test demonstrates a real boundary leak.
+
+## Closeout Notes
+
+Completed 2026-06-22.
+
+Outcome: Representative API and MCP project-ID boundaries now have regression
+tests proving invalid/traversal-like IDs return explicit 404/error responses
+and do not sanitize into existing project files. MCP delete coverage proves
+invalid IDs do not delete valid saved projects. The existing persistence and
+surface behavior already satisfied the tests, so no production boundary changes
+were required.
+
+Checkpoints:
+
+- Plan checkpoint: `f441d90`
+- Implementation checkpoint: `aa68b7a`
+
+Verification:
+
+- `python -m pytest tests/test_review_api.py -q` (`35 passed`)
+- `python -m pytest tests/test_mcp_server.py -q` (`72 passed`)
+- `python -m pytest tests/test_project_store.py -q` (`12 passed`)
+- `make docs-check`
+- `make check` (`1103 passed, 1 skipped, 8 deselected`)
+
+Caveat: this is regression coverage for representative API/MCP project-ID
+boundaries. It does not expand the project-ID syntax or implement a central
+FastAPI path-parameter validator.
