@@ -22,8 +22,9 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Select and plan the next highest-value evaluation-harness lane from the
-   ranked roadmap.
+1. Execute Plan #126 (`CONFIDENCE_CALIBRATION_PROTOCOL_PACKAGE.md`): add a
+   pre-evaluation protocol validator for confidence-calibration benchmark
+   metadata.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 

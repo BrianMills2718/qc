@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 126 | Confidence calibration protocol package | High | Planned | `CONFIDENCE_CALIBRATION_PROTOCOL_PACKAGE.md` |
 
 ## Completed Plans
 
