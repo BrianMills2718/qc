@@ -6,12 +6,12 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 200 | Claim ledger anchor detail read surfaces | High | In Progress | `CLAIM_LEDGER_ANCHOR_DETAIL_READ_SURFACES.md` |
 
 ## Completed Plans
 
 | Name | Outcome | Record |
 |------|---------|--------|
+| Claim ledger anchor detail read surfaces | API/MCP claim-ledger read rows now include bounded supporting/contrary anchor detail payloads, and CLI `project claims --show-anchors` prints bounded anchor details while preserving compact default output | `completed/CLAIM_LEDGER_ANCHOR_DETAIL_READ_SURFACES.md` |
 | Negative case review anchor details | API/MCP/browser claim-review rows now expose bounded supporting/contrary anchor details so negative-case review can inspect anchored contrary evidence without changing claim-decision semantics or claiming expert adjudication/D7 validity | `completed/NEGATIVE_CASE_REVIEW_ANCHOR_DETAILS.md` |
 | QC CLI governance lint surfaces | `qc_cli.py` now wraps scope-phrasing and prompt-override governance lint scripts through top-level commands without changing lint semantics or claiming sampling adequacy/prompt-injection robustness/model-obedience evidence | `completed/QC_CLI_GOVERNANCE_LINT_SURFACES.md` |
 | QC CLI export audit surfaces | `qc_cli.py` now wraps export-audit manifest writing, manifest verification, publish preflight, event-log verification, SQLite mirroring, and SQLite mirror verification scripts through top-level commands without duplicating local audit logic or claiming signing/append-only/external tamper evidence | `completed/QC_CLI_EXPORT_AUDIT_SURFACES.md` |

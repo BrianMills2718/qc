@@ -1,10 +1,43 @@
 # Plan #200: Claim Ledger Anchor Detail Read Surfaces
 
-**Status:** In Progress
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Negative Case Review Anchor Details
 **Blocks:** INV-9/INV-10 agent-drivable claim evidence inspection
+
+---
+
+## Outcome
+
+Completed 2026-06-22. General claim-ledger read surfaces now expose bounded
+anchor details without requiring review mode:
+
+- API `/projects/{project_id}/claims` rows include supporting/contrary anchor
+  counts plus bounded detail payloads.
+- MCP `qc_get_claims(project_id)` rows include the same bounded detail payloads.
+- CLI `project claims --show-anchors` prints bounded supporting/contrary anchor
+  details; default `project claims` output remains compact.
+
+This is evidence visibility only. It does not validate claim truth, add expert
+adjudication, create held-out D7 evidence, prove disconfirmation validity, or
+support SOTA claims.
+
+## Verification
+
+- TDD red state observed:
+  `python -m pytest tests/test_review_api.py tests/test_mcp_server.py tests/test_project_commands.py -q`
+  failed on missing API/MCP anchor details and missing `--show-anchors`.
+- Focused tests passed:
+  `python -m pytest tests/test_review_api.py tests/test_mcp_server.py tests/test_project_commands.py -q`
+  (`188 passed`).
+- Focused Ruff passed:
+  `python -m ruff check qc_clean/plugins/api/api_server.py qc_mcp_server.py qc_clean/core/cli/commands/project.py qc_cli.py tests/test_review_api.py tests/test_mcp_server.py tests/test_project_commands.py`.
+- Docs gate passed: `make docs-check`.
+- Full gate passed: `make check` (`1265 passed, 1 skipped, 8 deselected`;
+  Ruff and docs checks passed; type check remains not configured).
+- Implementation commit pushed:
+  `d6be36c6 [Plan: CLAIM_ANCHORS] Expose claim read anchor details`.
 
 ---
 
@@ -128,23 +161,23 @@ create a cross-project boundary, registry entry, or new evaluation capability.
 
 Feature-level criteria:
 
-- [ ] API `/projects/{project_id}/claims` rows include supporting/contrary
+- [x] API `/projects/{project_id}/claims` rows include supporting/contrary
   anchor counts and bounded detail payloads.
-- [ ] MCP `qc_get_claims` rows include the same bounded detail payloads.
-- [ ] CLI `project claims` default output remains compact.
-- [ ] CLI `project claims --show-anchors` prints bounded supporting/contrary
+- [x] MCP `qc_get_claims` rows include the same bounded detail payloads.
+- [x] CLI `project claims` default output remains compact.
+- [x] CLI `project claims --show-anchors` prints bounded supporting/contrary
   anchor details with doc ID, offsets, hash, optional application ID, and quote
   text.
-- [ ] Docs state this is evidence visibility, not claim-validity evidence,
+- [x] Docs state this is evidence visibility, not claim-validity evidence,
   expert adjudication, D7 evidence, or SOTA.
 
 Process criteria:
 
-- [ ] Required focused tests pass.
-- [ ] Focused Ruff passes.
-- [ ] `make docs-check` passes.
-- [ ] `make check` passes or any failure is documented with evidence.
-- [ ] Verified work is committed and pushed.
+- [x] Required focused tests pass.
+- [x] Focused Ruff passes.
+- [x] `make docs-check` passes.
+- [x] `make check` passes or any failure is documented with evidence.
+- [x] Verified work is committed and pushed.
 
 ---
 
@@ -158,5 +191,5 @@ Process criteria:
 
 ## Notes
 
-Use the existing bounded helper. Do not add unbounded claim, document, or
-retrieved-candidate dumps to any read surface.
+Used the existing bounded helper. No unbounded claim, document, or
+retrieved-candidate dumps were added to any read surface.

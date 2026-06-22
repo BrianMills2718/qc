@@ -26,13 +26,16 @@ highest-value documented lane.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Plan #200
-`CLAIM_LEDGER_ANCHOR_DETAIL_READ_SURFACES.md` is active. Extend bounded
+**Active checkpoint:** No implementation plan is active. Select and plan the
+next deterministic roadmap lane before editing code.
+
+**Completed checkpoint:** Plan #200
+`completed/CLAIM_LEDGER_ANCHOR_DETAIL_READ_SURFACES.md` extended bounded
 supporting/contrary anchor details from review rows to general claim-ledger
 read surfaces: API `/projects/{project_id}/claims`, MCP `qc_get_claims`, and
-opt-in CLI `project claims --show-anchors`. This is evidence visibility only,
-not claim-validity evidence, expert adjudication, held-out D7 evidence, or a
-SOTA claim.
+opt-in CLI `project claims --show-anchors`. It is evidence visibility only,
+not claim-validity evidence, expert adjudication, held-out D7 evidence,
+semantic disconfirmation validity, or a SOTA claim.
 
 **Completed checkpoint:** Plan #199
 `completed/NEGATIVE_CASE_REVIEW_ANCHOR_DETAILS.md` added bounded
