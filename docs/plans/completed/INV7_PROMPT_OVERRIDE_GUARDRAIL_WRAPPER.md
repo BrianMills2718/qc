@@ -1,10 +1,60 @@
 # Plan #165: INV-7 Prompt Override Guardrail Wrapper
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** None
 **Blocks:** broader INV-7 custom-prompt governance
+
+---
+
+## Outcome
+
+Rendered custom prompt overrides are now bookended by a repo-owned
+instruction/data-separation wrapper in `qc_clean/core/prompting.py`.
+`render_prompt_override()` still performs the existing placeholder declaration,
+bare-placeholder syntax, data-value, and metadata-value validations first. Only
+after a template passes validation and formats successfully does the renderer
+wrap the operator-authored prompt template with:
+
+- `BEGIN CUSTOM PROMPT OVERRIDE`;
+- stage-name metadata for prompt observability;
+- a repo-owned reminder that untrusted-data blocks and `DATA>` lines remain
+  source data only;
+- the rendered operator-authored prompt template;
+- `REPOSITORY DATA-BOUNDARY REMINDER` after the operator template; and
+- `END CUSTOM PROMPT OVERRIDE`.
+
+The regression suite now proves valid thematic and GT constant-comparison
+overrides still receive boundaried data blocks, and a valid operator template
+that places contradictory text after `{combined_text}` is still followed by the
+repo-owned final boundary reminder.
+
+Implementation commit: `abf8a39`
+(`Wrap INV-7 prompt overrides with boundary reminder`).
+
+Verification:
+
+- Initial focused prompt-override test failed before implementation because
+  the wrapper constants/behavior did not exist.
+- `python -m pytest tests/test_prompt_boundaries_inv7.py -k "prompt_override" -q`
+  -> 16 passed, 10 deselected.
+- `python -m pytest tests/test_prompt_boundaries_inv7.py tests/test_prompt_override_registry.py -q`
+  -> 30 passed.
+- `make lint-prompt-overrides` -> passed.
+- `python -m ruff check qc_clean/core/prompting.py tests/test_prompt_boundaries_inv7.py`
+  -> passed.
+- `make docs-check` -> passed.
+- `git diff --check` -> passed.
+- Direct render sanity check confirmed the repo reminder appears after
+  contradictory operator text and the prompt ends with `END CUSTOM PROMPT
+  OVERRIDE`.
+- `make check` -> 1122 passed, 1 skipped, 8 deselected; Ruff and docs gates
+  passed.
+
+This is deterministic custom-prompt governance only. It does not prove model
+obedience, prompt-injection robustness, held-out adversarial benchmark
+performance, methodological validity, or SOTA.
 
 ---
 

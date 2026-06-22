@@ -6,12 +6,12 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 165 | INV-7 prompt override guardrail wrapper | High | Planned | `INV7_PROMPT_OVERRIDE_GUARDRAIL_WRAPPER.md` |
 
 ## Completed Plans
 
 | Name | Outcome | Record |
 |------|---------|--------|
+| INV-7 prompt override guardrail wrapper | Rendered custom prompt overrides are now bookended by a repo-owned instruction/data-separation wrapper with a final data-boundary reminder after operator-authored template text | `completed/INV7_PROMPT_OVERRIDE_GUARDRAIL_WRAPPER.md` |
 | INV-7 committed live canary | A protocol-guarded built-in live canary artifact is now committed and scorecarded, while remaining explicitly non-evidentiary for robustness, validity, held-out, model-obedience, or SOTA claims | `completed/INV7_COMMITTED_LIVE_CANARY.md` |
 | MCP export audit SQLite mirror | MCP JSON/Markdown exports can now write confined SQLite mirrors for audit event logs when explicitly enabled with `audit_event_db=True` | `completed/MCP_EXPORT_AUDIT_SQLITE_MIRROR.md` |
 | Export audit SQLite workflow integration | Local export-audit scripts, Make targets, and `project export` can now update the optional SQLite event mirror whenever JSONL audit logging is explicitly enabled | `completed/EXPORT_AUDIT_SQLITE_WORKFLOW_INTEGRATION.md` |

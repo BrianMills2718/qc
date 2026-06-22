@@ -22,20 +22,26 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #165: add a repo-owned guardrail wrapper around rendered INV-7
-   custom prompt overrides.
+1. Select and plan the next deterministic, high-value roadmap lane.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Plan #165
-(`docs/plans/INV7_PROMPT_OVERRIDE_GUARDRAIL_WRAPPER.md`) adds a repo-owned
-wrapper around every rendered custom prompt override. The wrapper preserves the
-operator-authored template inside a stable boundary and appends a final
-instruction/data-separation reminder after arbitrary operator-authored text.
-This is deterministic custom-prompt governance only; it is not
-prompt-injection robustness evidence, model-obedience proof, held-out
-adversarial benchmark evidence, methodological-validity evidence, or a SOTA
-claim.
+**Active checkpoint:** Select the next deterministic roadmap lane from the
+remaining documented gaps. Candidate lanes include an INV-11 full higher-order
+recompute slice, further INV-7 custom-prompt governance beyond deterministic
+wrapping, or another protocol/accounting lane that can be verified without
+fabricating external gold labels, expert panels, theoretical sampling evidence,
+or SOTA claims.
+
+**Completed checkpoint:** Rendered custom prompt overrides are now bookended by
+a repo-owned instruction/data-separation wrapper. The wrapper preserves the
+operator-authored template inside a stable boundary and appends
+`REPOSITORY DATA-BOUNDARY REMINDER` after arbitrary operator-authored text.
+Regression tests cover thematic and GT override prompts plus a contradictory
+operator-template suffix. This is deterministic custom-prompt governance only;
+it is not prompt-injection robustness evidence, model-obedience proof,
+held-out/adversarial benchmark evidence, methodological-validity evidence, or a
+SOTA claim.
 
 **Completed checkpoint:** A protocol-guarded built-in INV-7 live canary
 artifact set is committed at
