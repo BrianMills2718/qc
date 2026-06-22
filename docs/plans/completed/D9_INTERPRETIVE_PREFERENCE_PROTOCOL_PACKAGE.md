@@ -1,6 +1,6 @@
 # Plan #123: D9 Interpretive Preference Protocol Package
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** D9 interpretive-preference scorecard and non-inferiority margin substrate
@@ -74,16 +74,16 @@ Internal protocol validation only; no cross-project boundary is created.
 
 ### Capability Validation
 
-- [ ] Valid schema_version=1 held-out D9 protocols pass validation.
-- [ ] Held-out protocols require prompt/model freeze, contamination check,
+- [x] Valid schema_version=1 held-out D9 protocols pass validation.
+- [x] Held-out protocols require prompt/model freeze, contamination check,
   pre-evaluation registration, blinding, project-state hash, and comparison
   artifact hash.
-- [ ] Corpus/project/comparison/outcome hashes are valid SHA-256 values.
-- [ ] Evaluator plan, target criteria, target surfaces, planned case count, and
+- [x] Corpus/project/comparison/outcome hashes are valid SHA-256 values.
+- [x] Evaluator plan, target criteria, target surfaces, planned case count, and
   non-inferiority margin are non-empty/in range.
-- [ ] Success criteria cover configured D9 outcome metrics.
-- [ ] CLI emits machine-readable JSON for valid and invalid protocols.
-- [ ] Make target routes to the CLI.
+- [x] Success criteria cover configured D9 outcome metrics.
+- [x] CLI emits machine-readable JSON for valid and invalid protocols.
+- [x] Make target routes to the CLI.
 
 ---
 
@@ -145,22 +145,22 @@ Internal protocol validation only; no cross-project boundary is created.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] D9 preference protocols can be validated before preference outcomes are
+- [x] D9 preference protocols can be validated before preference outcomes are
   collected or scored.
-- [ ] Held-out D9 protocols enforce freeze/contamination/registration/blinding
+- [x] Held-out D9 protocols enforce freeze/contamination/registration/blinding
   gates and required hashes.
-- [ ] Protocols carry non-inferiority margin metadata as pre-evaluation
+- [x] Protocols carry non-inferiority margin metadata as pre-evaluation
   process data.
-- [ ] CLI and Make target emit machine-readable success/failure.
-- [ ] Docs state the validator is process/provenance only.
+- [x] CLI and Make target emit machine-readable success/failure.
+- [x] Docs state the validator is process/provenance only.
 
 > Process criteria:
-- [ ] Required focused tests pass.
-- [ ] Focused Ruff check passes.
-- [ ] `make docs-check` passes.
-- [ ] Full `make check` passes or any failure is documented with evidence.
-- [ ] Type-check status is reported.
-- [ ] Verified work is committed and pushed.
+- [x] Required focused tests pass.
+- [x] Focused Ruff check passes.
+- [x] `make docs-check` passes.
+- [x] Full `make check` passes or any failure is documented with evidence.
+- [x] Type-check status is reported.
+- [x] Verified work is committed and pushed.
 
 ---
 
@@ -174,6 +174,36 @@ Internal protocol validation only; no cross-project boundary is created.
   — Status: DEFERRED | Decide in the score-time guard lane.
 
 ---
+
+## Outcome
+
+Implemented in `8835703`
+(`[Plan: D9_INTERPRETIVE_PREFERENCE_PROTOCOL_PACKAGE] Add D9 protocol validator`).
+The repo now has `qc_clean/core/d9_interpretive_preference_protocol.py`,
+`scripts/validate_d9_interpretive_preference_protocol.py`, and
+`make validate-d9-interpretive-preference-protocol PROTOCOL=...`. The
+validator checks schema_version=1 D9 protocol metadata, held-out prompt/model
+freeze, contamination, pre-evaluation registration, blinding, corpus/state/
+comparison-artifact hashes, evaluator plan, target criteria/surfaces, planned
+case count, non-inferiority margin, optional outcome-file hash locks, and
+success criteria. Documentation states this is process/provenance only, not
+blind expert-parity evidence, interpretive-depth evidence,
+methodological-validity evidence, or SOTA evidence.
+
+Verification evidence:
+
+- TDD red before implementation: `python -m pytest tests/test_d9_interpretive_preference_protocol.py -q`
+  failed at collection with
+  `ModuleNotFoundError: No module named 'qc_clean.core.d9_interpretive_preference_protocol'`.
+- `python -m pytest tests/test_d9_interpretive_preference_protocol.py -q`
+  - 6 passed.
+- `python -m ruff check qc_clean/core/d9_interpretive_preference_protocol.py scripts/validate_d9_interpretive_preference_protocol.py tests/test_d9_interpretive_preference_protocol.py`
+  - all checks passed.
+- `make -n validate-d9-interpretive-preference-protocol PROTOCOL=protocol.json`
+  - routed to `python scripts/validate_d9_interpretive_preference_protocol.py protocol.json`.
+- `make docs-check` - passed.
+- `make check` - 993 passed, 1 skipped, 8 deselected; Ruff and docs checks
+  passed; type check is not yet configured.
 
 ## Notes
 

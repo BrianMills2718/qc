@@ -22,11 +22,21 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #123 (`D9_INTERPRETIVE_PREFERENCE_PROTOCOL_PACKAGE.md`): add a
-   standalone pre-evaluation protocol validator for D9 blind preference
-   evaluation metadata.
+1. Select and create the next highest-value evaluation-harness or invariant
+   lane from `docs/PROJECT_THEORY_AND_GOALS.md` and `docs/EVALUATION_HARNESS.md`.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
+
+**Completed checkpoint:** D9 interpretive-preference protocols can now be
+validated with `make validate-d9-interpretive-preference-protocol PROTOCOL=...`
+/ `scripts/validate_d9_interpretive_preference_protocol.py`. The validator
+checks schema_version=1 protocol metadata, held-out prompt/model freeze,
+contamination, pre-evaluation registration, blinding, corpus/state/comparison
+artifact hashes, evaluator plan, target criteria/surfaces, planned case count,
+non-inferiority margin, optional outcome-file hash locks, and success criteria.
+This is process/provenance metadata only, not blind expert-parity evidence,
+interpretive-depth evidence, methodological-validity evidence, or SOTA
+evidence.
 
 **Completed checkpoint:** `make bench` now accepts `D8_PROTOCOL=...` and
 `scripts/bench_phase0.py --d8-gt-fidelity-protocol-file ...` to enforce D8
