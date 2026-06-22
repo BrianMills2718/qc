@@ -5,7 +5,7 @@ import json
 import sys
 
 import qc_cli
-from scripts import bench_phase0
+from scripts import bench_phase0, run_phase0_benchmark_package
 from qc_clean.core.persistence.project_store import ProjectStore
 from qc_clean.schemas.domain import Corpus, Document, ProjectState
 
@@ -132,6 +132,28 @@ def test_qc_cli_bench_forwards_all_phase0_flags(monkeypatch):
         "--artifact-dir",
         "artifacts",
     ]
+
+
+def test_qc_cli_bench_package_forwards_manifest_path(monkeypatch):
+    captured = {}
+
+    def fake_main(argv):
+        captured["argv"] = argv
+        return 0
+
+    monkeypatch.setattr(run_phase0_benchmark_package, "main", fake_main)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "qc_cli.py",
+            "bench-package",
+            "phase0_package.json",
+        ],
+    )
+
+    assert qc_cli.main() == 0
+    assert captured["argv"] == ["phase0_package.json"]
 
 
 def test_qc_cli_bench_forwards_files_and_output(tmp_path, monkeypatch, capsys):

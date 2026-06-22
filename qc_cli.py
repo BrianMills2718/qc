@@ -42,6 +42,7 @@ Examples:
   qc_cli project create --name "My Study" --methodology grounded_theory
   qc_cli project run <project_id>
   qc_cli bench <project_id>
+  qc_cli bench-package phase0_package.json
   qc_cli project export <project_id> --format markdown --output-file report.md
   qc_cli status --server
         """
@@ -202,6 +203,17 @@ Examples:
     bench_parser.add_argument(
         '--artifact-dir',
         help='Optional root directory for a versioned Phase 0 benchmark artifact package'
+    )
+
+    # Bench package command
+    bench_package_parser = subparsers.add_parser(
+        'bench-package',
+        help='Run evaluation-harness Phase 0 from a package manifest',
+        description='Run the deterministic Phase 0 scorecard from a strict package manifest',
+    )
+    bench_package_parser.add_argument(
+        'package_file',
+        help='Path to the Phase 0 benchmark package JSON manifest',
     )
 
     # Server command
@@ -403,6 +415,8 @@ def main() -> int:
             return handle_status_command(args)
         elif args.command == 'bench':
             return handle_bench_command(args)
+        elif args.command == 'bench-package':
+            return handle_bench_package_command(args)
         elif args.command == 'server':
             return handle_server_command(args)
         elif args.command == 'project':
@@ -485,6 +499,13 @@ def handle_bench_command(args) -> int:
     if args.artifact_dir:
         argv.extend(["--artifact-dir", args.artifact_dir])
     return bench_phase0.main(argv)
+
+
+def handle_bench_package_command(args) -> int:
+    """Run a Phase 0 benchmark package through the canonical CLI."""
+    from scripts import run_phase0_benchmark_package
+
+    return run_phase0_benchmark_package.main([args.package_file])
 
 
 if __name__ == "__main__":

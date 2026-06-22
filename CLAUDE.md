@@ -184,6 +184,7 @@ make verify-export-audit-log LOG=export_audit_events.jsonl
 python qc_cli.py bench <project_id>                                     # Phase 0 scorecard (same engine as make bench)
 python qc_cli.py bench <project_id> --confidence-calibration-protocol-file protocol.json --confidence-calibration-file calibration.json  # Same Phase 0 file/protocol flags as scripts/bench_phase0.py
 python qc_cli.py bench <project_id> --artifact-dir benchmark_results    # Write versioned Phase 0 scorecard package
+python qc_cli.py bench-package phase0_package.json                      # Run strict Phase 0 package manifest
 
 # Run pipeline on a project (local, no server needed)
 python qc_cli.py project run <project_id>                          # run full pipeline
@@ -439,6 +440,7 @@ make check              # Run deterministic tests + lint + docs checks
 make status             # Show git status
 make bench ID=<project_id>              # Phase 0 scorecard (D1-D10 local accounting substrates)
 python qc_cli.py bench <project_id>     # Same Phase 0 scorecard through the canonical CLI; mirrors scripts/bench_phase0.py file/protocol flags
+python qc_cli.py bench-package phase0_package.json  # Run a strict Phase 0 package manifest through the canonical CLI
 make validate-d4-codebook-quality-protocol PROTOCOL=protocol.json  # Validate pre-evaluation D4 rubric protocol metadata
 make d4-codebook-quality-preflight PROTOCOL=protocol.json QUALITY=quality.json  # Preflight D4 result file against protocol
 make bench ID=<project_id> D4_PROTOCOL=protocol.json CODEBOOK_QUALITY=quality.json  # Guard D4 scoring with protocol preflight
