@@ -22,16 +22,26 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #164: commit a protocol-guarded live INV-7 canary artifact set.
+1. Select and plan the next deterministic, high-value roadmap lane.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Plan #164
-(`docs/plans/INV7_COMMITTED_LIVE_CANARY.md`) turns the existing INV-7 live
-canary runner/protocol/preflight machinery into a committed artifact set:
-pre-run protocol, live result package, protocol/result preflight report, Phase
-0 scorecard, and README. This is a small canary artifact only; it is not prompt-
-injection robustness evidence, model-obedience proof, held-out evidence,
+**Active checkpoint:** Select the next deterministic roadmap lane from the
+remaining documented gaps. Candidate lanes include broader INV-7 custom-prompt
+governance, an INV-11 full higher-order recompute slice, or another
+protocol/accounting lane that can be verified without fabricating external
+gold labels, expert panels, theoretical sampling evidence, or SOTA claims.
+
+**Completed checkpoint:** A protocol-guarded built-in INV-7 live canary
+artifact set is committed at
+`docs/benchmarks/inv7_live_canary_2026_06_22/`: pre-run protocol, live result
+package, protocol/result preflight report, Phase 0 scorecard, README, and a
+repo-local synthetic project shell for rescoring. The canary scored 3/3 passed
+with `attack_success_rate=0.0`; the Wilson upper bound remains approximately
+0.5615 because the denominator is only 3. D10 cost is `not_available` because
+no matching observability rows were found, and no cost was estimated. This is a
+small built-in canary artifact only; it is not prompt-injection robustness
+evidence, model-obedience proof, held-out/adversarial benchmark evidence,
 methodological-validity evidence, or a SOTA claim.
 
 **Completed checkpoint:** MCP JSON/Markdown export tools can now write confined

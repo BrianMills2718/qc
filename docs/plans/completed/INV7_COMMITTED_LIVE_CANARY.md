@@ -1,10 +1,69 @@
 # Plan #164: INV-7 Committed Live Canary
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** None
 **Blocks:** broader prompt-injection benchmark evidence
+
+---
+
+## Outcome
+
+Committed a protocol-guarded built-in INV-7 live canary artifact set at
+`docs/benchmarks/inv7_live_canary_2026_06_22/`:
+
+- `protocol.json` - registered pre-run protocol metadata with exact built-in
+  fixture prompt hashes.
+- `result.json` - strict `schema_version=1` live result package for
+  `gpt-5-mini`, split `canary`, trace
+  `qualitative_coding/inv7-live-canary-2026-06-22`, and `max_budget=0.25`.
+- `preflight.json` - protocol/result preflight report with `status="pass"`.
+- `scorecard.json` - Phase 0 local scorecard for the canary package.
+- `README.md` - reviewer-facing commands, result summary, and claim caveats.
+- `projects/inv7_canary_project.json` - minimal repo-local synthetic project
+  shell used only to make Phase 0 scoring reproducible from committed files.
+
+The live canary run produced 3 fixture outcomes, all passing:
+`attack_success_rate=0.0`; the Wilson 95% upper bound is approximately
+`0.5615` because the denominator is only 3. D10 cost remains
+`not_available` because no matching `llm_calls` rows were found for the exact
+trace selector; no cost was estimated.
+
+Implementation also fixed the live runner package contract: generated live
+result JSON no longer persists derived summary fields
+(`total_fixtures`, `failed`, `passed`) that the strict package schema forbids,
+while the CLI still computes and prints those counts. Phase 0 now accepts
+`--projects-dir` / `PROJECTS_DIR=...` so committed artifact packages can carry
+repo-local synthetic project stores without relying on user-local project
+state.
+
+Implementation commit: `2b23cbc` (`Commit INV-7 live canary artifact`).
+
+Verification:
+
+- `make validate-inv7-live-protocol PROTOCOL=docs/benchmarks/inv7_live_canary_2026_06_22/protocol.json`
+  -> valid protocol, 3 fixtures.
+- `make validate-inv7-package PACKAGE=docs/benchmarks/inv7_live_canary_2026_06_22/result.json`
+  -> valid package, 3 passed, 0 failed.
+- `make inv7-live-preflight PROTOCOL=docs/benchmarks/inv7_live_canary_2026_06_22/protocol.json PACKAGE=docs/benchmarks/inv7_live_canary_2026_06_22/result.json`
+  -> `status="pass"`.
+- `python scripts/bench_phase0.py inv7_canary_project --projects-dir docs/benchmarks/inv7_live_canary_2026_06_22/projects --prompt-injection-file docs/benchmarks/inv7_live_canary_2026_06_22/result.json --trace-id qualitative_coding/inv7-live-canary-2026-06-22 --output /tmp/inv7_scorecard_check.json`
+  -> byte-identical scorecard to the committed artifact.
+- Focused tests:
+  `python -m pytest tests/test_inv7_fixture_runner.py tests/test_inv7_prompt_injection_package.py tests/test_inv7_live_protocol.py tests/test_inv7_live_preflight.py tests/test_bench_phase0_script.py -k "inv7 or prompt_injection or projects_dir" -q`
+  -> 28 passed, 37 deselected.
+- Targeted Ruff passed for touched Python files.
+- `make docs-check` -> passed.
+- `git diff --check` -> passed.
+- `make check` -> 1121 passed, 1 skipped, 8 deselected; Ruff and docs gates
+  passed.
+
+This is a small built-in canary artifact only. It is not held-out adversarial
+benchmark evidence, prompt-injection robustness evidence, model-obedience
+proof, methodological-validity evidence, or a SOTA claim. Remaining INV-7 work
+is broader custom-prompt threat-model tightening and held-out/adversarial live
+injection evaluation beyond the built-in canary.
 
 ---
 

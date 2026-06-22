@@ -6,12 +6,12 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 164 | INV-7 committed live canary | High | Planned | `INV7_COMMITTED_LIVE_CANARY.md` |
 
 ## Completed Plans
 
 | Name | Outcome | Record |
 |------|---------|--------|
+| INV-7 committed live canary | A protocol-guarded built-in live canary artifact is now committed and scorecarded, while remaining explicitly non-evidentiary for robustness, validity, held-out, model-obedience, or SOTA claims | `completed/INV7_COMMITTED_LIVE_CANARY.md` |
 | MCP export audit SQLite mirror | MCP JSON/Markdown exports can now write confined SQLite mirrors for audit event logs when explicitly enabled with `audit_event_db=True` | `completed/MCP_EXPORT_AUDIT_SQLITE_MIRROR.md` |
 | Export audit SQLite workflow integration | Local export-audit scripts, Make targets, and `project export` can now update the optional SQLite event mirror whenever JSONL audit logging is explicitly enabled | `completed/EXPORT_AUDIT_SQLITE_WORKFLOW_INTEGRATION.md` |
 | Export audit SQLite event mirror | Verified export audit JSONL event logs can now be mirrored into local SQLite and verified there for event shape, hashes, previous links, duplicate hashes, and row ordering | `completed/EXPORT_AUDIT_SQLITE_EVENT_MIRROR.md` |
