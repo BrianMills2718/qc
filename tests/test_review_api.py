@@ -24,6 +24,7 @@ from qc_clean.schemas.domain import (
     PipelineStatus,
     ProjectState,
     Provenance,
+    ClaimAdjudicationStatus,
 )
 
 
@@ -191,6 +192,38 @@ class TestReviewCodesEndpoint:
         assert resp.status_code == 404
 
 
+class TestReviewClaimsEndpoint:
+    def test_returns_claims_for_review(self, client):
+        resp = client.get("/projects/test-project-123/review/claims")
+
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["project_id"] == "test-project-123"
+        assert data["project_name"] == "Test Review Project"
+        assert data["pipeline_status"] == "paused_for_review"
+        assert data["summary"]["claims_count"] == 1
+        assert data["returned"] == 1
+        assert data["total_claims"] == 1
+        claim = data["claims"][0]
+        assert claim["id"] == "claim-review-api"
+        assert claim["kind"] == "code"
+        assert claim["source_stage"] == "thematic_coding"
+        assert claim["support_status"] == "needs_anchor"
+        assert claim["adjudication_status"] == "pending"
+        assert claim["claim_text"] == "Theme A is a code."
+        assert claim["scope"]["code_ids"] == ["C1"]
+        assert claim["origin_object_type"] == "code"
+        assert claim["origin_object_id"] == "C1"
+        assert claim["supporting_anchors"] == 0
+        assert claim["contrary_anchors"] == 0
+        assert claim["revision_history_count"] == 0
+        assert claim["created_by"] == "llm"
+
+    def test_404_for_missing_project(self, client):
+        resp = client.get("/projects/nonexistent/review/claims")
+        assert resp.status_code == 404
+
+
 class TestReviewDecisionsEndpoint:
     def test_submit_decisions(self, client):
         resp = client.post("/projects/test-project-123/review/decisions", json={
@@ -258,6 +291,28 @@ class TestReviewDecisionsEndpoint:
         assert resp.status_code == 200
         state = tmp_store.load("test-project-123")
         assert all(a.id != "A2" for a in state.code_applications)
+
+    def test_claim_decision_persists(self, client, tmp_store):
+        resp = client.post("/projects/test-project-123/review/decisions", json={
+            "decisions": [
+                {
+                    "target_type": "claim",
+                    "target_id": "claim-review-api",
+                    "action": "approve",
+                    "rationale": "Reviewed against source evidence.",
+                },
+            ]
+        })
+
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["applied"] == 1
+        assert data["claims_count"] == 1
+        state = tmp_store.load("test-project-123")
+        claim = state.claims[0]
+        assert claim.adjudication_status == ClaimAdjudicationStatus.RETAINED
+        assert claim.revision_history[-1].action == "approve"
+        assert claim.revision_history[-1].rationale == "Reviewed against source evidence."
 
     def test_empty_decisions(self, client):
         resp = client.post("/projects/test-project-123/review/decisions", json={

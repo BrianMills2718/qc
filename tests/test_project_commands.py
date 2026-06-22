@@ -771,6 +771,7 @@ class TestAPIEndpoints:
             paths = [e["path"] for e in server.endpoints]
             assert "/projects/{project_id}" in paths
             assert "/projects/{project_id}/claims" in paths
+            assert "/projects/{project_id}/review/claims" in paths
             assert "/projects/{project_id}/resume" in paths
         except ImportError:
             pytest.skip("FastAPI not installed")

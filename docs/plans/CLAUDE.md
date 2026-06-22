@@ -6,7 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| #78 | Claim Review API Listing | High | Planned | `CLAIM_REVIEW_API_LISTING.md` |
+| #78 | Claim Review API Listing | High | Implemented | `CLAIM_REVIEW_API_LISTING.md` |
 
 ## Completed Plans
 

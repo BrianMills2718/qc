@@ -1,6 +1,6 @@
 # Plan #78: Claim Review API Listing
 
-**Status:** Planned
+**Status:** Implemented
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Plan #4 first-class claim ledger; Plan #5 claim review decisions
@@ -108,20 +108,26 @@ capability or claim expert adjudication.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] `GET /projects/{project_id}/review/claims` returns claim review rows with
+- [x] `GET /projects/{project_id}/review/claims` returns claim review rows with
   status, scope, anchor counts, and revision count.
-- [ ] Missing projects return HTTP 404.
-- [ ] Existing `/projects/{project_id}/review/decisions` can persist claim
+- [x] Missing projects return HTTP 404.
+- [x] Existing `/projects/{project_id}/review/decisions` can persist claim
   approve/reject/modify decisions through the API.
-- [ ] Endpoint list advertises the new route.
-- [ ] Docs state this is an API substrate, not completed browser-native expert
+- [x] Endpoint list advertises the new route.
+- [x] Docs state this is an API substrate, not completed browser-native expert
   adjudication.
 
 > Process criteria:
-- [ ] Required tests pass
-- [ ] Full test suite passes
-- [ ] Type check status is reported
-- [ ] Docs updated
+- [x] Required tests pass
+- [x] Full test suite passes
+- [x] Type check status is reported
+- [x] Docs updated
+
+## Verification
+
+- `python -m pytest tests/test_review_api.py::TestReviewClaimsEndpoint tests/test_review_api.py::TestReviewDecisionsEndpoint::test_claim_decision_persists tests/test_project_commands.py::TestAPIEndpoints::test_get_project_endpoint_registered -q` — 4 passed.
+- `python -m pytest tests/test_review_api.py tests/test_review.py -q` — 41 passed.
+- `make check` — 794 passed, 1 skipped, 8 deselected; lint/docs passed; type check not yet configured.
 
 ---
 
