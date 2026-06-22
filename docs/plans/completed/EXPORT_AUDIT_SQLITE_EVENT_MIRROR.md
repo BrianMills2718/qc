@@ -1,10 +1,51 @@
 # Plan #161: Export Audit SQLite Event Mirror
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Export audit event log
 **Blocks:** future DB-backed audit workflow integration; future signed/external audit anchoring
+
+---
+
+## Outcome
+
+Verified export audit JSONL event logs can now be mirrored into a local SQLite
+database and verified there. The mirror path fails before DB writes when the
+source JSONL log is invalid, stores full event payload JSON plus query-friendly
+columns, is idempotent for already-imported events, and the verifier checks
+event shape, self-hashes, previous-event links, duplicate event hashes, stored
+hash columns, and row ordering.
+
+Agent-drivable surfaces:
+
+- `scripts/mirror_export_audit_event_log_db.py`
+- `scripts/verify_export_audit_event_db.py`
+- `make mirror-export-audit-db LOG=... DB=...`
+- `make verify-export-audit-db DB=...`
+
+This remains local provenance/queryability infrastructure only: it is not
+signing, immutable storage, external timestamping, append-only infrastructure,
+methodological validity evidence, or a full tamper-evident audit log.
+
+Implementation commit: `2832dd9`
+
+## Verification
+
+- TDD red: initial `python -m pytest tests/test_export_audit_event_db.py -q`
+  failed during collection because the SQLite mirror functions did not exist.
+- `python -m pytest tests/test_export_audit_event_log.py tests/test_export_audit_event_db.py -q`
+  -> 7 passed.
+- `python -m ruff check qc_clean/core/export/audit_event_log.py
+  scripts/mirror_export_audit_event_log_db.py
+  scripts/verify_export_audit_event_db.py tests/test_export_audit_event_db.py`
+  -> all checks passed.
+- `make docs-check` passed.
+- `git diff --check` passed.
+- `make help` listed `mirror-export-audit-db` and `verify-export-audit-db`.
+- `make check` -> 1114 passed, 1 skipped, 8 deselected; Ruff and docs-check
+  passed; type check remains not configured.
+- Commit `2832dd9` was pushed to `main`.
 
 ---
 
@@ -112,20 +153,20 @@ cross-project callable capability.
 
 Feature-level criteria:
 
-- [ ] Verified JSONL export audit events can be mirrored into SQLite.
-- [ ] SQLite verification checks event shape, self-hashes, previous-event links,
+- [x] Verified JSONL export audit events can be mirrored into SQLite.
+- [x] SQLite verification checks event shape, self-hashes, previous-event links,
   duplicate event hashes, and row ordering.
-- [ ] Invalid source JSONL logs fail before SQLite import mutates the DB.
-- [ ] Make targets expose the mirror and verifier workflows.
-- [ ] Docs preserve the local-only caveat and do not call this a full
+- [x] Invalid source JSONL logs fail before SQLite import mutates the DB.
+- [x] Make targets expose the mirror and verifier workflows.
+- [x] Docs preserve the local-only caveat and do not call this a full
   tamper-evident audit log.
 
 Process criteria:
 
-- [ ] Required focused tests pass.
-- [ ] `make docs-check` passes.
-- [ ] `make check` passes.
-- [ ] Verified increment is committed and pushed.
+- [x] Required focused tests pass.
+- [x] `make docs-check` passes.
+- [x] `make check` passes.
+- [x] Verified increment is committed and pushed.
 
 ---
 

@@ -6,12 +6,12 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 161 | Export audit SQLite event mirror | High | Planned | `EXPORT_AUDIT_SQLITE_EVENT_MIRROR.md` |
 
 ## Completed Plans
 
 | Name | Outcome | Record |
 |------|---------|--------|
+| Export audit SQLite event mirror | Verified export audit JSONL event logs can now be mirrored into local SQLite and verified there for event shape, hashes, previous links, duplicate hashes, and row ordering | `completed/EXPORT_AUDIT_SQLITE_EVENT_MIRROR.md` |
 | INV-9 relationship evidence anchors | Relationship claims now resolve direct evidence strings into exact supporting anchors when uniquely grounded, while ambiguous/unresolvable evidence remains visibly unanchored | `completed/INV9_RELATIONSHIP_EVIDENCE_ANCHORS.md` |
 | INV-9 code-scoped higher-order claim anchors | Higher-order claims with explicit code scope now inherit existing exact code-application anchors while corpus-level/no-code-scope claims remain visibly unanchored | `completed/INV9_CODE_SCOPED_HIGHER_ORDER_CLAIM_ANCHORS.md` |
 | INV-7 prompt override metadata boundary | Prompt override rendering now rejects structured or multi-line metadata placeholder values before custom prompt rendering | `completed/INV7_PROMPT_OVERRIDE_METADATA_BOUNDARY.md` |

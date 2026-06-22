@@ -22,18 +22,23 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #161: add an optional SQLite mirror/verifier for local export
-   audit event logs.
+1. Select the next highest-value roadmap lane with deterministic acceptance
+   criteria and no live/external evidence dependency.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Plan #161
-(`docs/plans/EXPORT_AUDIT_SQLITE_EVENT_MIRROR.md`) targets the audit-substrate
-roadmap's optional DB-backed event slice. The scope is local and non-default:
-verified JSONL event logs can be mirrored into SQLite and verified there, but
-this remains local provenance metadata, not signing, immutable storage, external
-timestamping, append-only infrastructure, methodological validity evidence, or
-a full tamper-evident audit log.
+**Active checkpoint:** Selecting next deterministic roadmap lane after Plan
+#161 closeout.
+
+**Completed checkpoint:** Verified export audit JSONL event logs can now be
+mirrored into local SQLite and verified there. The mirror imports full event
+payload JSON plus query-friendly columns, fails before DB writes when the source
+JSONL log is invalid, is idempotent for already-imported events, and checks
+event shape, self-hashes, previous-event links, duplicate event hashes, stored
+hash columns, and row ordering. This is local provenance/queryability
+infrastructure only, not signing, immutable storage, external timestamping,
+append-only infrastructure, methodological validity evidence, or a full
+tamper-evident audit log.
 
 **Completed checkpoint:** Relationship claims now resolve direct evidence
 strings into exact supporting anchors when the evidence uniquely grounds to the
