@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 161 | Export audit SQLite event mirror | High | Planned | `EXPORT_AUDIT_SQLITE_EVENT_MIRROR.md` |
 
 ## Completed Plans
 
