@@ -24,6 +24,11 @@ from qc_clean.schemas.domain import ProjectState
 logger = logging.getLogger(__name__)
 
 UNSAFE_FILENAME_CHARS_RE = re.compile(r"[^A-Za-z0-9 _.-]+")
+MISSING_CORPUS_SCOPE_WARNING_MESSAGE = (
+    "No corpus scope is recorded. Treat all claims below as bounded to "
+    "the loaded documents only; do not generalize to a population without "
+    "a stated and defensible sampling frame."
+)
 
 
 def _safe_filename_stem(value: str, fallback: str = "project") -> str:
@@ -37,6 +42,20 @@ def _default_export_path(project_name: str, suffix: str) -> Path:
     return Path(f"{_safe_filename_stem(project_name)}{suffix}")
 
 
+def _missing_corpus_scope_export_warning(
+    state: ProjectState,
+) -> Optional[Dict[str, Any]]:
+    """Return report-boundary warning metadata for claim exports without scope."""
+    if not state.claims or state.corpus_scope:
+        return None
+    return {
+        "code": "missing_corpus_scope",
+        "message": MISSING_CORPUS_SCOPE_WARNING_MESSAGE,
+        "applies_to": "claim_ledger",
+        "claim_count": len(state.claims),
+    }
+
+
 # ---------------------------------------------------------------------------
 # ProjectExporter -- works directly with ProjectState
 # ---------------------------------------------------------------------------
@@ -48,7 +67,10 @@ class ProjectExporter:
         """Export full project state as JSON. Returns the output path."""
         path = Path(output_file) if output_file else _default_export_path(state.name, ".json")
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(state.model_dump_json(indent=2), encoding="utf-8")
+        payload = state.model_dump(mode="json")
+        if warning := _missing_corpus_scope_export_warning(state):
+            payload["export_warnings"] = [warning]
+        path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
         logger.info("Exported JSON to %s", path)
         return str(path)
 
@@ -152,6 +174,19 @@ class ProjectExporter:
                         ], ensure_ascii=False),
                     ])
             paths.append(str(claims_path))
+
+        if warning := _missing_corpus_scope_export_warning(state):
+            warnings_path = out / "export_warnings.csv"
+            with open(warnings_path, "w", newline="", encoding="utf-8") as f:
+                writer = csv.writer(f)
+                writer.writerow(["code", "message", "applies_to", "claim_count"])
+                writer.writerow([
+                    warning["code"],
+                    warning["message"],
+                    warning["applies_to"],
+                    warning["claim_count"],
+                ])
+            paths.append(str(warnings_path))
 
         # -- irr_matrix.csv (only if IRR has been run) --
         if state.irr_result and state.irr_result.coding_matrix:
@@ -275,11 +310,7 @@ class ProjectExporter:
         elif state.claims:
             _a("## Corpus Scope")
             _a("")
-            _a(
-                "No corpus scope is recorded. Treat all claims below as bounded to "
-                "the loaded documents only; do not generalize to a population without "
-                "a stated and defensible sampling frame."
-            )
+            _a(MISSING_CORPUS_SCOPE_WARNING_MESSAGE)
             _a("")
 
         # Executive summary

@@ -6,7 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| #72 | Corpus Scope Machine-Readable Warnings | High | Planned | `CORPUS_SCOPE_MACHINE_READABLE_WARNINGS.md` |
+| #72 | Corpus Scope Machine-Readable Warnings | High | In Progress | `CORPUS_SCOPE_MACHINE_READABLE_WARNINGS.md` |
 
 ## Completed Plans
 

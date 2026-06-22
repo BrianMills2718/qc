@@ -1,6 +1,6 @@
 # Plan #72: Corpus Scope Machine-Readable Warnings
 
-**Status:** Planned
+**Status:** In Progress
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Plan #16 corpus scope contract; Plan #19 CLI/API scope surfaces; Plan #20 missing corpus scope report warning
@@ -112,21 +112,21 @@ cross-project callable capability.
 ## Acceptance Criteria
 
 > Feature-level criteria (what the plan accomplishes):
-- [ ] JSON exports with claims and no `corpus_scope` include one structured
+- [x] JSON exports with claims and no `corpus_scope` include one structured
   `missing_corpus_scope` warning with a claim count and report-boundary message.
-- [ ] CSV exports with claims and no `corpus_scope` include
+- [x] CSV exports with claims and no `corpus_scope` include
   `export_warnings.csv` with the same warning code/message.
-- [ ] JSON/CSV exports without claims do not gain warning noise or extra CSV
+- [x] JSON/CSV exports without claims do not gain warning noise or extra CSV
   files.
-- [ ] Markdown warning text remains present and uses the shared warning message.
-- [ ] Docs state this is machine-readable report discipline, not sampling-frame
+- [x] Markdown warning text remains present and uses the shared warning message.
+- [x] Docs state this is machine-readable report discipline, not sampling-frame
   validation.
 
 > Process criteria (quality gates):
-- [ ] Required tests pass
-- [ ] Full test suite passes
-- [ ] Type check status is reported
-- [ ] Docs updated
+- [x] Required tests pass (`python -m pytest tests/test_claim_ledger_exports.py tests/test_project_commands.py::TestProjectExporter -q`: 18 passed)
+- [x] Full test suite passes (`make check`: 780 passed, 1 skipped, 8 deselected; Ruff/docs-check passed)
+- [x] Type check status is reported (`make check`: type check not yet configured)
+- [x] Docs updated
 
 ---
 

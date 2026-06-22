@@ -1,6 +1,7 @@
 """Export coverage for the INV-9 claim ledger."""
 
 import csv
+import json
 from pathlib import Path
 
 from qc_clean.schemas.domain import (
@@ -44,6 +45,57 @@ def test_csv_export_writes_claims_file(tmp_path):
     assert rows[0]["kind"] == "synthesis_finding"
     assert rows[0]["support_status"] == "needs_anchor"
     assert rows[0]["claim_text"] == "AI changes workflow."
+
+
+def test_csv_export_writes_scope_warning_file_when_claims_have_no_scope(tmp_path):
+    from qc_clean.core.export.data_exporter import ProjectExporter
+
+    paths = ProjectExporter().export_csv(_claim_state(), str(tmp_path))
+
+    warning_path = tmp_path / "export_warnings.csv"
+    assert str(warning_path) in paths
+    with open(warning_path, newline="", encoding="utf-8") as f:
+        rows = list(csv.DictReader(f))
+    assert rows[0]["code"] == "missing_corpus_scope"
+    assert rows[0]["applies_to"] == "claim_ledger"
+    assert rows[0]["claim_count"] == "1"
+    assert "No corpus scope is recorded" in rows[0]["message"]
+    assert "bounded to the loaded documents" in rows[0]["message"]
+
+
+def test_csv_export_omits_scope_warning_file_without_claims(tmp_path):
+    from qc_clean.core.export.data_exporter import ProjectExporter
+
+    paths = ProjectExporter().export_csv(ProjectState(name="Minimal"), str(tmp_path))
+
+    assert str(tmp_path / "export_warnings.csv") not in paths
+    assert not (tmp_path / "export_warnings.csv").exists()
+
+
+def test_json_export_warns_when_claims_have_no_corpus_scope(tmp_path):
+    from qc_clean.core.export.data_exporter import ProjectExporter
+
+    out = tmp_path / "claims.json"
+    ProjectExporter().export_json(_claim_state(), str(out))
+
+    data = json.loads(out.read_text(encoding="utf-8"))
+    warnings = data["export_warnings"]
+    assert warnings[0]["code"] == "missing_corpus_scope"
+    assert warnings[0]["applies_to"] == "claim_ledger"
+    assert warnings[0]["claim_count"] == 1
+    assert "No corpus scope is recorded" in warnings[0]["message"]
+    assert "bounded to the loaded documents" in warnings[0]["message"]
+    assert data["claims"][0]["id"] == "claim-1"
+
+
+def test_json_export_omits_missing_scope_warning_without_claims(tmp_path):
+    from qc_clean.core.export.data_exporter import ProjectExporter
+
+    out = tmp_path / "minimal.json"
+    ProjectExporter().export_json(ProjectState(name="Minimal"), str(out))
+
+    data = json.loads(out.read_text(encoding="utf-8"))
+    assert "export_warnings" not in data
 
 
 def test_markdown_export_includes_claim_ledger_summary(tmp_path):
