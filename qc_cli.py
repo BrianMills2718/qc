@@ -43,6 +43,7 @@ Examples:
   qc_cli project run <project_id>
   qc_cli bench <project_id>
   qc_cli bench-package phase0_package.json
+  qc_cli write-phase0-adjudication-package <project_id> --output phase0_package.json --d3-gold-file d3_gold.json
   qc_cli verify-phase0-benchmark-artifact benchmark_results/run/manifest.json
   qc_cli validate-d3-gold d3_gold.json
   qc_cli validate-d7-gold d7_gold.json
@@ -238,6 +239,47 @@ Examples:
     bench_package_parser.add_argument(
         'package_file',
         help='Path to the Phase 0 benchmark package JSON manifest',
+    )
+
+    phase0_adjudication_package_writer_parser = subparsers.add_parser(
+        'write-phase0-adjudication-package',
+        help='Write a Phase 0 adjudication package manifest',
+        description='Write a strict Phase 0 package manifest from validated D3/D7 adjudication gold',
+    )
+    phase0_adjudication_package_writer_parser.add_argument(
+        'project_id',
+        help='Project ID to score with the package',
+    )
+    phase0_adjudication_package_writer_parser.add_argument(
+        '--output',
+        required=True,
+        help='Output Phase 0 package manifest path',
+    )
+    phase0_adjudication_package_writer_parser.add_argument(
+        '--d3-gold-file',
+        help='Optional versioned D3 adjudication gold package path',
+    )
+    phase0_adjudication_package_writer_parser.add_argument(
+        '--d7-gold-file',
+        '--gold-file',
+        dest='d7_gold_file',
+        help='Optional versioned D7 adjudication gold package path',
+    )
+    phase0_adjudication_package_writer_parser.add_argument(
+        '--scorecard-output',
+        help='Optional scorecard output path recorded in the package',
+    )
+    phase0_adjudication_package_writer_parser.add_argument(
+        '--artifact-dir',
+        help='Optional artifact root directory recorded in the package',
+    )
+    phase0_adjudication_package_writer_parser.add_argument(
+        '--observability-db',
+        help='Optional llm_client observability SQLite path for D10 scoring',
+    )
+    phase0_adjudication_package_writer_parser.add_argument(
+        '--trace-id',
+        help='Optional exact trace ID for D10 scoring',
     )
 
     phase0_artifact_verifier_parser = subparsers.add_parser(
@@ -719,6 +761,8 @@ def main() -> int:
             return handle_bench_command(args)
         elif args.command == 'bench-package':
             return handle_bench_package_command(args)
+        elif args.command == 'write-phase0-adjudication-package':
+            return handle_write_phase0_adjudication_package_command(args)
         elif args.command == 'verify-phase0-benchmark-artifact':
             return handle_verify_phase0_benchmark_artifact_command(args)
         elif args.command == 'run-d7-retrieval':
@@ -847,6 +891,25 @@ def handle_bench_package_command(args) -> int:
     from scripts import run_phase0_benchmark_package
 
     return run_phase0_benchmark_package.main([args.package_file])
+
+
+def handle_write_phase0_adjudication_package_command(args) -> int:
+    """Write a Phase 0 adjudication package through the canonical CLI."""
+    from scripts import write_phase0_adjudication_package
+
+    argv = [args.project_id, "--output", args.output]
+    for attr, flag in [
+        ("d3_gold_file", "--d3-gold-file"),
+        ("d7_gold_file", "--d7-gold-file"),
+        ("scorecard_output", "--scorecard-output"),
+        ("artifact_dir", "--artifact-dir"),
+        ("observability_db", "--observability-db"),
+        ("trace_id", "--trace-id"),
+    ]:
+        value = getattr(args, attr)
+        if value is not None:
+            argv.extend([flag, str(value)])
+    return write_phase0_adjudication_package.main(argv)
 
 
 def handle_verify_phase0_benchmark_artifact_command(args) -> int:

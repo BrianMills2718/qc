@@ -109,6 +109,10 @@ Each dimension maps to a SOTA claim and (where relevant) an invariant. The bar i
   package-local project stores; relative `projects_dir` paths resolve from the
   manifest directory before forwarding to `bench_phase0`. This is package
   portability/provenance support only, not benchmark-validity evidence.
+- `qc_cli.py write-phase0-adjudication-package ...` delegates to the same
+  strict Phase 0 adjudication package writer as
+  `make write-phase0-adjudication-package`; this is CLI parity for manifest
+  assembly only, not populated adjudication evidence.
 - D7 comparison also accepts `ARTIFACT_DIR=benchmark_results` /
   `--artifact-dir benchmark_results` and writes a versioned `report.json` plus
   `manifest.json` package for successful guarded or unguarded comparisons.

@@ -192,6 +192,7 @@ python qc_cli.py bench <project_id>                                     # Phase 
 python qc_cli.py bench <project_id> --confidence-calibration-protocol-file protocol.json --confidence-calibration-file calibration.json  # Same Phase 0 file/protocol flags as scripts/bench_phase0.py
 python qc_cli.py bench <project_id> --artifact-dir benchmark_results    # Write versioned Phase 0 scorecard package
 python qc_cli.py bench-package phase0_package.json                      # Run strict Phase 0 package manifest, including package-local projects_dir when supplied
+python qc_cli.py write-phase0-adjudication-package <project_id> --output phase0_package.json --d3-gold-file d3_gold.json --gold-file d7_gold.json  # Write strict Phase 0 manifest for imported D3/D7 gold
 python qc_cli.py verify-phase0-benchmark-artifact benchmark_results/run-dir/manifest.json  # Verify Phase 0 artifact hashes/metadata
 
 # Run pipeline on a project (local, no server needed)
@@ -468,6 +469,7 @@ make validate-adjudication-responses PACKAGE=sample.json  # Validate completed a
 make adjudication-response-preflight PROTOCOL=protocol.json SAMPLE=sample.json RESPONSES=responses.json  # Preflight completed responses against protocol/sample provenance before import
 make import-adjudication-responses PACKAGE=sample.json GOLD_SET_ID=study-v1 DATASET_NAME="Study dev labels" CODER_COUNT=1 ADJUDICATOR=coder-1 PROTOCOL="Single adjudicator review" PREFLIGHT_PROTOCOL=protocol.json PREFLIGHT_SAMPLE=sample.json D3_OUTPUT=d3_gold.json D7_OUTPUT=d7_gold.json  # Convert valid responses to D3/D7 gold package inputs with an import-time provenance guard
 make write-phase0-adjudication-package ID=<project_id> OUTPUT=phase0_package.json D3_GOLD=d3_gold.json GOLD=d7_gold.json  # Write strict Phase 0 package manifest for imported D3/D7 gold
+python qc_cli.py write-phase0-adjudication-package <project_id> --output phase0_package.json --d3-gold-file d3_gold.json --gold-file d7_gold.json  # Canonical CLI wrapper for Phase 0 adjudication package manifests
 make lint-scope-phrasing ID=<project_id> INPUT=report.md  # Lint arbitrary text for unsafe population-generalizing scope phrasing
 make export-audit-manifest ID=<project_id> FORMAT=markdown ARTIFACTS="report.md" OUTPUT=manifest.json AUDIT_LOG=events.jsonl AUDIT_DB=events.sqlite  # Write export artifact hash manifest and optional audit event mirror
 make verify-export-audit-manifest MANIFEST=manifest.json BASE_DIR=. ID=<project_id> AUDIT_LOG=events.jsonl AUDIT_DB=events.sqlite  # Verify manifest and optionally mirror the verification event

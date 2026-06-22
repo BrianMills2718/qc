@@ -9,6 +9,7 @@ from scripts import (
     bench_phase0,
     run_phase0_benchmark_package,
     verify_phase0_benchmark_artifact,
+    write_phase0_adjudication_package,
 )
 from qc_clean.core.persistence.project_store import ProjectStore
 from qc_clean.schemas.domain import Corpus, Document, ProjectState
@@ -166,6 +167,58 @@ def test_qc_cli_bench_package_forwards_manifest_path(monkeypatch):
 
     assert qc_cli.main() == 0
     assert captured["argv"] == ["phase0_package.json"]
+
+
+def test_qc_cli_write_phase0_adjudication_package_forwards_args(monkeypatch):
+    captured = {}
+
+    def fake_main(argv):
+        captured["argv"] = argv
+        return 0
+
+    monkeypatch.setattr(write_phase0_adjudication_package, "main", fake_main)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "qc_cli.py",
+            "write-phase0-adjudication-package",
+            "project-alpha",
+            "--output",
+            "phase0_package.json",
+            "--d3-gold-file",
+            "d3_gold.json",
+            "--gold-file",
+            "d7_gold.json",
+            "--scorecard-output",
+            "scorecard.json",
+            "--artifact-dir",
+            "benchmark_results",
+            "--observability-db",
+            "observability.db",
+            "--trace-id",
+            "trace-123",
+        ],
+    )
+
+    assert qc_cli.main() == 0
+    assert captured["argv"] == [
+        "project-alpha",
+        "--output",
+        "phase0_package.json",
+        "--d3-gold-file",
+        "d3_gold.json",
+        "--d7-gold-file",
+        "d7_gold.json",
+        "--scorecard-output",
+        "scorecard.json",
+        "--artifact-dir",
+        "benchmark_results",
+        "--observability-db",
+        "observability.db",
+        "--trace-id",
+        "trace-123",
+    ]
 
 
 def test_qc_cli_verify_phase0_benchmark_artifact_forwards_path(monkeypatch):

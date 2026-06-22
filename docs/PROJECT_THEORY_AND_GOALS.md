@@ -549,6 +549,10 @@ Sequencing rule: **the evaluation harness is the keystone** (it proves the SOTA 
    `make verify-phase0-benchmark-artifact ARTIFACT=...`; this checks
    scorecard/timing hashes and copied metadata only, not benchmark validity or
    SOTA evidence.
+   The strict Phase 0 adjudication manifest writer is available through both
+   `make write-phase0-adjudication-package ...` and
+   `qc_cli.py write-phase0-adjudication-package ...`; this is manifest assembly
+   for versioned package inputs only, not populated adjudication evidence.
    D3 now also has an externally fed baseline-comparison substrate through
    `D3_BASELINES=...` with per-baseline local span-overlap diagnostics and
    pre-run protocol validation through `make validate-d3-comparison-protocol`
