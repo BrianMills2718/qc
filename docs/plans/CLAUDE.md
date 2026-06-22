@@ -6,7 +6,6 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| #79 | MCP Claim Review Decisions | High | Implemented | `MCP_CLAIM_REVIEW_DECISIONS.md` |
 
 ## Completed Plans
 
@@ -37,6 +36,7 @@ Track all implementation work here.
 | Corpus scope create surfaces | Scope contract follow-up: CLI/MCP project creation can persist corpus scope when supplied while no-scope creation remains compatible | `completed/CORPUS_SCOPE_CREATE_SURFACES.md` |
 | Corpus scope completeness warnings | Scope/report follow-up: claim-bearing exports warn on empty scope records and population-without-sampling-frame metadata | `completed/CORPUS_SCOPE_COMPLETENESS_WARNINGS.md` |
 | Claim review API listing | INV-10 follow-up: `/projects/{id}/review/claims` exposes bounded claim review targets and claim decisions are covered through the review API | `completed/CLAIM_REVIEW_API_LISTING.md` |
+| MCP claim review decisions | INV-10 follow-up: `qc_review_decisions` applies generic review decisions including claim targets with preserved rationale | `completed/MCP_CLAIM_REVIEW_DECISIONS.md` |
 | INV-7 prompt injection scorecard | Evaluation-harness follow-up: `make bench` can score externally supplied prompt-injection fixture outcomes without mutating project state | `completed/INV7_PROMPT_INJECTION_SCORECARD.md` |
 | INV-11 incremental hard invalidation | Incremental recode now clears stale higher-order outputs, stale phase results, and stale claim rows it cannot recompute | `completed/INV11_INCREMENTAL_HARD_INVALIDATION.md` |
 | INV-11 review decisions inactive on invalidation | Review decisions targeting claims removed by incremental invalidation are retained as inactive audit history | `completed/INV11_REVIEW_DECISION_INACTIVE_ON_INVALIDATION.md` |
