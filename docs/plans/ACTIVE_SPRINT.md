@@ -22,8 +22,9 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Select the next highest-value documented roadmap lane from
-   `docs/PROJECT_THEORY_AND_GOALS.md` and `docs/EVALUATION_HARNESS.md`.
+1. Execute Plan #138 (`THEORETICAL_SAMPLING_CANDIDATE_EXPORT.md`): export
+   preflight-ready theoretical-sampling candidate packages from existing
+   diagnostic suggestions.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 

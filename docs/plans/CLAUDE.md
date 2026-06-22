@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 138 | Theoretical sampling candidate export | High | In Progress | `THEORETICAL_SAMPLING_CANDIDATE_EXPORT.md` |
 
 ## Completed Plans
 
