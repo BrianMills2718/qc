@@ -41,6 +41,9 @@ a { color: #2563eb; }
 .btn-danger:hover { background: #b91c1c; }
 .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 .decision-count { font-size: 13px; color: #666; margin-left: auto; }
+.mode-switch { display: flex; gap: 4px; align-items: center; border: 1px solid #d1d5db; border-radius: 6px; padding: 2px; background: #f9fafb; }
+.mode-btn { border: 0; border-radius: 4px; padding: 5px 12px; background: transparent; }
+.mode-btn.active { background: #fff; color: #111827; box-shadow: 0 1px 2px rgba(0,0,0,0.08); }
 
 /* Toast */
 .toast { position: fixed; top: 20px; right: 20px; z-index: 200; padding: 12px 20px; border-radius: 8px; font-size: 14px; color: #fff; display: none; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
@@ -72,6 +75,10 @@ a { color: #2563eb; }
 .card-desc { font-size: 13px; color: #555; margin-bottom: 6px; }
 .card-quotes { font-size: 12px; color: #777; }
 .card-quotes q { font-style: italic; }
+.claim-text { font-size: 14px; color: #333; margin-bottom: 8px; }
+.claim-meta { display: flex; gap: 8px; flex-wrap: wrap; font-size: 12px; color: #666; margin-bottom: 8px; }
+.claim-pill { padding: 1px 6px; border-radius: 4px; background: #f3f4f6; }
+.claim-scope { font-size: 12px; color: #777; margin-top: 4px; }
 
 /* Modify fields */
 .modify-fields { margin-top: 8px; display: flex; flex-direction: column; gap: 6px; }
@@ -127,6 +134,10 @@ a { color: #2563eb; }
 </div>
 
 <div class="action-bar">
+  <div class="mode-switch" aria-label="Review mode">
+    <button class="btn mode-btn active" id="codeModeBtn" onclick="setReviewMode('codes')">Codes</button>
+    <button class="btn mode-btn" id="claimModeBtn" onclick="setReviewMode('claims')">Claims</button>
+  </div>
   <button class="btn btn-success" id="approveAllBtn" onclick="approveAll()">Approve All</button>
   <button class="btn btn-primary" id="saveBtn" onclick="submitDecisions(false)">Save Decisions</button>
   <button class="btn btn-primary" id="saveResumeBtn" onclick="submitDecisions(true)">Save &amp; Resume Pipeline</button>
@@ -146,6 +157,7 @@ const API_BASE = "";
 let projectData = null;
 let decisions = new Map();  // targetId -> {target_type, target_id, action, rationale, new_value}
 let expandedCodes = new Set();
+let reviewMode = "codes";
 
 // -------------------------------------------------------------------
 // Data loading
@@ -153,7 +165,10 @@ let expandedCodes = new Set();
 
 async function loadProject() {
   try {
-    const resp = await fetch(API_BASE + "/projects/" + PROJECT_ID + "/review/codes");
+    const path = reviewMode === "claims"
+      ? "/projects/" + PROJECT_ID + "/review/claims"
+      : "/projects/" + PROJECT_ID + "/review/codes";
+    const resp = await fetch(API_BASE + path);
     if (!resp.ok) {
       const err = await resp.json().catch(() => ({ detail: resp.statusText }));
       throw new Error(err.detail || resp.statusText);
@@ -173,6 +188,7 @@ async function loadProject() {
 
 function render() {
   if (!projectData) return;
+  updateModeButtons();
 
   // Header
   document.getElementById("projectName").textContent = projectData.project_name || "Project";
@@ -186,13 +202,26 @@ function render() {
   );
 
   const summary = projectData.summary || {};
-  document.getElementById("stats").innerHTML =
-    "<span>" + (summary.codes_count || 0) + " codes</span>" +
-    "<span>" + (summary.applications_count || 0) + " applications</span>";
+  if (reviewMode === "claims") {
+    document.getElementById("stats").innerHTML =
+      "<span>" + (summary.claims_count || projectData.total_claims || 0) + " claims</span>" +
+      "<span>" + (projectData.returned || 0) + " shown</span>";
+  } else {
+    document.getElementById("stats").innerHTML =
+      "<span>" + (summary.codes_count || 0) + " codes</span>" +
+      "<span>" + (summary.applications_count || 0) + " applications</span>";
+  }
 
   updateDecisionCount();
 
-  // Cards
+  if (reviewMode === "claims") {
+    renderClaims();
+    return;
+  }
+  renderCodes();
+}
+
+function renderCodes() {
   const codes = projectData.codes || [];
   if (codes.length === 0) {
     document.getElementById("content").innerHTML =
@@ -203,6 +232,22 @@ function render() {
   let html = '<div class="cards">';
   for (const code of codes) {
     html += renderCodeCard(code);
+  }
+  html += '</div>';
+  document.getElementById("content").innerHTML = html;
+}
+
+function renderClaims() {
+  const claims = projectData.claims || [];
+  if (claims.length === 0) {
+    document.getElementById("content").innerHTML =
+      '<div class="empty">No claims to review.</div>';
+    return;
+  }
+
+  let html = '<div class="cards">';
+  for (const claim of claims) {
+    html += renderClaimCard(claim);
   }
   html += '</div>';
   document.getElementById("content").innerHTML = html;
@@ -318,6 +363,56 @@ function renderCodeCard(code) {
   return html;
 }
 
+function renderClaimCard(claim) {
+  const d = decisions.get(claim.id);
+  const action = d ? d.action : null;
+  const cardClass = action ? "card decision-" + action : "card";
+
+  let html = '<div class="' + cardClass + '" id="claim-card-' + claim.id + '">';
+  html += '<div class="card-top">';
+  html += '<div class="card-actions">';
+  for (const act of ["approve", "reject", "modify"]) {
+    const activeClass = action === act ? " active" : "";
+    html += '<button class="btn' + activeClass + '" onclick="setClaimDecision(\'' +
+            claim.id + '\',\'' + act + '\')">' + capitalize(act) + '</button>';
+  }
+  html += '</div>';
+  html += '<span class="card-provenance">' + escapeHtml(claim.created_by || "llm") + '</span>';
+  html += '</div>';
+
+  html += '<div class="card-body">';
+  html += '<div class="claim-text">' + escapeHtml(claim.claim_text || "") + '</div>';
+  html += '<div class="claim-meta">';
+  html += '<span class="claim-pill">' + escapeHtml(claim.kind || "claim") + '</span>';
+  html += '<span class="claim-pill">' + escapeHtml(claim.source_stage || "unknown stage") + '</span>';
+  html += '<span class="claim-pill">support: ' + escapeHtml(claim.support_status || "unknown") + '</span>';
+  html += '<span class="claim-pill">review: ' + escapeHtml(claim.adjudication_status || "pending") + '</span>';
+  html += '<span class="claim-pill">anchors: ' + (claim.supporting_anchors || 0) + ' / ' + (claim.contrary_anchors || 0) + '</span>';
+  html += '</div>';
+  html += '<div class="claim-scope">Scope: ' + escapeHtml(formatClaimScope(claim.scope || {})) + '</div>';
+  if (claim.origin_object_type || claim.origin_object_id) {
+    html += '<div class="claim-scope">Origin: ' + escapeHtml((claim.origin_object_type || "") + " " + (claim.origin_object_id || "")) + '</div>';
+  }
+  if (action === "modify") {
+    const nv = d.new_value || {};
+    html += '<div class="modify-fields">';
+    html += '<label>Revised Claim Text</label>';
+    html += '<textarea onchange="updateClaimModify(\'' + claim.id + '\',this.value)">' +
+            escapeHtml(nv.claim_text || claim.claim_text || "") + '</textarea>';
+    html += '</div>';
+  }
+  html += '</div>';
+
+  html += '<div class="rationale-row">';
+  html += '<label>Rationale</label>';
+  html += '<input type="text" placeholder="Optional rationale for this decision" value="' +
+          escapeAttr(d ? d.rationale || "" : "") +
+          '" onchange="updateRationale(\'' + claim.id + '\',this.value)">';
+  html += '</div>';
+  html += '</div>';
+  return html;
+}
+
 function renderAppItem(app, codeId) {
   const d = decisions.get(app.id);
   const action = d ? d.action : null;
@@ -361,6 +456,22 @@ function setDecision(codeId, action) {
   updateDecisionCount();
 }
 
+function setClaimDecision(claimId, action) {
+  const existing = decisions.get(claimId);
+  if (existing && existing.action === action) {
+    decisions.delete(claimId);
+  } else {
+    const d = { target_type: "claim", target_id: claimId, action: action, rationale: "" };
+    if (action === "modify") {
+      const claim = (projectData.claims || []).find(function(c) { return c.id === claimId; });
+      d.new_value = { claim_text: claim ? claim.claim_text || "" : "" };
+    }
+    decisions.set(claimId, d);
+  }
+  rerenderClaimCard(claimId);
+  updateDecisionCount();
+}
+
 function setAppDecision(appId, action, event) {
   if (event) event.stopPropagation();
   const existing = decisions.get(appId);
@@ -385,6 +496,13 @@ function updateModify(codeId, field, value) {
   if (d && d.action === "modify") {
     if (!d.new_value) d.new_value = {};
     d.new_value[field] = value;
+  }
+}
+
+function updateClaimModify(claimId, value) {
+  const d = decisions.get(claimId);
+  if (d && d.action === "modify") {
+    d.new_value = { claim_text: value };
   }
 }
 
@@ -427,6 +545,33 @@ function rerenderCard(codeId) {
   const tmp = document.createElement("div");
   tmp.innerHTML = renderCodeCard(code);
   el.replaceWith(tmp.firstElementChild);
+}
+
+function rerenderClaimCard(claimId) {
+  const claim = (projectData.claims || []).find(function(c) { return c.id === claimId; });
+  if (!claim) return;
+  const el = document.getElementById("claim-card-" + claimId);
+  if (!el) return;
+  const tmp = document.createElement("div");
+  tmp.innerHTML = renderClaimCard(claim);
+  el.replaceWith(tmp.firstElementChild);
+}
+
+function setReviewMode(mode) {
+  if (reviewMode === mode) return;
+  reviewMode = mode;
+  decisions = new Map();
+  expandedCodes = new Set();
+  loadProject();
+}
+
+function updateModeButtons() {
+  const codeBtn = document.getElementById("codeModeBtn");
+  const claimBtn = document.getElementById("claimModeBtn");
+  const approveAllBtn = document.getElementById("approveAllBtn");
+  if (codeBtn) codeBtn.className = "btn mode-btn" + (reviewMode === "codes" ? " active" : "");
+  if (claimBtn) claimBtn.className = "btn mode-btn" + (reviewMode === "claims" ? " active" : "");
+  if (approveAllBtn) approveAllBtn.style.display = reviewMode === "codes" ? "" : "none";
 }
 
 function updateDecisionCount() {
@@ -536,6 +681,15 @@ function truncate(s, n) {
 
 function capitalize(s) {
   return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+function formatClaimScope(scope) {
+  const parts = [];
+  if (scope.code_ids && scope.code_ids.length) parts.push("codes " + scope.code_ids.join(", "));
+  if (scope.doc_ids && scope.doc_ids.length) parts.push("docs " + scope.doc_ids.join(", "));
+  if (scope.participant_ids && scope.participant_ids.length) parts.push("participants " + scope.participant_ids.join(", "));
+  if (scope.corpus_level) parts.push("corpus");
+  return parts.length ? parts.join("; ") : "unspecified";
 }
 
 // -------------------------------------------------------------------

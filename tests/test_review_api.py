@@ -111,6 +111,15 @@ class TestReviewUIPage:
         assert "test-project-123" in resp.text
         assert "Code Review" in resp.text
 
+    def test_review_page_exposes_claim_review_ui(self, client):
+        resp = client.get("/review/test-project-123")
+
+        assert resp.status_code == 200
+        assert 'id="claimModeBtn"' in resp.text
+        assert '"/projects/" + PROJECT_ID + "/review/claims"' in resp.text
+        assert "function renderClaimCard" in resp.text
+        assert 'target_type: "claim"' in resp.text
+
     def test_404_for_missing_project(self, client):
         resp = client.get("/review/nonexistent")
         assert resp.status_code == 404

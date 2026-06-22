@@ -1,6 +1,6 @@
 # Plan #85: Claim Review Browser UI
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Claim review API listing; MCP claim review decisions
@@ -105,18 +105,29 @@ callable capability.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] Review page has a visible code/claim mode switch.
-- [ ] Claim mode fetches `/projects/{id}/review/claims`.
-- [ ] Claim cards show claim text and review-relevant metadata.
-- [ ] Claim approve/reject/modify decisions submit `target_type="claim"`.
-- [ ] Existing code and application review behavior is preserved.
-- [ ] Docs state this narrows INV-10 but does not create expert adjudication.
+- [x] Review page has a visible code/claim mode switch.
+- [x] Claim mode fetches `/projects/{id}/review/claims`.
+- [x] Claim cards show claim text and review-relevant metadata.
+- [x] Claim approve/reject/modify decisions submit `target_type="claim"`.
+- [x] Existing code and application review behavior is preserved.
+- [x] Docs state this narrows INV-10 but does not create expert adjudication.
 
 > Process criteria:
-- [ ] Required focused tests pass.
-- [ ] Full `make check` passes or any failure is documented with evidence.
-- [ ] Type-check status is reported.
+- [x] Required focused tests pass.
+- [x] Full `make check` passes or any failure is documented with evidence.
+- [x] Type-check status is reported.
 - [ ] Verified work is committed and pushed.
+
+---
+
+## Verification
+
+- Initial TDD run: `python -m pytest tests/test_review_api.py::TestReviewUIPage::test_review_page_exposes_claim_review_ui -q` failed because `id="claimModeBtn"` was absent.
+- `python -m pytest tests/test_review_api.py::TestReviewUIPage::test_review_page_exposes_claim_review_ui -q` - passed.
+- `python -m pytest tests/test_review_api.py -q` - `26 passed`.
+- `python -m ruff check qc_clean/plugins/api/review_ui.py tests/test_review_api.py` - passed.
+- `python scripts/check_markdown_links.py && python scripts/sync_plan_status.py --check && python scripts/meta/check_agents_sync.py --check` - passed.
+- `make check` - `813 passed, 1 skipped, 8 deselected`; Ruff and docs checks passed; type check is not yet configured.
 
 ---
 
