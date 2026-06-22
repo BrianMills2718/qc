@@ -22,10 +22,22 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #137 (`THEORETICAL_SAMPLING_PROTOCOL_PREFLIGHT.md`): add
-   protocol/candidate/result preflight for theoretical sampling packages.
+1. Select the next highest-value documented roadmap lane from
+   `docs/PROJECT_THEORY_AND_GOALS.md` and `docs/EVALUATION_HARNESS.md`.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
+
+**Completed checkpoint:** Theoretical-sampling candidate/result packages can
+now be preflighted against registered protocols through
+`make theoretical-sampling-preflight` /
+`scripts/preflight_theoretical_sampling_protocol.py`. The preflight validates
+schema_version=1 candidate/result packages and checks protocol IDs,
+project/corpus/state hashes, candidate-source policy, collection mode, max
+suggestions, target-gap code/type coverage, selected-candidate provenance, and
+result addressed-gap/success-criteria drift. This is protocol/provenance
+infrastructure only, not candidate-selection execution, data collection,
+sampling-frame adequacy evidence, methodological saturation evidence, full
+grounded-theory evidence, or SOTA evidence.
 
 **Completed checkpoint:** Pre-run theoretical-sampling protocol packages can
 now be validated through `make validate-theoretical-sampling-protocol` /

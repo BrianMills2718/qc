@@ -1,10 +1,38 @@
 # Plan #137: Theoretical Sampling Protocol Preflight
 
-**Status:** In Progress
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** #136
 **Blocks:** Future theoretical-sampling result packages and score-time GT-fidelity provenance
+
+---
+
+## Outcome
+
+Implemented in `200ce55` (`[Plan: THEORETICAL_SAMPLING_PROTOCOL_PREFLIGHT] Add protocol preflight`).
+The repo now has schema_version=1 theoretical-sampling candidate/result package
+models plus a preflight report, script, and Make target. The preflight checks
+protocol ID, project ID, corpus/state hashes, candidate-source policy,
+collection mode, max suggestions, target-gap code/type coverage, optional result
+package identity, selected-candidate provenance, and result addressed-gap /
+success-criteria drift.
+
+This is protocol/provenance infrastructure only. It is not candidate-selection
+execution, data collection, sampling-frame adequacy evidence, methodological
+saturation evidence, full grounded-theory evidence, or SOTA evidence.
+
+Verification:
+
+- TDD red captured: missing `qc_clean.core.theoretical_sampling_preflight`
+  module before implementation.
+- `python -m pytest tests/test_theoretical_sampling_preflight.py tests/test_theoretical_sampling_protocol.py tests/test_category_saturation_inv4.py -q`
+  passed (`11 passed`).
+- `python -m ruff check qc_clean/core/theoretical_sampling_preflight.py scripts/preflight_theoretical_sampling_protocol.py tests/test_theoretical_sampling_preflight.py`
+  passed.
+- `make docs-check` passed.
+- `make check` passed (`1041 passed, 1 skipped, 8 deselected`); type check is
+  not yet configured in this repo.
 
 ---
 
@@ -67,14 +95,14 @@ evidence, not GT-fidelity evidence, and not a SOTA claim.
 
 ### Capability Validation
 
-- [ ] Candidate packages validate and are cross-checked against protocol ID,
+- [x] Candidate packages validate and are cross-checked against protocol ID,
   project ID, corpus hash, optional state hash, source policy, collection mode,
   candidate count, and target gap coverage.
-- [ ] Optional result packages validate and selected candidate IDs are checked
+- [x] Optional result packages validate and selected candidate IDs are checked
   against the candidate pool and protocol target gaps.
-- [ ] Script emits a machine-readable pass/fail report and exits nonzero on
+- [x] Script emits a machine-readable pass/fail report and exits nonzero on
   failed preflight.
-- [ ] Make target exposes the preflight.
+- [x] Make target exposes the preflight.
 
 ---
 
@@ -132,21 +160,21 @@ evidence, not GT-fidelity evidence, and not a SOTA claim.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] Candidate packages are validated as schema_version=1 packages.
-- [ ] Result packages are validated as schema_version=1 packages when supplied.
-- [ ] Preflight enforces protocol/candidate/result ID and hash consistency.
-- [ ] Preflight enforces source-policy and collection-mode consistency.
-- [ ] Preflight enforces target-gap coverage and selected-candidate provenance.
-- [ ] Docs preserve that this is provenance/preflight infrastructure, not
+- [x] Candidate packages are validated as schema_version=1 packages.
+- [x] Result packages are validated as schema_version=1 packages when supplied.
+- [x] Preflight enforces protocol/candidate/result ID and hash consistency.
+- [x] Preflight enforces source-policy and collection-mode consistency.
+- [x] Preflight enforces target-gap coverage and selected-candidate provenance.
+- [x] Docs preserve that this is provenance/preflight infrastructure, not
   sampling adequacy or saturation evidence.
 
 > Process criteria:
-- [ ] Required focused tests pass.
-- [ ] Focused Ruff check passes.
-- [ ] `make docs-check` passes.
-- [ ] Full `make check` passes or any failure is documented with evidence.
-- [ ] Type-check status is reported.
-- [ ] Verified work is committed and pushed.
+- [x] Required focused tests pass.
+- [x] Focused Ruff check passes.
+- [x] `make docs-check` passes.
+- [x] Full `make check` passes or any failure is documented with evidence.
+- [x] Type-check status is reported.
+- [x] Verified work is committed and pushed.
 
 ---
 
