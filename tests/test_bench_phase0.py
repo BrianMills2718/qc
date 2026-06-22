@@ -67,6 +67,8 @@ def test_scorecard_includes_reliability_and_stability_when_present():
     assert card["reliability_llm_pass_agreement"]["cohens_kappa"] == 0.7
     assert card["reliability_llm_pass_agreement"]["gwet_ac1"] == 0.8
     assert card["reliability_llm_pass_agreement"]["application_level"] is False
+    assert card["reliability_llm_pass_agreement"]["prevalence"]["row_count"] == 0
+    assert card["reliability_llm_pass_agreement"]["prevalence"]["rating_count"] == 0
     assert "consistency not validity" in card["reliability_llm_pass_agreement"]["note"]
     assert card["stability"]["overall_stability"] == 0.8
     assert card["stability"]["unstable"] == 1
@@ -84,6 +86,7 @@ def test_scorecard_surfaces_application_level_reliability_metrics():
             fleiss_kappa=0.4,
             gwet_ac1=0.6,
             interpretation="fair",
+            coding_matrix={"code-a": [1, 1], "code-b": [1, 0]},
             application_level=True,
             application_units=3,
             application_percent_agreement=2 / 3,
@@ -91,12 +94,23 @@ def test_scorecard_surfaces_application_level_reliability_metrics():
             application_fleiss_kappa=0.25,
             application_gwet_ac1=0.5,
             application_interpretation="fair",
+            application_matrix={
+                "d#0::a": [1, 1],
+                "d#1::b": [1, 0],
+                "d#2::c": [0, 1],
+            },
             segment_decision_units=4,
             segment_decision_percent_agreement=0.75,
             segment_decision_cohens_kappa=0.5,
             segment_decision_fleiss_kappa=0.5,
             segment_decision_gwet_ac1=0.65,
             segment_decision_interpretation="moderate",
+            segment_decision_matrix={
+                "d#0": ["coded", "coded"],
+                "d#1": ["no_code", "coded"],
+                "d#2": ["not_examined", "coded"],
+                "d#3": ["no_code", "no_code"],
+            },
         ),
     )
 
@@ -104,24 +118,39 @@ def test_scorecard_surfaces_application_level_reliability_metrics():
 
     assert reliability["gwet_ac1"] == 0.6
     assert reliability["application_level"] is True
-    assert reliability["application_positive_segment_code"] == {
-        "units": 3,
-        "percent_agreement": 2 / 3,
-        "cohens_kappa": 0.25,
-        "fleiss_kappa": 0.25,
-        "gwet_ac1": 0.5,
-        "interpretation": "fair",
-        "note": "Positive segment x code cells where at least one pass applied the code.",
+    assert reliability["prevalence"]["categories"]["present"]["count"] == 3
+    assert reliability["prevalence"]["categories"]["present"]["rate"] == 0.75
+    assert reliability["prevalence"]["row_patterns"] == {
+        "all_absent": 0,
+        "all_present": 1,
+        "mixed": 1,
     }
-    assert reliability["segment_decision"] == {
-        "units": 4,
-        "percent_agreement": 0.75,
-        "cohens_kappa": 0.5,
-        "fleiss_kappa": 0.5,
-        "gwet_ac1": 0.65,
-        "interpretation": "moderate",
-        "note": "coded/no_code/not_examined decisions over the segment universe.",
-    }
+
+    positive = reliability["application_positive_segment_code"]
+    assert positive["units"] == 3
+    assert positive["percent_agreement"] == 2 / 3
+    assert positive["cohens_kappa"] == 0.25
+    assert positive["fleiss_kappa"] == 0.25
+    assert positive["gwet_ac1"] == 0.5
+    assert positive["interpretation"] == "fair"
+    assert positive["prevalence"]["row_count"] == 3
+    assert positive["prevalence"]["rating_count"] == 6
+    assert positive["prevalence"]["ratings_per_row"] == 2
+    assert positive["prevalence"]["categories"]["present"]["count"] == 4
+    assert positive["prevalence"]["categories"]["absent"]["rate"] == pytest.approx(1 / 3)
+
+    segment = reliability["segment_decision"]
+    assert segment["units"] == 4
+    assert segment["percent_agreement"] == 0.75
+    assert segment["cohens_kappa"] == 0.5
+    assert segment["fleiss_kappa"] == 0.5
+    assert segment["gwet_ac1"] == 0.65
+    assert segment["interpretation"] == "moderate"
+    assert segment["prevalence"]["row_count"] == 4
+    assert segment["prevalence"]["rating_count"] == 8
+    assert segment["prevalence"]["categories"]["coded"] == {"count": 4, "rate": 0.5}
+    assert segment["prevalence"]["categories"]["no_code"] == {"count": 3, "rate": 0.375}
+    assert segment["prevalence"]["categories"]["not_examined"] == {"count": 1, "rate": 0.125}
 
 
 def test_coverage_note_is_conditional_on_exhaustive_mode():

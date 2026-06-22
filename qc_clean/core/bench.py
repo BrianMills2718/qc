@@ -194,6 +194,7 @@ def phase0_scorecard(state: ProjectState) -> Dict[str, Any]:
             "gwet_ac1": irr.gwet_ac1,
             "interpretation": irr.interpretation,
             "application_level": irr.application_level,
+            "prevalence": _binary_matrix_prevalence(irr.coding_matrix),
             "note": (
                 "LLM-pass agreement, not human inter-rater reliability; "
                 "consistency not validity."
@@ -207,6 +208,7 @@ def phase0_scorecard(state: ProjectState) -> Dict[str, Any]:
                 "fleiss_kappa": irr.application_fleiss_kappa,
                 "gwet_ac1": irr.application_gwet_ac1,
                 "interpretation": irr.application_interpretation,
+                "prevalence": _binary_matrix_prevalence(irr.application_matrix),
                 "note": "Positive segment x code cells where at least one pass applied the code.",
             }
             card["reliability_llm_pass_agreement"]["segment_decision"] = {
@@ -216,6 +218,7 @@ def phase0_scorecard(state: ProjectState) -> Dict[str, Any]:
                 "fleiss_kappa": irr.segment_decision_fleiss_kappa,
                 "gwet_ac1": irr.segment_decision_gwet_ac1,
                 "interpretation": irr.segment_decision_interpretation,
+                "prevalence": _categorical_matrix_prevalence(irr.segment_decision_matrix),
                 "note": "coded/no_code/not_examined decisions over the segment universe.",
             }
     if state.stability_result is not None:
@@ -248,6 +251,71 @@ def phase0_scorecard(state: ProjectState) -> Dict[str, Any]:
         "cost_note": "D10 cost/latency is populated by the bench CLI from llm_client observability rows; never estimate it from ProjectState.",
     }
     return card
+
+
+def _binary_matrix_prevalence(matrix: Mapping[str, list[int]]) -> dict[str, Any]:
+    """Summarize absent/present rating prevalence for a binary agreement matrix."""
+    row_count = len(matrix)
+    rating_count, ratings_per_row = _matrix_rating_shape(matrix)
+    counts = {"absent": 0, "present": 0}
+    row_patterns = {"all_absent": 0, "all_present": 0, "mixed": 0}
+    for row in matrix.values():
+        if any(value not in {0, 1} for value in row):
+            raise ValueError("Binary reliability matrix values must be 0 or 1")
+        counts["present"] += sum(row)
+        counts["absent"] += len(row) - sum(row)
+        if row and all(value == 0 for value in row):
+            row_patterns["all_absent"] += 1
+        elif row and all(value == 1 for value in row):
+            row_patterns["all_present"] += 1
+        else:
+            row_patterns["mixed"] += 1
+    return {
+        "row_count": row_count,
+        "rating_count": rating_count,
+        "ratings_per_row": ratings_per_row,
+        "categories": _category_rates(counts, rating_count),
+        "row_patterns": row_patterns,
+        "note": "Rating prevalence for interpreting κ and AC1 under sparse labels.",
+    }
+
+
+def _categorical_matrix_prevalence(matrix: Mapping[str, list[str]]) -> dict[str, Any]:
+    """Summarize rating prevalence for a categorical agreement matrix."""
+    row_count = len(matrix)
+    rating_count, ratings_per_row = _matrix_rating_shape(matrix)
+    counts: Counter[str] = Counter()
+    for row in matrix.values():
+        counts.update(row)
+    return {
+        "row_count": row_count,
+        "rating_count": rating_count,
+        "ratings_per_row": ratings_per_row,
+        "categories": _category_rates(dict(sorted(counts.items())), rating_count),
+        "note": "Rating prevalence for interpreting κ and AC1 under sparse labels.",
+    }
+
+
+def _matrix_rating_shape(matrix: Mapping[str, list[Any]]) -> tuple[int, int]:
+    """Return total rating count and ratings per row, failing on ragged matrices."""
+    if not matrix:
+        return 0, 0
+    lengths = {len(row) for row in matrix.values()}
+    if len(lengths) != 1:
+        raise ValueError("Reliability matrix rows must have the same number of ratings")
+    ratings_per_row = lengths.pop()
+    return len(matrix) * ratings_per_row, ratings_per_row
+
+
+def _category_rates(counts: Mapping[str, int], rating_count: int) -> dict[str, dict[str, Any]]:
+    """Attach rates to category counts."""
+    return {
+        category: {
+            "count": count,
+            "rate": _safe_div(count, rating_count) if rating_count else None,
+        }
+        for category, count in counts.items()
+    }
 
 
 def d10_cost_latency_scorecard(
