@@ -28,10 +28,6 @@ highest-value documented lane.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active slice:** Plan #85, claim review browser UI. This slice adds a
-browser-native claim-review path on top of the existing API/MCP claim review
-surfaces without claiming expert adjudication.
-
 **Completed checkpoint:** Corpus-scope warning propagation now covers Markdown,
 JSON `export_warnings` metadata, and CSV `export_warnings.csv` for claim-bearing
 exports without recorded scope, and CLI/MCP project creation can now persist
@@ -40,7 +36,10 @@ Claim-bearing exports now also warn on empty scope records and
 population-without-sampling-frame metadata; this remains report discipline, not
 sampling adequacy evidence. Claim-review now has a bounded API listing at
 `/projects/{id}/review/claims` plus review-decision regression coverage, but no
-browser-native claim-review workflow or expert adjudication protocol is claimed.
+expert adjudication protocol is claimed. The browser review page now has a
+Claims mode that lists claim cards and submits claim approve/reject/modify
+decisions through the shared review decision endpoint; relationship and
+negative-case review UX remain future work.
 MCP now exposes `qc_review_decisions` for agent-driven review decisions,
 including claim targets with rationale preservation, while keeping the old
 `qc_review_codes` tool compatible. MCP also exposes `qc_review_claims` as a

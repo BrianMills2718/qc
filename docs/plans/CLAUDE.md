@@ -6,7 +6,6 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 85 | Claim review browser UI | High | Complete | `CLAIM_REVIEW_BROWSER_UI.md` |
 
 ## Completed Plans
 
@@ -39,6 +38,7 @@ Track all implementation work here.
 | Corpus scope create surfaces | Scope contract follow-up: CLI/MCP project creation can persist corpus scope when supplied while no-scope creation remains compatible | `completed/CORPUS_SCOPE_CREATE_SURFACES.md` |
 | Corpus scope completeness warnings | Scope/report follow-up: claim-bearing exports warn on empty scope records and population-without-sampling-frame metadata | `completed/CORPUS_SCOPE_COMPLETENESS_WARNINGS.md` |
 | Claim review API listing | INV-10 follow-up: `/projects/{id}/review/claims` exposes bounded claim review targets and claim decisions are covered through the review API | `completed/CLAIM_REVIEW_API_LISTING.md` |
+| Claim review browser UI | INV-10 follow-up: browser review page now has a Claims mode that lists claim cards and submits claim approve/reject/modify decisions | `completed/CLAIM_REVIEW_BROWSER_UI.md` |
 | MCP claim review decisions | INV-10 follow-up: `qc_review_decisions` applies generic review decisions including claim targets with preserved rationale | `completed/MCP_CLAIM_REVIEW_DECISIONS.md` |
 | MCP claim review listing | INV-10 follow-up: `qc_review_claims` exposes bounded claim review targets for agent-driven review workflows | `completed/MCP_CLAIM_REVIEW_LISTING.md` |
 | INV-7 prompt injection scorecard | Evaluation-harness follow-up: `make bench` can score externally supplied prompt-injection fixture outcomes without mutating project state | `completed/INV7_PROMPT_INJECTION_SCORECARD.md` |

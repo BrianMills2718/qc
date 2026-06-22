@@ -8,6 +8,25 @@
 
 ---
 
+## Outcome
+
+Completed 2026-06-21. The browser review page now includes a Codes/Claims mode
+switch. Claim mode fetches `/projects/{id}/review/claims`, renders claim cards
+with review-relevant metadata, and submits claim approve/reject/modify decisions
+through the existing `/projects/{id}/review/decisions` endpoint using
+`target_type="claim"`. Existing code and application review behavior remains on
+the Codes mode.
+
+This closes the first browser-native claim-review slice for INV-10. It does not
+add relationship/negative-case review UX, expert sampling, blinding, or
+methodological validity evidence.
+
+Verification: focused review API/UI tests passed (`26 passed`), Ruff passed on
+touched files, docs/plan/AGENTS checks passed, and final `make check` passed
+(`813 passed, 1 skipped, 8 deselected`; type check not yet configured).
+
+---
+
 ## Gap
 
 **Current:** Claim review is agent-drivable through `/projects/{id}/review/claims`,
@@ -116,7 +135,7 @@ callable capability.
 - [x] Required focused tests pass.
 - [x] Full `make check` passes or any failure is documented with evidence.
 - [x] Type-check status is reported.
-- [ ] Verified work is committed and pushed.
+- [x] Verified work is committed and pushed.
 
 ---
 
