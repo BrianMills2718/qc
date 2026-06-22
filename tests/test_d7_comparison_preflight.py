@@ -1,0 +1,235 @@
+"""Tests for D7 retrieval comparison protocol preflight."""
+
+from __future__ import annotations
+
+import hashlib
+import json
+
+from qc_clean.core.d7_comparison_preflight import preflight_d7_comparison_payloads
+from qc_clean.core.d7_retrieval import export_d7_retrieval_baseline
+from qc_clean.core.segmentation import segment_corpus
+from qc_clean.schemas.domain import (
+    AnalyticClaim,
+    ClaimKind,
+    ClaimScope,
+    Code,
+    Codebook,
+    Corpus,
+    Document,
+    ProjectState,
+)
+from scripts import preflight_d7_comparison
+
+
+def test_d7_comparison_preflight_accepts_matching_protocol_gold_and_predictions():
+    state = _state_with_claim("AI failed badly after rollout.", "AI improves workflow.")
+    package = _prediction_package(state)
+    gold = _gold_package(package)
+    protocol = _protocol_for(package, gold)
+
+    report = preflight_d7_comparison_payloads(protocol, gold, [package])
+
+    assert report.status == "pass"
+    assert report.protocol_id == "d7-heldout-comparison-v1"
+    assert report.baseline_count == 1
+    assert report.errors == []
+
+
+def test_d7_comparison_preflight_rejects_gold_mismatch():
+    state = _state_with_claim("AI failed badly after rollout.", "AI improves workflow.")
+    package = _prediction_package(state)
+    gold = _gold_package(package)
+    protocol = _protocol_for(package, gold)
+    gold["corpus_sha256"] = "f" * 64
+
+    report = preflight_d7_comparison_payloads(protocol, gold, [package])
+
+    assert report.status == "fail"
+    assert "corpus_sha256" in _error_fields(report)
+
+
+def test_d7_comparison_preflight_rejects_prediction_config_mismatch():
+    state = _state_with_claim("AI failed badly after rollout.", "AI improves workflow.")
+    package = _prediction_package(state)
+    gold = _gold_package(package)
+    protocol = _protocol_for(package, gold)
+    protocol["expected_predictions"][0]["candidates_per_claim"] = 2
+
+    report = preflight_d7_comparison_payloads(protocol, gold, [package])
+
+    assert report.status == "fail"
+    assert "candidates_per_claim" in _error_fields(report)
+
+
+def test_d7_comparison_preflight_rejects_prediction_file_hash_mismatch():
+    state = _state_with_claim("AI failed badly after rollout.", "AI improves workflow.")
+    package = _prediction_package(state)
+    gold = _gold_package(package)
+    protocol = _protocol_for(package, gold)
+    baseline = package["disconfirmation_baselines"][0]["name"]
+    protocol["expected_predictions"][0]["prediction_file_sha256"] = "f" * 64
+
+    report = preflight_d7_comparison_payloads(
+        protocol,
+        gold,
+        [package],
+        prediction_file_sha256_by_baseline={baseline: "e" * 64},
+    )
+
+    assert report.status == "fail"
+    assert "prediction_file_sha256" in _error_fields(report)
+
+
+def test_d7_comparison_preflight_script_outputs_json(tmp_path, capsys):
+    state = _state_with_claim("AI failed badly after rollout.", "AI improves workflow.")
+    package = _prediction_package(state)
+    gold = _gold_package(package)
+    prediction_path = tmp_path / "predictions.json"
+    prediction_path.write_text(json.dumps(package), encoding="utf-8")
+    protocol = _protocol_for(package, gold, prediction_file_sha256=_sha256_file(prediction_path))
+    protocol_path = tmp_path / "protocol.json"
+    gold_path = tmp_path / "gold.json"
+    protocol_path.write_text(json.dumps(protocol), encoding="utf-8")
+    gold_path.write_text(json.dumps(gold), encoding="utf-8")
+
+    exit_code = preflight_d7_comparison.main([
+        str(protocol_path),
+        str(gold_path),
+        str(prediction_path),
+    ])
+
+    output = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert output["status"] == "pass"
+
+    protocol["expected_predictions"][0]["prediction_file_sha256"] = "f" * 64
+    protocol_path.write_text(json.dumps(protocol), encoding="utf-8")
+    exit_code = preflight_d7_comparison.main([
+        str(protocol_path),
+        str(gold_path),
+        str(prediction_path),
+    ])
+
+    output = json.loads(capsys.readouterr().out)
+    assert exit_code == 1
+    assert output["status"] == "fail"
+    assert "prediction_file_sha256" in {error["field"] for error in output["errors"]}
+
+
+def _prediction_package(state: ProjectState) -> dict:
+    return export_d7_retrieval_baseline(
+        state,
+        candidates_per_claim=1,
+        trace_id="qualitative_coding/d7-retrieval/project-d7",
+        max_budget=1.0,
+    )
+
+
+def _gold_package(package: dict) -> dict:
+    metadata = package["retrieval_run"]
+    return {
+        "schema_version": 1,
+        "gold_set_id": "d7-heldout-v1",
+        "dataset_name": "Held-out D7 comparison v1",
+        "split": "held_out",
+        "corpus_sha256": metadata["corpus_sha256"],
+        "project_state_sha256": metadata["project_state_sha256"],
+        "prompt_frozen": True,
+        "contamination_checked": True,
+        "adjudication": {
+            "coder_count": 2,
+            "adjudicator": "expert-panel",
+            "protocol": "Independent coding followed by adjudication.",
+        },
+        "contrary_evidence": [
+            {
+                "target_claim_id": "claim-ai",
+                "doc_id": "d1",
+                "start_char": 0,
+                "end_char": len("AI failed badly after rollout."),
+            }
+        ],
+    }
+
+
+def _protocol_for(
+    package: dict,
+    gold: dict,
+    *,
+    prediction_file_sha256: str | None = None,
+) -> dict:
+    metadata = package["retrieval_run"]
+    baseline_name = package["disconfirmation_baselines"][0]["name"]
+    return {
+        "schema_version": 1,
+        "package_type": "qualitative_coding.d7_retrieval_comparison_protocol",
+        "protocol_id": "d7-heldout-comparison-v1",
+        "project_id": metadata["project_id"],
+        "dataset_name": gold["dataset_name"],
+        "split": gold["split"],
+        "gold_set_id": gold["gold_set_id"],
+        "corpus_sha256": gold["corpus_sha256"],
+        "project_state_sha256": gold["project_state_sha256"],
+        "prompt_frozen": gold["prompt_frozen"],
+        "contamination_checked": gold["contamination_checked"],
+        "registered_before_run": True,
+        "expected_predictions": [
+            {
+                "baseline_name": baseline_name,
+                "retrieval_mode": metadata["retrieval_mode"],
+                "candidates_per_claim": metadata["candidates_per_claim"],
+                "max_targets": metadata["max_targets"],
+                "embedding_model": metadata["embedding_model"],
+                "embedding_dimensions": metadata["embedding_dimensions"],
+                "trace_id": metadata["trace_id"],
+                "max_budget": metadata["max_budget"],
+                "prediction_file_sha256": prediction_file_sha256,
+            }
+        ],
+        "success_criteria": [
+            "Score retrieval predictions against the registered held-out D7 gold package."
+        ],
+        "caution": (
+            "D7 comparison protocol preflight is process metadata only; it is not "
+            "held-out D7 evidence, live-baseline evidence, or superiority evidence."
+        ),
+    }
+
+
+def _state_with_claim(content: str, claim_text: str) -> ProjectState:
+    doc = Document(id="d1", name="interview.txt", content=content)
+    state = ProjectState(
+        id="project-d7",
+        name="D7 retrieval preflight test",
+        corpus=Corpus(documents=[doc]),
+        codebook=Codebook(codes=[
+            Code(
+                id="AI_USE",
+                name="AI Use",
+                description="Use of AI in workflow",
+            )
+        ]),
+        claims=[_claim(claim_text)],
+    )
+    state.segments = segment_corpus(state.corpus.documents)
+    return state
+
+
+def _claim(text: str) -> AnalyticClaim:
+    return AnalyticClaim(
+        id="claim-ai",
+        claim_kind=ClaimKind.SYNTHESIS_FINDING,
+        source_stage="synthesis",
+        claim_text=text,
+        scope=ClaimScope(corpus_level=True, code_ids=["AI_USE"]),
+        origin_object_type="synthesis",
+        origin_object_id="finding:0",
+    )
+
+
+def _error_fields(report) -> set[str]:
+    return {error.field for error in report.errors}
+
+
+def _sha256_file(path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()

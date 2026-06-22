@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 
 import pytest
@@ -45,6 +46,24 @@ def test_exports_lexical_retrieval_candidates_as_d7_baseline_package():
     assert anchor["start_char"] == 0
     assert anchor["end_char"] == len("AI failed badly after rollout.")
     assert anchor["quote_text"] == "AI failed badly after rollout."
+
+
+def test_export_records_project_hash_trace_and_budget_provenance():
+    state = _state_with_claim("AI failed badly after rollout.", "AI improves workflow.")
+
+    package = export_d7_retrieval_baseline(
+        state,
+        candidates_per_claim=1,
+        trace_id="qualitative_coding/d7-retrieval/project-d7",
+        max_budget=0.75,
+    )
+
+    metadata = package["retrieval_run"]
+    assert metadata["project_id"] == state.id
+    assert metadata["project_state_sha256"] == _sha256_jsonable(state.model_dump(mode="json"))
+    assert metadata["corpus_sha256"] == _sha256_jsonable(state.corpus.model_dump(mode="json"))
+    assert metadata["trace_id"] == "qualitative_coding/d7-retrieval/project-d7"
+    assert metadata["max_budget"] == 0.75
 
 
 def test_embedding_hybrid_export_can_use_injected_embedding_provider():
@@ -187,6 +206,8 @@ def test_comparison_does_not_mutate_project_state():
 def _state_with_claim(content: str, claim_text: str) -> ProjectState:
     doc = Document(id="d1", name="interview.txt", content=content)
     state = ProjectState(
+        id="project-d7",
+        name="D7 retrieval test",
         corpus=Corpus(documents=[doc]),
         codebook=Codebook(codes=[
             Code(
@@ -199,6 +220,16 @@ def _state_with_claim(content: str, claim_text: str) -> ProjectState:
     )
     state.segments = segment_corpus(state.corpus.documents)
     return state
+
+
+def _sha256_jsonable(value: object) -> str:
+    payload = json.dumps(
+        value,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=False,
+    ).encode("utf-8")
+    return hashlib.sha256(payload).hexdigest()
 
 
 def _claim(text: str) -> AnalyticClaim:

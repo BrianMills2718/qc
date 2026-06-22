@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import hashlib
+import json
 import re
 from typing import Any, Iterable, Literal, Mapping
 
@@ -32,6 +34,9 @@ class D7RetrievalRunMetadata(BaseModel):
     """Metadata for one retrieval-candidate export run."""
 
     schema_version: Literal[1] = Field(default=1, description="Retrieval export metadata schema")
+    project_id: str = Field(description="Project ID used for retrieval prediction export")
+    project_state_sha256: str = Field(description="SHA-256 hash of the exported ProjectState JSON")
+    corpus_sha256: str = Field(description="SHA-256 hash of the exported corpus JSON")
     retrieval_mode: str = Field(description="Retrieval mode used for candidate generation")
     embedding_model: str | None = Field(
         default=None,
@@ -53,6 +58,8 @@ class D7RetrievalRunMetadata(BaseModel):
     min_semantic_similarity: float = Field(
         description="Minimum cosine similarity for semantic-only candidates"
     )
+    trace_id: str = Field(description="Observability trace ID used for retrieval export")
+    max_budget: float = Field(description="Maximum budget supplied to retrieval export")
     note: str = Field(description="Claim-discipline note for consumers")
 
 
@@ -156,6 +163,9 @@ def export_d7_retrieval_baseline(
         ],
     )
     metadata = D7RetrievalRunMetadata(
+        project_id=state.id,
+        project_state_sha256=_sha256_jsonable(state.model_dump(mode="json")),
+        corpus_sha256=_sha256_jsonable(state.corpus.model_dump(mode="json")),
         retrieval_mode=retrieval_mode,
         embedding_model=embedding_model,
         embedding_dimensions=embedding_dimensions,
@@ -169,6 +179,8 @@ def export_d7_retrieval_baseline(
         expanded_term_weight=expanded_term_weight,
         semantic_weight=semantic_weight,
         min_semantic_similarity=min_semantic_similarity,
+        trace_id=trace_id,
+        max_budget=max_budget,
         note=(
             "Retrieval predictions are candidate passages for D7 scoring; they are "
             "not human-adjudicated negative-case findings or methodological validity evidence."
@@ -242,3 +254,14 @@ def _slug(value: str) -> str:
     """Normalize a model/config value for use in a baseline name."""
     slug = re.sub(r"[^A-Za-z0-9]+", "_", value.strip()).strip("_").lower()
     return slug or "model"
+
+
+def _sha256_jsonable(value: Any) -> str:
+    """Hash a JSON-serializable value using canonical compact JSON."""
+    payload = json.dumps(
+        value,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=False,
+    ).encode("utf-8")
+    return hashlib.sha256(payload).hexdigest()

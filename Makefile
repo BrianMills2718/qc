@@ -1,4 +1,4 @@
-.PHONY: help test test-quick test-e2e test-all bench bench-package write-phase0-adjudication-package validate-d3-gold validate-d7-gold validate-inv7-package validate-inv7-live-protocol inv7-live-preflight validate-adjudication-responses validate-adjudication-protocol adjudication-protocol-preflight adjudication-response-preflight import-adjudication-responses lint-scope-phrasing export-audit-manifest verify-export-audit-manifest export-publish-preflight verify-export-audit-log run-d7-retrieval compare-d7-retrieval run-inv7-fixtures run-inv7-live-fixtures adjudication-sample check lint docs-check clean status cost errors
+.PHONY: help test test-quick test-e2e test-all bench bench-package write-phase0-adjudication-package validate-d3-gold validate-d7-gold validate-inv7-package validate-inv7-live-protocol inv7-live-preflight validate-d7-comparison-protocol d7-comparison-preflight validate-adjudication-responses validate-adjudication-protocol adjudication-protocol-preflight adjudication-response-preflight import-adjudication-responses lint-scope-phrasing export-audit-manifest verify-export-audit-manifest export-publish-preflight verify-export-audit-log run-d7-retrieval compare-d7-retrieval run-inv7-fixtures run-inv7-live-fixtures adjudication-sample check lint docs-check clean status cost errors
 
 DAYS ?= 7
 PROJECT ?= qualitative_coding
@@ -195,6 +195,24 @@ ifndef PREDICTIONS
 	$(error PREDICTIONS is required. Usage: make compare-d7-retrieval ID=<project_id> GOLD=gold.json PREDICTIONS="a.json b.json")
 endif
 	python scripts/compare_d7_retrieval.py $(ID) --gold-file $(GOLD) $(foreach file,$(PREDICTIONS),--predictions-file $(file)) $(if $(OUTPUT),--output $(OUTPUT),)
+
+validate-d7-comparison-protocol:  ## Validate a D7 retrieval comparison protocol (PROTOCOL=protocol.json)
+ifndef PROTOCOL
+	$(error PROTOCOL is required. Usage: make validate-d7-comparison-protocol PROTOCOL=protocol.json)
+endif
+	python scripts/validate_d7_comparison_protocol.py $(PROTOCOL)
+
+d7-comparison-preflight:  ## Preflight D7 comparison inputs (PROTOCOL=protocol.json GOLD=gold.json PREDICTIONS="a.json b.json")
+ifndef PROTOCOL
+	$(error PROTOCOL is required. Usage: make d7-comparison-preflight PROTOCOL=protocol.json GOLD=gold.json PREDICTIONS="a.json b.json")
+endif
+ifndef GOLD
+	$(error GOLD is required. Usage: make d7-comparison-preflight PROTOCOL=protocol.json GOLD=gold.json PREDICTIONS="a.json b.json")
+endif
+ifndef PREDICTIONS
+	$(error PREDICTIONS is required. Usage: make d7-comparison-preflight PROTOCOL=protocol.json GOLD=gold.json PREDICTIONS="a.json b.json")
+endif
+	python scripts/preflight_d7_comparison.py $(PROTOCOL) $(GOLD) $(PREDICTIONS)
 
 run-inv7-fixtures:  ## Run deterministic INV-7 structural fixtures (OUTPUT=inv7.json)
 ifndef OUTPUT
