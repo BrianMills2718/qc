@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 191 | QC CLI evaluation protocol surfaces | High | Planned | `QC_CLI_EVALUATION_PROTOCOL_SURFACES.md` |
 
 ## Completed Plans
 

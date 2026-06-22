@@ -26,10 +26,12 @@ highest-value documented lane.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Select and plan the next deterministic, high-value
-roadmap lane from `docs/PROJECT_THEORY_AND_GOALS.md` and
-`docs/EVALUATION_HARNESS.md`; no implementation slice is currently active
-after Plan #190 closeout.
+**Active checkpoint:** Plan #191 is active: add top-level `qc_cli.py` wrappers
+for D4/D6/D8/D9/confidence protocol validation and result preflight scripts.
+This slice should forward arguments to the canonical scripts without duplicating
+protocol/preflight logic or claiming populated labels, evaluation evidence,
+methodological-validity evidence, benchmark results, parity/superiority
+evidence, or SOTA.
 
 **Completed checkpoint:** `qc_cli.py` now wraps the theoretical-sampling
 protocol validation, candidate/result preflight, candidate package export, and
