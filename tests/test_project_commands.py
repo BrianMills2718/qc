@@ -179,6 +179,7 @@ class TestProjectAddDocs:
                 directory=None,
                 recode=False,
                 model=None,
+                refresh_higher_order=False,
             ),
         )
 
@@ -208,6 +209,7 @@ class TestProjectAddDocs:
             saved = store.load(args.project_id)
             seen["project_id"] = args.project_id
             seen["model"] = args.model
+            seen["refresh_higher_order"] = args.refresh_higher_order
             seen["documents"] = saved.corpus.num_documents
             return 0
 
@@ -221,6 +223,7 @@ class TestProjectAddDocs:
                 directory=None,
                 recode=True,
                 model="gpt-test",
+                refresh_higher_order=True,
             ),
         )
 
@@ -228,6 +231,7 @@ class TestProjectAddDocs:
         assert seen == {
             "project_id": state.id,
             "model": "gpt-test",
+            "refresh_higher_order": True,
             "documents": 1,
         }
 
@@ -258,6 +262,7 @@ class TestProjectAddDocs:
                 directory=None,
                 recode=True,
                 model="gpt-test",
+                refresh_higher_order=True,
             ),
         )
 
@@ -265,6 +270,103 @@ class TestProjectAddDocs:
         assert result == 1
         assert called is False
         assert saved.corpus.num_documents == 0
+
+
+# ---------------------------------------------------------------------------
+# Tests: _recode_project logic
+# ---------------------------------------------------------------------------
+
+class TestProjectRecode:
+    def test_recode_forwards_refresh_higher_order_to_pipeline_factory(
+        self,
+        tmp_store,
+        monkeypatch,
+    ):
+        state = ProjectState(
+            id="recode-refresh",
+            name="Recode Refresh",
+            config=ProjectConfig(methodology=Methodology.THEMATIC_ANALYSIS),
+            corpus=Corpus(documents=[
+                Document(id="coded", name="coded.txt", content="coded"),
+                Document(id="new", name="new.txt", content="new"),
+            ]),
+            codebook=Codebook(codes=[Code(id="C1", name="Existing")]),
+            code_applications=[
+                CodeApplication(code_id="C1", doc_id="coded", quote_text="coded"),
+            ],
+        )
+        tmp_store.save(state)
+        seen = {}
+
+        def fake_create_incremental_pipeline(
+            methodology,
+            on_stage_complete,
+            refresh_higher_order=False,
+        ):
+            seen["methodology"] = methodology
+            seen["refresh_higher_order"] = refresh_higher_order
+            return AnalysisPipeline(stages=[], on_stage_complete=on_stage_complete)
+
+        monkeypatch.setattr(
+            "qc_clean.core.pipeline.pipeline_factory.create_incremental_pipeline",
+            fake_create_incremental_pipeline,
+        )
+
+        result = project_commands._recode_project(
+            tmp_store,
+            SimpleNamespace(
+                project_id=state.id,
+                model="gpt-test",
+                refresh_higher_order=True,
+            ),
+        )
+
+        assert result == 0
+        assert seen == {
+            "methodology": Methodology.THEMATIC_ANALYSIS.value,
+            "refresh_higher_order": True,
+        }
+
+    def test_recode_refresh_higher_order_rejects_grounded_theory_before_pipeline(
+        self,
+        tmp_store,
+        monkeypatch,
+        capsys,
+    ):
+        state = ProjectState(
+            id="gt-refresh",
+            name="GT Refresh",
+            config=ProjectConfig(methodology=Methodology.GROUNDED_THEORY),
+            corpus=Corpus(documents=[
+                Document(id="coded", name="coded.txt", content="coded"),
+                Document(id="new", name="new.txt", content="new"),
+            ]),
+            codebook=Codebook(codes=[Code(id="C1", name="Existing")]),
+            code_applications=[
+                CodeApplication(code_id="C1", doc_id="coded", quote_text="coded"),
+            ],
+        )
+        tmp_store.save(state)
+
+        def fail_if_called(*args, **kwargs):
+            raise AssertionError("GT refresh must fail before pipeline creation")
+
+        monkeypatch.setattr(
+            "qc_clean.core.pipeline.pipeline_factory.create_incremental_pipeline",
+            fail_if_called,
+        )
+
+        result = project_commands._recode_project(
+            tmp_store,
+            SimpleNamespace(
+                project_id=state.id,
+                model="gpt-test",
+                refresh_higher_order=True,
+            ),
+        )
+
+        assert result == 1
+        assert "only supported for default/thematic" in capsys.readouterr().err
 
 
 # ---------------------------------------------------------------------------
@@ -963,6 +1065,7 @@ class TestCLIParsing:
             "--files",
             "interview.txt",
             "--recode",
+            "--refresh-higher-order",
             "--model",
             "gpt-test",
         ])
@@ -972,7 +1075,27 @@ class TestCLIParsing:
         assert args.project_id == "pid"
         assert args.files == ["interview.txt"]
         assert args.recode is True
+        assert args.refresh_higher_order is True
         assert args.model == "gpt-test"
+
+    def test_recode_subparser_accepts_refresh_higher_order(self):
+        from qc_cli import create_parser
+        parser = create_parser()
+
+        args = parser.parse_args([
+            "project",
+            "recode",
+            "pid",
+            "--model",
+            "gpt-test",
+            "--refresh-higher-order",
+        ])
+
+        assert args.command == "project"
+        assert args.project_action == "recode"
+        assert args.project_id == "pid"
+        assert args.model == "gpt-test"
+        assert args.refresh_higher_order is True
 
     def test_export_subparser(self):
         from qc_cli import create_parser

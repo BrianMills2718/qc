@@ -81,6 +81,7 @@ def create_pipeline(
 def create_incremental_pipeline(
     methodology: str = "default",
     on_stage_complete=None,
+    refresh_higher_order: bool = False,
 ) -> AnalysisPipeline:
     """
     Build a pipeline for incremental re-coding after new documents are added.
@@ -88,9 +89,42 @@ def create_incremental_pipeline(
     Skips ingest (docs already loaded), runs incremental coding with existing
     codebook as context, then re-runs downstream stages.
     """
-    from .stages.incremental_coding import IncrementalCodingStage
+    from .stages.incremental_coding import (
+        IncrementalCodingStage,
+        RebuildThematicPhase1ContextStage,
+    )
     from .stages.cross_interview import CrossInterviewStage
     from .stages.negative_case import NegativeCaseStage
+
+    is_gt = methodology == Methodology.GROUNDED_THEORY.value or methodology == "grounded_theory"
+    if refresh_higher_order and is_gt:
+        raise ValueError(
+            "refresh_higher_order is only supported for default/thematic "
+            "incremental recode; grounded-theory refresh requires a separate "
+            "GT context reconstruction pipeline."
+        )
+
+    if refresh_higher_order:
+        from .stages.perspective import PerspectiveStage
+        from .stages.relationship import RelationshipStage
+        from .stages.synthesis import SynthesisStage
+
+        stages = [
+            IncrementalCodingStage(emit_invalidation_warning=False),
+            RebuildThematicPhase1ContextStage(),
+            PerspectiveStage(),
+            RelationshipStage(),
+            SynthesisStage(),
+            CrossInterviewStage(),
+            # Disconfirmation runs last so it covers refreshed claim rows.
+            NegativeCaseStage(),
+        ]
+
+        logger.info(
+            "Created incremental %s refresh pipeline with %d stages",
+            methodology, len(stages),
+        )
+        return AnalysisPipeline(stages=stages, on_stage_complete=on_stage_complete)
 
     # Incremental pipeline only includes stages that work from state data.
     # Perspective/Relationship/Synthesis (default) and Axial/Selective/Theory

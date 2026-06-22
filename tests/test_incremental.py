@@ -15,6 +15,7 @@ import pytest
 from qc_clean.core.pipeline.pipeline_engine import PipelineContext
 from qc_clean.core.pipeline.stages.incremental_coding import (
     IncrementalCodingStage,
+    RebuildThematicPhase1ContextStage,
     _format_codebook_for_prompt,
 )
 from qc_clean.core.pipeline.pipeline_factory import create_incremental_pipeline
@@ -311,6 +312,44 @@ class TestIncrementalCodingStage:
         assert any("invalidated: synthesis" in warning for warning in result.data_warnings)
         assert not any("may be stale" in warning for warning in result.data_warnings)
 
+    def test_incremental_refresh_mode_invalidates_without_rerun_warning(self):
+        """Refresh pipelines clear stale outputs before recompute without stale warning."""
+        state = _make_state_with_codes()
+        state.synthesis = Synthesis(executive_summary="stale summary")
+        response = _make_code_hierarchy([
+            {
+                "id": "DATA_PRIVACY",
+                "name": "Data Privacy",
+                "description": "Concerns about data protection",
+                "example_quotes": ["Data privacy is our top concern"],
+                "confidence": 0.9,
+            },
+        ])
+
+        with patch("qc_clean.core.llm.llm_handler.LLMHandler") as MockLLM:
+            instance = MockLLM.return_value
+            instance.extract_structured = AsyncMock(return_value=response)
+            result = asyncio.run(
+                IncrementalCodingStage(emit_invalidation_warning=False).execute(
+                    state,
+                    PipelineContext(),
+                )
+            )
+
+        assert result.synthesis is None
+        assert not any("invalidated: synthesis" in warning for warning in result.data_warnings)
+
+    def test_rebuild_thematic_phase1_context_stage_uses_current_codebook(self):
+        state = _make_state_with_codes()
+        ctx = PipelineContext()
+
+        asyncio.run(RebuildThematicPhase1ContextStage().execute(state, ctx))
+
+        assert ctx.phase1_json is not None
+        hierarchy = CodeHierarchy.model_validate_json(ctx.phase1_json)
+        assert hierarchy.total_codes == 2
+        assert [code.id for code in hierarchy.codes] == ["AI_ADOPTION", "WORKFLOW_CHANGE"]
+
     def test_stage_name(self):
         assert IncrementalCodingStage().name() == "incremental_coding"
 
@@ -356,20 +395,47 @@ class TestIncrementalPipeline:
     def test_creates_default_pipeline(self):
         pipeline = create_incremental_pipeline("default")
         stage_names = [s.name() for s in pipeline.stages]
-        assert "incremental_coding" in stage_names
-        assert "negative_case_analysis" in stage_names
-        assert "cross_interview" in stage_names
+        assert stage_names == [
+            "incremental_coding",
+            "cross_interview",
+            "negative_case_analysis",
+        ]
         # Ctx-dependent stages are excluded from incremental pipeline
         assert "thematic_coding" not in stage_names
         assert "perspective" not in stage_names
         assert "ingest" not in stage_names
 
+    def test_creates_thematic_refresh_pipeline(self):
+        pipeline = create_incremental_pipeline(
+            "thematic_analysis",
+            refresh_higher_order=True,
+        )
+        stage_names = [s.name() for s in pipeline.stages]
+        assert stage_names == [
+            "incremental_coding",
+            "rebuild_thematic_phase1_context",
+            "perspective",
+            "relationship",
+            "synthesis",
+            "cross_interview",
+            "negative_case_analysis",
+        ]
+
+    def test_refresh_pipeline_rejects_grounded_theory(self):
+        with pytest.raises(ValueError, match="only supported for default/thematic"):
+            create_incremental_pipeline(
+                "grounded_theory",
+                refresh_higher_order=True,
+            )
+
     def test_creates_gt_pipeline(self):
         pipeline = create_incremental_pipeline("grounded_theory")
         stage_names = [s.name() for s in pipeline.stages]
-        assert "incremental_coding" in stage_names
-        assert "negative_case_analysis" in stage_names
-        assert "cross_interview" in stage_names
+        assert stage_names == [
+            "incremental_coding",
+            "cross_interview",
+            "negative_case_analysis",
+        ]
         # Ctx-dependent stages are excluded from incremental pipeline
         assert "gt_open_coding" not in stage_names
         assert "gt_axial_coding" not in stage_names

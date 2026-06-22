@@ -161,6 +161,7 @@ def _add_docs(store: ProjectStore, args) -> int:
         recode_args = SimpleNamespace(
             project_id=project_id,
             model=getattr(args, "model", None),
+            refresh_higher_order=getattr(args, "refresh_higher_order", False),
         )
         return _recode_project(store, recode_args)
 
@@ -807,6 +808,16 @@ def _recode_project(store: ProjectStore, args) -> int:
         print("All documents are already coded. Add new documents first with 'project add-docs'.", file=sys.stderr)
         return 1
 
+    refresh_higher_order = bool(getattr(args, "refresh_higher_order", False))
+    if refresh_higher_order and state.config.methodology == Methodology.GROUNDED_THEORY:
+        print(
+            "--refresh-higher-order is only supported for default/thematic "
+            "projects in this INV-11 slice; grounded-theory refresh requires a "
+            "separate GT context reconstruction pipeline.",
+            file=sys.stderr,
+        )
+        return 1
+
     from qc_clean.core.pipeline.pipeline_factory import create_incremental_pipeline
 
     async def save_callback(s):
@@ -815,6 +826,7 @@ def _recode_project(store: ProjectStore, args) -> int:
     pipeline = create_incremental_pipeline(
         methodology=state.config.methodology.value,
         on_stage_complete=save_callback,
+        refresh_higher_order=refresh_higher_order,
     )
 
     from qc_clean.core.pipeline.pipeline_engine import PipelineContext
@@ -830,6 +842,8 @@ def _recode_project(store: ProjectStore, args) -> int:
     print(f"  Total documents: {state.corpus.num_documents}")
     print(f"  Uncoded documents: {len(uncoded)}")
     print(f"  Model: {model_name}")
+    if refresh_higher_order:
+        print("  Refresh higher-order: enabled (thematic perspective/relationship/synthesis)")
     print()
 
     # Reset pipeline status for the incremental run

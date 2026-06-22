@@ -506,6 +506,14 @@ Examples:
         default=None,
         help='LLM model to use when --recode is supplied (default: project config)',
     )
+    proj_add.add_argument(
+        '--refresh-higher-order',
+        action='store_true',
+        help=(
+            'With --recode, refresh thematic perspective/relationship/synthesis '
+            'outputs after incremental coding (default/thematic projects only)'
+        ),
+    )
 
     proj_run = project_subparsers.add_parser('run', help='Run analysis pipeline on project')
     proj_run.add_argument('project_id', help='Project ID')
@@ -568,6 +576,14 @@ Examples:
     proj_recode = project_subparsers.add_parser('recode', help='Incrementally code new documents')
     proj_recode.add_argument('project_id', help='Project ID')
     proj_recode.add_argument('--model', default=None, help='LLM model to use (default: gpt-5-mini)')
+    proj_recode.add_argument(
+        '--refresh-higher-order',
+        action='store_true',
+        help=(
+            'Refresh thematic perspective/relationship/synthesis outputs after '
+            'incremental coding (default/thematic projects only)'
+        ),
+    )
 
     # Review command
     review_parser = subparsers.add_parser(

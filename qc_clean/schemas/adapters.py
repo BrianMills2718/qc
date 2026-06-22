@@ -11,6 +11,7 @@ from .analysis_schemas import (
     CodeHierarchy,
     EntityMapping,
     SpeakerAnalysis,
+    ThematicCode,
 )
 from .domain import (
     AnalysisMemo,
@@ -64,6 +65,43 @@ def code_hierarchy_to_codebook(
         methodology=methodology,
         created_by=Provenance.LLM,
         codes=codes,
+    )
+
+
+def codebook_to_code_hierarchy(codebook: Codebook) -> CodeHierarchy:
+    """Convert the current domain codebook back into Phase 1 JSON shape.
+
+    Incremental thematic refresh uses this to satisfy downstream stages that
+    consume ``ctx.phase1_json`` without rerunning full code discovery.
+    """
+    codes = [
+        ThematicCode(
+            id=code.id,
+            name=code.name,
+            description=code.description,
+            semantic_definition=code.definition,
+            parent_id=code.parent_id,
+            level=code.level,
+            example_quotes=list(code.example_quotes),
+            mention_count=code.mention_count,
+            discovery_confidence=code.confidence,
+            reasoning=code.reasoning,
+        )
+        for code in codebook.codes
+    ]
+    analysis_confidence = (
+        sum(code.discovery_confidence for code in codes) / len(codes)
+        if codes
+        else 0.0
+    )
+    return CodeHierarchy(
+        codes=codes,
+        total_codes=len(codes),
+        analysis_confidence=analysis_confidence,
+        analytical_memo=(
+            "Reconstructed from the current codebook for incremental thematic "
+            "higher-order refresh."
+        ),
     )
 
 

@@ -15,6 +15,7 @@ from qc_clean.core.grounding import MatchStatus, resolve_and_anchor, warn_unanch
 from qc_clean.core.prompting import format_untrusted_data_block, format_untrusted_documents
 from qc_clean.core.pipeline.irr import normalize_code_name
 from qc_clean.core.pipeline.saturation import calculate_codebook_change
+from qc_clean.schemas.adapters import codebook_to_code_hierarchy
 from qc_clean.schemas.analysis_schemas import CodeHierarchy
 from qc_clean.schemas.domain import (
     AnalysisMemo,
@@ -42,6 +43,9 @@ _STALE_CLAIM_SOURCE_STAGES = {
 
 class IncrementalCodingStage(PipelineStage):
     """Code only new/uncoded documents against an existing codebook."""
+
+    def __init__(self, *, emit_invalidation_warning: bool = True) -> None:
+        self._emit_invalidation_warning = emit_invalidation_warning
 
     def name(self) -> str:
         return "incremental_coding"
@@ -133,7 +137,7 @@ class IncrementalCodingStage(PipelineStage):
         # stale objects and stale ledger rows rather than exporting pre-recode
         # interpretations as if current.
         invalidated = invalidate_stale_higher_order_outputs(state)
-        if invalidated:
+        if invalidated and self._emit_invalidation_warning:
             warning = (
                 f"Incremental recode (iteration {state.iteration}) added "
                 f"{len(new_docs)} document(s) and invalidated: "
@@ -143,6 +147,25 @@ class IncrementalCodingStage(PipelineStage):
             state.data_warnings.append(warning)
             logger.warning("INV-11 invalidation: %s", warning)
 
+        return state
+
+
+class RebuildThematicPhase1ContextStage(PipelineStage):
+    """Reconstruct thematic Phase 1 context from the current codebook."""
+
+    def name(self) -> str:
+        return "rebuild_thematic_phase1_context"
+
+    def can_execute(self, state: ProjectState) -> bool:
+        return len(state.codebook.codes) > 0
+
+    async def execute(self, state: ProjectState, ctx: PipelineContext) -> ProjectState:
+        hierarchy = codebook_to_code_hierarchy(state.codebook)
+        ctx.phase1_json = hierarchy.model_dump_json(indent=2)
+        logger.info(
+            "Rebuilt thematic Phase 1 context from current codebook: codes=%d",
+            len(hierarchy.codes),
+        )
         return state
 
 

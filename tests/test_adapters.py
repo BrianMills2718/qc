@@ -21,11 +21,12 @@ from qc_clean.schemas.adapters import (
     build_project_state_from_phases,
     code_hierarchy_to_applications,
     code_hierarchy_to_codebook,
+    codebook_to_code_hierarchy,
     entity_mapping_to_entities,
     project_state_to_cross_interview_input,
     speaker_analysis_to_perspectives,
 )
-from qc_clean.schemas.domain import Provenance
+from qc_clean.schemas.domain import Code, Codebook, Provenance
 
 
 # ---------------------------------------------------------------------------
@@ -143,6 +144,58 @@ class TestCodeHierarchyToCodebook:
     def test_version(self, sample_hierarchy):
         cb = code_hierarchy_to_codebook(sample_hierarchy, version=3)
         assert cb.version == 3
+
+
+class TestCodebookToCodeHierarchy:
+    def test_round_trips_codebook_fields_for_recode_refresh(self):
+        codebook = Codebook(
+            codes=[
+                Code(
+                    id="AI_USAGE",
+                    name="AI Usage",
+                    description="Use of AI tools.",
+                    definition="Any AI usage.",
+                    parent_id=None,
+                    level=0,
+                    example_quotes=["I use AI daily."],
+                    mention_count=5,
+                    confidence=0.8,
+                    reasoning="Frequent direct mentions.",
+                ),
+                Code(
+                    id="AI_LIMITS",
+                    name="AI Limitations",
+                    description="Limits of AI.",
+                    definition="Where AI falls short.",
+                    parent_id="AI_USAGE",
+                    level=1,
+                    example_quotes=["AI hallucinates."],
+                    mention_count=2,
+                    confidence=0.6,
+                    reasoning="Participants named constraints.",
+                ),
+            ],
+        )
+
+        hierarchy = codebook_to_code_hierarchy(codebook)
+
+        assert hierarchy.total_codes == 2
+        assert hierarchy.analysis_confidence == pytest.approx(0.7)
+        first = hierarchy.codes[0]
+        assert first.id == "AI_USAGE"
+        assert first.name == "AI Usage"
+        assert first.semantic_definition == "Any AI usage."
+        assert first.example_quotes == ["I use AI daily."]
+        assert first.discovery_confidence == 0.8
+        assert first.reasoning == "Frequent direct mentions."
+        assert hierarchy.codes[1].parent_id == "AI_USAGE"
+
+    def test_empty_codebook_has_zero_confidence(self):
+        hierarchy = codebook_to_code_hierarchy(Codebook(codes=[]))
+
+        assert hierarchy.codes == []
+        assert hierarchy.total_codes == 0
+        assert hierarchy.analysis_confidence == 0.0
 
 
 class TestCodeHierarchyToApplications:
