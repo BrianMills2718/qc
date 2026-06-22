@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 93 | Corpus scope phrasing lint | High | Planned | `CORPUS_SCOPE_PHRASING_LINT.md` |
 
 ## Completed Plans
 

@@ -22,9 +22,9 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Create and execute the next high-value lane: corpus-scope phrasing lint
-   beyond export warnings, so agent/human-authored summaries can be checked for
-   population-generalizing language when scope is absent or under-specified.
+1. Execute Plan #93 (`CORPUS_SCOPE_PHRASING_LINT.md`): add deterministic
+   scope-aware phrasing lint for agent/human-authored summaries without
+   claiming sampling-frame adequacy or methodological validity.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
