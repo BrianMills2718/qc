@@ -8,6 +8,25 @@
 
 ---
 
+## Outcome
+
+Completed 2026-06-21. INV-7 prompt-injection fixture outputs now have a
+schema_version=1 package contract in `qc_clean/core/inv7_package.py`.
+Structural and live INV-7 fixture runners emit package metadata while preserving
+the existing `prompt_injection_evaluations` scorecard list, `make bench
+PROMPT_INJECTION=...` accepts versioned packages, and
+`make validate-inv7-package PACKAGE=...` validates package-level protocol
+metadata with machine-readable output.
+
+This is a protocol/provenance scaffold only. It does not run a committed live
+benchmark, does not establish model obedience, and does not make INV-7 met.
+
+Verification: focused INV-7 package/runner/Phase 0 tests passed, Ruff passed,
+docs/plan/AGENTS sync checks passed, and final `make check` passed (`812
+passed, 1 skipped, 8 deselected`; type check not yet configured).
+
+---
+
 ## Gap
 
 **Current:** `make run-inv7-fixtures` and `make run-inv7-live-fixtures` emit
@@ -144,7 +163,7 @@ benchmark study.
 - [x] Required focused tests pass.
 - [x] Full `make check` passes or any failure is documented with evidence.
 - [x] Type-check status is reported.
-- [ ] Verified work is committed and pushed.
+- [x] Verified work is committed and pushed.
 
 ---
 

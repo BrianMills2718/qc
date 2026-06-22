@@ -28,10 +28,6 @@ highest-value documented lane.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active slice:** Plan #84, INV-7 prompt-injection package. This slice adds a
-versioned protocol/validation container for structural and live INV-7 fixture
-outputs without claiming prompt-injection robustness.
-
 **Completed checkpoint:** Corpus-scope warning propagation now covers Markdown,
 JSON `export_warnings` metadata, and CSV `export_warnings.csv` for claim-bearing
 exports without recorded scope, and CLI/MCP project creation can now persist
@@ -74,7 +70,10 @@ and attack-success rates overall, by surface, and by attack type. Current
 prompt override surfaces now require bare declared protected data placeholders
 and reject indexed/converted/transformed or undeclared metadata placeholders
 before any LLM call; this narrows INV-7 custom-prompt governance but does not
-solve prompt injection. D3 and D7 scorecards now report exact-key binary system-vs-gold
+solve prompt injection. Structural and live INV-7 fixture outputs now have a
+schema_version=1 package contract, `make validate-inv7-package`, and Phase 0
+`PROMPT_INJECTION=` package-loader support; this is protocol/provenance only,
+not robustness evidence. D3 and D7 scorecards now report exact-key binary system-vs-gold
 percent agreement, Cohen's κ, Gwet's AC1, Krippendorff's α, and prevalence metadata. D3/D7
 scorecards also compare exact recall/precision/F1 against supplied
 versioned-package human-human metrics when present and surface supplied
