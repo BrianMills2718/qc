@@ -1,11 +1,45 @@
 # Plan #119: D4 Codebook Quality Scorecard Preflight Guard
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Plan #118 D4 codebook quality protocol result preflight
 **Blocks:** Guarded D4 benchmark scoring and populated D4 blind expert /
 LLM-judge evaluation workflow
+
+---
+
+## Outcome
+
+Implemented and verified optional D4 score-time preflight enforcement.
+`bench_phase0` now accepts `--d4-codebook-quality-protocol-file`, `make bench`
+forwards `D4_PROTOCOL=...`, and Phase 0 benchmark package manifests accept
+`d4_codebook_quality_protocol_file`. When a protocol is supplied, bench runs
+D4 protocol/result preflight before scorecard generation and before
+output/artifact writes. Failed preflight returns a JSON error with the
+preflight report and writes no scorecard/artifact files. Passing guarded
+scorecards include `_meta.preflight_reports.d4_codebook_quality`, and input
+hashes/command provenance include the D4 protocol file.
+
+Verification evidence:
+
+- TDD red: targeted bench/package tests initially failed because
+  `--d4-codebook-quality-protocol-file`,
+  `d4_codebook_quality_protocol_file`, and the protocol hash key were not
+  supported.
+- Focused tests: `python -m pytest tests/test_bench_phase0_script.py tests/test_phase0_benchmark_package.py -q`
+  passed (`38 passed`).
+- Focused Ruff:
+  `python -m ruff check scripts/bench_phase0.py scripts/run_phase0_benchmark_package.py tests/test_bench_phase0_script.py tests/test_phase0_benchmark_package.py`
+  passed.
+- Make dry-run:
+  `make -n bench ID=project D4_PROTOCOL=protocol.json CODEBOOK_QUALITY=quality.json`
+  forwarded `--d4-codebook-quality-protocol-file`.
+- Docs gate: `make docs-check` passed.
+- Full gate: `make check` passed (`973 passed, 1 skipped, 8 deselected`;
+  Ruff and docs checks clean; type check not configured).
+- Implementation commit pushed: `8c2ea30`
+  `[Plan: D4_CODEBOOK_QUALITY_SCORECARD_PREFLIGHT_GUARD] Add D4 score guard`.
 
 ---
 
@@ -73,14 +107,14 @@ Internal guarded-scoring capability only; no cross-project boundary is created.
 
 ### Capability Validation
 
-- [ ] Passing protocol/result preflight lets `bench_phase0` score D4 rows.
-- [ ] Passing guarded scorecards include
+- [x] Passing protocol/result preflight lets `bench_phase0` score D4 rows.
+- [x] Passing guarded scorecards include
   `_meta.preflight_reports.d4_codebook_quality`.
-- [ ] Failing protocol/result preflight returns non-zero JSON error and writes
+- [x] Failing protocol/result preflight returns non-zero JSON error and writes
   no scorecard/output/artifact files.
-- [ ] Input hashes, command provenance, and package manifests include the D4
+- [x] Input hashes, command provenance, and package manifests include the D4
   protocol file.
-- [ ] `make bench D4_PROTOCOL=...` forwards the guard flag.
+- [x] `make bench D4_PROTOCOL=...` forwards the guard flag.
 
 ---
 
@@ -143,28 +177,28 @@ Internal guarded-scoring capability only; no cross-project boundary is created.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] `bench_phase0` accepts `--d4-codebook-quality-protocol-file`.
-- [ ] `make bench` accepts `D4_PROTOCOL=...`.
-- [ ] Phase 0 package manifests accept `d4_codebook_quality_protocol_file`.
-- [ ] Passing guarded D4 scorecards include
+- [x] `bench_phase0` accepts `--d4-codebook-quality-protocol-file`.
+- [x] `make bench` accepts `D4_PROTOCOL=...`.
+- [x] Phase 0 package manifests accept `d4_codebook_quality_protocol_file`.
+- [x] Passing guarded D4 scorecards include
   `_meta.preflight_reports.d4_codebook_quality`.
-- [ ] Failed D4 preflight blocks scoring and output/artifact writes.
-- [ ] Protocol file hash and command provenance are recorded.
-- [ ] Docs state this is a provenance guard only, not codebook-quality evidence.
+- [x] Failed D4 preflight blocks scoring and output/artifact writes.
+- [x] Protocol file hash and command provenance are recorded.
+- [x] Docs state this is a provenance guard only, not codebook-quality evidence.
 
 > Process criteria:
-- [ ] Required focused tests pass.
-- [ ] Focused Ruff check passes.
-- [ ] `make docs-check` passes.
-- [ ] Full `make check` passes or any failure is documented with evidence.
-- [ ] Type-check status is reported.
-- [ ] Verified work is committed and pushed.
+- [x] Required focused tests pass.
+- [x] Focused Ruff check passes.
+- [x] `make docs-check` passes.
+- [x] Full `make check` passes or any failure is documented with evidence.
+- [x] Type-check status is reported.
+- [x] Verified work is committed and pushed.
 
 ---
 
 ## Open Questions
 
-- [ ] Should `D4_PROTOCOL` become required whenever D4 external files are
+- [x] Should `D4_PROTOCOL` become required whenever D4 external files are
   supplied? — Status: DEFERRED | This slice makes the guard opt-in so existing
   Phase 0 local accounting remains compatible. A later policy plan can decide
   whether populated benchmark packages must require it.

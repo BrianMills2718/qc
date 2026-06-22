@@ -22,10 +22,18 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #119 (`D4_CODEBOOK_QUALITY_SCORECARD_PREFLIGHT_GUARD.md`):
-   guard D4 scorecard generation with optional protocol/result preflight.
-2. Continue through the ranked roadmap without pausing after each verified
+1. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
+
+**Completed checkpoint:** `make bench` now accepts `D4_PROTOCOL=...` and
+`scripts/bench_phase0.py --d4-codebook-quality-protocol-file ...` to enforce
+D4 protocol/result preflight at score time. Failed preflight returns JSON with
+the preflight report and blocks scorecard/output/artifact writes; passing
+guarded scorecards include `_meta.preflight_reports.d4_codebook_quality`, and
+input hashes/command provenance/package manifests include the protocol file.
+This is score-time provenance only, not blind expert-panel evidence, LLM-judge
+evidence, codebook-quality evidence, methodological-validity evidence, or SOTA
+evidence.
 
 **Completed checkpoint:** D4 codebook-quality result files can now be
 preflighted against registered D4 protocols with
