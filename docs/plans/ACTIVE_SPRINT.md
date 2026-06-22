@@ -22,16 +22,21 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Select and plan the next deterministic, high-value roadmap lane.
+1. Execute Plan #166: add an opt-in thematic higher-order refresh path for
+   incremental recode.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Select the next deterministic roadmap lane from the
-remaining documented gaps. Candidate lanes include an INV-11 full higher-order
-recompute slice, further INV-7 custom-prompt governance beyond deterministic
-wrapping, or another protocol/accounting lane that can be verified without
-fabricating external gold labels, expert panels, theoretical sampling evidence,
-or SOTA claims.
+**Active checkpoint:** Plan #166
+(`docs/plans/INV11_THEMATIC_RECODE_HIGHER_ORDER_REFRESH.md`) adds an explicit
+`--refresh-higher-order` recode mode for default/thematic projects. The planned
+pipeline incrementally codes new documents, invalidates stale thematic
+higher-order outputs before intermediate save points, rebuilds Phase 1 context
+from the current codebook, reruns Perspective -> Relationship -> Synthesis,
+then reruns Cross-Interview -> Negative Case. Default recode behavior remains
+hard-invalidation only, and grounded-theory refresh must fail loudly as
+unsupported in this slice. This is an INV-11 thematic refresh slice only; it is
+not full INV-11 completion, methodological-validity evidence, or a SOTA claim.
 
 **Completed checkpoint:** Rendered custom prompt overrides are now bookended by
 a repo-owned instruction/data-separation wrapper. The wrapper preserves the

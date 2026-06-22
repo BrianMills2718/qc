@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 166 | INV-11 thematic recode higher-order refresh | High | Planned | `INV11_THEMATIC_RECODE_HIGHER_ORDER_REFRESH.md` |
 
 ## Completed Plans
 
