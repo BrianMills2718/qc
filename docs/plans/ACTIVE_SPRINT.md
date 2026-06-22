@@ -22,12 +22,15 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #109 (`INV7_LIVE_BENCHMARK_PROTOCOL.md`): validate pre-run
-   protocol packages for live INV-7 canary benchmark runs.
-2. Continue through the ranked roadmap without pausing after each verified
+1. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Completed checkpoint:** Live INV-7 fixture outputs now carry
+**Completed checkpoint:** Pre-run live INV-7 protocol packages can now be
+validated with `make validate-inv7-live-protocol PROTOCOL=...`, covering fixture
+set metadata, exact prompt hashes, model, trace ID, budget, held-out
+freeze/contamination/registration flags, and success criteria. This is protocol
+provenance only, not a live result or prompt-injection robustness evidence.
+Live INV-7 fixture outputs now carry
 `fixture_prompt_hashes`, a fixture-ID keyed SHA-256 map of the exact prompts
 sent to the live model caller. Versioned INV-7 package validation accepts
 matching prompt hashes and rejects missing/extra keys or malformed digests when

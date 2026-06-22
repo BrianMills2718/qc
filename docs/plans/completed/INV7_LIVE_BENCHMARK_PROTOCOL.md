@@ -1,10 +1,42 @@
 # Plan #109: INV-7 Live Benchmark Protocol
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** INV-7 live fixture runner; INV-7 live fixture prompt hashes
 **Blocks:** committed/scored live adversarial prompt-injection benchmark protocol
+
+---
+
+## Outcome
+
+Implemented and pushed in commit `382199a`:
+
+- Added `qc_clean/core/inv7_live_protocol.py` with a schema_version=1 pre-run
+  live INV-7 protocol package validator.
+- Added `scripts/validate_inv7_live_protocol.py`.
+- Added `make validate-inv7-live-protocol PROTOCOL=protocol.json`.
+- Validates fixture set metadata, exact prompt SHA-256 hashes, model, trace ID,
+  max budget, held-out freeze/contamination/registration flags, and success
+  criteria.
+- Updated docs to state this is pre-run provenance metadata only, not a live
+  result or prompt-injection robustness evidence.
+
+Verification:
+
+- `python -m pytest tests/test_inv7_live_protocol.py -q` failed before
+  implementation with missing module import, as expected.
+- `python -m pytest tests/test_inv7_live_protocol.py
+  tests/test_inv7_fixture_runner.py tests/test_inv7_prompt_injection_package.py
+  -q` -> 19 passed.
+- `python -m ruff check qc_clean/core/inv7_live_protocol.py
+  scripts/validate_inv7_live_protocol.py tests/test_inv7_live_protocol.py
+  qc_clean/core/inv7_package.py qc_clean/core/inv7_fixtures.py` -> passed.
+- `make docs-check` -> passed.
+- `make -n validate-inv7-live-protocol PROTOCOL=protocol.json` -> expected
+  script invocation.
+- `make check` -> 923 passed, 1 skipped, 8 deselected; Ruff/docs green; type
+  check not yet configured.
 
 ---
 
@@ -76,11 +108,11 @@ Internal protocol validation only; no cross-project boundary is created.
 
 ### Capability Validation
 
-- [ ] Valid held-out protocol package validates.
-- [ ] Held-out protocols require freeze, contamination check, and registration.
-- [ ] Prompt hash maps reject malformed hashes and empty fixture IDs.
-- [ ] Success criteria are required and non-empty.
-- [ ] CLI/Make target emit machine-readable validation output.
+- [x] Valid held-out protocol package validates.
+- [x] Held-out protocols require freeze, contamination check, and registration.
+- [x] Prompt hash maps reject malformed hashes and empty fixture IDs.
+- [x] Success criteria are required and non-empty.
+- [x] CLI/Make target emit machine-readable validation output.
 
 ---
 
@@ -139,25 +171,25 @@ Internal protocol validation only; no cross-project boundary is created.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] `validate_inv7_live_protocol_payload` accepts a valid schema_version=1
+- [x] `validate_inv7_live_protocol_payload` accepts a valid schema_version=1
   held-out protocol.
-- [ ] Held-out protocols require `prompt_frozen=true`,
+- [x] Held-out protocols require `prompt_frozen=true`,
   `contamination_checked=true`, and `registered_before_run=true`.
-- [ ] Protocol prompt hashes must be lowercase SHA-256 digests keyed by non-empty
+- [x] Protocol prompt hashes must be lowercase SHA-256 digests keyed by non-empty
   fixture IDs.
-- [ ] Success criteria are required and non-empty.
-- [ ] `make validate-inv7-live-protocol PROTOCOL=...` is discoverable and
+- [x] Success criteria are required and non-empty.
+- [x] `make validate-inv7-live-protocol PROTOCOL=...` is discoverable and
   dry-runs correctly.
-- [ ] Docs state the protocol is pre-run provenance metadata only, not a live
+- [x] Docs state the protocol is pre-run provenance metadata only, not a live
   result or robustness evidence.
 
 > Process criteria:
-- [ ] Required focused tests pass.
-- [ ] Focused Ruff check passes.
-- [ ] `make docs-check` passes.
-- [ ] Full `make check` passes or any failure is documented with evidence.
-- [ ] Type-check status is reported.
-- [ ] Verified work is committed and pushed.
+- [x] Required focused tests pass.
+- [x] Focused Ruff check passes.
+- [x] `make docs-check` passes.
+- [x] Full `make check` passes or any failure is documented with evidence.
+- [x] Type-check status is reported.
+- [x] Verified work is committed and pushed.
 
 ---
 
