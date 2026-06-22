@@ -22,10 +22,19 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #136 (`THEORETICAL_SAMPLING_PROTOCOL_PACKAGE.md`): add the
-   first machine-readable theoretical-sampling protocol validator.
+1. Select the next highest-value documented roadmap lane from
+   `docs/PROJECT_THEORY_AND_GOALS.md` and `docs/EVALUATION_HARNESS.md`.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
+
+**Completed checkpoint:** Pre-run theoretical-sampling protocol packages can
+now be validated through `make validate-theoretical-sampling-protocol` /
+`scripts/validate_theoretical_sampling_protocol.py`. The schema records target
+gap codes/types, category adequacy thresholds, candidate-source and
+collection-mode policy, collection rules, stopping rule, success criteria, and
+hashes. This is protocol/provenance infrastructure only, not populated
+theoretical sampling, sampling-frame adequacy evidence, methodological
+saturation evidence, full grounded-theory evidence, or SOTA evidence.
 
 **Completed checkpoint:** D7 comparison protocol/preflight can now guard
 opt-in live candidate-selection baseline packages as well as retrieval

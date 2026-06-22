@@ -6,7 +6,6 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 136 | Theoretical sampling protocol package | High | In Progress | `THEORETICAL_SAMPLING_PROTOCOL_PACKAGE.md` |
 
 ## Completed Plans
 
@@ -30,6 +29,7 @@ Track all implementation work here.
 | INV-7 prompt-injection package | INV-7 follow-up: structural and live fixture outputs now have a schema_version=1 package contract, validator, and Phase 0 loader support without claiming robustness evidence | `completed/INV7_PROMPT_INJECTION_PACKAGE.md` |
 | INV-4 category saturation diagnostic | INV-4 first slice: `make bench` reports diagnostic-only category property/dimension/support adequacy separately from codebook stability | `completed/INV4_CATEGORY_SATURATION_DIAGNOSTIC.md` |
 | INV-4 diagnostic-driven theoretical sampling | INV-4 follow-up: sampling suggestions use category adequacy gaps before falling back to low application coverage | `completed/INV4_DIAGNOSTIC_THEORETICAL_SAMPLING.md` |
+| Theoretical sampling protocol package | INV-4 follow-up: `make validate-theoretical-sampling-protocol` validates pre-run theoretical-sampling protocol metadata for target gaps, thresholds, candidate-source policy, collection rules, stopping rule, and success criteria without claiming sampling adequacy | `completed/THEORETICAL_SAMPLING_PROTOCOL_PACKAGE.md` |
 | Corpus scope contract | Report-boundary first slice: optional `ProjectState.corpus_scope` records scope and Markdown export surfaces it before claims | `completed/CORPUS_SCOPE_CONTRACT.md` |
 | INV-2 query-expansion disconfirmation retrieval | INV-2 follow-up: BM25-style retrieval can use weighted deterministic query-expansion terms while preserving exact candidate anchors | `completed/INV2_QUERY_EXPANSION_DISCONFIRMATION_RETRIEVAL.md` |
 | INV-2 embedding-hybrid disconfirmation retrieval | INV-2 follow-up: opt-in embedding-hybrid retrieval can add embedding cosine similarity while preserving the lexical default and exact anchors | `completed/INV2_EMBEDDING_HYBRID_DISCONFIRMATION_RETRIEVAL.md` |
