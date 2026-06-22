@@ -5,6 +5,7 @@ import sys
 import qc_cli
 from scripts import (
     compare_d7_retrieval,
+    run_d7_comparison_package,
     run_d7_retrieval,
     validate_d3_baseline_package,
     validate_d3_gold_set,
@@ -170,6 +171,28 @@ def test_qc_cli_verify_d7_comparison_artifact_forwards_path(monkeypatch):
 
     assert qc_cli.main() == 0
     assert captured["argv"] == ["benchmark_results/run/manifest.json"]
+
+
+def test_qc_cli_compare_d7_package_forwards_manifest_path(monkeypatch):
+    captured = {}
+
+    def fake_main(argv):
+        captured["argv"] = argv
+        return 0
+
+    monkeypatch.setattr(run_d7_comparison_package, "main", fake_main)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "qc_cli.py",
+            "compare-d7-package",
+            "d7_comparison_package.json",
+        ],
+    )
+
+    assert qc_cli.main() == 0
+    assert captured["argv"] == ["d7_comparison_package.json"]
 
 
 def test_qc_cli_validate_d7_baseline_package_forwards_path(monkeypatch):
