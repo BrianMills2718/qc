@@ -16,6 +16,7 @@ from qc_clean.schemas.domain import (
     AnalyticClaim,
     AnalysisMemo,
     AnalysisPhaseResult,
+    ClaimAdjudicationStatus,
     ClaimKind,
     ClaimScope,
     ClaimSupportStatus,
@@ -550,10 +551,76 @@ class TestReview:
         ]
         result = json.loads(qc_mcp_server.qc_review_codes("proj-done", decisions))
         assert result["applied"] == 2
+        assert result["claims_count"] == 0
         # Verify persisted: C2 should be gone
         state = tmp_store.load("proj-done")
         assert state.codebook.get_code("C2") is None
         assert state.codebook.get_code("C1").provenance == Provenance.HUMAN
+
+    def test_review_decisions_claim(self, completed_project, tmp_store):
+        completed_project.claims = [
+            AnalyticClaim(
+                id="claim-mcp",
+                claim_kind=ClaimKind.SYNTHESIS_FINDING,
+                source_stage="synthesis",
+                claim_text="AI adoption changes workflow.",
+                scope=ClaimScope(corpus_level=True),
+                origin_object_type="synthesis_key_finding",
+                origin_object_id="finding:0",
+            )
+        ]
+        tmp_store.save(completed_project)
+        decisions = [
+            {
+                "target_type": "claim",
+                "target_id": "claim-mcp",
+                "action": "approve",
+                "rationale": "Reviewed against source evidence.",
+            }
+        ]
+
+        result = json.loads(qc_mcp_server.qc_review_decisions("proj-done", decisions))
+
+        assert result["applied"] == 1
+        assert result["codes_remaining"] == 2
+        assert result["claims_count"] == 1
+        state = tmp_store.load("proj-done")
+        claim = state.claims[0]
+        assert claim.adjudication_status == ClaimAdjudicationStatus.RETAINED
+        assert claim.revision_history[-1].action == "approve"
+        assert claim.revision_history[-1].rationale == "Reviewed against source evidence."
+
+    def test_review_codes_delegates_claim_decision(self, completed_project, tmp_store):
+        completed_project.claims = [
+            AnalyticClaim(
+                id="claim-mcp-legacy",
+                claim_kind=ClaimKind.CODE,
+                source_stage="thematic_coding",
+                claim_text="AI Adoption is a code.",
+                scope=ClaimScope(code_ids=["C1"]),
+                origin_object_type="code",
+                origin_object_id="C1",
+            )
+        ]
+        tmp_store.save(completed_project)
+        decisions = [
+            {
+                "target_type": "claim",
+                "target_id": "claim-mcp-legacy",
+                "action": "reject",
+                "rationale": "Not supported after review.",
+            }
+        ]
+
+        result = json.loads(qc_mcp_server.qc_review_codes("proj-done", decisions))
+
+        assert result["applied"] == 1
+        assert result["claims_count"] == 1
+        state = tmp_store.load("proj-done")
+        claim = state.claims[0]
+        assert claim.adjudication_status == ClaimAdjudicationStatus.WITHDRAWN
+        assert claim.revision_history[-1].action == "reject"
+        assert claim.revision_history[-1].rationale == "Not supported after review."
 
     def test_review_codes_invalid_action(self, completed_project, tmp_store):
         decisions = [{"target_type": "code", "target_id": "C1", "action": "invalid_action"}]

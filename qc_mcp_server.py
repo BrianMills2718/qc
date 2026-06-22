@@ -875,23 +875,11 @@ async def qc_run_stability(
 # Granular review
 # ---------------------------------------------------------------------------
 
-@mcp.tool()
-def qc_review_codes(
+def _apply_mcp_review_decisions(
     project_id: str,
     decisions: List[Dict[str, Any]],
 ) -> str:
-    """Apply individual review decisions to codes in a project.
-
-    Each decision is a dict with:
-    - target_type: "code", "code_application", or "codebook"
-    - target_id: ID of the code or application
-    - action: "approve", "reject", "modify", "merge", or "split"
-    - new_value: Optional dict for modify/merge/split (e.g. {"name": "New Name"})
-
-    Args:
-        project_id: The project ID
-        decisions: List of review decision dicts
-    """
+    """Apply MCP review decisions through the shared ReviewManager."""
     try:
         state = store.load(project_id)
     except FileNotFoundError:
@@ -911,16 +899,64 @@ def qc_review_codes(
             target_type=d.get("target_type", "code"),
             target_id=d.get("target_id", ""),
             action=action,
+            rationale=d.get("rationale", ""),
             new_value=d.get("new_value"),
         ))
 
-    result = rm.apply_decisions(review_decisions)
+    try:
+        result = rm.apply_decisions(review_decisions)
+    except ValueError as exc:
+        return json.dumps({"error": str(exc)})
     store.save(state)
 
     return json.dumps({
         "applied": result["applied"],
+        "codes_remaining": len(state.codebook.codes),
+        "claims_count": len(state.claims),
         "can_resume": rm.can_resume(),
     })
+
+
+@mcp.tool()
+def qc_review_decisions(
+    project_id: str,
+    decisions: List[Dict[str, Any]],
+) -> str:
+    """Apply review decisions to codes, applications, codebooks, or claims.
+
+    Each decision is a dict with:
+    - target_type: "code", "code_application", "codebook", or "claim"
+    - target_id: ID of the reviewed object
+    - action: "approve", "reject", "modify", "merge", or "split"
+    - rationale: Optional reason for the decision
+    - new_value: Optional dict for modify/merge/split decisions
+
+    Args:
+        project_id: The project ID
+        decisions: List of review decision dicts
+    """
+    return _apply_mcp_review_decisions(project_id, decisions)
+
+
+@mcp.tool()
+def qc_review_codes(
+    project_id: str,
+    decisions: List[Dict[str, Any]],
+) -> str:
+    """Apply individual review decisions to a project; kept for compatibility.
+
+    Each decision is a dict with:
+    - target_type: "code", "code_application", "codebook", or "claim"
+    - target_id: ID of the reviewed object
+    - action: "approve", "reject", "modify", "merge", or "split"
+    - rationale: Optional reason for the decision
+    - new_value: Optional dict for modify/merge/split decisions
+
+    Args:
+        project_id: The project ID
+        decisions: List of review decision dicts
+    """
+    return _apply_mcp_review_decisions(project_id, decisions)
 
 
 if __name__ == "__main__":

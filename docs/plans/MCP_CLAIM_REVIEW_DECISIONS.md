@@ -1,6 +1,6 @@
 # Plan #79: MCP Claim Review Decisions
 
-**Status:** Planned
+**Status:** Implemented
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Plan #78 claim review API listing; existing ReviewManager claim decisions
@@ -100,18 +100,23 @@ shared capability or claim human/expert adjudication.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] `qc_review_decisions` accepts review decisions for claim targets.
-- [ ] MCP claim decisions preserve `rationale` in claim revision history.
-- [ ] `qc_review_codes` remains backward compatible.
-- [ ] Review decision payload includes code and claim counts plus resumability.
-- [ ] Docs preserve the distinction between agent-drivable adjudication plumbing
+- [x] `qc_review_decisions` accepts review decisions for claim targets.
+- [x] MCP claim decisions preserve `rationale` in claim revision history.
+- [x] `qc_review_codes` remains backward compatible.
+- [x] Review decision payload includes code and claim counts plus resumability.
+- [x] Docs preserve the distinction between agent-drivable adjudication plumbing
   and expert-reviewed validity evidence.
 
 > Process criteria:
-- [ ] Required tests pass
-- [ ] Full test suite passes
-- [ ] Type check status is reported
-- [ ] Docs updated
+- [x] Required tests pass
+- [x] Full test suite passes
+- [x] Type check status is reported
+- [x] Docs updated
+
+## Verification
+
+- `python -m pytest tests/test_mcp_server.py::TestReview::test_review_codes tests/test_mcp_server.py::TestReview::test_review_decisions_claim tests/test_mcp_server.py::TestReview::test_review_codes_delegates_claim_decision tests/test_mcp_server.py::TestReview::test_review_codes_invalid_action tests/test_mcp_server.py::TestReview::test_review_codes_empty tests/test_mcp_server.py::TestReview::test_review_codes_not_found -q` — 6 passed.
+- `make check` — 796 passed, 1 skipped, 8 deselected; lint/docs passed; type check not yet configured.
 
 ---
 
