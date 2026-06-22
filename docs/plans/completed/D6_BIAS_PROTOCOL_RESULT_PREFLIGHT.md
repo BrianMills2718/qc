@@ -1,10 +1,40 @@
 # Plan #115: D6 Bias Protocol Result Preflight
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Plan #114 D6 bias protocol package
 **Blocks:** Guarded D6 benchmark scoring and populated INV-5 bias-audit workflow
+
+---
+
+## Outcome
+
+Implemented in commit `150fd86` and pushed to `main`. The repo now has a
+standalone D6 protocol/result preflight at `qc_clean/core/d6_bias_preflight.py`,
+a machine-readable CLI at `scripts/preflight_d6_bias_protocol.py`, and
+`make d6-bias-preflight PROTOCOL=... STRATIFIED=... COUNTERFACTUAL=...`. The
+preflight validates the registered D6 protocol, validates concrete stratified
+and counterfactual rows, requires files for configured dimensions, rejects files
+for unconfigured dimensions, enforces optional protocol SHA-256 locks, checks
+stratified attributes/surfaces, checks counterfactual attributes, and returns a
+schema_version=1 pass/fail report. It remains process/provenance metadata only.
+
+Verification evidence:
+- TDD red slice: `python -m pytest tests/test_d6_bias_preflight.py -q`
+  initially failed because `qc_clean.core.d6_bias_preflight` did not exist.
+- Focused tests: `python -m pytest tests/test_d6_bias_preflight.py -q` -> `5
+  passed`.
+- Focused Ruff: `python -m ruff check qc_clean/core/d6_bias_preflight.py
+  scripts/preflight_d6_bias_protocol.py tests/test_d6_bias_preflight.py` ->
+  passed.
+- Make dry run: `make -n d6-bias-preflight PROTOCOL=protocol.json
+  STRATIFIED=bias_stratified.json COUNTERFACTUAL=bias_counterfactual.json`
+  routes to `python scripts/preflight_d6_bias_protocol.py protocol.json
+  --stratified-file bias_stratified.json --counterfactual-file
+  bias_counterfactual.json`.
+- Full gate: `make check` -> `958 passed, 1 skipped, 8 deselected`; Ruff and
+  docs checks passed; type check is still not configured.
 
 ---
 
@@ -74,14 +104,14 @@ Internal preflight capability only; no cross-project boundary is created.
 
 ### Capability Validation
 
-- [ ] Valid protocol + matching result files returns `status="pass"`.
-- [ ] Missing required result files fail for configured dimensions.
-- [ ] Unexpected result files fail for unconfigured dimensions.
-- [ ] Result-file SHA-256 locks fail on mismatch when protocol hashes are set.
-- [ ] Stratified rows reject unexpected/missing attributes and surfaces against
+- [x] Valid protocol + matching result files returns `status="pass"`.
+- [x] Missing required result files fail for configured dimensions.
+- [x] Unexpected result files fail for unconfigured dimensions.
+- [x] Result-file SHA-256 locks fail on mismatch when protocol hashes are set.
+- [x] Stratified rows reject unexpected/missing attributes and surfaces against
   the protocol strategy.
-- [ ] Counterfactual rows validate shape and reject unexpected attributes.
-- [ ] CLI emits machine-readable JSON and returns non-zero on failed preflight.
+- [x] Counterfactual rows validate shape and reject unexpected attributes.
+- [x] CLI emits machine-readable JSON and returns non-zero on failed preflight.
 
 ---
 
@@ -143,30 +173,30 @@ Internal preflight capability only; no cross-project boundary is created.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] Importable preflight returns a schema_version=1 report with pass/fail
+- [x] Importable preflight returns a schema_version=1 report with pass/fail
   status, protocol metadata, row counts, and errors.
-- [ ] CLI/Make preflight returns exit code 0 only when status is `pass`.
-- [ ] Configured D6 dimensions require matching result files.
-- [ ] Result files for unconfigured D6 dimensions fail loud.
-- [ ] Optional protocol file-hash locks are enforced.
-- [ ] Stratified rows are checked against registered attributes and surfaces.
-- [ ] Counterfactual rows are validated and checked against registered
+- [x] CLI/Make preflight returns exit code 0 only when status is `pass`.
+- [x] Configured D6 dimensions require matching result files.
+- [x] Result files for unconfigured D6 dimensions fail loud.
+- [x] Optional protocol file-hash locks are enforced.
+- [x] Stratified rows are checked against registered attributes and surfaces.
+- [x] Counterfactual rows are validated and checked against registered
   attributes.
-- [ ] Docs state this is provenance/preflight only, not bias evidence.
+- [x] Docs state this is provenance/preflight only, not bias evidence.
 
 > Process criteria:
-- [ ] Required focused tests pass.
-- [ ] Focused Ruff check passes.
-- [ ] `make docs-check` passes.
-- [ ] Full `make check` passes or any failure is documented with evidence.
-- [ ] Type-check status is reported.
-- [ ] Verified work is committed and pushed.
+- [x] Required focused tests pass.
+- [x] Focused Ruff check passes.
+- [x] `make docs-check` passes.
+- [x] Full `make check` passes or any failure is documented with evidence.
+- [x] Type-check status is reported.
+- [x] Verified work is committed and pushed.
 
 ---
 
 ## Open Questions
 
-- [ ] Should `make bench` grow an optional `D6_PROTOCOL=...` guard after this
+- [x] Should `make bench` grow an optional `D6_PROTOCOL=...` guard after this
   preflight exists? — Status: DEFERRED | This plan creates the standalone
   preflight first. Score-time guard integration is the likely next slice.
 

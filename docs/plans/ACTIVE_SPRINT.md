@@ -22,11 +22,18 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #115 (`D6_BIAS_PROTOCOL_RESULT_PREFLIGHT.md`): add a
-   protocol/result preflight for concrete D6 stratified and counterfactual
-   files before score-time guard integration.
-2. Continue through the ranked roadmap without pausing after each verified
+1. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
+
+**Completed checkpoint:** D6 bias result files can now be preflighted against a
+registered D6 protocol with `make d6-bias-preflight PROTOCOL=... STRATIFIED=...
+COUNTERFACTUAL=...` / `scripts/preflight_d6_bias_protocol.py`. The preflight
+validates the protocol, result row shapes, required files for configured
+dimensions, rejects files for unconfigured dimensions, checks optional SHA-256
+locks, checks stratified attributes/surfaces, checks counterfactual attributes,
+and emits a schema_version=1 pass/fail report. This is protocol/result
+provenance only, not a populated bias audit, causal proof, held-out correctness
+evidence, methodological-validity evidence, or a bias-free claim.
 
 **Completed checkpoint:** D6 bias-audit protocols can now be validated with
 `make validate-d6-bias-protocol PROTOCOL=...` /
