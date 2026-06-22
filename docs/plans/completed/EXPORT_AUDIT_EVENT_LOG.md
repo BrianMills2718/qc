@@ -1,10 +1,55 @@
 # Plan #99: Export Audit Event Log
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Export audit manifest generation, verification, and publish preflight
 **Blocks:** future signed/externally anchored audit log; stricter release packaging policy
+
+---
+
+## Outcome
+
+Implemented an opt-in local hash-linked export audit event log:
+
+- `qc_clean/core/export/audit_event_log.py` provides
+  `append_export_audit_event` and `verify_export_audit_event_log`.
+- `scripts/verify_export_audit_event_log.py` and
+  `make verify-export-audit-log LOG=...` verify event self-hashes and
+  previous-event links.
+- `scripts/write_export_audit_manifest.py`,
+  `scripts/verify_export_audit_manifest.py`, and
+  `scripts/export_publish_preflight.py` accept `--audit-log`.
+- Make targets for manifest write, manifest verify, and publish preflight pass
+  optional `AUDIT_LOG=...`.
+- `CLAUDE.md`, generated `AGENTS.md`, and
+  `docs/PROJECT_THEORY_AND_GOALS.md` document event logs as local
+  integrity/provenance metadata, not signing, immutable storage,
+  methodological validity evidence, or a full tamper-evident audit substrate.
+
+Implementation commit: `45ca13c`
+
+## Verification
+
+- TDD red: initial `python -m pytest tests/test_export_audit_event_log.py -q`
+  failed with `ModuleNotFoundError: No module named
+  'qc_clean.core.export.audit_event_log'`.
+- Focused behavior: `python -m pytest tests/test_export_audit_event_log.py -q`
+  -> 4 passed.
+- Related regressions: `python -m pytest tests/test_export_publish_preflight.py
+  tests/test_export_audit_manifest.py -q` -> 14 passed.
+- Focused lint: `python -m ruff check
+  qc_clean/core/export/audit_event_log.py
+  scripts/verify_export_audit_event_log.py
+  scripts/write_export_audit_manifest.py
+  scripts/verify_export_audit_manifest.py scripts/export_publish_preflight.py
+  tests/test_export_audit_event_log.py` -> all checks passed.
+- Command discoverability: `make help` lists `verify-export-audit-log` and
+  `AUDIT_LOG=...` on the three local audit operations.
+- Documentation governance: `make docs-check` passed.
+- Full gate: `make check` -> 877 passed, 1 skipped, 8 deselected; Ruff and
+  docs-check passed; type check remains not configured.
+- Commit `45ca13c` was pushed to `main`.
 
 ---
 
@@ -151,28 +196,28 @@ timestamping, and immutable storage are deliberately out of scope.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] Event log appends schema_version=1 JSONL records with event hashes and
+- [x] Event log appends schema_version=1 JSONL records with event hashes and
   previous-event links.
-- [ ] Event-log verifier detects malformed JSON, invalid event shapes,
+- [x] Event-log verifier detects malformed JSON, invalid event shapes,
   self-hash mismatches, and previous-link mismatches.
-- [ ] Manifest write, manifest verify, and publish preflight scripts support
+- [x] Manifest write, manifest verify, and publish preflight scripts support
   optional `--audit-log` without changing default behavior.
-- [ ] `make verify-export-audit-log LOG=...` is agent-drivable and emits JSON.
-- [ ] Docs state this is a local provenance/event-history aid, not signing,
+- [x] `make verify-export-audit-log LOG=...` is agent-drivable and emits JSON.
+- [x] Docs state this is a local provenance/event-history aid, not signing,
   immutable storage, a full tamper-evident audit substrate, or validity
   evidence.
 
 > Process criteria:
-- [ ] Required focused tests pass.
-- [ ] Full `make check` passes or any failure is documented with evidence.
-- [ ] Type-check status is reported.
-- [ ] Verified work is committed and pushed.
+- [x] Required focused tests pass.
+- [x] Full `make check` passes or any failure is documented with evidence.
+- [x] Type-check status is reported.
+- [x] Verified work is committed and pushed.
 
 ---
 
 ## Open Questions
 
-- [ ] Should CLI/MCP export flows write audit events by default when audit
+- [x] Should CLI/MCP export flows write audit events by default when audit
   manifests are requested? - Status: DEFERRED | Why it matters: this first
   slice proves the local event-log contract; default release/package policy is a
   separate decision.

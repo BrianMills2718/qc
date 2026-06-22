@@ -6,7 +6,6 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 99 | Export audit event log | High | Planned | `EXPORT_AUDIT_EVENT_LOG.md` |
 
 ## Completed Plans
 
@@ -110,6 +109,7 @@ Track all implementation work here.
 | Export audit CLI integration | Audit substrate follow-up: `project export --audit-manifest --verify-audit-manifest` can write and verify optional sidecars without changing default export contracts | `completed/EXPORT_AUDIT_CLI_INTEGRATION.md` |
 | MCP export audit integration | Audit substrate follow-up: MCP JSON/Markdown export tools can write and verify optional confined sidecars without changing default return contracts | `completed/MCP_EXPORT_AUDIT_INTEGRATION.md` |
 | Export publish preflight | Audit substrate follow-up: `make export-publish-preflight` requires a verified existing export-audit manifest for explicit local publish/handoff preflight without claiming signed/append-only audit | `completed/EXPORT_PUBLISH_PREFLIGHT.md` |
+| Export audit event log | Audit substrate follow-up: local audit scripts can append opt-in hash-linked JSONL events and `make verify-export-audit-log` verifies event self-hashes/links without claiming immutable or signed audit | `completed/EXPORT_AUDIT_EVENT_LOG.md` |
 
 ## Status Key
 
