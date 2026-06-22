@@ -22,11 +22,20 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #128 (`CONFIDENCE_CALIBRATION_SCORECARD_PREFLIGHT_GUARD.md`):
-   enforce confidence-calibration protocol/result preflight at score time when
-   a calibration protocol is supplied.
+1. Select and execute the next highest-value unblocked evaluation-harness lane
+   from `docs/PROJECT_THEORY_AND_GOALS.md` and `docs/EVALUATION_HARNESS.md`.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
+
+**Completed checkpoint:** `make bench` now accepts `CONFIDENCE_PROTOCOL=...`
+and `scripts/bench_phase0.py --confidence-calibration-protocol-file ...` to
+enforce confidence-calibration protocol/result preflight at score time. Failed
+preflight returns JSON with the preflight report and blocks
+scorecard/output/artifact writes; passing guarded scorecards include
+`_meta.preflight_reports.confidence_calibration`, input hashes, command
+provenance, and package manifests include the protocol file. This is
+score-time provenance only, not calibration proof, held-out correctness
+evidence, methodological-validity evidence, or SOTA evidence.
 
 **Completed checkpoint:** Confidence-calibration result files can now be
 preflighted against registered calibration protocols with

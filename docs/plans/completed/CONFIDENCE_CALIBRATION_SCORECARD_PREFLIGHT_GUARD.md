@@ -1,6 +1,6 @@
 # Plan #128: Confidence Calibration Scorecard Preflight Guard
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Plan #127 Confidence calibration protocol result preflight
@@ -80,15 +80,15 @@ Internal score-boundary guard only; no cross-project boundary is created.
 
 ### Capability Validation
 
-- [ ] `make bench CONFIDENCE_PROTOCOL=... CALIBRATION=...` runs
+- [x] `make bench CONFIDENCE_PROTOCOL=... CALIBRATION=...` runs
   confidence-calibration preflight before scorecard generation.
-- [ ] Passing guarded scorecards include
+- [x] Passing guarded scorecards include
   `_meta.preflight_reports.confidence_calibration`.
-- [ ] Protocol file SHA-256 is included in `_meta.input_hashes`.
-- [ ] Command metadata and artifact manifests include the protocol path.
-- [ ] Mismatched protocol/result inputs return JSON failure and do not write
+- [x] Protocol file SHA-256 is included in `_meta.input_hashes`.
+- [x] Command metadata and artifact manifests include the protocol path.
+- [x] Mismatched protocol/result inputs return JSON failure and do not write
   `--output` or `--artifact-dir` artifacts.
-- [ ] Package manifests can pass `confidence_calibration_protocol_file` through
+- [x] Package manifests can pass `confidence_calibration_protocol_file` through
   to the canonical bench path.
 
 ---
@@ -152,22 +152,22 @@ Internal score-boundary guard only; no cross-project boundary is created.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] Confidence-calibration protocol/result preflight can be enforced at
+- [x] Confidence-calibration protocol/result preflight can be enforced at
   `make bench` score time.
-- [ ] Passing guarded scorecards include a confidence-calibration preflight
+- [x] Passing guarded scorecards include a confidence-calibration preflight
   report in `_meta`.
-- [ ] Failing guarded runs block scorecard/output/artifact writes.
-- [ ] Confidence-calibration protocol file hashes/paths are carried through
+- [x] Failing guarded runs block scorecard/output/artifact writes.
+- [x] Confidence-calibration protocol file hashes/paths are carried through
   scorecards, manifests, and package runner command mapping.
-- [ ] Docs state the guard is process/provenance only.
+- [x] Docs state the guard is process/provenance only.
 
 > Process criteria:
-- [ ] Required focused tests pass.
-- [ ] Focused Ruff check passes.
-- [ ] `make docs-check` passes.
-- [ ] Full `make check` passes or any failure is documented with evidence.
-- [ ] Type-check status is reported.
-- [ ] Verified work is committed and pushed.
+- [x] Required focused tests pass.
+- [x] Focused Ruff check passes.
+- [x] `make docs-check` passes.
+- [x] Full `make check` passes or any failure is documented with evidence.
+- [x] Type-check status is reported.
+- [x] Verified work is committed and pushed.
 
 ---
 
@@ -177,6 +177,39 @@ Internal score-boundary guard only; no cross-project boundary is created.
   — Status: DECIDED | Use `CONFIDENCE_PROTOCOL` to avoid confusion with the
   existing `CALIBRATION` result-file variable while staying concise in
   `make bench`.
+
+---
+
+## Outcome
+
+Implemented in `a84ea44`
+(`[Plan: CONFIDENCE_CALIBRATION_SCORECARD_PREFLIGHT_GUARD] Add score-time guard`),
+with documentation status follow-ups in `fdcf80c` and `ce136a8`.
+`scripts/bench_phase0.py` now accepts
+`--confidence-calibration-protocol-file`; `make bench` exposes it as
+`CONFIDENCE_PROTOCOL=...`; and strict Phase 0 package manifests can carry
+`confidence_calibration_protocol_file`. Passing guarded runs include
+`_meta.preflight_reports.confidence_calibration`, protocol/result input hashes,
+command provenance, and artifact-manifest provenance. Failing preflights emit
+machine-readable JSON and return before scorecard, output file, or artifact
+writes.
+
+Verification evidence:
+
+- TDD red before implementation: focused tests failed on unrecognized
+  `--confidence-calibration-protocol-file` and strict package-manifest
+  rejection of `confidence_calibration_protocol_file` (4 failed, 45 passed).
+- `python -m pytest tests/test_bench_phase0_script.py tests/test_phase0_benchmark_package.py tests/test_confidence_calibration_preflight.py -q`
+  passed: 49 passed.
+- `python -m ruff check scripts/bench_phase0.py scripts/run_phase0_benchmark_package.py tests/test_bench_phase0_script.py tests/test_phase0_benchmark_package.py`
+  passed.
+- `make -n bench ID=project CONFIDENCE_PROTOCOL=protocol.json CALIBRATION=calibration.json`
+  routed to `scripts/bench_phase0.py --confidence-calibration-protocol-file protocol.json --confidence-calibration-file calibration.json`.
+- `make docs-check` passed.
+- `make check` passed: 1014 passed, 1 skipped, 8 deselected; Ruff passed;
+  docs-check passed.
+- Type check is not configured in this repo.
+- Implementation and documentation commits were pushed to `origin/main`.
 
 ---
 
