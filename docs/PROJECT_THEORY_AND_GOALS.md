@@ -553,6 +553,10 @@ Sequencing rule: **the evaluation harness is the keystone** (it proves the SOTA 
    `make write-phase0-adjudication-package ...` and
    `qc_cli.py write-phase0-adjudication-package ...`; this is manifest assembly
    for versioned package inputs only, not populated adjudication evidence.
+   The adjudication protocol/response validation and preflight scripts are also
+   available through top-level `qc_cli.py` wrappers; these are process checks
+   only, not labels, correctness estimates, validity evidence, or benchmark
+   results.
    D3 now also has an externally fed baseline-comparison substrate through
    `D3_BASELINES=...` with per-baseline local span-overlap diagnostics and
    pre-run protocol validation through `make validate-d3-comparison-protocol`

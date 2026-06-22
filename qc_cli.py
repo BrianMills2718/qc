@@ -44,6 +44,10 @@ Examples:
   qc_cli bench <project_id>
   qc_cli bench-package phase0_package.json
   qc_cli write-phase0-adjudication-package <project_id> --output phase0_package.json --d3-gold-file d3_gold.json
+  qc_cli validate-adjudication-protocol adjudication_protocol.json
+  qc_cli adjudication-protocol-preflight adjudication_protocol.json sample.json
+  qc_cli validate-adjudication-responses responses.json
+  qc_cli adjudication-response-preflight adjudication_protocol.json sample.json responses.json
   qc_cli verify-phase0-benchmark-artifact benchmark_results/run/manifest.json
   qc_cli validate-d3-gold d3_gold.json
   qc_cli validate-d7-gold d7_gold.json
@@ -280,6 +284,58 @@ Examples:
     phase0_adjudication_package_writer_parser.add_argument(
         '--trace-id',
         help='Optional exact trace ID for D10 scoring',
+    )
+
+    adjudication_protocol_validator_parser = subparsers.add_parser(
+        'validate-adjudication-protocol',
+        help='Validate an adjudication protocol package',
+        description='Validate a schema_version=1 adjudication protocol package',
+    )
+    adjudication_protocol_validator_parser.add_argument(
+        'protocol',
+        help='Path to a schema_version=1 adjudication protocol JSON package',
+    )
+
+    adjudication_protocol_preflight_parser = subparsers.add_parser(
+        'adjudication-protocol-preflight',
+        help='Preflight adjudication protocol/sample packages',
+        description='Preflight an adjudication protocol package against a sample package',
+    )
+    adjudication_protocol_preflight_parser.add_argument(
+        'protocol',
+        help='Path to a schema_version=1 adjudication protocol JSON package',
+    )
+    adjudication_protocol_preflight_parser.add_argument(
+        'sample',
+        help='Path to a schema_version=1 adjudication sample JSON package',
+    )
+
+    adjudication_response_validator_parser = subparsers.add_parser(
+        'validate-adjudication-responses',
+        help='Validate completed adjudication responses',
+        description='Validate a completed adjudication response package',
+    )
+    adjudication_response_validator_parser.add_argument(
+        'package',
+        help='Path to a completed adjudication response JSON package',
+    )
+
+    adjudication_response_preflight_parser = subparsers.add_parser(
+        'adjudication-response-preflight',
+        help='Preflight adjudication responses',
+        description='Preflight completed adjudication responses against protocol and sample packages',
+    )
+    adjudication_response_preflight_parser.add_argument(
+        'protocol',
+        help='Path to a schema_version=1 adjudication protocol JSON package',
+    )
+    adjudication_response_preflight_parser.add_argument(
+        'sample',
+        help='Path to a schema_version=1 adjudication sample JSON package',
+    )
+    adjudication_response_preflight_parser.add_argument(
+        'responses',
+        help='Path to a completed adjudication response JSON package',
     )
 
     phase0_artifact_verifier_parser = subparsers.add_parser(
@@ -763,6 +819,14 @@ def main() -> int:
             return handle_bench_package_command(args)
         elif args.command == 'write-phase0-adjudication-package':
             return handle_write_phase0_adjudication_package_command(args)
+        elif args.command == 'validate-adjudication-protocol':
+            return handle_validate_adjudication_protocol_command(args)
+        elif args.command == 'adjudication-protocol-preflight':
+            return handle_adjudication_protocol_preflight_command(args)
+        elif args.command == 'validate-adjudication-responses':
+            return handle_validate_adjudication_responses_command(args)
+        elif args.command == 'adjudication-response-preflight':
+            return handle_adjudication_response_preflight_command(args)
         elif args.command == 'verify-phase0-benchmark-artifact':
             return handle_verify_phase0_benchmark_artifact_command(args)
         elif args.command == 'run-d7-retrieval':
@@ -910,6 +974,38 @@ def handle_write_phase0_adjudication_package_command(args) -> int:
         if value is not None:
             argv.extend([flag, str(value)])
     return write_phase0_adjudication_package.main(argv)
+
+
+def handle_validate_adjudication_protocol_command(args) -> int:
+    """Validate an adjudication protocol package through the canonical CLI."""
+    from scripts import validate_adjudication_protocol
+
+    return validate_adjudication_protocol.main([args.protocol])
+
+
+def handle_adjudication_protocol_preflight_command(args) -> int:
+    """Preflight an adjudication protocol/sample pair through the canonical CLI."""
+    from scripts import preflight_adjudication_protocol_sample
+
+    return preflight_adjudication_protocol_sample.main([args.protocol, args.sample])
+
+
+def handle_validate_adjudication_responses_command(args) -> int:
+    """Validate adjudication responses through the canonical CLI."""
+    from scripts import validate_adjudication_responses
+
+    return validate_adjudication_responses.main([args.package])
+
+
+def handle_adjudication_response_preflight_command(args) -> int:
+    """Preflight adjudication responses through the canonical CLI."""
+    from scripts import preflight_adjudication_responses
+
+    return preflight_adjudication_responses.main([
+        args.protocol,
+        args.sample,
+        args.responses,
+    ])
 
 
 def handle_verify_phase0_benchmark_artifact_command(args) -> int:

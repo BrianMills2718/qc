@@ -113,6 +113,13 @@ Each dimension maps to a SOTA claim and (where relevant) an invariant. The bar i
   strict Phase 0 adjudication package writer as
   `make write-phase0-adjudication-package`; this is CLI parity for manifest
   assembly only, not populated adjudication evidence.
+- `qc_cli.py validate-adjudication-protocol ...`,
+  `qc_cli.py adjudication-protocol-preflight ...`,
+  `qc_cli.py validate-adjudication-responses ...`, and
+  `qc_cli.py adjudication-response-preflight ...` delegate to the existing
+  adjudication validation/preflight scripts. These are process/provenance
+  checks only, not expert labels, correctness estimates, validity evidence, or
+  benchmark results.
 - D7 comparison also accepts `ARTIFACT_DIR=benchmark_results` /
   `--artifact-dir benchmark_results` and writes a versioned `report.json` plus
   `manifest.json` package for successful guarded or unguarded comparisons.
