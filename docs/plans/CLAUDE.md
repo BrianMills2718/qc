@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 99 | Export audit event log | High | Planned | `EXPORT_AUDIT_EVENT_LOG.md` |
 
 ## Completed Plans
 

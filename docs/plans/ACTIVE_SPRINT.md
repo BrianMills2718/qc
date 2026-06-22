@@ -22,10 +22,10 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Create and execute the next audit-substrate slice:
-   `EXPORT_AUDIT_EVENT_LOG.md`, a local export-audit event log for manifest
-   write/verify/preflight events with hash-linked event records, without
-   claiming signing, immutable storage, or full tamper-evidence.
+1. Execute Plan #99 (`EXPORT_AUDIT_EVENT_LOG.md`): add a local export-audit
+   event log for manifest write/verify/preflight events with hash-linked event
+   records, without claiming signing, immutable storage, or full
+   tamper-evidence.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
