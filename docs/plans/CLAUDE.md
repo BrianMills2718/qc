@@ -6,12 +6,12 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 156 | Line ending normalization | Medium | Planned | `LINE_ENDING_NORMALIZATION.md` |
 
 ## Completed Plans
 
 | Name | Outcome | Record |
 |------|---------|--------|
+| Line ending normalization | Tracked text files are LF-normalized and `.gitattributes` now records an LF text policy; CRLF scans return no tracked text matches | `completed/LINE_ENDING_NORMALIZATION.md` |
 | Cost observability target verification | `make cost` returns real llm_client cost/embedding tables and `make errors` returns a clear recent-error summary, so no fallback replacement was needed | `completed/COST_OBSERVABILITY_TARGET_VERIFICATION.md` |
 | Ruff F541 expansion | Ruff now gates `F541`, and the existing no-placeholder f-strings were mechanically removed without intended runtime behavior changes | `completed/RUFF_F541_EXPANSION.md` |
 | Boundary invalid project ID tests | API/MCP regression tests now prove invalid/traversal-like project IDs return explicit not-found/error responses without aliasing to or deleting existing project files | `completed/BOUNDARY_INVALID_PROJECT_ID_TESTS.md` |

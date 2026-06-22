@@ -116,3 +116,30 @@ Process criteria:
 
 This commit will be broad by file count. Keep it mechanical and avoid combining
 semantic edits with line-ending normalization.
+
+## Closeout Notes
+
+Completed 2026-06-22.
+
+Outcome: Tracked text files were normalized from CRLF/mixed line endings to LF,
+and `.gitattributes` now records an LF text normalization policy. The final
+tracked-content scan reported no carriage returns in tracked text files. The
+change is intentionally mechanical; no semantic source edits were made.
+
+Checkpoints:
+
+- Plan checkpoint: `939acb3`
+- Implementation checkpoint: `78c4aae`
+
+Verification:
+
+- `git ls-files | xargs file | rg 'CRLF|with CRLF'` produced no matches.
+- `git ls-files -z | xargs -0 rg -Il $'\r'` produced no tracked text paths.
+- `make docs-check`
+- `make check` (`1103 passed, 1 skipped, 8 deselected`)
+
+Caveat: `git diff --check` surfaced pre-existing trailing whitespace after the
+line-ending rewrite made whole lines appear changed. That whitespace was not
+stripped in this lane because removing trailing spaces inside broad source and
+template files can alter literal multi-line string content. A future whitespace
+cleanup should be planned separately if desired.
