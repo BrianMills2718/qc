@@ -8,6 +8,26 @@
 
 ---
 
+## Outcome
+
+Completed 2026-06-21. MCP now exposes `qc_review_relationships(project_id,
+limit=100)` for bounded code/entity relationship review targets backed by
+`ReviewManager.get_pending_relationships()`. The shared MCP review-decision
+response now returns `relationships_count`, and MCP decision docstrings name the
+`code_relationship` and `entity_relationship` target types.
+
+This closes the MCP/agent first slice for relationship adjudication. It does not
+add browser relationship review, negative-case-specific review UX, or expert
+adjudication evidence.
+
+Verification: initial TDD run failed as expected (`4 failed, 56 passed`) because
+`qc_review_relationships` and `relationships_count` were missing. After
+implementation, focused MCP tests passed (`60 passed`), Ruff passed on touched
+files, docs/plan/AGENTS checks passed, and final `make check` passed (`828
+passed, 1 skipped, 8 deselected`; type check not yet configured).
+
+---
+
 ## Gap
 
 **Current:** `ReviewManager` and the HTTP API can list and adjudicate
@@ -112,18 +132,32 @@ a cross-project callable boundary.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] `qc_review_relationships` exists and returns bounded review rows.
-- [ ] Rows distinguish `code_relationship` and `entity_relationship`.
-- [ ] Limit handling matches `qc_review_claims` (`0..100`).
-- [ ] MCP review-decision results include `relationships_count`.
-- [ ] MCP can apply relationship decisions through the shared review manager.
-- [ ] Docs state this narrows INV-10 but does not add browser/expert review.
+- [x] `qc_review_relationships` exists and returns bounded review rows.
+- [x] Rows distinguish `code_relationship` and `entity_relationship`.
+- [x] Limit handling matches `qc_review_claims` (`0..100`).
+- [x] MCP review-decision results include `relationships_count`.
+- [x] MCP can apply relationship decisions through the shared review manager.
+- [x] Docs state this narrows INV-10 but does not add browser/expert review.
 
 > Process criteria:
-- [ ] Required focused tests pass.
-- [ ] Full `make check` passes or any failure is documented with evidence.
-- [ ] Type-check status is reported.
-- [ ] Verified work is committed and pushed.
+- [x] Required focused tests pass.
+- [x] Full `make check` passes or any failure is documented with evidence.
+- [x] Type-check status is reported.
+- [x] Verified work is committed and pushed.
+
+---
+
+## Verification
+
+- Initial TDD run: `python -m pytest tests/test_mcp_server.py -q` - failed as
+  expected because `qc_review_relationships` and `relationships_count` did not
+  exist (`4 failed, 56 passed`).
+- `python -m pytest tests/test_mcp_server.py -q` - passed (`60 passed`).
+- `python -m ruff check qc_mcp_server.py tests/test_mcp_server.py` - passed.
+- `python scripts/check_markdown_links.py && python scripts/sync_plan_status.py --check && python scripts/meta/check_agents_sync.py --check`
+  - passed.
+- `make check` - passed (`828 passed, 1 skipped, 8 deselected`); Ruff and docs
+  gates passed; type check is not yet configured.
 
 ---
 

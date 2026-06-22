@@ -6,7 +6,6 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 88 | MCP relationship review | High | Planned | `MCP_RELATIONSHIP_REVIEW.md` |
 
 ## Completed Plans
 
@@ -44,6 +43,7 @@ Track all implementation work here.
 | Relationship review API decisions | INV-10 follow-up: `/projects/{id}/review/relationships` and ReviewManager support code/entity relationship review decisions | `completed/RELATIONSHIP_REVIEW_API_DECISIONS.md` |
 | MCP claim review decisions | INV-10 follow-up: `qc_review_decisions` applies generic review decisions including claim targets with preserved rationale | `completed/MCP_CLAIM_REVIEW_DECISIONS.md` |
 | MCP claim review listing | INV-10 follow-up: `qc_review_claims` exposes bounded claim review targets for agent-driven review workflows | `completed/MCP_CLAIM_REVIEW_LISTING.md` |
+| MCP relationship review | INV-10 follow-up: `qc_review_relationships` exposes bounded code/entity relationship review targets for agent-driven review workflows | `completed/MCP_RELATIONSHIP_REVIEW.md` |
 | INV-7 prompt injection scorecard | Evaluation-harness follow-up: `make bench` can score externally supplied prompt-injection fixture outcomes without mutating project state | `completed/INV7_PROMPT_INJECTION_SCORECARD.md` |
 | INV-11 incremental hard invalidation | Incremental recode now clears stale higher-order outputs, stale phase results, and stale claim rows it cannot recompute | `completed/INV11_INCREMENTAL_HARD_INVALIDATION.md` |
 | INV-11 review decisions inactive on invalidation | Review decisions targeting claims removed by incremental invalidation are retained as inactive audit history | `completed/INV11_REVIEW_DECISION_INACTIVE_ON_INVALIDATION.md` |
