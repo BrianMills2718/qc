@@ -67,9 +67,13 @@ Examples:
   qc_cli validate-d3-gold d3_gold.json
   qc_cli validate-d7-gold d7_gold.json
   qc_cli validate-d3-baseline-package d3_baseline.json
+  qc_cli validate-d3-comparison-protocol d3_protocol.json
+  qc_cli d3-comparison-preflight d3_protocol.json d3_gold.json baseline_a.json baseline_b.json
   qc_cli run-d7-retrieval <project_id> --output predictions.json
   qc_cli run-d7-live-baseline <project_id> --output live_baseline.json --model gpt-5-mini
   qc_cli validate-d7-baseline-package baseline.json
+  qc_cli validate-d7-comparison-protocol d7_protocol.json
+  qc_cli d7-comparison-preflight d7_protocol.json d7_gold.json lexical.json embedding.json
   qc_cli compare-d7-retrieval <project_id> --gold-file d7_gold.json --predictions-file predictions.json --artifact-dir benchmark_results
   qc_cli write-d7-comparison-package <project_id> --output d7_package.json --gold-file d7_gold.json --predictions-file predictions.json
   qc_cli compare-d7-package d7_comparison_package.json
@@ -820,6 +824,35 @@ Examples:
         help='Path to the D3 baseline package JSON file',
     )
 
+    d3_comparison_protocol_validator_parser = subparsers.add_parser(
+        'validate-d3-comparison-protocol',
+        help='Validate a D3 comparison protocol package',
+        description='Validate a pre-run D3 baseline-comparison protocol package',
+    )
+    d3_comparison_protocol_validator_parser.add_argument(
+        'protocol',
+        help='Path to the D3 comparison protocol JSON file',
+    )
+
+    d3_comparison_preflight_parser = subparsers.add_parser(
+        'd3-comparison-preflight',
+        help='Preflight D3 comparison inputs',
+        description='Preflight a D3 comparison protocol, gold package, and baseline packages',
+    )
+    d3_comparison_preflight_parser.add_argument(
+        'protocol',
+        help='Path to the D3 comparison protocol JSON file',
+    )
+    d3_comparison_preflight_parser.add_argument(
+        'gold',
+        help='Path to the D3 gold package JSON file',
+    )
+    d3_comparison_preflight_parser.add_argument(
+        'predictions',
+        nargs='+',
+        help='One or more D3 baseline prediction package JSON files',
+    )
+
     # D7 baseline package validation command
     d7_baseline_validator_parser = subparsers.add_parser(
         'validate-d7-baseline-package',
@@ -829,6 +862,35 @@ Examples:
     d7_baseline_validator_parser.add_argument(
         'package_file',
         help='Path to the D7 baseline package JSON file',
+    )
+
+    d7_comparison_protocol_validator_parser = subparsers.add_parser(
+        'validate-d7-comparison-protocol',
+        help='Validate a D7 comparison protocol package',
+        description='Validate a pre-run D7 retrieval-comparison protocol package',
+    )
+    d7_comparison_protocol_validator_parser.add_argument(
+        'protocol',
+        help='Path to the D7 comparison protocol JSON file',
+    )
+
+    d7_comparison_preflight_parser = subparsers.add_parser(
+        'd7-comparison-preflight',
+        help='Preflight D7 comparison inputs',
+        description='Preflight a D7 comparison protocol, gold package, and prediction packages',
+    )
+    d7_comparison_preflight_parser.add_argument(
+        'protocol',
+        help='Path to the D7 comparison protocol JSON file',
+    )
+    d7_comparison_preflight_parser.add_argument(
+        'gold',
+        help='Path to the D7 gold package JSON file',
+    )
+    d7_comparison_preflight_parser.add_argument(
+        'predictions',
+        nargs='+',
+        help='One or more D7 retrieval or live-baseline prediction package JSON files',
     )
 
     # INV-7 prompt-injection fixture commands
@@ -1224,8 +1286,16 @@ def main() -> int:
             return handle_validate_d7_gold_command(args)
         elif args.command == 'validate-d3-baseline-package':
             return handle_validate_d3_baseline_package_command(args)
+        elif args.command == 'validate-d3-comparison-protocol':
+            return handle_validate_d3_comparison_protocol_command(args)
+        elif args.command == 'd3-comparison-preflight':
+            return handle_d3_comparison_preflight_command(args)
         elif args.command == 'validate-d7-baseline-package':
             return handle_validate_d7_baseline_package_command(args)
+        elif args.command == 'validate-d7-comparison-protocol':
+            return handle_validate_d7_comparison_protocol_command(args)
+        elif args.command == 'd7-comparison-preflight':
+            return handle_d7_comparison_preflight_command(args)
         elif args.command == 'run-inv7-fixtures':
             return handle_run_inv7_fixtures_command(args)
         elif args.command == 'run-inv7-live-fixtures':
@@ -1698,11 +1768,39 @@ def handle_validate_d3_baseline_package_command(args) -> int:
     return validate_d3_baseline_package.main([args.package_file])
 
 
+def handle_validate_d3_comparison_protocol_command(args) -> int:
+    """Validate a D3 comparison protocol through the canonical CLI."""
+    from scripts import validate_d3_comparison_protocol
+
+    return validate_d3_comparison_protocol.main([args.protocol])
+
+
+def handle_d3_comparison_preflight_command(args) -> int:
+    """Preflight D3 comparison inputs through the canonical CLI."""
+    from scripts import preflight_d3_comparison
+
+    return preflight_d3_comparison.main([args.protocol, args.gold, *args.predictions])
+
+
 def handle_validate_d7_baseline_package_command(args) -> int:
     """Validate a D7 baseline package through the canonical CLI."""
     from scripts import validate_d7_baseline_package
 
     return validate_d7_baseline_package.main([args.package_file])
+
+
+def handle_validate_d7_comparison_protocol_command(args) -> int:
+    """Validate a D7 comparison protocol through the canonical CLI."""
+    from scripts import validate_d7_comparison_protocol
+
+    return validate_d7_comparison_protocol.main([args.protocol])
+
+
+def handle_d7_comparison_preflight_command(args) -> int:
+    """Preflight D7 comparison inputs through the canonical CLI."""
+    from scripts import preflight_d7_comparison
+
+    return preflight_d7_comparison.main([args.protocol, args.gold, *args.predictions])
 
 
 def handle_run_inv7_fixtures_command(args) -> int:

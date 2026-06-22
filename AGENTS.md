@@ -100,6 +100,8 @@ make validate-d3-comparison-protocol PROTOCOL=d3_protocol.json  # Validate pre-r
 make d3-comparison-preflight PROTOCOL=d3_protocol.json GOLD=d3_gold.json PREDICTIONS="baseline.json"  # Preflight D3 comparison inputs before scoring
 make bench ID=<project_id> D3_GOLD=d3_gold.json D3_BASELINES=d3_baselines.json D3_PROTOCOL=d3_protocol.json  # Guard D3 baseline comparison scoring with protocol preflight and metric-criteria report when configured
 python qc_cli.py validate-d3-baseline-package d3_baseline.json  # Canonical CLI wrapper for D3 baseline package validation
+python qc_cli.py validate-d3-comparison-protocol d3_protocol.json  # Canonical CLI wrapper for D3 comparison protocol validation
+python qc_cli.py d3-comparison-preflight d3_protocol.json d3_gold.json baseline.json  # Canonical CLI wrapper for D3 comparison preflight
 make validate-d7-gold GOLD=gold_set.json  # Validate versioned held-out D7 gold-set package
 make validate-d7-baseline-package PACKAGE=d7_baseline.json  # Validate versioned D7 retrieval/live baseline package
 python qc_cli.py validate-d7-baseline-package d7_baseline.json  # Canonical CLI wrapper for D7 baseline package validation
@@ -120,6 +122,8 @@ make verify-d7-comparison-artifact ARTIFACT=benchmark_results/run-dir  # Verify 
 make run-d7-live-baseline ID=<project_id> OUTPUT=live_baseline.json MODEL=<model>  # Write opt-in live D7 candidate-selection baseline package for BASELINES=
 python qc_cli.py run-d7-retrieval <project_id> --output predictions.json  # Canonical CLI wrapper for D7 retrieval export
 python qc_cli.py run-d7-live-baseline <project_id> --output live_baseline.json --model <model>  # Canonical CLI wrapper for opt-in live D7 baseline export
+python qc_cli.py validate-d7-comparison-protocol d7_protocol.json  # Canonical CLI wrapper for D7 comparison protocol validation
+python qc_cli.py d7-comparison-preflight d7_protocol.json d7_gold.json lexical.json embedding.json  # Canonical CLI wrapper for D7 comparison preflight
 python qc_cli.py compare-d7-retrieval <project_id> --gold-file d7_gold.json --predictions-file lexical.json --predictions-file embedding.json --protocol-package d7_protocol.json --artifact-dir benchmark_results  # Canonical CLI wrapper for D7 retrieval comparison
 python qc_cli.py write-d7-comparison-package <project_id> --output d7_comparison_package.json --gold-file d7_gold.json --predictions-file lexical.json  # Canonical CLI wrapper for D7 comparison package writer
 python qc_cli.py compare-d7-package d7_comparison_package.json  # Canonical CLI wrapper for D7 comparison package runner
