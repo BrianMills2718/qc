@@ -6,7 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| #71 | D10 runtime environment metadata | High | Planned | `D10_RUNTIME_ENVIRONMENT_METADATA.md` |
+| #71 | D10 runtime environment metadata | High | In Progress | `D10_RUNTIME_ENVIRONMENT_METADATA.md` |
 
 ## Completed Plans
 

@@ -76,7 +76,7 @@ strict versioned benchmark package manifest with relative input paths through
 `make bench-package PACKAGE=...`; that runner invokes the same canonical
 scorecard path and adds orchestration/provenance only. Phase 0 artifact packages
 now include a hash-recorded `timing_d10.json` file for local D10 timing
-sections. This remains a
+sections with non-sensitive runtime environment metadata. This remains a
 gold-dependent exact-score/provenance/uncertainty, human-ceiling-comparison, and
 canary-fixture/counterfactual/GT-fidelity/preference/calibration-accounting substrate, not a populated held-out
 benchmark, full D3/D7 validity, populated D4 LLM-judge/blind-expert evaluation,

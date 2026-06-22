@@ -22,6 +22,8 @@ import argparse
 from datetime import datetime, timezone
 import hashlib
 import json
+import os
+import platform
 import re
 import sys
 from pathlib import Path
@@ -383,11 +385,28 @@ def phase0_timing_artifact(card: dict[str, Any]) -> dict[str, Any]:
             "wall_clock_d10",
             _missing_d10_artifact_section("wall_clock_d10"),
         ),
+        "runtime_environment": _runtime_environment_metadata(),
         "note": (
             "D10 timing artifact packages local Phase 0 timing metadata for "
             "review. It is not public benchmark timing evidence, a baseline "
             "comparison, or a SOTA claim."
         ),
+    }
+
+
+def _runtime_environment_metadata() -> dict[str, Any]:
+    """Return non-sensitive runtime context for local timing artifacts."""
+    return {
+        "python": {
+            "implementation": platform.python_implementation(),
+            "version": platform.python_version(),
+        },
+        "os": {
+            "system": platform.system(),
+            "release": platform.release(),
+        },
+        "machine": platform.machine(),
+        "logical_cpu_count": os.cpu_count() or 0,
     }
 
 

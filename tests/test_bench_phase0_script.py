@@ -512,6 +512,23 @@ def test_bench_phase0_writes_versioned_artifact_package(
     assert timing["artifact_type"] == "qualitative_coding.phase0_d10_timing"
     assert timing["cost_latency_d10"] == stdout_scorecard["cost_latency_d10"]
     assert timing["wall_clock_d10"] == stdout_scorecard["wall_clock_d10"]
+    runtime_environment = timing["runtime_environment"]
+    assert runtime_environment["python"]["implementation"]
+    assert runtime_environment["python"]["version"]
+    assert "system" in runtime_environment["os"]
+    assert "release" in runtime_environment["os"]
+    assert "machine" in runtime_environment
+    assert "logical_cpu_count" in runtime_environment
+    forbidden_environment_keys = {
+        "hostname",
+        "node",
+        "username",
+        "home",
+        "absolute_paths",
+        "environment_variables",
+        "serial_identifier",
+    }
+    assert forbidden_environment_keys.isdisjoint(runtime_environment)
     assert "not public benchmark timing evidence" in timing["note"]
     assert manifest["schema_version"] == 1
     assert manifest["artifact_type"] == "qualitative_coding.phase0_scorecard"

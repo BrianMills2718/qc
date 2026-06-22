@@ -1,6 +1,6 @@
 # Plan #71: D10 Runtime Environment Metadata
 
-**Status:** Planned
+**Status:** In Progress
 **Type:** implementation
 **Priority:** High
 **Blocked By:** D10 timing artifact
@@ -57,10 +57,10 @@ addition using Python standard-library runtime information.
 
 ### Capability Validation
 
-- [ ] Runtime metadata excludes hostnames, usernames, absolute paths, env vars,
+- [x] Runtime metadata excludes hostnames, usernames, absolute paths, env vars,
   and serial identifiers.
-- [ ] Artifact tests assert required metadata keys exist.
-- [ ] No new cross-project callable boundary is introduced.
+- [x] Artifact tests assert required metadata keys exist.
+- [x] No new cross-project callable boundary is introduced.
 
 ---
 
@@ -112,20 +112,20 @@ addition using Python standard-library runtime information.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] `timing_d10.json` includes `runtime_environment`.
-- [ ] Runtime metadata includes Python implementation/version, OS
+- [x] `timing_d10.json` includes `runtime_environment`.
+- [x] Runtime metadata includes Python implementation/version, OS
   family/release, machine architecture, and CPU count.
-- [ ] Runtime metadata excludes hostnames, usernames, absolute paths,
+- [x] Runtime metadata excludes hostnames, usernames, absolute paths,
   environment variables, and serial identifiers.
-- [ ] Manifest timing hash still covers the updated timing artifact.
-- [ ] Docs preserve the claim boundary: this is local runtime context, not
+- [x] Manifest timing hash still covers the updated timing artifact.
+- [x] Docs preserve the claim boundary: this is local runtime context, not
   public benchmark timing evidence.
 
 > Process criteria:
-- [ ] Focused tests pass.
-- [ ] Plan sync passes.
-- [ ] Markdown link check passes.
-- [ ] Full `make check` passes, or any non-codebase failure is recorded.
+- [x] Focused tests pass.
+- [x] Plan sync passes.
+- [x] Markdown link check passes.
+- [x] Full `make check` passes, or any non-codebase failure is recorded.
 - [ ] Verified implementation is committed and pushed.
 
 ---
