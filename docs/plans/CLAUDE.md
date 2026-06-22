@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 190 | QC CLI theoretical sampling surfaces | High | Planned | `QC_CLI_THEORETICAL_SAMPLING_SURFACES.md` |
 
 ## Completed Plans
 
