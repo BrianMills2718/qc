@@ -22,9 +22,11 @@ from qc_clean.schemas.domain import (
     ClaimSupportStatus,
     Code,
     CodeApplication,
+    CodeRelationship,
     Codebook,
     Corpus,
     CorpusScope,
+    DomainEntityRelationship,
     Document,
     Entity,
     IRRResult,
@@ -616,6 +618,76 @@ class TestReview:
         result = json.loads(qc_mcp_server.qc_review_claims("nope"))
         assert "error" in result
 
+    def test_review_relationships(self, completed_project, tmp_store):
+        completed_project.entities = [
+            Entity(id="E1", name="AI", entity_type="concept"),
+            Entity(id="E2", name="Clinic team", entity_type="team"),
+        ]
+        completed_project.code_relationships = [
+            CodeRelationship(
+                id="CR1",
+                source_code_id="C1",
+                target_code_id="C2",
+                relationship_type="tensions_with",
+                strength=0.7,
+                evidence=["AI use raises privacy concern."],
+            )
+        ]
+        completed_project.entity_relationships = [
+            DomainEntityRelationship(
+                id="ER1",
+                entity_1_id="E1",
+                entity_2_id="E2",
+                relationship_type="used_by",
+                strength=0.8,
+                supporting_evidence=["Clinic team uses AI."],
+            )
+        ]
+        tmp_store.save(completed_project)
+
+        result = json.loads(qc_mcp_server.qc_review_relationships("proj-done"))
+
+        assert result["project_id"] == "proj-done"
+        assert result["project_name"] == "Completed Study"
+        assert result["pipeline_status"] == "completed"
+        assert result["summary"]["relationships_count"] == 2
+        assert result["can_resume"] is False
+        assert result["returned"] == 2
+        assert result["total_relationships"] == 2
+        code_rel = result["relationships"][0]
+        assert code_rel["target_type"] == "code_relationship"
+        assert code_rel["id"] == "CR1"
+        assert code_rel["source_name"] == "AI Adoption"
+        assert code_rel["target_name"] == "Privacy Concerns"
+        assert code_rel["evidence_count"] == 1
+        entity_rel = result["relationships"][1]
+        assert entity_rel["target_type"] == "entity_relationship"
+        assert entity_rel["id"] == "ER1"
+        assert entity_rel["source_name"] == "AI"
+        assert entity_rel["target_name"] == "Clinic team"
+
+    def test_review_relationships_limit(self, completed_project, tmp_store):
+        completed_project.code_relationships = [
+            CodeRelationship(id="CR1", source_code_id="C1", target_code_id="C2"),
+            CodeRelationship(id="CR2", source_code_id="C2", target_code_id="C1"),
+        ]
+        tmp_store.save(completed_project)
+
+        limited = json.loads(qc_mcp_server.qc_review_relationships("proj-done", limit=1))
+        negative = json.loads(qc_mcp_server.qc_review_relationships("proj-done", limit=-5))
+
+        assert limited["returned"] == 1
+        assert limited["total_relationships"] == 2
+        assert limited["limit"] == 1
+        assert limited["relationships"][0]["id"] == "CR1"
+        assert negative["returned"] == 0
+        assert negative["total_relationships"] == 2
+        assert negative["limit"] == 0
+
+    def test_review_relationships_not_found(self, tmp_store):
+        result = json.loads(qc_mcp_server.qc_review_relationships("nope"))
+        assert "error" in result
+
     def test_approve_all_codes(self, completed_project, tmp_store):
         result = json.loads(qc_mcp_server.qc_approve_all_codes("proj-done"))
         assert result["approved"] == 2
@@ -673,6 +745,62 @@ class TestReview:
         assert claim.adjudication_status == ClaimAdjudicationStatus.RETAINED
         assert claim.revision_history[-1].action == "approve"
         assert claim.revision_history[-1].rationale == "Reviewed against source evidence."
+
+    def test_review_decisions_relationship(self, completed_project, tmp_store):
+        completed_project.entities = [
+            Entity(id="E1", name="AI", entity_type="concept"),
+            Entity(id="E2", name="Clinic team", entity_type="team"),
+        ]
+        completed_project.code_relationships = [
+            CodeRelationship(
+                id="CR1",
+                source_code_id="C1",
+                target_code_id="C2",
+                relationship_type="tensions_with",
+                strength=0.7,
+            )
+        ]
+        completed_project.entity_relationships = [
+            DomainEntityRelationship(
+                id="ER1",
+                entity_1_id="E1",
+                entity_2_id="E2",
+                relationship_type="used_by",
+                strength=0.8,
+            )
+        ]
+        tmp_store.save(completed_project)
+        decisions = [
+            {
+                "target_type": "code_relationship",
+                "target_id": "CR1",
+                "action": "modify",
+                "rationale": "Narrowed relation.",
+                "new_value": {
+                    "relationship_type": "moderates",
+                    "strength": 0.9,
+                    "evidence": ["reviewed evidence"],
+                },
+            },
+            {
+                "target_type": "entity_relationship",
+                "target_id": "ER1",
+                "action": "reject",
+                "rationale": "Unsupported entity link.",
+            },
+        ]
+
+        result = json.loads(qc_mcp_server.qc_review_decisions("proj-done", decisions))
+
+        assert result["applied"] == 2
+        assert result["relationships_count"] == 1
+        state = tmp_store.load("proj-done")
+        assert len(state.entity_relationships) == 0
+        assert len(state.code_relationships) == 1
+        rel = state.code_relationships[0]
+        assert rel.relationship_type == "moderates"
+        assert rel.strength == 0.9
+        assert rel.evidence == ["reviewed evidence"]
 
     def test_review_codes_delegates_claim_decision(self, completed_project, tmp_store):
         completed_project.claims = [

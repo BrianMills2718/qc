@@ -281,6 +281,36 @@ def qc_review_claims(project_id: str, limit: int = 100) -> str:
 
 
 @mcp.tool()
+def qc_review_relationships(project_id: str, limit: int = 100) -> str:
+    """List code/entity relationships as bounded review targets.
+
+    Args:
+        project_id: The project ID
+        limit: Maximum relationship rows to return, capped at 100
+    """
+    try:
+        state = store.load(project_id)
+    except FileNotFoundError:
+        return json.dumps({"error": f"Project '{project_id}' not found."})
+
+    safe_limit = min(max(0, limit), 100)
+    rm = ReviewManager(state)
+    all_relationships = rm.get_pending_relationships()
+    relationships = all_relationships[:safe_limit]
+    return json.dumps({
+        "project_id": state.id,
+        "project_name": state.name,
+        "pipeline_status": state.pipeline_status.value,
+        "relationships": relationships,
+        "returned": len(relationships),
+        "total_relationships": len(all_relationships),
+        "limit": safe_limit,
+        "summary": rm.get_review_summary().model_dump(mode="json"),
+        "can_resume": rm.can_resume(),
+    }, indent=2)
+
+
+@mcp.tool()
 def qc_get_codebook(project_id: str) -> str:
     """Get the codebook (all codes) for a project.
 
@@ -963,6 +993,9 @@ def _apply_mcp_review_decisions(
         "applied": result["applied"],
         "codes_remaining": len(state.codebook.codes),
         "claims_count": len(state.claims),
+        "relationships_count": (
+            len(state.code_relationships) + len(state.entity_relationships)
+        ),
         "can_resume": rm.can_resume(),
     })
 
@@ -972,10 +1005,11 @@ def qc_review_decisions(
     project_id: str,
     decisions: List[Dict[str, Any]],
 ) -> str:
-    """Apply review decisions to codes, applications, codebooks, or claims.
+    """Apply review decisions to codes, applications, codebooks, claims, or relationships.
 
     Each decision is a dict with:
-    - target_type: "code", "code_application", "codebook", or "claim"
+    - target_type: "code", "code_application", "codebook", "claim",
+      "code_relationship", or "entity_relationship"
     - target_id: ID of the reviewed object
     - action: "approve", "reject", "modify", "merge", or "split"
     - rationale: Optional reason for the decision
@@ -996,7 +1030,8 @@ def qc_review_codes(
     """Apply individual review decisions to a project; kept for compatibility.
 
     Each decision is a dict with:
-    - target_type: "code", "code_application", "codebook", or "claim"
+    - target_type: "code", "code_application", "codebook", "claim",
+      "code_relationship", or "entity_relationship"
     - target_id: ID of the reviewed object
     - action: "approve", "reject", "modify", "merge", or "split"
     - rationale: Optional reason for the decision
