@@ -7,10 +7,12 @@ from qc_clean.core.pipeline.irr import (
     compute_categorical_cohens_kappa,
     compute_categorical_fleiss_kappa,
     compute_categorical_gwet_ac1,
+    compute_categorical_krippendorff_alpha,
     compute_categorical_percent_agreement,
     compute_cohens_kappa,
     compute_fleiss_kappa,
     compute_gwet_ac1,
+    compute_krippendorff_alpha,
     compute_percent_agreement,
 )
 
@@ -48,6 +50,39 @@ def test_binary_gwet_ac1_reports_prevalence_robust_agreement():
     }
 
     assert abs(compute_gwet_ac1(matrix) - 0.5294117647058824) < 1e-9
+
+
+def test_binary_krippendorff_alpha_perfect_agreement():
+    matrix = {
+        "cell-1": [1, 1],
+        "cell-2": [0, 0],
+    }
+
+    assert compute_krippendorff_alpha(matrix) == 1.0
+
+
+def test_binary_krippendorff_alpha_mixed_exact_key_matrix():
+    matrix = {
+        "gold-and-system": [1, 1],
+        "gold-only": [1, 0],
+        "system-only": [0, 1],
+    }
+
+    assert abs(compute_krippendorff_alpha(matrix) - (-0.25)) < 1e-9
+
+
+def test_categorical_krippendorff_alpha_rejects_ragged_rows():
+    matrix = {
+        "row-1": ["coded", "coded"],
+        "row-2": ["coded"],
+    }
+
+    try:
+        compute_categorical_krippendorff_alpha(matrix)
+    except ValueError as exc:
+        assert "same number of ratings" in str(exc)
+    else:
+        raise AssertionError("Expected ragged Krippendorff alpha matrix to fail")
 
 
 def test_application_matrix_three_passes_fleiss():

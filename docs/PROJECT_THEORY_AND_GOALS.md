@@ -249,6 +249,11 @@ as the system and report system-minus-baseline deltas with local paired
 bootstrap intervals. This is not a live baseline run, held-out D3 result, or
 expert-parity claim.
 
+**Exact-key alpha metadata:** D3 and D7 `system_gold_agreement` sections now
+report exact-key binary Krippendorff's α beside percent agreement, Cohen's κ,
+Gwet's AC1, and prevalence. This is not full semantic/multi-label D3 α or
+boundary-disagreement-aware reliability evidence.
+
 **Phase 0 package runner:** `make bench-package PACKAGE=phase0_package.json` /
 `scripts/run_phase0_benchmark_package.py phase0_package.json` can validate a
 strict `schema_version=1` manifest, resolve benchmark input paths relative to
@@ -345,6 +350,8 @@ Sequencing rule: **the evaluation harness is the keystone** (it proves the SOTA 
    D3 now also has an externally fed baseline-comparison substrate through
    `D3_BASELINES=...`, but actual/live baseline runs on held-out data remain
    future benchmark work.
+   D3/D7 exact-key system-gold agreement now includes Krippendorff's α metadata;
+   full semantic/multi-label α remains future benchmark work.
 2. **Span-anchored grounding** — *MOSTLY DONE* (`qc_clean/core/grounding.py`: offsets + hash + verify + unique-resolution, ambiguous/unresolvable dropped). Remaining for full INV-1: fuzzy/semantic matcher (recover paraphrased quotes) + segment-derived `speaker`.
 3. **Segment universe** — *DONE* (`segmentation.py` registry + `ProjectState.segments` + `compute_coverage`; **exhaustive per-segment coding** via `project run --exhaustive` gives examined-and-judged coverage and segment-anchored applications — INV-8 met in that mode; `project irr --application-level` now reports positive segment × code application agreement and segment-decision agreement). Remaining: decide whether exhaustive becomes the default after live validation.
 4. **First-class claim ledger** — *MOSTLY DONE object layer* (`ProjectState.claims`, deterministic stage builders, no-claims events, negative-case target refs, CSV/Markdown/CLI/API/MCP surfaces). Remaining for full INV-9: stronger source anchoring for higher-order claims and deciding whether future LLM schemas emit claim-native outputs.

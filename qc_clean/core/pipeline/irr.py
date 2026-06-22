@@ -248,6 +248,15 @@ def compute_gwet_ac1(matrix: Dict[str, List[int]]) -> float:
     return compute_categorical_gwet_ac1(categorical_matrix)
 
 
+def compute_krippendorff_alpha(matrix: Dict[str, List[int]]) -> float:
+    """Krippendorff's alpha for complete binary agreement matrices."""
+    categorical_matrix = {
+        key: [str(value) for value in row]
+        for key, row in matrix.items()
+    }
+    return compute_categorical_krippendorff_alpha(categorical_matrix)
+
+
 def compute_categorical_percent_agreement(matrix: Dict[str, List[str]]) -> float:
     """Proportion of categorical rows where all passes assign the same value."""
     if not matrix:
@@ -340,6 +349,47 @@ def compute_categorical_gwet_ac1(matrix: Dict[str, List[str]]) -> float:
     if expected == 1.0:
         return 1.0
     return (observed - expected) / (1 - expected)
+
+
+def compute_categorical_krippendorff_alpha(matrix: Dict[str, List[str]]) -> float:
+    """Krippendorff's alpha for complete nominal categorical agreement matrices."""
+    if not matrix:
+        return 0.0
+    rows = list(matrix.values())
+    k = len(rows[0])
+    if k == 0:
+        return 0.0
+    if any(len(row) != k for row in rows):
+        raise ValueError("Krippendorff alpha requires every row to have the same number of ratings")
+    if k == 1:
+        return 1.0
+
+    observed_disagreement = 0.0
+    pairable_ratings = 0
+    category_totals: Counter[str] = Counter()
+    for row in rows:
+        counts = Counter(row)
+        category_totals.update(counts)
+        pair_count = k * (k - 1)
+        pairable_ratings += pair_count
+        observed_disagreement += pair_count - sum(
+            count * (count - 1) for count in counts.values()
+        )
+
+    if pairable_ratings == 0:
+        return 1.0
+
+    total_ratings = sum(category_totals.values())
+    if total_ratings <= 1:
+        return 1.0
+    observed = observed_disagreement / pairable_ratings
+    expected = 1 - (
+        sum(count * (count - 1) for count in category_totals.values())
+        / (total_ratings * (total_ratings - 1))
+    )
+    if expected == 0.0:
+        return 1.0 if observed == 0.0 else 0.0
+    return 1 - (observed / expected)
 
 
 def interpret_kappa(kappa: float) -> str:

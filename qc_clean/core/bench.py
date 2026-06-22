@@ -29,6 +29,7 @@ from qc_clean.core.pipeline.irr import (
     compute_categorical_percent_agreement,
     compute_cohens_kappa,
     compute_gwet_ac1,
+    compute_krippendorff_alpha,
     compute_percent_agreement,
 )
 from qc_clean.core.pipeline.saturation import assess_category_saturation
@@ -2412,6 +2413,7 @@ def _exact_key_system_gold_agreement(
         "percent_agreement": compute_percent_agreement(matrix),
         "cohens_kappa": compute_cohens_kappa(matrix),
         "gwet_ac1": compute_gwet_ac1(matrix),
+        "krippendorff_alpha": compute_krippendorff_alpha(matrix),
         "prevalence": _binary_matrix_prevalence(matrix),
         "note": (
             f"Binary agreement over the exact {dimension} key universe only. "

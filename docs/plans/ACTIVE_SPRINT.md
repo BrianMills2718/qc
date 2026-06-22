@@ -41,7 +41,7 @@ packages are validated by
 structural fixture export (`make run-inv7-fixtures`) and opt-in live model
 canary fixture export (`make run-inv7-live-fixtures`) for the `PROMPT_INJECTION=`
 scorecard path. D3 and D7 scorecards now report exact-key binary system-vs-gold
-percent agreement, Cohen's κ, Gwet's AC1, and prevalence metadata. D3/D7
+percent agreement, Cohen's κ, Gwet's AC1, Krippendorff's α, and prevalence metadata. D3/D7
 scorecards also compare exact recall/precision/F1 against supplied
 versioned-package human-human metrics when present and surface supplied
 human-human κ/α/AC1 metadata separately. D3 scorecards can now also score
