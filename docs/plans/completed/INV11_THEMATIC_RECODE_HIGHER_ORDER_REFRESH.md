@@ -1,10 +1,63 @@
 # Plan #166: INV-11 Thematic Recode Higher-Order Refresh
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** INV-11 hard invalidation; INV-11 add-docs recode hook
 **Blocks:** fuller corpus-mutation auto-recompute design
+
+---
+
+## Outcome
+
+Default/thematic projects can now opt into thematic higher-order refresh after
+incremental recode:
+
+- `project recode <project_id> --refresh-higher-order`
+- `project add-docs <project_id> ... --recode --refresh-higher-order`
+
+The default recode path remains unchanged: without the new flag it runs
+incremental coding, hard-invalidates stale higher-order outputs it does not
+recompute, and reruns Cross-Interview and Negative Case.
+
+The refresh path now:
+
+1. runs incremental coding on uncoded documents;
+2. invalidates stale higher-order outputs before the first post-incremental
+   save can preserve stale objects as current;
+3. reconstructs `ctx.phase1_json` from the current codebook via
+   `codebook_to_code_hierarchy()`;
+4. reruns Perspective -> Relationship -> Synthesis;
+5. reruns Cross-Interview -> Negative Case.
+
+Grounded-theory refresh is explicitly unsupported in this slice. If requested,
+the CLI returns a clear non-zero error before pipeline creation, and the
+factory also fails loudly if called directly with
+`refresh_higher_order=True` for GT.
+
+Implementation commit: `914e8b0`
+(`Add thematic recode higher-order refresh`).
+
+Verification:
+
+- Initial focused tests failed before implementation for missing adapter,
+  rebuild-stage, factory flag, CLI forwarding, parser, and GT-guard behavior.
+- `python -m pytest tests/test_adapters.py -k "CodebookToCodeHierarchy" -q`
+  -> 2 passed, 13 deselected.
+- `python -m pytest tests/test_incremental_staleness_inv11.py tests/test_project_commands.py -k "refresh_higher_order or stale_higher_order" -q`
+  -> 4 passed, 57 deselected.
+- `python -m pytest tests/test_incremental.py tests/test_pipeline_stages.py tests/test_project_commands.py -q`
+  -> 99 passed.
+- Targeted Ruff passed for touched Python files.
+- `make docs-check` -> passed.
+- `git diff --check` -> passed.
+- `make check` -> 1131 passed, 1 skipped, 8 deselected; Ruff and docs gates
+  passed.
+
+INV-11 remains partial. Refresh is opt-in and thematic-only; default recode
+still uses hard invalidation, GT axial/selective/theory refresh is not
+implemented, and no full automatic corpus-mutation policy exists. This is not
+methodological-validity evidence or a SOTA claim.
 
 ---
 

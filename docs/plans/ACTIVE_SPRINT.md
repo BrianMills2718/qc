@@ -22,21 +22,25 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #166: add an opt-in thematic higher-order refresh path for
-   incremental recode.
+1. Select and plan the next deterministic, high-value roadmap lane.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Plan #166
-(`docs/plans/INV11_THEMATIC_RECODE_HIGHER_ORDER_REFRESH.md`) adds an explicit
-`--refresh-higher-order` recode mode for default/thematic projects. The planned
-pipeline incrementally codes new documents, invalidates stale thematic
-higher-order outputs before intermediate save points, rebuilds Phase 1 context
-from the current codebook, reruns Perspective -> Relationship -> Synthesis,
-then reruns Cross-Interview -> Negative Case. Default recode behavior remains
-hard-invalidation only, and grounded-theory refresh must fail loudly as
-unsupported in this slice. This is an INV-11 thematic refresh slice only; it is
-not full INV-11 completion, methodological-validity evidence, or a SOTA claim.
+**Active checkpoint:** Select the next deterministic roadmap lane from the
+remaining documented gaps. Candidate lanes include GT/default-policy follow-ups
+for INV-11, broader INV-7 custom-prompt/live benchmark work, INV-2/D7
+evaluation-policy scaffolding that does not fabricate gold labels, or another
+protocol/accounting lane that can be verified without external evidence.
+
+**Completed checkpoint:** Default/thematic projects can now opt into
+`--refresh-higher-order` for `project recode` and
+`project add-docs --recode`. The refresh path incrementally codes new
+documents, invalidates stale higher-order outputs before intermediate save
+points, rebuilds Phase 1 context from the current codebook, reruns Perspective
+-> Relationship -> Synthesis, then reruns Cross-Interview -> Negative Case.
+Default recode still uses hard invalidation, and grounded-theory refresh fails
+loudly as unsupported. This is an INV-11 thematic refresh slice only; it is not
+full INV-11 completion, methodological-validity evidence, or a SOTA claim.
 
 **Completed checkpoint:** Rendered custom prompt overrides are now bookended by
 a repo-owned instruction/data-separation wrapper. The wrapper preserves the
