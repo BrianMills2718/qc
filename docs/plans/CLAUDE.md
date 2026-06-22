@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 154 | Ruff F541 expansion | Medium | Planned | `RUFF_F541_EXPANSION.md` |
 
 ## Completed Plans
 
