@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 116 | D6 bias scorecard preflight guard | High | Planned | `D6_BIAS_SCORECARD_PREFLIGHT_GUARD.md` |
 
 ## Completed Plans
 
