@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 107 | Prompt override placeholder policy | High | Planned | `PROMPT_OVERRIDE_PLACEHOLDER_POLICY.md` |
 
 ## Completed Plans
 

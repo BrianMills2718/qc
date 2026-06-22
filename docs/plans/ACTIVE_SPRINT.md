@@ -22,7 +22,9 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Continue through the ranked roadmap without pausing after each verified
+1. Execute Plan #107 (`PROMPT_OVERRIDE_PLACEHOLDER_POLICY.md`): make prompt
+   override metadata exposure explicit at the shared renderer boundary.
+2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
 **Completed checkpoint:** `make import-adjudication-responses` can now take
