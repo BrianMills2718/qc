@@ -1,10 +1,35 @@
 # Plan #129: QC Bench CLI Flag Parity
 
-**Status:** In Progress
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Phase 0 guard/input surfaces already implemented in `scripts/bench_phase0.py`
 **Blocks:** Agent-driven benchmark package and scorecard workflows through the canonical CLI
+
+---
+
+## Outcome
+
+Completed in implementation commit `8a658bf`. `qc_cli.py bench` now accepts
+and forwards the current Phase 0 external-input and protocol-guard flags from
+`scripts/bench_phase0.py`, including D3 baselines, D4/D6/D8/D9 protocol files,
+D6 stratified rows, and confidence-calibration protocol files. The change is
+CLI parity/provenance only; it adds no new metrics and does not license held-out
+benchmark, methodological-validity, or SOTA claims.
+
+Verification:
+
+- TDD red: `python -m pytest tests/test_qc_cli_bench.py -q` failed before the
+  implementation with argparse rejecting the missing flags.
+- Focused tests: `python -m pytest tests/test_qc_cli_bench.py -q` passed
+  (`4 passed`).
+- Focused lint: `python -m ruff check qc_cli.py tests/test_qc_cli_bench.py`
+  passed.
+- Docs: `make docs-check` passed.
+- Full gate: `make check` passed (`1015 passed, 1 skipped, 8 deselected`);
+  Ruff and docs checks passed inside the gate.
+- Type check: not configured.
+- Verified implementation was committed and pushed.
 
 ---
 
@@ -72,11 +97,11 @@ Internal CLI wrapper parity only; no cross-project boundary is created.
 
 ### Capability Validation
 
-- [ ] `qc_cli.py bench` accepts every current Phase 0 external-input/protocol
+- [x] `qc_cli.py bench` accepts every current Phase 0 external-input/protocol
   flag listed in this plan.
-- [ ] `handle_bench_command` forwards those flags unchanged to
+- [x] `handle_bench_command` forwards those flags unchanged to
   `bench_phase0.main`.
-- [ ] Existing `qc_cli.py bench` scorecard and artifact tests continue to pass.
+- [x] Existing `qc_cli.py bench` scorecard and artifact tests continue to pass.
 
 ---
 
@@ -127,18 +152,18 @@ Internal CLI wrapper parity only; no cross-project boundary is created.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] `qc_cli.py bench` accepts and forwards all current Phase 0 external input
+- [x] `qc_cli.py bench` accepts and forwards all current Phase 0 external input
   and protocol guard flags from this plan.
-- [ ] No existing CLI bench behavior regresses.
-- [ ] Docs state CLI parity with the canonical Phase 0 script/Make surface.
+- [x] No existing CLI bench behavior regresses.
+- [x] Docs state CLI parity with the canonical Phase 0 script/Make surface.
 
 > Process criteria:
-- [ ] Required focused tests pass.
-- [ ] Focused Ruff check passes.
-- [ ] `make docs-check` passes.
-- [ ] Full `make check` passes or any failure is documented with evidence.
-- [ ] Type-check status is reported.
-- [ ] Verified work is committed and pushed.
+- [x] Required focused tests pass.
+- [x] Focused Ruff check passes.
+- [x] `make docs-check` passes.
+- [x] Full `make check` passes or any failure is documented with evidence.
+- [x] Type-check status is reported.
+- [x] Verified work is committed and pushed.
 
 ---
 

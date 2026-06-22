@@ -22,10 +22,18 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #129 (`QC_BENCH_CLI_FLAG_PARITY.md`): mirror current Phase 0
-   external-input and protocol-guard flags through `qc_cli.py bench`.
+1. Select and execute the next highest-value unblocked evaluation-harness lane
+   from `docs/PROJECT_THEORY_AND_GOALS.md` and `docs/EVALUATION_HARNESS.md`.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
+
+**Completed checkpoint:** `qc_cli.py bench` now mirrors the current Phase 0
+external-input and protocol-guard flags from `scripts/bench_phase0.py`,
+including D3 baselines, D4/D6/D8/D9 protocol files, D6 stratified rows, and
+confidence-calibration protocol files. The wrapper forwards those flags
+unchanged to the canonical Phase 0 scorecard script. This is CLI
+parity/provenance only, not held-out benchmark evidence,
+methodological-validity evidence, or SOTA evidence.
 
 **Completed checkpoint:** `make bench` now accepts `CONFIDENCE_PROTOCOL=...`
 and `scripts/bench_phase0.py --confidence-calibration-protocol-file ...` to
