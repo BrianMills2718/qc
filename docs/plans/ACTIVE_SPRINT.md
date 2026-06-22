@@ -22,8 +22,8 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Select and execute the next highest-value unblocked evaluation-harness lane
-   from `docs/PROJECT_THEORY_AND_GOALS.md` and `docs/EVALUATION_HARNESS.md`.
+1. Execute Plan #133 (`INV7_FIXTURE_CLI_SURFACES.md`): expose structural and
+   live INV-7 fixture runners through canonical `qc_cli.py` commands.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 

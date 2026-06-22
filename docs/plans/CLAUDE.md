@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 133 | INV-7 fixture CLI surfaces | High | In Progress | `INV7_FIXTURE_CLI_SURFACES.md` |
 
 ## Completed Plans
 
