@@ -1,10 +1,25 @@
 # Plan #46: D5 Reliability Prevalence Tables
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** None
 **Blocks:** D5 reliability interpretation; future reliability bootstrap CIs
+
+---
+
+## Outcome
+
+Implemented deterministic prevalence summaries for D5 reliability scorecard
+sections. `make bench` now surfaces row counts, rating counts, ratings per row,
+category counts/rates, and binary row patterns for codebook-discovery and
+positive segment x code matrices; segment-decision matrices report categorical
+counts/rates. Empty matrices report explicit zero-count summaries.
+
+**Verification:** `python -m pytest tests/test_bench_phase0.py -q` (31 passed);
+`python -m ruff check qc_clean/core/bench.py tests/test_bench_phase0.py`; `make
+check` (731 passed, 1 skipped, 8 deselected; Ruff and docs checks passed; type
+check not yet configured).
 
 ---
 
@@ -55,13 +70,13 @@ Internal scorecard capability only; no cross-project boundary is created.
 
 ### Capability Validation
 
-- [ ] Binary prevalence summaries report rating counts/rates for absent/present.
-- [ ] Categorical prevalence summaries report rating counts/rates for segment
+- [x] Binary prevalence summaries report rating counts/rates for absent/present.
+- [x] Categorical prevalence summaries report rating counts/rates for segment
   decisions.
-- [ ] Empty matrices report explicit zero-row summaries, not errors.
-- [ ] D5 scorecard includes prevalence tables where corresponding matrices are
+- [x] Empty matrices report explicit zero-row summaries, not errors.
+- [x] D5 scorecard includes prevalence tables where corresponding matrices are
   present.
-- [ ] Docs preserve the consistency-not-validity caveat.
+- [x] Docs preserve the consistency-not-validity caveat.
 
 ---
 
@@ -110,25 +125,25 @@ Internal scorecard capability only; no cross-project boundary is created.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] Prevalence summaries include `row_count`, `rating_count`,
+- [x] Prevalence summaries include `row_count`, `rating_count`,
   `ratings_per_row`, category counts, and rates.
-- [ ] Codebook-discovery prevalence is surfaced when `coding_matrix` exists.
-- [ ] Application-positive and segment-decision prevalence are surfaced when
+- [x] Codebook-discovery prevalence is surfaced when `coding_matrix` exists.
+- [x] Application-positive and segment-decision prevalence are surfaced when
   `application_level=True`.
-- [ ] No human-IRR, validity, or expert-parity claim is introduced.
+- [x] No human-IRR, validity, or expert-parity claim is introduced.
 
 > Process criteria:
-- [ ] Required tests pass
-- [ ] Full test suite passes
-- [ ] Type check status reported
-- [ ] Docs updated
-- [ ] Plan completed, committed, and pushed
+- [x] Required tests pass
+- [x] Full test suite passes
+- [x] Type check status reported
+- [x] Docs updated
+- [x] Plan completed, committed, and pushed
 
 ---
 
 ## Open Questions
 
-- [ ] Should prevalence tables be exported by `project irr` directly? — Status:
+- [x] Should prevalence tables be exported by `project irr` directly? — Status:
   DEFERRED | Why it matters: the immediate D5 scorecard/artifact path needs
   prevalence first; CLI/export display can be expanded in a later UX-focused
   slice if the tables are too verbose for default output.

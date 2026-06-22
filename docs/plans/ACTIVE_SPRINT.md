@@ -43,10 +43,11 @@ canary fixture export (`make run-inv7-live-fixtures`) for the `PROMPT_INJECTION=
 scorecard path. D3/D7 scorecards also compare exact recall/precision/F1 against
 supplied versioned-package human-human metrics when present. D5 reliability now
 surfaces Gwet's AC1 for LLM-pass codebook-discovery, positive application-cell,
-and segment-decision consistency when IRR results exist. This remains a
+and segment-decision consistency when IRR results exist, with rating prevalence
+tables in the Phase 0 scorecard. This remains a
 gold-dependent exact-score/provenance/uncertainty, human-ceiling-comparison, and
 canary-fixture substrate, not a populated held-out benchmark, full D3/D7
-validity, κ/α/AC1 human agreement, D5 reliability bootstrap/prevalence evidence,
+validity, κ/α/AC1 human agreement, D5 reliability bootstrap evidence,
 populated human-ceiling agreement, held-out live-baseline result,
 committed/scored live adversarial prompt-injection benchmark, or expert-parity/SOTA
 evidence.
