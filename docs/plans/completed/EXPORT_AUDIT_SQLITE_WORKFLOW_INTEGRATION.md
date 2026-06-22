@@ -1,10 +1,53 @@
 # Plan #162: Export Audit SQLite Workflow Integration
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Export audit SQLite event mirror
 **Blocks:** future signed/external audit anchoring
+
+---
+
+## Outcome
+
+Local export-audit workflows can now update the optional SQLite event mirror as
+part of the same operation that appends JSONL audit events:
+
+- `scripts/write_export_audit_manifest.py --audit-log ... --audit-db ...`
+- `scripts/verify_export_audit_manifest.py --audit-log ... --audit-db ...`
+- `scripts/export_publish_preflight.py --audit-log ... --audit-db ...`
+- `make export-audit-manifest ... AUDIT_LOG=... AUDIT_DB=...`
+- `make verify-export-audit-manifest ... AUDIT_LOG=... AUDIT_DB=...`
+- `make export-publish-preflight ... AUDIT_LOG=... AUDIT_DB=...`
+- `qc_cli.py project export ... --audit-manifest ... --audit-log ... --audit-db ...`
+
+`--audit-db` / `AUDIT_DB` requires the JSONL event log, so SQLite remains a
+mirror rather than a standalone source of truth. Default export behavior remains
+unchanged when the audit DB flag is absent. MCP SQLite mirror integration remains
+future work because it needs a separate confined output naming policy.
+
+This is local provenance/queryability infrastructure only: it is not signing,
+immutable storage, external timestamping, append-only infrastructure,
+methodological validity evidence, or a full tamper-evident audit log.
+
+Implementation commit: `93ca01d`
+
+## Verification
+
+- TDD red: focused tests initially failed for missing `--audit-db` script/parser
+  support and missing `project export` DB mirror behavior.
+- `python -m pytest tests/test_export_audit_event_log.py tests/test_export_audit_event_db.py tests/test_project_commands.py -q`
+  -> 60 passed.
+- `python -m ruff check qc_clean/core/cli/commands/project.py qc_cli.py
+  scripts/write_export_audit_manifest.py scripts/verify_export_audit_manifest.py
+  scripts/export_publish_preflight.py tests/test_export_audit_event_log.py
+  tests/test_project_commands.py` -> all checks passed.
+- `make docs-check` passed.
+- `git diff --check` passed.
+- `make help` lists `AUDIT_DB` on existing audit targets.
+- `make check` -> 1118 passed, 1 skipped, 8 deselected; Ruff and docs-check
+  passed; type check remains not configured.
+- Commit `93ca01d` was pushed to `main`.
 
 ---
 
@@ -128,21 +171,21 @@ not create a cross-project callable capability.
 
 Feature-level criteria:
 
-- [ ] Audit scripts mirror JSONL events into SQLite when `--audit-log` and
+- [x] Audit scripts mirror JSONL events into SQLite when `--audit-log` and
   `--audit-db` are supplied.
-- [ ] `project export` mirrors JSONL events into SQLite when `--audit-manifest`,
+- [x] `project export` mirrors JSONL events into SQLite when `--audit-manifest`,
   `--audit-log`, and `--audit-db` are supplied.
-- [ ] `--audit-db` / `AUDIT_DB` fails loud without `--audit-log` / `AUDIT_LOG`.
-- [ ] Existing defaults remain unchanged when audit DB flags are absent.
-- [ ] Docs preserve the local mirror caveat and do not call this append-only or
+- [x] `--audit-db` / `AUDIT_DB` fails loud without `--audit-log` / `AUDIT_LOG`.
+- [x] Existing defaults remain unchanged when audit DB flags are absent.
+- [x] Docs preserve the local mirror caveat and do not call this append-only or
   tamper-evident storage.
 
 Process criteria:
 
-- [ ] Required focused tests pass.
-- [ ] `make docs-check` passes.
-- [ ] `make check` passes.
-- [ ] Verified increment is committed and pushed.
+- [x] Required focused tests pass.
+- [x] `make docs-check` passes.
+- [x] `make check` passes.
+- [x] Verified increment is committed and pushed.
 
 ---
 

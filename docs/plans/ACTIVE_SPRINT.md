@@ -22,17 +22,23 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #162: wire the optional SQLite audit mirror into local CLI and
-   script export-audit workflows behind explicit audit-log dependency guards.
+1. Select the next highest-value roadmap lane with deterministic acceptance
+   criteria and no live/external evidence dependency.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Plan #162
-(`docs/plans/EXPORT_AUDIT_SQLITE_WORKFLOW_INTEGRATION.md`) integrates the
-SQLite audit mirror into local CLI/script export-audit workflows without making
-DB logging default. `--audit-db` remains an explicit mirror of `--audit-log`,
-not a standalone source of truth, not append-only storage, and not full
-tamper-evidence.
+**Active checkpoint:** Selecting next deterministic roadmap lane after Plan
+#162 closeout.
+
+**Completed checkpoint:** Local export-audit scripts, Make targets, and
+`project export` can now update the optional SQLite event mirror whenever JSONL
+audit logging is explicitly enabled. `--audit-db` / `AUDIT_DB` requires
+`--audit-log` / `AUDIT_LOG`, so SQLite remains a mirror rather than a standalone
+source of truth. MCP SQLite mirror integration remains future work because it
+needs a separate confined output naming policy. This is local provenance/
+queryability infrastructure only, not signing, immutable storage, external
+timestamping, append-only infrastructure, methodological validity evidence, or
+a full tamper-evident audit log.
 
 **Completed checkpoint:** Verified export audit JSONL event logs can now be
 mirrored into local SQLite and verified there. The mirror imports full event

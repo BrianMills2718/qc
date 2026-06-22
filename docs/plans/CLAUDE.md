@@ -6,12 +6,12 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 162 | Export audit SQLite workflow integration | High | Planned | `EXPORT_AUDIT_SQLITE_WORKFLOW_INTEGRATION.md` |
 
 ## Completed Plans
 
 | Name | Outcome | Record |
 |------|---------|--------|
+| Export audit SQLite workflow integration | Local export-audit scripts, Make targets, and `project export` can now update the optional SQLite event mirror whenever JSONL audit logging is explicitly enabled | `completed/EXPORT_AUDIT_SQLITE_WORKFLOW_INTEGRATION.md` |
 | Export audit SQLite event mirror | Verified export audit JSONL event logs can now be mirrored into local SQLite and verified there for event shape, hashes, previous links, duplicate hashes, and row ordering | `completed/EXPORT_AUDIT_SQLITE_EVENT_MIRROR.md` |
 | INV-9 relationship evidence anchors | Relationship claims now resolve direct evidence strings into exact supporting anchors when uniquely grounded, while ambiguous/unresolvable evidence remains visibly unanchored | `completed/INV9_RELATIONSHIP_EVIDENCE_ANCHORS.md` |
 | INV-9 code-scoped higher-order claim anchors | Higher-order claims with explicit code scope now inherit existing exact code-application anchors while corpus-level/no-code-scope claims remain visibly unanchored | `completed/INV9_CODE_SCOPED_HIGHER_ORDER_CLAIM_ANCHORS.md` |
