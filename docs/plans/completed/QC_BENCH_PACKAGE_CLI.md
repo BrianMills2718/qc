@@ -1,10 +1,37 @@
 # Plan #130: QC Bench Package CLI
 
-**Status:** In Progress
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Completed Phase 0 benchmark package runner
 **Blocks:** Canonical CLI execution of strict Phase 0 benchmark manifests
+
+---
+
+## Outcome
+
+Completed in implementation commit `7c51c4f`. `qc_cli.py` now exposes
+`bench-package <package_file>` as a thin wrapper over
+`scripts.run_phase0_benchmark_package.main`, so strict Phase 0 package
+manifests can be run through the canonical local CLI without duplicating
+manifest validation or scorecard logic. This is package orchestration and
+provenance only; it does not create package contents, run held-out benchmarks,
+or license methodological-validity or SOTA claims.
+
+Verification:
+
+- TDD red: `python -m pytest tests/test_qc_cli_bench.py -q` failed before the
+  implementation because argparse rejected `bench-package`.
+- Focused tests: `python -m pytest tests/test_qc_cli_bench.py -q` passed
+  (`5 passed`); `python -m pytest tests/test_phase0_benchmark_package.py -q`
+  passed (`4 passed`).
+- Focused lint: `python -m ruff check qc_cli.py tests/test_qc_cli_bench.py`
+  passed.
+- Docs: `make docs-check` passed.
+- Full gate: `make check` passed (`1016 passed, 1 skipped, 8 deselected`);
+  Ruff and docs checks passed inside the gate.
+- Type check: not configured.
+- Verified implementation was committed and pushed.
 
 ---
 
@@ -62,11 +89,11 @@ Internal CLI wrapper only; no new cross-project boundary is created.
 
 ### Capability Validation
 
-- [ ] `qc_cli.py bench-package <package_file>` is accepted by argparse.
-- [ ] The handler forwards the manifest path unchanged to
+- [x] `qc_cli.py bench-package <package_file>` is accepted by argparse.
+- [x] The handler forwards the manifest path unchanged to
   `run_phase0_benchmark_package.main`.
-- [ ] Existing `qc_cli.py bench` behavior continues to pass.
-- [ ] Existing package-runner tests continue to pass.
+- [x] Existing `qc_cli.py bench` behavior continues to pass.
+- [x] Existing package-runner tests continue to pass.
 
 ---
 
@@ -119,19 +146,19 @@ Internal CLI wrapper only; no new cross-project boundary is created.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] `qc_cli.py bench-package <package_file>` exists.
-- [ ] The command delegates to `scripts.run_phase0_benchmark_package.main`
+- [x] `qc_cli.py bench-package <package_file>` exists.
+- [x] The command delegates to `scripts.run_phase0_benchmark_package.main`
   without duplicating package validation/scoring logic.
-- [ ] Docs list the canonical CLI package surface.
-- [ ] Existing package-runner behavior does not regress.
+- [x] Docs list the canonical CLI package surface.
+- [x] Existing package-runner behavior does not regress.
 
 > Process criteria:
-- [ ] Required focused tests pass.
-- [ ] Focused Ruff check passes.
-- [ ] `make docs-check` passes.
-- [ ] Full `make check` passes or any failure is documented with evidence.
-- [ ] Type-check status is reported.
-- [ ] Verified work is committed and pushed.
+- [x] Required focused tests pass.
+- [x] Focused Ruff check passes.
+- [x] `make docs-check` passes.
+- [x] Full `make check` passes or any failure is documented with evidence.
+- [x] Type-check status is reported.
+- [x] Verified work is committed and pushed.
 
 ---
 

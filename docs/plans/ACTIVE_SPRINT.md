@@ -22,10 +22,19 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #130 (`QC_BENCH_PACKAGE_CLI.md`): expose strict Phase 0
-   benchmark package manifests through `qc_cli.py bench-package`.
+1. Select and execute the next highest-value unblocked evaluation-harness lane
+   from `docs/PROJECT_THEORY_AND_GOALS.md` and `docs/EVALUATION_HARNESS.md`.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
+
+**Completed checkpoint:** Strict Phase 0 package manifests can now be run
+through the canonical local CLI with
+`qc_cli.py bench-package <package_file>`. The command delegates to
+`scripts.run_phase0_benchmark_package.main` and preserves the package runner's
+manifest validation, relative-path resolution, JSON error behavior, and
+canonical scorecard invocation. This is package orchestration/provenance only,
+not held-out benchmark evidence, methodological-validity evidence, or SOTA
+evidence.
 
 **Completed checkpoint:** `qc_cli.py bench` now mirrors the current Phase 0
 external-input and protocol-guard flags from `scripts/bench_phase0.py`,

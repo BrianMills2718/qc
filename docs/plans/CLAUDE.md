@@ -6,7 +6,6 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 130 | QC bench package CLI | High | In Progress | `QC_BENCH_PACKAGE_CLI.md` |
 
 ## Completed Plans
 
@@ -63,6 +62,7 @@ Track all implementation work here.
 | Phase 0 input hashes | Evaluation-harness follow-up: `make bench` reports SHA-256 hashes for loaded state, corpus, and supplied benchmark files | `completed/PHASE0_INPUT_HASHES.md` |
 | QC bench CLI | Evaluation-harness follow-up: `qc_cli.py bench` wraps the deterministic Phase 0 scorecard with the same current flags as `make bench` | `completed/QC_BENCH_CLI.md` |
 | QC bench CLI flag parity | Evaluation-harness follow-up: `qc_cli.py bench` mirrors current Phase 0 external-input and protocol-guard flags from `scripts/bench_phase0.py` | `completed/QC_BENCH_CLI_FLAG_PARITY.md` |
+| QC bench package CLI | Evaluation-harness follow-up: `qc_cli.py bench-package` runs strict Phase 0 package manifests through the canonical package runner | `completed/QC_BENCH_PACKAGE_CLI.md` |
 | Phase 0 benchmark artifacts | Evaluation-harness follow-up: Phase 0 bench writes versioned `benchmark_results/` packages with scorecard and manifest provenance | `completed/PHASE0_BENCHMARK_ARTIFACTS.md` |
 | Phase 0 run configuration hashes | Evaluation-harness follow-up: Phase 0 scorecards and artifact manifests hash persisted methodology/model/config metadata while marking prompt hashes as not-run | `completed/PHASE0_RUN_CONFIGURATION_HASHES.md` |
 | D7 held-out gold-set scaffold | Evaluation-harness follow-up: versioned D7 gold-set packages can be validated and used as `--gold-file` inputs without claiming held-out results | `completed/D7_HELD_OUT_GOLD_SET_SCAFFOLD.md` |
