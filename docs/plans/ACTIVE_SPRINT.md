@@ -26,12 +26,12 @@ highest-value documented lane.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Select the next deterministic roadmap lane from the
-remaining documented gaps. Candidate lanes include INV-2/D7 evaluation-policy
-scaffolding that does not fabricate gold labels, a committed/protocol-guarded
-INV-7 live benchmark artifact lane if budget and protocol are explicit,
-default-policy follow-ups for INV-11, or another protocol/accounting lane that
-can be verified without external evidence.
+**Active checkpoint:** Plan #169 is active: commit a protocol-guarded INV-7 live
+canary artifact for built-in fixture-set version `2`, including the new custom
+prompt override canaries, using `gpt-5-mini`, trace
+`qualitative_coding/inv7-live-canary-v2-2026-06-22`, and `max_budget=0.50`.
+This is a small canary artifact only, not prompt-injection robustness,
+model-obedience, held-out benchmark, methodological-validity, or SOTA evidence.
 
 **Completed checkpoint:** Built-in INV-7 structural and opt-in live fixture
 sets now include custom prompt override coverage for registered
