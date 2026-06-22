@@ -26,12 +26,23 @@ highest-value documented lane.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Plan #172 is active: add structured, machine-checkable
-D7 comparison metric success criteria to the existing protocol/guarded
-comparison surface. The slice is protocol/accounting infrastructure only; it
-does not generate gold labels, choose a validated embedding/reviewer policy, or
-claim held-out D7 evidence, superiority evidence, methodological-validity
-evidence, or SOTA.
+**Active checkpoint:** Select the next deterministic roadmap lane from the
+remaining documented gaps. Candidate lanes include semantic/embedding D7
+evaluation-policy scaffolding that does not fabricate gold labels, broader
+held-out live INV-7 protocol/accounting that can be populated later, populated
+theoretical-sampling protocol/result evidence if concrete inputs exist, or
+another protocol/accounting lane that can be verified without external
+evidence.
+
+**Completed checkpoint:** D7 comparison protocols can now include optional
+structured `metric_criteria` for exact-score metrics and local span-overlap
+diagnostics. `make validate-d7-comparison-protocol` reports the count, and
+guarded `make compare-d7-retrieval PROTOCOL=...` output includes an additive
+`metric_criteria_report` with pass/fail/missing rows after preflight passes.
+Exact D7 scores, baseline deltas, span-overlap diagnostics, and preflight
+semantics remain unchanged. This is protocol/accounting infrastructure only,
+not held-out D7 evidence, live-baseline evidence, validated embedding/reviewer
+policy, methodological-validity evidence, superiority evidence, or SOTA.
 
 **Completed checkpoint:** D7 baseline rows now include diagnostic-only
 `span_overlap` metadata. The diagnostic compares baseline contrary-evidence

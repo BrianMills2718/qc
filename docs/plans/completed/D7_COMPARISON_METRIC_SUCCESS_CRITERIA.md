@@ -1,11 +1,52 @@
 # Plan #172: D7 Comparison Metric Success Criteria
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** D7 comparison protocol/preflight guard
 **Blocks:** Held-out D7 retrieval/live-baseline comparisons with pre-registered
 machine-checkable pass/fail criteria
+
+---
+
+## Outcome
+
+Implemented and verified optional structured `metric_criteria` for D7
+comparison protocol packages. Protocol validation now accepts machine-checkable
+per-baseline thresholds for exact D7 metrics and local span-overlap diagnostics,
+rejects duplicate criterion IDs, unknown baselines, invalid operators,
+out-of-range thresholds, and empty rationales, and the validator CLI reports
+`metric_criteria_count`. Guarded `compare-d7-retrieval` reports now include a
+`metric_criteria_report` after passing preflight when criteria are configured,
+with overall pass/fail status plus per-criterion pass/fail/missing rows. Exact
+D7 scores, baseline deltas, span-overlap diagnostics, and preflight behavior
+remain unchanged except for this additive criteria report.
+
+Verification evidence:
+
+- TDD red:
+  `python -m pytest tests/test_d7_comparison_protocol.py tests/test_d7_comparison_guard.py -q`
+  initially failed with missing `metric_criteria` support and missing guarded
+  `metric_criteria_report` output (`6 failed, 9 passed`).
+- Focused protocol/guard tests:
+  `python -m pytest tests/test_d7_comparison_protocol.py tests/test_d7_comparison_guard.py -q`
+  passed (`15 passed`).
+- Broader D7 cluster:
+  `python -m pytest tests/test_d7_comparison_protocol.py tests/test_d7_comparison_preflight.py tests/test_d7_comparison_guard.py tests/test_d7_retrieval.py -q`
+  passed (`31 passed`).
+- Focused Ruff:
+  `python -m ruff check qc_clean/core/d7_comparison_protocol.py scripts/validate_d7_comparison_protocol.py scripts/compare_d7_retrieval.py tests/test_d7_comparison_protocol.py tests/test_d7_comparison_guard.py`
+  passed.
+- Docs gate: `make docs-check` passed.
+- Diff whitespace: `git diff --check` passed.
+- Full gate: `make check` passed (`1147 passed, 1 skipped, 8 deselected`;
+  Ruff and docs checks clean; type check not configured).
+- Implementation commit pushed: `5f03b6e`
+  `[Plan: D7_COMPARISON_METRIC_SUCCESS_CRITERIA] Add D7 metric criteria`.
+
+This is protocol/accounting infrastructure only. It is not held-out D7
+evidence, live-baseline evidence, validated embedding/reviewer policy,
+methodological-validity evidence, superiority evidence, or SOTA evidence.
 
 ---
 
@@ -80,15 +121,15 @@ created.
 
 ### Capability Validation
 
-- [ ] Valid protocols with structured metric criteria are accepted.
-- [ ] Criteria can target exact D7 metrics and span-overlap diagnostics for
+- [x] Valid protocols with structured metric criteria are accepted.
+- [x] Criteria can target exact D7 metrics and span-overlap diagnostics for
   expected baselines.
-- [ ] Criteria cannot reference unknown baselines or unsupported/missing
+- [x] Criteria cannot reference unknown baselines or unsupported/missing
   metrics.
-- [ ] Operators and thresholds are validated deterministically.
-- [ ] Guarded comparison output includes criteria result status when criteria
+- [x] Operators and thresholds are validated deterministically.
+- [x] Guarded comparison output includes criteria result status when criteria
   are present.
-- [ ] Unguarded or no-criteria comparison output remains compatible.
+- [x] Unguarded or no-criteria comparison output remains compatible.
 
 ---
 
@@ -177,29 +218,29 @@ Deferred by design:
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] D7 comparison protocol JSON can include structured metric criteria while
+- [x] D7 comparison protocol JSON can include structured metric criteria while
   existing no-criteria protocols remain valid.
-- [ ] Protocol validation rejects duplicate criterion IDs, unknown baselines,
+- [x] Protocol validation rejects duplicate criterion IDs, unknown baselines,
   invalid operators, out-of-range exact/span-IoU thresholds, and empty rationale.
-- [ ] Guarded D7 comparison reports include a criteria evaluation section when
+- [x] Guarded D7 comparison reports include a criteria evaluation section when
   the supplied protocol has `metric_criteria`.
-- [ ] Criteria results include overall status, per-criterion pass/fail/missing
+- [x] Criteria results include overall status, per-criterion pass/fail/missing
   status, observed values when available, and the pre-registered threshold.
-- [ ] Missing metrics fail explicitly.
-- [ ] Exact D7 TP/FP/FN, baseline deltas, span-overlap diagnostics, and preflight
+- [x] Missing metrics fail explicitly.
+- [x] Exact D7 TP/FP/FN, baseline deltas, span-overlap diagnostics, and preflight
   pass/fail behavior remain unchanged except for the additive criteria section.
-- [ ] Docs state structured criteria are protocol/accounting only, not held-out
+- [x] Docs state structured criteria are protocol/accounting only, not held-out
   D7 evidence, superiority evidence, methodological-validity evidence, or SOTA.
 
 > Process criteria:
-- [ ] TDD red state observed for at least one new protocol/guard test before
+- [x] TDD red state observed for at least one new protocol/guard test before
   implementation.
-- [ ] Focused tests pass.
-- [ ] Focused Ruff check passes.
-- [ ] `make docs-check` passes.
-- [ ] `make check` passes.
-- [ ] Plan is moved to completed with verification evidence.
-- [ ] Verified implementation is committed and pushed.
+- [x] Focused tests pass.
+- [x] Focused Ruff check passes.
+- [x] `make docs-check` passes.
+- [x] `make check` passes.
+- [x] Plan is moved to completed with verification evidence.
+- [x] Verified implementation is committed and pushed.
 
 ---
 

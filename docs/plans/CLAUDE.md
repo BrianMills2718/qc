@@ -6,12 +6,12 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 172 | D7 comparison metric success criteria | High | Planned | `D7_COMPARISON_METRIC_SUCCESS_CRITERIA.md` |
 
 ## Completed Plans
 
 | Name | Outcome | Record |
 |------|---------|--------|
+| D7 comparison metric success criteria | D7 comparison protocols can now carry optional structured per-baseline metric criteria, and guarded retrieval comparison reports include additive pass/fail/missing criteria accounting without changing exact D7 scoring or preflight semantics | `completed/D7_COMPARISON_METRIC_SUCCESS_CRITERIA.md` |
 | D7 baseline span-overlap diagnostics | D7 baseline rows and retrieval comparison reports now include diagnostic-only same-target/document span-IoU and Modified Hausdorff metadata without changing exact baseline scores or deltas | `completed/D7_BASELINE_SPAN_OVERLAP_DIAGNOSTICS.md` |
 | D7 span-overlap diagnostics | D7 scorecards now include diagnostic-only same-target/document span-IoU and Modified Hausdorff overlap metadata for contrary-evidence anchors without changing exact D7 scores or claims | `completed/D7_SPAN_OVERLAP_DIAGNOSTICS.md` |
 | INV-7 committed live canary v2 | A protocol-guarded built-in fixture-set v2 live canary artifact is now committed and scorecarded with five fixtures, including custom prompt override surfaces, while remaining explicitly non-evidentiary for robustness, validity, held-out, model-obedience, or SOTA claims | `completed/INV7_COMMITTED_LIVE_CANARY_V2.md` |
