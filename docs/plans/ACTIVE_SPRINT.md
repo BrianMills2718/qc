@@ -22,9 +22,9 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Create and execute the next high-value lane: optional project-export CLI
-   integration for audit manifests, so exports can write and verify sidecar
-   manifests when requested without changing default export contracts.
+1. Execute Plan #96 (`EXPORT_AUDIT_CLI_INTEGRATION.md`): add optional
+   `project export` audit-manifest and immediate-verification flags without
+   changing default export contracts.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 

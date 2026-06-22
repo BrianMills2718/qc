@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 96 | Export audit CLI integration | High | Planned | `EXPORT_AUDIT_CLI_INTEGRATION.md` |
 
 ## Completed Plans
 
