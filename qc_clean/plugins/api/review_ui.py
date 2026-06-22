@@ -137,6 +137,7 @@ a { color: #2563eb; }
   <div class="mode-switch" aria-label="Review mode">
     <button class="btn mode-btn active" id="codeModeBtn" onclick="setReviewMode('codes')">Codes</button>
     <button class="btn mode-btn" id="claimModeBtn" onclick="setReviewMode('claims')">Claims</button>
+    <button class="btn mode-btn" id="negativeCaseModeBtn" onclick="setReviewMode('negative_cases')">Negative Cases</button>
     <button class="btn mode-btn" id="relationshipModeBtn" onclick="setReviewMode('relationships')">Relationships</button>
   </div>
   <button class="btn btn-success" id="approveAllBtn" onclick="approveAll()">Approve All</button>
@@ -169,6 +170,8 @@ async function loadProject() {
     let path = "/projects/" + PROJECT_ID + "/review/codes";
     if (reviewMode === "claims") {
       path = "/projects/" + PROJECT_ID + "/review/claims";
+    } else if (reviewMode === "negative_cases") {
+      path = "/projects/" + PROJECT_ID + "/review/negative-cases";
     } else if (reviewMode === "relationships") {
       path = "/projects/" + PROJECT_ID + "/review/relationships";
     }
@@ -210,6 +213,10 @@ function render() {
     document.getElementById("stats").innerHTML =
       "<span>" + (summary.claims_count || projectData.total_claims || 0) + " claims</span>" +
       "<span>" + (projectData.returned || 0) + " shown</span>";
+  } else if (reviewMode === "negative_cases") {
+    document.getElementById("stats").innerHTML =
+      "<span>" + (projectData.total_negative_cases || 0) + " negative cases</span>" +
+      "<span>" + (projectData.returned || 0) + " shown</span>";
   } else if (reviewMode === "relationships") {
     document.getElementById("stats").innerHTML =
       "<span>" + (summary.relationships_count || projectData.total_relationships || 0) + " relationships</span>" +
@@ -224,6 +231,10 @@ function render() {
 
   if (reviewMode === "claims") {
     renderClaims();
+    return;
+  }
+  if (reviewMode === "negative_cases") {
+    renderNegativeCases();
     return;
   }
   if (reviewMode === "relationships") {
@@ -260,6 +271,22 @@ function renderClaims() {
   let html = '<div class="cards">';
   for (const claim of claims) {
     html += renderClaimCard(claim);
+  }
+  html += '</div>';
+  document.getElementById("content").innerHTML = html;
+}
+
+function renderNegativeCases() {
+  const negativeCases = projectData.negative_cases || [];
+  if (negativeCases.length === 0) {
+    document.getElementById("content").innerHTML =
+      '<div class="empty">No negative cases to review.</div>';
+    return;
+  }
+
+  let html = '<div class="cards">';
+  for (const negativeCase of negativeCases) {
+    html += renderClaimCard(negativeCase);
   }
   html += '</div>';
   document.getElementById("content").innerHTML = html;
@@ -543,6 +570,10 @@ function renderAppItem(app, codeId) {
 // Decision management
 // -------------------------------------------------------------------
 
+function currentClaimRows() {
+  return (projectData.claims || []).concat(projectData.negative_cases || []);
+}
+
 function setDecision(codeId, action) {
   const existing = decisions.get(codeId);
   if (existing && existing.action === action) {
@@ -566,7 +597,7 @@ function setClaimDecision(claimId, action) {
   } else {
     const d = { target_type: "claim", target_id: claimId, action: action, rationale: "" };
     if (action === "modify") {
-      const claim = (projectData.claims || []).find(function(c) { return c.id === claimId; });
+      const claim = currentClaimRows().find(function(c) { return c.id === claimId; });
       d.new_value = { claim_text: claim ? claim.claim_text || "" : "" };
     }
     decisions.set(claimId, d);
@@ -697,7 +728,7 @@ function rerenderCard(codeId) {
 }
 
 function rerenderClaimCard(claimId) {
-  const claim = (projectData.claims || []).find(function(c) { return c.id === claimId; });
+  const claim = currentClaimRows().find(function(c) { return c.id === claimId; });
   if (!claim) return;
   const el = document.getElementById("claim-card-" + claimId);
   if (!el) return;
@@ -727,10 +758,12 @@ function setReviewMode(mode) {
 function updateModeButtons() {
   const codeBtn = document.getElementById("codeModeBtn");
   const claimBtn = document.getElementById("claimModeBtn");
+  const negativeCaseBtn = document.getElementById("negativeCaseModeBtn");
   const relationshipBtn = document.getElementById("relationshipModeBtn");
   const approveAllBtn = document.getElementById("approveAllBtn");
   if (codeBtn) codeBtn.className = "btn mode-btn" + (reviewMode === "codes" ? " active" : "");
   if (claimBtn) claimBtn.className = "btn mode-btn" + (reviewMode === "claims" ? " active" : "");
+  if (negativeCaseBtn) negativeCaseBtn.className = "btn mode-btn" + (reviewMode === "negative_cases" ? " active" : "");
   if (relationshipBtn) relationshipBtn.className = "btn mode-btn" + (reviewMode === "relationships" ? " active" : "");
   if (approveAllBtn) approveAllBtn.style.display = reviewMode === "codes" ? "" : "none";
 }

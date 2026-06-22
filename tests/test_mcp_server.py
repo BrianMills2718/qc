@@ -618,6 +618,82 @@ class TestReview:
         result = json.loads(qc_mcp_server.qc_review_claims("nope"))
         assert "error" in result
 
+    def test_review_negative_cases(self, completed_project, tmp_store):
+        completed_project.claims = [
+            AnalyticClaim(
+                id="claim-normal",
+                claim_kind=ClaimKind.CODE,
+                source_stage="thematic_coding",
+                claim_text="AI Adoption is a code.",
+                scope=ClaimScope(code_ids=["C1"]),
+                origin_object_type="code",
+                origin_object_id="C1",
+            ),
+            AnalyticClaim(
+                id="neg-mcp",
+                claim_kind=ClaimKind.NEGATIVE_CASE,
+                source_stage="negative_case_analysis",
+                claim_text="Negative case for AI Adoption: counterexample.",
+                scope=ClaimScope(claim_ids=["claim-normal"], code_ids=["C1"]),
+                origin_object_type="negative_case",
+                origin_object_id="negative_case:0:AI Adoption",
+                support_status=ClaimSupportStatus.NEEDS_ANCHOR,
+            ),
+        ]
+        tmp_store.save(completed_project)
+
+        result = json.loads(qc_mcp_server.qc_review_negative_cases("proj-done"))
+
+        assert result["project_id"] == "proj-done"
+        assert result["project_name"] == "Completed Study"
+        assert result["pipeline_status"] == "completed"
+        assert result["returned"] == 1
+        assert result["total_negative_cases"] == 1
+        assert result["can_resume"] is False
+        negative_case = result["negative_cases"][0]
+        assert negative_case["id"] == "neg-mcp"
+        assert negative_case["kind"] == "negative_case"
+        assert negative_case["scope"]["claim_ids"] == ["claim-normal"]
+        assert negative_case["scope"]["code_ids"] == ["C1"]
+
+    def test_review_negative_cases_limit(self, completed_project, tmp_store):
+        completed_project.claims = [
+            AnalyticClaim(
+                id="neg-1",
+                claim_kind=ClaimKind.NEGATIVE_CASE,
+                source_stage="negative_case_analysis",
+                claim_text="Negative case 1.",
+                scope=ClaimScope(code_ids=["C1"]),
+                origin_object_type="negative_case",
+                origin_object_id="negative_case:0",
+            ),
+            AnalyticClaim(
+                id="neg-2",
+                claim_kind=ClaimKind.NEGATIVE_CASE,
+                source_stage="negative_case_analysis",
+                claim_text="Negative case 2.",
+                scope=ClaimScope(code_ids=["C2"]),
+                origin_object_type="negative_case",
+                origin_object_id="negative_case:1",
+            ),
+        ]
+        tmp_store.save(completed_project)
+
+        limited = json.loads(qc_mcp_server.qc_review_negative_cases("proj-done", limit=1))
+        negative = json.loads(qc_mcp_server.qc_review_negative_cases("proj-done", limit=-5))
+
+        assert limited["returned"] == 1
+        assert limited["total_negative_cases"] == 2
+        assert limited["limit"] == 1
+        assert limited["negative_cases"][0]["id"] == "neg-1"
+        assert negative["returned"] == 0
+        assert negative["total_negative_cases"] == 2
+        assert negative["limit"] == 0
+
+    def test_review_negative_cases_not_found(self, tmp_store):
+        result = json.loads(qc_mcp_server.qc_review_negative_cases("nope"))
+        assert "error" in result
+
     def test_review_relationships(self, completed_project, tmp_store):
         completed_project.entities = [
             Entity(id="E1", name="AI", entity_type="concept"),

@@ -31,6 +31,7 @@ from qc_clean.core.pipeline.pipeline_factory import create_pipeline, create_incr
 from qc_clean.core.pipeline.pipeline_engine import PipelineContext
 from qc_clean.core.pipeline.irr import run_irr_analysis, run_stability_analysis
 from qc_clean.schemas.domain import (
+    ClaimKind,
     CorpusScope,
     Document,
     HumanReviewDecision,
@@ -274,6 +275,43 @@ def qc_review_claims(project_id: str, limit: int = 100) -> str:
         "claims": claims,
         "returned": len(claims),
         "total_claims": len(state.claims),
+        "limit": safe_limit,
+        "summary": rm.get_review_summary().model_dump(mode="json"),
+        "can_resume": rm.can_resume(),
+    }, indent=2)
+
+
+@mcp.tool()
+def qc_review_negative_cases(project_id: str, limit: int = 100) -> str:
+    """List negative-case claims as bounded review targets.
+
+    Decisions for these rows should use target_type="claim" because negative
+    cases are represented as AnalyticClaim objects.
+
+    Args:
+        project_id: The project ID
+        limit: Maximum negative-case rows to return, capped at 100
+    """
+    try:
+        state = store.load(project_id)
+    except FileNotFoundError:
+        return json.dumps({"error": f"Project '{project_id}' not found."})
+
+    safe_limit = min(max(0, limit), 100)
+    rm = ReviewManager(state)
+    all_negative_cases = [
+        claim for claim in state.claims if claim.claim_kind == ClaimKind.NEGATIVE_CASE
+    ]
+    negative_cases = [
+        _claim_review_row(claim) for claim in all_negative_cases[:safe_limit]
+    ]
+    return json.dumps({
+        "project_id": state.id,
+        "project_name": state.name,
+        "pipeline_status": state.pipeline_status.value,
+        "negative_cases": negative_cases,
+        "returned": len(negative_cases),
+        "total_negative_cases": len(all_negative_cases),
         "limit": safe_limit,
         "summary": rm.get_review_summary().model_dump(mode="json"),
         "can_resume": rm.can_resume(),

@@ -131,7 +131,7 @@ class QCAPIServer:
         
         from fastapi import HTTPException, BackgroundTasks
         from pydantic import BaseModel, ConfigDict, Field
-        from qc_clean.schemas.domain import CorpusScope, ProjectState, ReviewAction
+        from qc_clean.schemas.domain import ClaimKind, CorpusScope, ProjectState, ReviewAction
         
         # Health check endpoint
         @self._app.get("/health")
@@ -202,6 +202,25 @@ class QCAPIServer:
                 default=None,
                 description="Additional scope caveats or notes.",
             )
+
+        def claim_review_row(claim) -> Dict[str, Any]:
+            """Return one bounded claim row for API/browser review surfaces."""
+            return {
+                "id": claim.id,
+                "kind": claim.claim_kind.value,
+                "source_stage": claim.source_stage,
+                "support_status": claim.support_status.value,
+                "adjudication_status": claim.adjudication_status.value,
+                "claim_text": claim.claim_text,
+                "scope": claim.scope.model_dump(mode="json"),
+                "origin_object_type": claim.origin_object_type,
+                "origin_object_id": claim.origin_object_id,
+                "supporting_anchors": len(claim.supporting_anchors),
+                "contrary_anchors": len(claim.contrary_anchors),
+                "revision_history_count": len(claim.revision_history),
+                "created_by": claim.created_by.value,
+                "created_at": claim.created_at,
+            }
 
         def scope_payload(state: ProjectState) -> Dict[str, Any]:
             """Build a stable JSON payload for project corpus scope."""
@@ -448,24 +467,7 @@ class QCAPIServer:
                 raise HTTPException(status_code=404, detail=f"Project not found: {project_id}")
 
             rm = ReviewManager(state)
-            claims = []
-            for claim in rm.get_pending_claims()[:100]:
-                claims.append({
-                    "id": claim.id,
-                    "kind": claim.claim_kind.value,
-                    "source_stage": claim.source_stage,
-                    "support_status": claim.support_status.value,
-                    "adjudication_status": claim.adjudication_status.value,
-                    "claim_text": claim.claim_text,
-                    "scope": claim.scope.model_dump(mode="json"),
-                    "origin_object_type": claim.origin_object_type,
-                    "origin_object_id": claim.origin_object_id,
-                    "supporting_anchors": len(claim.supporting_anchors),
-                    "contrary_anchors": len(claim.contrary_anchors),
-                    "revision_history_count": len(claim.revision_history),
-                    "created_by": claim.created_by.value,
-                    "created_at": claim.created_at,
-                })
+            claims = [claim_review_row(claim) for claim in rm.get_pending_claims()[:100]]
 
             return {
                 "project_id": state.id,
@@ -474,6 +476,39 @@ class QCAPIServer:
                 "claims": claims,
                 "returned": len(claims),
                 "total_claims": len(state.claims),
+                "summary": rm.get_review_summary().model_dump(mode="json"),
+            }
+
+        @self._app.get("/projects/{project_id}/review/negative-cases")
+        async def get_review_negative_cases(project_id: str, limit: int = 100):
+            """Get negative-case claims as review targets."""
+            from qc_clean.core.persistence.project_store import ProjectStore
+            from qc_clean.core.pipeline.review import ReviewManager
+            store = ProjectStore()
+            try:
+                state = store.load(project_id)
+            except FileNotFoundError:
+                raise HTTPException(status_code=404, detail=f"Project not found: {project_id}")
+
+            rm = ReviewManager(state)
+            bounded_limit = min(max(0, limit), 100)
+            all_negative_cases = [
+                claim
+                for claim in rm.get_pending_claims()
+                if claim.claim_kind == ClaimKind.NEGATIVE_CASE
+            ]
+            negative_cases = [
+                claim_review_row(claim) for claim in all_negative_cases[:bounded_limit]
+            ]
+
+            return {
+                "project_id": state.id,
+                "project_name": state.name,
+                "pipeline_status": state.pipeline_status.value,
+                "negative_cases": negative_cases,
+                "returned": len(negative_cases),
+                "total_negative_cases": len(all_negative_cases),
+                "limit": bounded_limit,
                 "summary": rm.get_review_summary().model_dump(mode="json"),
             }
 
@@ -742,6 +777,7 @@ class QCAPIServer:
             {"method": "GET", "path": "/review/{project_id}", "description": "Review UI page"},
             {"method": "GET", "path": "/projects/{project_id}/review/codes", "description": "Get codes for review UI"},
             {"method": "GET", "path": "/projects/{project_id}/review/claims", "description": "Get claims for review UI"},
+            {"method": "GET", "path": "/projects/{project_id}/review/negative-cases", "description": "Get negative-case claims for review API"},
             {"method": "GET", "path": "/projects/{project_id}/review/relationships", "description": "Get relationships for review API"},
             {"method": "GET", "path": "/projects/{project_id}/review", "description": "Get review summary"},
             {"method": "POST", "path": "/projects/{project_id}/review/decisions", "description": "Submit review decisions"},

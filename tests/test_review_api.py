@@ -157,6 +157,15 @@ class TestReviewUIPage:
         assert "function setRelationshipDecision" in resp.text
         assert "target_type: relationship.target_type" in resp.text
 
+    def test_review_page_exposes_negative_case_review_ui(self, client):
+        resp = client.get("/review/test-project-123")
+
+        assert resp.status_code == 200
+        assert 'id="negativeCaseModeBtn"' in resp.text
+        assert '"/projects/" + PROJECT_ID + "/review/negative-cases"' in resp.text
+        assert "function renderNegativeCases" in resp.text
+        assert "renderClaimCard(negativeCase)" in resp.text
+
     def test_404_for_missing_project(self, client):
         resp = client.get("/review/nonexistent")
         assert resp.status_code == 404
@@ -267,6 +276,49 @@ class TestReviewClaimsEndpoint:
 
     def test_404_for_missing_project(self, client):
         resp = client.get("/projects/nonexistent/review/claims")
+        assert resp.status_code == 404
+
+
+class TestReviewNegativeCasesEndpoint:
+    def test_returns_negative_cases_for_review(self, client, tmp_store, review_project):
+        review_project.claims = [
+            AnalyticClaim(
+                id="claim-normal",
+                claim_kind=ClaimKind.CODE,
+                source_stage="thematic_coding",
+                claim_text="Theme A is a code.",
+                scope=ClaimScope(code_ids=["C1"]),
+                origin_object_type="code",
+                origin_object_id="C1",
+            ),
+            AnalyticClaim(
+                id="neg-1",
+                claim_kind=ClaimKind.NEGATIVE_CASE,
+                source_stage="negative_case_analysis",
+                claim_text="Negative case for Theme A: counterexample.",
+                scope=ClaimScope(claim_ids=["claim-normal"], code_ids=["C1"]),
+                origin_object_type="negative_case",
+                origin_object_id="negative_case:0:Theme A",
+            ),
+        ]
+        tmp_store.save(review_project)
+
+        resp = client.get("/projects/test-project-123/review/negative-cases")
+
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["project_id"] == "test-project-123"
+        assert data["returned"] == 1
+        assert data["total_negative_cases"] == 1
+        negative_case = data["negative_cases"][0]
+        assert negative_case["id"] == "neg-1"
+        assert negative_case["kind"] == "negative_case"
+        assert negative_case["scope"]["claim_ids"] == ["claim-normal"]
+        assert negative_case["scope"]["code_ids"] == ["C1"]
+        assert negative_case["claim_text"] == "Negative case for Theme A: counterexample."
+
+    def test_404_for_missing_project(self, client):
+        resp = client.get("/projects/nonexistent/review/negative-cases")
         assert resp.status_code == 404
 
 
