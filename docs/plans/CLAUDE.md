@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 127 | Confidence calibration protocol result preflight | High | Planned | `CONFIDENCE_CALIBRATION_PROTOCOL_RESULT_PREFLIGHT.md` |
 
 ## Completed Plans
 
