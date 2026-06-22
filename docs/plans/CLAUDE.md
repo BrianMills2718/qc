@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 117 | D4 codebook quality protocol package | High | Planned | `D4_CODEBOOK_QUALITY_PROTOCOL_PACKAGE.md` |
 
 ## Completed Plans
 
