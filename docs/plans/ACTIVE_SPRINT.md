@@ -22,15 +22,17 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #154: add Ruff `F541` to the lint gate and remove the current
-   no-placeholder f-strings without changing runtime behavior.
+1. Select the next highest-value documented roadmap lane from
+   `docs/PROJECT_THEORY_AND_GOALS.md`, `docs/EVALUATION_HARNESS.md`, and the
+   remaining `CLAUDE.md` maintenance follow-ups.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Plan #154 (`docs/plans/RUFF_F541_EXPANSION.md`) targets
-the documented Ruff expansion maintenance lane. The current `F541` scan finds
-seven fixable no-placeholder f-strings; this slice adds the rule to the normal
-lint gate and removes only those prefixes. `F401` and `E402` remain deferred.
+**Completed checkpoint:** Ruff now gates `F541`, and the seven existing
+no-placeholder f-strings were mechanically rewritten without intended runtime
+behavior changes. The normal `make lint` gate includes F541 through
+`pyproject.toml`; `F401` and `E402` remain deferred for separate wrapper/
+re-export review.
 
 **Completed checkpoint:** Representative API and MCP project-ID boundaries now
 have regression tests for invalid/traversal-like IDs. API read/mutation

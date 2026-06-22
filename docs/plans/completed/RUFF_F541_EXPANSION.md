@@ -129,3 +129,26 @@ Process criteria:
 
 Do not add `F401` or `E402` in this slice. They remain deferred because wrapper
 and re-export patterns need separate review.
+
+## Closeout Notes
+
+Completed 2026-06-22.
+
+Outcome: Ruff `F541` is now selected in `pyproject.toml`, and all seven
+pre-existing no-placeholder f-strings were mechanically rewritten without
+intended runtime behavior changes. `F401` and `E402` remain intentionally
+deferred for separate wrapper/re-export review.
+
+Checkpoints:
+
+- Plan checkpoint: `b54e167`
+- Implementation checkpoint: `bf567d4`
+
+Verification:
+
+- `python -m ruff check . --select F541`
+- `python -m pytest tests/test_project_commands.py -k export -q` (`26 passed,
+  23 deselected`)
+- `python -m pytest tests/test_qdpx_export.py -q` (`14 passed`)
+- `make docs-check`
+- `make check` (`1103 passed, 1 skipped, 8 deselected`)

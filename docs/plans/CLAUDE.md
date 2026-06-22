@@ -6,12 +6,12 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 154 | Ruff F541 expansion | Medium | Planned | `RUFF_F541_EXPANSION.md` |
 
 ## Completed Plans
 
 | Name | Outcome | Record |
 |------|---------|--------|
+| Ruff F541 expansion | Ruff now gates `F541`, and the existing no-placeholder f-strings were mechanically removed without intended runtime behavior changes | `completed/RUFF_F541_EXPANSION.md` |
 | Boundary invalid project ID tests | API/MCP regression tests now prove invalid/traversal-like project IDs return explicit not-found/error responses without aliasing to or deleting existing project files | `completed/BOUNDARY_INVALID_PROJECT_ID_TESTS.md` |
 | Explicit export overwrite policy | Project exports now keep default overwrite behavior for compatibility while supporting `--no-overwrite` / `overwrite=False` guards that fail before clobbering existing JSON/CSV/Markdown/QDPX artifacts | `completed/EXPORT_OVERWRITE_POLICY.md` |
 | Corpus-scope adequacy scorecard | Phase 0 now reports deterministic corpus-scope status, field completeness, document/claim counts, and status warnings without claiming sampling validity | `completed/CORPUS_SCOPE_ADEQUACY_SCORECARD.md` |
