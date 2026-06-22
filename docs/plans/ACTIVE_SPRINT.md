@@ -22,19 +22,20 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #74, Phase 0 run-configuration hashes, without pretending Phase
-   0 executed live prompt/model benchmark runs.
-2. Choose the next highest-value unmet evaluation-harness or scope-discipline
+1. Choose the next highest-value unmet evaluation-harness or scope-discipline
    lane that can be advanced without pretending held-out expert data exists.
-3. Continue through the ranked roadmap without pausing after each verified
+2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
 **Completed checkpoint:** Corpus-scope warning propagation now covers Markdown,
 JSON `export_warnings` metadata, and CSV `export_warnings.csv` for claim-bearing
 exports without recorded scope; this remains report discipline, not sampling
-adequacy evidence. D1 grounding and D2 coverage/examined/coded-segment rates now
-report local Wilson intervals in the Phase 0 scorecard; coded-segment rate is
-over examined decisions only, not untouched text. D3 and D7 scorecard sections now accept raw gold or
+adequacy evidence. Phase 0 scorecards and artifact manifests now include
+run-configuration hashes for persisted methodology/model/config metadata while
+marking prompt hashes as not-run. D1 grounding and D2
+coverage/examined/coded-segment rates now report local Wilson intervals in the
+Phase 0 scorecard; coded-segment rate is over examined decisions only, not
+untouched text. D3 and D7 scorecard sections now accept raw gold or
 versioned `schema_version=1` gold-set packages, surface compact
 `gold_provenance` when package metadata is present, and report configurable local
 exact-key `f1_bootstrap_ci` intervals by default. D3 scorecards also report

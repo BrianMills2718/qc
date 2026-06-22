@@ -8,6 +8,23 @@
 
 ---
 
+## Outcome
+
+Phase 0 scorecards now include `_meta.run_configuration_hashes`, which records
+the configured methodology, configured model name, SHA-256 of the canonical
+persisted `ProjectConfig` payload, and a prompt-hash status of `not_run`.
+Versioned Phase 0 artifact manifests copy that block, and direct artifact-writer
+callers get a fallback computed from `state`. This is local provenance only; it
+does not claim Phase 0 executed frozen prompts or live model benchmark runs.
+
+**Verification:** `python -m pytest tests/test_bench_phase0_script.py -q`
+passed (28 tests); `python -m ruff check scripts/bench_phase0.py
+tests/test_bench_phase0_script.py` passed; final `make check` passed (781
+passed, 1 skipped, 8 deselected; Ruff/docs-check passed). Type checking is not
+configured in this repo.
+
+---
+
 ## Gap
 
 **Current:** Phase 0 scorecards and artifact manifests include hashes for the
