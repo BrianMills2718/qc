@@ -1,11 +1,52 @@
 # Plan #178: D3 Comparison Metric Success Criteria
 
-**Status:** Planned
+**Status:** Completed
 **Type:** implementation
 **Priority:** High
 **Blocked By:** D3 baseline comparison score-time guard
 **Blocks:** Held-out D3 application-baseline comparisons with pre-registered
 machine-checkable pass/fail criteria
+
+---
+
+## Outcome
+
+Implemented and pushed in commit `9ff1b87`.
+
+The D3 comparison protocol module now includes
+`evaluate_d3_comparison_metric_criteria()`, report/result models, exact metric
+lookups, span-overlap diagnostic lookups, explicit missing-metric accounting,
+and the same pass/fail/missing semantics as the completed D7 metric-criteria
+lane. Guarded Phase 0 scoring now attaches
+`application_validity_d3.metric_criteria_report` after a passing
+`D3_PROTOCOL=...` preflight when the protocol includes criteria. Existing D3
+scores, baseline deltas, span-overlap diagnostics, preflight behavior, output
+writes, artifact writes, and no-criteria/unguarded scoring remain unchanged
+except for the additive criteria report when configured.
+
+Verification evidence:
+
+- TDD red:
+  `python -m pytest tests/test_d3_comparison_protocol.py tests/test_bench_phase0_script.py -k "d3_comparison or d3_baseline" -q`
+  initially failed during collection because
+  `evaluate_d3_comparison_metric_criteria` did not exist.
+- Focused D3 selection:
+  `python -m pytest tests/test_d3_comparison_protocol.py tests/test_bench_phase0_script.py -k "d3_comparison or d3_baseline" -q`
+  passed: 17 passed, 41 deselected.
+- Full touched D3 files:
+  `python -m pytest tests/test_d3_comparison_protocol.py tests/test_bench_phase0_script.py -q`
+  passed: 58 passed.
+- Focused Ruff:
+  `python -m ruff check qc_clean/core/d3_comparison_protocol.py scripts/bench_phase0.py tests/test_d3_comparison_protocol.py tests/test_bench_phase0_script.py`
+  passed.
+- Docs gate: `make docs-check` passed.
+- Diff whitespace: `git diff --check` passed.
+- Full gate: `make check` passed: 1173 passed, 1 skipped, 8 deselected; Ruff
+  passed; docs-check passed; type check remains not configured.
+
+This is local protocol/accounting infrastructure only. It is not held-out D3
+evidence, live baseline evidence, expert parity, superiority evidence,
+methodological-validity evidence, or SOTA evidence.
 
 ---
 
@@ -115,11 +156,11 @@ created.
 
 ### Capability Validation
 
-- [ ] Criteria can target exact D3 baseline metrics and span-overlap diagnostics.
-- [ ] Criteria cannot silently pass when metrics are absent or malformed.
-- [ ] Guarded Phase 0 output includes criteria result status when criteria are
+- [x] Criteria can target exact D3 baseline metrics and span-overlap diagnostics.
+- [x] Criteria cannot silently pass when metrics are absent or malformed.
+- [x] Guarded Phase 0 output includes criteria result status when criteria are
   present.
-- [ ] Unguarded or no-criteria D3 scoring remains compatible.
+- [x] Unguarded or no-criteria D3 scoring remains compatible.
 
 ---
 
@@ -181,30 +222,30 @@ created.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] D3 metric criteria are evaluated deterministically against guarded Phase
+- [x] D3 metric criteria are evaluated deterministically against guarded Phase
   0 scorecards.
-- [ ] Criteria results include overall status, per-criterion pass/fail/missing
+- [x] Criteria results include overall status, per-criterion pass/fail/missing
   status, observed values when available, and the pre-registered threshold.
-- [ ] Missing metrics fail explicitly.
-- [ ] Exact D3 TP/FP/FN, baseline deltas, span-overlap diagnostics, and
+- [x] Missing metrics fail explicitly.
+- [x] Exact D3 TP/FP/FN, baseline deltas, span-overlap diagnostics, and
   preflight pass/fail behavior remain unchanged except for the additive
   criteria section.
-- [ ] Guarded D3 scorecards with no structured criteria remain compatible and
+- [x] Guarded D3 scorecards with no structured criteria remain compatible and
   omit the additive criteria report.
-- [ ] Docs state structured criteria are local protocol/accounting only, not
+- [x] Docs state structured criteria are local protocol/accounting only, not
   held-out D3 evidence, live baseline evidence, expert parity, superiority,
   methodological-validity evidence, or SOTA.
 
 > Process criteria:
-- [ ] TDD red state observed for at least one new protocol/bench test before
+- [x] TDD red state observed for at least one new protocol/bench test before
   implementation.
-- [ ] Focused tests pass.
-- [ ] Focused Ruff check passes.
-- [ ] `make docs-check` passes.
-- [ ] `git diff --check` passes.
-- [ ] `make check` passes.
-- [ ] Plan is moved to completed with verification evidence.
-- [ ] Verified implementation is committed and pushed.
+- [x] Focused tests pass.
+- [x] Focused Ruff check passes.
+- [x] `make docs-check` passes.
+- [x] `git diff --check` passes.
+- [x] `make check` passes.
+- [x] Plan is moved to completed with verification evidence.
+- [x] Verified implementation is committed and pushed.
 
 ---
 

@@ -6,12 +6,12 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 178 | D3 comparison metric success criteria | High | Planned | `D3_COMPARISON_METRIC_SUCCESS_CRITERIA.md` |
 
 ## Completed Plans
 
 | Name | Outcome | Record |
 |------|---------|--------|
+| D3 comparison metric success criteria | Guarded D3 comparison scorecards now include additive pre-registered metric-criteria pass/fail/missing accounting for exact baseline metrics and local span-overlap diagnostics when configured, without changing D3 scoring or preflight semantics | `completed/D3_COMPARISON_METRIC_SUCCESS_CRITERIA.md` |
 | D3 baseline comparison score-time guard | D3 comparison protocols can now be enforced at the Phase 0 score boundary through `make bench`, `qc_cli.py bench`, and benchmark package manifests, recording passing preflight reports and blocking scorecard/output/artifact writes on protocol drift while preserving unguarded legacy D3 scoring | `completed/D3_BASELINE_COMPARISON_SCORE_TIME_GUARD.md` |
 | D3 baseline comparison preflight | D3 comparison preflight now cross-checks registered protocols, versioned D3 gold packages, and versioned D3 baseline packages before scoring workflows, while leaving score-time enforcement deferred | `completed/D3_BASELINE_COMPARISON_PREFLIGHT.md` |
 | D3 baseline comparison protocol | D3 baseline comparison protocols can now validate pre-run gold/baseline intent, held-out provenance flags, hash locks, success criteria, and optional exact/span metric criteria without yet adding preflight or score-time enforcement | `completed/D3_BASELINE_COMPARISON_PROTOCOL.md` |

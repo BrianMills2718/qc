@@ -26,16 +26,23 @@ highest-value documented lane.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Plan #178 is active: evaluate pre-registered D3
-comparison protocol `metric_criteria` against guarded Phase 0 scorecards after
-`make bench D3_PROTOCOL=...` preflight passes. This slice should add a
-machine-readable D3 metric-criteria report with pass/fail/missing rows for
-exact baseline metrics and local span-overlap diagnostics while preserving
-existing D3 scoring, preflight, output, artifact, and unguarded behavior. It
-must not run or create baselines, collect held-out labels, add full semantic/
-multi-label D3 agreement, choose default success thresholds, or claim held-out
-D3 evidence, expert parity, superiority evidence, methodological-validity
-evidence, or SOTA.
+**Active checkpoint:** Select and plan the next deterministic, high-value
+roadmap lane. The current best next lane is an INV-2/D7 follow-up around
+held-out comparison readiness: improve the retrieval/live-baseline benchmark
+path without claiming held-out D7 evidence unless an actual frozen gold set,
+baselines, and scored artifacts are present.
+
+**Completed checkpoint:** Guarded D3 comparison scorecards now evaluate
+pre-registered D3 comparison protocol `metric_criteria` after
+`make bench D3_PROTOCOL=...` preflight passes. The additive
+`application_validity_d3.metric_criteria_report` records pass/fail/missing rows
+for exact baseline metrics and local span-overlap diagnostics when criteria are
+configured. Existing D3 scoring, baseline deltas, preflight semantics,
+output/artifact behavior, no-criteria guarded runs, and unguarded scoring remain
+compatible. This is local protocol/accounting metadata only; it does not run or
+create baselines, collect held-out labels, add semantic/multi-label D3
+agreement, establish expert parity, demonstrate superiority, prove
+methodological validity, or support SOTA claims.
 
 **Completed checkpoint:** `make bench D3_PROTOCOL=... D3_GOLD=...
 D3_BASELINES=...`, `scripts/bench_phase0.py
