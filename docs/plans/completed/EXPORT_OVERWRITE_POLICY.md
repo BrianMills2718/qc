@@ -66,4 +66,29 @@ Fails when:
 
 ## Closeout Notes
 
-To be filled after implementation and verification.
+Completed 2026-06-22.
+
+Outcome: Project exports now have an explicit overwrite policy. Default export
+behavior remains backward-compatible (`overwrite=True`), while
+`overwrite=False` and `project export --no-overwrite` fail loudly before
+clobbering existing JSON, Markdown, QDPX, or any planned CSV artifact. CSV
+exports preflight the full artifact set before writing so no-overwrite failures
+do not leave partial output.
+
+Checkpoints:
+
+- Plan checkpoint: `55ea954`
+- Implementation checkpoint: `0765829`
+
+Verification:
+
+- `python -m pytest tests/test_project_commands.py -k "export" -q` (`26 passed,
+  23 deselected`)
+- `python -m pytest tests/test_qdpx_export.py -q` (`14 passed`)
+- `python -m pytest tests/test_claim_ledger_exports.py -q` (`18 passed`)
+- `ruff check qc_clean/core/export/data_exporter.py qc_clean/core/cli/commands/project.py qc_cli.py tests/test_project_commands.py tests/test_qdpx_export.py`
+- `make docs-check`
+- `make check` (`1097 passed, 1 skipped, 8 deselected`)
+
+Caveat: this is local clobber prevention only. It is not append-only storage,
+tamper-evidence, external signing, or a durable audit substrate.
