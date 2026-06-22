@@ -51,6 +51,7 @@ _CONFIDENCE_CALIBRATION_EXTRA_KEY = "confidence_calibration_evaluations"
 _EXACT_BOOTSTRAP_EXTRA_KEY = "phase0_exact_bootstrap"
 _RELIABILITY_BOOTSTRAP_EXTRA_KEY = "phase0_reliability_bootstrap"
 _RUBRIC_BOOTSTRAP_EXTRA_KEY = "phase0_rubric_bootstrap"
+_CALIBRATION_BOOTSTRAP_EXTRA_KEY = "phase0_calibration_bootstrap"
 DEFAULT_OBSERVABILITY_DB_PATH = Path.home() / "projects" / "data" / "llm_observability.db"
 _WILSON_Z_95 = 1.959963984540054
 _HUMAN_CEILING_EXACT_METRICS = ("recall", "precision", "f1")
@@ -172,6 +173,38 @@ class RubricBootstrapConfig(BaseModel):
         if not 0 < self.confidence_level < 1:
             raise ValueError(
                 "phase0_rubric_bootstrap.confidence_level must be between 0 and 1"
+            )
+        return self
+
+
+class CalibrationBootstrapConfig(BaseModel):
+    """Config for deterministic confidence-calibration bootstrap intervals."""
+
+    enabled: bool = Field(
+        default=True,
+        description="Whether confidence-calibration scorecards should include bootstrap intervals",
+    )
+    samples: int = Field(
+        default=1000,
+        description="Number of bootstrap resamples to draw over calibration records",
+    )
+    confidence_level: float = Field(
+        default=0.95,
+        description="Two-sided confidence level for the bootstrap interval",
+    )
+    seed: int = Field(
+        default=0,
+        description="Deterministic random seed for calibration bootstrap resampling",
+    )
+
+    @model_validator(mode="after")
+    def require_valid_settings(self) -> "CalibrationBootstrapConfig":
+        """Reject malformed calibration bootstrap settings."""
+        if self.samples < 1:
+            raise ValueError("phase0_calibration_bootstrap.samples must be at least 1")
+        if not 0 < self.confidence_level < 1:
+            raise ValueError(
+                "phase0_calibration_bootstrap.confidence_level must be between 0 and 1"
             )
         return self
 
@@ -1587,11 +1620,19 @@ def confidence_calibration_scorecard(state: ProjectState) -> Dict[str, Any]:
             ),
         }
 
+    bootstrap_config = _calibration_bootstrap_config(state)
     return {
         "status": "scored",
         "source": f"ProjectState.config.extra['{_CONFIDENCE_CALIBRATION_EXTRA_KEY}']",
-        **_confidence_calibration_summary(evaluations),
-        "by_surface": _confidence_calibration_by_surface(evaluations),
+        **_confidence_calibration_summary(
+            evaluations,
+            bootstrap_config,
+            unit="confidence/correctness record",
+        ),
+        "by_surface": _confidence_calibration_by_surface(
+            evaluations,
+            bootstrap_config,
+        ),
         "note": (
             "Scores externally supplied confidence/correctness records. This is "
             "a measurement substrate, not evidence that system confidence is "
@@ -1620,19 +1661,35 @@ def _confidence_calibration_evaluations(
         raise ValueError(f"Invalid confidence_calibration_evaluations metadata: {exc}") from exc
 
 
+def _calibration_bootstrap_config(state: ProjectState) -> CalibrationBootstrapConfig:
+    """Load Phase 0 confidence-calibration bootstrap config from project metadata."""
+    raw = state.config.extra.get(_CALIBRATION_BOOTSTRAP_EXTRA_KEY)
+    if raw is None:
+        return CalibrationBootstrapConfig()
+    if not isinstance(raw, dict):
+        raise ValueError(
+            f"ProjectState.config.extra['{_CALIBRATION_BOOTSTRAP_EXTRA_KEY}'] "
+            "must be an object"
+        )
+    try:
+        return CalibrationBootstrapConfig.model_validate(raw)
+    except ValidationError as exc:
+        raise ValueError(f"Invalid phase0_calibration_bootstrap config: {exc}") from exc
+
+
 def _confidence_calibration_summary(
     evaluations: list[ConfidenceCalibrationEvaluation],
+    bootstrap_config: CalibrationBootstrapConfig,
+    *,
+    unit: str,
 ) -> dict[str, Any]:
     """Return deterministic calibration metrics for confidence/correctness records."""
     total = len(evaluations)
     correct_count = sum(1 for evaluation in evaluations if evaluation.correct)
-    brier_values = [
-        (evaluation.confidence - float(evaluation.correct)) ** 2
-        for evaluation in evaluations
-    ]
+    brier_score = _confidence_calibration_brier_score(evaluations)
     bins = _calibration_bins(evaluations)
-    expected_calibration_error = sum(bin_data["weighted_gap"] for bin_data in bins)
-    return {
+    expected_calibration_error = _expected_calibration_error_from_bins(bins)
+    summary = {
         "total_records": total,
         "correct_records": correct_count,
         "incorrect_records": total - correct_count,
@@ -1641,11 +1698,106 @@ def _confidence_calibration_summary(
         "mean_confidence": _mean_or_none([
             evaluation.confidence for evaluation in evaluations
         ]),
-        "brier_score": _mean_or_none(brier_values),
+        "brier_score": brier_score,
         "expected_calibration_error": expected_calibration_error,
         "bin_count": _CALIBRATION_BIN_COUNT,
         "calibration_bins": bins,
     }
+    if bootstrap_config.enabled:
+        intervals = _confidence_calibration_bootstrap_intervals(
+            evaluations,
+            bootstrap_config,
+            unit=unit,
+        )
+        summary["brier_score_ci"] = intervals["brier_score"]
+        summary["expected_calibration_error_ci"] = intervals[
+            "expected_calibration_error"
+        ]
+    return summary
+
+
+def _confidence_calibration_brier_score(
+    evaluations: list[ConfidenceCalibrationEvaluation],
+) -> float | None:
+    """Return mean squared confidence error for supplied calibration records."""
+    return _mean_or_none([
+        (evaluation.confidence - float(evaluation.correct)) ** 2
+        for evaluation in evaluations
+    ])
+
+
+def _confidence_calibration_expected_calibration_error(
+    evaluations: list[ConfidenceCalibrationEvaluation],
+) -> float:
+    """Return fixed-bin expected calibration error for calibration records."""
+    return _expected_calibration_error_from_bins(_calibration_bins(evaluations))
+
+
+def _expected_calibration_error_from_bins(bins: list[dict[str, Any]]) -> float:
+    """Return fixed-bin ECE from precomputed calibration-bin summaries."""
+    return sum(bin_data["weighted_gap"] for bin_data in bins)
+
+
+def _confidence_calibration_bootstrap_intervals(
+    evaluations: list[ConfidenceCalibrationEvaluation],
+    bootstrap_config: CalibrationBootstrapConfig,
+    *,
+    unit: str,
+) -> dict[str, dict[str, Any]]:
+    """Return deterministic bootstrap intervals for calibration metrics."""
+    base: dict[str, Any] = {
+        "method": "calibration_record_bootstrap",
+        "confidence_level": bootstrap_config.confidence_level,
+        "samples": bootstrap_config.samples,
+        "seed": bootstrap_config.seed,
+        "unit": unit,
+        "population_size": len(evaluations),
+        "note": (
+            "Deterministic local bootstrap over supplied confidence/correctness "
+            "records. This is uncertainty metadata, not calibration proof."
+        ),
+    }
+    if not evaluations:
+        return {
+            metric: {
+                **base,
+                "metric": metric,
+                "status": "not_available",
+                "lower": None,
+                "upper": None,
+                "reason": "No calibration records available for bootstrap.",
+            }
+            for metric in ("brier_score", "expected_calibration_error")
+        }
+
+    rng = Random(bootstrap_config.seed)
+    sample_size = len(evaluations)
+    values: dict[str, list[float]] = {
+        "brier_score": [],
+        "expected_calibration_error": [],
+    }
+    for _ in range(bootstrap_config.samples):
+        sample = [evaluations[rng.randrange(sample_size)] for _ in range(sample_size)]
+        brier_score = _confidence_calibration_brier_score(sample)
+        if brier_score is None:
+            raise ValueError("Calibration bootstrap sample unexpectedly empty")
+        values["brier_score"].append(brier_score)
+        values["expected_calibration_error"].append(
+            _confidence_calibration_expected_calibration_error(sample)
+        )
+
+    alpha = (1 - bootstrap_config.confidence_level) / 2
+    intervals = {}
+    for metric, metric_values in values.items():
+        metric_values.sort()
+        intervals[metric] = {
+            **base,
+            "metric": metric,
+            "status": "scored",
+            "lower": _percentile(metric_values, alpha),
+            "upper": _percentile(metric_values, 1 - alpha),
+        }
+    return intervals
 
 
 def _calibration_bins(
@@ -1697,13 +1849,18 @@ def _calibration_bins(
 
 def _confidence_calibration_by_surface(
     evaluations: list[ConfidenceCalibrationEvaluation],
+    bootstrap_config: CalibrationBootstrapConfig,
 ) -> dict[str, dict[str, Any]]:
     """Summarize confidence calibration records by prediction surface."""
     grouped: dict[str, list[ConfidenceCalibrationEvaluation]] = {}
     for evaluation in evaluations:
         grouped.setdefault(evaluation.surface, []).append(evaluation)
     return {
-        surface: _confidence_calibration_summary(group)
+        surface: _confidence_calibration_summary(
+            group,
+            bootstrap_config,
+            unit=f"confidence/correctness record ({surface})",
+        )
         for surface, group in sorted(grouped.items())
     }
 

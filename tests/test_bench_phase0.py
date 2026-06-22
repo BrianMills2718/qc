@@ -1173,7 +1173,14 @@ def test_scorecard_scores_confidence_calibration_outcomes():
     assert calibration["accuracy_ci"]["denominator"] == 4
     assert calibration["mean_confidence"] == pytest.approx(0.575)
     assert calibration["brier_score"] == pytest.approx(0.2625)
+    assert calibration["brier_score_ci"]["method"] == "calibration_record_bootstrap"
+    assert calibration["brier_score_ci"]["metric"] == "brier_score"
+    assert calibration["brier_score_ci"]["population_size"] == 4
     assert calibration["expected_calibration_error"] == pytest.approx(0.425)
+    assert calibration["expected_calibration_error_ci"]["metric"] == (
+        "expected_calibration_error"
+    )
+    assert calibration["expected_calibration_error_ci"]["population_size"] == 4
     assert calibration["bin_count"] == 10
     bins = calibration["calibration_bins"]
     assert len(bins) == 10
@@ -1197,8 +1204,43 @@ def test_scorecard_scores_confidence_calibration_outcomes():
     assert thematic["accuracy_ci"]["denominator"] == 2
     assert thematic["mean_confidence"] == pytest.approx(0.85)
     assert thematic["brier_score"] == pytest.approx(0.325)
+    assert thematic["brier_score_ci"]["population_size"] == 2
     assert thematic["expected_calibration_error"] == pytest.approx(0.45)
+    assert thematic["expected_calibration_error_ci"]["population_size"] == 2
     assert "not evidence that system confidence is calibrated" in calibration["note"]
+
+
+def test_scorecard_confidence_calibration_bootstrap_can_be_disabled():
+    state = ProjectState(
+        name="calibration-eval",
+        config=ProjectConfig(
+            methodology=Methodology.THEMATIC_ANALYSIS,
+            extra={
+                "phase0_calibration_bootstrap": {"enabled": False},
+                "confidence_calibration_evaluations": [
+                    {
+                        "item_id": "theme-correct",
+                        "surface": "thematic_coding",
+                        "confidence": 0.9,
+                        "correct": True,
+                    },
+                    {
+                        "item_id": "theme-wrong",
+                        "surface": "thematic_coding",
+                        "confidence": 0.8,
+                        "correct": False,
+                    },
+                ],
+            },
+        ),
+    )
+
+    calibration = phase0_scorecard(state)["confidence_calibration"]
+
+    assert calibration["status"] == "scored"
+    assert "brier_score_ci" not in calibration
+    assert "expected_calibration_error_ci" not in calibration
+    assert "brier_score_ci" not in calibration["by_surface"]["thematic_coding"]
 
 
 def test_scorecard_invalid_confidence_calibration_metadata_fails_loud():
