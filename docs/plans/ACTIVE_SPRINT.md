@@ -28,6 +28,10 @@ highest-value documented lane.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
+**Active slice:** Plan #85, claim review browser UI. This slice adds a
+browser-native claim-review path on top of the existing API/MCP claim review
+surfaces without claiming expert adjudication.
+
 **Completed checkpoint:** Corpus-scope warning propagation now covers Markdown,
 JSON `export_warnings` metadata, and CSV `export_warnings.csv` for claim-bearing
 exports without recorded scope, and CLI/MCP project creation can now persist

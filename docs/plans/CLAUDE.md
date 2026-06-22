@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 85 | Claim review browser UI | High | Planned | `CLAIM_REVIEW_BROWSER_UI.md` |
 
 ## Completed Plans
 
