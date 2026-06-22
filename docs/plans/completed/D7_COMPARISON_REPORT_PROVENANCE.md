@@ -1,10 +1,44 @@
 # Plan #179: D7 Comparison Report Provenance
 
-**Status:** Planned
+**Status:** Completed
 **Type:** implementation
 **Priority:** High
 **Blocked By:** D7 comparison preflight guard; D7 comparison metric success criteria
 **Blocks:** Reproducible held-out D7 retrieval/live-baseline comparison artifacts
+
+---
+
+## Outcome
+
+Implemented and pushed in commit `dfe2b04`.
+
+Successful `scripts/compare_d7_retrieval.py` reports now include additive
+`_meta.input_hashes` and `_meta.command` blocks. The hash block records the
+loaded project ID, ProjectState hash, corpus hash, gold file hash, ordered
+prediction file hashes, and optional protocol file hash. The command block
+records the project ID, gold path, ordered prediction paths, optional protocol
+path, and optional output path. Stdout and `--output` JSON serialize the same
+report object, so metadata matches. Failed preflight still returns before
+scoring and writes no output report.
+
+Verification evidence:
+
+- TDD red:
+  `python -m pytest tests/test_d7_comparison_guard.py -q` initially failed with
+  missing `_meta` in guarded and unguarded comparison outputs.
+- Focused tests:
+  `python -m pytest tests/test_d7_comparison_guard.py -q` passed: 7 passed.
+- Focused Ruff:
+  `python -m ruff check scripts/compare_d7_retrieval.py tests/test_d7_comparison_guard.py`
+  passed.
+- Docs gate: `make docs-check` passed.
+- Diff whitespace: `git diff --check` passed.
+- Full gate: `make check` passed: 1174 passed, 1 skipped, 8 deselected; Ruff
+  passed; docs-check passed; type check remains not configured.
+
+This is local provenance/accounting metadata only. It is not held-out D7
+evidence, live-baseline evidence, superiority evidence,
+methodological-validity evidence, or SOTA evidence.
 
 ---
 
@@ -98,11 +132,11 @@ created.
 
 ### Capability Validation
 
-- [ ] Successful guarded reports include file/state/corpus hashes.
-- [ ] Successful unguarded reports include hashes with `protocol_file_sha256`
+- [x] Successful guarded reports include file/state/corpus hashes.
+- [x] Successful unguarded reports include hashes with `protocol_file_sha256`
   set to null.
-- [ ] Stdout and output-file metadata match.
-- [ ] Failed preflight still writes no output report.
+- [x] Stdout and output-file metadata match.
+- [x] Failed preflight still writes no output report.
 
 ---
 
@@ -161,25 +195,25 @@ created.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] Successful D7 comparison reports include `_meta.input_hashes`.
-- [ ] Successful D7 comparison reports include `_meta.command`.
-- [ ] Prediction file hashes preserve input order.
-- [ ] Guarded reports include protocol file hash/path.
-- [ ] Unguarded reports set protocol hash/path to null and remain compatible.
-- [ ] Failed preflight still blocks output writes.
-- [ ] Docs state this is provenance/accounting only, not held-out D7 evidence,
+- [x] Successful D7 comparison reports include `_meta.input_hashes`.
+- [x] Successful D7 comparison reports include `_meta.command`.
+- [x] Prediction file hashes preserve input order.
+- [x] Guarded reports include protocol file hash/path.
+- [x] Unguarded reports set protocol hash/path to null and remain compatible.
+- [x] Failed preflight still blocks output writes.
+- [x] Docs state this is provenance/accounting only, not held-out D7 evidence,
   live-baseline evidence, superiority evidence, methodological-validity
   evidence, or SOTA.
 
 > Process criteria:
-- [ ] TDD red state observed before implementation.
-- [ ] Focused tests pass.
-- [ ] Focused Ruff check passes.
-- [ ] `make docs-check` passes.
-- [ ] `git diff --check` passes.
-- [ ] `make check` passes.
-- [ ] Plan is moved to completed with verification evidence.
-- [ ] Verified implementation is committed and pushed.
+- [x] TDD red state observed before implementation.
+- [x] Focused tests pass.
+- [x] Focused Ruff check passes.
+- [x] `make docs-check` passes.
+- [x] `git diff --check` passes.
+- [x] `make check` passes.
+- [x] Plan is moved to completed with verification evidence.
+- [x] Verified implementation is committed and pushed.
 
 ---
 

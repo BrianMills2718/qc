@@ -6,12 +6,12 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 179 | D7 comparison report provenance | High | Planned | `D7_COMPARISON_REPORT_PROVENANCE.md` |
 
 ## Completed Plans
 
 | Name | Outcome | Record |
 |------|---------|--------|
+| D7 comparison report provenance | Successful D7 retrieval/live-baseline comparison reports now include additive `_meta.input_hashes` and `_meta.command` provenance for loaded state/corpus, gold, ordered prediction files, optional protocol files, and command paths without changing scoring, preflight, or metric-criteria semantics | `completed/D7_COMPARISON_REPORT_PROVENANCE.md` |
 | D3 comparison metric success criteria | Guarded D3 comparison scorecards now include additive pre-registered metric-criteria pass/fail/missing accounting for exact baseline metrics and local span-overlap diagnostics when configured, without changing D3 scoring or preflight semantics | `completed/D3_COMPARISON_METRIC_SUCCESS_CRITERIA.md` |
 | D3 baseline comparison score-time guard | D3 comparison protocols can now be enforced at the Phase 0 score boundary through `make bench`, `qc_cli.py bench`, and benchmark package manifests, recording passing preflight reports and blocking scorecard/output/artifact writes on protocol drift while preserving unguarded legacy D3 scoring | `completed/D3_BASELINE_COMPARISON_SCORE_TIME_GUARD.md` |
 | D3 baseline comparison preflight | D3 comparison preflight now cross-checks registered protocols, versioned D3 gold packages, and versioned D3 baseline packages before scoring workflows, while leaving score-time enforcement deferred | `completed/D3_BASELINE_COMPARISON_PREFLIGHT.md` |

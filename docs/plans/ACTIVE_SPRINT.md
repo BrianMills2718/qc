@@ -26,13 +26,19 @@ highest-value documented lane.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Plan #179 is active: add deterministic `_meta.input_hashes`
-and `_meta.command` provenance to successful D7 retrieval/live-baseline
-comparison reports. This slice should make `make compare-d7-retrieval` reports
-reviewable without conversation context by recording loaded state/corpus hashes,
-gold/prediction/protocol file hashes, and command paths. It must not add
-artifact directories, run live models, generate held-out gold labels, choose a
-default embedding/adversarial retrieval policy, change D7 scores, or claim
+**Active checkpoint:** Select and plan the next deterministic, high-value
+roadmap lane. The current best next lane remains an INV-2/D7 follow-up around
+held-out comparison readiness, while preserving the rule that no held-out D7,
+live-baseline, superiority, methodological-validity, or SOTA claim is licensed
+without actual frozen gold, baseline, and scored benchmark artifacts.
+
+**Completed checkpoint:** Successful D7 retrieval/live-baseline comparison
+reports now include additive `_meta.input_hashes` and `_meta.command`
+provenance. The hash block records loaded ProjectState/corpus hashes, the D7
+gold file hash, ordered prediction file hashes, and optional protocol file hash;
+the command block records the project ID and compared file paths. Stdout and
+`--output` JSON carry the same metadata, and failed preflight still writes no
+output report. This is local provenance/accounting metadata only; it is not
 held-out D7 evidence, live-baseline evidence, superiority evidence,
 methodological-validity evidence, or SOTA.
 
