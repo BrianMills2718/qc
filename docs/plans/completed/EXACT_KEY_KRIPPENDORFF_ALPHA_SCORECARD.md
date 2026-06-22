@@ -1,12 +1,35 @@
 # Plan #58: Exact-Key Krippendorff Alpha Scorecard
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** None
 **Blocks:** Stronger D3/D7 exact-key agreement metadata
 
 ---
+
+## Outcome
+
+D3 and D7 exact-key `system_gold_agreement` sections now include
+`krippendorff_alpha` beside percent agreement, Cohen's κ, Gwet's AC1, and
+prevalence metadata. The implementation adds a tested nominal categorical
+Krippendorff's α helper plus a binary wrapper for the existing exact-key
+gold/system presence matrices. Docs preserve the caveat that this is exact-key
+binary metadata, not full semantic/multi-label D3 α or boundary-aware
+reliability evidence.
+
+## Verification
+
+- Focused tests: `python -m pytest tests/test_irr_application_level.py tests/test_bench_phase0.py -q`
+  (`63 passed`)
+- Focused lint: `python -m ruff check qc_clean/core/pipeline/irr.py qc_clean/core/bench.py tests/test_irr_application_level.py tests/test_bench_phase0.py`
+  (`All checks passed!`)
+- Docs/link/plan checks:
+  - `python scripts/check_markdown_links.py`
+  - `python scripts/sync_plan_status.py --check`
+- Full gate: `make check` (`769 passed, 1 skipped, 8 deselected`; ruff and
+  docs-check passed)
+- Type check: not configured by the repo (`make check` reports this explicitly)
 
 ## Gap
 
@@ -62,11 +85,11 @@ Internal scorecard capability only; no cross-project boundary is created.
 
 ### Capability Validation
 
-- [ ] Perfect exact-key agreement returns α = 1.0.
-- [ ] Mixed exact-key disagreement returns deterministic nominal α.
-- [ ] D3 `system_gold_agreement` includes `krippendorff_alpha`.
-- [ ] D7 `system_gold_agreement` includes `krippendorff_alpha`.
-- [ ] Docs state this is exact-key metadata, not full semantic/multi-label α.
+- [x] Perfect exact-key agreement returns α = 1.0.
+- [x] Mixed exact-key disagreement returns deterministic nominal α.
+- [x] D3 `system_gold_agreement` includes `krippendorff_alpha`.
+- [x] D7 `system_gold_agreement` includes `krippendorff_alpha`.
+- [x] Docs state this is exact-key metadata, not full semantic/multi-label α.
 
 ---
 
@@ -121,18 +144,18 @@ Internal scorecard capability only; no cross-project boundary is created.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] A tested Krippendorff's α helper exists for complete nominal matrices.
-- [ ] D3 and D7 exact-key `system_gold_agreement` include `krippendorff_alpha`.
-- [ ] Existing κ/AC1/prevalence fields remain unchanged.
-- [ ] Docs preserve the caveat that full semantic/multi-label α remains future
+- [x] A tested Krippendorff's α helper exists for complete nominal matrices.
+- [x] D3 and D7 exact-key `system_gold_agreement` include `krippendorff_alpha`.
+- [x] Existing κ/AC1/prevalence fields remain unchanged.
+- [x] Docs preserve the caveat that full semantic/multi-label α remains future
   benchmark work.
 
 > Process criteria:
-- [ ] Required tests pass
-- [ ] Full test suite passes
-- [ ] Type check status reported
-- [ ] Docs updated
-- [ ] Plan completed, committed, and pushed
+- [x] Required tests pass
+- [x] Full test suite passes
+- [x] Type check status reported
+- [x] Docs updated
+- [x] Plan completed, committed, and pushed
 
 ---
 
