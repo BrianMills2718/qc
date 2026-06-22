@@ -26,10 +26,15 @@ highest-value documented lane.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Select and plan the next deterministic, high-value
-roadmap lane. The next likely lane is a D3 score-time preflight guard that
-threads the completed D3 comparison preflight through `make bench
-D3_PROTOCOL=...`, but it must be planned before implementation.
+**Active checkpoint:** Plan #177 is active: add an optional D3 score-time
+preflight guard that threads the completed D3 comparison preflight through
+`make bench D3_PROTOCOL=...`, `scripts/bench_phase0.py
+--d3-comparison-protocol-file`, `qc_cli.py bench`, and Phase 0 package
+manifests. This slice is score-time provenance only; it must not run or create
+baselines, evaluate D3 structured metric criteria against scorecard output,
+collect held-out labels, add full semantic/multi-label D3 agreement, or claim
+held-out D3 evidence, expert parity, superiority evidence,
+methodological-validity evidence, or SOTA.
 
 **Completed checkpoint:** D3 comparison preflight now cross-checks registered
 D3 comparison protocols, versioned D3 gold packages, and versioned D3 baseline

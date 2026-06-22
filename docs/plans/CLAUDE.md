@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 177 | D3 baseline comparison score-time guard | High | Planned | `D3_BASELINE_COMPARISON_SCORE_TIME_GUARD.md` |
 
 ## Completed Plans
 
