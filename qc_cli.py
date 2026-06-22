@@ -52,6 +52,9 @@ Examples:
   qc_cli compare-d7-retrieval <project_id> --gold-file d7_gold.json --predictions-file predictions.json
   qc_cli run-inv7-fixtures --output inv7.json
   qc_cli run-inv7-live-fixtures --output inv7_live.json --model gpt-5-mini
+  qc_cli validate-inv7-package inv7.json
+  qc_cli validate-inv7-live-protocol inv7_protocol.json
+  qc_cli inv7-live-preflight inv7_protocol.json inv7_live.json
   qc_cli project export <project_id> --format markdown --output-file report.md
   qc_cli status --server
         """
@@ -367,6 +370,40 @@ Examples:
         help='llm_client maximum budget for the live fixture run',
     )
 
+    inv7_package_validator_parser = subparsers.add_parser(
+        'validate-inv7-package',
+        help='Validate an INV-7 prompt-injection package',
+        description='Validate a schema_version=1 INV-7 prompt-injection package',
+    )
+    inv7_package_validator_parser.add_argument(
+        'package_file',
+        help='Path to the INV-7 package JSON file',
+    )
+
+    inv7_live_protocol_validator_parser = subparsers.add_parser(
+        'validate-inv7-live-protocol',
+        help='Validate an INV-7 live protocol package',
+        description='Validate a schema_version=1 INV-7 live benchmark protocol',
+    )
+    inv7_live_protocol_validator_parser.add_argument(
+        'protocol_file',
+        help='Path to the INV-7 live protocol JSON file',
+    )
+
+    inv7_live_preflight_parser = subparsers.add_parser(
+        'inv7-live-preflight',
+        help='Preflight INV-7 live result package against protocol',
+        description='Preflight an INV-7 live result package against a live protocol',
+    )
+    inv7_live_preflight_parser.add_argument(
+        'protocol_file',
+        help='Path to the INV-7 live protocol JSON file',
+    )
+    inv7_live_preflight_parser.add_argument(
+        'package_file',
+        help='Path to the INV-7 live result package JSON file',
+    )
+
     # Server command
     server_parser = subparsers.add_parser(
         'server',
@@ -596,6 +633,12 @@ def main() -> int:
             return handle_run_inv7_fixtures_command(args)
         elif args.command == 'run-inv7-live-fixtures':
             return handle_run_inv7_live_fixtures_command(args)
+        elif args.command == 'validate-inv7-package':
+            return handle_validate_inv7_package_command(args)
+        elif args.command == 'validate-inv7-live-protocol':
+            return handle_validate_inv7_live_protocol_command(args)
+        elif args.command == 'inv7-live-preflight':
+            return handle_inv7_live_preflight_command(args)
         elif args.command == 'server':
             return handle_server_command(args)
         elif args.command == 'project':
@@ -809,6 +852,27 @@ def handle_run_inv7_live_fixtures_command(args) -> int:
         if value is not None:
             argv.extend([flag, str(value)])
     return run_inv7_live_fixtures.main(argv)
+
+
+def handle_validate_inv7_package_command(args) -> int:
+    """Validate an INV-7 prompt-injection package through the canonical CLI."""
+    from scripts import validate_inv7_prompt_injection_package
+
+    return validate_inv7_prompt_injection_package.main([args.package_file])
+
+
+def handle_validate_inv7_live_protocol_command(args) -> int:
+    """Validate an INV-7 live protocol through the canonical CLI."""
+    from scripts import validate_inv7_live_protocol
+
+    return validate_inv7_live_protocol.main([args.protocol_file])
+
+
+def handle_inv7_live_preflight_command(args) -> int:
+    """Preflight an INV-7 live package through the canonical CLI."""
+    from scripts import preflight_inv7_live_package
+
+    return preflight_inv7_live_package.main([args.protocol_file, args.package_file])
 
 
 if __name__ == "__main__":
