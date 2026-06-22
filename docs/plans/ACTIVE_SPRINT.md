@@ -22,9 +22,17 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Plan #146: add top-level CLI wrappers for existing D3/D7 gold-set validators.
+1. Select the next highest-value documented roadmap lane from
+   `docs/PROJECT_THEORY_AND_GOALS.md` and `docs/EVALUATION_HARNESS.md`.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
+
+**Completed checkpoint:** `qc_cli.py validate-d3-gold <gold_set>` and
+`qc_cli.py validate-d7-gold <gold_set>` now delegate to the canonical D3/D7
+gold-set validator scripts while preserving script-owned JSON output and exit
+codes. This is CLI parity/package-provenance validation only, not held-out
+gold evidence, expert-label evidence, methodological-validity evidence, or
+superiority evidence.
 
 **Completed checkpoint:** `project add-docs --recode` now explicitly adds
 documents and invokes the existing incremental recode path in one opt-in

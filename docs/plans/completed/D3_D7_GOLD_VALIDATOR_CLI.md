@@ -1,10 +1,27 @@
 # Plan #146: D3/D7 Gold Validator CLI Surfaces
 
-**Status:** In Progress
+**Status:** Complete
 **Type:** implementation
 **Priority:** Medium
 **Blocked By:** D3/D7 held-out gold-set scaffolds
 **Blocks:** easier held-out package validation in agent-driven workflows
+
+---
+
+## Outcome
+
+The top-level CLI now exposes `qc_cli.py validate-d3-gold <gold_set>` and
+`qc_cli.py validate-d7-gold <gold_set>`. Both commands delegate directly to the
+canonical validator scripts and preserve script-owned JSON output and exit-code
+semantics. This is CLI parity and package/provenance validation only; it does
+not create labels, run held-out benchmarks, or provide validity evidence.
+
+**Verification:** `python -m pytest tests/test_qc_cli_d7_retrieval.py
+tests/test_d3_gold_set.py tests/test_d7_gold_set.py -q` passed (14 tests),
+`python -m ruff check qc_cli.py tests/test_qc_cli_d7_retrieval.py` passed, and
+`make docs-check` passed. Final `make check` passed (1075 passed, 1 skipped, 8
+deselected; Ruff/docs-check passed). Type checking is not configured in this
+repo.
 
 ---
 
@@ -103,17 +120,17 @@ top-level CLI. It does not create a new scoring or validation capability.
 ## Acceptance Criteria
 
 > Feature-level criteria (what the plan accomplishes):
-- [ ] `qc_cli.py validate-d3-gold <gold_set>` is available.
-- [ ] `qc_cli.py validate-d7-gold <gold_set>` is available.
-- [ ] Both wrappers delegate to canonical validator scripts without duplicating validation logic.
-- [ ] Both wrappers preserve script-owned JSON output and exit codes.
-- [ ] Docs describe these as package/provenance validation only, not held-out evidence.
+- [x] `qc_cli.py validate-d3-gold <gold_set>` is available.
+- [x] `qc_cli.py validate-d7-gold <gold_set>` is available.
+- [x] Both wrappers delegate to canonical validator scripts without duplicating validation logic.
+- [x] Both wrappers preserve script-owned JSON output and exit codes.
+- [x] Docs describe these as package/provenance validation only, not held-out evidence.
 
 > Process criteria (quality gates):
-- [ ] Required focused tests pass.
-- [ ] Full test suite passes (`make check`).
-- [ ] Type check status is reported.
-- [ ] Docs updated.
+- [x] Required focused tests pass (`python -m pytest tests/test_qc_cli_d7_retrieval.py tests/test_d3_gold_set.py tests/test_d7_gold_set.py -q`: 14 passed).
+- [x] Full test suite passes (`make check`: 1075 passed, 1 skipped, 8 deselected; Ruff/docs-check passed).
+- [x] Type check status is reported (`make check`: type check not yet configured).
+- [x] Docs updated.
 
 ---
 

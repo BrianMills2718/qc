@@ -6,7 +6,6 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 146 | D3/D7 gold validator CLI surfaces | Medium | In progress | `D3_D7_GOLD_VALIDATOR_CLI.md` |
 
 ## Completed Plans
 
@@ -75,6 +74,7 @@ Track all implementation work here.
 | Phase 0 benchmark artifacts | Evaluation-harness follow-up: Phase 0 bench writes versioned `benchmark_results/` packages with scorecard and manifest provenance | `completed/PHASE0_BENCHMARK_ARTIFACTS.md` |
 | Phase 0 run configuration hashes | Evaluation-harness follow-up: Phase 0 scorecards and artifact manifests hash persisted methodology/model/config metadata while marking prompt hashes as not-run | `completed/PHASE0_RUN_CONFIGURATION_HASHES.md` |
 | D7 held-out gold-set scaffold | Evaluation-harness follow-up: versioned D7 gold-set packages can be validated and used as `--gold-file` inputs without claiming held-out results | `completed/D7_HELD_OUT_GOLD_SET_SCAFFOLD.md` |
+| D3/D7 gold validator CLI surfaces | `qc_cli.py validate-d3-gold` and `qc_cli.py validate-d7-gold` wrap the canonical gold-set validators without duplicating validation logic or claiming held-out evidence | `completed/D3_D7_GOLD_VALIDATOR_CLI.md` |
 | INV-7 fixture runner scaffold | Evaluation-harness follow-up: `make run-inv7-fixtures` writes deterministic structural prompt-boundary fixture outcomes for `PROMPT_INJECTION=` | `completed/INV7_FIXTURE_RUNNER_SCAFFOLD.md` |
 | D7 retrieval-mode export | Evaluation-harness follow-up: `make run-d7-retrieval` exports retrieval candidates as D7 baseline-compatible predictions for `make bench BASELINES=...` | `completed/D7_RETRIEVAL_MODE_EXPORT.md` |
 | D7 retrieval comparison report | Evaluation-harness follow-up: `make compare-d7-retrieval` scores multiple retrieval prediction packages against one D7 gold file with the existing exact-span scorer | `completed/D7_RETRIEVAL_COMPARISON_REPORT.md` |
