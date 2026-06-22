@@ -182,6 +182,32 @@ class TestClaimLedgerEndpoint:
         assert data["disconfirmation_summary"]["unchallenged_targets"] == 1
 
 
+class TestInvalidProjectIDBoundaries:
+    @pytest.mark.parametrize("invalid_id", ["test-project-123!", "%2E%2E%2Ftest-project-123"])
+    def test_invalid_project_ids_return_404_without_aliasing_existing_project(
+        self, client, tmp_store, invalid_id
+    ):
+        original_scope = tmp_store.load("test-project-123").corpus_scope.model_dump()
+
+        read_responses = [
+            client.get(f"/projects/{invalid_id}/claims"),
+            client.get(f"/projects/{invalid_id}/review/codes"),
+        ]
+        mutation_response = client.put(
+            f"/projects/{invalid_id}/scope",
+            json={
+                "phenomenon": "Should not write",
+                "population": "Should not write",
+            },
+        )
+
+        for response in [*read_responses, mutation_response]:
+            assert response.status_code == 404
+
+        loaded = tmp_store.load("test-project-123")
+        assert loaded.corpus_scope.model_dump() == original_scope
+
+
 class TestCorpusScopeEndpoint:
     def test_get_project_scope_returns_current_scope(self, client):
         resp = client.get("/projects/test-project-123/scope")

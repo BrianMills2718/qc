@@ -207,6 +207,38 @@ class TestProjectManagement:
         result = json.loads(qc_mcp_server.qc_show_project("nonexistent"))
         assert "error" in result
 
+    @pytest.mark.parametrize("invalid_id", ["../proj-1", "proj-1!"])
+    def test_invalid_project_ids_return_error_without_aliasing_existing_project(
+        self, sample_project, tmp_store, tmp_path, invalid_id
+    ):
+        export_path = tmp_path / "should-not-export.json"
+
+        results = [
+            json.loads(qc_mcp_server.qc_show_project(invalid_id)),
+            json.loads(qc_mcp_server.qc_get_claims(invalid_id)),
+            json.loads(qc_mcp_server.qc_get_codebook(invalid_id)),
+            json.loads(qc_mcp_server.qc_export_json(invalid_id, str(export_path))),
+        ]
+
+        for result in results:
+            assert "error" in result
+            assert "not found" in result["error"]
+
+        assert export_path.exists() is False
+        assert tmp_store.exists("proj-1") is True
+        assert json.loads(qc_mcp_server.qc_show_project("proj-1"))["id"] == "proj-1"
+
+    @pytest.mark.parametrize("invalid_id", ["../proj-1", "proj-1!"])
+    def test_delete_invalid_project_id_does_not_delete_existing_project(
+        self, sample_project, tmp_store, invalid_id
+    ):
+        result = json.loads(qc_mcp_server.qc_delete_project(invalid_id))
+
+        assert "error" in result
+        assert "not found" in result["error"]
+        assert tmp_store.exists("proj-1") is True
+        assert json.loads(qc_mcp_server.qc_show_project("proj-1"))["id"] == "proj-1"
+
     def test_show_project_includes_phase_results(self, completed_project, tmp_store):
         result = json.loads(qc_mcp_server.qc_show_project("proj-done"))
         assert "phase_results" in result
