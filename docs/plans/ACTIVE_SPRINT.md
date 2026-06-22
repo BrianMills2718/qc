@@ -22,7 +22,11 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Continue through the ranked roadmap without pausing after each verified
+1. Execute Plan #106 (`ADJUDICATION_IMPORT_PREFLIGHT_GUARD.md`): make
+   `import-adjudication-responses` optionally run the response preflight at the
+   import boundary and fail before writing gold-package outputs on provenance
+   mismatch.
+2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
 **Completed checkpoint:** Completed adjudication response packages can now be

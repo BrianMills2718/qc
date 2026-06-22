@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 106 | Adjudication import preflight guard | High | Planned | `ADJUDICATION_IMPORT_PREFLIGHT_GUARD.md` |
 
 ## Completed Plans
 
