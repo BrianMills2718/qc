@@ -1,4 +1,4 @@
-.PHONY: help test test-quick test-e2e test-all bench bench-package validate-d3-gold validate-d7-gold validate-inv7-package validate-adjudication-responses lint-scope-phrasing export-audit-manifest verify-export-audit-manifest export-publish-preflight verify-export-audit-log run-d7-retrieval compare-d7-retrieval run-inv7-fixtures run-inv7-live-fixtures adjudication-sample check lint docs-check clean status cost errors
+.PHONY: help test test-quick test-e2e test-all bench bench-package validate-d3-gold validate-d7-gold validate-inv7-package validate-adjudication-responses import-adjudication-responses lint-scope-phrasing export-audit-manifest verify-export-audit-manifest export-publish-preflight verify-export-audit-log run-d7-retrieval compare-d7-retrieval run-inv7-fixtures run-inv7-live-fixtures adjudication-sample check lint docs-check clean status cost errors
 
 DAYS ?= 7
 PROJECT ?= qualitative_coding
@@ -52,6 +52,30 @@ ifndef PACKAGE
 	$(error PACKAGE is required. Usage: make validate-adjudication-responses PACKAGE=sample.json)
 endif
 	python scripts/validate_adjudication_responses.py $(PACKAGE)
+
+import-adjudication-responses:  ## Import completed adjudication responses to D3/D7 gold packages (PACKAGE=responses.json GOLD_SET_ID=id DATASET_NAME=name CODER_COUNT=1 ADJUDICATOR=id PROTOCOL=summary [D3_OUTPUT=d3.json] [D7_OUTPUT=d7.json])
+ifndef PACKAGE
+	$(error PACKAGE is required. Usage: make import-adjudication-responses PACKAGE=responses.json GOLD_SET_ID=id DATASET_NAME=name CODER_COUNT=1 ADJUDICATOR=id PROTOCOL=summary D3_OUTPUT=d3.json)
+endif
+ifndef GOLD_SET_ID
+	$(error GOLD_SET_ID is required)
+endif
+ifndef DATASET_NAME
+	$(error DATASET_NAME is required)
+endif
+ifndef CODER_COUNT
+	$(error CODER_COUNT is required)
+endif
+ifndef ADJUDICATOR
+	$(error ADJUDICATOR is required)
+endif
+ifndef PROTOCOL
+	$(error PROTOCOL is required)
+endif
+ifeq ($(strip $(D3_OUTPUT)$(D7_OUTPUT)),)
+	$(error D3_OUTPUT or D7_OUTPUT is required)
+endif
+	python scripts/import_adjudication_responses.py $(PACKAGE) $(if $(D3_OUTPUT),--output-d3 $(D3_OUTPUT),) $(if $(D7_OUTPUT),--output-d7 $(D7_OUTPUT),) --gold-set-id "$(GOLD_SET_ID)" --dataset-name "$(DATASET_NAME)" --split "$(or $(SPLIT),dev)" --coder-count "$(CODER_COUNT)" --adjudicator "$(ADJUDICATOR)" --protocol "$(PROTOCOL)" $(if $(PROMPT_FROZEN),--prompt-frozen,) $(if $(CONTAMINATION_CHECKED),--contamination-checked,) $(if $(NOTES),--notes "$(NOTES)",)
 
 lint-scope-phrasing:  ## Lint report text for unsafe scope phrasing (ID=<project_id> INPUT=report.md)
 ifndef ID

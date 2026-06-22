@@ -48,6 +48,7 @@ make bench ID=<project_id> OBS_DB=path TRACE_ID=trace  # Override D10 observabil
 make bench ID=<project_id> ARTIFACT_DIR=benchmark_results  # Write versioned Phase 0 scorecard package
 make adjudication-sample ID=<project_id> OUTPUT=sample.json  # Export unlabeled human/expert review sample packet
 make validate-adjudication-responses PACKAGE=sample.json  # Validate completed adjudication response package shape/completeness
+make import-adjudication-responses PACKAGE=sample.json GOLD_SET_ID=study-v1 DATASET_NAME="Study dev labels" CODER_COUNT=1 ADJUDICATOR=coder-1 PROTOCOL="Single adjudicator review" D3_OUTPUT=d3_gold.json D7_OUTPUT=d7_gold.json  # Convert valid responses to D3/D7 gold package inputs
 make lint-scope-phrasing ID=<project_id> INPUT=report.md  # Lint arbitrary text for unsafe population-generalizing scope phrasing
 make export-audit-manifest ID=<project_id> FORMAT=markdown ARTIFACTS="report.md" OUTPUT=manifest.json  # Write export artifact hash manifest
 make verify-export-audit-manifest MANIFEST=manifest.json BASE_DIR=. ID=<project_id>  # Verify manifest self-hash, artifact hashes, and optional project-state hash
