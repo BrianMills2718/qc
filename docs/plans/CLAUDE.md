@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 200 | Claim ledger anchor detail read surfaces | High | In Progress | `CLAIM_LEDGER_ANCHOR_DETAIL_READ_SURFACES.md` |
 
 ## Completed Plans
 
