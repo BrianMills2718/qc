@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 148 | D3 baseline validator CLI | Low | In progress | `D3_BASELINE_VALIDATOR_CLI.md` |
 
 ## Completed Plans
 
