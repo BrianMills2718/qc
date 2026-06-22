@@ -43,6 +43,8 @@ Examples:
   qc_cli project run <project_id>
   qc_cli bench <project_id>
   qc_cli bench-package phase0_package.json
+  qc_cli run-d7-retrieval <project_id> --output predictions.json
+  qc_cli compare-d7-retrieval <project_id> --gold-file d7_gold.json --predictions-file predictions.json
   qc_cli project export <project_id> --format markdown --output-file report.md
   qc_cli status --server
         """
@@ -214,6 +216,50 @@ Examples:
     bench_package_parser.add_argument(
         'package_file',
         help='Path to the Phase 0 benchmark package JSON manifest',
+    )
+
+    # D7 retrieval export command
+    d7_retrieval_parser = subparsers.add_parser(
+        'run-d7-retrieval',
+        help='Export D7 retrieval predictions',
+        description='Export disconfirmation retrieval candidates as D7 baseline predictions',
+    )
+    d7_retrieval_parser.add_argument('project_id', help='Project ID to export')
+    d7_retrieval_parser.add_argument('--output', help='Optional JSON output path')
+    d7_retrieval_parser.add_argument('--name', help='Optional baseline name')
+    d7_retrieval_parser.add_argument('--description', help='Optional baseline description')
+    d7_retrieval_parser.add_argument('--max-targets', type=int)
+    d7_retrieval_parser.add_argument('--candidates-per-claim', type=int)
+    d7_retrieval_parser.add_argument('--retrieval-mode')
+    d7_retrieval_parser.add_argument('--bm25-k1', type=float)
+    d7_retrieval_parser.add_argument('--bm25-b', type=float)
+    d7_retrieval_parser.add_argument('--contrary-cue-weight', type=float)
+    d7_retrieval_parser.add_argument('--expanded-term-weight', type=float)
+    d7_retrieval_parser.add_argument('--embedding-model')
+    d7_retrieval_parser.add_argument('--embedding-dimensions', type=int)
+    d7_retrieval_parser.add_argument('--semantic-weight', type=float)
+    d7_retrieval_parser.add_argument('--min-semantic-similarity', type=float)
+    d7_retrieval_parser.add_argument('--trace-id')
+    d7_retrieval_parser.add_argument('--max-budget', type=float)
+
+    # D7 retrieval comparison command
+    d7_comparison_parser = subparsers.add_parser(
+        'compare-d7-retrieval',
+        help='Compare D7 retrieval prediction packages',
+        description='Score D7 retrieval prediction packages against one gold file',
+    )
+    d7_comparison_parser.add_argument('project_id', help='Project ID to score')
+    d7_comparison_parser.add_argument('--gold-file', required=True, help='D7 gold JSON file')
+    d7_comparison_parser.add_argument(
+        '--predictions-file',
+        required=True,
+        action='append',
+        help='Retrieval prediction package JSON file; repeat to compare multiple packages',
+    )
+    d7_comparison_parser.add_argument('--output', help='Optional JSON report output path')
+    d7_comparison_parser.add_argument(
+        '--protocol-package',
+        help='Optional D7 comparison protocol package used to preflight before scoring',
     )
 
     # Server command
@@ -417,6 +463,10 @@ def main() -> int:
             return handle_bench_command(args)
         elif args.command == 'bench-package':
             return handle_bench_package_command(args)
+        elif args.command == 'run-d7-retrieval':
+            return handle_run_d7_retrieval_command(args)
+        elif args.command == 'compare-d7-retrieval':
+            return handle_compare_d7_retrieval_command(args)
         elif args.command == 'server':
             return handle_server_command(args)
         elif args.command == 'project':
@@ -506,6 +556,49 @@ def handle_bench_package_command(args) -> int:
     from scripts import run_phase0_benchmark_package
 
     return run_phase0_benchmark_package.main([args.package_file])
+
+
+def handle_run_d7_retrieval_command(args) -> int:
+    """Export D7 retrieval predictions through the canonical CLI."""
+    from scripts import run_d7_retrieval
+
+    argv = [args.project_id]
+    for attr, flag in [
+        ("output", "--output"),
+        ("name", "--name"),
+        ("description", "--description"),
+        ("max_targets", "--max-targets"),
+        ("candidates_per_claim", "--candidates-per-claim"),
+        ("retrieval_mode", "--retrieval-mode"),
+        ("bm25_k1", "--bm25-k1"),
+        ("bm25_b", "--bm25-b"),
+        ("contrary_cue_weight", "--contrary-cue-weight"),
+        ("expanded_term_weight", "--expanded-term-weight"),
+        ("embedding_model", "--embedding-model"),
+        ("embedding_dimensions", "--embedding-dimensions"),
+        ("semantic_weight", "--semantic-weight"),
+        ("min_semantic_similarity", "--min-semantic-similarity"),
+        ("trace_id", "--trace-id"),
+        ("max_budget", "--max-budget"),
+    ]:
+        value = getattr(args, attr)
+        if value is not None:
+            argv.extend([flag, str(value)])
+    return run_d7_retrieval.main(argv)
+
+
+def handle_compare_d7_retrieval_command(args) -> int:
+    """Compare D7 retrieval prediction packages through the canonical CLI."""
+    from scripts import compare_d7_retrieval
+
+    argv = [args.project_id, "--gold-file", args.gold_file]
+    for prediction_file in args.predictions_file:
+        argv.extend(["--predictions-file", prediction_file])
+    if args.output is not None:
+        argv.extend(["--output", args.output])
+    if args.protocol_package is not None:
+        argv.extend(["--protocol-package", args.protocol_package])
+    return compare_d7_retrieval.main(argv)
 
 
 if __name__ == "__main__":

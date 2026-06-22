@@ -116,7 +116,8 @@ Internal CLI wrapper capability only; no new cross-project boundary is created.
 
 | Test Pattern | Why |
 |--------------|-----|
-| `python -m pytest tests/test_qc_cli_d7_retrieval.py tests/test_d7_retrieval.py tests/test_d7_comparison_report.py tests/test_d7_comparison_guard.py -q` | Top-level wrappers plus underlying D7 retrieval/comparison behavior. |
+| `python -m pytest tests/test_qc_cli_d7_retrieval.py tests/test_d7_retrieval.py tests/test_d7_comparison_guard.py -q` | Top-level wrappers plus underlying D7 retrieval/comparison behavior. |
+| `python -m pytest tests/test_d7_comparison_protocol.py tests/test_d7_comparison_preflight.py -q` | Existing D7 comparison protocol/preflight behavior. |
 | `python -m ruff check qc_cli.py tests/test_qc_cli_d7_retrieval.py` | Focused lint on modified CLI surfaces. |
 | `make docs-check` | Plan index, docs links, and AGENTS sync stay valid. |
 | `make check` | Full deterministic gate. |
