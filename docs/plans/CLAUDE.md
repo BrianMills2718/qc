@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 104 | Adjudication protocol sample preflight | High | Planned | `ADJUDICATION_PROTOCOL_SAMPLE_PREFLIGHT.md` |
 
 ## Completed Plans
 
