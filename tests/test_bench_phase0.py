@@ -363,6 +363,7 @@ def test_scorecard_d3_compares_exact_metrics_to_human_ceiling_package():
                         "precision": 0.8,
                         "f1": 0.85,
                         "cohens_kappa": 0.72,
+                        "gwet_ac1": 0.81,
                     },
                 )
             },
@@ -394,7 +395,12 @@ def test_scorecard_d3_compares_exact_metrics_to_human_ceiling_package():
     }
     assert comparison["metrics"]["precision"]["system_minus_human"] == pytest.approx(0.2)
     assert comparison["metrics"]["f1"]["system_minus_human"] == pytest.approx(0.15)
-    assert comparison["non_comparable_human_metrics"] == ["cohens_kappa"]
+    assert comparison["chance_corrected_agreement"]["status"] == "reported"
+    assert comparison["chance_corrected_agreement"]["metrics"] == {
+        "cohens_kappa": 0.72,
+        "gwet_ac1": 0.81,
+    }
+    assert comparison["non_comparable_human_metrics"] == []
     assert "not expert-parity evidence" in comparison["note"]
 
 
@@ -414,7 +420,12 @@ def test_scorecard_human_ceiling_noncomparable_metrics_are_not_scored():
                             "end_char": len(content),
                         }
                     ],
-                    {"cohens_kappa": 0.72, "notes": "No exact-score ceiling."},
+                    {
+                        "cohens_kappa": 0.72,
+                        "fleiss_kappa": "not-recorded",
+                        "krippendorffs_alpha": 0.68,
+                        "notes": "No exact-score ceiling.",
+                    },
                 )
             },
         ),
@@ -432,13 +443,26 @@ def test_scorecard_human_ceiling_noncomparable_metrics_are_not_scored():
 
     comparison = phase0_scorecard(state)["application_validity_d3"]["human_ceiling_comparison"]
 
-    assert comparison["status"] == "not_available"
+    assert comparison["status"] == "metadata_only"
     assert "no numeric recall, precision, or f1" in comparison["reason"]
     assert comparison["human_metrics"] == {
         "cohens_kappa": 0.72,
+        "fleiss_kappa": "not-recorded",
+        "krippendorffs_alpha": 0.68,
         "notes": "No exact-score ceiling.",
     }
-    assert comparison["non_comparable_human_metrics"] == ["cohens_kappa", "notes"]
+    assert comparison["chance_corrected_agreement"]["status"] == "reported"
+    assert comparison["chance_corrected_agreement"]["metrics"] == {
+        "cohens_kappa": 0.72,
+        "krippendorff_alpha": 0.68,
+    }
+    assert comparison["chance_corrected_agreement"]["non_numeric_metrics"] == [
+        "fleiss_kappa"
+    ]
+    assert "system scorecard does not compute system" in (
+        comparison["chance_corrected_agreement"]["note"]
+    )
+    assert comparison["non_comparable_human_metrics"] == ["notes"]
 
 
 def test_scorecard_d3_f1_bootstrap_configurable_and_disableable():
@@ -1031,7 +1055,7 @@ def test_scorecard_d7_compares_exact_metrics_to_human_ceiling_package():
                             "end_char": end,
                         }
                     ],
-                    {"recall": 0.8, "precision": 0.8, "f1": 0.8},
+                    {"recall": 0.8, "precision": 0.8, "f1": 0.8, "gwet_ac1": 0.74},
                 )
             },
         ),
@@ -1051,6 +1075,7 @@ def test_scorecard_d7_compares_exact_metrics_to_human_ceiling_package():
     }
     assert comparison["metrics"]["precision"]["system_value"] == 0.0
     assert comparison["metrics"]["f1"]["system_minus_human"] == -0.8
+    assert comparison["chance_corrected_agreement"]["metrics"] == {"gwet_ac1": 0.74}
     assert comparison["non_comparable_human_metrics"] == []
 
 

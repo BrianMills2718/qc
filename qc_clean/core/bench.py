@@ -46,6 +46,15 @@ _RELIABILITY_BOOTSTRAP_EXTRA_KEY = "phase0_reliability_bootstrap"
 DEFAULT_OBSERVABILITY_DB_PATH = Path.home() / "projects" / "data" / "llm_observability.db"
 _WILSON_Z_95 = 1.959963984540054
 _HUMAN_CEILING_EXACT_METRICS = ("recall", "precision", "f1")
+_HUMAN_CEILING_AGREEMENT_METRIC_ALIASES = {
+    "cohen_kappa": "cohens_kappa",
+    "cohens_kappa": "cohens_kappa",
+    "fleiss_kappa": "fleiss_kappa",
+    "gwet_ac1": "gwet_ac1",
+    "gwets_ac1": "gwet_ac1",
+    "krippendorff_alpha": "krippendorff_alpha",
+    "krippendorffs_alpha": "krippendorff_alpha",
+}
 
 
 @dataclass(frozen=True)
@@ -1480,9 +1489,12 @@ def _human_ceiling_comparison(
             "reason": "Gold-set adjudication has no human_human_agreement metrics.",
         }
 
+    chance_corrected = _chance_corrected_agreement_metadata(human_metrics)
     comparable: dict[str, dict[str, Any]] = {}
     non_comparable = []
     for key, human_value in sorted(human_metrics.items()):
+        if key in _HUMAN_CEILING_AGREEMENT_METRIC_ALIASES:
+            continue
         if key not in _HUMAN_CEILING_EXACT_METRICS:
             non_comparable.append(key)
             continue
@@ -1499,14 +1511,20 @@ def _human_ceiling_comparison(
         }
 
     if not comparable:
+        status = (
+            "metadata_only"
+            if chance_corrected["status"] == "reported"
+            else "not_available"
+        )
         return {
             **base,
-            "status": "not_available",
+            "status": status,
             "reason": (
                 "human_human_agreement has no numeric recall, precision, or f1 "
                 "metrics comparable to the exact-anchor scorecard."
             ),
             "human_metrics": dict(human_metrics),
+            "chance_corrected_agreement": chance_corrected,
             "non_comparable_human_metrics": non_comparable,
         }
 
@@ -1515,11 +1533,52 @@ def _human_ceiling_comparison(
         "status": "scored",
         "human_metrics": dict(human_metrics),
         "metrics": comparable,
+        "chance_corrected_agreement": chance_corrected,
         "non_comparable_human_metrics": non_comparable,
         "system_meets_all_comparable_metrics": all(
             item["meets_or_exceeds_human"] for item in comparable.values()
         ),
     }
+
+
+def _chance_corrected_agreement_metadata(
+    human_metrics: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Extract human-human chance-corrected agreement metadata."""
+    metrics: dict[str, float] = {}
+    non_numeric = []
+    for key, value in sorted(human_metrics.items()):
+        canonical_key = _HUMAN_CEILING_AGREEMENT_METRIC_ALIASES.get(key)
+        if canonical_key is None:
+            continue
+        if _is_numeric_metric(value):
+            metrics[canonical_key] = float(value)
+        else:
+            non_numeric.append(key)
+
+    if not metrics:
+        result: dict[str, Any] = {
+            "status": "not_available",
+            "reason": (
+                "human_human_agreement has no numeric chance-corrected "
+                "agreement metrics."
+            ),
+            "metric_keys": sorted(set(_HUMAN_CEILING_AGREEMENT_METRIC_ALIASES.values())),
+        }
+    else:
+        result = {
+            "status": "reported",
+            "metrics": dict(sorted(metrics.items())),
+            "metric_keys": sorted(metrics),
+            "note": (
+                "Human-human chance-corrected agreement metadata from the gold "
+                "package only; the system scorecard does not compute system "
+                "kappa/alpha/AC1 agreement here."
+            ),
+        }
+    if non_numeric:
+        result["non_numeric_metrics"] = sorted(non_numeric)
+    return result
 
 
 def _is_numeric_metric(value: Any) -> bool:
