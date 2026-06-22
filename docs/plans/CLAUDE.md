@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 92 | INV-3 adjudication response validator | High | Planned | `INV3_ADJUDICATION_RESPONSE_VALIDATOR.md` |
 
 ## Completed Plans
 

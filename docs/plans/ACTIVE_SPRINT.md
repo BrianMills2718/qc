@@ -22,9 +22,9 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Choose the next highest-value unmet evaluation-harness, review, grounding,
-   scope-discipline, or validity-protocol lane that can be advanced without
-   pretending held-out expert data exists.
+1. Execute Plan #92 (`INV3_ADJUDICATION_RESPONSE_VALIDATOR.md`): validate
+   completed adjudication sample responses without importing them as gold,
+   scoring correctness, or claiming expert evidence.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
