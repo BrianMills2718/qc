@@ -6,7 +6,6 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 148 | D3 baseline validator CLI | Low | In progress | `D3_BASELINE_VALIDATOR_CLI.md` |
 
 ## Completed Plans
 
@@ -96,6 +95,7 @@ Track all implementation work here.
 | D3 span-overlap IoU scorecard | Evaluation-harness follow-up: D3 scorecards now report local same-code/doc char-span IoU overlap diagnostics beside exact-anchor scores | `completed/D3_SPAN_OVERLAP_IOU_SCORECARD.md` |
 | D3 Modified Hausdorff scorecard | Evaluation-harness follow-up: D3 span-overlap diagnostics now report local discrete Modified Hausdorff distances beside IoU | `completed/D3_MODIFIED_HAUSDORFF_SCORECARD.md` |
 | D3 baseline package validator | Versioned D3 application-baseline packages now validate through `make validate-d3-baseline-package`, and recognized packages validate before `D3_BASELINES=` scoring while legacy inputs remain compatible | `completed/D3_BASELINE_PACKAGE_VALIDATOR.md` |
+| D3 baseline validator CLI | `qc_cli.py validate-d3-baseline-package` wraps the canonical D3 baseline package validator without duplicating validation logic or claiming held-out evidence | `completed/D3_BASELINE_VALIDATOR_CLI.md` |
 | INV-7 live fixture runner | Evaluation-harness follow-up: `make run-inv7-live-fixtures` writes opt-in live model canary fixture outcomes for `PROMPT_INJECTION=` without claiming prompt-injection robustness | `completed/INV7_LIVE_FIXTURE_RUNNER.md` |
 | INV-7 live fixture prompt hashes | INV-7 follow-up: live fixture packages now carry exact prompt SHA-256 hashes for provenance without claiming prompt-injection robustness | `completed/INV7_LIVE_FIXTURE_PROMPT_HASHES.md` |
 | INV-7 live benchmark protocol | INV-7 follow-up: `make validate-inv7-live-protocol` validates pre-run live canary protocol metadata before live prompt-injection runs | `completed/INV7_LIVE_BENCHMARK_PROTOCOL.md` |

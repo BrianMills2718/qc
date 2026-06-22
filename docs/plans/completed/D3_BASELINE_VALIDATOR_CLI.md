@@ -1,10 +1,26 @@
 # Plan #148: D3 Baseline Validator CLI
 
-**Status:** In Progress
+**Status:** Complete
 **Type:** implementation
 **Priority:** Low
 **Blocked By:** D3 baseline package validator
 **Blocks:** CLI parity for evaluation-harness package validation
+
+---
+
+## Outcome
+
+The top-level CLI now exposes
+`qc_cli.py validate-d3-baseline-package <package_file>`, delegating directly to
+`scripts.validate_d3_baseline_package.main()`. The wrapper preserves the
+script-owned machine-readable JSON output and exit-code semantics and does not
+duplicate validation logic.
+
+**Verification:** `python -m pytest tests/test_qc_cli_d7_retrieval.py
+tests/test_d3_baseline_package.py -q` passed (11 tests), targeted Ruff passed,
+and `make docs-check` passed. Final `make check` passed (1081 passed, 1
+skipped, 8 deselected; Ruff/docs-check passed). Type checking is not configured
+in this repo.
 
 ---
 
@@ -94,16 +110,16 @@ does not create new package validation logic.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] `qc_cli.py validate-d3-baseline-package <package_file>` is available.
-- [ ] The wrapper delegates to `scripts.validate_d3_baseline_package.main()` without duplicating validation logic.
-- [ ] Script-owned JSON output and exit codes are preserved.
-- [ ] Docs state this is package/provenance validation only, not held-out evidence.
+- [x] `qc_cli.py validate-d3-baseline-package <package_file>` is available.
+- [x] The wrapper delegates to `scripts.validate_d3_baseline_package.main()` without duplicating validation logic.
+- [x] Script-owned JSON output and exit codes are preserved.
+- [x] Docs state this is package/provenance validation only, not held-out evidence.
 
 > Process criteria:
-- [ ] Focused tests pass.
-- [ ] Full test suite passes (`make check`).
-- [ ] Type check status is reported.
-- [ ] Docs updated.
+- [x] Focused tests pass (`python -m pytest tests/test_qc_cli_d7_retrieval.py tests/test_d3_baseline_package.py -q`: 11 passed).
+- [x] Full test suite passes (`make check`: 1081 passed, 1 skipped, 8 deselected; Ruff/docs-check passed).
+- [x] Type check status is reported (`make check`: type check not yet configured).
+- [x] Docs updated.
 
 ---
 
