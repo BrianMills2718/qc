@@ -668,6 +668,8 @@ def _show_claims(store: ProjectStore, args) -> int:
         return 1
 
     limit = max(0, int(getattr(args, "limit", 20)))
+    raw_offset = getattr(args, "offset", 0)
+    offset = max(0, int(raw_offset if isinstance(raw_offset, int) else 0))
     summary = summarize_claim_ledger(state)
     disconfirmation = summarize_disconfirmation_coverage(state)
     print(f"Claim Ledger: {state.name}")
@@ -689,7 +691,12 @@ def _show_claims(store: ProjectStore, args) -> int:
         print("\n  Claims:")
         show_anchors = getattr(args, "show_anchors", False) is True
         show_scope = getattr(args, "show_scope", False) is True
-        for claim in state.claims[:limit]:
+        page = state.claims[offset : offset + limit]
+        if offset or len(state.claims) > limit:
+            start = offset + 1 if page else 0
+            end = offset + len(page) if page else 0
+            print(f"    Showing claims {start}-{end} of {len(state.claims)}")
+        for claim in page:
             print(
                 f"    - [{claim.claim_kind.value}/{claim.source_stage}/"
                 f"{claim.support_status.value}] {claim.claim_text}"
@@ -699,8 +706,9 @@ def _show_claims(store: ProjectStore, args) -> int:
             if show_anchors:
                 _print_claim_anchor_details("supporting", claim.supporting_anchors)
                 _print_claim_anchor_details("contrary", claim.contrary_anchors)
-        if len(state.claims) > limit:
-            print(f"    ... and {len(state.claims) - limit} more")
+        remaining = max(0, len(state.claims) - offset - len(page))
+        if remaining:
+            print(f"    ... and {remaining} more")
 
     return 0
 

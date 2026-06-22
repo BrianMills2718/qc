@@ -392,6 +392,59 @@ class TestInspection:
         }
         assert result["claims"][0]["contrary_anchor_details"][0]["quote_hash"] == "contrary-mcp"
 
+    def test_get_claims_limit_offset_metadata(self, completed_project, tmp_store):
+        completed_project.claims = [
+            AnalyticClaim(
+                id="claim-1",
+                claim_kind=ClaimKind.CODE,
+                source_stage="thematic_coding",
+                claim_text="Claim 1.",
+                scope=ClaimScope(code_ids=["C1"]),
+                origin_object_type="code",
+                origin_object_id="C1",
+            ),
+            AnalyticClaim(
+                id="claim-2",
+                claim_kind=ClaimKind.CODE,
+                source_stage="thematic_coding",
+                claim_text="Claim 2.",
+                scope=ClaimScope(code_ids=["C2"]),
+                origin_object_type="code",
+                origin_object_id="C2",
+            ),
+        ]
+        tmp_store.save(completed_project)
+
+        result = json.loads(qc_mcp_server.qc_get_claims("proj-done", limit=1, offset=1))
+
+        assert result["returned"] == 1
+        assert result["total_claims"] == 2
+        assert result["limit"] == 1
+        assert result["offset"] == 1
+        assert result["claims"][0]["id"] == "claim-2"
+
+    def test_get_claims_negative_offset(self, completed_project, tmp_store):
+        completed_project.claims = [
+            AnalyticClaim(
+                id="claim-1",
+                claim_kind=ClaimKind.CODE,
+                source_stage="thematic_coding",
+                claim_text="Claim 1.",
+                scope=ClaimScope(code_ids=["C1"]),
+                origin_object_type="code",
+                origin_object_id="C1",
+            )
+        ]
+        tmp_store.save(completed_project)
+
+        result = json.loads(qc_mcp_server.qc_get_claims("proj-done", limit=1, offset=-5))
+
+        assert result["returned"] == 1
+        assert result["total_claims"] == 1
+        assert result["limit"] == 1
+        assert result["offset"] == 0
+        assert result["claims"][0]["id"] == "claim-1"
+
 
 # ---------------------------------------------------------------------------
 # Pipeline execution (mocked LLM)

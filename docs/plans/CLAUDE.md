@@ -6,7 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 204 | Claim ledger CLI/MCP offset pagination | High | Planned | `CLAIM_LEDGER_CLI_MCP_OFFSET_PAGINATION.md` |
+| 204 | Claim ledger CLI/MCP offset pagination | High | In Progress | `CLAIM_LEDGER_CLI_MCP_OFFSET_PAGINATION.md` |
 
 ## Completed Plans
 

@@ -1694,8 +1694,20 @@ class TestCLIParsing:
         assert args.project_action == "claims"
         assert args.project_id == "pid"
         assert args.limit == 5
+        assert args.offset == 0
         assert args.show_anchors is False
         assert args.show_scope is False
+
+    def test_claims_subparser_accepts_offset(self):
+        from qc_cli import create_parser
+        parser = create_parser()
+
+        args = parser.parse_args(["project", "claims", "pid", "--offset", "3"])
+
+        assert args.command == "project"
+        assert args.project_action == "claims"
+        assert args.project_id == "pid"
+        assert args.offset == 3
 
     def test_claims_subparser_accepts_show_anchors(self):
         from qc_cli import create_parser
@@ -1866,6 +1878,50 @@ class TestProjectClaimsCommand:
         assert "Efficiency is a code." in out
         assert "claim-cli-hash" not in out
         assert "scope: " not in out
+
+    def test_project_claims_command_outputs_offset_page(
+        self, tmp_store, capsys
+    ):
+        from qc_clean.core.cli.commands.project import _show_claims
+
+        state = ProjectState(
+            id="claims-offset-proj",
+            name="Claims Offset Project",
+            claims=[
+                AnalyticClaim(
+                    claim_kind=ClaimKind.CODE,
+                    source_stage="thematic_coding",
+                    claim_text="First claim.",
+                    scope=ClaimScope(code_ids=["C1"]),
+                    origin_object_type="code",
+                    origin_object_id="C1",
+                ),
+                AnalyticClaim(
+                    claim_kind=ClaimKind.CODE,
+                    source_stage="thematic_coding",
+                    claim_text="Second claim.",
+                    scope=ClaimScope(code_ids=["C2"]),
+                    origin_object_type="code",
+                    origin_object_id="C2",
+                ),
+            ],
+        )
+        tmp_store.save(state)
+        args = MagicMock(
+            project_id="claims-offset-proj",
+            limit=1,
+            offset=1,
+            show_anchors=False,
+            show_scope=False,
+        )
+
+        result = _show_claims(tmp_store, args)
+
+        assert result == 0
+        out = capsys.readouterr().out
+        assert "Showing claims 2-2 of 2" in out
+        assert "Second claim." in out
+        assert "First claim." not in out
 
     def test_project_claims_command_outputs_scope_when_requested(
         self, tmp_store, capsys

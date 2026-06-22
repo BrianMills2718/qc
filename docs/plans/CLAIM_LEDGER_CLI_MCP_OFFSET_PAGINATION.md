@@ -1,6 +1,6 @@
 # Plan #204: Claim Ledger CLI/MCP Offset Pagination
 
-**Status:** Planned
+**Status:** In Progress
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Claim Ledger API Offset Pagination

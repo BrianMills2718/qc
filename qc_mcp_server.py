@@ -320,20 +320,23 @@ def qc_show_project(project_id: str) -> str:
 
 
 @mcp.tool()
-def qc_get_claims(project_id: str, limit: int = 50) -> str:
+def qc_get_claims(project_id: str, limit: int = 50, offset: int = 0) -> str:
     """Get the first-class analytic claim ledger for a project.
 
     Args:
         project_id: The project ID
         limit: Maximum number of claim rows to return (default 50)
+        offset: Number of claim rows to skip before returning rows (default 0)
     """
     try:
         state = store.load(project_id)
     except FileNotFoundError:
         return json.dumps({"error": f"Project '{project_id}' not found."})
 
+    safe_limit = max(0, limit)
+    safe_offset = max(0, offset)
     rows = []
-    for claim in state.claims[:max(0, limit)]:
+    for claim in state.claims[safe_offset : safe_offset + safe_limit]:
         rows.append({
             "id": claim.id,
             "kind": claim.claim_kind.value,
@@ -359,6 +362,9 @@ def qc_get_claims(project_id: str, limit: int = 50) -> str:
         "claim_summary": summarize_claim_ledger(state),
         "disconfirmation_summary": summarize_disconfirmation_coverage(state),
         "returned": len(rows),
+        "total_claims": len(state.claims),
+        "limit": safe_limit,
+        "offset": safe_offset,
         "claims": rows,
     }, indent=2)
 

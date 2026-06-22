@@ -1216,6 +1216,7 @@ Examples:
     proj_claims = project_subparsers.add_parser('claims', help='Show project claim ledger')
     proj_claims.add_argument('project_id', help='Project ID')
     proj_claims.add_argument('--limit', type=int, default=20, help='Maximum claims to show (default: 20)')
+    proj_claims.add_argument('--offset', type=int, default=0, help='Number of claims to skip before showing rows')
     proj_claims.add_argument(
         '--show-anchors',
         action='store_true',
