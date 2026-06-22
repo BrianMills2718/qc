@@ -6,7 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 83 | INV-7 strict prompt override placeholders | High | Planned | `INV7_STRICT_PROMPT_OVERRIDE_PLACEHOLDERS.md` |
+| 83 | INV-7 strict prompt override placeholders | High | Complete | `INV7_STRICT_PROMPT_OVERRIDE_PLACEHOLDERS.md` |
 
 ## Completed Plans
 

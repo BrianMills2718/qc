@@ -7,6 +7,7 @@ LLM prompts by putting every corpus-provided line behind a stable data prefix.
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from string import Formatter
 from typing import Any, Iterable, Protocol
 
@@ -18,6 +19,15 @@ class DocumentLike(Protocol):
 
     name: str
     content: str
+
+
+@dataclass(frozen=True)
+class _PromptFieldUse:
+    """One format field found in a prompt override template."""
+
+    field_name: str
+    conversion: str | None
+    format_spec: str
 
 
 def format_untrusted_data_block(label: str, text: str) -> str:
@@ -63,20 +73,15 @@ def render_prompt_override(
     values: dict[str, Any],
 ) -> str:
     """Render a custom prompt override after checking protected placeholders."""
-    field_names = _format_field_names(stage_name, template)
-    missing = sorted(set(required_placeholders) - field_names)
-    if missing:
-        raise ValueError(
-            f"Prompt override for {stage_name} must include protected placeholder(s): "
-            f"{', '.join(missing)}"
-        )
+    field_uses = _format_field_uses(stage_name, template)
+    _validate_field_uses(
+        stage_name=stage_name,
+        field_uses=field_uses,
+        required_placeholders=set(required_placeholders),
+        allowed_placeholders=set(values),
+    )
     try:
         return template.format(**values)
-    except KeyError as exc:
-        missing_name = str(exc.args[0])
-        raise ValueError(
-            f"Prompt override for {stage_name} references unknown placeholder: {missing_name}"
-        ) from exc
     except (IndexError, ValueError) as exc:
         raise ValueError(f"Prompt override for {stage_name} is not valid: {exc}") from exc
 
@@ -87,17 +92,79 @@ def _one_line_label(label: str) -> str:
     return compact or "data"
 
 
-def _format_field_names(stage_name: str, template: str) -> set[str]:
-    """Return root field names used by a ``str.format`` template."""
+def _format_field_uses(stage_name: str, template: str) -> list[_PromptFieldUse]:
+    """Return field usages from a ``str.format`` template."""
     try:
-        parsed = Formatter().parse(template)
-        return {
-            _root_field_name(field_name)
-            for _, field_name, _, _ in parsed
-            if field_name
-        }
+        return [
+            _PromptFieldUse(
+                field_name=field_name,
+                conversion=conversion,
+                format_spec=format_spec,
+            )
+            for _, field_name, format_spec, conversion in Formatter().parse(template)
+            if field_name is not None
+        ]
     except ValueError as exc:
         raise ValueError(f"Prompt override for {stage_name} is not valid: {exc}") from exc
+
+
+def _validate_field_uses(
+    *,
+    stage_name: str,
+    field_uses: list[_PromptFieldUse],
+    required_placeholders: set[str],
+    allowed_placeholders: set[str],
+) -> set[str]:
+    """Fail loudly if an override uses anything except declared bare fields."""
+    invalid = sorted({
+        _format_field_use(field_use)
+        for field_use in field_uses
+        if _has_unsupported_syntax(field_use)
+    })
+    if invalid:
+        raise ValueError(
+            f"Prompt override for {stage_name} uses unsupported placeholder syntax: "
+            f"{', '.join(invalid)}. Use bare placeholders only."
+        )
+
+    field_names = {field_use.field_name for field_use in field_uses}
+    unknown = sorted(field_names - allowed_placeholders)
+    if unknown:
+        raise ValueError(
+            f"Prompt override for {stage_name} references unknown placeholder(s): "
+            f"{', '.join(unknown)}"
+        )
+
+    missing = sorted(required_placeholders - field_names)
+    if missing:
+        raise ValueError(
+            f"Prompt override for {stage_name} must include protected placeholder(s): "
+            f"{', '.join(missing)}"
+        )
+
+    return field_names
+
+
+def _has_unsupported_syntax(field_use: _PromptFieldUse) -> bool:
+    """Return true when a field could transform or indirectly access a value."""
+    return (
+        not field_use.field_name
+        or field_use.field_name != _root_field_name(field_use.field_name)
+        or field_use.conversion is not None
+        or bool(field_use.format_spec)
+    )
+
+
+def _format_field_use(field_use: _PromptFieldUse) -> str:
+    """Render a field usage for an error message."""
+    if not field_use.field_name:
+        return "{}"
+    rendered = field_use.field_name
+    if field_use.conversion is not None:
+        rendered = f"{rendered}!{field_use.conversion}"
+    if field_use.format_spec:
+        rendered = f"{rendered}:{field_use.format_spec}"
+    return rendered
 
 
 def _root_field_name(field_name: str) -> str:

@@ -1,6 +1,6 @@
 # Plan #83: INV-7 Strict Prompt Override Placeholders
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** None
@@ -110,17 +110,28 @@ cross-project callable capability.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] Valid existing prompt overrides still render and receive protected data blocks.
-- [ ] Protected placeholders must be exact bare placeholders, not indexed, attributed, converted, or format-specified.
-- [ ] Undeclared metadata-like placeholders fail loudly before any LLM call.
-- [ ] Error messages name the affected stage and problematic placeholder syntax.
-- [ ] INV-7 docs remain conservative and do not claim prompt injection is solved.
+- [x] Valid existing prompt overrides still render and receive protected data blocks.
+- [x] Protected placeholders must be exact bare placeholders, not indexed, attributed, converted, or format-specified.
+- [x] Undeclared metadata-like placeholders fail loudly before any LLM call.
+- [x] Error messages name the affected stage and problematic placeholder syntax.
+- [x] INV-7 docs remain conservative and do not claim prompt injection is solved.
 
 > Process criteria:
-- [ ] Required focused tests pass.
-- [ ] Full `make check` passes or any failure is documented with evidence.
-- [ ] Type-check status is reported.
+- [x] Required focused tests pass.
+- [x] Full `make check` passes or any failure is documented with evidence.
+- [x] Type-check status is reported.
 - [ ] Verified work is committed and pushed.
+
+---
+
+## Verification
+
+- `python -m pytest tests/test_prompt_boundaries_inv7.py -k "indexed_combined_text or repr_combined_text or undeclared_metadata_placeholder" -q` - first failed against the old parser (`2 failed, 1 passed`), then passed after implementation (`3 passed, 14 deselected`).
+- `python -m pytest tests/test_prompt_boundaries_inv7.py -q` - `17 passed`.
+- `python -m ruff check qc_clean/core/prompting.py tests/test_prompt_boundaries_inv7.py` - passed.
+- `python scripts/meta/check_agents_sync.py --check` - passed.
+- `python scripts/sync_plan_status.py --check && python scripts/check_markdown_links.py` - passed.
+- `make check` - `807 passed, 1 skipped, 8 deselected`; Ruff and docs checks passed; type check is not yet configured.
 
 ---
 
