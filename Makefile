@@ -1,4 +1,4 @@
-.PHONY: help test test-quick test-e2e test-all bench bench-package validate-d3-gold validate-d7-gold validate-inv7-package validate-adjudication-responses lint-scope-phrasing run-d7-retrieval compare-d7-retrieval run-inv7-fixtures run-inv7-live-fixtures adjudication-sample check lint docs-check clean status cost errors
+.PHONY: help test test-quick test-e2e test-all bench bench-package validate-d3-gold validate-d7-gold validate-inv7-package validate-adjudication-responses lint-scope-phrasing export-audit-manifest run-d7-retrieval compare-d7-retrieval run-inv7-fixtures run-inv7-live-fixtures adjudication-sample check lint docs-check clean status cost errors
 
 DAYS ?= 7
 PROJECT ?= qualitative_coding
@@ -61,6 +61,21 @@ ifndef INPUT
 	$(error INPUT is required. Usage: make lint-scope-phrasing ID=<project_id> INPUT=report.md)
 endif
 	python scripts/lint_scope_phrasing.py $(ID) --input-file $(INPUT) $(if $(PROJECTS_DIR),--projects-dir $(PROJECTS_DIR),)
+
+export-audit-manifest:  ## Write export hash manifest (ID=<project_id> FORMAT=json|csv|markdown|qdpx ARTIFACTS="file..." OUTPUT=manifest.json)
+ifndef ID
+	$(error ID is required. Usage: make export-audit-manifest ID=<project_id> FORMAT=markdown ARTIFACTS="report.md" OUTPUT=manifest.json)
+endif
+ifndef FORMAT
+	$(error FORMAT is required. Usage: make export-audit-manifest ID=<project_id> FORMAT=markdown ARTIFACTS="report.md" OUTPUT=manifest.json)
+endif
+ifndef ARTIFACTS
+	$(error ARTIFACTS is required. Usage: make export-audit-manifest ID=<project_id> FORMAT=markdown ARTIFACTS="report.md" OUTPUT=manifest.json)
+endif
+ifndef OUTPUT
+	$(error OUTPUT is required. Usage: make export-audit-manifest ID=<project_id> FORMAT=markdown ARTIFACTS="report.md" OUTPUT=manifest.json)
+endif
+	python scripts/write_export_audit_manifest.py $(ID) --format $(FORMAT) $(foreach file,$(ARTIFACTS),--artifact $(file)) --output $(OUTPUT) $(if $(BASE_DIR),--base-dir $(BASE_DIR),) $(if $(PROJECTS_DIR),--projects-dir $(PROJECTS_DIR),)
 
 MODE ?= lexical_bm25
 
