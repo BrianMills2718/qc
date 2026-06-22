@@ -1,10 +1,42 @@
 # Plan #94: Export Audit Hash Manifest
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Existing JSON/CSV/Markdown/QDPX export surfaces
 **Blocks:** tamper-evident audit substrate first slices; reproducible handoffs
+
+---
+
+## Outcome
+
+Implemented schema_version=1 export-audit hash manifests for existing
+JSON/CSV/Markdown/QDPX export artifacts. The manifest records export format,
+project ID/name, deterministic project-state SHA-256, per-artifact relative path
+when a base directory is supplied, size, artifact SHA-256, artifact count,
+manifest SHA-256, and a caveat that this is local integrity/provenance metadata
+only. Added:
+
+- `qc_clean/core/export/audit_manifest.py`
+- `scripts/write_export_audit_manifest.py`
+- `make export-audit-manifest ID=<project_id> FORMAT=markdown ARTIFACTS="report.md" OUTPUT=manifest.json`
+
+Implementation commit: `3a1c230`
+
+## Verification
+
+- TDD red check: `python -m pytest tests/test_export_audit_manifest.py -q`
+  initially failed with `ModuleNotFoundError: No module named
+  'qc_clean.core.export.audit_manifest'`.
+- Focused pass: `python -m pytest tests/test_export_audit_manifest.py -q` →
+  `4 passed`.
+- Focused lint: `python -m ruff check qc_clean/core/export/audit_manifest.py scripts/write_export_audit_manifest.py tests/test_export_audit_manifest.py` →
+  `All checks passed!`
+- Make target discovery: `make help` lists `export-audit-manifest`.
+- Docs gate: `make docs-check` passed.
+- Full gate: `make check` → `854 passed, 1 skipped, 8 deselected`; Ruff and
+  docs checks passed.
+- Type-check status: `make check` reports `Type check not yet configured`.
 
 ---
 
@@ -136,30 +168,30 @@ over local files. It is not a full audit architecture.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] Manifest records schema version, package type, export format, project ID,
+- [x] Manifest records schema version, package type, export format, project ID,
   project name, project-state SHA-256, artifact count, per-file size/SHA-256,
   caveat, and manifest SHA-256.
-- [ ] Artifact ordering is deterministic.
-- [ ] Missing artifact paths fail loudly.
-- [ ] Script and Make target are agent-drivable and produce JSON.
-- [ ] Existing export output contracts remain unchanged.
-- [ ] Docs state this is integrity/provenance metadata, not a full
+- [x] Artifact ordering is deterministic.
+- [x] Missing artifact paths fail loudly.
+- [x] Script and Make target are agent-drivable and produce JSON.
+- [x] Existing export output contracts remain unchanged.
+- [x] Docs state this is integrity/provenance metadata, not a full
   tamper-evident audit substrate.
 
 > Process criteria:
-- [ ] Required focused tests pass.
-- [ ] Full `make check` passes or any failure is documented with evidence.
-- [ ] Type-check status is reported.
-- [ ] Verified work is committed and pushed.
+- [x] Required focused tests pass.
+- [x] Full `make check` passes or any failure is documented with evidence.
+- [x] Type-check status is reported.
+- [x] Verified work is committed and pushed.
 
 ---
 
 ## Open Questions
 
-- [ ] Should exporters write manifests automatically? - Status: DEFERRED | Why
+- [x] Should exporters write manifests automatically? - Status: DEFERRED | Why
   it matters: automatic sidecars change output contracts and should be a
   separate strict/export-policy decision.
-- [ ] Should manifests be signed or appended to an immutable log? - Status:
+- [x] Should manifests be signed or appended to an immutable log? - Status:
   DEFERRED | Why it matters: that is the real tamper-evident substrate, not this
   first hash-manifest slice.
 

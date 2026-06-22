@@ -22,9 +22,9 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #94 (`EXPORT_AUDIT_HASH_MANIFEST.md`): add a deterministic
-   export-audit hash manifest for JSON/CSV/Markdown/QDPX outputs as a first
-   integrity/provenance slice without claiming a full append-only audit log.
+1. Create and execute the next high-value lane: export-audit manifest
+   verification, so generated hash manifests can be checked against artifact
+   bytes without claiming a signed or append-only audit log.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
@@ -58,7 +58,11 @@ gate only and still does not import labels, create gold, score correctness, or
 provide expert evidence. `make lint-scope-phrasing` now scans arbitrary
 agent/human-authored text for risky population-generalizing phrasing under
 missing or under-specified corpus scope; this is report discipline only, not
-sampling-frame adequacy or validity evidence.
+sampling-frame adequacy or validity evidence. `make export-audit-manifest` now
+writes schema_version=1 hash manifests for existing JSON/CSV/Markdown/QDPX
+export artifacts with project-state and per-file SHA-256 hashes; this is local
+integrity/provenance metadata only, not signing, append-only logging, or a full
+tamper-evident audit substrate.
 MCP now exposes `qc_review_decisions` for agent-driven review decisions,
 including claim targets with rationale preservation, while keeping the old
 `qc_review_codes` tool compatible. MCP also exposes `qc_review_claims` as a

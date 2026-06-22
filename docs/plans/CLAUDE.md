@@ -6,7 +6,6 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 94 | Export audit hash manifest | High | Planned | `EXPORT_AUDIT_HASH_MANIFEST.md` |
 
 ## Completed Plans
 
@@ -105,6 +104,7 @@ Track all implementation work here.
 | INV-3 adjudication sample export | INV-3 first slice: `make adjudication-sample` exports unlabeled schema_version=1 sample packets for human/expert review inputs without claiming labels or validity evidence | `completed/INV3_ADJUDICATION_SAMPLE_EXPORT.md` |
 | INV-3 adjudication response validator | INV-3 follow-up: `make validate-adjudication-responses` validates completed sample response shape/completeness without importing labels or claiming validity evidence | `completed/INV3_ADJUDICATION_RESPONSE_VALIDATOR.md` |
 | Corpus scope phrasing lint | Scope/report follow-up: `make lint-scope-phrasing` scans arbitrary text for risky population-generalizing phrasing under missing or under-specified corpus scope | `completed/CORPUS_SCOPE_PHRASING_LINT.md` |
+| Export audit hash manifest | Audit substrate first slice: `make export-audit-manifest` records project-state and export artifact SHA-256 hashes without claiming a full tamper-evident log | `completed/EXPORT_AUDIT_HASH_MANIFEST.md` |
 
 ## Status Key
 
