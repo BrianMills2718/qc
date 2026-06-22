@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| #143 | D7 baseline package validator | High | Planned | `D7_BASELINE_PACKAGE_VALIDATOR.md` |
 
 ## Completed Plans
 

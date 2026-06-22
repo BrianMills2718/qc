@@ -22,8 +22,9 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Select the next highest-value documented roadmap lane from
-   `docs/PROJECT_THEORY_AND_GOALS.md` and `docs/EVALUATION_HARNESS.md`.
+1. Execute Plan #143, `D7_BASELINE_PACKAGE_VALIDATOR.md`, to make versioned
+   D7 baseline/prediction package validation available outside optional
+   comparison-protocol preflight and tighten the direct `BASELINES=` path.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
