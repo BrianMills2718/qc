@@ -22,13 +22,17 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #105 (`ADJUDICATION_RESPONSE_PREFLIGHT.md`): check completed
-   adjudication responses against the registered protocol and sample package
-   before import.
-2. Continue through the ranked roadmap without pausing after each verified
+1. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Completed checkpoint:** Corpus-scope warning propagation now covers Markdown,
+**Completed checkpoint:** Completed adjudication response packages can now be
+preflighted with `make adjudication-response-preflight PROTOCOL=...
+SAMPLE=... RESPONSES=...`, which reuses protocol/sample preflight, requires
+completed response validation, checks project/corpus/project-state hashes,
+enforces exact sample item IDs, and confirms protocol-required target types have
+completed responses before import. This is process/provenance metadata only; it
+does not create labels, prove label correctness, supply expert evidence, or
+license SOTA or methodological-validity claims. Corpus-scope warning propagation now covers Markdown,
 JSON `export_warnings` metadata, and CSV `export_warnings.csv` for claim-bearing
 exports without recorded scope, and CLI/MCP project creation can now persist
 corpus scope when supplied while leaving no-scope creation compatible.

@@ -1,10 +1,47 @@
 # Plan #105: Adjudication Response Preflight
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Adjudication protocol package; Adjudication protocol sample preflight; INV-3 adjudication response validator
 **Blocks:** safer D3/D7 gold import; held-out adjudication run discipline
+
+---
+
+## Outcome
+
+Implemented and pushed in commit `15c2785`:
+
+- Added `qc_clean/core/adjudication_response_preflight.py` with a
+  machine-readable response preflight report.
+- Added `scripts/preflight_adjudication_responses.py` and
+  `make adjudication-response-preflight PROTOCOL=... SAMPLE=...
+  RESPONSES=...`.
+- Added TDD coverage for pass, upstream preflight failure propagation,
+  incomplete responses, item-ID mismatch, hash mismatch, required target-type
+  completion, and CLI JSON/exit-code behavior.
+- Updated claim-discipline docs to state response preflight is
+  process/provenance metadata only, not expert evidence or validity evidence.
+
+Verification:
+
+- `python -m pytest tests/test_adjudication_response_preflight.py -q` failed
+  before implementation with missing module import, as expected.
+- `python -m pytest tests/test_adjudication_response_preflight.py
+  tests/test_adjudication_preflight.py tests/test_adjudication_protocol.py
+  tests/test_adjudication_sample.py tests/test_adjudication_import.py -q` ->
+  28 passed.
+- `python -m ruff check qc_clean/core/adjudication_response_preflight.py
+  scripts/preflight_adjudication_responses.py
+  tests/test_adjudication_response_preflight.py
+  qc_clean/core/adjudication_preflight.py qc_clean/core/adjudication_sample.py
+  qc_clean/core/adjudication_import.py` -> passed.
+- `make docs-check` -> passed.
+- `make help | rg "adjudication-response-preflight"` -> target discoverable.
+- `make -n adjudication-response-preflight PROTOCOL=protocol.json
+  SAMPLE=sample.json RESPONSES=responses.json` -> expected script invocation.
+- `make check` -> 908 passed, 1 skipped, 8 deselected; Ruff/docs green; type
+  check not yet configured.
 
 ---
 
@@ -74,10 +111,10 @@ Internal preflight capability only; no cross-project boundary is created.
 
 ### Capability Validation
 
-- [ ] Protocol/sample preflight is reused instead of duplicating those checks.
-- [ ] Response completeness validation is reused.
-- [ ] Item identity and target-type coverage checks are covered by tests.
-- [ ] CLI emits machine-readable JSON.
+- [x] Protocol/sample preflight is reused instead of duplicating those checks.
+- [x] Response completeness validation is reused.
+- [x] Item identity and target-type coverage checks are covered by tests.
+- [x] CLI emits machine-readable JSON.
 
 ---
 
@@ -119,10 +156,11 @@ Internal preflight capability only; no cross-project boundary is created.
 | Test File | Test Function | What It Verifies |
 |-----------|---------------|------------------|
 | `tests/test_adjudication_response_preflight.py` | `test_response_preflight_accepts_matching_protocol_sample_and_responses` | Matching complete responses pass. |
-| `tests/test_adjudication_response_preflight.py` | `test_response_preflight_propagates_protocol_sample_failure` | Existing protocol/sample mismatch blocks response preflight. |
+| `tests/test_adjudication_response_preflight.py` | `test_response_preflight_propagates_protocol_sample_failures` | Existing protocol/sample mismatch blocks response preflight. |
 | `tests/test_adjudication_response_preflight.py` | `test_response_preflight_rejects_incomplete_responses` | Incomplete completed-response package fails. |
 | `tests/test_adjudication_response_preflight.py` | `test_response_preflight_rejects_item_id_mismatch` | Response item IDs must match sample item IDs exactly. |
-| `tests/test_adjudication_response_preflight.py` | `test_response_preflight_rejects_hash_mismatch` | Response project/corpus hashes must match sample package. |
+| `tests/test_adjudication_response_preflight.py` | `test_response_preflight_rejects_response_hash_mismatch` | Response project/corpus hashes must match sample package. |
+| `tests/test_adjudication_response_preflight.py` | `test_response_preflight_rejects_missing_required_target_type_responses` | Protocol-required response target types must be complete. |
 | `tests/test_adjudication_response_preflight.py` | `test_response_preflight_script_outputs_json` | CLI emits valid/invalid machine-readable JSON with exit codes. |
 
 ### Existing Tests (Must Pass)
@@ -139,23 +177,23 @@ Internal preflight capability only; no cross-project boundary is created.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] Matching protocol/sample/response package trio passes preflight.
-- [ ] Protocol/sample preflight failures block response preflight.
-- [ ] Incomplete responses fail loudly.
-- [ ] Response/sample item-ID mismatch fails loudly.
-- [ ] Response/sample hash mismatch fails loudly.
-- [ ] `make adjudication-response-preflight PROTOCOL=... SAMPLE=...
+- [x] Matching protocol/sample/response package trio passes preflight.
+- [x] Protocol/sample preflight failures block response preflight.
+- [x] Incomplete responses fail loudly.
+- [x] Response/sample item-ID mismatch fails loudly.
+- [x] Response/sample hash mismatch fails loudly.
+- [x] `make adjudication-response-preflight PROTOCOL=... SAMPLE=...
   RESPONSES=...` is discoverable.
-- [ ] Docs state response preflight is process/provenance metadata only, not
+- [x] Docs state response preflight is process/provenance metadata only, not
   labels or evidence.
 
 > Process criteria:
-- [ ] Required focused tests pass.
-- [ ] Focused Ruff check passes.
-- [ ] `make docs-check` passes.
-- [ ] Full `make check` passes or any failure is documented with evidence.
-- [ ] Type-check status is reported.
-- [ ] Verified work is committed and pushed.
+- [x] Required focused tests pass.
+- [x] Focused Ruff check passes.
+- [x] `make docs-check` passes.
+- [x] Full `make check` passes or any failure is documented with evidence.
+- [x] Type-check status is reported.
+- [x] Verified work is committed and pushed.
 
 ---
 
