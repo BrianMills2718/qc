@@ -163,9 +163,15 @@ def main(argv: Sequence[str] | None = None) -> int:
         type=Path,
         help="Optional root directory for a versioned Phase 0 benchmark artifact package",
     )
+    parser.add_argument(
+        "--projects-dir",
+        type=Path,
+        default=None,
+        help="Optional project store directory; defaults to the user ProjectStore location",
+    )
     args = parser.parse_args(argv)
 
-    store = ProjectStore()
+    store = ProjectStore(projects_dir=args.projects_dir) if args.projects_dir else ProjectStore()
     try:
         state = store.load(args.project_id)
     except FileNotFoundError:
@@ -776,6 +782,7 @@ def phase0_command_provenance(args: argparse.Namespace) -> dict[str, Any]:
         "trace_id": args.trace_id,
         "output": args.output,
         "artifact_dir": str(args.artifact_dir) if args.artifact_dir else None,
+        "projects_dir": str(args.projects_dir) if args.projects_dir else None,
     }
 
 

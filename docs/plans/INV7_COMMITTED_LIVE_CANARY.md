@@ -10,9 +10,9 @@
 
 ## Gap
 
-**Current:** INV-7 has deterministic structural fixture packages, a live canary
-runner, live protocol validation, result-package validation, and
-protocol-to-result preflight. The repo still has no committed/scored live
+**Before this plan:** INV-7 had deterministic structural fixture packages, a
+live canary runner, live protocol validation, result-package validation, and
+protocol-to-result preflight. The repo had no committed/scored live
 adversarial canary result.
 
 **Target:** Commit a first protocol-registered live INV-7 canary artifact set:
@@ -28,8 +28,8 @@ The run uses the built-in INV-7 live fixtures, `split="canary"`, model
 `max_budget=0.25`. The scorecard is Phase 0 local accounting only; it is not
 held-out evidence and not proof of prompt-injection robustness.
 
-**Why:** This closes the current "no committed/scored live adversarial
-benchmark run" gap for the built-in canary path while preserving claim
+**Why:** This closes the built-in "no committed/scored live adversarial
+canary run" gap while preserving claim
 discipline. It gives reviewers a concrete artifact package to inspect without
 pretending the canary is a full benchmark.
 
@@ -80,6 +80,13 @@ capabilities.
 - `docs/plans/ACTIVE_SPRINT.md` - active sprint checkpoint.
 - `docs/benchmarks/inv7_live_canary_2026_06_22/` - committed canary protocol,
   result, preflight, scorecard, and README artifacts.
+- `qc_clean/core/inv7_fixtures.py` and `scripts/run_inv7_live_fixtures.py` -
+  ensure generated live result JSON is strict-package compatible while the CLI
+  still prints summary counts.
+- `scripts/bench_phase0.py`, `Makefile`, and `tests/test_bench_phase0_script.py`
+  - allow repo-local project stores for benchmark artifact scoring.
+- `tests/test_inv7_fixture_runner.py` - regression coverage for package-
+  compatible live fixture output.
 - `docs/PROJECT_THEORY_AND_GOALS.md` - status wording if the artifact run
   succeeds.
 - `docs/EVALUATION_HARNESS.md` - status wording if the artifact run succeeds.
@@ -124,7 +131,7 @@ through existing tested commands.
 | `make run-inv7-live-fixtures OUTPUT=docs/benchmarks/inv7_live_canary_2026_06_22/result.json MODEL=gpt-5-mini TRACE_ID=qualitative_coding/inv7-live-canary-2026-06-22 MAX_BUDGET=0.25` | Produces the live canary result package |
 | `make validate-inv7-package PACKAGE=docs/benchmarks/inv7_live_canary_2026_06_22/result.json` | Result package satisfies schema/version contract |
 | `make inv7-live-preflight PROTOCOL=docs/benchmarks/inv7_live_canary_2026_06_22/protocol.json PACKAGE=docs/benchmarks/inv7_live_canary_2026_06_22/result.json` | Protocol/result metadata and prompt hashes match |
-| `python scripts/bench_phase0.py __missing_project_for_inv7_canary__ --prompt-injection-file docs/benchmarks/inv7_live_canary_2026_06_22/result.json --output docs/benchmarks/inv7_live_canary_2026_06_22/scorecard.json` | Phase 0 scores the canary package without needing a saved project |
+| `python scripts/bench_phase0.py inv7_canary_project --projects-dir docs/benchmarks/inv7_live_canary_2026_06_22/projects --prompt-injection-file docs/benchmarks/inv7_live_canary_2026_06_22/result.json --trace-id qualitative_coding/inv7-live-canary-2026-06-22 --output docs/benchmarks/inv7_live_canary_2026_06_22/scorecard.json` | Phase 0 scores the canary package against a repo-local synthetic project shell |
 | `python -m pytest tests/test_inv7_fixture_runner.py tests/test_inv7_prompt_injection_package.py tests/test_inv7_live_protocol.py tests/test_inv7_live_preflight.py tests/test_bench_phase0_script.py -k "inv7 or prompt_injection" -q` | Existing INV-7 runner/package/protocol/scorecard behavior remains compatible |
 | `make docs-check` | Plan index, links, and AGENTS sync remain valid |
 | `make check` | Full deterministic gate remains green |
@@ -170,3 +177,10 @@ Built-in live fixture prompt hashes for this plan:
   `545b183cb5ea63978b6235c5c02579e2184d6c62cb06a3ee42682653284741b3`
 - `live-thematic-raw-direct-override`:
   `511a1e388d14137f8f857d4ba0a6dd5286bd119bb23575bdb69f6e86b5aaf5d9`
+
+First validation found that `run_inv7_live_fixtures_async()` wrote summary
+counts (`total_fixtures`, `failed`, `passed`) into the result package even
+though `Inv7PromptInjectionPackage` intentionally forbids unknown top-level
+fields. This plan now includes the compatibility fix: generated result JSON is
+strict-package compatible, while the CLI computes and prints summary counts
+without persisting them.

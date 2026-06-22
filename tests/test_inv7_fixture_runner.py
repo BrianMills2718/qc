@@ -11,6 +11,7 @@ from qc_clean.core.inv7_fixtures import (
     run_inv7_live_fixtures_async,
     run_inv7_structural_fixtures,
 )
+from qc_clean.core.inv7_package import validate_inv7_prompt_injection_package_payload
 from scripts import run_inv7_fixtures, run_inv7_live_fixtures
 
 
@@ -133,9 +134,9 @@ def test_run_inv7_live_fixtures_uses_fake_model_and_flags_canary():
     assert payload["model"] == "fake-model"
     assert payload["trace_id"] == "trace-123"
     assert payload["max_budget"] == 0.25
-    assert payload["total_fixtures"] == 2
-    assert payload["failed"] == 1
-    assert payload["passed"] == 1
+    assert "total_fixtures" not in payload
+    assert "failed" not in payload
+    assert "passed" not in payload
     assert payload["fixture_prompt_hashes"] == {
         fixture.fixture_id: _sha256_text(fixture.prompt)
         for fixture in fixtures
@@ -149,6 +150,10 @@ def test_run_inv7_live_fixtures_uses_fake_model_and_flags_canary():
     assert followed["forbidden_markers_found"] == ["VALIDATED"]
     for item in payload["prompt_injection_evaluations"]:
         PromptInjectionEvaluation.model_validate(item)
+    package = validate_inv7_prompt_injection_package_payload(payload)
+    assert package.total_fixtures == 2
+    assert package.failed == 1
+    assert package.passed == 1
 
 
 def test_run_inv7_live_fixture_script_writes_json_output(tmp_path, capsys, monkeypatch):
@@ -157,14 +162,19 @@ def test_run_inv7_live_fixture_script_writes_json_output(tmp_path, capsys, monke
     async def fake_runner(*, model_name: str, trace_id: str, max_budget: float):
         return {
             "schema_version": 1,
+            "package_id": "inv7-live-built-in",
             "mode": "live_model",
+            "split": "canary",
+            "fixture_set_id": "built_in_inv7_live",
+            "fixture_set_version": "1",
+            "prompt_frozen": True,
+            "contamination_checked": False,
             "evaluator": "live_model_canary",
             "model": model_name,
             "trace_id": trace_id,
             "max_budget": max_budget,
-            "total_fixtures": 1,
-            "failed": 0,
-            "passed": 1,
+            "fixture_prompt_hashes": {"fake-live": "a" * 64},
+            "note": "Canary package only; not robustness evidence.",
             "prompt_injection_evaluations": [
                 {
                     "fixture_id": "fake-live",
@@ -208,6 +218,7 @@ def test_run_inv7_live_fixture_script_writes_json_output(tmp_path, capsys, monke
     payload = json.loads(output_path.read_text(encoding="utf-8"))
     assert payload["model"] == "fake-live-model"
     assert payload["max_budget"] == 0.5
+    validate_inv7_prompt_injection_package_payload(payload)
     PromptInjectionEvaluation.model_validate(payload["prompt_injection_evaluations"][0])
 
 

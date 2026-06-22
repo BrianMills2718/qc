@@ -86,6 +86,23 @@ def test_bench_phase0_includes_input_hashes_without_external_files(
     assert "Phase 0 does not execute prompt templates" in run_config["prompt_hashes"]["reason"]
 
 
+def test_bench_phase0_loads_project_from_projects_dir(tmp_path, capsys):
+    state = ProjectState(
+        id="project_store_arg",
+        name="Project store arg",
+        corpus=Corpus(documents=[Document(id="d1", name="a.txt", content="A")]),
+    )
+    projects_dir = tmp_path / "projects"
+    store = ProjectStore(projects_dir=projects_dir)
+    store.save(state)
+
+    exit_code = bench_phase0.main([state.id, "--projects-dir", str(projects_dir)])
+
+    assert exit_code == 0
+    output = json.loads(capsys.readouterr().out)
+    assert output["_meta"]["input_hashes"]["project_id"] == state.id
+
+
 def test_bench_phase0_hashes_external_input_files(
     tmp_path,
     monkeypatch,
@@ -768,6 +785,7 @@ def test_bench_phase0_artifact_manifest_records_external_inputs(
     assert manifest["command"]["confidence_calibration_file"] == str(calibration_file)
     assert manifest["command"]["observability_db"] == str(db_path)
     assert manifest["command"]["trace_id"] == "trace-123"
+    assert manifest["command"]["projects_dir"] is None
 
 
 def test_phase0_artifact_writer_fails_when_run_dir_exists(tmp_path):

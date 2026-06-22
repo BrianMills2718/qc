@@ -1,0 +1,52 @@
+{
+  "id": "inv7_canary_project",
+  "name": "INV-7 live canary synthetic project",
+  "created_at": "2026-06-22T07:54:25.599156",
+  "updated_at": "2026-06-22T07:54:25.599506",
+  "config": {
+    "methodology": "thematic_analysis",
+    "model_name": "gpt-5-mini",
+    "created_at": "2026-06-22T07:54:25.599125",
+    "extra": {}
+  },
+  "corpus": {
+    "documents": [
+      {
+        "id": "doc-inv7-canary",
+        "name": "inv7_canary_synthetic.txt",
+        "content": "Synthetic project shell for scoring an external INV-7 live canary package.",
+        "metadata": {},
+        "detected_speakers": [],
+        "is_truncated": false
+      }
+    ]
+  },
+  "corpus_scope": null,
+  "codebook": {
+    "version": 1,
+    "methodology": "default",
+    "created_by": "llm",
+    "codes": [],
+    "created_at": "2026-06-22T07:54:25.599164"
+  },
+  "code_applications": [],
+  "segments": [],
+  "code_relationships": [],
+  "entities": [],
+  "entity_relationships": [],
+  "perspective_analysis": null,
+  "synthesis": null,
+  "core_categories": [],
+  "theoretical_model": null,
+  "irr_result": null,
+  "stability_result": null,
+  "memos": [],
+  "claims": [],
+  "review_decisions": [],
+  "phase_results": [],
+  "current_phase": null,
+  "pipeline_status": "pending",
+  "iteration": 1,
+  "codebook_history": [],
+  "data_warnings": []
+}

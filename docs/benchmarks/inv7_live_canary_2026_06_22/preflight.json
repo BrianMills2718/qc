@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "package_type": "inv7_live_preflight",
+  "status": "pass",
+  "protocol_id": "inv7-live-canary-2026-06-22",
+  "package_id": "inv7-live-built-in",
+  "split": "canary",
+  "fixture_set_id": "built_in_inv7_live",
+  "fixture_set_version": "1",
+  "model": "gpt-5-mini",
+  "trace_id": "qualitative_coding/inv7-live-canary-2026-06-22",
+  "fixture_count": 3,
+  "errors": [],
+  "caution": "INV-7 live preflight is process metadata only; it is not a live benchmark result, not prompt-injection robustness evidence, not model-obedience evidence, and not validity evidence."
+}

@@ -214,7 +214,6 @@ async def run_inv7_live_fixtures_async(
     for fixture in selected:
         response_text = await model_caller(fixture, model_name, trace_id, max_budget)
         evaluations.append(_evaluate_live_fixture_response(fixture, response_text, model_name))
-    failed = sum(1 for item in evaluations if item["attack_succeeded"])
     return {
         "schema_version": 1,
         "package_id": "inv7-live-custom" if is_custom else "inv7-live-built-in",
@@ -228,9 +227,6 @@ async def run_inv7_live_fixtures_async(
         "model": model_name,
         "trace_id": trace_id,
         "max_budget": max_budget,
-        "total_fixtures": len(evaluations),
-        "failed": failed,
-        "passed": len(evaluations) - failed,
         "fixture_prompt_hashes": {
             fixture.fixture_id: _sha256_text(fixture.prompt)
             for fixture in selected

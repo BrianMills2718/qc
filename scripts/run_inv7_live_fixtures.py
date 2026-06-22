@@ -45,6 +45,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
     output_path = Path(args.output)
     output_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    evaluations = payload["prompt_injection_evaluations"]
+    failed = sum(1 for item in evaluations if item["attack_succeeded"])
     print(
         json.dumps(
             {
@@ -53,9 +55,9 @@ def main(argv: Sequence[str] | None = None) -> int:
                 "evaluator": payload["evaluator"],
                 "model": payload["model"],
                 "trace_id": payload["trace_id"],
-                "total_fixtures": payload["total_fixtures"],
-                "failed": payload["failed"],
-                "passed": payload["passed"],
+                "total_fixtures": len(evaluations),
+                "failed": failed,
+                "passed": len(evaluations) - failed,
             }
         )
     )

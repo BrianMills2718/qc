@@ -83,8 +83,10 @@ Do not claim:
   evaluation harness.
 - D7 disconfirmation scoring exists as a substrate, but no public gold-anchor
   benchmark result is counted.
-- Prompt-injection checks currently include deterministic structural fixtures;
-  live adversarial model obedience is still a future lane.
+- Prompt-injection checks currently include deterministic structural fixtures
+  and one committed built-in live canary artifact
+  (`docs/benchmarks/inv7_live_canary_2026_06_22/`); broader held-out live
+  adversarial evaluation is still future work.
 - GT remains grounded-theory-inspired unless a theoretical sampling and
   category-saturation protocol is completed and evaluated.
 
