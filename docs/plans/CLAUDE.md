@@ -6,12 +6,12 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 168 | INV-7 custom prompt override fixtures | High | Planned | `INV7_CUSTOM_PROMPT_OVERRIDE_FIXTURES.md` |
 
 ## Completed Plans
 
 | Name | Outcome | Record |
 |------|---------|--------|
+| INV-7 custom prompt override fixtures | Built-in INV-7 structural and opt-in live fixture sets now include custom prompt override canaries for thematic and GT constant-comparison override surfaces rendered through the production override wrapper | `completed/INV7_CUSTOM_PROMPT_OVERRIDE_FIXTURES.md` |
 | INV-11 GT recode higher-order refresh | Grounded-theory projects can now opt into `--refresh-higher-order` after incremental recode to rebuild GT open-code context and rerun Axial, Selective, and Theory Integration before Cross-Interview and Negative Case | `completed/INV11_GT_RECODE_HIGHER_ORDER_REFRESH.md` |
 | INV-11 thematic recode higher-order refresh | Default/thematic projects can now opt into `--refresh-higher-order` after incremental recode to rebuild Phase 1 context and rerun Perspective, Relationship, and Synthesis before Cross-Interview and Negative Case; GT refresh was deferred to a later slice | `completed/INV11_THEMATIC_RECODE_HIGHER_ORDER_REFRESH.md` |
 | INV-7 prompt override guardrail wrapper | Rendered custom prompt overrides are now bookended by a repo-owned instruction/data-separation wrapper with a final data-boundary reminder after operator-authored template text | `completed/INV7_PROMPT_OVERRIDE_GUARDRAIL_WRAPPER.md` |

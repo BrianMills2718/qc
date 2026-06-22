@@ -26,12 +26,22 @@ highest-value documented lane.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Plan #168 is active: expand the built-in INV-7
-structural and opt-in live fixture sets to cover registered custom prompt
-override surfaces (`thematic_coding` and `gt_constant_comparison`) using the
-production `render_prompt_override()` wrapper. This is fixture coverage only,
-not prompt-injection robustness, model-obedience, methodological-validity, or
-SOTA evidence.
+**Active checkpoint:** Select the next deterministic roadmap lane from the
+remaining documented gaps. Candidate lanes include INV-2/D7 evaluation-policy
+scaffolding that does not fabricate gold labels, a committed/protocol-guarded
+INV-7 live benchmark artifact lane if budget and protocol are explicit,
+default-policy follow-ups for INV-11, or another protocol/accounting lane that
+can be verified without external evidence.
+
+**Completed checkpoint:** Built-in INV-7 structural and opt-in live fixture
+sets now include custom prompt override coverage for registered
+`thematic_coding` and `gt_constant_comparison` override surfaces. The new
+fixtures render through the production `render_prompt_override()` wrapper and
+exercise thematic `{combined_text}` plus GT `{segment_text}` and optional
+`{codebook_context}` payloads. The built-in fixture-set version is now `2`.
+This is fixture-definition and canary-coverage expansion only; it is not
+prompt-injection robustness evidence, model-obedience proof, methodological
+validity evidence, held-out adversarial benchmark evidence, or a SOTA claim.
 
 **Completed checkpoint:** Grounded-theory projects can now opt into
 `--refresh-higher-order` for `project recode` and
@@ -50,9 +60,10 @@ evidence, saturation evidence, full-GT evidence, or a SOTA claim.
 documents, invalidates stale higher-order outputs before intermediate save
 points, rebuilds Phase 1 context from the current codebook, reruns Perspective
 -> Relationship -> Synthesis, then reruns Cross-Interview -> Negative Case.
-Default recode still uses hard invalidation, and grounded-theory refresh fails
-loudly as unsupported. This is an INV-11 thematic refresh slice only; it is not
-full INV-11 completion, methodological-validity evidence, or a SOTA claim.
+Default recode still uses hard invalidation; grounded-theory refresh was
+deferred in that slice and later implemented as a separate GT refresh
+checkpoint. This is an INV-11 thematic refresh slice only; it is not full
+INV-11 completion, methodological-validity evidence, or a SOTA claim.
 
 **Completed checkpoint:** Rendered custom prompt overrides are now bookended by
 a repo-owned instruction/data-separation wrapper. The wrapper preserves the

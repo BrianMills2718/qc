@@ -1,10 +1,49 @@
 # Plan #168: INV-7 Custom Prompt Override Fixtures
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** INV-7 fixture runner scaffold; INV-7 live fixture runner; INV-7 prompt override guardrail wrapper
 **Blocks:** broader committed INV-7 adversarial benchmark evidence
+
+---
+
+## Outcome
+
+The built-in INV-7 structural and opt-in live fixture sets now include custom
+prompt override coverage for the registered override surfaces:
+
+- `thematic-prompt-override-direct-override`
+- `gt-prompt-override-segment-and-codebook-context`
+- `live-thematic-prompt-override-direct-override`
+- `live-gt-prompt-override-segment-and-codebook-context`
+
+The fixtures render through the production `render_prompt_override()` wrapper
+and exercise thematic `{combined_text}` plus GT `{segment_text}` and optional
+`{codebook_context}` payloads. The built-in structural/live fixture-set version
+is now `2`.
+
+Implementation commit: `2221a13`
+(`Add INV-7 custom override fixtures`).
+
+Verification:
+
+- Initial focused fixture test failed before implementation because the custom
+  override fixture IDs were absent.
+- `python -m pytest tests/test_inv7_fixture_runner.py -q`
+  -> 8 passed.
+- `python -m pytest tests/test_inv7_fixture_runner.py tests/test_prompt_boundaries_inv7.py tests/test_inv7_prompt_injection_package.py tests/test_bench_phase0.py tests/test_bench_phase0_script.py -k "inv7 or prompt_injection or prompt_override" -q`
+  -> 48 passed, 104 deselected.
+- `make lint-prompt-overrides` -> passed.
+- Targeted Ruff passed for touched Python files.
+- `make docs-check` -> passed.
+- `git diff --check` -> passed.
+- `make check` -> 1135 passed, 1 skipped, 8 deselected; Ruff and docs gates
+  passed.
+
+This is fixture-definition and canary-coverage expansion only. It is not
+prompt-injection robustness evidence, model-obedience proof, methodological
+validity evidence, held-out adversarial benchmark evidence, or a SOTA claim.
 
 ---
 
@@ -84,7 +123,8 @@ project capabilities, and this plan only expands their built-in fixture sets.
 
 ## Files Affected
 
-- `docs/plans/INV7_CUSTOM_PROMPT_OVERRIDE_FIXTURES.md` - active plan.
+- `docs/plans/completed/INV7_CUSTOM_PROMPT_OVERRIDE_FIXTURES.md` - completed
+  plan.
 - `docs/plans/CLAUDE.md` - active plan index.
 - `docs/plans/ACTIVE_SPRINT.md` - sprint checkpoint.
 - `qc_clean/core/inv7_fixtures.py` - add custom override structural/live
@@ -142,17 +182,17 @@ project capabilities, and this plan only expands their built-in fixture sets.
 
 ## Acceptance Criteria
 
-- [ ] Structural fixtures include custom prompt override coverage for
+- [x] Structural fixtures include custom prompt override coverage for
   `thematic_coding` and `gt_constant_comparison`.
-- [ ] Live fixtures include custom prompt override canaries for those surfaces.
-- [ ] The custom override fixtures render through `render_prompt_override()`,
+- [x] Live fixtures include custom prompt override canaries for those surfaces.
+- [x] The custom override fixtures render through `render_prompt_override()`,
   not hand-built wrapper strings.
-- [ ] Existing package schema, scorecard compatibility, and Make/CLI surfaces
+- [x] Existing package schema, scorecard compatibility, and Make/CLI surfaces
   remain unchanged.
-- [ ] Docs state this expands fixture coverage only and does not prove
+- [x] Docs state this expands fixture coverage only and does not prove
   prompt-injection robustness, model obedience, methodological validity, or
   SOTA.
-- [ ] Required tests and gates pass.
+- [x] Required tests and gates pass.
 
 ---
 
