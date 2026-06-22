@@ -137,6 +137,7 @@ a { color: #2563eb; }
   <div class="mode-switch" aria-label="Review mode">
     <button class="btn mode-btn active" id="codeModeBtn" onclick="setReviewMode('codes')">Codes</button>
     <button class="btn mode-btn" id="claimModeBtn" onclick="setReviewMode('claims')">Claims</button>
+    <button class="btn mode-btn" id="relationshipModeBtn" onclick="setReviewMode('relationships')">Relationships</button>
   </div>
   <button class="btn btn-success" id="approveAllBtn" onclick="approveAll()">Approve All</button>
   <button class="btn btn-primary" id="saveBtn" onclick="submitDecisions(false)">Save Decisions</button>
@@ -165,9 +166,12 @@ let reviewMode = "codes";
 
 async function loadProject() {
   try {
-    const path = reviewMode === "claims"
-      ? "/projects/" + PROJECT_ID + "/review/claims"
-      : "/projects/" + PROJECT_ID + "/review/codes";
+    let path = "/projects/" + PROJECT_ID + "/review/codes";
+    if (reviewMode === "claims") {
+      path = "/projects/" + PROJECT_ID + "/review/claims";
+    } else if (reviewMode === "relationships") {
+      path = "/projects/" + PROJECT_ID + "/review/relationships";
+    }
     const resp = await fetch(API_BASE + path);
     if (!resp.ok) {
       const err = await resp.json().catch(() => ({ detail: resp.statusText }));
@@ -206,6 +210,10 @@ function render() {
     document.getElementById("stats").innerHTML =
       "<span>" + (summary.claims_count || projectData.total_claims || 0) + " claims</span>" +
       "<span>" + (projectData.returned || 0) + " shown</span>";
+  } else if (reviewMode === "relationships") {
+    document.getElementById("stats").innerHTML =
+      "<span>" + (summary.relationships_count || projectData.total_relationships || 0) + " relationships</span>" +
+      "<span>" + (projectData.returned || 0) + " shown</span>";
   } else {
     document.getElementById("stats").innerHTML =
       "<span>" + (summary.codes_count || 0) + " codes</span>" +
@@ -216,6 +224,10 @@ function render() {
 
   if (reviewMode === "claims") {
     renderClaims();
+    return;
+  }
+  if (reviewMode === "relationships") {
+    renderRelationships();
     return;
   }
   renderCodes();
@@ -248,6 +260,22 @@ function renderClaims() {
   let html = '<div class="cards">';
   for (const claim of claims) {
     html += renderClaimCard(claim);
+  }
+  html += '</div>';
+  document.getElementById("content").innerHTML = html;
+}
+
+function renderRelationships() {
+  const relationships = projectData.relationships || [];
+  if (relationships.length === 0) {
+    document.getElementById("content").innerHTML =
+      '<div class="empty">No relationships to review.</div>';
+    return;
+  }
+
+  let html = '<div class="cards">';
+  for (const relationship of relationships) {
+    html += renderRelationshipCard(relationship);
   }
   html += '</div>';
   document.getElementById("content").innerHTML = html;
@@ -413,6 +441,81 @@ function renderClaimCard(claim) {
   return html;
 }
 
+function renderRelationshipCard(relationship) {
+  const d = decisions.get(relationship.id);
+  const action = d ? d.action : null;
+  const cardClass = action ? "card decision-" + action : "card";
+
+  let html = '<div class="' + cardClass + '" id="relationship-card-' + relationship.id + '">';
+  html += '<div class="card-top">';
+  html += '<div class="card-actions">';
+  for (const act of ["approve", "reject", "modify"]) {
+    const activeClass = action === act ? " active" : "";
+    html += '<button class="btn' + activeClass + '" onclick="setRelationshipDecision(\'' +
+            relationship.id + '\',\'' + act + '\')">' + capitalize(act) + '</button>';
+  }
+  html += '</div>';
+  html += '<span class="card-confidence">' + (relationship.strength != null ? Number(relationship.strength).toFixed(2) : "") + '</span>';
+  html += '</div>';
+
+  html += '<div class="card-body">';
+  html += '<div class="card-name">' + escapeHtml(relationship.source_name || relationship.source_id || "") +
+          ' &rarr; ' + escapeHtml(relationship.target_name || relationship.target_id || "") +
+          ' <span class="card-provenance">' + escapeHtml(relationship.target_type || "relationship") + '</span></div>';
+  html += '<div class="card-desc">' + escapeHtml(relationship.relationship_type || "related_to") + '</div>';
+  html += '<div class="claim-meta">';
+  html += '<span class="claim-pill">' + escapeHtml(relationship.relationship_family || "relationship") + '</span>';
+  html += '<span class="claim-pill">evidence: ' + (relationship.evidence_count || 0) + '</span>';
+  html += '</div>';
+  if (relationship.evidence && relationship.evidence.length > 0) {
+    html += '<div class="card-quotes">Evidence: ';
+    html += relationship.evidence.slice(0, 3).map(function(q) {
+      return '<q>' + escapeHtml(truncate(q, 120)) + '</q>';
+    }).join(", ");
+    html += '</div>';
+  }
+  if (relationship.conditions && relationship.conditions.length > 0) {
+    html += '<div class="claim-scope">Conditions: ' + escapeHtml(relationship.conditions.join("; ")) + '</div>';
+  }
+  if (relationship.consequences && relationship.consequences.length > 0) {
+    html += '<div class="claim-scope">Consequences: ' + escapeHtml(relationship.consequences.join("; ")) + '</div>';
+  }
+  if (action === "modify") {
+    const nv = d.new_value || {};
+    const evidenceField = relationship.target_type === "entity_relationship" ? "supporting_evidence" : "evidence";
+    html += '<div class="modify-fields">';
+    html += '<label>Relationship Type</label>';
+    html += '<input type="text" value="' + escapeAttr(nv.relationship_type || relationship.relationship_type || "") +
+            '" onchange="updateRelationshipModify(\'' + relationship.id + '\',\'relationship_type\',this.value,false)">';
+    html += '<label>Strength</label>';
+    html += '<input type="number" min="0" max="1" step="0.01" value="' +
+            escapeAttr(String(nv.strength != null ? nv.strength : relationship.strength || 0)) +
+            '" onchange="updateRelationshipModify(\'' + relationship.id + '\',\'strength\',this.value,false)">';
+    html += '<label>Evidence (one per line)</label>';
+    html += '<textarea onchange="updateRelationshipModify(\'' + relationship.id + '\',\'' + evidenceField + '\',this.value,true)">' +
+            escapeHtml((nv[evidenceField] || relationship.evidence || []).join("\n")) + '</textarea>';
+    if (relationship.target_type === "code_relationship") {
+      html += '<label>Conditions (one per line)</label>';
+      html += '<textarea onchange="updateRelationshipModify(\'' + relationship.id + '\',\'conditions\',this.value,true)">' +
+              escapeHtml((nv.conditions || relationship.conditions || []).join("\n")) + '</textarea>';
+      html += '<label>Consequences (one per line)</label>';
+      html += '<textarea onchange="updateRelationshipModify(\'' + relationship.id + '\',\'consequences\',this.value,true)">' +
+              escapeHtml((nv.consequences || relationship.consequences || []).join("\n")) + '</textarea>';
+    }
+    html += '</div>';
+  }
+  html += '</div>';
+
+  html += '<div class="rationale-row">';
+  html += '<label>Rationale</label>';
+  html += '<input type="text" placeholder="Optional rationale for this decision" value="' +
+          escapeAttr(d ? d.rationale || "" : "") +
+          '" onchange="updateRationale(\'' + relationship.id + '\',this.value)">';
+  html += '</div>';
+  html += '</div>';
+  return html;
+}
+
 function renderAppItem(app, codeId) {
   const d = decisions.get(app.id);
   const action = d ? d.action : null;
@@ -472,6 +575,37 @@ function setClaimDecision(claimId, action) {
   updateDecisionCount();
 }
 
+function setRelationshipDecision(relationshipId, action) {
+  const existing = decisions.get(relationshipId);
+  if (existing && existing.action === action) {
+    decisions.delete(relationshipId);
+  } else {
+    const relationship = (projectData.relationships || []).find(function(r) { return r.id === relationshipId; });
+    const d = {
+      target_type: relationship.target_type,
+      target_id: relationshipId,
+      action: action,
+      rationale: "",
+    };
+    if (action === "modify") {
+      d.new_value = {
+        relationship_type: relationship ? relationship.relationship_type || "" : "",
+        strength: relationship && relationship.strength != null ? relationship.strength : 0,
+      };
+      if (relationship && relationship.target_type === "entity_relationship") {
+        d.new_value.supporting_evidence = relationship.evidence || [];
+      } else {
+        d.new_value.evidence = relationship ? relationship.evidence || [] : [];
+        d.new_value.conditions = relationship ? relationship.conditions || [] : [];
+        d.new_value.consequences = relationship ? relationship.consequences || [] : [];
+      }
+    }
+    decisions.set(relationshipId, d);
+  }
+  rerenderRelationshipCard(relationshipId);
+  updateDecisionCount();
+}
+
 function setAppDecision(appId, action, event) {
   if (event) event.stopPropagation();
   const existing = decisions.get(appId);
@@ -503,6 +637,21 @@ function updateClaimModify(claimId, value) {
   const d = decisions.get(claimId);
   if (d && d.action === "modify") {
     d.new_value = { claim_text: value };
+  }
+}
+
+function updateRelationshipModify(relationshipId, field, value, asLines) {
+  const d = decisions.get(relationshipId);
+  if (d && d.action === "modify") {
+    if (!d.new_value) d.new_value = {};
+    if (field === "strength") {
+      const parsed = parseFloat(value);
+      d.new_value[field] = isNaN(parsed) ? 0 : parsed;
+    } else if (asLines) {
+      d.new_value[field] = value.split("\n").map(function(v) { return v.trim(); }).filter(Boolean);
+    } else {
+      d.new_value[field] = value;
+    }
   }
 }
 
@@ -557,6 +706,16 @@ function rerenderClaimCard(claimId) {
   el.replaceWith(tmp.firstElementChild);
 }
 
+function rerenderRelationshipCard(relationshipId) {
+  const relationship = (projectData.relationships || []).find(function(r) { return r.id === relationshipId; });
+  if (!relationship) return;
+  const el = document.getElementById("relationship-card-" + relationshipId);
+  if (!el) return;
+  const tmp = document.createElement("div");
+  tmp.innerHTML = renderRelationshipCard(relationship);
+  el.replaceWith(tmp.firstElementChild);
+}
+
 function setReviewMode(mode) {
   if (reviewMode === mode) return;
   reviewMode = mode;
@@ -568,9 +727,11 @@ function setReviewMode(mode) {
 function updateModeButtons() {
   const codeBtn = document.getElementById("codeModeBtn");
   const claimBtn = document.getElementById("claimModeBtn");
+  const relationshipBtn = document.getElementById("relationshipModeBtn");
   const approveAllBtn = document.getElementById("approveAllBtn");
   if (codeBtn) codeBtn.className = "btn mode-btn" + (reviewMode === "codes" ? " active" : "");
   if (claimBtn) claimBtn.className = "btn mode-btn" + (reviewMode === "claims" ? " active" : "");
+  if (relationshipBtn) relationshipBtn.className = "btn mode-btn" + (reviewMode === "relationships" ? " active" : "");
   if (approveAllBtn) approveAllBtn.style.display = reviewMode === "codes" ? "" : "none";
 }
 

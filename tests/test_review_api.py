@@ -147,6 +147,16 @@ class TestReviewUIPage:
         assert "function renderClaimCard" in resp.text
         assert 'target_type: "claim"' in resp.text
 
+    def test_review_page_exposes_relationship_review_ui(self, client):
+        resp = client.get("/review/test-project-123")
+
+        assert resp.status_code == 200
+        assert 'id="relationshipModeBtn"' in resp.text
+        assert '"/projects/" + PROJECT_ID + "/review/relationships"' in resp.text
+        assert "function renderRelationshipCard" in resp.text
+        assert "function setRelationshipDecision" in resp.text
+        assert "target_type: relationship.target_type" in resp.text
+
     def test_404_for_missing_project(self, client):
         resp = client.get("/review/nonexistent")
         assert resp.status_code == 404
