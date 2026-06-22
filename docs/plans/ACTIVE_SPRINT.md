@@ -22,10 +22,14 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Choose the next highest-value unmet evaluation-harness, review, grounding, or
+1. Execute Plan #87 (`RELATIONSHIP_REVIEW_API_DECISIONS.md`): add
+   ReviewManager/API relationship review targets and explicit
+   `code_relationship` / `entity_relationship` decision semantics without
+   claiming browser, MCP, or expert review coverage.
+2. Choose the next highest-value unmet evaluation-harness, review, grounding, or
    scope-discipline lane that can be advanced without pretending held-out expert
    data exists.
-2. Continue through the ranked roadmap without pausing after each verified
+3. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
 **Completed checkpoint:** Corpus-scope warning propagation now covers Markdown,

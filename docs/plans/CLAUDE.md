@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 87 | Relationship review API decisions | High | Planned | `RELATIONSHIP_REVIEW_API_DECISIONS.md` |
 
 ## Completed Plans
 
