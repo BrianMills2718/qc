@@ -352,7 +352,6 @@ The ranked roadmap (invariants before features) lives in `docs/PROJECT_THEORY_AN
 
 ### Maintenance Follow-Ups (2026-06-19)
 - **Line endings**: Normalize mixed CRLF/LF files in one mechanical commit with no behavior changes, then run `make check`.
-- **Cost observability target**: Verify `make cost`; if `llm_client cost` is unavailable or unstable, replace the fallback with an explicit repo-local helper like `make errors`.
 
 ## prompt_eval Integration (Prompt Optimization)
 
