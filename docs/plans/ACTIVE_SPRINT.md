@@ -26,13 +26,22 @@ highest-value documented lane.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Plan #167 is active: implement GT opt-in
-`--refresh-higher-order` after incremental recode by rebuilding GT open-code
-context from the current codebook, rerunning Axial -> Selective -> Theory
-Integration, then rerunning Cross-Interview -> Negative Case. Preserve the
-default hard-invalidation path and existing thematic refresh path. This narrows
-INV-11 but does not make refresh default and does not provide GT
-methodological-validity, saturation, or SOTA evidence.
+**Active checkpoint:** Select the next deterministic roadmap lane from the
+remaining documented gaps. Candidate lanes include default-policy follow-ups for
+INV-11, broader INV-7 custom-prompt/live benchmark work, INV-2/D7
+evaluation-policy scaffolding that does not fabricate gold labels, or another
+protocol/accounting lane that can be verified without external evidence.
+
+**Completed checkpoint:** Grounded-theory projects can now opt into
+`--refresh-higher-order` for `project recode` and
+`project add-docs --recode`. The refresh path incrementally codes new
+documents, invalidates stale higher-order outputs before intermediate save
+points, rebuilds GT open-code context from the current codebook, reruns Axial
+-> Selective -> Theory Integration, then reruns Cross-Interview -> Negative
+Case. Default recode still uses hard invalidation, and the existing
+default/thematic refresh path remains unchanged. This is an INV-11 GT refresh
+slice only; it is not full INV-11 completion, GT methodological-validity
+evidence, saturation evidence, full-GT evidence, or a SOTA claim.
 
 **Completed checkpoint:** Default/thematic projects can now opt into
 `--refresh-higher-order` for `project recode` and

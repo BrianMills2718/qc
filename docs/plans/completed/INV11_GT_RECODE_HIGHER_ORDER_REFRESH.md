@@ -1,10 +1,56 @@
 # Plan #167: INV-11 GT Recode Higher-Order Refresh
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** #166
 **Blocks:** fuller default corpus-mutation auto-refresh policy
+
+---
+
+## Outcome
+
+Grounded-theory projects can now opt into higher-order refresh after
+incremental recode:
+
+- `project recode <project_id> --refresh-higher-order`
+- `project add-docs <project_id> ... --recode --refresh-higher-order`
+
+The GT refresh path now:
+
+1. runs incremental coding on uncoded documents;
+2. invalidates stale higher-order outputs before the first post-incremental
+   save can preserve stale objects as current;
+3. reconstructs `ctx.gt_open_codes` and `ctx.gt_open_codes_text` from the
+   current codebook via `codebook_to_open_codes()`;
+4. reruns Axial -> Selective -> Theory Integration;
+5. reruns Cross-Interview -> Negative Case.
+
+Default recode remains unchanged: without `--refresh-higher-order`, it uses
+hard invalidation plus Cross-Interview and Negative Case. The existing
+default/thematic refresh path remains unchanged.
+
+Implementation commit: `ccd7051`
+(`Add GT recode higher-order refresh`).
+
+Verification:
+
+- Initial focused tests failed before implementation because
+  `RebuildGTOpenCodesContextStage` did not exist.
+- `python -m pytest tests/test_adapters.py -k "CodebookToOpenCodes or CodebookToCodeHierarchy" tests/test_incremental.py -k "gt_open_codes_context or gt_refresh_pipeline or thematic_refresh_pipeline or creates_default_pipeline" tests/test_project_commands.py -k "refresh_higher_order" -q`
+  -> 3 passed, 89 deselected.
+- `python -m pytest tests/test_adapters.py tests/test_incremental.py tests/test_pipeline_stages.py tests/test_project_commands.py -q`
+  -> 116 passed.
+- Targeted Ruff passed for touched Python files.
+- `make docs-check` -> passed.
+- `git diff --check` -> passed.
+- `make check` -> 1133 passed, 1 skipped, 8 deselected; Ruff and docs gates
+  passed.
+
+INV-11 remains partial. Refresh is still opt-in, default recode still uses hard
+invalidation, and no full automatic corpus-mutation policy exists. This is not
+grounded-theory methodological-validity evidence, saturation evidence, full-GT
+evidence, or a SOTA claim.
 
 ---
 
@@ -86,7 +132,8 @@ callable capability.
 
 ## Files Affected
 
-- `docs/plans/INV11_GT_RECODE_HIGHER_ORDER_REFRESH.md` - active plan.
+- `docs/plans/completed/INV11_GT_RECODE_HIGHER_ORDER_REFRESH.md` - completed
+  plan.
 - `docs/plans/CLAUDE.md` - active plan index.
 - `docs/plans/ACTIVE_SPRINT.md` - sprint checkpoint.
 - `qc_clean/schemas/adapters.py` - tighten `codebook_to_open_codes()` if needed
@@ -138,7 +185,7 @@ callable capability.
 | Test File | Test Function | What It Verifies |
 |-----------|---------------|------------------|
 | `tests/test_incremental.py` | `test_rebuild_gt_open_codes_context_stage_uses_current_codebook` | GT context rebuild creates `gt_open_codes` and `gt_open_codes_text` from the current codebook. |
-| `tests/test_incremental.py` | `test_refresh_pipeline_supports_grounded_theory` | GT refresh pipeline has incremental -> rebuild GT context -> axial -> selective -> theory -> cross-interview -> negative-case order. |
+| `tests/test_incremental.py` | `test_creates_gt_refresh_pipeline` | GT refresh pipeline has incremental -> rebuild GT context -> axial -> selective -> theory -> cross-interview -> negative-case order. |
 | `tests/test_project_commands.py` | `test_recode_refresh_higher_order_allows_grounded_theory` | CLI no longer rejects GT refresh before pipeline creation and forwards the flag. |
 | `tests/test_adapters.py` | adapter preservation test if needed | Adapter preserves GT-relevant codebook fields. |
 
@@ -157,23 +204,23 @@ callable capability.
 
 ## Acceptance Criteria
 
-- [ ] Default compatibility: `create_incremental_pipeline()` without refresh
+- [x] Default compatibility: `create_incremental_pipeline()` without refresh
   still returns incremental coding -> cross-interview -> negative-case.
-- [ ] Thematic compatibility: existing default/thematic refresh pipeline order
+- [x] Thematic compatibility: existing default/thematic refresh pipeline order
   is unchanged.
-- [ ] GT refresh pipeline: grounded-theory refresh runs incremental coding,
+- [x] GT refresh pipeline: grounded-theory refresh runs incremental coding,
   rebuilds GT open-code context, reruns axial/selective/theory integration, then
   reruns cross-interview and negative-case.
-- [ ] Safe invalidation: refresh mode still invalidates stale higher-order
+- [x] Safe invalidation: refresh mode still invalidates stale higher-order
   objects before recompute and does not leave the old "rerun full pipeline"
   warning after successful refresh.
-- [ ] CLI: `project recode --refresh-higher-order` and
+- [x] CLI: `project recode --refresh-higher-order` and
   `project add-docs --recode --refresh-higher-order` parse and forward the flag
   for GT projects.
-- [ ] Claim discipline: docs state this is opt-in higher-order refresh, not full
+- [x] Claim discipline: docs state this is opt-in higher-order refresh, not full
   INV-11 completion, not GT methodological-validity evidence, not saturation
   evidence, and not SOTA.
-- [ ] Required tests and gates pass.
+- [x] Required tests and gates pass.
 
 ---
 
