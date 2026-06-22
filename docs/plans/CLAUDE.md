@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 151 | Corpus-scope adequacy scorecard | High | Planned | `CORPUS_SCOPE_ADEQUACY_SCORECARD.md` |
 
 ## Completed Plans
 

@@ -22,10 +22,19 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Select the next highest-value documented roadmap lane from
-   `docs/PROJECT_THEORY_AND_GOALS.md` and `docs/EVALUATION_HARNESS.md`.
+1. Execute Plan #151: add deterministic Phase 0 corpus-scope record adequacy
+   accounting without turning a filled scope record into sampling-validity
+   evidence.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
+
+**Active checkpoint:** Plan #151 (`docs/plans/CORPUS_SCOPE_ADEQUACY_SCORECARD.md`)
+targets the corpus-boundary roadmap gap where scope can be recorded and linted
+but is not summarized in Phase 0. This slice must report missing/empty/
+missing-sampling-frame/complete states and field-level completeness, while
+preserving the claim discipline that scope-record completeness is not
+sampling-frame adequacy, population-validity evidence, methodological validity,
+or SOTA evidence.
 
 **Completed checkpoint:** Phase 0 now reports deterministic
 `claim_anchor_coverage` for INV-9 ledger rows: total claims,
