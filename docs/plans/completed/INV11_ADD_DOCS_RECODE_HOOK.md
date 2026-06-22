@@ -1,10 +1,34 @@
 # Plan #145: INV-11 Add-Docs Recode Hook
 
-**Status:** In Progress
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** INV-11 hard invalidation
 **Blocks:** fuller corpus-mutation auto-recompute design
+
+---
+
+## Outcome
+
+`project add-docs` now supports an explicit `--recode` flag plus `--model` for
+that recode call. When at least one document is added, `--recode` saves the
+mutated project state and delegates to the existing `_recode_project` handler,
+so the same incremental pipeline and INV-11 hard-invalidation behavior are used.
+Plain `add-docs` remains a mutation-only command and does not spend model
+budget. If all additions fail, the command exits non-zero and does not invoke
+recode.
+
+The theory and operational docs now describe this as explicit
+incremental-recode-on-mutation only. INV-11 remains partial because omitted
+higher-order stages still are not fully recomputed.
+
+**Verification:** `python -m pytest tests/test_project_commands.py
+tests/test_incremental_staleness_inv11.py tests/test_incremental.py -q` passed
+(65 tests), `python -m ruff check qc_cli.py
+qc_clean/core/cli/commands/project.py tests/test_project_commands.py` passed,
+and `make docs-check` passed. Final `make check` passed (1073 passed, 1
+skipped, 8 deselected; Ruff/docs-check passed). Type checking is not configured
+in this repo.
 
 ---
 
@@ -113,18 +137,18 @@ cross-project shared capability.
 ## Acceptance Criteria
 
 > Feature-level criteria (what the plan accomplishes):
-- [ ] `qc_cli.py project add-docs --recode` is available.
-- [ ] `--recode` invokes the existing incremental recode path after successful additions.
-- [ ] `--model` on `add-docs --recode` is forwarded to the recode path.
-- [ ] Plain `add-docs` behavior remains unchanged.
-- [ ] Zero successful additions do not trigger recode.
-- [ ] Docs preserve the claim that INV-11 remains partial: this is explicit incremental recode-on-mutation, not full higher-order auto-recompute.
+- [x] `qc_cli.py project add-docs --recode` is available.
+- [x] `--recode` invokes the existing incremental recode path after successful additions.
+- [x] `--model` on `add-docs --recode` is forwarded to the recode path.
+- [x] Plain `add-docs` behavior remains unchanged.
+- [x] Zero successful additions do not trigger recode.
+- [x] Docs preserve the claim that INV-11 remains partial: this is explicit incremental recode-on-mutation, not full higher-order auto-recompute.
 
 > Process criteria (quality gates):
-- [ ] Required focused tests pass.
-- [ ] Full test suite passes (`make check`).
-- [ ] Type check status is reported.
-- [ ] Docs updated.
+- [x] Required focused tests pass (`python -m pytest tests/test_project_commands.py tests/test_incremental_staleness_inv11.py tests/test_incremental.py -q`: 65 passed).
+- [x] Full test suite passes (`make check`: 1073 passed, 1 skipped, 8 deselected; Ruff/docs-check passed).
+- [x] Type check status is reported (`make check`: type check not yet configured).
+- [x] Docs updated.
 
 ---
 

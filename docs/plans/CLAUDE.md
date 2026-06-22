@@ -6,7 +6,6 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 145 | INV-11 add-docs recode hook | High | In progress | `INV11_ADD_DOCS_RECODE_HOOK.md` |
 
 ## Completed Plans
 
@@ -59,6 +58,7 @@ Track all implementation work here.
 | INV-11 incremental hard invalidation | Incremental recode now clears stale higher-order outputs, stale phase results, and stale claim rows it cannot recompute | `completed/INV11_INCREMENTAL_HARD_INVALIDATION.md` |
 | INV-11 review decisions inactive on invalidation | Review decisions targeting claims removed by incremental invalidation are retained as inactive audit history | `completed/INV11_REVIEW_DECISION_INACTIVE_ON_INVALIDATION.md` |
 | INV-11 narrow surface warnings | INV-11 follow-up: MCP codebook and graph code/entity data responses now surface `data_warnings` when present | `completed/INV11_NARROW_SURFACE_WARNINGS.md` |
+| INV-11 add-docs recode hook | `project add-docs --recode` now explicitly adds documents and invokes the existing incremental recode path without making plain add-docs spend model budget | `completed/INV11_ADD_DOCS_RECODE_HOOK.md` |
 | Review summary active inactive counts | Review summaries and CLI now distinguish active decisions from historical inactive decisions | `completed/REVIEW_SUMMARY_ACTIVE_INACTIVE_COUNTS.md` |
 | D10 cost latency scorecard | Evaluation-harness follow-up: `make bench` now reports D10 cost/latency from real llm_client observability rows | `completed/D10_COST_LATENCY_SCORECARD.md` |
 | D10 tool-call costs | Evaluation-harness follow-up: D10 cost/latency now includes optional observed tool-call accounting and combined local totals without changing LLM-only fields | `completed/D10_TOOL_CALL_COSTS.md` |

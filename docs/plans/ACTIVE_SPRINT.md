@@ -22,10 +22,17 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Plan #145: implement the explicit `project add-docs --recode` hook as the
-   next narrow INV-11 corpus-mutation recompute slice.
+1. Select the next highest-value documented roadmap lane from
+   `docs/PROJECT_THEORY_AND_GOALS.md` and `docs/EVALUATION_HARNESS.md`.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
+
+**Completed checkpoint:** `project add-docs --recode` now explicitly adds
+documents and invokes the existing incremental recode path in one opt-in
+command, forwarding `--model` when supplied. Plain `add-docs` still does not
+spend model budget, and zero successful additions do not trigger recode. This
+is explicit incremental recode-on-mutation only; INV-11 remains partial because
+full higher-order auto-recompute is still unresolved.
 
 **Completed checkpoint:** The top-level CLI now exposes
 `qc_cli.py validate-d7-baseline-package <package_file>`, delegating to the
