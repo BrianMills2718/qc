@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 47 | D5 reliability bootstrap intervals | High | Planned | `D5_RELIABILITY_BOOTSTRAP_INTERVALS.md` |
 
 ## Completed Plans
 
