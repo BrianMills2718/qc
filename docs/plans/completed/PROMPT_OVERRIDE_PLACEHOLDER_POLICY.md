@@ -1,10 +1,43 @@
 # Plan #107: Prompt Override Placeholder Policy
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** INV-7 strict prompt override placeholders
 **Blocks:** broader custom-prompt governance; future metadata-exposure review
+
+---
+
+## Outcome
+
+Implemented and pushed in commit `759a1b0`:
+
+- Extended `render_prompt_override` with explicit required data, optional data,
+  and metadata placeholder declarations.
+- Added fail-loud checks for renderer value keys not declared in one of those
+  roles.
+- Updated thematic coding to declare `{num_interviews}` as metadata.
+- Updated GT constant-comparison to declare `{codebook_context}` as optional
+  protected data and `{seg_idx}`, `{total_segments}`, `{doc_name}` as metadata.
+- Added renderer-level tests for undeclared values, declared metadata, and
+  optional data placeholders.
+- Updated INV-7 docs to record explicit placeholder exposure policy while
+  preserving the prompt-injection caveat.
+
+Verification:
+
+- `python -m pytest tests/test_prompt_boundaries_inv7.py -q` failed before
+  implementation on the new policy tests, as expected.
+- `python -m pytest tests/test_prompt_boundaries_inv7.py
+  tests/test_inv7_fixture_runner.py tests/test_inv7_prompt_injection_package.py
+  -q` -> 30 passed.
+- `python -m ruff check qc_clean/core/prompting.py
+  qc_clean/core/pipeline/stages/thematic_coding.py
+  qc_clean/core/pipeline/stages/gt_constant_comparison.py
+  tests/test_prompt_boundaries_inv7.py` -> passed.
+- `make docs-check` -> passed.
+- `make check` -> 914 passed, 1 skipped, 8 deselected; Ruff/docs green; type
+  check not yet configured.
 
 ---
 
@@ -76,11 +109,11 @@ Internal prompt-rendering governance only; no cross-project boundary is created.
 
 ### Capability Validation
 
-- [ ] Undeclared value keys fail loud before rendering.
-- [ ] Declared metadata placeholders remain usable.
-- [ ] Required protected data placeholders are still required.
-- [ ] Optional data placeholders can be used but are not required.
-- [ ] Existing thematic and GT override tests still pass.
+- [x] Undeclared value keys fail loud before rendering.
+- [x] Declared metadata placeholders remain usable.
+- [x] Required protected data placeholders are still required.
+- [x] Optional data placeholders can be used but are not required.
+- [x] Existing thematic and GT override tests still pass.
 
 ---
 
@@ -139,24 +172,24 @@ Internal prompt-rendering governance only; no cross-project boundary is created.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] Shared renderer rejects value keys not declared as required data,
+- [x] Shared renderer rejects value keys not declared as required data,
   optional data, or metadata placeholders.
-- [ ] Shared renderer still rejects unknown template placeholders.
-- [ ] Shared renderer still rejects transformed/non-bare placeholders.
-- [ ] Existing thematic override can use `{combined_text}` and
+- [x] Shared renderer still rejects unknown template placeholders.
+- [x] Shared renderer still rejects transformed/non-bare placeholders.
+- [x] Existing thematic override can use `{combined_text}` and
   `{num_interviews}`.
-- [ ] Existing GT override can use `{segment_text}`, `{codebook_context}`,
+- [x] Existing GT override can use `{segment_text}`, `{codebook_context}`,
   `{seg_idx}`, `{total_segments}`, and `{doc_name}`.
-- [ ] Docs state this is metadata-exposure governance, not prompt-injection
+- [x] Docs state this is metadata-exposure governance, not prompt-injection
   robustness evidence.
 
 > Process criteria:
-- [ ] Required focused tests pass.
-- [ ] Focused Ruff check passes.
-- [ ] `make docs-check` passes.
-- [ ] Full `make check` passes or any failure is documented with evidence.
-- [ ] Type-check status is reported.
-- [ ] Verified work is committed and pushed.
+- [x] Required focused tests pass.
+- [x] Focused Ruff check passes.
+- [x] `make docs-check` passes.
+- [x] Full `make check` passes or any failure is documented with evidence.
+- [x] Type-check status is reported.
+- [x] Verified work is committed and pushed.
 
 ---
 

@@ -6,7 +6,6 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 107 | Prompt override placeholder policy | High | Planned | `PROMPT_OVERRIDE_PLACEHOLDER_POLICY.md` |
 
 ## Completed Plans
 
@@ -26,6 +25,7 @@ Track all implementation work here.
 | INV-2 D7 gold file bench input | Evaluation-harness follow-up: `make bench ID=<project> GOLD=gold.json` feeds external D7 gold without mutating project state | `completed/INV2_D7_GOLD_FILE_BENCH_INPUT.md` |
 | INV-7 prompt override guards | INV-7 follow-up: current prompt override surfaces fail loudly if required protected data placeholders are omitted | `completed/INV7_PROMPT_OVERRIDE_GUARDS.md` |
 | INV-7 strict prompt override placeholders | INV-7 follow-up: current prompt override surfaces require bare declared placeholders and reject transformed protected data or undeclared metadata placeholders before LLM calls | `completed/INV7_STRICT_PROMPT_OVERRIDE_PLACEHOLDERS.md` |
+| Prompt override placeholder policy | INV-7 follow-up: prompt override renderer values must be declared as required data, optional data, or metadata before exposure to custom prompts | `completed/PROMPT_OVERRIDE_PLACEHOLDER_POLICY.md` |
 | INV-7 prompt-injection package | INV-7 follow-up: structural and live fixture outputs now have a schema_version=1 package contract, validator, and Phase 0 loader support without claiming robustness evidence | `completed/INV7_PROMPT_INJECTION_PACKAGE.md` |
 | INV-4 category saturation diagnostic | INV-4 first slice: `make bench` reports diagnostic-only category property/dimension/support adequacy separately from codebook stability | `completed/INV4_CATEGORY_SATURATION_DIAGNOSTIC.md` |
 | INV-4 diagnostic-driven theoretical sampling | INV-4 follow-up: sampling suggestions use category adequacy gaps before falling back to low application coverage | `completed/INV4_DIAGNOSTIC_THEORETICAL_SAMPLING.md` |

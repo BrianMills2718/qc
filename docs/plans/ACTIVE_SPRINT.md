@@ -22,12 +22,17 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #107 (`PROMPT_OVERRIDE_PLACEHOLDER_POLICY.md`): make prompt
-   override metadata exposure explicit at the shared renderer boundary.
-2. Continue through the ranked roadmap without pausing after each verified
+1. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Completed checkpoint:** `make import-adjudication-responses` can now take
+**Completed checkpoint:** Prompt override rendering now requires every exposed
+value to be declared as required protected data, optional protected data, or
+metadata. Thematic overrides explicitly expose `{combined_text}` plus
+`{num_interviews}` metadata; GT constant-comparison exposes `{segment_text}`,
+optional `{codebook_context}`, and scalar metadata `{seg_idx}`,
+`{total_segments}`, `{doc_name}`. Undeclared renderer values fail before any LLM
+call. This is custom-prompt governance only, not proof of prompt-injection
+robustness. `make import-adjudication-responses` can now take
 `PREFLIGHT_PROTOCOL=... PREFLIGHT_SAMPLE=...` and run response preflight at the
 import boundary before writing D3/D7 gold-package outputs. Failed preflight
 emits machine-readable JSON and writes no outputs; passing guarded imports
