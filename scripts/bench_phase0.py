@@ -41,6 +41,7 @@ from qc_clean.core.bench import (
 )
 from qc_clean.core.d3_gold import application_gold_payload_for_scorecard
 from qc_clean.core.d7_gold import d7_gold_payload_for_scorecard
+from qc_clean.core.inv7_package import prompt_injection_payload_for_scorecard
 from qc_clean.core.persistence.project_store import ProjectStore
 
 
@@ -690,14 +691,7 @@ def load_prompt_injection_file(path: Path) -> Any:
     except json.JSONDecodeError as exc:
         raise ValueError(f"Prompt injection file '{path}' is not valid JSON: {exc}") from exc
 
-    if isinstance(raw, list):
-        return raw
-    if isinstance(raw, dict) and isinstance(raw.get("prompt_injection_evaluations"), list):
-        return raw["prompt_injection_evaluations"]
-    raise ValueError(
-        "Prompt injection file must be a JSON list of fixture outcomes or an "
-        "object with a 'prompt_injection_evaluations' list"
-    )
+    return prompt_injection_payload_for_scorecard(raw)
 
 
 def load_bias_counterfactual_file(path: Path) -> Any:

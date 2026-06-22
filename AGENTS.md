@@ -47,7 +47,9 @@ make bench ID=<project_id> PROMPT_INJECTION=inv7.json  # Add external INV-7 fixt
 make bench ID=<project_id> OBS_DB=path TRACE_ID=trace  # Override D10 observability DB / exact trace
 make bench ID=<project_id> ARTIFACT_DIR=benchmark_results  # Write versioned Phase 0 scorecard package
 make validate-d7-gold GOLD=gold_set.json  # Validate versioned held-out D7 gold-set package
-make run-inv7-fixtures OUTPUT=inv7.json  # Write structural INV-7 fixture result file for PROMPT_INJECTION=
+make run-inv7-fixtures OUTPUT=inv7.json  # Write structural INV-7 fixture package for PROMPT_INJECTION=
+make run-inv7-live-fixtures OUTPUT=inv7_live.json MODEL=<model>  # Write opt-in live canary package for PROMPT_INJECTION=
+make validate-inv7-package PACKAGE=inv7.json  # Validate schema_version=1 INV-7 package metadata
 make cost               # Show LLM spend (DAYS=7)
 make errors             # Show recent error breakdown
 

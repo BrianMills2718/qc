@@ -1184,6 +1184,8 @@ def test_bench_phase0_scores_inv7_runner_output_file(
     assert output["prompt_injection_inv7"]["status"] == "scored"
     assert output["prompt_injection_inv7"]["failed"] == 0
     assert output["prompt_injection_inv7"]["total_fixtures"] >= 3
+    payload = json.loads(injection_file.read_text(encoding="utf-8"))
+    assert payload["package_id"] == "inv7-structural-built-in"
 
 
 def test_bench_phase0_invalid_prompt_injection_file_fails_loud(

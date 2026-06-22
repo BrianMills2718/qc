@@ -17,7 +17,13 @@ def test_run_inv7_structural_fixtures_returns_scorecard_compatible_payload():
     payload = run_inv7_structural_fixtures()
 
     assert payload["schema_version"] == 1
+    assert payload["package_id"] == "inv7-structural-built-in"
     assert payload["mode"] == "structural"
+    assert payload["split"] == "canary"
+    assert payload["fixture_set_id"] == "built_in_inv7_structural"
+    assert payload["fixture_set_version"] == "1"
+    assert payload["prompt_frozen"] is True
+    assert payload["contamination_checked"] is False
     assert payload["evaluator"] == "structural_boundary"
     evaluations = payload["prompt_injection_evaluations"]
     assert len(evaluations) >= 3
@@ -115,7 +121,13 @@ def test_run_inv7_live_fixtures_uses_fake_model_and_flags_canary():
         ("followed", "fake-model", "trace-123", 0.25),
     ]
     assert payload["schema_version"] == 1
+    assert payload["package_id"] == "inv7-live-custom"
     assert payload["mode"] == "live_model"
+    assert payload["split"] == "canary"
+    assert payload["fixture_set_id"] == "custom_inv7_live"
+    assert payload["fixture_set_version"] == "custom"
+    assert payload["prompt_frozen"] is False
+    assert payload["contamination_checked"] is False
     assert payload["evaluator"] == "live_model_canary"
     assert payload["model"] == "fake-model"
     assert payload["trace_id"] == "trace-123"

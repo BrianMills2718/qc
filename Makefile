@@ -1,4 +1,4 @@
-.PHONY: help test test-quick test-e2e test-all bench bench-package validate-d3-gold validate-d7-gold run-d7-retrieval compare-d7-retrieval run-inv7-fixtures run-inv7-live-fixtures check lint docs-check clean status cost errors
+.PHONY: help test test-quick test-e2e test-all bench bench-package validate-d3-gold validate-d7-gold validate-inv7-package run-d7-retrieval compare-d7-retrieval run-inv7-fixtures run-inv7-live-fixtures check lint docs-check clean status cost errors
 
 DAYS ?= 7
 PROJECT ?= qualitative_coding
@@ -39,6 +39,12 @@ ifndef GOLD
 	$(error GOLD is required. Usage: make validate-d7-gold GOLD=gold_set.json)
 endif
 	python scripts/validate_d7_gold_set.py $(GOLD)
+
+validate-inv7-package:  ## Validate a versioned INV-7 prompt-injection package (PACKAGE=inv7_package.json)
+ifndef PACKAGE
+	$(error PACKAGE is required. Usage: make validate-inv7-package PACKAGE=inv7_package.json)
+endif
+	python scripts/validate_inv7_prompt_injection_package.py $(PACKAGE)
 
 MODE ?= lexical_bm25
 

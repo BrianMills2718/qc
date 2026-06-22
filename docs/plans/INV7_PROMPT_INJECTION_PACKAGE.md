@@ -1,6 +1,6 @@
 # Plan #84: INV-7 Prompt-Injection Package
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** INV-7 fixture runner scaffold; INV-7 live fixture runner
@@ -132,19 +132,32 @@ benchmark study.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] Versioned INV-7 prompt-injection package model exists.
-- [ ] Structural and live INV-7 fixture runners emit package metadata.
-- [ ] Invalid live package metadata fails loudly.
-- [ ] Duplicate fixture IDs fail loudly.
-- [ ] `make validate-inv7-package PACKAGE=...` validates packages.
-- [ ] `make bench PROMPT_INJECTION=...` accepts the versioned package shape.
-- [ ] Docs state the package is protocol/provenance only, not robustness evidence.
+- [x] Versioned INV-7 prompt-injection package model exists.
+- [x] Structural and live INV-7 fixture runners emit package metadata.
+- [x] Invalid live package metadata fails loudly.
+- [x] Duplicate fixture IDs fail loudly.
+- [x] `make validate-inv7-package PACKAGE=...` validates packages.
+- [x] `make bench PROMPT_INJECTION=...` accepts the versioned package shape.
+- [x] Docs state the package is protocol/provenance only, not robustness evidence.
 
 > Process criteria:
-- [ ] Required focused tests pass.
-- [ ] Full `make check` passes or any failure is documented with evidence.
-- [ ] Type-check status is reported.
+- [x] Required focused tests pass.
+- [x] Full `make check` passes or any failure is documented with evidence.
+- [x] Type-check status is reported.
 - [ ] Verified work is committed and pushed.
+
+---
+
+## Verification
+
+- Initial TDD run: `python -m pytest tests/test_inv7_prompt_injection_package.py tests/test_inv7_fixture_runner.py -q` failed during collection with `ModuleNotFoundError: No module named 'qc_clean.core.inv7_package'`.
+- `python -m pytest tests/test_inv7_prompt_injection_package.py tests/test_inv7_fixture_runner.py -q` - `10 passed`.
+- `python -m pytest tests/test_bench_phase0_script.py -k "prompt_injection" -q` - `2 passed, 26 deselected`.
+- `python -m pytest tests/test_inv7_prompt_injection_package.py tests/test_inv7_fixture_runner.py tests/test_bench_phase0_script.py -k "prompt_injection or inv7" -q` - `13 passed, 25 deselected`.
+- `python -m ruff check qc_clean/core/inv7_package.py qc_clean/core/inv7_fixtures.py scripts/bench_phase0.py scripts/validate_inv7_prompt_injection_package.py tests/test_inv7_prompt_injection_package.py tests/test_inv7_fixture_runner.py tests/test_bench_phase0_script.py` - passed.
+- `python scripts/check_markdown_links.py && python scripts/sync_plan_status.py --check && python scripts/meta/check_agents_sync.py --check` - passed.
+- `make -n validate-inv7-package PACKAGE=inv7.json` - resolved to `python scripts/validate_inv7_prompt_injection_package.py inv7.json`.
+- `make check` - `812 passed, 1 skipped, 8 deselected`; Ruff and docs checks passed; type check is not yet configured.
 
 ---
 

@@ -84,11 +84,18 @@ def run_inv7_structural_fixtures(
     fixtures: list[Inv7StructuralFixture] | None = None,
 ) -> dict[str, Any]:
     """Run deterministic INV-7 structural fixtures and return bench-compatible JSON."""
+    is_custom = fixtures is not None
     selected = fixtures if fixtures is not None else default_inv7_structural_fixtures()
     evaluations = [_evaluate_structural_fixture(fixture) for fixture in selected]
     return {
         "schema_version": 1,
+        "package_id": "inv7-structural-custom" if is_custom else "inv7-structural-built-in",
         "mode": "structural",
+        "split": "canary",
+        "fixture_set_id": "custom_inv7_structural" if is_custom else "built_in_inv7_structural",
+        "fixture_set_version": "custom" if is_custom else "1",
+        "prompt_frozen": not is_custom,
+        "contamination_checked": False,
         "evaluator": "structural_boundary",
         "note": (
             "Deterministic prompt-construction checks only. These fixtures do not "
@@ -199,6 +206,7 @@ async def run_inv7_live_fixtures_async(
     call_model: Inv7LiveModelCaller | None = None,
 ) -> dict[str, Any]:
     """Run live INV-7 fixtures and return bench-compatible JSON."""
+    is_custom = fixtures is not None
     selected = fixtures if fixtures is not None else default_inv7_live_fixtures()
     model_caller = call_model or _call_live_fixture_model
     evaluations = []
@@ -208,7 +216,13 @@ async def run_inv7_live_fixtures_async(
     failed = sum(1 for item in evaluations if item["attack_succeeded"])
     return {
         "schema_version": 1,
+        "package_id": "inv7-live-custom" if is_custom else "inv7-live-built-in",
         "mode": "live_model",
+        "split": "canary",
+        "fixture_set_id": "custom_inv7_live" if is_custom else "built_in_inv7_live",
+        "fixture_set_version": "custom" if is_custom else "1",
+        "prompt_frozen": not is_custom,
+        "contamination_checked": False,
         "evaluator": "live_model_canary",
         "model": model_name,
         "trace_id": trace_id,

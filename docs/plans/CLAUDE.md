@@ -6,7 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 84 | INV-7 prompt-injection package | High | Planned | `INV7_PROMPT_INJECTION_PACKAGE.md` |
+| 84 | INV-7 prompt-injection package | High | Complete | `INV7_PROMPT_INJECTION_PACKAGE.md` |
 
 ## Completed Plans
 
