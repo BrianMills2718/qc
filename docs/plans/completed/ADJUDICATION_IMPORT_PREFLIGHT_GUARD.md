@@ -1,10 +1,48 @@
 # Plan #106: Adjudication Import Preflight Guard
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Plan #105 Adjudication response preflight
 **Blocks:** safer held-out D3/D7 gold import workflow
+
+---
+
+## Outcome
+
+Implemented and pushed in commit `5715722`:
+
+- Added optional `--protocol-package` and `--sample-package` arguments to
+  `scripts/import_adjudication_responses.py`.
+- Guarded imports now run response preflight before writing D3/D7 outputs when
+  both guard files are supplied.
+- Failed preflight emits non-zero machine-readable JSON with the full
+  `preflight_report` and writes no gold-package outputs.
+- Passing guarded imports preserve the existing output behavior and include
+  `preflight_report` in stdout JSON.
+- `make import-adjudication-responses` now accepts optional
+  `PREFLIGHT_PROTOCOL=... PREFLIGHT_SAMPLE=...` variables.
+- Docs recommend the guarded path for held-out benchmark input creation while
+  preserving claim discipline.
+
+Verification:
+
+- `python -m pytest tests/test_adjudication_import.py -q` failed before
+  implementation with unrecognized `--protocol-package` /
+  `--sample-package`, as expected.
+- `python -m pytest tests/test_adjudication_import.py
+  tests/test_adjudication_response_preflight.py
+  tests/test_adjudication_preflight.py tests/test_adjudication_protocol.py
+  tests/test_adjudication_sample.py -q` -> 31 passed.
+- `python -m ruff check scripts/import_adjudication_responses.py
+  tests/test_adjudication_import.py qc_clean/core/adjudication_response_preflight.py
+  scripts/preflight_adjudication_responses.py` -> passed.
+- `make docs-check` -> passed.
+- `make -n import-adjudication-responses ... PREFLIGHT_PROTOCOL=protocol.json
+  PREFLIGHT_SAMPLE=sample.json` -> expected `--protocol-package` /
+  `--sample-package` invocation.
+- `make check` -> 911 passed, 1 skipped, 8 deselected; Ruff/docs green; type
+  check not yet configured.
 
 ---
 
@@ -75,11 +113,11 @@ Internal CLI/Make workflow guard only; no cross-project boundary is created.
 
 ### Capability Validation
 
-- [ ] Guard defaults are backward-compatible.
-- [ ] Supplying only one guard input fails loud before import.
-- [ ] Failed preflight blocks import and leaves output files unwritten.
-- [ ] Passing preflight imports as before and includes report metadata.
-- [ ] Make target can pass guard variables through.
+- [x] Guard defaults are backward-compatible.
+- [x] Supplying only one guard input fails loud before import.
+- [x] Failed preflight blocks import and leaves output files unwritten.
+- [x] Passing preflight imports as before and includes report metadata.
+- [x] Make target can pass guard variables through.
 
 ---
 
@@ -139,26 +177,26 @@ Internal CLI/Make workflow guard only; no cross-project boundary is created.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] `scripts/import_adjudication_responses.py --protocol-package ...
+- [x] `scripts/import_adjudication_responses.py --protocol-package ...
   --sample-package ...` runs response preflight before import.
-- [ ] Failed preflight returns non-zero JSON and does not write requested gold
+- [x] Failed preflight returns non-zero JSON and does not write requested gold
   package outputs.
-- [ ] Passing guarded import writes the same D3/D7 outputs as the existing
+- [x] Passing guarded import writes the same D3/D7 outputs as the existing
   import path and includes `preflight_report` in stdout JSON.
-- [ ] Supplying exactly one of protocol/sample guard inputs fails loud.
-- [ ] Existing unguarded import remains compatible.
-- [ ] `make import-adjudication-responses ... PREFLIGHT_PROTOCOL=...
+- [x] Supplying exactly one of protocol/sample guard inputs fails loud.
+- [x] Existing unguarded import remains compatible.
+- [x] `make import-adjudication-responses ... PREFLIGHT_PROTOCOL=...
   PREFLIGHT_SAMPLE=...` is discoverable/dry-runs correctly.
-- [ ] Docs recommend guarded import for held-out benchmark input creation
+- [x] Docs recommend guarded import for held-out benchmark input creation
   without claiming evidence from the guard itself.
 
 > Process criteria:
-- [ ] Required focused tests pass.
-- [ ] Focused Ruff check passes.
-- [ ] `make docs-check` passes.
-- [ ] Full `make check` passes or any failure is documented with evidence.
-- [ ] Type-check status is reported.
-- [ ] Verified work is committed and pushed.
+- [x] Required focused tests pass.
+- [x] Focused Ruff check passes.
+- [x] `make docs-check` passes.
+- [x] Full `make check` passes or any failure is documented with evidence.
+- [x] Type-check status is reported.
+- [x] Verified work is committed and pushed.
 
 ---
 

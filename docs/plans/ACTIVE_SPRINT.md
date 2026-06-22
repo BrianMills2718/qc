@@ -22,14 +22,16 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #106 (`ADJUDICATION_IMPORT_PREFLIGHT_GUARD.md`): make
-   `import-adjudication-responses` optionally run the response preflight at the
-   import boundary and fail before writing gold-package outputs on provenance
-   mismatch.
-2. Continue through the ranked roadmap without pausing after each verified
+1. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Completed checkpoint:** Completed adjudication response packages can now be
+**Completed checkpoint:** `make import-adjudication-responses` can now take
+`PREFLIGHT_PROTOCOL=... PREFLIGHT_SAMPLE=...` and run response preflight at the
+import boundary before writing D3/D7 gold-package outputs. Failed preflight
+emits machine-readable JSON and writes no outputs; passing guarded imports
+include the preflight report in stdout. This is an import-time provenance guard
+only, not evidence that labels are expert-produced, correct, held out, or
+methodologically valid. Completed adjudication response packages can now be
 preflighted with `make adjudication-response-preflight PROTOCOL=...
 SAMPLE=... RESPONSES=...`, which reuses protocol/sample preflight, requires
 completed response validation, checks project/corpus/project-state hashes,

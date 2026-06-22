@@ -6,7 +6,6 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 106 | Adjudication import preflight guard | High | Planned | `ADJUDICATION_IMPORT_PREFLIGHT_GUARD.md` |
 
 ## Completed Plans
 
@@ -105,6 +104,7 @@ Track all implementation work here.
 | Adjudication protocol package | INV-3 follow-up: `make validate-adjudication-protocol` validates pre-label adjudication protocol metadata without claiming labels or evidence exist | `completed/ADJUDICATION_PROTOCOL_PACKAGE.md` |
 | Adjudication protocol sample preflight | INV-3 follow-up: `make adjudication-protocol-preflight` cross-checks protocol/sample package matching before labeling without claiming labels or evidence exist | `completed/ADJUDICATION_PROTOCOL_SAMPLE_PREFLIGHT.md` |
 | Adjudication response preflight | INV-3 follow-up: `make adjudication-response-preflight` checks completed responses against protocol/sample provenance and exact item IDs before import without claiming labels or validity evidence | `completed/ADJUDICATION_RESPONSE_PREFLIGHT.md` |
+| Adjudication import preflight guard | INV-3 follow-up: `make import-adjudication-responses ... PREFLIGHT_PROTOCOL=... PREFLIGHT_SAMPLE=...` can run response preflight at the import boundary before writing D3/D7 gold-package inputs | `completed/ADJUDICATION_IMPORT_PREFLIGHT_GUARD.md` |
 | INV-3 adjudication sample export | INV-3 first slice: `make adjudication-sample` exports unlabeled schema_version=1 sample packets for human/expert review inputs without claiming labels or validity evidence | `completed/INV3_ADJUDICATION_SAMPLE_EXPORT.md` |
 | INV-3 adjudication response validator | INV-3 follow-up: `make validate-adjudication-responses` validates completed sample response shape/completeness without importing labels or claiming validity evidence | `completed/INV3_ADJUDICATION_RESPONSE_VALIDATOR.md` |
 | INV-3 adjudication response import | INV-3 follow-up: `make import-adjudication-responses` converts valid completed code-application and negative-case responses into D3/D7 gold package inputs while excluding invalid/unclear labels | `completed/INV3_ADJUDICATION_RESPONSE_IMPORT.md` |
