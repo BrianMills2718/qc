@@ -837,16 +837,56 @@ def test_scorecard_scores_gt_fidelity_rubric_outcomes():
     assert d8["evaluator_types"] == {"human_expert": 1, "llm_judge": 1}
     assert d8["scopes"] == {"category": 1, "grounded_theory_pipeline": 1}
     assert d8["overall_mean"] == pytest.approx(0.7)
-    assert d8["metric_summary"]["constant_comparison"] == {
-        "mean": pytest.approx(0.7),
-        "min": 0.6,
-        "max": 0.8,
-    }
+    assert d8["overall_mean_ci"]["method"] == "rubric_mean_bootstrap"
+    assert d8["overall_mean_ci"]["population_size"] == 2
+    assert d8["metric_summary"]["constant_comparison"]["mean"] == pytest.approx(0.7)
+    assert d8["metric_summary"]["constant_comparison"]["min"] == 0.6
+    assert d8["metric_summary"]["constant_comparison"]["max"] == 0.8
+    assert d8["metric_summary"]["constant_comparison"]["mean_ci"][
+        "population_size"
+    ] == 2
     assert d8["metric_summary"]["category_development"]["mean"] == pytest.approx(0.75)
     assert d8["by_evaluator_type"]["llm_judge"]["overall_mean"] == pytest.approx(0.75)
+    assert d8["by_evaluator_type"]["llm_judge"]["overall_mean_ci"][
+        "population_size"
+    ] == 1
     assert d8["by_evaluator_type"]["human_expert"]["overall_mean"] == pytest.approx(0.65)
     assert d8["by_scope"]["category"]["overall_mean"] == pytest.approx(0.65)
+    assert d8["by_scope"]["category"]["overall_mean_ci"]["population_size"] == 1
+    assert d8["by_scope"]["category"]["metric_summary"]["memo_quality"]["mean_ci"][
+        "population_size"
+    ] == 1
     assert "not expert-rubric acceptance" in d8["note"]
+
+
+def test_scorecard_gt_fidelity_bootstrap_can_be_disabled():
+    state = ProjectState(
+        name="gt-fidelity-eval",
+        config=ProjectConfig(
+            methodology=Methodology.GROUNDED_THEORY,
+            extra={
+                "phase0_rubric_bootstrap": {"enabled": False},
+                "gt_fidelity_evaluations": [
+                    {
+                        "evaluator": "judge-a",
+                        "evaluator_type": "llm_judge",
+                        "constant_comparison": 0.8,
+                        "category_development": 0.7,
+                        "memo_quality": 0.9,
+                        "saturation_justification": 0.6,
+                    },
+                ],
+            },
+        ),
+    )
+
+    d8 = phase0_scorecard(state)["gt_fidelity_d8"]
+
+    assert d8["status"] == "scored"
+    assert "overall_mean_ci" not in d8
+    assert "mean_ci" not in d8["metric_summary"]["constant_comparison"]
+    assert "overall_mean_ci" not in d8["by_evaluator_type"]["llm_judge"]
+    assert "overall_mean_ci" not in d8["by_scope"]["grounded_theory_pipeline"]
 
 
 def test_scorecard_invalid_gt_fidelity_metadata_fails_loud():

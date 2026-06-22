@@ -1223,24 +1223,37 @@ def gt_fidelity_scorecard(state: ProjectState) -> Dict[str, Any]:
             ),
         }
 
-    return {
+    bootstrap_config = _rubric_bootstrap_config(state)
+    overall_scores = [_gt_fidelity_overall_score(ev) for ev in evaluations]
+    scorecard = {
         "status": "scored",
         "source": f"ProjectState.config.extra['{_GT_FIDELITY_EXTRA_KEY}']",
         "total_evaluations": len(evaluations),
         "evaluator_types": dict(sorted(Counter(ev.evaluator_type for ev in evaluations).items())),
         "scopes": dict(sorted(Counter(ev.scope for ev in evaluations).items())),
-        "metric_summary": _gt_fidelity_metric_summary(evaluations),
-        "overall_mean": _mean_or_none([
-            _gt_fidelity_overall_score(ev) for ev in evaluations
-        ]),
-        "by_evaluator_type": _gt_fidelity_by_evaluator_type(evaluations),
-        "by_scope": _gt_fidelity_by_scope(evaluations),
+        "metric_summary": _gt_fidelity_metric_summary(
+            evaluations,
+            bootstrap_config,
+        ),
+        "overall_mean": _mean_or_none(overall_scores),
+        "by_evaluator_type": _gt_fidelity_by_evaluator_type(
+            evaluations,
+            bootstrap_config,
+        ),
+        "by_scope": _gt_fidelity_by_scope(evaluations, bootstrap_config),
         "note": (
             "Scores externally supplied GT-fidelity rubric outcomes. This is a "
             "measurement substrate, not expert-rubric acceptance, proof of "
             "methodological saturation, full grounded theory, or a SOTA claim."
         ),
     }
+    if bootstrap_config.enabled:
+        scorecard["overall_mean_ci"] = _rubric_mean_bootstrap_ci(
+            overall_scores,
+            bootstrap_config,
+            unit="GT-fidelity rubric outcome",
+        )
+    return scorecard
 
 
 def _gt_fidelity_evaluations(state: ProjectState) -> list[GTFidelityEvaluation]:
@@ -1263,52 +1276,73 @@ def _gt_fidelity_evaluations(state: ProjectState) -> list[GTFidelityEvaluation]:
 
 def _gt_fidelity_metric_summary(
     evaluations: list[GTFidelityEvaluation],
-) -> dict[str, dict[str, float | None]]:
+    bootstrap_config: RubricBootstrapConfig,
+) -> dict[str, dict[str, Any]]:
     """Summarize each D8 rubric metric over all evaluations."""
-    return {
-        metric_name: _numeric_summary([
-            getattr(evaluation, metric_name) for evaluation in evaluations
-        ])
-        for metric_name in _GT_FIDELITY_METRICS
-    }
+    summaries: dict[str, dict[str, Any]] = {}
+    for metric_name in _GT_FIDELITY_METRICS:
+        values = [getattr(evaluation, metric_name) for evaluation in evaluations]
+        summary = _numeric_summary(values)
+        if bootstrap_config.enabled:
+            summary["mean_ci"] = _rubric_mean_bootstrap_ci(
+                values,
+                bootstrap_config,
+                unit=f"GT-fidelity {metric_name} score",
+            )
+        summaries[metric_name] = summary
+    return summaries
 
 
 def _gt_fidelity_by_evaluator_type(
     evaluations: list[GTFidelityEvaluation],
+    bootstrap_config: RubricBootstrapConfig,
 ) -> dict[str, dict[str, Any]]:
     """Summarize D8 rubric outcomes by evaluator type."""
     grouped: dict[str, list[GTFidelityEvaluation]] = {}
     for evaluation in evaluations:
         grouped.setdefault(evaluation.evaluator_type, []).append(evaluation)
-    return {
-        evaluator_type: {
+    summaries = {}
+    for evaluator_type, group in sorted(grouped.items()):
+        overall_scores = [_gt_fidelity_overall_score(evaluation) for evaluation in group]
+        summary = {
             "count": len(group),
-            "metric_summary": _gt_fidelity_metric_summary(group),
-            "overall_mean": _mean_or_none([
-                _gt_fidelity_overall_score(evaluation) for evaluation in group
-            ]),
+            "metric_summary": _gt_fidelity_metric_summary(group, bootstrap_config),
+            "overall_mean": _mean_or_none(overall_scores),
         }
-        for evaluator_type, group in sorted(grouped.items())
-    }
+        if bootstrap_config.enabled:
+            summary["overall_mean_ci"] = _rubric_mean_bootstrap_ci(
+                overall_scores,
+                bootstrap_config,
+                unit=f"GT-fidelity rubric outcome ({evaluator_type})",
+            )
+        summaries[evaluator_type] = summary
+    return summaries
 
 
 def _gt_fidelity_by_scope(
     evaluations: list[GTFidelityEvaluation],
+    bootstrap_config: RubricBootstrapConfig,
 ) -> dict[str, dict[str, Any]]:
     """Summarize D8 rubric outcomes by reviewed artifact scope."""
     grouped: dict[str, list[GTFidelityEvaluation]] = {}
     for evaluation in evaluations:
         grouped.setdefault(evaluation.scope, []).append(evaluation)
-    return {
-        scope: {
+    summaries = {}
+    for scope, group in sorted(grouped.items()):
+        overall_scores = [_gt_fidelity_overall_score(evaluation) for evaluation in group]
+        summary = {
             "count": len(group),
-            "metric_summary": _gt_fidelity_metric_summary(group),
-            "overall_mean": _mean_or_none([
-                _gt_fidelity_overall_score(evaluation) for evaluation in group
-            ]),
+            "metric_summary": _gt_fidelity_metric_summary(group, bootstrap_config),
+            "overall_mean": _mean_or_none(overall_scores),
         }
-        for scope, group in sorted(grouped.items())
-    }
+        if bootstrap_config.enabled:
+            summary["overall_mean_ci"] = _rubric_mean_bootstrap_ci(
+                overall_scores,
+                bootstrap_config,
+                unit=f"GT-fidelity rubric outcome ({scope})",
+            )
+        summaries[scope] = summary
+    return summaries
 
 
 def _gt_fidelity_overall_score(evaluation: GTFidelityEvaluation) -> float:
