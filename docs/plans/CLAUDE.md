@@ -6,11 +6,13 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 203 | Claim ledger API offset pagination | High | Planned | `CLAIM_LEDGER_API_OFFSET_PAGINATION.md` |
 
 ## Completed Plans
 
 | Name | Outcome | Record |
 |------|---------|--------|
+| Portfolio dossier spine | Standardized wiki-visible dossier, methodology, artifact, validation, concern, and ADR pages now exist for portfolio navigation without changing code or claiming new methodological evidence | `completed/PORTFOLIO_DOSSIER_SPINE.md` |
 | Claim ledger API limit metadata | API `/projects/{project_id}/claims` now accepts bounded `limit` queries and reports `returned`, `total_claims`, and applied `limit` metadata while preserving existing claim row fields | `completed/CLAIM_LEDGER_API_LIMIT_METADATA.md` |
 | Claim ledger scope read surfaces | API/MCP claim-ledger read rows now include serialized ClaimScope, and CLI `project claims --show-scope` prints compact scope summaries while preserving compact default output | `completed/CLAIM_LEDGER_SCOPE_READ_SURFACES.md` |
 | Claim ledger anchor detail read surfaces | API/MCP claim-ledger read rows now include bounded supporting/contrary anchor detail payloads, and CLI `project claims --show-anchors` prints bounded anchor details while preserving compact default output | `completed/CLAIM_LEDGER_ANCHOR_DETAIL_READ_SURFACES.md` |

@@ -1,10 +1,34 @@
 version: 1
 project: qualitative_coding
 publish:
+  - path: PROJECT.md
+    type: ProjectDossier
+    title: Qualitative Coding Project Dossier
+    tags: [portfolio, analysis, qualitative-coding, dossier]
   - path: README.md
     type: ProjectOverview
     title: Qualitative Coding Overview
     tags: [portfolio, analysis, qualitative-coding]
+  - path: docs/METHODOLOGY.md
+    type: Methodology
+    title: Qualitative Coding Methodology
+    tags: [portfolio, qualitative-coding, methodology]
+  - path: docs/ARTIFACTS.md
+    type: ArtifactRegister
+    title: Qualitative Coding Artifact Register
+    tags: [portfolio, qualitative-coding, artifacts]
+  - path: docs/VALIDATION.md
+    type: Validation
+    title: Qualitative Coding Validation Register
+    tags: [portfolio, qualitative-coding, validation, evaluation]
+  - path: docs/CONCERNS.md
+    type: ConcernRegister
+    title: Qualitative Coding Concern Register
+    tags: [portfolio, qualitative-coding, concerns]
+  - path: docs/adr/0001_qualitative_coding_methodology_spine.md
+    type: ADR
+    title: ADR 0001 - Qualitative Coding Methodology Spine
+    tags: [portfolio, qualitative-coding, adr, methodology]
   - path: docs/PORTFOLIO_REVIEWER_GUIDE.md
     type: PortfolioGuide
     title: Qualitative Coding Portfolio Reviewer Guide
@@ -53,6 +77,10 @@ publish:
     type: Plan
     title: Phase 0 Benchmark Artifacts
     tags: [qualitative-coding, benchmarking, evaluation]
+  - path: docs/plans/completed/PORTFOLIO_DOSSIER_SPINE.md
+    type: Plan
+    title: Portfolio Dossier Spine
+    tags: [portfolio, qualitative-coding, documentation]
 exclude:
   - docs/CLAUDE.md
   - data/**

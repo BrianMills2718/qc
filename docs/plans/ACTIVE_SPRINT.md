@@ -26,8 +26,13 @@ highest-value documented lane.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** No implementation plan is active. Select and plan the
-next deterministic roadmap lane before editing code.
+**Active checkpoint:** Plan #203
+`CLAIM_LEDGER_API_OFFSET_PAGINATION.md` is active. Add an explicit non-negative
+`offset` query parameter and response metadata to API
+`/projects/{project_id}/claims` so agents can traverse claim ledgers by
+repeated bounded pages. This is API pagination/accounting only, not
+claim-validity evidence, human/expert adjudication, held-out D7 evidence,
+semantic disconfirmation validity, or SOTA.
 
 **Completed checkpoint:** Plan #202
 `completed/CLAIM_LEDGER_API_LIMIT_METADATA.md` made API
