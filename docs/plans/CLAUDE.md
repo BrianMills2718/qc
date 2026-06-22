@@ -6,13 +6,13 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 140 | INV-1 deterministic fuzzy grounding | High | In Progress | `INV1_DETERMINISTIC_FUZZY_GROUNDING.md` |
 
 ## Completed Plans
 
 | Name | Outcome | Record |
 |------|---------|--------|
 | INV-1 span anchoring + harness Phase 0 | INV-1 mostly met; `make bench` Phase 0 stood up | `completed/INV1_OVERNIGHT_SPRINT.md` |
+| INV-1 deterministic fuzzy grounding | INV-1 follow-up: normalized exact grounding now has a conservative deterministic fuzzy fallback for long near-verbatim spans while preserving ambiguity drops and hash-verifiable original offsets | `completed/INV1_DETERMINISTIC_FUZZY_GROUNDING.md` |
 | INV-8 segment universe + exhaustive coding | INV-8 met in exhaustive mode (`--exhaustive`); coverage denominator | `completed/INV8_SEGMENT_UNIVERSE.md` |
 | Application-level IRR | `project irr --application-level` reports positive segment x code agreement plus segment-decision agreement | `completed/IRR_APPLICATION_LEVEL.md` |
 | INV-9 first-class claim ledger | INV-9 object layer mostly met; claims emitted/read across stages and surfaces | `completed/INV9_CLAIM_LEDGER.md` |

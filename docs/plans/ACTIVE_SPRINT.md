@@ -22,10 +22,19 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #140 (`INV1_DETERMINISTIC_FUZZY_GROUNDING.md`): add a
-   conservative deterministic fuzzy fallback for INV-1 span grounding.
+1. Select the next highest-value documented roadmap lane from
+   `docs/PROJECT_THEORY_AND_GOALS.md` and `docs/EVALUATION_HARNESS.md`.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
+
+**Completed checkpoint:** Span grounding now has a conservative deterministic
+fuzzy fallback for long near-verbatim quote elisions. Exact normalized matching
+still runs first; exact ambiguity remains ambiguous; fuzzy recovery only runs
+when exact matching finds zero occurrences; short vague quotes are rejected; and
+multiple fuzzy-qualified source regions are ambiguous rather than guessed.
+Recovered spans still point to exact original source text and verify by hash.
+This is deterministic near-verbatim recovery only, not semantic grounding,
+methodological-validity evidence, or SOTA evidence.
 
 **Completed checkpoint:** Explicit selected candidate IDs can now be recorded as
 schema_version=1 theoretical-sampling result packages through

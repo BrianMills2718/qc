@@ -1,10 +1,37 @@
 # Plan #140: INV-1 Deterministic Fuzzy Grounding
 
-**Status:** In Progress
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** None
 **Blocks:** Higher D1 recovery for near-verbatim LLM quote outputs
+
+---
+
+## Outcome
+
+Implemented in `d868419` (`[Plan: INV1_DETERMINISTIC_FUZZY_GROUNDING] Add fuzzy grounding fallback`).
+`resolve_span()` now runs exact normalized matching first, then a conservative
+deterministic token-window fuzzy fallback only when exact matching finds zero
+occurrences. Fuzzy matching requires long-enough quotes, a high match ratio, and
+exactly one non-overlapping source region; repeated fuzzy-qualified regions
+return `AMBIGUOUS`. Returned spans still point to exact original source text and
+verify with `quote_hash` / `verify_anchor`.
+
+This is deterministic near-verbatim recovery only. It is not semantic grounding,
+not embedding retrieval, not methodological-validity evidence, and not a SOTA
+claim.
+
+Verification:
+
+- TDD red captured: near-verbatim elisions and repeated near-matches returned
+  `NONE` before implementation.
+- `python -m pytest tests/test_grounding.py -q` passed (`19 passed`).
+- `python -m ruff check qc_clean/core/grounding.py tests/test_grounding.py`
+  passed.
+- `make docs-check` passed.
+- `make check` passed (`1055 passed, 1 skipped, 8 deselected`); type check is
+  not yet configured in this repo.
 
 ---
 
@@ -66,11 +93,11 @@ phrases.
 
 ### Capability Validation
 
-- [ ] Near-verbatim elided quote recovers the exact original source span.
-- [ ] Fuzzy fallback does not run when exact matching is ambiguous.
-- [ ] Repeated fuzzy candidates return ambiguous rather than guessing.
-- [ ] Short vague quotes do not fuzzy-match.
-- [ ] Existing exact grounding tests remain unchanged.
+- [x] Near-verbatim elided quote recovers the exact original source span.
+- [x] Fuzzy fallback does not run when exact matching is ambiguous.
+- [x] Repeated fuzzy candidates return ambiguous rather than guessing.
+- [x] Short vague quotes do not fuzzy-match.
+- [x] Existing exact grounding tests remain unchanged.
 
 ---
 
@@ -124,20 +151,20 @@ phrases.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] Fuzzy fallback recovers a single long near-verbatim source span.
-- [ ] Exact matching semantics and ambiguity handling remain intact.
-- [ ] Fuzzy ambiguity fails loud as ambiguous.
-- [ ] Returned fuzzy anchors verify with `verify_anchor`.
-- [ ] Docs preserve that this is deterministic fuzzy recovery, not full semantic
+- [x] Fuzzy fallback recovers a single long near-verbatim source span.
+- [x] Exact matching semantics and ambiguity handling remain intact.
+- [x] Fuzzy ambiguity fails loud as ambiguous.
+- [x] Returned fuzzy anchors verify with `verify_anchor`.
+- [x] Docs preserve that this is deterministic fuzzy recovery, not full semantic
   grounding or methodological-validity evidence.
 
 > Process criteria:
-- [ ] Required focused tests pass.
-- [ ] Focused Ruff check passes.
-- [ ] `make docs-check` passes.
-- [ ] Full `make check` passes or any failure is documented with evidence.
-- [ ] Type-check status is reported.
-- [ ] Verified work is committed and pushed.
+- [x] Required focused tests pass.
+- [x] Focused Ruff check passes.
+- [x] `make docs-check` passes.
+- [x] Full `make check` passes or any failure is documented with evidence.
+- [x] Type-check status is reported.
+- [x] Verified work is committed and pushed.
 
 ---
 
