@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 164 | INV-7 committed live canary | High | Planned | `INV7_COMMITTED_LIVE_CANARY.md` |
 
 ## Completed Plans
 

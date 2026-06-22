@@ -22,13 +22,17 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Select and plan the next deterministic lane from the ranked roadmap.
+1. Execute Plan #164: commit a protocol-guarded live INV-7 canary artifact set.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Plan #163 has been implemented and is being closed out;
-the next active lane should be selected from the ranked roadmap with a fresh
-plan and acceptance criteria before implementation.
+**Active checkpoint:** Plan #164
+(`docs/plans/INV7_COMMITTED_LIVE_CANARY.md`) turns the existing INV-7 live
+canary runner/protocol/preflight machinery into a committed artifact set:
+pre-run protocol, live result package, protocol/result preflight report, Phase
+0 scorecard, and README. This is a small canary artifact only; it is not prompt-
+injection robustness evidence, model-obedience proof, held-out evidence,
+methodological-validity evidence, or a SOTA claim.
 
 **Completed checkpoint:** MCP JSON/Markdown export tools can now write confined
 SQLite mirrors for audit event logs when explicitly enabled with
