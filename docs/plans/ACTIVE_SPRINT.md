@@ -26,10 +26,12 @@ highest-value documented lane.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** No implementation plan is currently active. Select the
-next deterministic, high-value roadmap lane, write its plan with acceptance
-criteria, then proceed without pausing unless a canonical stop condition is
-reached.
+**Active checkpoint:** Plan #193 is active: add top-level `qc_cli.py` wrappers
+for D3/D7 comparison protocol validation and comparison preflight scripts. This
+slice should forward protocol, gold, and ordered prediction paths to the
+canonical scripts without duplicating protocol/preflight logic or claiming
+held-out D3/D7 evidence, methodological-validity evidence, parity/superiority
+evidence, or SOTA.
 
 **Completed checkpoint:** `ProjectConfig.auto_refresh_higher_order_on_recode`
 now records a durable project-level recode refresh default. New projects can opt

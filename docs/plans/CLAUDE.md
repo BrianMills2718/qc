@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 193 | QC CLI D3/D7 comparison protocol surfaces | High | Planned | `QC_CLI_D3_D7_COMPARISON_PROTOCOL_SURFACES.md` |
 
 ## Completed Plans
 
