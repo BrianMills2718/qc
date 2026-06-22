@@ -7,6 +7,7 @@ import json
 import pytest
 
 from qc_clean.core.d3_comparison_protocol import (
+    evaluate_d3_comparison_metric_criteria,
     validate_d3_comparison_protocol_payload,
 )
 from scripts import validate_d3_comparison_protocol
@@ -61,6 +62,95 @@ def test_validate_d3_comparison_protocol_accepts_metric_criteria(tmp_path, capsy
     assert len(package.metric_criteria) == 2
     assert package.metric_criteria[0].criterion_id == "baseline-recall-floor"
     assert output["metric_criteria_count"] == 2
+
+
+def test_evaluate_d3_comparison_metric_criteria_returns_pass_fail_rows():
+    payload = _valid_protocol()
+    payload["metric_criteria"] = [
+        {
+            "criterion_id": "baseline-recall-floor",
+            "baseline_name": "single_prompt_baseline",
+            "metric": "recall",
+            "operator": ">=",
+            "threshold": 0.8,
+            "rationale": "Application baseline should recover most adjudicated anchors.",
+        },
+        {
+            "criterion_id": "baseline-f1-floor",
+            "baseline_name": "single_prompt_baseline",
+            "metric": "f1",
+            "operator": ">=",
+            "threshold": 0.9,
+            "rationale": "Application baseline should meet the pre-registered F1 floor.",
+        },
+    ]
+    scorecard = {
+        "application_validity_d3": {
+            "baselines": {
+                "single_prompt_baseline": {
+                    "recall": 0.85,
+                    "precision": 0.75,
+                    "f1": 0.8,
+                    "span_overlap": {
+                        "status": "scored",
+                        "mean_best_gold_iou": 1.0,
+                    },
+                }
+            }
+        }
+    }
+
+    report = evaluate_d3_comparison_metric_criteria(payload, scorecard)
+
+    assert report is not None
+    assert report.status == "fail"
+    assert report.criterion_count == 2
+    assert report.passed_count == 1
+    assert report.failed_count == 1
+    assert report.missing_count == 0
+    assert [result.status for result in report.results] == ["pass", "fail"]
+    assert report.results[0].observed_value == 0.85
+    assert report.results[1].observed_value == 0.8
+
+
+def test_evaluate_d3_comparison_metric_criteria_reports_missing_metrics():
+    payload = _valid_protocol()
+    payload["metric_criteria"] = [
+        {
+            "criterion_id": "missing-span-diagnostic",
+            "baseline_name": "single_prompt_baseline",
+            "metric": "mean_best_predicted_modified_hausdorff_distance",
+            "operator": "<=",
+            "threshold": 0.0,
+            "rationale": "Span diagnostics should be available for this comparison.",
+        }
+    ]
+    scorecard = {
+        "application_validity_d3": {
+            "baselines": {
+                "single_prompt_baseline": {
+                    "recall": 1.0,
+                    "precision": 1.0,
+                    "f1": 1.0,
+                    "span_overlap": {
+                        "status": "not_available",
+                        "reason": "No predicted code applications with offsets.",
+                    },
+                }
+            }
+        }
+    }
+
+    report = evaluate_d3_comparison_metric_criteria(payload, scorecard)
+
+    assert report is not None
+    assert report.status == "fail"
+    assert report.criterion_count == 1
+    assert report.passed_count == 0
+    assert report.failed_count == 0
+    assert report.missing_count == 1
+    assert report.results[0].status == "missing"
+    assert report.results[0].observed_value is None
 
 
 def test_validate_d3_comparison_protocol_rejects_unknown_metric_criterion_baseline():

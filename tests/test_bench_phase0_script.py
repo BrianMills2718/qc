@@ -524,6 +524,160 @@ def test_bench_phase0_d3_comparison_protocol_guard_allows_matching_inputs(
     assert "application_baselines" not in reloaded.config.extra
 
 
+def test_bench_phase0_d3_comparison_protocol_guard_includes_metric_criteria_results(
+    tmp_path,
+    monkeypatch,
+    capsys,
+):
+    content = "AI helped delivery."
+    doc = Document(id="d1", name="interview.txt", content=content)
+    state = ProjectState(
+        id="project_d3_guard",
+        name="D3 guard project",
+        corpus=Corpus(documents=[doc]),
+        code_applications=[
+            CodeApplication(
+                code_id="AI_USE",
+                doc_id=doc.id,
+                quote_text=content,
+                start_char=0,
+                end_char=len(content),
+            )
+        ],
+    )
+    store = ProjectStore(projects_dir=tmp_path / "projects")
+    store.save(state)
+    d3_gold_file = tmp_path / "d3_gold.json"
+    d3_gold_file.write_text(
+        json.dumps(_d3_gold_package_payload(doc_id=doc.id, end_char=len(content))),
+        encoding="utf-8",
+    )
+    d3_baselines_file = tmp_path / "d3_baselines.json"
+    d3_baselines_file.write_text(
+        json.dumps(_d3_baseline_package_payload(doc_id=doc.id, end_char=len(content))),
+        encoding="utf-8",
+    )
+    protocol = _d3_comparison_protocol_payload(
+        prediction_file_sha256=_sha256_file(d3_baselines_file)
+    )
+    protocol["metric_criteria"] = [
+        {
+            "criterion_id": "baseline-recall-floor",
+            "baseline_name": "single_prompt_baseline",
+            "metric": "recall",
+            "operator": ">=",
+            "threshold": 1.0,
+            "rationale": "The synthetic fixture should recover the gold anchor.",
+        },
+        {
+            "criterion_id": "baseline-span-iou-floor",
+            "baseline_name": "single_prompt_baseline",
+            "metric": "mean_best_gold_iou",
+            "operator": ">=",
+            "threshold": 1.0,
+            "rationale": "The synthetic fixture should match the gold span.",
+        },
+    ]
+    d3_protocol_file = tmp_path / "d3_protocol.json"
+    d3_protocol_file.write_text(json.dumps(protocol), encoding="utf-8")
+    monkeypatch.setattr(bench_phase0, "ProjectStore", lambda: store)
+
+    exit_code = bench_phase0.main([
+        state.id,
+        "--d3-gold-file",
+        str(d3_gold_file),
+        "--d3-baselines-file",
+        str(d3_baselines_file),
+        "--d3-comparison-protocol-file",
+        str(d3_protocol_file),
+    ])
+
+    assert exit_code == 0
+    output = json.loads(capsys.readouterr().out)
+    criteria = output["application_validity_d3"]["metric_criteria_report"]
+    assert criteria["status"] == "pass"
+    assert criteria["criterion_count"] == 2
+    assert criteria["passed_count"] == 2
+    assert criteria["failed_count"] == 0
+    assert criteria["missing_count"] == 0
+    assert {row["status"] for row in criteria["results"]} == {"pass"}
+
+
+def test_bench_phase0_d3_comparison_protocol_guard_reports_missing_metric_criteria(
+    tmp_path,
+    monkeypatch,
+    capsys,
+):
+    content = "AI helped delivery."
+    doc = Document(id="d1", name="interview.txt", content=content)
+    state = ProjectState(
+        id="project_d3_guard_missing_metric",
+        name="D3 guard missing metric project",
+        corpus=Corpus(documents=[doc]),
+        code_applications=[
+            CodeApplication(
+                code_id="AI_USE",
+                doc_id=doc.id,
+                quote_text=content,
+                start_char=0,
+                end_char=len(content),
+            )
+        ],
+    )
+    store = ProjectStore(projects_dir=tmp_path / "projects")
+    store.save(state)
+    d3_gold_file = tmp_path / "d3_gold.json"
+    d3_gold_file.write_text(
+        json.dumps(_d3_gold_package_payload(doc_id=doc.id, end_char=len(content))),
+        encoding="utf-8",
+    )
+    baseline_payload = _d3_baseline_package_payload(
+        doc_id=doc.id,
+        end_char=len(content),
+    )
+    baseline_anchor = baseline_payload["application_baselines"][0]["code_applications"][0]
+    baseline_anchor.pop("start_char")
+    baseline_anchor.pop("end_char")
+    baseline_anchor["segment_id"] = "segment-without-offsets"
+    d3_baselines_file = tmp_path / "d3_baselines.json"
+    d3_baselines_file.write_text(json.dumps(baseline_payload), encoding="utf-8")
+    protocol = _d3_comparison_protocol_payload(
+        prediction_file_sha256=_sha256_file(d3_baselines_file)
+    )
+    protocol["metric_criteria"] = [
+        {
+            "criterion_id": "missing-span-diagnostic",
+            "baseline_name": "single_prompt_baseline",
+            "metric": "mean_best_predicted_modified_hausdorff_distance",
+            "operator": "<=",
+            "threshold": 0.0,
+            "rationale": "Span diagnostics should be available for this comparison.",
+        }
+    ]
+    d3_protocol_file = tmp_path / "d3_protocol.json"
+    d3_protocol_file.write_text(json.dumps(protocol), encoding="utf-8")
+    monkeypatch.setattr(bench_phase0, "ProjectStore", lambda: store)
+
+    exit_code = bench_phase0.main([
+        state.id,
+        "--d3-gold-file",
+        str(d3_gold_file),
+        "--d3-baselines-file",
+        str(d3_baselines_file),
+        "--d3-comparison-protocol-file",
+        str(d3_protocol_file),
+    ])
+
+    assert exit_code == 0
+    output = json.loads(capsys.readouterr().out)
+    criteria = output["application_validity_d3"]["metric_criteria_report"]
+    assert criteria["status"] == "fail"
+    assert criteria["criterion_count"] == 1
+    assert criteria["missing_count"] == 1
+    assert criteria["results"][0]["status"] == "missing"
+    assert criteria["results"][0]["observed_value"] is None
+
+
 def test_bench_phase0_d3_comparison_protocol_guard_blocks_mismatch_and_writes_no_output(
     tmp_path,
     monkeypatch,

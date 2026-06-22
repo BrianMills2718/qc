@@ -6,7 +6,7 @@ import json
 import math
 import re
 from pathlib import Path
-from typing import Any, Literal
+from typing import Any, Literal, Mapping
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationError, model_validator
 
@@ -29,6 +29,7 @@ D3ComparisonMetric = Literal[
     "mean_best_predicted_modified_hausdorff_distance",
 ]
 D3ComparisonOperator = Literal[">=", ">", "<=", "<", "=="]
+D3MetricCriteriaStatus = Literal["pass", "fail", "missing"]
 
 _PROPORTION_METRICS: set[D3ComparisonMetric] = {
     "recall",
@@ -36,6 +37,12 @@ _PROPORTION_METRICS: set[D3ComparisonMetric] = {
     "f1",
     "mean_best_gold_iou",
     "mean_best_predicted_iou",
+}
+_SPAN_OVERLAP_METRICS: set[D3ComparisonMetric] = {
+    "mean_best_gold_iou",
+    "mean_best_predicted_iou",
+    "mean_best_gold_modified_hausdorff_distance",
+    "mean_best_predicted_modified_hausdorff_distance",
 }
 
 
@@ -131,6 +138,45 @@ class D3ComparisonMetricCriterion(BaseModel):
                 "D3 metric criterion threshold for Modified Hausdorff metrics must be non-negative"
             )
         return self
+
+
+class D3MetricCriterionResult(BaseModel):
+    """Evaluation result for one D3 comparison metric criterion."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    criterion_id: str = Field(description="Stable unique criterion ID")
+    baseline_name: str = Field(description="Baseline evaluated")
+    metric: D3ComparisonMetric = Field(description="Metric evaluated")
+    operator: D3ComparisonOperator = Field(description="Threshold comparison operator")
+    threshold: float = Field(description="Pre-registered threshold")
+    observed_value: float | None = Field(
+        description="Observed metric value, or null when unavailable"
+    )
+    status: D3MetricCriteriaStatus = Field(description="Criterion evaluation status")
+    rationale: str = Field(description="Pre-registered rationale")
+    message: str = Field(description="Human-readable criterion result explanation")
+
+
+class D3MetricCriteriaReport(BaseModel):
+    """Machine-readable D3 metric-criteria evaluation report."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    schema_version: Literal[1] = Field(description="Metric criteria report schema version")
+    package_type: Literal["d3_application_baseline_comparison_metric_criteria"] = Field(
+        description="Report package kind"
+    )
+    status: Literal["pass", "fail"] = Field(description="Overall criteria status")
+    protocol_id: str = Field(description="Protocol ID evaluated")
+    criterion_count: int = Field(description="Number of criteria evaluated")
+    passed_count: int = Field(description="Number of passing criteria")
+    failed_count: int = Field(description="Number of failed criteria")
+    missing_count: int = Field(description="Number of criteria with missing metric values")
+    results: list[D3MetricCriterionResult] = Field(
+        description="Per-criterion evaluation rows"
+    )
+    caution: str = Field(description="Claim-discipline caveat for criteria consumers")
 
 
 class D3ComparisonProtocolPackage(BaseModel):
@@ -266,5 +312,129 @@ def validate_d3_comparison_protocol_payload(payload: Any) -> D3ComparisonProtoco
         raise ValueError(f"Invalid D3 comparison protocol package: {exc}") from exc
 
 
+def evaluate_d3_comparison_metric_criteria(
+    protocol_payload: Any,
+    scorecard: Mapping[str, Any],
+) -> D3MetricCriteriaReport | None:
+    """Evaluate D3 protocol metric criteria against a Phase 0 scorecard."""
+    protocol = validate_d3_comparison_protocol_payload(protocol_payload)
+    if not protocol.metric_criteria:
+        return None
+
+    results = [
+        _evaluate_metric_criterion(criterion, scorecard)
+        for criterion in protocol.metric_criteria
+    ]
+    passed_count = sum(1 for result in results if result.status == "pass")
+    failed_count = sum(1 for result in results if result.status == "fail")
+    missing_count = sum(1 for result in results if result.status == "missing")
+    return D3MetricCriteriaReport(
+        schema_version=1,
+        package_type="d3_application_baseline_comparison_metric_criteria",
+        status="pass" if passed_count == len(results) else "fail",
+        protocol_id=protocol.protocol_id,
+        criterion_count=len(results),
+        passed_count=passed_count,
+        failed_count=failed_count,
+        missing_count=missing_count,
+        results=results,
+        caution=(
+            "D3 metric criteria evaluate pre-registered local comparison metrics only; "
+            "they are not held-out D3 evidence, expert-parity evidence, "
+            "methodological-validity evidence, superiority evidence, or SOTA evidence."
+        ),
+    )
+
+
 def _is_sha256(value: str) -> bool:
     return bool(_SHA256_RE.fullmatch(value))
+
+
+def _evaluate_metric_criterion(
+    criterion: D3ComparisonMetricCriterion,
+    scorecard: Mapping[str, Any],
+) -> D3MetricCriterionResult:
+    """Evaluate one D3 criterion against a Phase 0 scorecard."""
+    observed = _lookup_baseline_metric(
+        scorecard,
+        baseline_name=criterion.baseline_name,
+        metric=criterion.metric,
+    )
+    if observed is None:
+        return D3MetricCriterionResult(
+            criterion_id=criterion.criterion_id,
+            baseline_name=criterion.baseline_name,
+            metric=criterion.metric,
+            operator=criterion.operator,
+            threshold=criterion.threshold,
+            observed_value=None,
+            status="missing",
+            rationale=criterion.rationale,
+            message=(
+                f"Metric {criterion.metric!r} was not available for baseline "
+                f"{criterion.baseline_name!r}"
+            ),
+        )
+    passed = _compare(observed, criterion.operator, criterion.threshold)
+    return D3MetricCriterionResult(
+        criterion_id=criterion.criterion_id,
+        baseline_name=criterion.baseline_name,
+        metric=criterion.metric,
+        operator=criterion.operator,
+        threshold=criterion.threshold,
+        observed_value=observed,
+        status="pass" if passed else "fail",
+        rationale=criterion.rationale,
+        message=(
+            f"Observed {criterion.metric}={observed} "
+            f"{'met' if passed else 'did not meet'} "
+            f"{criterion.operator} {criterion.threshold}"
+        ),
+    )
+
+
+def _lookup_baseline_metric(
+    scorecard: Mapping[str, Any],
+    *,
+    baseline_name: str,
+    metric: D3ComparisonMetric,
+) -> float | None:
+    """Return a D3 baseline metric value when present and numeric."""
+    d3_section = scorecard.get("application_validity_d3")
+    if not isinstance(d3_section, Mapping):
+        return None
+    baselines = d3_section.get("baselines")
+    if not isinstance(baselines, Mapping):
+        return None
+    baseline = baselines.get(baseline_name)
+    if not isinstance(baseline, Mapping):
+        return None
+    if metric in _SPAN_OVERLAP_METRICS:
+        span_overlap = baseline.get("span_overlap")
+        if not isinstance(span_overlap, Mapping):
+            return None
+        return _numeric_or_none(span_overlap.get(metric))
+    return _numeric_or_none(baseline.get(metric))
+
+
+def _numeric_or_none(value: Any) -> float | None:
+    """Return finite numeric values as floats; treat everything else as missing."""
+    if type(value) not in {int, float}:
+        return None
+    numeric = float(value)
+    if not math.isfinite(numeric):
+        return None
+    return numeric
+
+
+def _compare(observed: float, operator: D3ComparisonOperator, threshold: float) -> bool:
+    """Compare an observed metric to a threshold."""
+    if operator == ">=":
+        return observed >= threshold
+    if operator == ">":
+        return observed > threshold
+    if operator == "<=":
+        return observed <= threshold
+    if operator == "<":
+        return observed < threshold
+    return observed == threshold

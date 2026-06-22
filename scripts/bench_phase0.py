@@ -58,6 +58,9 @@ from qc_clean.core.confidence_calibration_preflight import (
     preflight_confidence_calibration_payloads,
 )
 from qc_clean.core.d3_baseline_package import d3_baselines_payload_for_scorecard
+from qc_clean.core.d3_comparison_protocol import (
+    evaluate_d3_comparison_metric_criteria,
+)
 from qc_clean.core.d3_comparison_preflight import preflight_d3_comparison_payloads
 from qc_clean.core.d3_gold import application_gold_payload_for_scorecard
 from qc_clean.core.d7_baseline_package import d7_baselines_payload_for_scorecard
@@ -204,6 +207,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     prompt_injection_package_payload: Any | None = None
     d3_gold_payload: Any | None = None
     d3_baselines_payload: Any | None = None
+    d3_comparison_protocol: Any | None = None
 
     if args.d3_gold_file:
         d3_gold_path = Path(args.d3_gold_file)
@@ -570,6 +574,19 @@ def main(argv: Sequence[str] | None = None) -> int:
     except ValueError as exc:
         print(json.dumps({"error": str(exc)}))
         return 1
+    try:
+        d3_metric_criteria_report = (
+            evaluate_d3_comparison_metric_criteria(d3_comparison_protocol, card)
+            if d3_comparison_protocol is not None
+            else None
+        )
+    except ValueError as exc:
+        print(json.dumps({"error": str(exc)}))
+        return 1
+    if d3_metric_criteria_report is not None:
+        card.setdefault("application_validity_d3", {})["metric_criteria_report"] = (
+            d3_metric_criteria_report.model_dump(mode="json")
+        )
     if d6_bias_preflight_report is not None:
         card.setdefault("_meta", {}).setdefault("preflight_reports", {})["d6_bias"] = (
             d6_bias_preflight_report.model_dump(mode="json")
