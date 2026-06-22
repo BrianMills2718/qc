@@ -22,10 +22,13 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Choose the next highest-value unmet evaluation-harness, review, grounding, or
+1. Execute Plan #88 (`MCP_RELATIONSHIP_REVIEW.md`): expose MCP relationship
+   review listing and relationship decision counts using the existing
+   ReviewManager relationship semantics.
+2. Choose the next highest-value unmet evaluation-harness, review, grounding, or
    scope-discipline lane that can be advanced without pretending held-out expert
    data exists.
-2. Continue through the ranked roadmap without pausing after each verified
+3. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
 **Completed checkpoint:** Corpus-scope warning propagation now covers Markdown,

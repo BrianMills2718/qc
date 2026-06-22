@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 88 | MCP relationship review | High | Planned | `MCP_RELATIONSHIP_REVIEW.md` |
 
 ## Completed Plans
 
