@@ -1,6 +1,6 @@
 # Plan #74: Phase 0 Run Configuration Hashes
 
-**Status:** Planned
+**Status:** In Progress
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Phase 0 input hashes; Phase 0 benchmark artifacts
@@ -112,20 +112,20 @@ create a cross-project callable capability.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] Phase 0 scorecards include `_meta.run_configuration_hashes`.
-- [ ] Run-configuration hash metadata includes the configured methodology,
+- [x] Phase 0 scorecards include `_meta.run_configuration_hashes`.
+- [x] Run-configuration hash metadata includes the configured methodology,
   model name, SHA-256 of the canonical config payload, and algorithm.
-- [ ] Prompt/template hash metadata is explicit `not_run`, not silently absent
+- [x] Prompt/template hash metadata is explicit `not_run`, not silently absent
   and not falsely populated.
-- [ ] Artifact manifests include the run-configuration hash block.
-- [ ] Docs preserve the caveat that full prompt/model hashes remain future
+- [x] Artifact manifests include the run-configuration hash block.
+- [x] Docs preserve the caveat that full prompt/model hashes remain future
   `prompt_eval` work.
 
 > Process criteria:
-- [ ] Required tests pass
-- [ ] Full test suite passes
-- [ ] Type check status is reported
-- [ ] Docs updated
+- [x] Required tests pass (`python -m pytest tests/test_bench_phase0_script.py -q`: 28 passed)
+- [x] Full test suite passes (`make check`: 781 passed, 1 skipped, 8 deselected; Ruff/docs-check passed)
+- [x] Type check status is reported (`make check`: type check not yet configured)
+- [x] Docs updated
 
 ---
 

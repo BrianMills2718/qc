@@ -262,6 +262,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         ),
         observability_db=args.observability_db,
     )
+    card["_meta"]["run_configuration_hashes"] = phase0_run_configuration_hashes(
+        loaded_state,
+    )
     observability_db = args.observability_db or DEFAULT_OBSERVABILITY_DB_PATH
     card["wall_clock_d10"] = d10_wall_clock_scorecard(state)
     card["cost_latency_d10"] = d10_cost_latency_scorecard(
@@ -345,6 +348,9 @@ def phase0_artifact_manifest(
     input_hashes = meta.get("input_hashes")
     if not isinstance(input_hashes, dict):
         raise ValueError("Phase 0 scorecard is missing _meta.input_hashes; cannot write artifact")
+    run_configuration_hashes = meta.get("run_configuration_hashes")
+    if not isinstance(run_configuration_hashes, dict):
+        run_configuration_hashes = phase0_run_configuration_hashes(state)
     return {
         "schema_version": 1,
         "artifact_type": "qualitative_coding.phase0_scorecard",
@@ -357,6 +363,7 @@ def phase0_artifact_manifest(
         "timing_file": "timing_d10.json",
         "timing_sha256": timing_sha256,
         "input_hashes": input_hashes,
+        "run_configuration_hashes": run_configuration_hashes,
         "claim_discipline": meta.get("claims"),
         "prompt_eval": {
             "status": "not_run",
@@ -543,6 +550,35 @@ def phase0_input_hashes(
             else None
         ),
         "observability_db_sha256": sha256_file(observability_db),
+    }
+
+
+def phase0_run_configuration_hashes(state) -> dict[str, Any]:
+    """Return deterministic Phase 0 run-configuration hashes."""
+    payload = run_configuration_hash_payload(state)
+    return {
+        "hash_algorithm": "sha256",
+        "project_id": state.id,
+        "methodology": payload["methodology"],
+        "model_name": payload["model_name"],
+        "project_config_sha256": sha256_jsonable(payload),
+        "prompt_hashes": {
+            "status": "not_run",
+            "reason": (
+                "Phase 0 does not execute prompt templates or live model calls; "
+                "full prompt/model hashes belong to the future prompt_eval-backed suite."
+            ),
+        },
+    }
+
+
+def run_configuration_hash_payload(state) -> dict[str, Any]:
+    """Return the canonical persisted config payload hashed by Phase 0."""
+    methodology = getattr(state.config.methodology, "value", state.config.methodology)
+    return {
+        "methodology": methodology,
+        "model_name": state.config.model_name,
+        "config_extra": state.config.extra,
     }
 
 

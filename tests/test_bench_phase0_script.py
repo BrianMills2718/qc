@@ -18,6 +18,7 @@ from qc_clean.schemas.domain import (
     CodeApplication,
     Corpus,
     Document,
+    Methodology,
     ProjectConfig,
     ProjectState,
 )
@@ -31,6 +32,11 @@ def test_bench_phase0_includes_input_hashes_without_external_files(
     state = ProjectState(
         id="project_hashes",
         name="Hash project",
+        config=ProjectConfig(
+            methodology=Methodology.THEMATIC_ANALYSIS,
+            model_name="gpt-5-large",
+            extra={"phase0_exact_bootstrap": {"samples": 11}},
+        ),
         corpus=Corpus(documents=[Document(id="d1", name="a.txt", content="A")]),
     )
     store = ProjectStore(projects_dir=tmp_path / "projects")
@@ -62,6 +68,16 @@ def test_bench_phase0_includes_input_hashes_without_external_files(
     assert hashes["interpretive_preference_file_sha256"] is None
     assert hashes["confidence_calibration_file_sha256"] is None
     assert hashes["observability_db_sha256"] is None
+    run_config = output["_meta"]["run_configuration_hashes"]
+    assert run_config["hash_algorithm"] == "sha256"
+    assert run_config["project_id"] == state.id
+    assert run_config["methodology"] == "thematic_analysis"
+    assert run_config["model_name"] == "gpt-5-large"
+    assert run_config["project_config_sha256"] == bench_phase0.sha256_jsonable(
+        bench_phase0.run_configuration_hash_payload(persisted)
+    )
+    assert run_config["prompt_hashes"]["status"] == "not_run"
+    assert "Phase 0 does not execute prompt templates" in run_config["prompt_hashes"]["reason"]
 
 
 def test_bench_phase0_hashes_external_input_files(
@@ -540,6 +556,10 @@ def test_bench_phase0_writes_versioned_artifact_package(
     assert manifest["timing_file"] == "timing_d10.json"
     assert manifest["timing_sha256"] == hashlib.sha256(timing_path.read_bytes()).hexdigest()
     assert manifest["input_hashes"] == stdout_scorecard["_meta"]["input_hashes"]
+    assert manifest["run_configuration_hashes"] == (
+        stdout_scorecard["_meta"]["run_configuration_hashes"]
+    )
+    assert manifest["run_configuration_hashes"]["prompt_hashes"]["status"] == "not_run"
     assert manifest["claim_discipline"] == stdout_scorecard["_meta"]["claims"]
     assert manifest["prompt_eval"]["status"] == "not_run"
 
@@ -770,6 +790,9 @@ def test_phase0_artifact_writer_fails_when_run_dir_exists(tmp_path):
     assert manifest["timing_sha256"] == hashlib.sha256(
         (run_dir / "timing_d10.json").read_bytes()
     ).hexdigest()
+    assert manifest["run_configuration_hashes"]["project_id"] == state.id
+    assert manifest["run_configuration_hashes"]["model_name"] == state.config.model_name
+    assert manifest["run_configuration_hashes"]["prompt_hashes"]["status"] == "not_run"
 
     with pytest.raises(ValueError, match="already exists"):
         bench_phase0.write_phase0_benchmark_artifact(
