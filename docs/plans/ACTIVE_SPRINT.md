@@ -22,11 +22,19 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #143, `D7_BASELINE_PACKAGE_VALIDATOR.md`, to make versioned
-   D7 baseline/prediction package validation available outside optional
-   comparison-protocol preflight and tighten the direct `BASELINES=` path.
+1. Select the next highest-value documented roadmap lane from
+   `docs/PROJECT_THEORY_AND_GOALS.md` and `docs/EVALUATION_HARNESS.md`.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
+
+**Completed checkpoint:** Versioned D7 retrieval and live-baseline prediction
+packages now validate through `qc_clean/core/d7_baseline_package.py` and
+`make validate-d7-baseline-package PACKAGE=...`. D7 comparison preflight reuses
+that validator, and direct Phase 0 `BASELINES=` scoring validates recognized
+versioned packages before returning baseline rows while preserving legacy raw
+lists. This is package/provenance validation only, not held-out D7 evidence,
+live-baseline evidence, methodological-validity evidence, or superiority
+evidence.
 
 **Completed checkpoint:** Supported custom prompt override surfaces are now
 declared in `qc_clean/core/prompt_override_registry.py`, and

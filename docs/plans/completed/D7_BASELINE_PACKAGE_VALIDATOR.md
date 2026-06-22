@@ -1,6 +1,18 @@
 # Plan #143: D7 Baseline Package Validator
 
-**Status:** Planned
+Completed 2026-06-22. Versioned D7 retrieval and live-baseline prediction
+packages now validate through `qc_clean/core/d7_baseline_package.py` and
+`make validate-d7-baseline-package PACKAGE=...`. D7 comparison preflight reuses
+that validator, and the Phase 0 `BASELINES=` loader validates recognized
+versioned packages before scoring while preserving legacy raw-list input.
+Verification: `python -m pytest tests/test_d7_baseline_package.py
+tests/test_d7_retrieval.py tests/test_d7_live_baseline.py
+tests/test_d7_comparison_preflight.py tests/test_bench_phase0_script.py -q`
+(64 passed), targeted Ruff, `make -n validate-d7-baseline-package
+PACKAGE=/tmp/d7_baseline.json`, `make docs-check`, and `make check` (1068
+passed, 1 skipped, 8 deselected; type check not configured).
+
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** None
@@ -133,23 +145,23 @@ not create a cross-project callable capability.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] Standalone validation accepts both versioned D7 retrieval and live-baseline
+- [x] Standalone validation accepts both versioned D7 retrieval and live-baseline
       packages and reports package type, baseline count, candidate count, and
       claim-discipline caveat.
-- [ ] Standalone validation rejects malformed recognized versioned packages with
+- [x] Standalone validation rejects malformed recognized versioned packages with
       a non-zero CLI exit and JSON error.
-- [ ] D7 comparison preflight uses the shared package validator.
-- [ ] `BASELINES=` validates recognized versioned packages before scoring while
+- [x] D7 comparison preflight uses the shared package validator.
+- [x] `BASELINES=` validates recognized versioned packages before scoring while
       preserving raw-list compatibility.
-- [ ] Docs state this is package/provenance validation only, not held-out D7
+- [x] Docs state this is package/provenance validation only, not held-out D7
       evidence, live-baseline evidence, or superiority evidence.
 
 > Process criteria:
-- [ ] Required new tests pass.
-- [ ] Related D7 and bench loader tests pass.
-- [ ] `make docs-check` passes.
-- [ ] `make check` passes.
-- [ ] Plan is completed, committed, and pushed.
+- [x] Required new tests pass.
+- [x] Related D7 and bench loader tests pass.
+- [x] `make docs-check` passes.
+- [x] `make check` passes.
+- [x] Plan is completed, committed, and pushed.
 
 ---
 
