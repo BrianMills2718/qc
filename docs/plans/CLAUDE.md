@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 188 | QC CLI adjudication validation surfaces | High | Planned | `QC_CLI_ADJUDICATION_VALIDATION_SURFACES.md` |
 
 ## Completed Plans
 
