@@ -1,6 +1,13 @@
 # Plan #69: INV-7 Attack-Type Scorecard
 
-**Status:** In Progress
+**Outcome:** Complete. INV-7 prompt-injection fixture scorecards now report
+`by_attack_type` summaries with the same counts, failed fixture IDs, rates, and
+Wilson intervals as `by_surface`, while preserving the measurement-substrate
+caveat. Verified with focused prompt-injection tests, docs checks, and full
+`make check` on 2026-06-21 (`776 passed, 1 skipped, 8 deselected`; Ruff/docs
+checks passed; type check remains not configured).
+
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** None
@@ -130,7 +137,7 @@ scorecard stratification over an already modeled fixture field.
 - [x] Plan sync passes.
 - [x] Markdown link check passes.
 - [x] Full `make check` passes, or any non-codebase failure is recorded.
-- [ ] Verified implementation is committed and pushed.
+- [x] Verified implementation is committed and pushed.
 
 ---
 

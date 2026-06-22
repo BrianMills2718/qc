@@ -6,7 +6,6 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| #69 | INV-7 attack-type scorecard | High | In Progress | `INV7_ATTACK_TYPE_SCORECARD.md` |
 
 ## Completed Plans
 
@@ -78,6 +77,7 @@ Track all implementation work here.
 | D8 GT-fidelity bootstrap intervals | Evaluation-harness follow-up: D8 GT-fidelity scorecards report deterministic local bootstrap intervals for rubric means without claiming expert-rubric acceptance or full GT evidence | `completed/D8_GT_FIDELITY_BOOTSTRAP_INTERVALS.md` |
 | D9 tie-rate Wilson intervals | Evaluation-harness follow-up: D9 interpretive-preference scorecards report Wilson intervals for tie rates without claiming blind expert parity | `completed/D9_TIE_RATE_WILSON_INTERVALS.md` |
 | INV-7 prompt-injection Wilson intervals | Evaluation-harness follow-up: INV-7 prompt-injection fixture scorecards report Wilson intervals for pass and attack-success rates without claiming prompt-injection robustness | `completed/INV7_PROMPT_INJECTION_WILSON_INTERVALS.md` |
+| INV-7 attack-type scorecard | Evaluation-harness follow-up: INV-7 prompt-injection fixture scorecards report by-attack-type pass and attack-success summaries without claiming prompt-injection robustness | `completed/INV7_ATTACK_TYPE_SCORECARD.md` |
 | D1/D2 structural rate Wilson intervals | Evaluation-harness follow-up: Phase 0 grounding, coverage, and examined rates report Wilson intervals without claiming validity evidence | `completed/D1_D2_STRUCTURAL_RATE_WILSON_INTERVALS.md` |
 | Confidence calibration bootstrap intervals | Evaluation-harness follow-up: confidence-calibration scorecards report deterministic local bootstrap intervals for Brier score and ECE without claiming calibrated confidence | `completed/CONFIDENCE_CALIBRATION_BOOTSTRAP_INTERVALS.md` |
 
