@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 158 | INV-7 prompt override metadata boundary | High | Planned | `INV7_PROMPT_OVERRIDE_METADATA_BOUNDARY.md` |
 
 ## Completed Plans
 
