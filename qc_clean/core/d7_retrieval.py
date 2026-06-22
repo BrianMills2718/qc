@@ -229,9 +229,10 @@ def compare_d7_retrieval_predictions(
         baseline_count=len(baselines),
         disconfirmation_d7=d7_scorecard,
         note=(
-            "D7 retrieval comparison reports exact-span point estimates from exported "
-            "candidate predictions. This is not a held-out result or superiority claim "
-            "without frozen data, live baselines, and interval-tested deltas."
+            "D7 retrieval comparison reports exact-span point estimates plus local "
+            "baseline span-overlap diagnostics from exported candidate predictions. "
+            "This is not a held-out result or superiority claim without frozen data, "
+            "live baselines, and interval-tested deltas."
         ),
     )
     return report.model_dump(mode="json")

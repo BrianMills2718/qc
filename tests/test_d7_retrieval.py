@@ -157,6 +157,47 @@ def test_compares_retrieval_prediction_packages_against_gold():
     assert baselines["empty_retrieval"]["precision"] == 0.0
 
 
+def test_comparison_report_includes_baseline_span_overlap():
+    content = "0123456789abcdefghij0123456789"
+    state = _state_with_claim(content, "AI improves workflow.")
+    package = {
+        "disconfirmation_baselines": [
+            {
+                "name": "near_retrieval",
+                "description": "Near-boundary retrieval baseline.",
+                "contrary_evidence": [
+                    {
+                        "target_claim_id": "claim-ai",
+                        "doc_id": "d1",
+                        "start_char": 15,
+                        "end_char": 25,
+                    }
+                ],
+            }
+        ]
+    }
+    gold = [
+        {
+            "target_claim_id": "claim-ai",
+            "doc_id": "d1",
+            "start_char": 10,
+            "end_char": 20,
+        }
+    ]
+
+    report = compare_d7_retrieval_predictions(
+        state,
+        gold_payload=gold,
+        prediction_packages=[package],
+    )
+
+    overlap = report["disconfirmation_d7"]["baselines"]["near_retrieval"]["span_overlap"]
+
+    assert overlap["status"] == "scored"
+    assert overlap["mean_best_gold_iou"] == pytest.approx(5 / 15)
+    assert overlap["gold_best_overlaps"][0]["best_predicted_key"] == "claim-ai|d1|15:25"
+
+
 def test_comparison_fails_loud_on_duplicate_baseline_names():
     state = _state_with_claim("AI failed badly after rollout.", "AI improves workflow.")
     package = export_d7_retrieval_baseline(

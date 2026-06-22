@@ -2818,6 +2818,7 @@ def disconfirmation_d7_scorecard(state: ProjectState) -> Dict[str, Any]:
     if baselines:
         card["baselines"] = _score_d7_baselines(
             gold_keys,
+            gold,
             baselines,
             system_score,
             system_predicted_keys=predicted_keys,
@@ -3132,6 +3133,7 @@ def _score_d3_baselines(
 
 def _score_d7_baselines(
     gold_keys: set[str],
+    gold: list[DisconfirmationGoldAnchor],
     baselines: list[DisconfirmationBaselinePrediction],
     system_score: Dict[str, Any],
     *,
@@ -3151,6 +3153,14 @@ def _score_d7_baselines(
             bootstrap_config=bootstrap_config,
         )
         baseline_score["description"] = baseline.description
+        baseline_spans, baseline_unscored_spans = _d7_spans_from_annotations(
+            baseline.contrary_evidence
+        )
+        baseline_score["span_overlap"] = _d7_span_overlap_score_for_predictions(
+            gold,
+            baseline_spans,
+            baseline_unscored_spans,
+        )
         baseline_score["system_minus_baseline"] = {
             "recall": system_score["recall"] - baseline_score["recall"],
             "precision": system_score["precision"] - baseline_score["precision"],
@@ -3174,9 +3184,22 @@ def _d7_span_overlap_score(
     state: ProjectState,
 ) -> dict[str, Any]:
     """Compute same-target/document D7 contrary-evidence char-span diagnostics."""
+    predicted_spans, unscored_predicted_count = _predicted_disconfirmation_spans(state)
+    return _d7_span_overlap_score_for_predictions(
+        gold,
+        predicted_spans,
+        unscored_predicted_count,
+    )
+
+
+def _d7_span_overlap_score_for_predictions(
+    gold: list[DisconfirmationGoldAnchor],
+    predicted_spans: list[_ComparableSpan],
+    unscored_predicted_count: int,
+) -> dict[str, Any]:
+    """Compute D7 char-span overlap diagnostics for one prediction set."""
     gold_spans = [_d7_span_from_gold(anchor) for anchor in gold]
     scoreable_gold_spans = [span for span in gold_spans if span is not None]
-    predicted_spans, unscored_predicted_count = _predicted_disconfirmation_spans(state)
     base: dict[str, Any] = {
         "metric": "char_span_iou_same_target_claim_doc",
         "matching_rule": "same_target_claim_id_and_doc_id",
@@ -3248,6 +3271,21 @@ def _d7_span_from_gold(anchor: DisconfirmationGoldAnchor) -> _ComparableSpan | N
         end_char=anchor.end_char,
         key=_key_for_gold(anchor),
     )
+
+
+def _d7_spans_from_annotations(
+    anchors: list[DisconfirmationGoldAnchor],
+) -> tuple[list[_ComparableSpan], int]:
+    """Return unique scoreable D7 spans from gold-shaped prediction anchors."""
+    spans_by_key: dict[str, _ComparableSpan] = {}
+    unscored_count = 0
+    for anchor in anchors:
+        span = _d7_span_from_gold(anchor)
+        if span is None:
+            unscored_count += 1
+            continue
+        spans_by_key.setdefault(span.key, span)
+    return [spans_by_key[key] for key in sorted(spans_by_key)], unscored_count
 
 
 def _predicted_disconfirmation_spans(state: ProjectState) -> tuple[list[_ComparableSpan], int]:
