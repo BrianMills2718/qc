@@ -304,6 +304,7 @@ def _export_project(store: ProjectStore, args) -> int:
     fmt = getattr(args, "format", "json")
     output_file = getattr(args, "output_file", None)
     output_dir = getattr(args, "output_dir", None)
+    overwrite = not bool(vars(args).get("no_overwrite", False))
     audit_manifest = vars(args).get("audit_manifest")
     audit_log = vars(args).get("audit_log")
     verify_audit_manifest = bool(vars(args).get("verify_audit_manifest", False))
@@ -319,21 +320,21 @@ def _export_project(store: ProjectStore, args) -> int:
         artifact_paths: list[str] = []
 
         if fmt == "json":
-            path = exporter.export_json(state, output_file)
+            path = exporter.export_json(state, output_file, overwrite=overwrite)
             artifact_paths = [path]
             print(f"Exported JSON to: {path}")
         elif fmt == "csv":
-            paths = exporter.export_csv(state, output_dir)
+            paths = exporter.export_csv(state, output_dir, overwrite=overwrite)
             artifact_paths = paths
             print("Exported CSV files:")
             for p in paths:
                 print(f"  {p}")
         elif fmt == "markdown":
-            path = exporter.export_markdown(state, output_file)
+            path = exporter.export_markdown(state, output_file, overwrite=overwrite)
             artifact_paths = [path]
             print(f"Exported Markdown to: {path}")
         elif fmt == "qdpx":
-            path = exporter.export_qdpx(state, output_file)
+            path = exporter.export_qdpx(state, output_file, overwrite=overwrite)
             artifact_paths = [path]
             print(f"Exported QDPX to: {path}")
             print("  Compatible with ATLAS.ti, NVivo, MAXQDA")

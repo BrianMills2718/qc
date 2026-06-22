@@ -463,6 +463,28 @@ class TestProjectExporter:
         assert data["pipeline_status"] == "completed"
         assert len(data["codebook"]["codes"]) == 2
 
+    def test_export_json_overwrites_by_default(self, tmp_path, sample_state):
+        from qc_clean.core.export.data_exporter import ProjectExporter
+
+        out = tmp_path / "output.json"
+        out.write_text("old", encoding="utf-8")
+
+        path = ProjectExporter().export_json(sample_state, str(out))
+        data = json.loads(Path(path).read_text(encoding="utf-8"))
+
+        assert data["name"] == "Test Export Project"
+
+    def test_export_json_no_overwrite_rejects_existing_path(self, tmp_path, sample_state):
+        from qc_clean.core.export.data_exporter import ProjectExporter
+
+        out = tmp_path / "output.json"
+        out.write_text("old", encoding="utf-8")
+
+        with pytest.raises(FileExistsError, match="Refusing to overwrite"):
+            ProjectExporter().export_json(sample_state, str(out), overwrite=False)
+
+        assert out.read_text(encoding="utf-8") == "old"
+
     def test_export_csv(self, tmp_path, sample_state):
         from qc_clean.core.export.data_exporter import ProjectExporter
         exporter = ProjectExporter()
@@ -492,6 +514,22 @@ class TestProjectExporter:
         assert rows[0]["code_name"] == "Communication"
         assert rows[0]["doc_name"] == "interview1.txt"
 
+    def test_export_csv_no_overwrite_checks_all_targets_before_writing(
+        self,
+        tmp_path,
+        sample_state,
+    ):
+        from qc_clean.core.export.data_exporter import ProjectExporter
+
+        apps_path = tmp_path / "applications.csv"
+        apps_path.write_text("old-apps", encoding="utf-8")
+
+        with pytest.raises(FileExistsError, match="applications.csv"):
+            ProjectExporter().export_csv(sample_state, str(tmp_path), overwrite=False)
+
+        assert apps_path.read_text(encoding="utf-8") == "old-apps"
+        assert not (tmp_path / "codes.csv").exists()
+
     def test_export_markdown(self, tmp_path, sample_state):
         from qc_clean.core.export.data_exporter import ProjectExporter
         exporter = ProjectExporter()
@@ -517,6 +555,21 @@ class TestProjectExporter:
         assert "Improve listening" in content
         assert "## Key Findings" in content
         assert "Finding 1" in content
+
+    def test_export_markdown_no_overwrite_rejects_existing_path(
+        self,
+        tmp_path,
+        sample_state,
+    ):
+        from qc_clean.core.export.data_exporter import ProjectExporter
+
+        out = tmp_path / "report.md"
+        out.write_text("old report", encoding="utf-8")
+
+        with pytest.raises(FileExistsError, match="Refusing to overwrite"):
+            ProjectExporter().export_markdown(sample_state, str(out), overwrite=False)
+
+        assert out.read_text(encoding="utf-8") == "old report"
 
     def test_export_markdown_code_hierarchy(self, tmp_path, sample_state):
         from qc_clean.core.export.data_exporter import ProjectExporter
@@ -609,6 +662,35 @@ class TestProjectExporter:
         assert out.exists()
         assert zipfile.is_zipfile(out)
         assert "Exported QDPX" in capsys.readouterr().out
+
+    def test_project_export_command_no_overwrite_rejects_existing_output(
+        self,
+        tmp_path,
+        tmp_store,
+        sample_state,
+        capsys,
+    ):
+        from qc_clean.core.cli.commands.project import _export_project
+
+        tmp_store.save(sample_state)
+        out = tmp_path / "export.json"
+        out.write_text("old", encoding="utf-8")
+        args = MagicMock(
+            project_id=sample_state.id,
+            format="json",
+            output_file=str(out),
+            output_dir=None,
+            audit_manifest=None,
+            verify_audit_manifest=False,
+            audit_log=None,
+            no_overwrite=True,
+        )
+
+        result = _export_project(tmp_store, args)
+
+        assert result == 1
+        assert out.read_text(encoding="utf-8") == "old"
+        assert "Refusing to overwrite existing export artifact" in capsys.readouterr().err
 
     def test_project_export_command_writes_audit_manifest_for_json(
         self,
@@ -850,6 +932,24 @@ class TestCLIParsing:
         args = parser.parse_args(["project", "export", "pid", "--format", "json", "--output-file", "out.json"])
         assert args.format == "json"
         assert args.output_file == "out.json"
+
+    def test_export_subparser_no_overwrite_flag(self):
+        from qc_cli import create_parser
+
+        parser = create_parser()
+
+        args = parser.parse_args([
+            "project",
+            "export",
+            "pid",
+            "--format",
+            "json",
+            "--output-file",
+            "out.json",
+            "--no-overwrite",
+        ])
+
+        assert args.no_overwrite is True
 
     def test_export_subparser_audit_manifest_flags(self):
         from qc_cli import create_parser

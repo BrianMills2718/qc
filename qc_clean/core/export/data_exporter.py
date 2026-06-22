@@ -52,6 +52,18 @@ def _default_export_path(project_name: str, suffix: str) -> Path:
     return Path(f"{_safe_filename_stem(project_name)}{suffix}")
 
 
+def _ensure_can_write(path: Path, *, overwrite: bool) -> None:
+    """Fail before writing when overwrite is disabled and the target exists."""
+    if not overwrite and path.exists():
+        raise FileExistsError(f"Refusing to overwrite existing export artifact: {path}")
+
+
+def _ensure_can_write_all(paths: List[Path], *, overwrite: bool) -> None:
+    """Fail before writing any artifact when one target would be clobbered."""
+    for path in paths:
+        _ensure_can_write(path, overwrite=overwrite)
+
+
 def _corpus_scope_export_warnings(
     state: ProjectState,
 ) -> List[Dict[str, Any]]:
@@ -168,10 +180,17 @@ def _markdown_table_cell(value: str) -> str:
 class ProjectExporter:
     """Export a ProjectState to JSON, CSV, or Markdown."""
 
-    def export_json(self, state: ProjectState, output_file: Optional[str] = None) -> str:
+    def export_json(
+        self,
+        state: ProjectState,
+        output_file: Optional[str] = None,
+        *,
+        overwrite: bool = True,
+    ) -> str:
         """Export full project state as JSON. Returns the output path."""
         path = Path(output_file) if output_file else _default_export_path(state.name, ".json")
         path.parent.mkdir(parents=True, exist_ok=True)
+        _ensure_can_write(path, overwrite=overwrite)
         payload = state.model_dump(mode="json")
         if warnings := _corpus_scope_export_warnings(state):
             payload["export_warnings"] = warnings
@@ -179,7 +198,13 @@ class ProjectExporter:
         logger.info("Exported JSON to %s", path)
         return str(path)
 
-    def export_csv(self, state: ProjectState, output_dir: Optional[str] = None) -> List[str]:
+    def export_csv(
+        self,
+        state: ProjectState,
+        output_dir: Optional[str] = None,
+        *,
+        overwrite: bool = True,
+    ) -> List[str]:
         """
         Export codes and code-applications as two CSV files.
         Returns list of output paths.
@@ -187,10 +212,35 @@ class ProjectExporter:
         out = Path(output_dir) if output_dir else Path(".")
         out.mkdir(parents=True, exist_ok=True)
 
+        codes_path = out / "codes.csv"
+        apps_path = out / "applications.csv"
+        memos_path = out / "memos.csv"
+        claims_path = out / "claims.csv"
+        warnings_path = out / "export_warnings.csv"
+        irr_path = out / "irr_matrix.csv"
+        app_path = out / "irr_application_matrix.csv"
+        decision_path = out / "irr_segment_decisions.csv"
+        stab_path = out / "stability.csv"
+        planned_paths = [codes_path, apps_path]
+        if state.memos:
+            planned_paths.append(memos_path)
+        if state.claims:
+            planned_paths.append(claims_path)
+        if _corpus_scope_export_warnings(state):
+            planned_paths.append(warnings_path)
+        if state.irr_result and state.irr_result.coding_matrix:
+            planned_paths.append(irr_path)
+        if state.irr_result and state.irr_result.application_matrix:
+            planned_paths.append(app_path)
+        if state.irr_result and state.irr_result.segment_decision_matrix:
+            planned_paths.append(decision_path)
+        if state.stability_result and state.stability_result.code_stability:
+            planned_paths.append(stab_path)
+        _ensure_can_write_all(planned_paths, overwrite=overwrite)
+
         paths: List[str] = []
 
         # -- codes.csv --
-        codes_path = out / "codes.csv"
         with open(codes_path, "w", newline="", encoding="utf-8") as f:
             writer = csv.writer(f)
             writer.writerow([
@@ -206,7 +256,6 @@ class ProjectExporter:
         paths.append(str(codes_path))
 
         # -- applications.csv --
-        apps_path = out / "applications.csv"
         with open(apps_path, "w", newline="", encoding="utf-8") as f:
             writer = csv.writer(f)
             writer.writerow([
@@ -231,7 +280,6 @@ class ProjectExporter:
 
         # -- memos.csv (only if memos exist) --
         if state.memos:
-            memos_path = out / "memos.csv"
             with open(memos_path, "w", newline="", encoding="utf-8") as f:
                 writer = csv.writer(f)
                 writer.writerow([
@@ -254,7 +302,6 @@ class ProjectExporter:
         # -- claims.csv (only if claim ledger exists) --
         if state.claims:
             corpus_scope_boundary = _corpus_scope_boundary_for_export(state)
-            claims_path = out / "claims.csv"
             with open(claims_path, "w", newline="", encoding="utf-8") as f:
                 writer = csv.writer(f)
                 writer.writerow([
@@ -285,7 +332,6 @@ class ProjectExporter:
             paths.append(str(claims_path))
 
         if warnings := _corpus_scope_export_warnings(state):
-            warnings_path = out / "export_warnings.csv"
             with open(warnings_path, "w", newline="", encoding="utf-8") as f:
                 writer = csv.writer(f)
                 writer.writerow(["code", "message", "applies_to", "claim_count"])
@@ -301,7 +347,6 @@ class ProjectExporter:
         # -- irr_matrix.csv (only if IRR has been run) --
         if state.irr_result and state.irr_result.coding_matrix:
             irr = state.irr_result
-            irr_path = out / "irr_matrix.csv"
             with open(irr_path, "w", newline="", encoding="utf-8") as f:
                 writer = csv.writer(f)
                 header = ["code_name"] + [f"pass_{i+1}" for i in range(irr.num_passes)] + ["agreement"]
@@ -313,7 +358,6 @@ class ProjectExporter:
 
         if state.irr_result and state.irr_result.application_matrix:
             irr = state.irr_result
-            app_path = out / "irr_application_matrix.csv"
             with open(app_path, "w", newline="", encoding="utf-8") as f:
                 writer = csv.writer(f)
                 header = ["segment_code_cell"] + [f"pass_{i+1}" for i in range(irr.num_passes)] + ["agreement"]
@@ -325,7 +369,6 @@ class ProjectExporter:
 
         if state.irr_result and state.irr_result.segment_decision_matrix:
             irr = state.irr_result
-            decision_path = out / "irr_segment_decisions.csv"
             with open(decision_path, "w", newline="", encoding="utf-8") as f:
                 writer = csv.writer(f)
                 header = ["segment_key"] + [f"pass_{i+1}" for i in range(irr.num_passes)] + ["agreement"]
@@ -338,7 +381,6 @@ class ProjectExporter:
         # -- stability.csv (only if stability has been run) --
         if state.stability_result and state.stability_result.code_stability:
             sr = state.stability_result
-            stab_path = out / "stability.csv"
             with open(stab_path, "w", newline="", encoding="utf-8") as f:
                 writer = csv.writer(f)
                 writer.writerow(["code_name", "stability_score", "classification",
@@ -357,13 +399,20 @@ class ProjectExporter:
         logger.info("Exported CSV to %s", out)
         return paths
 
-    def export_markdown(self, state: ProjectState, output_file: Optional[str] = None) -> str:
+    def export_markdown(
+        self,
+        state: ProjectState,
+        output_file: Optional[str] = None,
+        *,
+        overwrite: bool = True,
+    ) -> str:
         """Export a human-readable Markdown report. Returns the output path."""
         path = Path(output_file) if output_file else _default_export_path(
             f"{state.name}_report",
             ".md",
         )
         path.parent.mkdir(parents=True, exist_ok=True)
+        _ensure_can_write(path, overwrite=overwrite)
 
         lines: List[str] = []
         _a = lines.append  # shorthand
@@ -709,7 +758,13 @@ class ProjectExporter:
         logger.info("Exported Markdown to %s", path)
         return str(path)
 
-    def export_qdpx(self, state: ProjectState, output_file: Optional[str] = None) -> str:
+    def export_qdpx(
+        self,
+        state: ProjectState,
+        output_file: Optional[str] = None,
+        *,
+        overwrite: bool = True,
+    ) -> str:
         """
         Export as REFI-QDA QDPX file (ZIP containing project.qde XML + source texts).
 
@@ -718,6 +773,7 @@ class ProjectExporter:
         """
         path = Path(output_file) if output_file else _default_export_path(state.name, ".qdpx")
         path.parent.mkdir(parents=True, exist_ok=True)
+        _ensure_can_write(path, overwrite=overwrite)
 
         NS = "urn:QDA-XML:project:1.0"
         user_guid = str(uuid.uuid4())

@@ -53,6 +53,15 @@ class TestQdpxExport:
         assert out.exists()
         assert zipfile.is_zipfile(out)
 
+    def test_no_overwrite_rejects_existing_qdpx(self, sample_state, tmp_path):
+        out = tmp_path / "test.qdpx"
+        out.write_text("old", encoding="utf-8")
+
+        with pytest.raises(FileExistsError, match="Refusing to overwrite"):
+            ProjectExporter().export_qdpx(sample_state, str(out), overwrite=False)
+
+        assert out.read_text(encoding="utf-8") == "old"
+
     def test_contains_project_qde_and_sources(self, sample_state, tmp_path):
         out = tmp_path / "test.qdpx"
         ProjectExporter().export_qdpx(sample_state, str(out))
