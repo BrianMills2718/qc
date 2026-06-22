@@ -22,7 +22,10 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Continue through the ranked roadmap without pausing after each verified
+1. Execute Plan #114 (`D6_BIAS_PROTOCOL_PACKAGE.md`): add a D6 bias-audit
+   protocol package validator before any populated D6 rows are treated as
+   benchmark evidence.
+2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
 **Completed checkpoint:** Phase 0 now scores externally supplied D6 stratified

@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 114 | D6 bias protocol package | High | Planned | `D6_BIAS_PROTOCOL_PACKAGE.md` |
 
 ## Completed Plans
 
