@@ -1,6 +1,6 @@
 # Plan #126: Confidence Calibration Protocol Package
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Confidence calibration scorecard, Wilson intervals, and bootstrap intervals
@@ -77,17 +77,17 @@ Internal protocol validation only; no cross-project boundary is created.
 
 ### Capability Validation
 
-- [ ] Valid schema_version=1 held-out confidence-calibration protocols pass
+- [x] Valid schema_version=1 held-out confidence-calibration protocols pass
   validation.
-- [ ] Held-out protocols require prompt/model freeze, contamination check,
+- [x] Held-out protocols require prompt/model freeze, contamination check,
   pre-evaluation registration, project-state hash, and prediction/confidence
   artifact hash.
-- [ ] Corpus/project/prediction/outcome hashes are valid SHA-256 values.
-- [ ] Label-source plan, target surfaces, confidence source, planned item
+- [x] Corpus/project/prediction/outcome hashes are valid SHA-256 values.
+- [x] Label-source plan, target surfaces, confidence source, planned item
   count, and configured outcome metrics are non-empty.
-- [ ] Success criteria cover configured calibration outcome metrics.
-- [ ] CLI emits machine-readable JSON for valid and invalid protocols.
-- [ ] Make target routes to the CLI.
+- [x] Success criteria cover configured calibration outcome metrics.
+- [x] CLI emits machine-readable JSON for valid and invalid protocols.
+- [x] Make target routes to the CLI.
 
 ---
 
@@ -149,22 +149,22 @@ Internal protocol validation only; no cross-project boundary is created.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] Confidence-calibration protocols can be validated before correctness
+- [x] Confidence-calibration protocols can be validated before correctness
   labels are collected or scored.
-- [ ] Held-out protocols enforce freeze/contamination/registration gates and
+- [x] Held-out protocols enforce freeze/contamination/registration gates and
   required hashes.
-- [ ] Protocols carry label-source, confidence-source, target-surface, planned
+- [x] Protocols carry label-source, confidence-source, target-surface, planned
   item-count, and outcome-metric metadata as pre-evaluation process data.
-- [ ] CLI and Make target emit machine-readable success/failure.
-- [ ] Docs state the validator is process/provenance only.
+- [x] CLI and Make target emit machine-readable success/failure.
+- [x] Docs state the validator is process/provenance only.
 
 > Process criteria:
-- [ ] Required focused tests pass.
-- [ ] Focused Ruff check passes.
-- [ ] `make docs-check` passes.
-- [ ] Full `make check` passes or any failure is documented with evidence.
-- [ ] Type-check status is reported.
-- [ ] Verified work is committed and pushed.
+- [x] Required focused tests pass.
+- [x] Focused Ruff check passes.
+- [x] `make docs-check` passes.
+- [x] Full `make check` passes or any failure is documented with evidence.
+- [x] Type-check status is reported.
+- [x] Verified work is committed and pushed.
 
 ---
 
@@ -177,6 +177,38 @@ Internal protocol validation only; no cross-project boundary is created.
   settings or keep bootstrap settings in Phase 0 config only? — Status:
   DEFERRED | Decide in the score-time guard lane if the protocol/result
   preflight needs to govern uncertainty settings.
+
+---
+
+## Outcome
+
+Implemented in `7533b0c`
+(`[Plan: CONFIDENCE_CALIBRATION_PROTOCOL_PACKAGE] Add calibration protocol validator`).
+The repo now has `qc_clean/core/confidence_calibration_protocol.py`,
+`scripts/validate_confidence_calibration_protocol.py`, and
+`make validate-confidence-calibration-protocol PROTOCOL=...`. The validator
+checks schema_version=1 calibration protocol metadata, held-out prompt/model
+freeze, contamination, pre-evaluation registration, corpus/state/prediction
+artifact hashes, label-source plan, target surfaces, confidence source,
+planned item count, configured outcome metrics, optional outcome-file hash
+locks, and success criteria. Documentation states this is process/provenance
+only, not calibration proof, held-out correctness evidence,
+methodological-validity evidence, or SOTA evidence.
+
+Verification evidence:
+
+- TDD red before implementation: `python -m pytest tests/test_confidence_calibration_protocol.py -q`
+  failed at collection with
+  `ModuleNotFoundError: No module named 'qc_clean.core.confidence_calibration_protocol'`.
+- `python -m pytest tests/test_confidence_calibration_protocol.py -q`
+  - 6 passed.
+- `python -m ruff check qc_clean/core/confidence_calibration_protocol.py scripts/validate_confidence_calibration_protocol.py tests/test_confidence_calibration_protocol.py`
+  - all checks passed.
+- `make -n validate-confidence-calibration-protocol PROTOCOL=protocol.json`
+  - routed to `python scripts/validate_confidence_calibration_protocol.py protocol.json`.
+- `make docs-check` - passed.
+- `make check` - 1007 passed, 1 skipped, 8 deselected; Ruff and docs checks
+  passed; type check is not yet configured.
 
 ---
 

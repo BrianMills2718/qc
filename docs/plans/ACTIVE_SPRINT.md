@@ -22,11 +22,20 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #126 (`CONFIDENCE_CALIBRATION_PROTOCOL_PACKAGE.md`): add a
-   pre-evaluation protocol validator for confidence-calibration benchmark
-   metadata.
+1. Select and plan the confidence-calibration protocol/result preflight lane.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
+
+**Completed checkpoint:** Confidence-calibration protocols can now be
+validated with `make validate-confidence-calibration-protocol PROTOCOL=...` /
+`scripts/validate_confidence_calibration_protocol.py`. The validator checks
+schema_version=1 protocol metadata, held-out prompt/model freeze,
+contamination, pre-evaluation registration, corpus/state/prediction-artifact
+hashes, label-source plan, target surfaces, confidence source, planned item
+count, configured outcome metrics, optional outcome-file hash locks, and
+success criteria. This is process/provenance metadata only, not calibration
+proof, held-out correctness evidence, methodological-validity evidence, or
+SOTA evidence.
 
 **Completed checkpoint:** `make bench` now accepts `D9_PROTOCOL=...` and
 `scripts/bench_phase0.py --d9-interpretive-preference-protocol-file ...` to
