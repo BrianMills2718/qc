@@ -22,9 +22,11 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Choose the next highest-value unmet evaluation-harness or scope-discipline
+1. Execute Plan #76, corpus-scope create surfaces, without treating recorded
+   scope as sampling-frame validation.
+2. Choose the next highest-value unmet evaluation-harness or scope-discipline
    lane that can be advanced without pretending held-out expert data exists.
-2. Continue through the ranked roadmap without pausing after each verified
+3. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
 **Completed checkpoint:** Corpus-scope warning propagation now covers Markdown,
