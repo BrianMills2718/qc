@@ -90,6 +90,11 @@ def render_prompt_override(
         values=values,
         data_placeholders=required | optional_data,
     )
+    _validate_metadata_placeholder_values(
+        stage_name=stage_name,
+        values=values,
+        metadata_placeholders=metadata,
+    )
     field_uses = _format_field_uses(stage_name, template)
     _validate_field_uses(
         stage_name=stage_name,
@@ -227,6 +232,42 @@ def _is_untrusted_data_block_value(value: Any) -> bool:
         and "END UNTRUSTED DATA BLOCK" in stripped
         and f"\n{DATA_LINE_PREFIX}" in stripped
     )
+
+
+def _validate_metadata_placeholder_values(
+    *,
+    stage_name: str,
+    values: dict[str, Any],
+    metadata_placeholders: set[str],
+) -> None:
+    """Fail loudly when metadata placeholders could inject prompt lines."""
+    structured = sorted(
+        placeholder
+        for placeholder in metadata_placeholders & set(values)
+        if not _is_scalar_metadata_value(values[placeholder])
+    )
+    if structured:
+        raise ValueError(
+            f"Prompt override for {stage_name} metadata placeholder(s) "
+            f"{', '.join(structured)} must be scalar metadata values"
+        )
+
+    multiline = sorted(
+        placeholder
+        for placeholder in metadata_placeholders & set(values)
+        if isinstance(values[placeholder], str)
+        and ("\r" in values[placeholder] or "\n" in values[placeholder])
+    )
+    if multiline:
+        raise ValueError(
+            f"Prompt override for {stage_name} metadata placeholder(s) "
+            f"{', '.join(multiline)} must be single-line metadata values"
+        )
+
+
+def _is_scalar_metadata_value(value: Any) -> bool:
+    """Return whether a value is safe to expose as scalar prompt metadata."""
+    return value is None or isinstance(value, str | int | float | bool)
 
 
 def _has_unsupported_syntax(field_use: _PromptFieldUse) -> bool:
