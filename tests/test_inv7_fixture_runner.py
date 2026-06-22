@@ -8,6 +8,8 @@ from qc_clean.core.bench import PromptInjectionEvaluation
 from qc_clean.core.inv7_fixtures import (
     Inv7LiveFixture,
     Inv7StructuralFixture,
+    default_inv7_live_fixtures,
+    default_inv7_structural_fixtures,
     run_inv7_live_fixtures_async,
     run_inv7_structural_fixtures,
 )
@@ -23,7 +25,7 @@ def test_run_inv7_structural_fixtures_returns_scorecard_compatible_payload():
     assert payload["mode"] == "structural"
     assert payload["split"] == "canary"
     assert payload["fixture_set_id"] == "built_in_inv7_structural"
-    assert payload["fixture_set_version"] == "1"
+    assert payload["fixture_set_version"] == "2"
     assert payload["prompt_frozen"] is True
     assert payload["contamination_checked"] is False
     assert payload["evaluator"] == "structural_boundary"
@@ -33,6 +35,8 @@ def test_run_inv7_structural_fixtures_returns_scorecard_compatible_payload():
         "thematic_coding",
         "synthesis",
         "incremental_coding",
+        "thematic_coding_prompt_override",
+        "gt_constant_comparison_prompt_override",
     }
     assert all(item["attack_succeeded"] is False for item in evaluations)
     for item in evaluations:
@@ -76,6 +80,62 @@ def test_structural_fixture_marks_unwrapped_attack_as_success():
     assert result["fixture_id"] == "broken-boundary"
     assert result["attack_succeeded"] is True
     assert result["failure_mode"] == "adversarial_payload_not_data_prefixed"
+
+
+def test_default_structural_fixtures_include_custom_prompt_overrides():
+    fixtures = {
+        fixture.fixture_id: fixture
+        for fixture in default_inv7_structural_fixtures()
+    }
+
+    assert "thematic-prompt-override-direct-override" in fixtures
+    assert "gt-prompt-override-segment-and-codebook-context" in fixtures
+    for fixture_id in [
+        "thematic-prompt-override-direct-override",
+        "gt-prompt-override-segment-and-codebook-context",
+    ]:
+        rendered = fixtures[fixture_id].rendered_text
+        assert "BEGIN CUSTOM PROMPT OVERRIDE" in rendered
+        assert "REPOSITORY DATA-BOUNDARY REMINDER" in rendered
+        assert "END CUSTOM PROMPT OVERRIDE" in rendered
+
+    payload = run_inv7_structural_fixtures()
+    evaluations = {
+        item["fixture_id"]: item
+        for item in payload["prompt_injection_evaluations"]
+    }
+    assert evaluations["thematic-prompt-override-direct-override"]["surface"] == (
+        "thematic_coding_prompt_override"
+    )
+    assert evaluations["gt-prompt-override-segment-and-codebook-context"]["surface"] == (
+        "gt_constant_comparison_prompt_override"
+    )
+    assert evaluations["thematic-prompt-override-direct-override"]["attack_succeeded"] is False
+    assert evaluations["gt-prompt-override-segment-and-codebook-context"]["attack_succeeded"] is False
+
+
+def test_default_live_fixtures_include_custom_prompt_overrides():
+    fixtures = {
+        fixture.fixture_id: fixture
+        for fixture in default_inv7_live_fixtures()
+    }
+
+    assert "live-thematic-prompt-override-direct-override" in fixtures
+    assert "live-gt-prompt-override-segment-and-codebook-context" in fixtures
+    assert fixtures["live-thematic-prompt-override-direct-override"].surface == (
+        "thematic_coding_prompt_override"
+    )
+    assert fixtures["live-gt-prompt-override-segment-and-codebook-context"].surface == (
+        "gt_constant_comparison_prompt_override"
+    )
+    for fixture_id in [
+        "live-thematic-prompt-override-direct-override",
+        "live-gt-prompt-override-segment-and-codebook-context",
+    ]:
+        prompt = fixtures[fixture_id].prompt
+        assert "BEGIN CUSTOM PROMPT OVERRIDE" in prompt
+        assert "REPOSITORY DATA-BOUNDARY REMINDER" in prompt
+        assert fixtures[fixture_id].forbidden_markers == ["VALIDATED"]
 
 
 def test_run_inv7_live_fixtures_uses_fake_model_and_flags_canary():
