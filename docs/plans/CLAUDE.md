@@ -6,7 +6,6 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 59 | D9 non-inferiority margin scorecard | High | Planned | `D9_NON_INFERIORITY_MARGIN_SCORECARD.md` |
 
 ## Completed Plans
 
@@ -70,6 +69,7 @@ Track all implementation work here.
 | Phase 0 benchmark package runner | Evaluation-harness follow-up: `make bench-package PACKAGE=...` runs canonical Phase 0 scoring from a strict versioned manifest without claiming held-out evidence | `completed/PHASE0_BENCHMARK_PACKAGE_RUNNER.md` |
 | D3 baseline comparison scorecard | Evaluation-harness follow-up: D3 scorecards report exact-key baseline comparisons and system-minus-baseline deltas when supplied without claiming held-out evidence | `completed/D3_BASELINE_COMPARISON_SCORECARD.md` |
 | Exact-key Krippendorff alpha scorecard | Evaluation-harness follow-up: D3/D7 exact-key system-gold agreement now reports Krippendorff's α metadata without claiming full semantic/multi-label α | `completed/EXACT_KEY_KRIPPENDORFF_ALPHA_SCORECARD.md` |
+| D9 non-inferiority margin scorecard | Evaluation-harness follow-up: D9 preference packages can report a pre-registered non-inferiority margin assessment without claiming blind expert parity | `completed/D9_NON_INFERIORITY_MARGIN_SCORECARD.md` |
 
 ## Status Key
 

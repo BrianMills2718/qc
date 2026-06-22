@@ -1,12 +1,38 @@
 # Plan #59: D9 Non-Inferiority Margin Scorecard
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** None
 **Blocks:** D9 blind preference parity assessment
 
 ---
+
+## Outcome
+
+D9 interpretive-preference scorecards now always include
+`non_inferiority_assessment`. When D9 preference packages include protocol
+metadata with `non_inferiority_margin` and
+`registered_before_evaluation=true`, the scorecard reports a
+system-minus-human preference-rate point estimate, CI, required lower bound,
+and `meets_non_inferiority`. Missing protocol metadata reports
+`not_available`, and unregistered protocol metadata reports `not_registered`
+without licensing non-inferiority. Object-shaped D9 files are preserved in
+memory so protocol metadata reaches the scorecard without mutating saved project
+state.
+
+## Verification
+
+- Focused tests: `python -m pytest tests/test_bench_phase0.py tests/test_bench_phase0_script.py -q`
+  (`80 passed`)
+- Focused lint: `python -m ruff check qc_clean/core/bench.py scripts/bench_phase0.py tests/test_bench_phase0.py tests/test_bench_phase0_script.py`
+  (`All checks passed!`)
+- Docs/link/plan checks:
+  - `python scripts/check_markdown_links.py`
+  - `python scripts/sync_plan_status.py --check`
+- Full gate: `make check` (`771 passed, 1 skipped, 8 deselected`; ruff and
+  docs-check passed)
+- Type check: not configured by the repo (`make check` reports this explicitly)
 
 ## Gap
 
@@ -62,11 +88,11 @@ Internal scorecard capability only; no cross-project boundary is created.
 
 ### Capability Validation
 
-- [ ] D9 packages may carry protocol metadata without breaking existing outcome-list loading.
-- [ ] Missing protocol metadata reports `not_available`, not pass/fail.
-- [ ] Unregistered protocol metadata reports a non-licensing status.
-- [ ] Registered protocol metadata computes system-minus-human point estimate and CI.
-- [ ] The assessment only passes when the lower CI bound is above `-margin`.
+- [x] D9 packages may carry protocol metadata without breaking existing outcome-list loading.
+- [x] Missing protocol metadata reports `not_available`, not pass/fail.
+- [x] Unregistered protocol metadata reports a non-licensing status.
+- [x] Registered protocol metadata computes system-minus-human point estimate and CI.
+- [x] The assessment only passes when the lower CI bound is above `-margin`.
 
 ---
 
@@ -126,21 +152,21 @@ Internal scorecard capability only; no cross-project boundary is created.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] `interpretive_preference_d9.non_inferiority_assessment` is always present.
-- [ ] Without protocol metadata, the assessment is explicitly `not_available`.
-- [ ] With `registered_before_evaluation=false`, the assessment does not license
+- [x] `interpretive_preference_d9.non_inferiority_assessment` is always present.
+- [x] Without protocol metadata, the assessment is explicitly `not_available`.
+- [x] With `registered_before_evaluation=false`, the assessment does not license
   non-inferiority.
-- [ ] With registered protocol metadata, the assessment reports margin, point
+- [x] With registered protocol metadata, the assessment reports margin, point
   estimate, CI, and pass/fail.
-- [ ] Docs preserve the caveat that this is still not blind expert-parity
+- [x] Docs preserve the caveat that this is still not blind expert-parity
   evidence without populated held-out expert outcomes.
 
 > Process criteria:
-- [ ] Required tests pass
-- [ ] Full test suite passes
-- [ ] Type check status reported
-- [ ] Docs updated
-- [ ] Plan completed, committed, and pushed
+- [x] Required tests pass
+- [x] Full test suite passes
+- [x] Type check status reported
+- [x] Docs updated
+- [x] Plan completed, committed, and pushed
 
 ---
 
