@@ -1,6 +1,15 @@
 # Plan #71: D10 Runtime Environment Metadata
 
-**Status:** In Progress
+**Outcome:** Complete. `timing_d10.json` now includes a non-sensitive
+`runtime_environment` block with Python implementation/version, OS
+system/release, machine architecture, and logical CPU count. Tests assert the
+required metadata and that sensitive top-level keys such as hostnames,
+usernames, paths, environment variables, and serial identifiers are absent.
+Verified with focused artifact/D10 tests, docs checks, and full `make check` on
+2026-06-21 (`776 passed, 1 skipped, 8 deselected`; Ruff/docs checks passed;
+type check remains not configured).
+
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** D10 timing artifact
@@ -126,7 +135,7 @@ addition using Python standard-library runtime information.
 - [x] Plan sync passes.
 - [x] Markdown link check passes.
 - [x] Full `make check` passes, or any non-codebase failure is recorded.
-- [ ] Verified implementation is committed and pushed.
+- [x] Verified implementation is committed and pushed.
 
 ---
 
