@@ -1,10 +1,43 @@
 # Plan #131: D7 Retrieval CLI Surfaces
 
-**Status:** In Progress
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Existing D7 retrieval export and comparison scripts
 **Blocks:** Canonical CLI execution of D7 retrieval baseline export and guarded comparison
+
+---
+
+## Outcome
+
+Completed in implementation commit `4abd87e`. `qc_cli.py` now exposes
+`run-d7-retrieval` and `compare-d7-retrieval` as thin wrappers over the
+existing D7 retrieval export and comparison scripts. The wrappers forward
+script flags unchanged, including embedding-export options, repeated
+`--predictions-file` inputs, and optional comparison protocol packages. This is
+CLI orchestration/provenance only; it does not run held-out D7 comparisons,
+create live baselines, or license D7 superiority or methodological-validity
+claims.
+
+Verification:
+
+- TDD red: `python -m pytest tests/test_qc_cli_d7_retrieval.py -q` failed
+  before implementation because argparse rejected both new commands.
+- Focused wrapper tests: `python -m pytest tests/test_qc_cli_d7_retrieval.py -q`
+  passed (`2 passed`).
+- Focused D7 tests:
+  `python -m pytest tests/test_qc_cli_d7_retrieval.py tests/test_d7_retrieval.py tests/test_d7_comparison_guard.py -q`
+  passed (`13 passed`).
+- D7 protocol/preflight tests:
+  `python -m pytest tests/test_d7_comparison_protocol.py tests/test_d7_comparison_preflight.py -q`
+  passed (`10 passed`).
+- Focused lint: `python -m ruff check qc_cli.py tests/test_qc_cli_d7_retrieval.py`
+  passed.
+- Docs: `make docs-check` passed.
+- Full gate: `make check` passed (`1018 passed, 1 skipped, 8 deselected`);
+  Ruff and docs checks passed inside the gate.
+- Type check: not configured.
+- Verified implementation was committed and pushed.
 
 ---
 
@@ -68,12 +101,12 @@ Internal CLI wrapper capability only; no new cross-project boundary is created.
 
 ### Capability Validation
 
-- [ ] `qc_cli.py run-d7-retrieval` accepts and forwards current retrieval export
+- [x] `qc_cli.py run-d7-retrieval` accepts and forwards current retrieval export
   flags.
-- [ ] `qc_cli.py compare-d7-retrieval` accepts and forwards current comparison
+- [x] `qc_cli.py compare-d7-retrieval` accepts and forwards current comparison
   flags including repeated `--predictions-file` and optional
   `--protocol-package`.
-- [ ] Existing script-level D7 retrieval/comparison behavior continues to pass.
+- [x] Existing script-level D7 retrieval/comparison behavior continues to pass.
 
 ---
 
@@ -127,21 +160,21 @@ Internal CLI wrapper capability only; no new cross-project boundary is created.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] `qc_cli.py run-d7-retrieval <project_id>` exists and forwards supported
+- [x] `qc_cli.py run-d7-retrieval <project_id>` exists and forwards supported
   script flags.
-- [ ] `qc_cli.py compare-d7-retrieval <project_id>` exists and forwards
+- [x] `qc_cli.py compare-d7-retrieval <project_id>` exists and forwards
   supported script flags.
-- [ ] The wrappers do not duplicate retrieval export, preflight, scoring, or
+- [x] The wrappers do not duplicate retrieval export, preflight, scoring, or
   JSON error logic from the scripts.
-- [ ] Docs list these commands and preserve D7 claim caveats.
+- [x] Docs list these commands and preserve D7 claim caveats.
 
 > Process criteria:
-- [ ] Required focused tests pass.
-- [ ] Focused Ruff check passes.
-- [ ] `make docs-check` passes.
-- [ ] Full `make check` passes or any failure is documented with evidence.
-- [ ] Type-check status is reported.
-- [ ] Verified work is committed and pushed.
+- [x] Required focused tests pass.
+- [x] Focused Ruff check passes.
+- [x] `make docs-check` passes.
+- [x] Full `make check` passes or any failure is documented with evidence.
+- [x] Type-check status is reported.
+- [x] Verified work is committed and pushed.
 
 ---
 
