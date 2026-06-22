@@ -5,6 +5,7 @@ Usage:
     python scripts/bench_phase0.py <project_id> [--d3-gold-file d3_gold.json]
         [--d3-baselines-file baselines.json] [--gold-file gold.json]
         [--d7-baselines-file baselines.json] [--prompt-injection-file inv7.json]
+        [--d6-bias-protocol-file protocol.json]
         [--bias-counterfactual-file bias.json]
         [--bias-stratified-file bias_stratified.json]
         [--codebook-quality-file quality.json]
@@ -40,6 +41,7 @@ from qc_clean.core.bench import (
     d10_wall_clock_scorecard,
     phase0_scorecard,
 )
+from qc_clean.core.d6_bias_preflight import preflight_d6_bias_payloads
 from qc_clean.core.d3_gold import application_gold_payload_for_scorecard
 from qc_clean.core.d7_gold import d7_gold_payload_for_scorecard
 from qc_clean.core.inv7_package import prompt_injection_payload_for_scorecard
@@ -69,6 +71,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument(
         "--prompt-injection-file",
         help="Optional INV-7 prompt-injection fixture results JSON file; applied in memory only",
+    )
+    parser.add_argument(
+        "--d6-bias-protocol-file",
+        help="Optional D6 bias protocol JSON file; preflights supplied D6 rows before scoring",
     )
     parser.add_argument(
         "--bias-counterfactual-file",
@@ -122,6 +128,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         print(json.dumps({"error": f"Project '{args.project_id}' not found."}))
         return 1
     loaded_state = state
+    bias_counterfactual_results: Any | None = None
+    bias_stratified_results: Any | None = None
 
     if args.d3_gold_file:
         try:
@@ -197,6 +205,37 @@ def main(argv: Sequence[str] | None = None) -> int:
         state.config.extra = dict(state.config.extra)
         state.config.extra["bias_stratified_evaluations"] = bias_stratified_results
 
+    d6_bias_preflight_report = None
+    if args.d6_bias_protocol_file:
+        try:
+            d6_bias_protocol = load_d6_bias_protocol_file(
+                Path(args.d6_bias_protocol_file)
+            )
+        except ValueError as exc:
+            print(json.dumps({"error": str(exc)}))
+            return 1
+        d6_bias_preflight_report = preflight_d6_bias_payloads(
+            d6_bias_protocol,
+            bias_stratified_results,
+            bias_counterfactual_results,
+            stratified_file_sha256=(
+                sha256_file(Path(args.bias_stratified_file))
+                if args.bias_stratified_file
+                else None
+            ),
+            counterfactual_file_sha256=(
+                sha256_file(Path(args.bias_counterfactual_file))
+                if args.bias_counterfactual_file
+                else None
+            ),
+        )
+        if d6_bias_preflight_report.status != "pass":
+            print(json.dumps({
+                "error": "D6 bias preflight failed",
+                "preflight_report": d6_bias_preflight_report.model_dump(mode="json"),
+            }))
+            return 1
+
     if args.codebook_quality_file:
         try:
             codebook_quality_results = load_codebook_quality_file(
@@ -252,6 +291,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     except ValueError as exc:
         print(json.dumps({"error": str(exc)}))
         return 1
+    if d6_bias_preflight_report is not None:
+        card.setdefault("_meta", {}).setdefault("preflight_reports", {})["d6_bias"] = (
+            d6_bias_preflight_report.model_dump(mode="json")
+        )
     card.setdefault("_meta", {})["input_hashes"] = phase0_input_hashes(
         loaded_state,
         d3_gold_file=Path(args.d3_gold_file) if args.d3_gold_file else None,
@@ -261,6 +304,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         gold_file=Path(args.gold_file) if args.gold_file else None,
         d7_baselines_file=Path(args.d7_baselines_file) if args.d7_baselines_file else None,
         prompt_injection_file=Path(args.prompt_injection_file) if args.prompt_injection_file else None,
+        d6_bias_protocol_file=(
+            Path(args.d6_bias_protocol_file) if args.d6_bias_protocol_file else None
+        ),
         bias_counterfactual_file=(
             Path(args.bias_counterfactual_file) if args.bias_counterfactual_file else None
         ),
@@ -463,6 +509,11 @@ def phase0_command_provenance(args: argparse.Namespace) -> dict[str, Any]:
         "prompt_injection_file": (
             str(Path(args.prompt_injection_file)) if args.prompt_injection_file else None
         ),
+        "d6_bias_protocol_file": (
+            str(Path(args.d6_bias_protocol_file))
+            if args.d6_bias_protocol_file
+            else None
+        ),
         "bias_counterfactual_file": (
             str(Path(args.bias_counterfactual_file))
             if args.bias_counterfactual_file
@@ -528,6 +579,7 @@ def phase0_input_hashes(
     gold_file: Path | None,
     d7_baselines_file: Path | None,
     prompt_injection_file: Path | None,
+    d6_bias_protocol_file: Path | None,
     bias_counterfactual_file: Path | None,
     bias_stratified_file: Path | None,
     codebook_quality_file: Path | None,
@@ -554,6 +606,9 @@ def phase0_input_hashes(
         ),
         "prompt_injection_file_sha256": (
             sha256_file(prompt_injection_file) if prompt_injection_file else None
+        ),
+        "d6_bias_protocol_file_sha256": (
+            sha256_file(d6_bias_protocol_file) if d6_bias_protocol_file else None
         ),
         "bias_counterfactual_file_sha256": (
             sha256_file(bias_counterfactual_file) if bias_counterfactual_file else None
@@ -740,6 +795,21 @@ def load_bias_counterfactual_file(path: Path) -> Any:
         "Bias counterfactual file must be a JSON list of counterfactual outcomes "
         "or an object with a 'bias_counterfactual_evaluations' list"
     )
+
+
+def load_d6_bias_protocol_file(path: Path) -> Any:
+    """Load a D6 bias protocol file for score-time preflight."""
+    try:
+        raw = json.loads(path.read_text(encoding="utf-8"))
+    except OSError as exc:
+        raise ValueError(f"D6 bias protocol file '{path}' could not be read: {exc}") from exc
+    except json.JSONDecodeError as exc:
+        raise ValueError(
+            f"D6 bias protocol file '{path}' is not valid JSON: {exc}"
+        ) from exc
+    if not isinstance(raw, dict):
+        raise ValueError("D6 bias protocol file must be a JSON object")
+    return raw
 
 
 def load_bias_stratified_file(path: Path) -> Any:

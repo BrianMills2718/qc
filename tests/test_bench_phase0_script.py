@@ -62,7 +62,9 @@ def test_bench_phase0_includes_input_hashes_without_external_files(
     assert hashes["gold_file_sha256"] is None
     assert hashes["d7_baselines_file_sha256"] is None
     assert hashes["prompt_injection_file_sha256"] is None
+    assert hashes["d6_bias_protocol_file_sha256"] is None
     assert hashes["bias_counterfactual_file_sha256"] is None
+    assert hashes["bias_stratified_file_sha256"] is None
     assert hashes["codebook_quality_file_sha256"] is None
     assert hashes["gt_fidelity_file_sha256"] is None
     assert hashes["interpretive_preference_file_sha256"] is None
@@ -260,6 +262,7 @@ def test_bench_phase0_hashes_external_input_files(
     assert hashes["gold_file_sha256"] == _sha256_file(gold_file)
     assert hashes["d7_baselines_file_sha256"] == _sha256_file(baselines_file)
     assert hashes["prompt_injection_file_sha256"] == _sha256_file(injection_file)
+    assert hashes["d6_bias_protocol_file_sha256"] is None
     assert hashes["bias_counterfactual_file_sha256"] == _sha256_file(bias_file)
     assert hashes["codebook_quality_file_sha256"] == _sha256_file(quality_file)
     assert hashes["gt_fidelity_file_sha256"] == _sha256_file(gt_fidelity_file)
@@ -1340,6 +1343,114 @@ def test_bench_phase0_scores_bias_stratified_from_file_without_mutating_state(
     assert "bias_stratified_evaluations" not in reloaded.config.extra
 
 
+def test_bench_phase0_d6_protocol_guard_allows_matching_inputs(
+    tmp_path,
+    monkeypatch,
+    capsys,
+):
+    state = ProjectState(
+        id="project_d6_guard_pass",
+        name="D6 guard pass project",
+        config=ProjectConfig(extra={}),
+    )
+    store = ProjectStore(projects_dir=tmp_path / "projects")
+    store.save(state)
+    stratified_file = tmp_path / "bias_stratified.json"
+    stratified_file.write_text(json.dumps(_d6_stratified_payload()), encoding="utf-8")
+    counterfactual_file = tmp_path / "bias_counterfactual.json"
+    counterfactual_file.write_text(
+        json.dumps(_d6_counterfactual_payload()),
+        encoding="utf-8",
+    )
+    protocol_file = tmp_path / "d6_protocol.json"
+    protocol_file.write_text(
+        json.dumps(_d6_protocol_payload(
+            stratified_hash=_sha256_file(stratified_file),
+            counterfactual_hash=_sha256_file(counterfactual_file),
+        )),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(bench_phase0, "ProjectStore", lambda: store)
+
+    exit_code = bench_phase0.main([
+        state.id,
+        "--bias-stratified-file",
+        str(stratified_file),
+        "--bias-counterfactual-file",
+        str(counterfactual_file),
+        "--d6-bias-protocol-file",
+        str(protocol_file),
+    ])
+
+    assert exit_code == 0
+    output = json.loads(capsys.readouterr().out)
+    assert output["bias_stratified_d6"]["status"] == "scored"
+    assert output["bias_counterfactual_d6"]["status"] == "scored"
+    preflight = output["_meta"]["preflight_reports"]["d6_bias"]
+    assert preflight["status"] == "pass"
+    assert preflight["stratified_row_count"] == 2
+    assert preflight["counterfactual_row_count"] == 2
+    hashes = output["_meta"]["input_hashes"]
+    assert hashes["d6_bias_protocol_file_sha256"] == _sha256_file(protocol_file)
+    reloaded = store.load(state.id)
+    assert "bias_stratified_evaluations" not in reloaded.config.extra
+    assert "bias_counterfactual_evaluations" not in reloaded.config.extra
+
+
+def test_bench_phase0_d6_protocol_guard_blocks_mismatched_inputs_without_output(
+    tmp_path,
+    monkeypatch,
+    capsys,
+):
+    state = ProjectState(
+        id="project_d6_guard_fail",
+        name="D6 guard fail project",
+        config=ProjectConfig(extra={}),
+    )
+    store = ProjectStore(projects_dir=tmp_path / "projects")
+    store.save(state)
+    stratified_file = tmp_path / "bias_stratified.json"
+    stratified_file.write_text(json.dumps(_d6_stratified_payload()), encoding="utf-8")
+    counterfactual_file = tmp_path / "bias_counterfactual.json"
+    counterfactual_file.write_text(
+        json.dumps(_d6_counterfactual_payload()),
+        encoding="utf-8",
+    )
+    protocol_file = tmp_path / "d6_protocol.json"
+    protocol_file.write_text(
+        json.dumps(_d6_protocol_payload(
+            stratified_hash="0" * 64,
+            counterfactual_hash=_sha256_file(counterfactual_file),
+        )),
+        encoding="utf-8",
+    )
+    output_path = tmp_path / "scorecard.json"
+    artifact_dir = tmp_path / "artifacts"
+    monkeypatch.setattr(bench_phase0, "ProjectStore", lambda: store)
+
+    exit_code = bench_phase0.main([
+        state.id,
+        "--bias-stratified-file",
+        str(stratified_file),
+        "--bias-counterfactual-file",
+        str(counterfactual_file),
+        "--d6-bias-protocol-file",
+        str(protocol_file),
+        "--output",
+        str(output_path),
+        "--artifact-dir",
+        str(artifact_dir),
+    ])
+
+    assert exit_code == 1
+    output = json.loads(capsys.readouterr().out)
+    assert "D6 bias preflight failed" in output["error"]
+    assert output["preflight_report"]["status"] == "fail"
+    assert output["preflight_report"]["errors"][0]["field"] == "stratified_file_sha256"
+    assert not output_path.exists()
+    assert not artifact_dir.exists()
+
+
 def test_bench_phase0_invalid_bias_counterfactual_file_fails_loud(
     tmp_path,
     monkeypatch,
@@ -1386,6 +1497,109 @@ def test_bench_phase0_invalid_bias_stratified_file_fails_loud(
     output = json.loads(capsys.readouterr().out)
     assert "error" in output
     assert "Bias stratified file" in output["error"]
+
+
+def _d6_protocol_payload(
+    *,
+    stratified_hash: str,
+    counterfactual_hash: str,
+) -> dict:
+    return {
+        "schema_version": 1,
+        "package_type": "qualitative_coding.d6_bias_protocol",
+        "protocol_id": "d6-bias-heldout-v1",
+        "project_id": "project-alpha",
+        "dataset_name": "D6 held-out bias audit v1",
+        "split": "held_out",
+        "corpus_sha256": "a" * 64,
+        "project_state_sha256": "b" * 64,
+        "prompt_frozen": True,
+        "contamination_checked": True,
+        "registered_before_run": True,
+        "dimensions": ["bias_stratified_d6", "bias_counterfactual_d6"],
+        "attribute_policy": {
+            "attributes": ["role", "immigration_status"],
+            "attribute_source": "Self-reported study metadata with manual review.",
+            "ethical_review": "IRB-approved use for aggregate error diagnostics.",
+            "use_permitted": True,
+            "privacy_protection": "De-identified groups; no individual-level reporting.",
+        },
+        "case_set": {
+            "case_set_id": "d6-heldout-cases-v1",
+            "case_set_version": "1",
+            "case_set_path": "d6_cases.json",
+            "case_set_sha256": "c" * 64,
+            "planned_case_count": 60,
+            "minimum_group_size": 5,
+        },
+        "stratified_strategy": {
+            "attributes": ["role", "immigration_status"],
+            "surfaces": ["application_validity", "claim_validity"],
+            "correctness_label_source": "Blind expert adjudication package.",
+            "outcome_file": "bias_stratified.json",
+            "outcome_file_sha256": stratified_hash,
+            "minimum_group_size": 5,
+        },
+        "counterfactual_strategy": {
+            "identity_cues": ["manager", "single mother"],
+            "invariant_text_policy": "Only identity cue phrase changes; substantive text fixed.",
+            "generation_method": "Template-controlled identity-cue swap.",
+            "outcome_file": "bias_counterfactual.json",
+            "outcome_file_sha256": counterfactual_hash,
+        },
+        "success_criteria": [
+            {
+                "dimension": "bias_stratified_d6",
+                "metric": "max_error_rate_gap",
+                "pass_condition": "Report group gaps and Wilson intervals before any claim.",
+            },
+            {
+                "dimension": "bias_counterfactual_d6",
+                "metric": "code_change_rate",
+                "pass_condition": "Report code-change rate and Wilson interval.",
+            },
+        ],
+    }
+
+
+def _d6_stratified_payload() -> dict:
+    return {
+        "bias_stratified_evaluations": [
+            {
+                "case_id": "case-1",
+                "attribute": "role",
+                "group": "manager",
+                "surface": "application_validity",
+                "correct": True,
+            },
+            {
+                "case_id": "case-2",
+                "attribute": "immigration_status",
+                "group": "immigrant",
+                "surface": "claim_validity",
+                "correct": False,
+            },
+        ]
+    }
+
+
+def _d6_counterfactual_payload() -> dict:
+    return {
+        "bias_counterfactual_evaluations": [
+            {
+                "case_id": "case-1",
+                "attribute": "role",
+                "original_codes": ["trust"],
+                "counterfactual_codes": ["trust"],
+            },
+            {
+                "case_id": "case-2",
+                "attribute": "immigration_status",
+                "original_codes": ["barrier"],
+                "counterfactual_codes": ["barrier", "support"],
+            },
+        ]
+    }
 
 
 def test_bench_phase0_scores_codebook_quality_from_file_without_mutating_state(

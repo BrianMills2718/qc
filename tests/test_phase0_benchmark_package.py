@@ -97,6 +97,50 @@ def test_phase0_benchmark_package_forwards_relative_inputs(
         }),
         encoding="utf-8",
     )
+    d6_protocol = package_dir / "d6_protocol.json"
+    d6_protocol.write_text(
+        json.dumps({
+            "schema_version": 1,
+            "package_type": "qualitative_coding.d6_bias_protocol",
+            "protocol_id": "d6-package-protocol-v1",
+            "project_id": state.id,
+            "dataset_name": "D6 package protocol v1",
+            "split": "held_out",
+            "corpus_sha256": "a" * 64,
+            "project_state_sha256": "b" * 64,
+            "prompt_frozen": True,
+            "contamination_checked": True,
+            "registered_before_run": True,
+            "dimensions": ["bias_stratified_d6"],
+            "attribute_policy": {
+                "attributes": ["gender"],
+                "attribute_source": "Study metadata.",
+                "ethical_review": "Approved aggregate diagnostic use.",
+                "use_permitted": True,
+                "privacy_protection": "Aggregate reporting only.",
+            },
+            "case_set": {
+                "case_set_id": "d6-package-cases-v1",
+                "case_set_version": "1",
+                "planned_case_count": 2,
+            },
+            "stratified_strategy": {
+                "attributes": ["gender"],
+                "surfaces": ["application_validity"],
+                "correctness_label_source": "Package test labels.",
+                "outcome_file": "bias_stratified.json",
+                "outcome_file_sha256": bench_phase0.sha256_file(bias_stratified),
+            },
+            "success_criteria": [
+                {
+                    "dimension": "bias_stratified_d6",
+                    "metric": "max_error_rate_gap",
+                    "pass_condition": "Report gap before any claim.",
+                }
+            ],
+        }),
+        encoding="utf-8",
+    )
     package_file = package_dir / "phase0_package.json"
     package_file.write_text(
         json.dumps({
@@ -105,6 +149,7 @@ def test_phase0_benchmark_package_forwards_relative_inputs(
             "d3_gold_file": "d3_gold.json",
             "d3_baselines_file": "d3_baselines.json",
             "bias_stratified_file": "bias_stratified.json",
+            "d6_bias_protocol_file": "d6_protocol.json",
             "codebook_quality_file": "quality.json",
         }),
         encoding="utf-8",
@@ -123,10 +168,12 @@ def test_phase0_benchmark_package_forwards_relative_inputs(
     assert output["codebook_quality_d4"]["status"] == "scored"
     assert output["bias_stratified_d6"]["status"] == "scored"
     assert output["bias_stratified_d6"]["incorrect_cases"] == 1
+    assert output["_meta"]["preflight_reports"]["d6_bias"]["status"] == "pass"
     hashes = output["_meta"]["input_hashes"]
     assert hashes["d3_gold_file_sha256"] == bench_phase0.sha256_file(d3_gold)
     assert hashes["d3_baselines_file_sha256"] == bench_phase0.sha256_file(d3_baselines)
     assert hashes["bias_stratified_file_sha256"] == bench_phase0.sha256_file(bias_stratified)
+    assert hashes["d6_bias_protocol_file_sha256"] == bench_phase0.sha256_file(d6_protocol)
     assert hashes["codebook_quality_file_sha256"] == bench_phase0.sha256_file(quality)
     reloaded = store.load(state.id)
     assert "application_gold" not in reloaded.config.extra
