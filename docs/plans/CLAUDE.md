@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 59 | D9 non-inferiority margin scorecard | High | Planned | `D9_NON_INFERIORITY_MARGIN_SCORECARD.md` |
 
 ## Completed Plans
 
