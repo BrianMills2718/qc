@@ -22,7 +22,9 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Continue through the ranked roadmap without pausing after each verified
+1. Execute Plan #108 (`INV7_LIVE_FIXTURE_PROMPT_HASHES.md`): add prompt-hash
+   provenance to live INV-7 fixture outputs and package validation.
+2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
 **Completed checkpoint:** Prompt override rendering now requires every exposed

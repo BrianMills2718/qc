@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 108 | INV-7 live fixture prompt hashes | High | Planned | `INV7_LIVE_FIXTURE_PROMPT_HASHES.md` |
 
 ## Completed Plans
 
