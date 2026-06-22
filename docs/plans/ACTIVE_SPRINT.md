@@ -22,7 +22,7 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Create and execute the next validity-infrastructure slice: build a strict
+1. Execute Plan #102 (`D3_D7_IMPORTED_GOLD_BENCH_PACKAGE.md`): build a strict
    Phase 0 benchmark-package assembly path for imported D3/D7 adjudication gold
    outputs, preserving existing claim discipline that imported packages are
    protocol artifacts until populated by real adjudication.

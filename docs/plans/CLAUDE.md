@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 102 | D3/D7 imported-gold benchmark package | High | Planned | `D3_D7_IMPORTED_GOLD_BENCH_PACKAGE.md` |
 
 ## Completed Plans
 
