@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 165 | INV-7 prompt override guardrail wrapper | High | Planned | `INV7_PROMPT_OVERRIDE_GUARDRAIL_WRAPPER.md` |
 
 ## Completed Plans
 
