@@ -22,8 +22,9 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Select the next highest-value documented roadmap lane from
-   `docs/PROJECT_THEORY_AND_GOALS.md` and `docs/EVALUATION_HARNESS.md`.
+1. Execute Plan #144, `D7_BASELINE_VALIDATOR_CLI.md`, to add top-level
+   `qc_cli.py validate-d7-baseline-package` parity for the D7 baseline package
+   validator.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 

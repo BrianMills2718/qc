@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| #144 | D7 baseline validator CLI | Medium | Planned | `D7_BASELINE_VALIDATOR_CLI.md` |
 
 ## Completed Plans
 
