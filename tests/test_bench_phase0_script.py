@@ -63,6 +63,7 @@ def test_bench_phase0_includes_input_hashes_without_external_files(
     assert hashes["d7_baselines_file_sha256"] is None
     assert hashes["prompt_injection_file_sha256"] is None
     assert hashes["d6_bias_protocol_file_sha256"] is None
+    assert hashes["d4_codebook_quality_protocol_file_sha256"] is None
     assert hashes["bias_counterfactual_file_sha256"] is None
     assert hashes["bias_stratified_file_sha256"] is None
     assert hashes["codebook_quality_file_sha256"] is None
@@ -1451,6 +1452,95 @@ def test_bench_phase0_d6_protocol_guard_blocks_mismatched_inputs_without_output(
     assert not artifact_dir.exists()
 
 
+def test_bench_phase0_d4_protocol_guard_allows_matching_inputs(
+    tmp_path,
+    monkeypatch,
+    capsys,
+):
+    state = ProjectState(
+        id="project_d4_guard_pass",
+        name="D4 guard pass project",
+        config=ProjectConfig(extra={}),
+    )
+    store = ProjectStore(projects_dir=tmp_path / "projects")
+    store.save(state)
+    quality_file = tmp_path / "quality.json"
+    quality_file.write_text(json.dumps(_d4_quality_payload()), encoding="utf-8")
+    protocol_file = tmp_path / "d4_protocol.json"
+    protocol_file.write_text(
+        json.dumps(_d4_protocol_payload(quality_hash=_sha256_file(quality_file))),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(bench_phase0, "ProjectStore", lambda: store)
+
+    exit_code = bench_phase0.main([
+        state.id,
+        "--codebook-quality-file",
+        str(quality_file),
+        "--d4-codebook-quality-protocol-file",
+        str(protocol_file),
+    ])
+
+    assert exit_code == 0
+    output = json.loads(capsys.readouterr().out)
+    assert output["codebook_quality_d4"]["status"] == "scored"
+    preflight = output["_meta"]["preflight_reports"]["d4_codebook_quality"]
+    assert preflight["status"] == "pass"
+    assert preflight["result_row_count"] == 2
+    assert preflight["evaluator_count"] == 2
+    hashes = output["_meta"]["input_hashes"]
+    assert hashes["d4_codebook_quality_protocol_file_sha256"] == _sha256_file(
+        protocol_file
+    )
+    assert hashes["codebook_quality_file_sha256"] == _sha256_file(quality_file)
+    reloaded = store.load(state.id)
+    assert "codebook_quality_evaluations" not in reloaded.config.extra
+
+
+def test_bench_phase0_d4_protocol_guard_blocks_mismatched_inputs_without_output(
+    tmp_path,
+    monkeypatch,
+    capsys,
+):
+    state = ProjectState(
+        id="project_d4_guard_fail",
+        name="D4 guard fail project",
+        config=ProjectConfig(extra={}),
+    )
+    store = ProjectStore(projects_dir=tmp_path / "projects")
+    store.save(state)
+    quality_file = tmp_path / "quality.json"
+    quality_file.write_text(json.dumps(_d4_quality_payload()), encoding="utf-8")
+    protocol_file = tmp_path / "d4_protocol.json"
+    protocol_file.write_text(
+        json.dumps(_d4_protocol_payload(quality_hash="0" * 64)),
+        encoding="utf-8",
+    )
+    output_path = tmp_path / "scorecard.json"
+    artifact_dir = tmp_path / "artifacts"
+    monkeypatch.setattr(bench_phase0, "ProjectStore", lambda: store)
+
+    exit_code = bench_phase0.main([
+        state.id,
+        "--codebook-quality-file",
+        str(quality_file),
+        "--d4-codebook-quality-protocol-file",
+        str(protocol_file),
+        "--output",
+        str(output_path),
+        "--artifact-dir",
+        str(artifact_dir),
+    ])
+
+    assert exit_code == 1
+    output = json.loads(capsys.readouterr().out)
+    assert "D4 codebook-quality preflight failed" in output["error"]
+    assert output["preflight_report"]["status"] == "fail"
+    assert output["preflight_report"]["errors"][0]["field"] == "quality_file_sha256"
+    assert not output_path.exists()
+    assert not artifact_dir.exists()
+
+
 def test_bench_phase0_invalid_bias_counterfactual_file_fails_loud(
     tmp_path,
     monkeypatch,
@@ -1559,6 +1649,81 @@ def _d6_protocol_payload(
                 "pass_condition": "Report code-change rate and Wilson interval.",
             },
         ],
+    }
+
+
+def _d4_protocol_payload(*, quality_hash: str) -> dict:
+    return {
+        "schema_version": 1,
+        "package_type": "qualitative_coding.d4_codebook_quality_protocol",
+        "protocol_id": "d4-codebook-quality-heldout-v1",
+        "project_id": "project-alpha",
+        "dataset_name": "D4 held-out codebook quality v1",
+        "split": "held_out",
+        "corpus_sha256": "a" * 64,
+        "project_state_sha256": "b" * 64,
+        "codebook_artifact_sha256": "c" * 64,
+        "prompt_frozen": True,
+        "contamination_checked": True,
+        "registered_before_evaluation": True,
+        "blinding": {
+            "raters_blinded_to_origin": True,
+            "source_labels_masked": True,
+            "blinding_method": "Anonymized codebooks without origin labels.",
+        },
+        "evaluator_plan": {
+            "evaluator_types": ["human_expert", "llm_judge"],
+            "planned_evaluator_count": 2,
+            "qualification": "Expert qualitative rater plus frozen LLM judge.",
+        },
+        "rubric_metrics": ["clarity", "specificity", "usefulness", "grounding"],
+        "target_scopes": ["codebook", "individual_code"],
+        "outcome_file": "quality.json",
+        "outcome_file_sha256": quality_hash,
+        "success_criteria": [
+            {
+                "metric": "clarity",
+                "pass_condition": "Report clarity mean and interval.",
+            },
+            {
+                "metric": "specificity",
+                "pass_condition": "Report specificity mean and interval.",
+            },
+            {
+                "metric": "usefulness",
+                "pass_condition": "Report usefulness mean and interval.",
+            },
+            {
+                "metric": "grounding",
+                "pass_condition": "Report grounding mean and interval.",
+            },
+        ],
+    }
+
+
+def _d4_quality_payload() -> dict:
+    return {
+        "codebook_quality_evaluations": [
+            {
+                "evaluator": "expert-a",
+                "evaluator_type": "human_expert",
+                "clarity": 0.8,
+                "specificity": 0.7,
+                "usefulness": 0.9,
+                "grounding": 1.0,
+                "scope": "codebook",
+            },
+            {
+                "evaluator": "judge-a",
+                "evaluator_type": "llm_judge",
+                "clarity": 0.9,
+                "specificity": 0.8,
+                "usefulness": 0.9,
+                "grounding": 0.8,
+                "scope": "individual_code",
+                "code_id": "C-001",
+            },
+        ]
     }
 
 

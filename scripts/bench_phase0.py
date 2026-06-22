@@ -8,6 +8,7 @@ Usage:
         [--d6-bias-protocol-file protocol.json]
         [--bias-counterfactual-file bias.json]
         [--bias-stratified-file bias_stratified.json]
+        [--d4-codebook-quality-protocol-file protocol.json]
         [--codebook-quality-file quality.json]
         [--gt-fidelity-file gt_fidelity.json]
         [--interpretive-preference-file preference.json]
@@ -40,6 +41,9 @@ from qc_clean.core.bench import (
     d10_cost_latency_scorecard,
     d10_wall_clock_scorecard,
     phase0_scorecard,
+)
+from qc_clean.core.d4_codebook_quality_preflight import (
+    preflight_d4_codebook_quality_payloads,
 )
 from qc_clean.core.d6_bias_preflight import preflight_d6_bias_payloads
 from qc_clean.core.d3_gold import application_gold_payload_for_scorecard
@@ -83,6 +87,13 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument(
         "--bias-stratified-file",
         help="Optional D6 stratified correctness/error JSON file; applied in memory only",
+    )
+    parser.add_argument(
+        "--d4-codebook-quality-protocol-file",
+        help=(
+            "Optional D4 codebook-quality protocol JSON file; preflights "
+            "supplied D4 rows before scoring"
+        ),
     )
     parser.add_argument(
         "--codebook-quality-file",
@@ -130,6 +141,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     loaded_state = state
     bias_counterfactual_results: Any | None = None
     bias_stratified_results: Any | None = None
+    codebook_quality_results: Any | None = None
 
     if args.d3_gold_file:
         try:
@@ -248,6 +260,33 @@ def main(argv: Sequence[str] | None = None) -> int:
         state.config.extra = dict(state.config.extra)
         state.config.extra["codebook_quality_evaluations"] = codebook_quality_results
 
+    d4_codebook_quality_preflight_report = None
+    if args.d4_codebook_quality_protocol_file:
+        try:
+            d4_codebook_quality_protocol = load_d4_codebook_quality_protocol_file(
+                Path(args.d4_codebook_quality_protocol_file)
+            )
+        except ValueError as exc:
+            print(json.dumps({"error": str(exc)}))
+            return 1
+        d4_codebook_quality_preflight_report = preflight_d4_codebook_quality_payloads(
+            d4_codebook_quality_protocol,
+            codebook_quality_results,
+            quality_file_sha256=(
+                sha256_file(Path(args.codebook_quality_file))
+                if args.codebook_quality_file
+                else None
+            ),
+        )
+        if d4_codebook_quality_preflight_report.status != "pass":
+            print(json.dumps({
+                "error": "D4 codebook-quality preflight failed",
+                "preflight_report": d4_codebook_quality_preflight_report.model_dump(
+                    mode="json"
+                ),
+            }))
+            return 1
+
     if args.gt_fidelity_file:
         try:
             gt_fidelity_results = load_gt_fidelity_file(Path(args.gt_fidelity_file))
@@ -295,6 +334,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         card.setdefault("_meta", {}).setdefault("preflight_reports", {})["d6_bias"] = (
             d6_bias_preflight_report.model_dump(mode="json")
         )
+    if d4_codebook_quality_preflight_report is not None:
+        card.setdefault("_meta", {}).setdefault("preflight_reports", {})[
+            "d4_codebook_quality"
+        ] = d4_codebook_quality_preflight_report.model_dump(mode="json")
     card.setdefault("_meta", {})["input_hashes"] = phase0_input_hashes(
         loaded_state,
         d3_gold_file=Path(args.d3_gold_file) if args.d3_gold_file else None,
@@ -306,6 +349,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         prompt_injection_file=Path(args.prompt_injection_file) if args.prompt_injection_file else None,
         d6_bias_protocol_file=(
             Path(args.d6_bias_protocol_file) if args.d6_bias_protocol_file else None
+        ),
+        d4_codebook_quality_protocol_file=(
+            Path(args.d4_codebook_quality_protocol_file)
+            if args.d4_codebook_quality_protocol_file
+            else None
         ),
         bias_counterfactual_file=(
             Path(args.bias_counterfactual_file) if args.bias_counterfactual_file else None
@@ -514,6 +562,11 @@ def phase0_command_provenance(args: argparse.Namespace) -> dict[str, Any]:
             if args.d6_bias_protocol_file
             else None
         ),
+        "d4_codebook_quality_protocol_file": (
+            str(Path(args.d4_codebook_quality_protocol_file))
+            if args.d4_codebook_quality_protocol_file
+            else None
+        ),
         "bias_counterfactual_file": (
             str(Path(args.bias_counterfactual_file))
             if args.bias_counterfactual_file
@@ -580,6 +633,7 @@ def phase0_input_hashes(
     d7_baselines_file: Path | None,
     prompt_injection_file: Path | None,
     d6_bias_protocol_file: Path | None,
+    d4_codebook_quality_protocol_file: Path | None,
     bias_counterfactual_file: Path | None,
     bias_stratified_file: Path | None,
     codebook_quality_file: Path | None,
@@ -609,6 +663,11 @@ def phase0_input_hashes(
         ),
         "d6_bias_protocol_file_sha256": (
             sha256_file(d6_bias_protocol_file) if d6_bias_protocol_file else None
+        ),
+        "d4_codebook_quality_protocol_file_sha256": (
+            sha256_file(d4_codebook_quality_protocol_file)
+            if d4_codebook_quality_protocol_file
+            else None
         ),
         "bias_counterfactual_file_sha256": (
             sha256_file(bias_counterfactual_file) if bias_counterfactual_file else None
@@ -809,6 +868,23 @@ def load_d6_bias_protocol_file(path: Path) -> Any:
         ) from exc
     if not isinstance(raw, dict):
         raise ValueError("D6 bias protocol file must be a JSON object")
+    return raw
+
+
+def load_d4_codebook_quality_protocol_file(path: Path) -> Any:
+    """Load a D4 codebook-quality protocol file for score-time preflight."""
+    try:
+        raw = json.loads(path.read_text(encoding="utf-8"))
+    except OSError as exc:
+        raise ValueError(
+            f"D4 codebook-quality protocol file '{path}' could not be read: {exc}"
+        ) from exc
+    except json.JSONDecodeError as exc:
+        raise ValueError(
+            f"D4 codebook-quality protocol file '{path}' is not valid JSON: {exc}"
+        ) from exc
+    if not isinstance(raw, dict):
+        raise ValueError("D4 codebook-quality protocol file must be a JSON object")
     return raw
 
 

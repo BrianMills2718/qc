@@ -66,12 +66,63 @@ def test_phase0_benchmark_package_forwards_relative_inputs(
             "codebook_quality_evaluations": [
                 {
                     "evaluator": "judge-a",
+                    "evaluator_type": "unspecified",
                     "clarity": 0.8,
                     "specificity": 0.7,
                     "usefulness": 0.9,
                     "grounding": 1.0,
                 }
             ]
+        }),
+        encoding="utf-8",
+    )
+    d4_protocol = package_dir / "d4_protocol.json"
+    d4_protocol.write_text(
+        json.dumps({
+            "schema_version": 1,
+            "package_type": "qualitative_coding.d4_codebook_quality_protocol",
+            "protocol_id": "d4-package-protocol-v1",
+            "project_id": state.id,
+            "dataset_name": "D4 package protocol v1",
+            "split": "held_out",
+            "corpus_sha256": "a" * 64,
+            "project_state_sha256": "b" * 64,
+            "codebook_artifact_sha256": "c" * 64,
+            "prompt_frozen": True,
+            "contamination_checked": True,
+            "registered_before_evaluation": True,
+            "blinding": {
+                "raters_blinded_to_origin": True,
+                "source_labels_masked": True,
+                "blinding_method": "Package fixture masks codebook origin.",
+            },
+            "evaluator_plan": {
+                "evaluator_types": ["unspecified"],
+                "planned_evaluator_count": 1,
+                "qualification": "Package fixture evaluator.",
+            },
+            "rubric_metrics": ["clarity", "specificity", "usefulness", "grounding"],
+            "target_scopes": ["codebook"],
+            "outcome_file": "quality.json",
+            "outcome_file_sha256": bench_phase0.sha256_file(quality),
+            "success_criteria": [
+                {
+                    "metric": "clarity",
+                    "pass_condition": "Report clarity before any claim.",
+                },
+                {
+                    "metric": "specificity",
+                    "pass_condition": "Report specificity before any claim.",
+                },
+                {
+                    "metric": "usefulness",
+                    "pass_condition": "Report usefulness before any claim.",
+                },
+                {
+                    "metric": "grounding",
+                    "pass_condition": "Report grounding before any claim.",
+                },
+            ],
         }),
         encoding="utf-8",
     )
@@ -150,6 +201,7 @@ def test_phase0_benchmark_package_forwards_relative_inputs(
             "d3_baselines_file": "d3_baselines.json",
             "bias_stratified_file": "bias_stratified.json",
             "d6_bias_protocol_file": "d6_protocol.json",
+            "d4_codebook_quality_protocol_file": "d4_protocol.json",
             "codebook_quality_file": "quality.json",
         }),
         encoding="utf-8",
@@ -169,11 +221,15 @@ def test_phase0_benchmark_package_forwards_relative_inputs(
     assert output["bias_stratified_d6"]["status"] == "scored"
     assert output["bias_stratified_d6"]["incorrect_cases"] == 1
     assert output["_meta"]["preflight_reports"]["d6_bias"]["status"] == "pass"
+    assert output["_meta"]["preflight_reports"]["d4_codebook_quality"]["status"] == "pass"
     hashes = output["_meta"]["input_hashes"]
     assert hashes["d3_gold_file_sha256"] == bench_phase0.sha256_file(d3_gold)
     assert hashes["d3_baselines_file_sha256"] == bench_phase0.sha256_file(d3_baselines)
     assert hashes["bias_stratified_file_sha256"] == bench_phase0.sha256_file(bias_stratified)
     assert hashes["d6_bias_protocol_file_sha256"] == bench_phase0.sha256_file(d6_protocol)
+    assert hashes["d4_codebook_quality_protocol_file_sha256"] == (
+        bench_phase0.sha256_file(d4_protocol)
+    )
     assert hashes["codebook_quality_file_sha256"] == bench_phase0.sha256_file(quality)
     reloaded = store.load(state.id)
     assert "application_gold" not in reloaded.config.extra
