@@ -22,8 +22,9 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Select the next highest-value documented roadmap lane from
-   `docs/PROJECT_THEORY_AND_GOALS.md` and `docs/EVALUATION_HARNESS.md`.
+1. Execute Plan #142, `INV7_PROMPT_OVERRIDE_SURFACE_REGISTRY.md`, to turn the
+   remaining INV-7 custom-prompt governance gap into a deterministic registry
+   and source check.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 

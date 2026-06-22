@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| #142 | INV-7 prompt override surface registry | High | Planned | `INV7_PROMPT_OVERRIDE_SURFACE_REGISTRY.md` |
 
 ## Completed Plans
 
