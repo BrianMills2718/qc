@@ -6,7 +6,6 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 96 | Export audit CLI integration | High | Planned | `EXPORT_AUDIT_CLI_INTEGRATION.md` |
 
 ## Completed Plans
 
@@ -107,6 +106,7 @@ Track all implementation work here.
 | Corpus scope phrasing lint | Scope/report follow-up: `make lint-scope-phrasing` scans arbitrary text for risky population-generalizing phrasing under missing or under-specified corpus scope | `completed/CORPUS_SCOPE_PHRASING_LINT.md` |
 | Export audit hash manifest | Audit substrate first slice: `make export-audit-manifest` records project-state and export artifact SHA-256 hashes without claiming a full tamper-evident log | `completed/EXPORT_AUDIT_HASH_MANIFEST.md` |
 | Export audit manifest verification | Audit substrate follow-up: `make verify-export-audit-manifest` checks manifest self-hash, artifact hashes, and optional project-state hash without claiming a signed/append-only log | `completed/EXPORT_AUDIT_MANIFEST_VERIFICATION.md` |
+| Export audit CLI integration | Audit substrate follow-up: `project export --audit-manifest --verify-audit-manifest` can write and verify optional sidecars without changing default export contracts | `completed/EXPORT_AUDIT_CLI_INTEGRATION.md` |
 
 ## Status Key
 

@@ -1,10 +1,37 @@
 # Plan #96: Export Audit CLI Integration
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Plan #94 export audit hash manifest; Plan #95 manifest verification
 **Blocks:** lower-friction export integrity handoffs; future strict publish preflight
+
+---
+
+## Outcome
+
+Added optional audit-manifest integration to `qc_cli.py project export`.
+Exports still behave exactly as before unless audit flags are supplied. When
+`--audit-manifest manifest.json` is present, the command writes a schema_version=1
+export-audit manifest for the produced JSON/CSV/Markdown/QDPX artifact path(s).
+When `--verify-audit-manifest` is also present, it immediately verifies the
+manifest against artifact bytes and the current in-memory project state.
+
+Implementation commit: `c24d1bd`
+
+## Verification
+
+- TDD red check: `python -m pytest tests/test_project_commands.py -q` initially
+  failed with missing manifest files, missing parser flags, and missing
+  verify-without-manifest rejection (`5 failed, 31 passed`).
+- Focused pass: `python -m pytest tests/test_project_commands.py -q` →
+  `36 passed`.
+- Focused lint: `python -m ruff check qc_cli.py qc_clean/core/cli/commands/project.py tests/test_project_commands.py` →
+  `All checks passed!`
+- Docs gate: `make docs-check` passed.
+- Full gate: `make check` → `864 passed, 1 skipped, 8 deselected`; Ruff and
+  docs checks passed.
+- Type-check status: `make check` reports `Type check not yet configured`.
 
 ---
 
@@ -124,26 +151,26 @@ it does not create a new cross-project capability.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] Default `project export` behavior remains unchanged without audit flags.
-- [ ] JSON/Markdown/QDPX exports can write a one-artifact manifest.
-- [ ] CSV exports can write a manifest containing every returned CSV artifact.
-- [ ] `--verify-audit-manifest` verifies immediately and fails loud on invalid
+- [x] Default `project export` behavior remains unchanged without audit flags.
+- [x] JSON/Markdown/QDPX exports can write a one-artifact manifest.
+- [x] CSV exports can write a manifest containing every returned CSV artifact.
+- [x] `--verify-audit-manifest` verifies immediately and fails loud on invalid
   verification.
-- [ ] `--verify-audit-manifest` without `--audit-manifest` exits nonzero.
-- [ ] Docs state CLI integration is optional integrity/provenance metadata, not
+- [x] `--verify-audit-manifest` without `--audit-manifest` exits nonzero.
+- [x] Docs state CLI integration is optional integrity/provenance metadata, not
   a full tamper-evident audit log.
 
 > Process criteria:
-- [ ] Required focused tests pass.
-- [ ] Full `make check` passes or any failure is documented with evidence.
-- [ ] Type-check status is reported.
-- [ ] Verified work is committed and pushed.
+- [x] Required focused tests pass.
+- [x] Full `make check` passes or any failure is documented with evidence.
+- [x] Type-check status is reported.
+- [x] Verified work is committed and pushed.
 
 ---
 
 ## Open Questions
 
-- [ ] Should exports eventually write manifests by default? - Status: DEFERRED |
+- [x] Should exports eventually write manifests by default? - Status: DEFERRED |
   Why it matters: default sidecars change user-visible output contracts and
   should wait for a publish/export policy decision.
 

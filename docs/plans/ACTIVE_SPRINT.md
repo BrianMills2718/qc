@@ -22,9 +22,9 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #96 (`EXPORT_AUDIT_CLI_INTEGRATION.md`): add optional
-   `project export` audit-manifest and immediate-verification flags without
-   changing default export contracts.
+1. Create and execute the next high-value lane: MCP export-audit integration,
+   so agent-facing export tools can write optional manifest sidecars without
+   changing their default return contracts.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
@@ -65,7 +65,9 @@ integrity/provenance metadata only, not signing, append-only logging, or a full
 tamper-evident audit substrate. `make verify-export-audit-manifest` now checks
 manifest self-hash, artifact sizes/hashes, and optional current project-state
 hash; verification is still local integrity checking, not a signed or
-append-only audit log.
+append-only audit log. `qc_cli.py project export --audit-manifest ...
+--verify-audit-manifest` can now write and immediately verify optional sidecars
+for JSON/CSV/Markdown/QDPX exports without changing default export behavior.
 MCP now exposes `qc_review_decisions` for agent-driven review decisions,
 including claim targets with rationale preservation, while keeping the old
 `qc_review_codes` tool compatible. MCP also exposes `qc_review_claims` as a
