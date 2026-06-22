@@ -1,12 +1,28 @@
 # Plan #66: D1/D2 Structural Rate Wilson Intervals
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** None
 **Blocks:** Phase 0 foundational-rate uncertainty metadata
 
 ---
+
+## Outcome
+
+Phase 0 scorecards now attach local Wilson interval metadata to foundational
+structural rates: `grounding.grounding_rate_ci`, `coverage.coverage_rate_ci`,
+and `coverage.examined_rate_ci`. The underlying `GroundingReport` and
+`CoverageReport` dataclasses are unchanged. Empty denominators keep undefined
+Wilson bounds. This is local uncertainty metadata, not validity evidence.
+
+## Verification
+
+- `python -m pytest tests/test_bench_phase0.py -q` - 54 passed
+- `python -m ruff check qc_clean/core/bench.py tests/test_bench_phase0.py` - clean
+- `python scripts/check_markdown_links.py` - clean
+- `python scripts/sync_plan_status.py --check` - clean
+- `make check` - 773 passed, 1 skipped, 8 deselected; lint and docs checks clean; type check not configured
 
 ## Gap
 
@@ -56,12 +72,12 @@ Internal scorecard capability only; no cross-project boundary is created.
 
 ### Capability Validation
 
-- [ ] Grounding scorecard includes `grounding_rate_ci`.
-- [ ] Coverage scorecard includes `coverage_rate_ci`.
-- [ ] Coverage scorecard includes `examined_rate_ci`.
-- [ ] Interval counts match existing numerator/denominator fields.
-- [ ] Empty denominators keep undefined Wilson bounds.
-- [ ] Docs preserve the caveat that intervals are local uncertainty metadata, not validity evidence.
+- [x] Grounding scorecard includes `grounding_rate_ci`.
+- [x] Coverage scorecard includes `coverage_rate_ci`.
+- [x] Coverage scorecard includes `examined_rate_ci`.
+- [x] Interval counts match existing numerator/denominator fields.
+- [x] Empty denominators keep undefined Wilson bounds.
+- [x] Docs preserve the caveat that intervals are local uncertainty metadata, not validity evidence.
 
 ---
 
@@ -110,18 +126,18 @@ Internal scorecard capability only; no cross-project boundary is created.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] D1 grounding rate has Wilson interval metadata.
-- [ ] D2 coverage rate has Wilson interval metadata.
-- [ ] D2 examined rate has Wilson interval metadata.
-- [ ] Existing D1/D2 point metrics are unchanged.
-- [ ] Docs preserve the caveat that this is local metadata only.
+- [x] D1 grounding rate has Wilson interval metadata.
+- [x] D2 coverage rate has Wilson interval metadata.
+- [x] D2 examined rate has Wilson interval metadata.
+- [x] Existing D1/D2 point metrics are unchanged.
+- [x] Docs preserve the caveat that this is local metadata only.
 
 > Process criteria:
-- [ ] Required tests pass
-- [ ] Full test suite passes
-- [ ] Type check status reported
-- [ ] Docs updated
-- [ ] Plan completed, committed, and pushed
+- [x] Required tests pass
+- [x] Full test suite passes
+- [x] Type check status reported
+- [x] Docs updated
+- [x] Plan completed, committed, and pushed
 
 ---
 
