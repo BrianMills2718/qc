@@ -1,10 +1,49 @@
 # Plan #138: Theoretical Sampling Candidate Export
 
-**Status:** In Progress
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** #137
 **Blocks:** Agent-drivable theoretical-sampling package workflows
+
+---
+
+## Outcome
+
+Implemented across:
+
+- `b578a5e` (`[Plan: THEORETICAL_SAMPLING_CANDIDATE_EXPORT] Add candidate export`)
+  for core exporter, script, Make target, and tests.
+- `5bd82a8` (`[Plan: THEORETICAL_SAMPLING_CANDIDATE_EXPORT] Document candidate export`)
+  for canonical docs.
+- `d24d80d` (`[Plan: THEORETICAL_SAMPLING_CANDIDATE_EXPORT] Add candidate export`)
+  for generated `AGENTS.md` sync.
+
+The repo now exports schema_version=1 loaded-document theoretical-sampling
+candidate packages from existing diagnostic suggestions via
+`make export-theoretical-sampling-candidates` /
+`scripts/export_theoretical_sampling_candidates.py`. Exported packages include
+protocol metadata, project/corpus/state hashes, loaded-document candidates,
+target gap codes/types, and the claim-discipline caveat, and they are compatible
+with `make theoretical-sampling-preflight`.
+
+This is candidate-package/provenance export only. It is not candidate-selection
+execution, new data collection, sampling-frame adequacy evidence,
+methodological saturation evidence, full grounded-theory evidence, or SOTA
+evidence.
+
+Verification:
+
+- TDD red captured: missing `qc_clean.core.theoretical_sampling_candidates`
+  module and missing `scripts.export_theoretical_sampling_candidates` import
+  before implementation.
+- `python -m pytest tests/test_theoretical_sampling_candidate_export.py tests/test_export_theoretical_sampling_candidates_script.py tests/test_theoretical_sampling_preflight.py -q`
+  passed (`10 passed`).
+- `python -m ruff check qc_clean/core/theoretical_sampling_candidates.py scripts/export_theoretical_sampling_candidates.py tests/test_theoretical_sampling_candidate_export.py tests/test_export_theoretical_sampling_candidates_script.py`
+  passed.
+- `make docs-check` passed.
+- `make check` passed (`1046 passed, 1 skipped, 8 deselected`); type check is
+  not yet configured in this repo.
 
 ---
 
@@ -65,12 +104,12 @@ methodological saturation.
 
 ### Capability Validation
 
-- [ ] Exported package validates with `TheoreticalSamplingCandidatePackage`.
-- [ ] Export fails loudly if the protocol requires external-only collection.
-- [ ] Export records project/corpus/state hashes and does not mutate
+- [x] Exported package validates with `TheoreticalSamplingCandidatePackage`.
+- [x] Export fails loudly if the protocol requires external-only collection.
+- [x] Export records project/corpus/state hashes and does not mutate
   `ProjectState`.
-- [ ] Script writes identical stdout/file JSON and returns JSON errors.
-- [ ] Make target exposes the exporter.
+- [x] Script writes identical stdout/file JSON and returns JSON errors.
+- [x] Make target exposes the exporter.
 
 ---
 
@@ -129,21 +168,21 @@ methodological saturation.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] Core exporter writes schema_version=1 candidate packages.
-- [ ] Candidate packages are preflight-compatible with Plan #137.
-- [ ] Export fails loudly for protocol/source combinations it cannot satisfy.
-- [ ] Export does not mutate saved or in-memory project state.
-- [ ] Script and Make target are agent-drivable.
-- [ ] Docs preserve that this is package export/provenance only, not sampling
+- [x] Core exporter writes schema_version=1 candidate packages.
+- [x] Candidate packages are preflight-compatible with Plan #137.
+- [x] Export fails loudly for protocol/source combinations it cannot satisfy.
+- [x] Export does not mutate saved or in-memory project state.
+- [x] Script and Make target are agent-drivable.
+- [x] Docs preserve that this is package export/provenance only, not sampling
   execution, sampling adequacy, or saturation evidence.
 
 > Process criteria:
-- [ ] Required focused tests pass.
-- [ ] Focused Ruff check passes.
-- [ ] `make docs-check` passes.
-- [ ] Full `make check` passes or any failure is documented with evidence.
-- [ ] Type-check status is reported.
-- [ ] Verified work is committed and pushed.
+- [x] Required focused tests pass.
+- [x] Focused Ruff check passes.
+- [x] `make docs-check` passes.
+- [x] Full `make check` passes or any failure is documented with evidence.
+- [x] Type-check status is reported.
+- [x] Verified work is committed and pushed.
 
 ---
 

@@ -22,11 +22,22 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #138 (`THEORETICAL_SAMPLING_CANDIDATE_EXPORT.md`): export
-   preflight-ready theoretical-sampling candidate packages from existing
-   diagnostic suggestions.
+1. Select the next highest-value documented roadmap lane from
+   `docs/PROJECT_THEORY_AND_GOALS.md` and `docs/EVALUATION_HARNESS.md`.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
+
+**Completed checkpoint:** Loaded-document theoretical-sampling candidate
+packages can now be exported through
+`make export-theoretical-sampling-candidates` /
+`scripts/export_theoretical_sampling_candidates.py`. The exporter loads a saved
+project, validates the registered protocol against the current project/corpus
+hashes, runs the existing diagnostic `suggest_next_documents()` heuristic, and
+writes schema_version=1 candidate packages compatible with
+`make theoretical-sampling-preflight`. This is candidate-package/provenance
+export only, not candidate-selection execution, new data collection,
+sampling-frame adequacy evidence, methodological saturation evidence, full
+grounded-theory evidence, or SOTA evidence.
 
 **Completed checkpoint:** Theoretical-sampling candidate/result packages can
 now be preflighted against registered protocols through
