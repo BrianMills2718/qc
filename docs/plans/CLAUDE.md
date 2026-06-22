@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 147 | D3 baseline package validator | Medium | In progress | `D3_BASELINE_PACKAGE_VALIDATOR.md` |
 
 ## Completed Plans
 
