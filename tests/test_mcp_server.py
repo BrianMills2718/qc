@@ -941,6 +941,65 @@ class TestExport:
         assert result["format"] == "json"
         assert Path(result["exported_to"]).exists()
 
+    def test_export_markdown_with_audit_manifest(
+        self,
+        completed_project,
+        tmp_store,
+        tmp_path,
+        monkeypatch,
+    ):
+        exports_dir = (tmp_path / "exports").resolve()
+        monkeypatch.setattr(qc_mcp_server, "EXPORTS_DIR", exports_dir)
+
+        result = json.loads(
+            qc_mcp_server.qc_export_markdown(
+                "proj-done",
+                output_file="../../report.md",
+                audit_manifest=True,
+            )
+        )
+
+        assert result["format"] == "markdown"
+        assert Path(result["exported_to"]).parent == exports_dir
+        assert Path(result["audit_manifest"]).parent == exports_dir
+        assert Path(result["audit_manifest"]).name == "report.manifest.json"
+        assert Path(result["audit_manifest"]).exists()
+
+    def test_export_json_with_audit_manifest_verification(
+        self,
+        completed_project,
+        tmp_store,
+        tmp_path,
+        monkeypatch,
+    ):
+        exports_dir = (tmp_path / "exports").resolve()
+        monkeypatch.setattr(qc_mcp_server, "EXPORTS_DIR", exports_dir)
+
+        result = json.loads(
+            qc_mcp_server.qc_export_json(
+                "proj-done",
+                output_file="export.json",
+                audit_manifest=True,
+                verify_audit_manifest=True,
+            )
+        )
+
+        assert result["format"] == "json"
+        assert result["audit_verification"]["status"] == "verified"
+        assert Path(result["audit_manifest"]).exists()
+
+    def test_export_verify_requires_audit_manifest(self, completed_project, tmp_store):
+        result = json.loads(
+            qc_mcp_server.qc_export_json(
+                "proj-done",
+                output_file="export.json",
+                verify_audit_manifest=True,
+            )
+        )
+
+        assert "error" in result
+        assert "requires audit_manifest=True" in result["error"]
+
     def test_export_not_found(self, tmp_store):
         result = json.loads(qc_mcp_server.qc_export_markdown("nope"))
         assert "error" in result

@@ -49,3 +49,9 @@ def test_confine_export_blank_name_falls_back_to_default(exports_dir):
     result = Path(mcp_server._confine_export_path("...", "fallback.json"))
     assert result.parent == exports_dir
     assert result.name == "fallback.json"
+
+
+def test_confine_export_manifest_stays_in_exports_dir(exports_dir):
+    result = Path(mcp_server._manifest_path_for_export("/tmp/unsafe/report.md"))
+    assert result.parent == exports_dir
+    assert result.name == "report.manifest.json"

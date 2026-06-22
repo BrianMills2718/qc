@@ -24,6 +24,11 @@ import sys
 sys.path.insert(0, str(Path(__file__).parent))
 
 from qc_clean.core.persistence.project_store import ProjectStore
+from qc_clean.core.export.audit_manifest import (
+    build_export_audit_manifest,
+    verify_export_audit_manifest_payload,
+    write_export_audit_manifest,
+)
 from qc_clean.core.export.data_exporter import ProjectExporter
 from qc_clean.core.claims import summarize_claim_ledger, summarize_disconfirmation_coverage
 from qc_clean.core.pipeline.review import ReviewManager
@@ -80,6 +85,50 @@ def _confine_export_path(output_file: Optional[str], default_name: str) -> str:
     if EXPORTS_DIR != candidate.parent:
         raise ValueError(f"Refusing to export outside {EXPORTS_DIR}: {output_file!r}")
     return str(candidate)
+
+
+def _manifest_path_for_export(export_path: str) -> str:
+    """Return a confined export-audit manifest path for one exported artifact."""
+    export_name = Path(export_path).name
+    stem = Path(export_name).stem or "export"
+    return _confine_export_path(f"{stem}.manifest.json", "export.manifest.json")
+
+
+def _with_optional_export_audit(
+    payload: dict[str, Any],
+    state: ProjectState,
+    export_format: str,
+    artifact_path: str,
+    *,
+    audit_manifest: bool,
+    verify_audit_manifest: bool,
+) -> dict[str, Any]:
+    """Add optional export-audit manifest and verification fields to an MCP payload."""
+    if verify_audit_manifest and not audit_manifest:
+        return {"error": "verify_audit_manifest=True requires audit_manifest=True"}
+    if not audit_manifest:
+        return payload
+
+    manifest_path = _manifest_path_for_export(artifact_path)
+    manifest = build_export_audit_manifest(
+        state,
+        export_format=export_format,  # type: ignore[arg-type]
+        artifact_paths=[artifact_path],
+        base_dir=EXPORTS_DIR,
+    )
+    written = write_export_audit_manifest(manifest, manifest_path)
+    payload["audit_manifest"] = written
+
+    if verify_audit_manifest:
+        report = verify_export_audit_manifest_payload(
+            manifest,
+            base_dir=EXPORTS_DIR,
+            state=state,
+        )
+        payload["audit_verification"] = report.model_dump(mode="json")
+        if report.status != "verified":
+            payload["error"] = "Export audit manifest verification failed"
+    return payload
 
 
 @mcp.tool()
@@ -521,7 +570,12 @@ def qc_grounding_report(project_id: str) -> str:
 
 
 @mcp.tool()
-def qc_export_markdown(project_id: str, output_file: str | None = None) -> str:
+def qc_export_markdown(
+    project_id: str,
+    output_file: str | None = None,
+    audit_manifest: bool = False,
+    verify_audit_manifest: bool = False,
+) -> str:
     """Export a project as a human-readable Markdown report.
 
     Includes executive summary, codebook, key quotes, memos,
@@ -530,6 +584,8 @@ def qc_export_markdown(project_id: str, output_file: str | None = None) -> str:
     Args:
         project_id: The project ID
         output_file: Optional output file path (default: {project_name}_report.md)
+        audit_manifest: Whether to write a confined export-audit manifest sidecar
+        verify_audit_manifest: Whether to verify the sidecar immediately
     """
     try:
         state = store.load(project_id)
@@ -538,16 +594,31 @@ def qc_export_markdown(project_id: str, output_file: str | None = None) -> str:
 
     safe_path = _confine_export_path(output_file, f"{state.name}_report.md")
     path = exporter.export_markdown(state, safe_path)
-    return json.dumps({"exported_to": path, "format": "markdown"})
+    payload = _with_optional_export_audit(
+        {"exported_to": path, "format": "markdown"},
+        state,
+        "markdown",
+        path,
+        audit_manifest=audit_manifest,
+        verify_audit_manifest=verify_audit_manifest,
+    )
+    return json.dumps(payload)
 
 
 @mcp.tool()
-def qc_export_json(project_id: str, output_file: str | None = None) -> str:
+def qc_export_json(
+    project_id: str,
+    output_file: str | None = None,
+    audit_manifest: bool = False,
+    verify_audit_manifest: bool = False,
+) -> str:
     """Export a project's full state as JSON.
 
     Args:
         project_id: The project ID
         output_file: Optional output file path (default: {project_name}.json)
+        audit_manifest: Whether to write a confined export-audit manifest sidecar
+        verify_audit_manifest: Whether to verify the sidecar immediately
     """
     try:
         state = store.load(project_id)
@@ -556,7 +627,15 @@ def qc_export_json(project_id: str, output_file: str | None = None) -> str:
 
     safe_path = _confine_export_path(output_file, f"{state.name}.json")
     path = exporter.export_json(state, safe_path)
-    return json.dumps({"exported_to": path, "format": "json"})
+    payload = _with_optional_export_audit(
+        {"exported_to": path, "format": "json"},
+        state,
+        "json",
+        path,
+        audit_manifest=audit_manifest,
+        verify_audit_manifest=verify_audit_manifest,
+    )
+    return json.dumps(payload)
 
 
 @mcp.tool()
