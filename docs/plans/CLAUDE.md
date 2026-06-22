@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 157 | INV-7 prompt override data value boundary | High | Planned | `INV7_PROMPT_OVERRIDE_DATA_VALUE_BOUNDARY.md` |
 
 ## Completed Plans
 
