@@ -22,9 +22,10 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #100 (`EXPORT_AUDIT_CLI_MCP_EVENT_INTEGRATION.md`): add opt-in
-   event-log writing to CLI/MCP export-audit workflows while preserving default
-   behavior and MCP export sandboxing.
+1. Create and execute the next validity-infrastructure slice:
+   `INV3_ADJUDICATION_RESPONSE_IMPORT.md`, converting shape-validated
+   adjudication response packages into reusable D3/D7 gold inputs without
+   claiming expert evidence unless labels are actually supplied.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
@@ -81,7 +82,10 @@ preflight operations via `--audit-log` / `AUDIT_LOG=...`; `make
 verify-export-audit-log` verifies event self-hashes and previous-event links.
 This is local provenance/event-history metadata only, not signing, immutable
 storage, external timestamping, methodological validity evidence, or a full
-tamper-evident audit substrate.
+tamper-evident audit substrate. CLI `project export --audit-manifest ...
+--audit-log ...` and MCP JSON/Markdown export tools with `audit_event_log=True`
+can now append those event-log records from the main export workflows while
+preserving default export behavior and MCP confined output paths.
 MCP now exposes `qc_review_decisions` for agent-driven review decisions,
 including claim targets with rationale preservation, while keeping the old
 `qc_review_codes` tool compatible. MCP also exposes `qc_review_claims` as a

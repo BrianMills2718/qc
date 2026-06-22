@@ -1,10 +1,48 @@
 # Plan #100: Export Audit CLI/MCP Event Integration
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Export audit event log
 **Blocks:** stricter release packaging policy; future signed/external audit anchoring
+
+---
+
+## Outcome
+
+Implemented opt-in event-log writing from the main export workflows:
+
+- `qc_cli.py project export` accepts `--audit-log` when `--audit-manifest` is
+  supplied.
+- CLI export appends `manifest_written` and, when immediate verification runs,
+  `manifest_verified` events.
+- MCP `qc_export_json` and `qc_export_markdown` accept `audit_event_log=True`
+  and write confined event logs under `EXPORTS_DIR`.
+- MCP rejects `audit_event_log=True` without `audit_manifest=True`.
+- `CLAUDE.md`, generated `AGENTS.md`, and
+  `docs/PROJECT_THEORY_AND_GOALS.md` preserve the local-only caveat.
+
+Implementation commit: `659209a`
+
+## Verification
+
+- TDD red: initial `python -m pytest tests/test_project_commands.py
+  tests/test_mcp_server.py tests/test_export_audit_event_log.py -q` failed
+  with 5 expected failures: missing CLI audit-log output, missing CLI dependency
+  rejection, missing parser flag, and missing MCP `audit_event_log` parameters.
+- Focused behavior: `python -m pytest tests/test_project_commands.py
+  tests/test_mcp_server.py tests/test_export_audit_event_log.py -q` -> 111
+  passed.
+- Focused lint: `python -m ruff check qc_cli.py
+  qc_clean/core/cli/commands/project.py qc_mcp_server.py
+  tests/test_project_commands.py tests/test_mcp_server.py` -> all checks
+  passed.
+- Documentation governance: `make docs-check` passed.
+- Command discoverability: `make help` unchanged and still lists the event-log
+  verifier target.
+- Full gate: `make check` -> 882 passed, 1 skipped, 8 deselected; Ruff and
+  docs-check passed; type check remains not configured.
+- Commit `659209a` was pushed to `main`.
 
 ---
 
@@ -139,29 +177,29 @@ event-log contract.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] CLI `project export` supports `--audit-log` when `--audit-manifest` is
+- [x] CLI `project export` supports `--audit-log` when `--audit-manifest` is
   supplied.
-- [ ] CLI export appends `manifest_written` and, when requested,
+- [x] CLI export appends `manifest_written` and, when requested,
   `manifest_verified` events.
-- [ ] CLI rejects `--audit-log` without `--audit-manifest`.
-- [ ] MCP JSON/Markdown export tools support confined `audit_event_log=True`.
-- [ ] MCP rejects `audit_event_log=True` without `audit_manifest=True`.
-- [ ] Default CLI/MCP export behavior and existing audit-manifest outputs remain
+- [x] CLI rejects `--audit-log` without `--audit-manifest`.
+- [x] MCP JSON/Markdown export tools support confined `audit_event_log=True`.
+- [x] MCP rejects `audit_event_log=True` without `audit_manifest=True`.
+- [x] Default CLI/MCP export behavior and existing audit-manifest outputs remain
   compatible.
-- [ ] Docs state event logs remain opt-in local provenance metadata, not signed
+- [x] Docs state event logs remain opt-in local provenance metadata, not signed
   or immutable audit evidence.
 
 > Process criteria:
-- [ ] Required focused tests pass.
-- [ ] Full `make check` passes or any failure is documented with evidence.
-- [ ] Type-check status is reported.
-- [ ] Verified work is committed and pushed.
+- [x] Required focused tests pass.
+- [x] Full `make check` passes or any failure is documented with evidence.
+- [x] Type-check status is reported.
+- [x] Verified work is committed and pushed.
 
 ---
 
 ## Open Questions
 
-- [ ] Should event logs become mandatory for public release packaging? - Status:
+- [x] Should event logs become mandatory for public release packaging? - Status:
   DEFERRED | Why it matters: this slice adds opt-in workflow coverage; release
   policy belongs in a separate signed/anchored audit plan.
 
