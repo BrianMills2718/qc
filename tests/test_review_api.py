@@ -190,6 +190,57 @@ class TestClaimLedgerEndpoint:
         assert data["disconfirmation_summary"]["total_targets"] == 1
         assert data["disconfirmation_summary"]["unchallenged_targets"] == 1
 
+    def test_get_project_claims_includes_limit_metadata(self, client):
+        resp = client.get("/projects/test-project-123/claims")
+
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["returned"] == 1
+        assert data["total_claims"] == 1
+        assert data["limit"] == 100
+
+    def test_get_project_claims_limit_parameter(
+        self, client, tmp_store, review_project
+    ):
+        review_project.claims = [
+            AnalyticClaim(
+                id="claim-1",
+                claim_kind=ClaimKind.CODE,
+                source_stage="thematic_coding",
+                claim_text="Claim 1.",
+                scope=ClaimScope(code_ids=["C1"]),
+                origin_object_type="code",
+                origin_object_id="C1",
+            ),
+            AnalyticClaim(
+                id="claim-2",
+                claim_kind=ClaimKind.CODE,
+                source_stage="thematic_coding",
+                claim_text="Claim 2.",
+                scope=ClaimScope(code_ids=["C2"]),
+                origin_object_type="code",
+                origin_object_id="C2",
+            ),
+        ]
+        tmp_store.save(review_project)
+
+        limited = client.get("/projects/test-project-123/claims?limit=1")
+        negative = client.get("/projects/test-project-123/claims?limit=-5")
+
+        assert limited.status_code == 200
+        limited_data = limited.json()
+        assert limited_data["returned"] == 1
+        assert limited_data["total_claims"] == 2
+        assert limited_data["limit"] == 1
+        assert limited_data["claims"][0]["id"] == "claim-1"
+
+        assert negative.status_code == 200
+        negative_data = negative.json()
+        assert negative_data["returned"] == 0
+        assert negative_data["total_claims"] == 2
+        assert negative_data["limit"] == 0
+        assert negative_data["claims"] == []
+
     def test_get_project_claims_includes_anchor_details(
         self, client, tmp_store, review_project
     ):

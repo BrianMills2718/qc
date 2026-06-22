@@ -6,7 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 202 | Claim ledger API limit metadata | High | Planned | `CLAIM_LEDGER_API_LIMIT_METADATA.md` |
+| 202 | Claim ledger API limit metadata | High | In Progress | `CLAIM_LEDGER_API_LIMIT_METADATA.md` |
 
 ## Completed Plans
 

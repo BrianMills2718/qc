@@ -1,6 +1,6 @@
 # Plan #202: Claim Ledger API Limit Metadata
 
-**Status:** Planned
+**Status:** In Progress
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Claim Ledger Scope Read Surfaces

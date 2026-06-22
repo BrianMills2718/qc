@@ -739,7 +739,7 @@ class QCAPIServer:
             return scope_payload(state)
 
         @self._app.get("/projects/{project_id}/claims")
-        async def get_project_claims(project_id: str):
+        async def get_project_claims(project_id: str, limit: int = 100):
             """Get claim-ledger summary and bounded claim rows for a project."""
             from qc_clean.core.claims import (
                 summarize_claim_ledger,
@@ -751,32 +751,38 @@ class QCAPIServer:
                 state = store.load(project_id)
             except FileNotFoundError:
                 raise HTTPException(status_code=404, detail=f"Project not found: {project_id}")
+            max_rows = max(0, int(self.config.get("claim_ledger_api_max_rows", 100)))
+            bounded_limit = min(max(0, limit), max_rows)
+            rows = [
+                {
+                    "id": claim.id,
+                    "kind": claim.claim_kind.value,
+                    "source_stage": claim.source_stage,
+                    "support_status": claim.support_status.value,
+                    "adjudication_status": claim.adjudication_status.value,
+                    "claim_text": claim.claim_text,
+                    "scope": claim.scope.model_dump(mode="json"),
+                    "origin_object_type": claim.origin_object_type,
+                    "origin_object_id": claim.origin_object_id,
+                    "supporting_anchors": len(claim.supporting_anchors),
+                    "contrary_anchors": len(claim.contrary_anchors),
+                    "supporting_anchor_details": format_claim_anchor_details(
+                        claim.supporting_anchors
+                    ),
+                    "contrary_anchor_details": format_claim_anchor_details(
+                        claim.contrary_anchors
+                    ),
+                }
+                for claim in state.claims[:bounded_limit]
+            ]
             return {
                 "project": state.name,
                 "claim_summary": summarize_claim_ledger(state),
                 "disconfirmation_summary": summarize_disconfirmation_coverage(state),
-                "claims": [
-                    {
-                        "id": claim.id,
-                        "kind": claim.claim_kind.value,
-                        "source_stage": claim.source_stage,
-                        "support_status": claim.support_status.value,
-                        "adjudication_status": claim.adjudication_status.value,
-                        "claim_text": claim.claim_text,
-                        "scope": claim.scope.model_dump(mode="json"),
-                        "origin_object_type": claim.origin_object_type,
-                        "origin_object_id": claim.origin_object_id,
-                        "supporting_anchors": len(claim.supporting_anchors),
-                        "contrary_anchors": len(claim.contrary_anchors),
-                        "supporting_anchor_details": format_claim_anchor_details(
-                            claim.supporting_anchors
-                        ),
-                        "contrary_anchor_details": format_claim_anchor_details(
-                            claim.contrary_anchors
-                        ),
-                    }
-                    for claim in state.claims[:100]
-                ],
+                "returned": len(rows),
+                "total_claims": len(state.claims),
+                "limit": bounded_limit,
+                "claims": rows,
             }
 
         self.endpoints = [
