@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 128 | Confidence calibration scorecard preflight guard | High | Planned | `CONFIDENCE_CALIBRATION_SCORECARD_PREFLIGHT_GUARD.md` |
 
 ## Completed Plans
 

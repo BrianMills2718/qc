@@ -22,9 +22,9 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Create and execute the next confidence-calibration scorecard preflight guard
-   plan: enforce protocol/result preflight at score time when a calibration
-   protocol is supplied.
+1. Execute Plan #128 (`CONFIDENCE_CALIBRATION_SCORECARD_PREFLIGHT_GUARD.md`):
+   enforce confidence-calibration protocol/result preflight at score time when
+   a calibration protocol is supplied.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
