@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 119 | D4 codebook quality scorecard preflight guard | High | Planned | `D4_CODEBOOK_QUALITY_SCORECARD_PREFLIGHT_GUARD.md` |
 
 ## Completed Plans
 

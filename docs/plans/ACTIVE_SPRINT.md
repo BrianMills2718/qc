@@ -22,7 +22,9 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Continue through the ranked roadmap without pausing after each verified
+1. Execute Plan #119 (`D4_CODEBOOK_QUALITY_SCORECARD_PREFLIGHT_GUARD.md`):
+   guard D4 scorecard generation with optional protocol/result preflight.
+2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
 **Completed checkpoint:** D4 codebook-quality result files can now be
