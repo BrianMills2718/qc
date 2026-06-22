@@ -45,6 +45,7 @@ Examples:
   qc_cli bench-package phase0_package.json
   qc_cli run-d7-retrieval <project_id> --output predictions.json
   qc_cli run-d7-live-baseline <project_id> --output live_baseline.json --model gpt-5-mini
+  qc_cli validate-d7-baseline-package baseline.json
   qc_cli compare-d7-retrieval <project_id> --gold-file d7_gold.json --predictions-file predictions.json
   qc_cli run-inv7-fixtures --output inv7.json
   qc_cli run-inv7-live-fixtures --output inv7_live.json --model gpt-5-mini
@@ -290,6 +291,17 @@ Examples:
         help='Optional D7 comparison protocol package used to preflight before scoring',
     )
 
+    # D7 baseline package validation command
+    d7_baseline_validator_parser = subparsers.add_parser(
+        'validate-d7-baseline-package',
+        help='Validate a D7 baseline prediction package',
+        description='Validate a versioned D7 retrieval or live-baseline prediction package',
+    )
+    d7_baseline_validator_parser.add_argument(
+        'package_file',
+        help='Path to the D7 baseline package JSON file',
+    )
+
     # INV-7 prompt-injection fixture commands
     inv7_fixture_parser = subparsers.add_parser(
         'run-inv7-fixtures',
@@ -527,6 +539,8 @@ def main() -> int:
             return handle_run_d7_live_baseline_command(args)
         elif args.command == 'compare-d7-retrieval':
             return handle_compare_d7_retrieval_command(args)
+        elif args.command == 'validate-d7-baseline-package':
+            return handle_validate_d7_baseline_package_command(args)
         elif args.command == 'run-inv7-fixtures':
             return handle_run_inv7_fixtures_command(args)
         elif args.command == 'run-inv7-live-fixtures':
@@ -693,6 +707,13 @@ def handle_compare_d7_retrieval_command(args) -> int:
     if args.protocol_package is not None:
         argv.extend(["--protocol-package", args.protocol_package])
     return compare_d7_retrieval.main(argv)
+
+
+def handle_validate_d7_baseline_package_command(args) -> int:
+    """Validate a D7 baseline package through the canonical CLI."""
+    from scripts import validate_d7_baseline_package
+
+    return validate_d7_baseline_package.main([args.package_file])
 
 
 def handle_run_inv7_fixtures_command(args) -> int:

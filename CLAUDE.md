@@ -470,6 +470,7 @@ make export-publish-preflight MANIFEST=manifest.json BASE_DIR=. ID=<project_id> 
 make verify-export-audit-log LOG=export_audit_events.jsonl  # Verify opt-in local hash-linked export audit event log
 make validate-d7-gold GOLD=gold_set.json  # Validate versioned held-out D7 gold-set package
 make validate-d7-baseline-package PACKAGE=d7_baseline.json  # Validate versioned D7 retrieval/live baseline package
+python qc_cli.py validate-d7-baseline-package d7_baseline.json  # Canonical CLI wrapper for D7 baseline package validation
 make validate-theoretical-sampling-protocol PROTOCOL=theoretical_sampling_protocol.json  # Validate pre-run theoretical-sampling protocol metadata
 make export-theoretical-sampling-candidates ID=<project_id> PROTOCOL=theoretical_sampling_protocol.json OUTPUT=candidates.json  # Export loaded-document theoretical-sampling candidates
 make export-theoretical-sampling-results PROTOCOL=theoretical_sampling_protocol.json CANDIDATES=candidates.json SELECTED=loaded-doc-1 SUCCESS_CRITERION="..." OUTPUT=results.json  # Export selected theoretical-sampling candidates as a result package

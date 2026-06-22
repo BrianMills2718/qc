@@ -3,7 +3,7 @@
 import sys
 
 import qc_cli
-from scripts import compare_d7_retrieval, run_d7_retrieval
+from scripts import compare_d7_retrieval, run_d7_retrieval, validate_d7_baseline_package
 
 
 def test_qc_cli_run_d7_retrieval_forwards_flags(monkeypatch):
@@ -136,3 +136,25 @@ def test_qc_cli_compare_d7_retrieval_forwards_flags(monkeypatch):
         "--protocol-package",
         "protocol.json",
     ]
+
+
+def test_qc_cli_validate_d7_baseline_package_forwards_path(monkeypatch):
+    captured = {}
+
+    def fake_main(argv):
+        captured["argv"] = argv
+        return 7
+
+    monkeypatch.setattr(validate_d7_baseline_package, "main", fake_main)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "qc_cli.py",
+            "validate-d7-baseline-package",
+            "baseline.json",
+        ],
+    )
+
+    assert qc_cli.main() == 7
+    assert captured["argv"] == ["baseline.json"]
