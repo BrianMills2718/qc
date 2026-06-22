@@ -677,7 +677,7 @@ def load_interpretive_preference_file(path: Path) -> Any:
     if isinstance(raw, list):
         return raw
     if isinstance(raw, dict) and isinstance(raw.get("interpretive_preference_evaluations"), list):
-        return raw["interpretive_preference_evaluations"]
+        return raw
     raise ValueError(
         "Interpretive preference file must be a JSON list of forced-choice outcomes "
         "or an object with an 'interpretive_preference_evaluations' list"

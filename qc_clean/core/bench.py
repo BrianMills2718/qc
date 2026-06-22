@@ -345,6 +345,31 @@ class InterpretivePreferenceEvaluation(BaseModel):
         return self
 
 
+class InterpretivePreferenceProtocol(BaseModel):
+    """Protocol metadata for D9 non-inferiority assessment."""
+
+    non_inferiority_margin: float = Field(
+        description="Pre-registered tolerated system-minus-human preference deficit"
+    )
+    registered_before_evaluation: bool = Field(
+        default=False,
+        description="Whether the margin was registered before outcome evaluation",
+    )
+    protocol_id: str = Field(
+        default="unspecified",
+        description="Stable protocol identifier or redacted registration label",
+    )
+    notes: str = Field(default="", description="Optional protocol caveats")
+
+    @model_validator(mode="after")
+    def require_valid_protocol(self) -> "InterpretivePreferenceProtocol":
+        """Reject unusable non-inferiority protocol metadata."""
+        if not 0 < self.non_inferiority_margin < 1:
+            raise ValueError("D9 non_inferiority_margin must be between 0 and 1")
+        self.protocol_id = self.protocol_id.strip() or "unspecified"
+        return self
+
+
 class ConfidenceCalibrationEvaluation(BaseModel):
     """External confidence/correctness record used for calibration scoring."""
 
@@ -1185,10 +1210,16 @@ def interpretive_preference_scorecard(state: ProjectState) -> Dict[str, Any]:
             ),
         }
 
+    summary = _interpretive_preference_summary(evaluations)
+    protocol = _interpretive_preference_protocol(state)
     return {
         "status": "scored",
         "source": f"ProjectState.config.extra['{_INTERPRETIVE_PREFERENCE_EXTRA_KEY}']",
-        **_interpretive_preference_summary(evaluations),
+        **summary,
+        "non_inferiority_assessment": _interpretive_preference_non_inferiority_assessment(
+            summary,
+            protocol,
+        ),
         "by_evaluator": _interpretive_preference_grouped_summary(
             evaluations,
             key_fn=lambda evaluation: evaluation.evaluator,
@@ -1225,6 +1256,32 @@ def _interpretive_preference_evaluations(
         raise ValueError(f"Invalid interpretive_preference_evaluations metadata: {exc}") from exc
 
 
+def _interpretive_preference_protocol(
+    state: ProjectState,
+) -> InterpretivePreferenceProtocol | None:
+    """Load optional D9 non-inferiority protocol metadata."""
+    raw = state.config.extra.get(_INTERPRETIVE_PREFERENCE_EXTRA_KEY)
+    if not isinstance(raw, dict):
+        return None
+
+    payload = None
+    for key in ("interpretive_preference_protocol", "protocol"):
+        if isinstance(raw.get(key), dict):
+            payload = raw[key]
+            break
+    if payload is None and (
+        "non_inferiority_margin" in raw or "registered_before_evaluation" in raw
+    ):
+        payload = raw
+    if payload is None:
+        return None
+
+    try:
+        return InterpretivePreferenceProtocol.model_validate(payload)
+    except ValidationError as exc:
+        raise ValueError(f"Invalid interpretive preference protocol metadata: {exc}") from exc
+
+
 def _interpretive_preference_summary(
     evaluations: list[InterpretivePreferenceEvaluation],
 ) -> dict[str, Any]:
@@ -1244,6 +1301,71 @@ def _interpretive_preference_summary(
         "tie_rate": _safe_div(ties, total),
         "system_preference_rate": _safe_div_or_none(system_wins, non_tie_cases),
         "system_preference_ci": _wilson_interval(system_wins, non_tie_cases),
+    }
+
+
+def _interpretive_preference_non_inferiority_assessment(
+    summary: Mapping[str, Any],
+    protocol: InterpretivePreferenceProtocol | None,
+) -> dict[str, Any]:
+    """Assess D9 non-inferiority only when pre-registered protocol metadata exists."""
+    base = {
+        "metric": "system_minus_human_preference_rate",
+        "note": (
+            "D9 non-inferiority requires pre-registered margin metadata and "
+            "populated blind expert preference outcomes. This local assessment "
+            "does not by itself establish expert parity."
+        ),
+    }
+    if protocol is None:
+        return {
+            **base,
+            "status": "not_available",
+            "reason": "No D9 non-inferiority protocol metadata was supplied.",
+        }
+
+    protocol_payload = {
+        "protocol_id": protocol.protocol_id,
+        "non_inferiority_margin": protocol.non_inferiority_margin,
+        "registered_before_evaluation": protocol.registered_before_evaluation,
+        "notes": protocol.notes,
+    }
+    rate = summary.get("system_preference_rate")
+    interval = summary.get("system_preference_ci")
+    if rate is None or not isinstance(interval, Mapping) or interval.get("lower") is None:
+        return {
+            **base,
+            "status": "not_available",
+            "reason": "No non-tie D9 preference cases are available.",
+            "protocol": protocol_payload,
+        }
+
+    difference = (2 * float(rate)) - 1
+    lower = (2 * float(interval["lower"])) - 1
+    upper = (2 * float(interval["upper"])) - 1
+    assessed = {
+        **base,
+        "protocol": protocol_payload,
+        "system_minus_human": difference,
+        "system_minus_human_ci": {
+            "method": interval["method"],
+            "confidence_level": interval["confidence_level"],
+            "lower": lower,
+            "upper": upper,
+        },
+        "required_lower_bound": -protocol.non_inferiority_margin,
+    }
+    if not protocol.registered_before_evaluation:
+        return {
+            **assessed,
+            "status": "not_registered",
+            "meets_non_inferiority": False,
+            "reason": "Protocol metadata was not registered before evaluation.",
+        }
+    return {
+        **assessed,
+        "status": "scored",
+        "meets_non_inferiority": lower > -protocol.non_inferiority_margin,
     }
 
 

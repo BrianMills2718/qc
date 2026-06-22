@@ -58,7 +58,9 @@ outcomes through `BIAS_COUNTERFACTUAL=` / `--bias-counterfactual-file`. Phase 0
 now scores externally supplied D8 GT-fidelity rubric outcomes through
 `GT_FIDELITY=` / `--gt-fidelity-file`. Phase 0
 now scores externally supplied D9 forced-choice interpretive-preference outcomes
-through `PREFERENCE=` / `--interpretive-preference-file`. Phase 0 now scores
+through `PREFERENCE=` / `--interpretive-preference-file`; D9 packages can now
+include protocol metadata for a local non-inferiority margin assessment without
+licensing blind expert parity. Phase 0 now scores
 externally supplied confidence/correctness calibration records through
 `CALIBRATION=` / `--confidence-calibration-file`. Phase 0 can also run from a
 strict versioned benchmark package manifest with relative input paths through

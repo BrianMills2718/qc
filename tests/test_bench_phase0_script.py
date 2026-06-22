@@ -1392,6 +1392,11 @@ def test_bench_phase0_scores_interpretive_preference_from_file_without_mutating_
                     "preferred": "tie",
                 },
             ],
+            "protocol": {
+                "protocol_id": "d9-margin-v1",
+                "non_inferiority_margin": 0.1,
+                "registered_before_evaluation": True,
+            },
         }),
         encoding="utf-8",
     )
@@ -1411,6 +1416,8 @@ def test_bench_phase0_scores_interpretive_preference_from_file_without_mutating_
     assert d9["human_wins"] == 1
     assert d9["ties"] == 1
     assert d9["system_preference_rate"] == pytest.approx(0.5)
+    assert d9["non_inferiority_assessment"]["status"] == "scored"
+    assert d9["non_inferiority_assessment"]["protocol"]["protocol_id"] == "d9-margin-v1"
     reloaded = store.load(state.id)
     assert "interpretive_preference_evaluations" not in reloaded.config.extra
 

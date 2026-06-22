@@ -894,10 +894,103 @@ def test_scorecard_scores_interpretive_preference_outcomes():
     assert d9["system_preference_ci"]["method"] == "wilson"
     assert d9["system_preference_ci"]["successes"] == 2
     assert d9["system_preference_ci"]["denominator"] == 3
+    assert d9["non_inferiority_assessment"]["status"] == "not_available"
+    assert "protocol metadata" in d9["non_inferiority_assessment"]["reason"]
     assert d9["by_evaluator"]["expert-a"]["system_preference_rate"] == pytest.approx(0.5)
     assert d9["by_evaluator"]["expert-b"]["tie_rate"] == pytest.approx(0.5)
     assert d9["by_criterion"]["latent_meaning"]["non_tie_cases"] == 1
     assert "not blind expert-parity evidence" in d9["note"]
+
+
+def test_scorecard_d9_non_inferiority_requires_pre_registration():
+    state = ProjectState(
+        name="preference-margin",
+        config=ProjectConfig(
+            methodology=Methodology.THEMATIC_ANALYSIS,
+            extra={
+                "interpretive_preference_evaluations": {
+                    "interpretive_preference_evaluations": [
+                        {"case_id": f"system-{idx}", "preferred": "system"}
+                        for idx in range(5)
+                    ] + [{"case_id": "human-1", "preferred": "human"}],
+                    "protocol": {
+                        "protocol_id": "d9-margin-v1",
+                        "non_inferiority_margin": 0.2,
+                        "registered_before_evaluation": False,
+                    },
+                }
+            },
+        ),
+    )
+
+    assessment = phase0_scorecard(state)["interpretive_preference_d9"][
+        "non_inferiority_assessment"
+    ]
+
+    assert assessment["status"] == "not_registered"
+    assert assessment["meets_non_inferiority"] is False
+    assert assessment["protocol"]["protocol_id"] == "d9-margin-v1"
+    assert assessment["system_minus_human"] == pytest.approx(2 / 3)
+    assert assessment["required_lower_bound"] == pytest.approx(-0.2)
+    assert "not registered" in assessment["reason"]
+
+
+def test_scorecard_d9_registered_non_inferiority_margin_passes_and_fails():
+    passing = ProjectState(
+        name="preference-margin-pass",
+        config=ProjectConfig(
+            methodology=Methodology.THEMATIC_ANALYSIS,
+            extra={
+                "interpretive_preference_evaluations": {
+                    "interpretive_preference_evaluations": [
+                        {"case_id": f"system-{idx}", "preferred": "system"}
+                        for idx in range(5)
+                    ] + [{"case_id": "human-1", "preferred": "human"}],
+                    "protocol": {
+                        "protocol_id": "d9-margin-v1",
+                        "non_inferiority_margin": 0.2,
+                        "registered_before_evaluation": True,
+                    },
+                }
+            },
+        ),
+    )
+    failing = ProjectState(
+        name="preference-margin-fail",
+        config=ProjectConfig(
+            methodology=Methodology.THEMATIC_ANALYSIS,
+            extra={
+                "interpretive_preference_evaluations": {
+                    "interpretive_preference_evaluations": [
+                        {"case_id": f"system-{idx}", "preferred": "system"}
+                        for idx in range(2)
+                    ] + [
+                        {"case_id": f"human-{idx}", "preferred": "human"}
+                        for idx in range(4)
+                    ],
+                    "protocol": {
+                        "protocol_id": "d9-margin-v1",
+                        "non_inferiority_margin": 0.2,
+                        "registered_before_evaluation": True,
+                    },
+                }
+            },
+        ),
+    )
+
+    passing_assessment = phase0_scorecard(passing)["interpretive_preference_d9"][
+        "non_inferiority_assessment"
+    ]
+    failing_assessment = phase0_scorecard(failing)["interpretive_preference_d9"][
+        "non_inferiority_assessment"
+    ]
+
+    assert passing_assessment["status"] == "scored"
+    assert passing_assessment["meets_non_inferiority"] is True
+    assert passing_assessment["system_minus_human_ci"]["lower"] > -0.2
+    assert failing_assessment["status"] == "scored"
+    assert failing_assessment["meets_non_inferiority"] is False
+    assert failing_assessment["system_minus_human_ci"]["lower"] < -0.2
 
 
 def test_scorecard_invalid_interpretive_preference_metadata_fails_loud():
