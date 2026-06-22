@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 46 | D5 reliability prevalence tables | High | Planned | `D5_RELIABILITY_PREVALENCE_TABLES.md` |
 
 ## Completed Plans
 
