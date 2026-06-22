@@ -1,6 +1,6 @@
 # Plan #121: D8 GT Fidelity Protocol Result Preflight
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Plan #120 D8 GT-fidelity protocol package
@@ -74,18 +74,18 @@ created.
 
 ### Capability Validation
 
-- [ ] Valid protocol/result pairs produce `status="pass"`.
-- [ ] Missing D8 result files fail loud.
-- [ ] Invalid protocol packages fail loud inside the report.
-- [ ] Invalid D8 result row payloads fail loud inside the report.
-- [ ] Protocol `outcome_file_sha256` is checked against the actual result file
+- [x] Valid protocol/result pairs produce `status="pass"`.
+- [x] Missing D8 result files fail loud.
+- [x] Invalid protocol packages fail loud inside the report.
+- [x] Invalid D8 result row payloads fail loud inside the report.
+- [x] Protocol `outcome_file_sha256` is checked against the actual result file
   hash when set.
-- [ ] Result evaluator types match the protocol evaluator plan.
-- [ ] Unique result evaluators meet or exceed the protocol planned evaluator
+- [x] Result evaluator types match the protocol evaluator plan.
+- [x] Unique result evaluators meet or exceed the protocol planned evaluator
   count.
-- [ ] Result scopes match protocol target scopes.
-- [ ] Non-`grounded_theory_pipeline` result scopes require `artifact_id`.
-- [ ] CLI emits machine-readable JSON and exits non-zero on failure.
+- [x] Result scopes match protocol target scopes.
+- [x] Non-`grounded_theory_pipeline` result scopes require `artifact_id`.
+- [x] CLI emits machine-readable JSON and exits non-zero on failure.
 
 ---
 
@@ -172,29 +172,29 @@ Deferred by design:
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] A schema_version=1 D8 GT-fidelity protocol/result preflight report can be
+- [x] A schema_version=1 D8 GT-fidelity protocol/result preflight report can be
   produced by importable code.
-- [ ] `make d8-gt-fidelity-preflight PROTOCOL=protocol.json
+- [x] `make d8-gt-fidelity-preflight PROTOCOL=protocol.json
   GT_FIDELITY=gt_fidelity.json` emits JSON and returns non-zero on failed
   preflight.
-- [ ] Result files must exist and contain valid D8 rubric rows.
-- [ ] Protocol hash locks, evaluator plan, target scopes, and targeted-scope
+- [x] Result files must exist and contain valid D8 rubric rows.
+- [x] Protocol hash locks, evaluator plan, target scopes, and targeted-scope
   artifact IDs are enforced.
-- [ ] Docs state D8 preflight is process/provenance only.
+- [x] Docs state D8 preflight is process/provenance only.
 
 > Process criteria:
-- [ ] Required focused tests pass.
-- [ ] Focused Ruff check passes.
-- [ ] `make docs-check` passes.
-- [ ] Full `make check` passes or any failure is documented with evidence.
-- [ ] Type-check status is reported.
-- [ ] Verified work is committed and pushed.
+- [x] Required focused tests pass.
+- [x] Focused Ruff check passes.
+- [x] `make docs-check` passes.
+- [x] Full `make check` passes or any failure is documented with evidence.
+- [x] Type-check status is reported.
+- [x] Verified work is committed and pushed.
 
 ---
 
 ## Open Questions
 
-- [ ] Should the D8 score-time guard follow immediately? — Status: DEFERRED |
+- [x] Should the D8 score-time guard follow immediately? — Status: NEXT |
   This plan adds standalone protocol/result preflight first. The score-time
   guard can follow the D4/D6 guard pattern in the next slice.
 
@@ -206,3 +206,22 @@ This plan creates a result-file preflight. It does not collect expert ratings,
 run LLM judges, validate rubric labels beyond schema/protocol consistency,
 prove methodological saturation, prove full grounded theory, or license a SOTA
 claim.
+
+---
+
+## Outcome
+
+Implemented in commit `74711d5`
+(`[Plan: D8_GT_FIDELITY_PROTOCOL_RESULT_PREFLIGHT] Add D8 result preflight`)
+and pushed to `main`.
+
+Verification evidence:
+
+- TDD red: focused D8 preflight tests initially failed with
+  `ModuleNotFoundError: No module named 'qc_clean.core.d8_gt_fidelity_preflight'`.
+- `python -m pytest tests/test_d8_gt_fidelity_protocol.py tests/test_d8_gt_fidelity_preflight.py -q`: 12 passed.
+- `python -m ruff check qc_clean/core/d8_gt_fidelity_protocol.py qc_clean/core/d8_gt_fidelity_preflight.py scripts/validate_d8_gt_fidelity_protocol.py scripts/preflight_d8_gt_fidelity_protocol.py tests/test_d8_gt_fidelity_protocol.py tests/test_d8_gt_fidelity_preflight.py`: passed.
+- `make -n d8-gt-fidelity-preflight PROTOCOL=protocol.json GT_FIDELITY=gt_fidelity.json`: emitted `python scripts/preflight_d8_gt_fidelity_protocol.py protocol.json --gt-fidelity-file gt_fidelity.json`.
+- `make docs-check`: Markdown links, doc coupling, plan status, and AGENTS sync passed.
+- `make check`: 985 passed, 1 skipped, 8 deselected; Ruff passed; docs-check passed.
+- Type check status: not configured.

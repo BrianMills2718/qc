@@ -22,10 +22,19 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #121 (`D8_GT_FIDELITY_PROTOCOL_RESULT_PREFLIGHT.md`): add a
-   deterministic D8 protocol/result preflight before score-time guard wiring.
+1. Select the next unambiguous D8 score-time guard lane from the roadmap.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
+
+**Completed checkpoint:** D8 GT-fidelity result files can now be preflighted
+against registered D8 protocols with
+`make d8-gt-fidelity-preflight PROTOCOL=... GT_FIDELITY=...` /
+`scripts/preflight_d8_gt_fidelity_protocol.py`. The preflight validates the
+protocol and concrete result rows, checks optional result-file SHA-256 locks,
+evaluator type/count, target scopes, and targeted-scope `artifact_id` coverage,
+and emits a schema_version=1 pass/fail report. This is process/provenance
+metadata only, not expert-rubric acceptance, methodological-saturation
+evidence, full grounded-theory evidence, or SOTA evidence.
 
 **Completed checkpoint:** D8 GT-fidelity protocols can now be validated with
 `make validate-d8-gt-fidelity-protocol PROTOCOL=...` /
