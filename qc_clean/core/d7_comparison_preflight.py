@@ -4,8 +4,12 @@ from __future__ import annotations
 
 from typing import Any, Literal, Mapping
 
-from pydantic import BaseModel, Field, ValidationError
+from pydantic import BaseModel, Field
 
+from qc_clean.core.d7_baseline_package import (
+    D7BaselinePackage,
+    validate_d7_baseline_package_payload,
+)
 from qc_clean.core.d7_comparison_protocol import (
     D7ComparisonProtocolPackage,
     D7ExpectedRetrievalPrediction,
@@ -16,7 +20,7 @@ from qc_clean.core.d7_live_baseline import D7LiveBaselinePackage
 from qc_clean.core.d7_retrieval import D7RetrievalBaselinePackage
 
 
-D7PredictionPackage = D7RetrievalBaselinePackage | D7LiveBaselinePackage
+D7PredictionPackage = D7BaselinePackage
 
 D7_COMPARISON_PREFLIGHT_CAUTION = (
     "D7 comparison preflight is process metadata only; it is not a held-out D7 "
@@ -123,21 +127,12 @@ def _validate_predictions(
         return packages
     for index, payload in enumerate(payloads, start=1):
         try:
-            packages.append(D7RetrievalBaselinePackage.model_validate(payload))
-            continue
-        except ValidationError as retrieval_exc:
-            try:
-                packages.append(D7LiveBaselinePackage.model_validate(payload))
-                continue
-            except ValidationError as live_exc:
-                message = (
-                    "Invalid D7 prediction package. Retrieval package error: "
-                    f"{retrieval_exc}; live baseline package error: {live_exc}"
-                )
+            packages.append(validate_d7_baseline_package_payload(payload))
+        except ValueError as exc:
             errors.append(
                 D7ComparisonPreflightError(
                     field=f"prediction_package[{index}]",
-                    message=message,
+                    message=str(exc),
                 )
             )
     return packages
