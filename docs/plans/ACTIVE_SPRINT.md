@@ -62,7 +62,8 @@ through `PREFERENCE=` / `--interpretive-preference-file`; D9 packages can now
 include protocol metadata for a local non-inferiority margin assessment without
 licensing blind expert parity. Phase 0 now scores
 externally supplied confidence/correctness calibration records through
-`CALIBRATION=` / `--confidence-calibration-file`. Phase 0 can also run from a
+`CALIBRATION=` / `--confidence-calibration-file`, now with Wilson intervals for
+overall, calibration-bin, and per-surface accuracy. Phase 0 can also run from a
 strict versioned benchmark package manifest with relative input paths through
 `make bench-package PACKAGE=...`; that runner invokes the same canonical
 scorecard path and adds orchestration/provenance only. This remains a

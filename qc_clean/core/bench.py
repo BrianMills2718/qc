@@ -1452,6 +1452,7 @@ def _confidence_calibration_summary(
         "correct_records": correct_count,
         "incorrect_records": total - correct_count,
         "accuracy": _safe_div(correct_count, total),
+        "accuracy_ci": _wilson_interval(correct_count, total),
         "mean_confidence": _mean_or_none([
             evaluation.confidence for evaluation in evaluations
         ]),
@@ -1485,8 +1486,10 @@ def _calibration_bins(
         mean_confidence = None
         gap = None
         weighted_gap = 0.0
+        correct_count = 0
         if group:
-            accuracy = _safe_div(sum(1 for evaluation in group if evaluation.correct), len(group))
+            correct_count = sum(1 for evaluation in group if evaluation.correct)
+            accuracy = _safe_div(correct_count, len(group))
             mean_confidence = _mean_or_none([
                 evaluation.confidence for evaluation in group
             ])
@@ -1499,6 +1502,7 @@ def _calibration_bins(
             "upper_inclusive": index == _CALIBRATION_BIN_COUNT - 1,
             "count": len(group),
             "accuracy": accuracy,
+            "accuracy_ci": _wilson_interval(correct_count, len(group)),
             "mean_confidence": mean_confidence,
             "calibration_gap": gap,
             "weighted_gap": weighted_gap,

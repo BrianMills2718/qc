@@ -1492,6 +1492,8 @@ def test_bench_phase0_scores_confidence_calibration_from_file_without_mutating_s
     assert calibration["status"] == "scored"
     assert calibration["total_records"] == 2
     assert calibration["accuracy"] == pytest.approx(0.5)
+    assert calibration["accuracy_ci"]["successes"] == 1
+    assert calibration["accuracy_ci"]["denominator"] == 2
     assert calibration["brier_score"] == pytest.approx(0.325)
     reloaded = store.load(state.id)
     assert "confidence_calibration_evaluations" not in reloaded.config.extra

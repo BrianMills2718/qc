@@ -1069,14 +1069,22 @@ def test_scorecard_scores_confidence_calibration_outcomes():
     assert calibration["correct_records"] == 2
     assert calibration["incorrect_records"] == 2
     assert calibration["accuracy"] == pytest.approx(0.5)
+    assert calibration["accuracy_ci"]["method"] == "wilson"
+    assert calibration["accuracy_ci"]["successes"] == 2
+    assert calibration["accuracy_ci"]["denominator"] == 4
     assert calibration["mean_confidence"] == pytest.approx(0.575)
     assert calibration["brier_score"] == pytest.approx(0.2625)
     assert calibration["expected_calibration_error"] == pytest.approx(0.425)
     assert calibration["bin_count"] == 10
     bins = calibration["calibration_bins"]
     assert len(bins) == 10
+    assert bins[0]["count"] == 0
+    assert bins[0]["accuracy_ci"]["lower"] is None
+    assert bins[0]["accuracy_ci"]["upper"] is None
     assert bins[2]["count"] == 1
     assert bins[2]["accuracy"] == 0.0
+    assert bins[2]["accuracy_ci"]["successes"] == 0
+    assert bins[2]["accuracy_ci"]["denominator"] == 1
     assert bins[2]["mean_confidence"] == pytest.approx(0.2)
     assert bins[2]["calibration_gap"] == pytest.approx(0.2)
     assert bins[9]["upper_inclusive"] is True
@@ -1086,6 +1094,8 @@ def test_scorecard_scores_confidence_calibration_outcomes():
     thematic = calibration["by_surface"]["thematic_coding"]
     assert thematic["total_records"] == 2
     assert thematic["accuracy"] == pytest.approx(0.5)
+    assert thematic["accuracy_ci"]["successes"] == 1
+    assert thematic["accuracy_ci"]["denominator"] == 2
     assert thematic["mean_confidence"] == pytest.approx(0.85)
     assert thematic["brier_score"] == pytest.approx(0.325)
     assert thematic["expected_calibration_error"] == pytest.approx(0.45)

@@ -261,6 +261,11 @@ system-minus-human preference-rate interval and margin-gated
 `non_inferiority_assessment`. This is not blind expert-parity evidence without
 populated held-out expert outcomes.
 
+**Confidence-calibration interval metadata:** confidence-calibration scorecards
+now include Wilson intervals for overall accuracy, calibration-bin accuracy,
+and per-surface accuracy. These are local uncertainty intervals over supplied
+labels, not proof that confidence is calibrated on held-out data.
+
 **Phase 0 package runner:** `make bench-package PACKAGE=phase0_package.json` /
 `scripts/run_phase0_benchmark_package.py phase0_package.json` can validate a
 strict `schema_version=1` manifest, resolve benchmark input paths relative to
@@ -362,6 +367,8 @@ Sequencing rule: **the evaluation harness is the keystone** (it proves the SOTA 
    D9 can now compute a non-inferiority margin assessment from package protocol
    metadata, but populated blind expert preference outcomes remain future
    benchmark work.
+   Confidence calibration now reports Wilson accuracy intervals, but populated
+   held-out calibration labels remain future benchmark work.
 2. **Span-anchored grounding** — *MOSTLY DONE* (`qc_clean/core/grounding.py`: offsets + hash + verify + unique-resolution, ambiguous/unresolvable dropped). Remaining for full INV-1: fuzzy/semantic matcher (recover paraphrased quotes) + segment-derived `speaker`.
 3. **Segment universe** — *DONE* (`segmentation.py` registry + `ProjectState.segments` + `compute_coverage`; **exhaustive per-segment coding** via `project run --exhaustive` gives examined-and-judged coverage and segment-anchored applications — INV-8 met in that mode; `project irr --application-level` now reports positive segment × code application agreement and segment-decision agreement). Remaining: decide whether exhaustive becomes the default after live validation.
 4. **First-class claim ledger** — *MOSTLY DONE object layer* (`ProjectState.claims`, deterministic stage builders, no-claims events, negative-case target refs, CSV/Markdown/CLI/API/MCP surfaces). Remaining for full INV-9: stronger source anchoring for higher-order claims and deciding whether future LLM schemas emit claim-native outputs.
