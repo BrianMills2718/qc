@@ -6,12 +6,12 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 183 | D7 comparison package writer | High | Planned | `D7_COMPARISON_PACKAGE_WRITER.md` |
 
 ## Completed Plans
 
 | Name | Outcome | Record |
 |------|---------|--------|
+| D7 comparison package writer | D7 retrieval/live-baseline comparison manifests can now be written through script, Make, and `qc_cli.py` after validating versioned gold and prediction packages plus optional protocol preflight, preserving prediction order and package-relative paths without claiming benchmark evidence | `completed/D7_COMPARISON_PACKAGE_WRITER.md` |
 | D7 comparison package runner | D7 retrieval/live-baseline comparisons can now run from a strict schema_version=1 manifest through script, Make, and `qc_cli.py`, resolving paths relative to the package, preserving prediction order, optionally verifying the artifact created by the invocation, and remaining reproducibility/provenance infrastructure only | `completed/D7_COMPARISON_PACKAGE_RUNNER.md` |
 | D7 comparison artifact verifier | D7 comparison artifact directories or manifests can now be verified through script, Make, and `qc_cli.py` surfaces for report hash, copied metadata, prompt-eval status, and claim-caveat consistency without claiming benchmark evidence | `completed/D7_COMPARISON_ARTIFACT_VERIFIER.md` |
 | D7 comparison artifact package | Successful D7 retrieval/live-baseline comparison reports can now write optional versioned artifact directories with `report.json` and `manifest.json` hashes, command provenance, input hashes, and claim caveats while preserving preflight, output, and metric-criteria semantics | `completed/D7_COMPARISON_ARTIFACT_PACKAGE.md` |

@@ -26,16 +26,25 @@ highest-value documented lane.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Plan #183 is active: add a D7 comparison package writer
-for manifest-driven standalone D7 retrieval/live-baseline comparisons. This
-slice should validate versioned D7 gold and retrieval/live-baseline prediction
-packages, optionally run existing D7 comparison preflight when a protocol is
-supplied, preserve ordered prediction files, write package-relative manifest
-paths when possible, and expose Make/`qc_cli.py` surfaces. It must not create
-held-out data, run retrieval/live baselines, choose retrieval/model policy, add
-artifact signing, verify post-run artifact contents, or claim held-out D7
-evidence, live-baseline evidence, superiority evidence, methodological-validity
-evidence, or SOTA.
+**Active checkpoint:** Select and plan the next deterministic, high-value
+roadmap lane from `docs/PROJECT_THEORY_AND_GOALS.md` / `docs/EVALUATION_HARNESS.md`.
+Prefer lanes that reduce manual coordination before held-out evaluation or
+make existing benchmark/provenance surfaces more agent-drivable, without
+claiming evidence that has not been produced.
+
+**Completed checkpoint:** D7 retrieval/live-baseline comparison manifests can
+now be written through `scripts/write_d7_comparison_package.py`, `make
+write-d7-comparison-package ...`, and `qc_cli.py
+write-d7-comparison-package ...`. The writer validates versioned D7 gold
+packages and versioned D7 retrieval/live-baseline prediction packages before
+writing, preserves prediction order, emits package-relative manifest paths when
+possible, records optional comparison output / artifact directory /
+verify-artifact fields, and runs existing D7 comparison preflight before
+writing when a protocol package is supplied. This is manifest
+reproducibility/provenance infrastructure only; it does not create held-out D7
+data, run retrieval or live baselines, choose retrieval/model policy, prove
+semantic disconfirmation validity, establish superiority, or support SOTA
+claims.
 
 **Completed checkpoint:** D7 retrieval/live-baseline comparisons can now run
 from strict `schema_version=1` package manifests through

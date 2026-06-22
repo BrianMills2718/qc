@@ -1,6 +1,6 @@
 # Plan #183: D7 Comparison Package Writer
 
-**Status:** Planned
+**Status:** Completed
 **Type:** implementation
 **Priority:** High
 **Blocked By:** #182
@@ -83,12 +83,12 @@ created.
 
 ### Capability Validation
 
-- [ ] Valid D7 gold and prediction packages produce a strict runner-compatible
+- [x] Valid D7 gold and prediction packages produce a strict runner-compatible
   manifest.
-- [ ] Manifest paths are relative to the manifest directory when possible.
-- [ ] Ordered prediction files are preserved.
-- [ ] Invalid D7 gold or prediction packages fail before writing.
-- [ ] Optional protocol packages trigger existing D7 comparison preflight before
+- [x] Manifest paths are relative to the manifest directory when possible.
+- [x] Ordered prediction files are preserved.
+- [x] Invalid D7 gold or prediction packages fail before writing.
+- [x] Optional protocol packages trigger existing D7 comparison preflight before
   writing.
 
 ---
@@ -155,33 +155,74 @@ created.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] Valid inputs write a strict D7 comparison package accepted by the runner.
-- [ ] D7 gold files are validated as versioned D7 gold packages.
-- [ ] Prediction files are validated as versioned D7 retrieval/live-baseline
+- [x] Valid inputs write a strict D7 comparison package accepted by the runner.
+- [x] D7 gold files are validated as versioned D7 gold packages.
+- [x] Prediction files are validated as versioned D7 retrieval/live-baseline
   packages.
-- [ ] Prediction file order is preserved.
-- [ ] Relative manifest paths are emitted when files are inside the manifest
+- [x] Prediction file order is preserved.
+- [x] Relative manifest paths are emitted when files are inside the manifest
   directory.
-- [ ] Optional protocol packages run existing D7 comparison preflight before
+- [x] Optional protocol packages run existing D7 comparison preflight before
   writing.
-- [ ] Optional comparison output, artifact directory, and verify-artifact flag
+- [x] Optional comparison output, artifact directory, and verify-artifact flag
   are recorded.
-- [ ] Invalid inputs return a JSON error and do not write a manifest.
-- [ ] Make and `qc_cli.py` surfaces delegate to the canonical writer.
-- [ ] Docs state this package writer is reproducibility/provenance
+- [x] Invalid inputs return a JSON error and do not write a manifest.
+- [x] Make and `qc_cli.py` surfaces delegate to the canonical writer.
+- [x] Docs state this package writer is reproducibility/provenance
   infrastructure only, not held-out D7 evidence, live-baseline evidence,
   superiority evidence, methodological-validity evidence, or SOTA.
 
 > Process criteria:
-- [ ] TDD red state observed before implementation.
-- [ ] Focused tests pass.
-- [ ] Focused Ruff check passes.
-- [ ] Make dry-run passes.
-- [ ] `make docs-check` passes.
-- [ ] `git diff --check` passes.
-- [ ] `make check` passes.
-- [ ] Plan is moved to completed with verification evidence.
-- [ ] Verified implementation is committed and pushed.
+- [x] TDD red state observed before implementation.
+- [x] Focused tests pass.
+- [x] Focused Ruff check passes.
+- [x] Make dry-run passes.
+- [x] `make docs-check` passes.
+- [x] `git diff --check` passes.
+- [x] `make check` passes.
+- [x] Plan is moved to completed with verification evidence.
+- [x] Verified implementation is committed and pushed.
+
+---
+
+## Outcome
+
+Implemented and pushed in commit `cb45db9f`
+(`[Plan: D7_COMPARISON_PACKAGE_WRITER] Add D7 comparison package writer`).
+
+The slice adds `scripts/write_d7_comparison_package.py`, `make
+write-d7-comparison-package`, and `qc_cli.py write-d7-comparison-package`.
+The writer validates versioned D7 gold packages and versioned D7
+retrieval/live-baseline prediction packages before writing, preserves
+prediction order, emits package-relative manifest paths when possible, records
+optional comparison output / artifact directory / artifact verification fields,
+and runs existing D7 comparison preflight before writing when a protocol package
+is supplied.
+
+Verification evidence:
+
+- TDD red:
+  `python -m pytest tests/test_d7_comparison_package_writer.py tests/test_d7_comparison_package_runner.py tests/test_qc_cli_d7_retrieval.py -q`
+  failed during collection with `ImportError: cannot import name
+  'write_d7_comparison_package'`.
+- Focused package/CLI tests:
+  `python -m pytest tests/test_d7_comparison_package_writer.py tests/test_d7_comparison_package_runner.py tests/test_qc_cli_d7_retrieval.py -q`
+  -> `17 passed`.
+- Focused lint:
+  `python -m ruff check scripts/write_d7_comparison_package.py tests/test_d7_comparison_package_writer.py tests/test_qc_cli_d7_retrieval.py qc_cli.py`
+  -> passed.
+- Make dry-run:
+  `make -n write-d7-comparison-package ID=project GOLD=gold.json PREDICTIONS="a.json b.json" OUTPUT=d7_package.json`
+  -> `python scripts/write_d7_comparison_package.py project --output d7_package.json --gold-file gold.json --predictions-file a.json --predictions-file b.json`.
+- `make docs-check` -> passed.
+- `git diff --check` -> passed.
+- Full gate: `make check` -> `1192 passed, 1 skipped, 8 deselected`; Ruff
+  passed; docs-check passed; type check remains not configured.
+
+This remains reproducibility/provenance infrastructure only. It does not create
+held-out D7 data, run retrieval, run live baselines, validate retrieval/model
+policy, prove semantic disconfirmation validity, establish superiority, or
+support SOTA claims.
 
 ---
 
