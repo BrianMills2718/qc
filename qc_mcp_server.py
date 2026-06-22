@@ -345,6 +345,12 @@ def qc_get_claims(project_id: str, limit: int = 50) -> str:
             "origin_object_id": claim.origin_object_id,
             "supporting_anchors": len(claim.supporting_anchors),
             "contrary_anchors": len(claim.contrary_anchors),
+            "supporting_anchor_details": format_claim_anchor_details(
+                claim.supporting_anchors
+            ),
+            "contrary_anchor_details": format_claim_anchor_details(
+                claim.contrary_anchors
+            ),
         })
 
     return json.dumps({

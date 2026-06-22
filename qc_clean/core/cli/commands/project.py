@@ -10,7 +10,11 @@ from pathlib import Path
 from time import perf_counter
 from types import SimpleNamespace
 
-from qc_clean.core.claims import summarize_claim_ledger, summarize_disconfirmation_coverage
+from qc_clean.core.claims import (
+    format_claim_anchor_details,
+    summarize_claim_ledger,
+    summarize_disconfirmation_coverage,
+)
 from qc_clean.core.persistence.project_store import ProjectStore
 from qc_clean.schemas.domain import (
     CorpusScope,
@@ -682,15 +686,36 @@ def _show_claims(store: ProjectStore, args) -> int:
 
     if state.claims and limit:
         print("\n  Claims:")
+        show_anchors = getattr(args, "show_anchors", False) is True
         for claim in state.claims[:limit]:
             print(
                 f"    - [{claim.claim_kind.value}/{claim.source_stage}/"
                 f"{claim.support_status.value}] {claim.claim_text}"
             )
+            if show_anchors:
+                _print_claim_anchor_details("supporting", claim.supporting_anchors)
+                _print_claim_anchor_details("contrary", claim.contrary_anchors)
         if len(state.claims) > limit:
             print(f"    ... and {len(state.claims) - limit} more")
 
     return 0
+
+
+def _print_claim_anchor_details(label: str, anchors) -> None:
+    """Print bounded claim-anchor details for opt-in CLI inspection."""
+    for detail in format_claim_anchor_details(anchors):
+        start = detail["start_char"]
+        end = detail["end_char"]
+        span = f"{start}-{end}" if start is not None and end is not None else "unpositioned"
+        hash_part = f" hash {detail['quote_hash']}" if detail["quote_hash"] else ""
+        app_part = (
+            f" app {detail['code_application_id']}"
+            if detail["code_application_id"]
+            else ""
+        )
+        print(f"      {label} anchor: {detail['doc_id']} {span}{hash_part}{app_part}")
+        if detail["quote_text"]:
+            print(f"        quote: {detail['quote_text']}")
 
 
 def _show_or_update_scope(store: ProjectStore, args) -> int:

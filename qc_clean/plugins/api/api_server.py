@@ -765,6 +765,14 @@ class QCAPIServer:
                         "claim_text": claim.claim_text,
                         "origin_object_type": claim.origin_object_type,
                         "origin_object_id": claim.origin_object_id,
+                        "supporting_anchors": len(claim.supporting_anchors),
+                        "contrary_anchors": len(claim.contrary_anchors),
+                        "supporting_anchor_details": format_claim_anchor_details(
+                            claim.supporting_anchors
+                        ),
+                        "contrary_anchor_details": format_claim_anchor_details(
+                            claim.contrary_anchors
+                        ),
                     }
                     for claim in state.claims[:100]
                 ],

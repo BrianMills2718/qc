@@ -190,6 +190,47 @@ class TestClaimLedgerEndpoint:
         assert data["disconfirmation_summary"]["total_targets"] == 1
         assert data["disconfirmation_summary"]["unchallenged_targets"] == 1
 
+    def test_get_project_claims_includes_anchor_details(
+        self, client, tmp_store, review_project
+    ):
+        review_project.claims[0].supporting_anchors = [
+            ClaimAnchor(
+                doc_id="d1",
+                start_char=0,
+                end_char=12,
+                quote_text="support text",
+                quote_hash="support-hash",
+                code_application_id="A1",
+            )
+        ]
+        review_project.claims[0].contrary_anchors = [
+            ClaimAnchor(
+                doc_id="d1",
+                start_char=20,
+                end_char=35,
+                quote_text="contrary text",
+                quote_hash="contrary-hash",
+            )
+        ]
+        tmp_store.save(review_project)
+
+        resp = client.get("/projects/test-project-123/claims")
+
+        assert resp.status_code == 200
+        claim = resp.json()["claims"][0]
+        assert claim["supporting_anchors"] == 1
+        assert claim["contrary_anchors"] == 1
+        assert claim["supporting_anchor_details"][0] == {
+            "doc_id": "d1",
+            "start_char": 0,
+            "end_char": 12,
+            "quote_hash": "support-hash",
+            "quote_text": "support text",
+            "segment_id": None,
+            "code_application_id": "A1",
+        }
+        assert claim["contrary_anchor_details"][0]["quote_text"] == "contrary text"
+
 
 class TestInvalidProjectIDBoundaries:
     @pytest.mark.parametrize("invalid_id", ["test-project-123!", "%2E%2E%2Ftest-project-123"])

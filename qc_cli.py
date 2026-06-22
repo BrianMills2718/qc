@@ -1216,6 +1216,11 @@ Examples:
     proj_claims = project_subparsers.add_parser('claims', help='Show project claim ledger')
     proj_claims.add_argument('project_id', help='Project ID')
     proj_claims.add_argument('--limit', type=int, default=20, help='Maximum claims to show (default: 20)')
+    proj_claims.add_argument(
+        '--show-anchors',
+        action='store_true',
+        help='Show bounded supporting/contrary anchor details for each displayed claim',
+    )
 
     proj_scope = project_subparsers.add_parser('scope', help='Show or update project corpus scope')
     proj_scope.add_argument('project_id', help='Project ID')

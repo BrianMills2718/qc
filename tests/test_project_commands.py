@@ -15,6 +15,7 @@ from unittest.mock import patch, MagicMock
 from qc_clean.core.cli.commands import project as project_commands
 from qc_clean.schemas.domain import (
     AnalyticClaim,
+    ClaimAnchor,
     ClaimKind,
     ClaimScope,
     ClaimSupportStatus,
@@ -1693,6 +1694,18 @@ class TestCLIParsing:
         assert args.project_action == "claims"
         assert args.project_id == "pid"
         assert args.limit == 5
+        assert args.show_anchors is False
+
+    def test_claims_subparser_accepts_show_anchors(self):
+        from qc_cli import create_parser
+        parser = create_parser()
+
+        args = parser.parse_args(["project", "claims", "pid", "--show-anchors"])
+
+        assert args.command == "project"
+        assert args.project_action == "claims"
+        assert args.project_id == "pid"
+        assert args.show_anchors is True
 
     def test_scope_subparser(self):
         from qc_cli import create_parser
@@ -1812,11 +1825,21 @@ class TestProjectClaimsCommand:
                     origin_object_type="code",
                     origin_object_id="C1",
                     support_status=ClaimSupportStatus.SUPPORTED,
+                    supporting_anchors=[
+                        ClaimAnchor(
+                            doc_id="d1",
+                            start_char=2,
+                            end_char=17,
+                            quote_text="Efficiency quote",
+                            quote_hash="claim-cli-hash",
+                            code_application_id="A1",
+                        )
+                    ],
                 )
             ],
         )
         tmp_store.save(state)
-        args = MagicMock(project_id="claims-proj", limit=10)
+        args = MagicMock(project_id="claims-proj", limit=10, show_anchors=False)
 
         result = _show_claims(tmp_store, args)
 
@@ -1828,6 +1851,58 @@ class TestProjectClaimsCommand:
         assert "0 challenged, 1 unchallenged" in out
         assert "thematic_coding" in out
         assert "Efficiency is a code." in out
+        assert "claim-cli-hash" not in out
+
+    def test_project_claims_command_outputs_anchor_details_when_requested(
+        self, tmp_store, capsys
+    ):
+        from qc_clean.core.cli.commands.project import _show_claims
+
+        state = ProjectState(
+            id="claims-anchor-proj",
+            name="Claims Anchor Project",
+            claims=[
+                AnalyticClaim(
+                    claim_kind=ClaimKind.CODE,
+                    source_stage="thematic_coding",
+                    claim_text="Efficiency is a code.",
+                    scope=ClaimScope(code_ids=["C1"]),
+                    origin_object_type="code",
+                    origin_object_id="C1",
+                    support_status=ClaimSupportStatus.SUPPORTED,
+                    supporting_anchors=[
+                        ClaimAnchor(
+                            doc_id="d1",
+                            start_char=2,
+                            end_char=17,
+                            quote_text="Efficiency quote",
+                            quote_hash="claim-cli-hash",
+                            code_application_id="A1",
+                        )
+                    ],
+                    contrary_anchors=[
+                        ClaimAnchor(
+                            doc_id="d2",
+                            start_char=4,
+                            end_char=21,
+                            quote_text="Exception quote",
+                            quote_hash="claim-cli-contrary",
+                        )
+                    ],
+                )
+            ],
+        )
+        tmp_store.save(state)
+        args = MagicMock(project_id="claims-anchor-proj", limit=10, show_anchors=True)
+
+        result = _show_claims(tmp_store, args)
+
+        assert result == 0
+        out = capsys.readouterr().out
+        assert "supporting anchor: d1 2-17 hash claim-cli-hash app A1" in out
+        assert "Efficiency quote" in out
+        assert "contrary anchor: d2 4-21 hash claim-cli-contrary" in out
+        assert "Exception quote" in out
 
 
 class TestProjectAdjudicationSampleCommand:

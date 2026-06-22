@@ -347,6 +347,25 @@ class TestInspection:
                 origin_object_type="code",
                 origin_object_id="C1",
                 support_status=ClaimSupportStatus.SUPPORTED,
+                supporting_anchors=[
+                    ClaimAnchor(
+                        doc_id="d1",
+                        start_char=0,
+                        end_char=18,
+                        quote_text="AI adoption evidence",
+                        quote_hash="support-mcp",
+                        code_application_id="A1",
+                    )
+                ],
+                contrary_anchors=[
+                    ClaimAnchor(
+                        doc_id="d2",
+                        start_char=5,
+                        end_char=24,
+                        quote_text="AI adoption exception",
+                        quote_hash="contrary-mcp",
+                    )
+                ],
             )
         ]
         tmp_store.save(completed_project)
@@ -358,6 +377,18 @@ class TestInspection:
         assert result["disconfirmation_summary"]["unchallenged_targets"] == 1
         assert result["claims"][0]["claim_text"] == "AI Adoption is a code."
         assert result["claims"][0]["support_status"] == "supported"
+        assert result["claims"][0]["supporting_anchors"] == 1
+        assert result["claims"][0]["contrary_anchors"] == 1
+        assert result["claims"][0]["supporting_anchor_details"][0] == {
+            "doc_id": "d1",
+            "start_char": 0,
+            "end_char": 18,
+            "quote_hash": "support-mcp",
+            "quote_text": "AI adoption evidence",
+            "segment_id": None,
+            "code_application_id": "A1",
+        }
+        assert result["claims"][0]["contrary_anchor_details"][0]["quote_hash"] == "contrary-mcp"
 
 
 # ---------------------------------------------------------------------------
