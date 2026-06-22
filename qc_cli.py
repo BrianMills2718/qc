@@ -282,6 +282,29 @@ Examples:
     proj_export.add_argument('--output-file', help='Output file path (for json/markdown/qdpx)')
     proj_export.add_argument('--output-dir', help='Output directory (for csv)')
 
+    proj_adjudication = project_subparsers.add_parser(
+        'adjudication-sample',
+        help='Export an unlabeled adjudication sample package'
+    )
+    proj_adjudication.add_argument('project_id', help='Project ID')
+    proj_adjudication.add_argument(
+        '--output-file',
+        required=True,
+        help='Output JSON package path'
+    )
+    proj_adjudication.add_argument(
+        '--limit-per-type',
+        type=int,
+        default=20,
+        help='Maximum sample items per target type (default: 20)'
+    )
+    proj_adjudication.add_argument(
+        '--context-chars',
+        type=int,
+        default=120,
+        help='Characters of source context before/after anchored spans (default: 120)'
+    )
+
     proj_irr = project_subparsers.add_parser('irr', help='Run inter-rater reliability analysis')
     proj_irr.add_argument('project_id', help='Project ID')
     proj_irr.add_argument('--passes', type=int, default=3, help='Number of coding passes (default: 3)')

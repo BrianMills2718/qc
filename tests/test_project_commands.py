@@ -20,6 +20,7 @@ from qc_clean.schemas.domain import (
     ClaimSupportStatus,
     Code,
     CodeApplication,
+    CodeRelationship,
     Codebook,
     Corpus,
     CorpusScope,
@@ -625,6 +626,29 @@ class TestCLIParsing:
         assert args.exclusion_criteria == ["Vendors"]
         assert args.notes == "Bounded to early adopters."
 
+    def test_adjudication_sample_subparser(self):
+        from qc_cli import create_parser
+        parser = create_parser()
+
+        args = parser.parse_args([
+            "project",
+            "adjudication-sample",
+            "pid",
+            "--output-file",
+            "sample.json",
+            "--limit-per-type",
+            "5",
+            "--context-chars",
+            "80",
+        ])
+
+        assert args.command == "project"
+        assert args.project_action == "adjudication-sample"
+        assert args.project_id == "pid"
+        assert args.output_file == "sample.json"
+        assert args.limit_per_type == 5
+        assert args.context_chars == 80
+
 
 class TestProjectClaimsCommand:
     def test_project_claims_command_outputs_summary(self, tmp_store, capsys):
@@ -658,6 +682,73 @@ class TestProjectClaimsCommand:
         assert "0 challenged, 1 unchallenged" in out
         assert "thematic_coding" in out
         assert "Efficiency is a code." in out
+
+
+class TestProjectAdjudicationSampleCommand:
+    def test_project_adjudication_sample_command_writes_json(self, tmp_store, tmp_path, capsys):
+        from qc_clean.core.cli.commands.project import _export_adjudication_sample
+
+        doc = Document(id="d1", name="interview.txt", content="A participant wants autonomy.")
+        state = ProjectState(
+            id="adj-cli",
+            name="Adjudication CLI",
+            corpus=Corpus(documents=[doc]),
+            codebook=Codebook(codes=[Code(id="C1", name="Autonomy")]),
+            code_applications=[
+                CodeApplication(
+                    id="A1",
+                    code_id="C1",
+                    doc_id="d1",
+                    quote_text="autonomy",
+                    start_char=20,
+                    end_char=28,
+                )
+            ],
+            code_relationships=[
+                CodeRelationship(
+                    id="R1",
+                    source_code_id="C1",
+                    target_code_id="C2",
+                    relationship_type="related_to",
+                )
+            ],
+        )
+        tmp_store.save(state)
+        output_file = tmp_path / "adjudication_sample.json"
+        args = MagicMock(
+            project_id="adj-cli",
+            output_file=str(output_file),
+            limit_per_type=10,
+            context_chars=20,
+        )
+
+        result = _export_adjudication_sample(tmp_store, args)
+
+        assert result == 0
+        payload = json.loads(output_file.read_text(encoding="utf-8"))
+        assert payload["schema_version"] == 1
+        assert payload["project_id"] == "adj-cli"
+        assert payload["item_counts"]["returned"]["code_application"] == 1
+        assert payload["item_counts"]["returned"]["code_relationship"] == 1
+        out = capsys.readouterr().out
+        assert "Exported adjudication sample to:" in out
+        assert "Items: 2" in out
+
+    def test_project_adjudication_sample_missing_project_fails(self, tmp_store, tmp_path, capsys):
+        from qc_clean.core.cli.commands.project import _export_adjudication_sample
+
+        args = MagicMock(
+            project_id="missing",
+            output_file=str(tmp_path / "sample.json"),
+            limit_per_type=10,
+            context_chars=20,
+        )
+
+        result = _export_adjudication_sample(tmp_store, args)
+
+        assert result == 1
+        err = capsys.readouterr().err
+        assert "Project not found: missing" in err
 
 
 class TestProjectScopeCommand:

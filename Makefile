@@ -1,8 +1,9 @@
-.PHONY: help test test-quick test-e2e test-all bench bench-package validate-d3-gold validate-d7-gold validate-inv7-package run-d7-retrieval compare-d7-retrieval run-inv7-fixtures run-inv7-live-fixtures check lint docs-check clean status cost errors
+.PHONY: help test test-quick test-e2e test-all bench bench-package validate-d3-gold validate-d7-gold validate-inv7-package run-d7-retrieval compare-d7-retrieval run-inv7-fixtures run-inv7-live-fixtures adjudication-sample check lint docs-check clean status cost errors
 
 DAYS ?= 7
 PROJECT ?= qualitative_coding
 LIMIT ?= 20
+CONTEXT_CHARS ?= 120
 
 help:  ## Show this help
 	@grep -E '^[a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-20s %s\n", $$1, $$2}'
@@ -80,6 +81,15 @@ ifndef OUTPUT
 	$(error OUTPUT is required. Usage: make run-inv7-live-fixtures OUTPUT=inv7_live.json MODEL=<model>)
 endif
 	python scripts/run_inv7_live_fixtures.py --output $(OUTPUT) $(if $(MODEL),--model $(MODEL),) $(if $(TRACE_ID),--trace-id $(TRACE_ID),) $(if $(MAX_BUDGET),--max-budget $(MAX_BUDGET),)
+
+adjudication-sample:  ## Export an unlabeled adjudication sample package (ID=<project_id> OUTPUT=sample.json [LIMIT=20] [CONTEXT_CHARS=120])
+ifndef ID
+	$(error ID is required. Usage: make adjudication-sample ID=<project_id> OUTPUT=sample.json)
+endif
+ifndef OUTPUT
+	$(error OUTPUT is required. Usage: make adjudication-sample ID=<project_id> OUTPUT=sample.json)
+endif
+	python qc_cli.py project adjudication-sample $(ID) --output-file $(OUTPUT) --limit-per-type $(LIMIT) --context-chars $(CONTEXT_CHARS)
 
 check:  ## Run deterministic tests + lint + docs checks
 	python -m pytest tests/ -m "not live_llm" -x -q

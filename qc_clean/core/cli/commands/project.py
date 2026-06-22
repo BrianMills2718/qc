@@ -42,6 +42,8 @@ def handle_project_command(args) -> int:
         return _run_project(store, args)
     elif args.project_action == "export":
         return _export_project(store, args)
+    elif args.project_action == "adjudication-sample":
+        return _export_adjudication_sample(store, args)
     elif args.project_action == "irr":
         return _run_irr(store, args)
     elif args.project_action == "stability":
@@ -316,6 +318,37 @@ def _export_project(store: ProjectStore, args) -> int:
         print(f"Export failed: {e}", file=sys.stderr)
         return 1
 
+    return 0
+
+
+def _export_adjudication_sample(store: ProjectStore, args) -> int:
+    """Export an unlabeled adjudication sample package for a project."""
+    project_id = args.project_id
+    try:
+        state = store.load(project_id)
+    except FileNotFoundError:
+        print(f"Project not found: {project_id}", file=sys.stderr)
+        return 1
+
+    from qc_clean.core.adjudication_sample import (
+        build_adjudication_sample_package,
+        write_adjudication_sample_package,
+    )
+
+    package = build_adjudication_sample_package(
+        state,
+        limit_per_type=getattr(args, "limit_per_type", 20),
+        context_chars=getattr(args, "context_chars", 120),
+    )
+    output_file = getattr(args, "output_file", None)
+    if not output_file:
+        print("--output-file is required", file=sys.stderr)
+        return 1
+
+    path = write_adjudication_sample_package(package, output_file)
+    print(f"Exported adjudication sample to: {path}")
+    print(f"  Items: {package.item_counts['returned']['total']}")
+    print("  Note: package is unlabeled input, not validity evidence.")
     return 0
 
 
