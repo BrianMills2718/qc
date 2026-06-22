@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ValidationError
 
 from qc_clean.schemas.domain import (
     AnalyticClaim,
@@ -28,6 +28,7 @@ TargetType = Literal[
     "code_relationship",
     "entity_relationship",
 ]
+ResponseValidity = Literal["valid", "invalid", "unclear"]
 
 TARGET_TYPE_ORDER: tuple[TargetType, ...] = (
     "code_application",
@@ -105,6 +106,45 @@ class AdjudicationSamplePackage(BaseModel):
         description="Caveat that this unlabeled package is not validity evidence"
     )
     items: list[AdjudicationSampleItem] = Field(description="Unlabeled sample items")
+
+
+class AdjudicationResponse(BaseModel):
+    """One completed adjudication response for a sample item."""
+
+    validity: str = Field(description="Adjudicator label: valid, invalid, or unclear")
+    rationale: str = Field(default="", description="Human rationale for the label")
+    corrected_value: Any | None = Field(default=None, description="Optional corrected target value")
+    adjudicator_id: str = Field(description="Coder/adjudicator identifier")
+
+
+class AdjudicationResponseValidationError(BaseModel):
+    """One item-level adjudication response validation error."""
+
+    item_id: str = Field(description="Sample item ID with the validation error")
+    field: str = Field(description="Field or package area that failed validation")
+    message: str = Field(description="Human-readable validation error")
+
+
+class AdjudicationResponseValidationReport(BaseModel):
+    """Validation report for a completed adjudication response package."""
+
+    schema_version: Literal[1] = Field(description="Validation report schema version")
+    package_type: Literal["adjudication_response_validation"] = Field(
+        description="Package kind for response validation reports"
+    )
+    project_id: str | None = Field(default=None, description="Project ID from the sample package")
+    project_name: str | None = Field(default=None, description="Project name from the sample package")
+    status: Literal["complete", "invalid"] = Field(description="Overall response validation status")
+    total_items: int = Field(description="Number of sample items inspected")
+    valid_response_count: int = Field(description="Number of items with complete valid responses")
+    error_count: int = Field(description="Number of validation errors")
+    counts_by_validity: dict[ResponseValidity, int] = Field(
+        description="Valid response counts by validity label"
+    )
+    errors: list[AdjudicationResponseValidationError] = Field(
+        description="Item-level validation errors"
+    )
+    caution: str = Field(description="Caveat that validation is not expert evidence")
 
 
 def build_adjudication_sample_package(
@@ -202,6 +242,160 @@ def write_adjudication_sample_package(
         encoding="utf-8",
     )
     return str(path)
+
+
+def load_adjudication_response_package(path: str | Path) -> AdjudicationResponseValidationReport:
+    """Load a JSON adjudication response package and return its validation report."""
+    path = Path(path)
+    try:
+        raw = json.loads(path.read_text(encoding="utf-8"))
+    except OSError as exc:
+        raise ValueError(f"Adjudication response file '{path}' could not be read: {exc}") from exc
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"Adjudication response file '{path}' is not valid JSON: {exc}") from exc
+    return validate_adjudication_response_payload(raw)
+
+
+def validate_adjudication_response_payload(
+    payload: Any,
+) -> AdjudicationResponseValidationReport:
+    """Validate completed adjudication responses without treating them as gold."""
+    if not isinstance(payload, dict):
+        return _response_validation_report(
+            project_id=None,
+            project_name=None,
+            total_items=0,
+            valid_response_count=0,
+            counts_by_validity=_empty_validity_counts(),
+            errors=[
+                AdjudicationResponseValidationError(
+                    item_id="__package__",
+                    field="package",
+                    message="adjudication response package must be a JSON object",
+                )
+            ],
+        )
+
+    try:
+        package = AdjudicationSamplePackage.model_validate(payload)
+    except ValidationError as exc:
+        return _response_validation_report(
+            project_id=payload.get("project_id") if isinstance(payload.get("project_id"), str) else None,
+            project_name=(
+                payload.get("project_name") if isinstance(payload.get("project_name"), str) else None
+            ),
+            total_items=0,
+            valid_response_count=0,
+            counts_by_validity=_empty_validity_counts(),
+            errors=[
+                AdjudicationResponseValidationError(
+                    item_id="__package__",
+                    field="package",
+                    message=f"invalid adjudication sample package: {exc}",
+                )
+            ],
+        )
+
+    raw_items = payload.get("items", [])
+    if not isinstance(raw_items, list):
+        raw_items = []
+
+    errors: list[AdjudicationResponseValidationError] = []
+    counts_by_validity = _empty_validity_counts()
+    valid_response_count = 0
+    seen_item_ids: set[str] = set()
+
+    for raw_item in raw_items:
+        if not isinstance(raw_item, dict):
+            errors.append(
+                AdjudicationResponseValidationError(
+                    item_id="__item__",
+                    field="item",
+                    message="sample item must be a JSON object",
+                )
+            )
+            continue
+
+        item_id = str(raw_item.get("item_id") or "")
+        if not item_id:
+            item_id = "__missing_item_id__"
+        item_errors: list[AdjudicationResponseValidationError] = []
+        if item_id in seen_item_ids:
+            item_errors.append(
+                AdjudicationResponseValidationError(
+                    item_id=item_id,
+                    field="item_id",
+                    message="duplicate item_id in adjudication response package",
+                )
+            )
+        seen_item_ids.add(item_id)
+
+        raw_response = _response_payload_from_item(raw_item)
+        if raw_response is None:
+            item_errors.append(
+                AdjudicationResponseValidationError(
+                    item_id=item_id,
+                    field="response",
+                    message="missing response object with completed adjudication fields",
+                )
+            )
+            errors.extend(item_errors)
+            continue
+
+        try:
+            response = AdjudicationResponse.model_validate(raw_response)
+        except ValidationError as exc:
+            item_errors.append(
+                AdjudicationResponseValidationError(
+                    item_id=item_id,
+                    field="response",
+                    message=f"invalid response object: {exc}",
+                )
+            )
+            errors.extend(item_errors)
+            continue
+
+        validity = response.validity.strip().lower()
+        if validity not in {"valid", "invalid", "unclear"}:
+            item_errors.append(
+                AdjudicationResponseValidationError(
+                    item_id=item_id,
+                    field="validity",
+                    message="validity must be one of: valid, invalid, unclear",
+                )
+            )
+        if not response.adjudicator_id.strip():
+            item_errors.append(
+                AdjudicationResponseValidationError(
+                    item_id=item_id,
+                    field="adjudicator_id",
+                    message="adjudicator_id is required",
+                )
+            )
+        if validity in {"invalid", "unclear"} and not response.rationale.strip():
+            item_errors.append(
+                AdjudicationResponseValidationError(
+                    item_id=item_id,
+                    field="rationale",
+                    message="rationale is required for invalid or unclear responses",
+                )
+            )
+
+        if item_errors:
+            errors.extend(item_errors)
+            continue
+
+        valid_response_count += 1
+        counts_by_validity[validity] += 1
+
+    return _response_validation_report(
+        project_id=package.project_id,
+        project_name=package.project_name,
+        total_items=len(package.items),
+        valid_response_count=valid_response_count,
+        counts_by_validity=counts_by_validity,
+        errors=errors,
+    )
 
 
 def _item_for_application(
@@ -416,6 +610,61 @@ def _source_context(
         context_before=context_before,
         context_after=context_after,
     )
+
+
+def _response_payload_from_item(raw_item: dict[str, Any]) -> dict[str, Any] | None:
+    """Return a completed response object from a raw sample item, if present."""
+    response = raw_item.get("response")
+    if isinstance(response, dict):
+        return response
+
+    template = raw_item.get("response_template")
+    if not isinstance(template, dict):
+        return None
+    if any(
+        [
+            str(template.get("validity") or "").strip(),
+            str(template.get("rationale") or "").strip(),
+            template.get("corrected_value") is not None,
+            str(template.get("adjudicator_id") or "").strip(),
+        ]
+    ):
+        return template
+    return None
+
+
+def _response_validation_report(
+    *,
+    project_id: str | None,
+    project_name: str | None,
+    total_items: int,
+    valid_response_count: int,
+    counts_by_validity: dict[ResponseValidity, int],
+    errors: list[AdjudicationResponseValidationError],
+) -> AdjudicationResponseValidationReport:
+    """Build a response validation report with consistent caveats."""
+    return AdjudicationResponseValidationReport(
+        schema_version=1,
+        package_type="adjudication_response_validation",
+        project_id=project_id,
+        project_name=project_name,
+        status="complete" if not errors else "invalid",
+        total_items=total_items,
+        valid_response_count=valid_response_count,
+        error_count=len(errors),
+        counts_by_validity=counts_by_validity,
+        errors=errors,
+        caution=(
+            "This report validates response completeness and shape only; it is "
+            "not expert evidence, a gold set, a correctness estimate, or a "
+            "benchmark result."
+        ),
+    )
+
+
+def _empty_validity_counts() -> dict[ResponseValidity, int]:
+    """Return the standard zeroed response validity counters."""
+    return {"valid": 0, "invalid": 0, "unclear": 0}
 
 
 def _sha256_jsonable(value: Any) -> str:

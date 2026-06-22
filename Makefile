@@ -1,4 +1,4 @@
-.PHONY: help test test-quick test-e2e test-all bench bench-package validate-d3-gold validate-d7-gold validate-inv7-package run-d7-retrieval compare-d7-retrieval run-inv7-fixtures run-inv7-live-fixtures adjudication-sample check lint docs-check clean status cost errors
+.PHONY: help test test-quick test-e2e test-all bench bench-package validate-d3-gold validate-d7-gold validate-inv7-package validate-adjudication-responses run-d7-retrieval compare-d7-retrieval run-inv7-fixtures run-inv7-live-fixtures adjudication-sample check lint docs-check clean status cost errors
 
 DAYS ?= 7
 PROJECT ?= qualitative_coding
@@ -46,6 +46,12 @@ ifndef PACKAGE
 	$(error PACKAGE is required. Usage: make validate-inv7-package PACKAGE=inv7_package.json)
 endif
 	python scripts/validate_inv7_prompt_injection_package.py $(PACKAGE)
+
+validate-adjudication-responses:  ## Validate completed adjudication sample responses (PACKAGE=sample.json)
+ifndef PACKAGE
+	$(error PACKAGE is required. Usage: make validate-adjudication-responses PACKAGE=sample.json)
+endif
+	python scripts/validate_adjudication_responses.py $(PACKAGE)
 
 MODE ?= lexical_bm25
 

@@ -4,6 +4,7 @@ import json
 
 from qc_clean.core.adjudication_sample import (
     build_adjudication_sample_package,
+    validate_adjudication_response_payload,
     write_adjudication_sample_package,
 )
 from qc_clean.schemas.domain import (
@@ -121,6 +122,114 @@ def test_limit_per_type_and_negative_case_split():
     assert [
         item["item_id"] for item in payload["items"] if item["target_type"] == "negative_case"
     ] == ["negative_case:neg-1"]
+
+
+def test_validate_complete_adjudication_responses():
+    payload = _completed_response_payload()
+
+    report = validate_adjudication_response_payload(payload)
+    report_payload = report.model_dump(mode="json")
+
+    assert report_payload["schema_version"] == 1
+    assert report_payload["status"] == "complete"
+    assert report_payload["total_items"] == 5
+    assert report_payload["valid_response_count"] == 5
+    assert report_payload["error_count"] == 0
+    assert report_payload["counts_by_validity"] == {
+        "valid": 3,
+        "invalid": 1,
+        "unclear": 1,
+    }
+    assert "not expert evidence" in report_payload["caution"]
+
+
+def test_validate_adjudication_responses_reports_errors():
+    payload = _completed_response_payload()
+    payload["items"][0].pop("response")
+    payload["items"][1]["response"] = {
+        "validity": "maybe",
+        "rationale": "Not a valid label.",
+        "corrected_value": None,
+        "adjudicator_id": "coder-1",
+    }
+    payload["items"][2]["response"] = {
+        "validity": "unclear",
+        "rationale": "",
+        "corrected_value": None,
+        "adjudicator_id": "coder-1",
+    }
+    payload["items"][3]["response"] = {
+        "validity": "valid",
+        "rationale": "",
+        "corrected_value": None,
+        "adjudicator_id": "",
+    }
+
+    report = validate_adjudication_response_payload(payload).model_dump(mode="json")
+
+    assert report["status"] == "invalid"
+    assert report["valid_response_count"] == 1
+    assert report["error_count"] == 4
+    errors_by_item = {error["item_id"]: error["message"] for error in report["errors"]}
+    assert "missing response" in errors_by_item["code_application:A1"]
+    assert "validity must be one of" in errors_by_item["claim:claim-1"]
+    assert "rationale is required" in errors_by_item["negative_case:neg-1"]
+    assert "adjudicator_id is required" in errors_by_item["code_relationship:R1"]
+
+
+def test_validate_adjudication_responses_rejects_duplicate_item_ids():
+    payload = _completed_response_payload()
+    payload["items"].append(dict(payload["items"][0]))
+
+    report = validate_adjudication_response_payload(payload).model_dump(mode="json")
+
+    assert report["status"] == "invalid"
+    assert any(
+        error["item_id"] == "code_application:A1"
+        and "duplicate item_id" in error["message"]
+        for error in report["errors"]
+    )
+
+
+def test_validate_adjudication_responses_script(tmp_path, capsys):
+    from scripts import validate_adjudication_responses
+
+    valid_path = tmp_path / "valid_responses.json"
+    valid_path.write_text(json.dumps(_completed_response_payload()), encoding="utf-8")
+
+    valid_exit = validate_adjudication_responses.main([str(valid_path)])
+    valid_report = json.loads(capsys.readouterr().out)
+
+    assert valid_exit == 0
+    assert valid_report["status"] == "complete"
+
+    invalid_payload = _completed_response_payload()
+    invalid_payload["items"][0]["response"]["validity"] = ""
+    invalid_path = tmp_path / "invalid_responses.json"
+    invalid_path.write_text(json.dumps(invalid_payload), encoding="utf-8")
+
+    invalid_exit = validate_adjudication_responses.main([str(invalid_path)])
+    invalid_report = json.loads(capsys.readouterr().out)
+
+    assert invalid_exit == 1
+    assert invalid_report["status"] == "invalid"
+
+
+def _completed_response_payload() -> dict:
+    package = build_adjudication_sample_package(
+        _adjudication_state(),
+        limit_per_type=10,
+        context_chars=8,
+    ).model_dump(mode="json")
+    labels = ["valid", "invalid", "unclear", "valid", "valid"]
+    for item, validity in zip(package["items"], labels):
+        item["response"] = {
+            "validity": validity,
+            "rationale": "Reviewed by coder.",
+            "corrected_value": None,
+            "adjudicator_id": "coder-1",
+        }
+    return package
 
 
 def _adjudication_state() -> ProjectState:
