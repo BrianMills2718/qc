@@ -710,6 +710,12 @@ def grounding_scorecard(state: ProjectState) -> dict[str, Any]:
 def coverage_scorecard(state: ProjectState) -> dict[str, Any]:
     """Serialize D2 coverage with local Wilson interval metadata."""
     report = asdict(compute_coverage(state))
+    examined_segments = report["examined_segments"]
+    report["coded_segment_rate"] = (
+        report["coded_segments"] / examined_segments
+        if examined_segments
+        else None
+    )
     report["coverage_rate_ci"] = _wilson_interval(
         report["covered_segments"],
         report["total_segments"],
@@ -717,6 +723,10 @@ def coverage_scorecard(state: ProjectState) -> dict[str, Any]:
     report["examined_rate_ci"] = _wilson_interval(
         report["examined_segments"],
         report["total_segments"],
+    )
+    report["coded_segment_rate_ci"] = _wilson_interval(
+        report["coded_segments"],
+        examined_segments,
     )
     return report
 

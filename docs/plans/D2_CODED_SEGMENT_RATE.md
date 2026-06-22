@@ -1,6 +1,6 @@
 # Plan #73: D2 Coded Segment Rate
 
-**Status:** Planned
+**Status:** In Progress
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Plan #3 segment universe; Plan #58 D1/D2 structural rate Wilson intervals
@@ -106,20 +106,20 @@ cross-project callable capability.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] D2 coverage scorecard reports `coded_segment_rate` as `None` when no
+- [x] D2 coverage scorecard reports `coded_segment_rate` as `None` when no
   segment decisions exist.
-- [ ] D2 coverage scorecard reports `coded_segment_rate` as
+- [x] D2 coverage scorecard reports `coded_segment_rate` as
   `coded_segments / examined_segments` when decisions exist.
-- [ ] D2 coverage scorecard reports a Wilson `coded_segment_rate_ci` with
+- [x] D2 coverage scorecard reports a Wilson `coded_segment_rate_ci` with
   successes=`coded_segments` and denominator=`examined_segments`.
-- [ ] Docs label the metric as local examined-decision accounting, not validity
+- [x] Docs label the metric as local examined-decision accounting, not validity
   or population prevalence.
 
 > Process criteria:
-- [ ] Required tests pass
-- [ ] Full test suite passes
-- [ ] Type check status is reported
-- [ ] Docs updated
+- [x] Required tests pass (`python -m pytest tests/test_bench_phase0.py tests/test_segmentation.py -q`: 68 passed)
+- [x] Full test suite passes (`make check`: 781 passed, 1 skipped, 8 deselected; Ruff/docs-check passed)
+- [x] Type check status is reported (`make check`: type check not yet configured)
+- [x] Docs updated
 
 ---
 

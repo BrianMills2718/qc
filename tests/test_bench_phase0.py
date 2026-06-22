@@ -223,6 +223,9 @@ def test_coverage_note_is_conditional_on_exhaustive_mode():
     assert traversal_card["coverage"]["coverage_rate_ci"]["denominator"] == 1
     assert traversal_card["coverage"]["examined_rate_ci"]["successes"] == 0
     assert traversal_card["coverage"]["examined_rate_ci"]["denominator"] == 1
+    assert traversal_card["coverage"]["coded_segment_rate"] is None
+    assert traversal_card["coverage"]["coded_segment_rate_ci"]["successes"] == 0
+    assert traversal_card["coverage"]["coded_segment_rate_ci"]["denominator"] == 0
     assert "traversal coverage only" in note_t
     assert "examined-and-judged coverage available" not in note_t
 
@@ -233,8 +236,40 @@ def test_coverage_note_is_conditional_on_exhaustive_mode():
     note_e = examined_card["_meta"]["coverage_note"]
     assert examined_card["coverage"]["examined_rate_ci"]["successes"] == 1
     assert examined_card["coverage"]["examined_rate_ci"]["denominator"] == 1
+    assert examined_card["coverage"]["coded_segment_rate"] == 0.0
+    assert examined_card["coverage"]["coded_segment_rate_ci"]["successes"] == 0
+    assert examined_card["coverage"]["coded_segment_rate_ci"]["denominator"] == 1
     assert "examined-and-judged coverage available" in note_e
     assert "traversal coverage only" not in note_e
+
+
+def test_coverage_scorecard_reports_mixed_coded_segment_rate():
+    content = "Alex: one.\nSam: two.\nRiley: three."
+    doc = Document(name="d.txt", content=content)
+    state = ProjectState(
+        name="mixed",
+        config=ProjectConfig(methodology=Methodology.THEMATIC_ANALYSIS),
+        corpus=Corpus(documents=[doc]),
+        segments=[
+            Segment(id="S1", doc_id=doc.id, index=0, start_char=0, end_char=9,
+                    text="Alex: one", decision="coded"),
+            Segment(id="S2", doc_id=doc.id, index=1, start_char=10, end_char=18,
+                    text="Sam: two", decision="no_code"),
+            Segment(id="S3", doc_id=doc.id, index=2, start_char=19, end_char=len(content),
+                    text="Riley: three.", decision="coded"),
+        ],
+    )
+
+    coverage = phase0_scorecard(state)["coverage"]
+
+    assert coverage["coded_segments"] == 2
+    assert coverage["examined_segments"] == 3
+    assert coverage["coded_segment_rate"] == pytest.approx(2 / 3)
+    assert coverage["coded_segment_rate_ci"]["method"] == "wilson"
+    assert coverage["coded_segment_rate_ci"]["successes"] == 2
+    assert coverage["coded_segment_rate_ci"]["denominator"] == 3
+    assert coverage["coded_segment_rate_ci"]["lower"] <= coverage["coded_segment_rate"]
+    assert coverage["coded_segment_rate_ci"]["upper"] >= coverage["coded_segment_rate"]
 
 
 def test_scorecard_grounding_rate_one_when_no_applications():
