@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 67 | Confidence calibration bootstrap intervals | High | Planned | `CONFIDENCE_CALIBRATION_BOOTSTRAP_INTERVALS.md` |
 
 ## Completed Plans
 
