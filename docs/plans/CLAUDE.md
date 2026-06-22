@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| #77 | Corpus Scope Completeness Warnings | High | Planned | `CORPUS_SCOPE_COMPLETENESS_WARNINGS.md` |
 
 ## Completed Plans
 
