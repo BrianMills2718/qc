@@ -1459,6 +1459,7 @@ def _interpretive_preference_summary(
         "ties": ties,
         "non_tie_cases": non_tie_cases,
         "tie_rate": _safe_div(ties, total),
+        "tie_rate_ci": _wilson_interval(ties, total),
         "system_preference_rate": _safe_div_or_none(system_wins, non_tie_cases),
         "system_preference_ci": _wilson_interval(system_wins, non_tie_cases),
     }

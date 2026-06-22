@@ -967,6 +967,9 @@ def test_scorecard_scores_interpretive_preference_outcomes():
     assert d9["ties"] == 1
     assert d9["non_tie_cases"] == 3
     assert d9["tie_rate"] == pytest.approx(0.25)
+    assert d9["tie_rate_ci"]["method"] == "wilson"
+    assert d9["tie_rate_ci"]["successes"] == 1
+    assert d9["tie_rate_ci"]["denominator"] == 4
     assert d9["system_preference_rate"] == pytest.approx(2 / 3)
     assert d9["system_preference_ci"]["method"] == "wilson"
     assert d9["system_preference_ci"]["successes"] == 2
@@ -974,8 +977,14 @@ def test_scorecard_scores_interpretive_preference_outcomes():
     assert d9["non_inferiority_assessment"]["status"] == "not_available"
     assert "protocol metadata" in d9["non_inferiority_assessment"]["reason"]
     assert d9["by_evaluator"]["expert-a"]["system_preference_rate"] == pytest.approx(0.5)
+    assert d9["by_evaluator"]["expert-a"]["tie_rate_ci"]["successes"] == 0
+    assert d9["by_evaluator"]["expert-a"]["tie_rate_ci"]["denominator"] == 2
     assert d9["by_evaluator"]["expert-b"]["tie_rate"] == pytest.approx(0.5)
+    assert d9["by_evaluator"]["expert-b"]["tie_rate_ci"]["successes"] == 1
+    assert d9["by_evaluator"]["expert-b"]["tie_rate_ci"]["denominator"] == 2
     assert d9["by_criterion"]["latent_meaning"]["non_tie_cases"] == 1
+    assert d9["by_criterion"]["latent_meaning"]["tie_rate_ci"]["successes"] == 1
+    assert d9["by_criterion"]["latent_meaning"]["tie_rate_ci"]["denominator"] == 2
     assert "not blind expert-parity evidence" in d9["note"]
 
 

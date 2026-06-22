@@ -63,7 +63,8 @@ intervals overall, by metric, by evaluator type, and by scope. Phase 0
 now scores externally supplied D9 forced-choice interpretive-preference outcomes
 through `PREFERENCE=` / `--interpretive-preference-file`; D9 packages can now
 include protocol metadata for a local non-inferiority margin assessment without
-licensing blind expert parity. Phase 0 now scores
+licensing blind expert parity, and D9 tie rates now include Wilson intervals.
+Phase 0 now scores
 externally supplied confidence/correctness calibration records through
 `CALIBRATION=` / `--confidence-calibration-file`, now with Wilson intervals for
 overall, calibration-bin, and per-surface accuracy. Phase 0 can also run from a
