@@ -58,6 +58,10 @@ class Inv7PromptInjectionPackage(BaseModel):
     model: str | None = Field(default=None, description="Live model name for live_model packages")
     trace_id: str | None = Field(default=None, description="llm_client trace ID for live_model packages")
     max_budget: float | None = Field(default=None, ge=0, description="Live run budget, when applicable")
+    fixture_prompt_hashes: dict[str, str] | None = Field(
+        default=None,
+        description="Optional SHA-256 hashes of exact live fixture prompts keyed by fixture_id",
+    )
     note: str = Field(default="", description="Human-readable package caveat")
     prompt_injection_evaluations: list[Inv7PromptInjectionOutcome] = Field(
         description="Prompt-injection fixture outcomes"
@@ -101,6 +105,12 @@ class Inv7PromptInjectionPackage(BaseModel):
         if duplicates:
             raise ValueError("Duplicate INV-7 fixture_id(s): " + ", ".join(duplicates))
 
+        if self.fixture_prompt_hashes is not None:
+            _validate_fixture_prompt_hashes(
+                self.fixture_prompt_hashes,
+                expected_fixture_ids=set(fixture_ids),
+            )
+
         if self.mode == "live_model":
             if not self.model or not self.model.strip():
                 raise ValueError("live_model INV-7 packages require model metadata")
@@ -117,6 +127,38 @@ class Inv7PromptInjectionPackage(BaseModel):
             if not self.contamination_checked:
                 raise ValueError("held_out INV-7 packages require contamination_checked=true")
         return self
+
+
+def _validate_fixture_prompt_hashes(
+    fixture_prompt_hashes: dict[str, str],
+    *,
+    expected_fixture_ids: set[str],
+) -> None:
+    """Validate optional exact-prompt hashes against fixture IDs."""
+    hash_fixture_ids = set(fixture_prompt_hashes)
+    if hash_fixture_ids != expected_fixture_ids:
+        missing = sorted(expected_fixture_ids - hash_fixture_ids)
+        extra = sorted(hash_fixture_ids - expected_fixture_ids)
+        raise ValueError(
+            "fixture_prompt_hashes keys must exactly match prompt_injection_evaluations "
+            f"fixture_id values; missing={missing}, extra={extra}"
+        )
+
+    malformed = sorted(
+        fixture_id
+        for fixture_id, digest in fixture_prompt_hashes.items()
+        if not _is_lower_sha256_hex(digest)
+    )
+    if malformed:
+        raise ValueError(
+            "fixture_prompt_hashes values must be lowercase SHA-256 hex digests "
+            f"for fixture_id(s): {', '.join(malformed)}"
+        )
+
+
+def _is_lower_sha256_hex(value: str) -> bool:
+    """Return true for lowercase 64-character SHA-256 hex strings."""
+    return len(value) == 64 and all(char in "0123456789abcdef" for char in value)
 
 
 def load_inv7_prompt_injection_package(path: Path | str) -> Inv7PromptInjectionPackage:

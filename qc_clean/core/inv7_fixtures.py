@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 from collections.abc import Awaitable, Callable
 from typing import Any
 
@@ -230,6 +231,10 @@ async def run_inv7_live_fixtures_async(
         "total_fixtures": len(evaluations),
         "failed": failed,
         "passed": len(evaluations) - failed,
+        "fixture_prompt_hashes": {
+            fixture.fixture_id: _sha256_text(fixture.prompt)
+            for fixture in selected
+        },
         "note": (
             "Live model prompt-injection canary fixtures. Passing these fixtures "
             "does not prove prompt-injection robustness."
@@ -339,3 +344,8 @@ def _live_fixture_prompt(title: str, payload: str, *, task: str) -> str:
 def _contains_forbidden_marker(response_text: str, marker: str) -> bool:
     """Return true when the response contains a canary marker."""
     return marker.casefold() in response_text.casefold()
+
+
+def _sha256_text(text: str) -> str:
+    """Return the SHA-256 hash for a prompt string."""
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()

@@ -22,6 +22,15 @@ def test_valid_live_inv7_package_validates():
     assert package.model == "fake-live-model"
     assert package.total_fixtures == 1
     assert package.failed == 0
+    assert package.fixture_prompt_hashes == {"live-direct": "a" * 64}
+
+
+def test_live_inv7_package_accepts_legacy_payload_without_prompt_hashes():
+    payload = _valid_live_package(include_hashes=False)
+
+    package = validate_inv7_prompt_injection_package_payload(payload)
+
+    assert package.fixture_prompt_hashes is None
 
 
 def test_live_inv7_package_requires_model_metadata():
@@ -39,6 +48,22 @@ def test_inv7_package_rejects_duplicate_fixture_ids():
     )
 
     with pytest.raises(ValueError, match="Duplicate INV-7 fixture_id"):
+        validate_inv7_prompt_injection_package_payload(payload)
+
+
+def test_live_inv7_package_rejects_prompt_hash_key_mismatch():
+    payload = _valid_live_package()
+    payload["fixture_prompt_hashes"] = {"wrong-fixture": "a" * 64}
+
+    with pytest.raises(ValueError, match="fixture_prompt_hashes.*fixture_id"):
+        validate_inv7_prompt_injection_package_payload(payload)
+
+
+def test_live_inv7_package_rejects_malformed_prompt_hash():
+    payload = _valid_live_package()
+    payload["fixture_prompt_hashes"] = {"live-direct": "not-a-sha256"}
+
+    with pytest.raises(ValueError, match="fixture_prompt_hashes.*SHA-256"):
         validate_inv7_prompt_injection_package_payload(payload)
 
 
@@ -73,8 +98,8 @@ def test_validate_inv7_package_script_emits_summary(tmp_path, capsys):
     }
 
 
-def _valid_live_package() -> dict:
-    return {
+def _valid_live_package(*, include_hashes: bool = True) -> dict:
+    payload = {
         "schema_version": 1,
         "package_id": "inv7-live-canary",
         "mode": "live_model",
@@ -101,3 +126,6 @@ def _valid_live_package() -> dict:
             }
         ],
     }
+    if include_hashes:
+        payload["fixture_prompt_hashes"] = {"live-direct": "a" * 64}
+    return payload
