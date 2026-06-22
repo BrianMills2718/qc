@@ -42,6 +42,7 @@ make check              # Run deterministic tests + lint + docs checks
 make status             # Show git status
 make bench ID=<project_id>              # Phase 0 scorecard (D1-D10 local accounting substrates)
 python qc_cli.py bench <project_id>     # Same Phase 0 scorecard through the canonical CLI
+make validate-d4-codebook-quality-protocol PROTOCOL=protocol.json  # Validate pre-evaluation D4 rubric protocol metadata
 make validate-d6-bias-protocol PROTOCOL=protocol.json  # Validate pre-run D6 bias-audit protocol metadata
 make d6-bias-preflight PROTOCOL=protocol.json STRATIFIED=bias_stratified.json COUNTERFACTUAL=bias_counterfactual.json  # Preflight D6 result files against protocol
 make bench ID=<project_id> D6_PROTOCOL=protocol.json BIAS_STRATIFIED=bias_stratified.json BIAS_COUNTERFACTUAL=bias_counterfactual.json  # Guard D6 scoring with protocol preflight
