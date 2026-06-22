@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 134 | D7 live candidate baseline export | High | In Progress | `D7_LIVE_CANDIDATE_BASELINE_EXPORT.md` |
 
 ## Completed Plans
 

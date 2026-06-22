@@ -22,8 +22,8 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Select and execute the next highest-value documented roadmap lane with a
-   fresh plan and explicit acceptance criteria.
+1. Execute Plan #134 (`D7_LIVE_CANDIDATE_BASELINE_EXPORT.md`): add the first
+   opt-in live D7 candidate-selection baseline package generator.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
