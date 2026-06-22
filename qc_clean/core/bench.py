@@ -108,8 +108,8 @@ _HUMAN_CEILING_AGREEMENT_METRIC_ALIASES = {
 
 
 @dataclass(frozen=True)
-class _ApplicationSpan:
-    code_id: str
+class _ComparableSpan:
+    surface_id: str
     doc_id: str
     start_char: int
     end_char: int
@@ -2807,6 +2807,7 @@ def disconfirmation_d7_scorecard(state: ProjectState) -> Dict[str, Any]:
         unit="exact target-claim/source-anchor key",
         caveat="semantic disconfirmation validity or held-out benchmark evidence",
     )
+    card["span_overlap"] = _d7_span_overlap_score(gold, state)
     card["human_ceiling_comparison"] = _human_ceiling_comparison(
         system_score,
         gold_provenance,
@@ -3166,6 +3167,133 @@ def _score_d7_baselines(
             )
         scored[baseline.name] = baseline_score
     return dict(sorted(scored.items()))
+
+
+def _d7_span_overlap_score(
+    gold: list[DisconfirmationGoldAnchor],
+    state: ProjectState,
+) -> dict[str, Any]:
+    """Compute same-target/document D7 contrary-evidence char-span diagnostics."""
+    gold_spans = [_d7_span_from_gold(anchor) for anchor in gold]
+    scoreable_gold_spans = [span for span in gold_spans if span is not None]
+    predicted_spans, unscored_predicted_count = _predicted_disconfirmation_spans(state)
+    base: dict[str, Any] = {
+        "metric": "char_span_iou_same_target_claim_doc",
+        "matching_rule": "same_target_claim_id_and_doc_id",
+        "note": (
+            "Local span-overlap diagnostic for D7 exact-score outputs. It is not "
+            "semantic disconfirmation validity, held-out benchmark evidence, or "
+            "expert-parity evidence."
+        ),
+        "gold_span_count": len(scoreable_gold_spans),
+        "predicted_span_count": len(predicted_spans),
+        "unscored_gold_count": len(gold) - len(scoreable_gold_spans),
+        "unscored_predicted_count": unscored_predicted_count,
+    }
+    if not scoreable_gold_spans:
+        return {
+            **base,
+            "status": "not_available",
+            "reason": "No D7 gold anchors with char-span offsets are available for IoU scoring.",
+        }
+    if not predicted_spans:
+        return {
+            **base,
+            "status": "not_available",
+            "reason": "No system contrary anchors with char-span offsets are available for IoU scoring.",
+        }
+
+    gold_rows = [
+        _best_span_overlap_row(
+            source=span,
+            candidates=predicted_spans,
+            source_key="gold_key",
+            best_key="best_predicted_key",
+        )
+        for span in scoreable_gold_spans
+    ]
+    predicted_rows = [
+        _best_span_overlap_row(
+            source=span,
+            candidates=scoreable_gold_spans,
+            source_key="predicted_key",
+            best_key="best_gold_key",
+        )
+        for span in predicted_spans
+    ]
+    return {
+        **base,
+        "status": "scored",
+        "mean_best_gold_iou": _mean(row["best_iou"] for row in gold_rows),
+        "mean_best_predicted_iou": _mean(row["best_iou"] for row in predicted_rows),
+        "mean_best_gold_modified_hausdorff_distance": _mean_optional(
+            row["best_modified_hausdorff_distance"] for row in gold_rows
+        ),
+        "mean_best_predicted_modified_hausdorff_distance": _mean_optional(
+            row["best_modified_hausdorff_distance"] for row in predicted_rows
+        ),
+        "gold_best_overlaps": gold_rows,
+        "predicted_best_overlaps": predicted_rows,
+    }
+
+
+def _d7_span_from_gold(anchor: DisconfirmationGoldAnchor) -> _ComparableSpan | None:
+    """Convert a D7 gold anchor to a scoreable char span when offsets exist."""
+    if anchor.start_char is None or anchor.end_char is None:
+        return None
+    return _ComparableSpan(
+        surface_id=anchor.target_claim_id,
+        doc_id=anchor.doc_id,
+        start_char=anchor.start_char,
+        end_char=anchor.end_char,
+        key=_key_for_gold(anchor),
+    )
+
+
+def _predicted_disconfirmation_spans(state: ProjectState) -> tuple[list[_ComparableSpan], int]:
+    """Return unique scoreable system contrary spans and unscored count."""
+    spans_by_key: dict[str, _ComparableSpan] = {}
+    unscored_count = 0
+    for claim in state.claims:
+        if claim.claim_kind != ClaimKind.NEGATIVE_CASE:
+            continue
+        if not claim.scope.claim_ids:
+            unscored_count += max(1, len(claim.contrary_anchors))
+            continue
+        if not claim.contrary_anchors:
+            unscored_count += max(1, len(claim.scope.claim_ids))
+            continue
+        for target_claim_id in claim.scope.claim_ids:
+            for anchor in claim.contrary_anchors:
+                if anchor.start_char is None or anchor.end_char is None:
+                    unscored_count += 1
+                    continue
+                if anchor.start_char < 0 or anchor.end_char <= anchor.start_char:
+                    raise ValueError(
+                        "D7 system contrary anchor span offsets must satisfy "
+                        "0 <= start_char < end_char"
+                    )
+                key = _key_for_anchor(
+                    target_claim_id=target_claim_id,
+                    doc_id=anchor.doc_id,
+                    start_char=anchor.start_char,
+                    end_char=anchor.end_char,
+                    segment_id=anchor.segment_id,
+                )
+                if key is None:
+                    unscored_count += 1
+                    continue
+                spans_by_key.setdefault(
+                    key,
+                    _ComparableSpan(
+                        surface_id=target_claim_id,
+                        doc_id=anchor.doc_id,
+                        start_char=anchor.start_char,
+                        end_char=anchor.end_char,
+                        key=key,
+                    ),
+                )
+    return [spans_by_key[key] for key in sorted(spans_by_key)], unscored_count
 
 
 def _d7_gold_annotations(state: ProjectState) -> list[DisconfirmationGoldAnchor]:
@@ -3639,7 +3767,7 @@ def _d3_span_overlap_score(
         }
 
     gold_rows = [
-        _best_application_span_overlap_row(
+        _best_span_overlap_row(
             source=span,
             candidates=predicted_spans,
             source_key="gold_key",
@@ -3648,7 +3776,7 @@ def _d3_span_overlap_score(
         for span in scoreable_gold_spans
     ]
     predicted_rows = [
-        _best_application_span_overlap_row(
+        _best_span_overlap_row(
             source=span,
             candidates=scoreable_gold_spans,
             source_key="predicted_key",
@@ -3672,12 +3800,12 @@ def _d3_span_overlap_score(
     }
 
 
-def _application_span_from_gold(anchor: ApplicationGoldAnchor) -> _ApplicationSpan | None:
+def _application_span_from_gold(anchor: ApplicationGoldAnchor) -> _ComparableSpan | None:
     """Convert a D3 gold anchor to a scoreable char span when offsets exist."""
     if anchor.start_char is None or anchor.end_char is None:
         return None
-    return _ApplicationSpan(
-        code_id=anchor.code_id,
+    return _ComparableSpan(
+        surface_id=anchor.code_id,
         doc_id=anchor.doc_id,
         start_char=anchor.start_char,
         end_char=anchor.end_char,
@@ -3685,9 +3813,9 @@ def _application_span_from_gold(anchor: ApplicationGoldAnchor) -> _ApplicationSp
     )
 
 
-def _predicted_application_spans(state: ProjectState) -> tuple[list[_ApplicationSpan], int]:
+def _predicted_application_spans(state: ProjectState) -> tuple[list[_ComparableSpan], int]:
     """Return unique scoreable system application spans and unscored count."""
-    spans_by_key: dict[str, _ApplicationSpan] = {}
+    spans_by_key: dict[str, _ComparableSpan] = {}
     unscored_count = 0
     for app in state.code_applications:
         key = _key_for_application_anchor(
@@ -3710,8 +3838,8 @@ def _predicted_application_spans(state: ProjectState) -> tuple[list[_Application
             )
         spans_by_key.setdefault(
             key,
-            _ApplicationSpan(
-                code_id=app.code_id,
+            _ComparableSpan(
+                surface_id=app.code_id,
                 doc_id=app.doc_id,
                 start_char=app.start_char,
                 end_char=app.end_char,
@@ -3721,18 +3849,18 @@ def _predicted_application_spans(state: ProjectState) -> tuple[list[_Application
     return [spans_by_key[key] for key in sorted(spans_by_key)], unscored_count
 
 
-def _best_application_span_overlap_row(
+def _best_span_overlap_row(
     *,
-    source: _ApplicationSpan,
-    candidates: list[_ApplicationSpan],
+    source: _ComparableSpan,
+    candidates: list[_ComparableSpan],
     source_key: str,
     best_key: str,
 ) -> dict[str, Any]:
-    """Find the best same-code/document IoU row for one source span."""
+    """Find the best same-surface/document IoU row for one source span."""
     same_surface = [
         candidate
         for candidate in candidates
-        if candidate.code_id == source.code_id and candidate.doc_id == source.doc_id
+        if candidate.surface_id == source.surface_id and candidate.doc_id == source.doc_id
     ]
     if not same_surface:
         return {
@@ -3757,7 +3885,7 @@ def _best_application_span_overlap_row(
     }
 
 
-def _span_iou(a: _ApplicationSpan, b: _ApplicationSpan) -> float:
+def _span_iou(a: _ComparableSpan, b: _ComparableSpan) -> float:
     """Compute intersection-over-union for two char spans."""
     intersection = max(0, min(a.end_char, b.end_char) - max(a.start_char, b.start_char))
     if intersection == 0:
@@ -3766,7 +3894,7 @@ def _span_iou(a: _ApplicationSpan, b: _ApplicationSpan) -> float:
     return _safe_div(intersection, union)
 
 
-def _modified_hausdorff_distance(a: _ApplicationSpan, b: _ApplicationSpan) -> float:
+def _modified_hausdorff_distance(a: _ComparableSpan, b: _ComparableSpan) -> float:
     """Compute discrete modified Hausdorff distance between two char spans."""
     a_to_b = _mean(
         _distance_from_position_to_span(position, b)
@@ -3779,7 +3907,7 @@ def _modified_hausdorff_distance(a: _ApplicationSpan, b: _ApplicationSpan) -> fl
     return max(a_to_b, b_to_a)
 
 
-def _distance_from_position_to_span(position: int, span: _ApplicationSpan) -> int:
+def _distance_from_position_to_span(position: int, span: _ComparableSpan) -> int:
     """Return nearest-char distance from one position to a half-open span."""
     if span.start_char <= position < span.end_char:
         return 0

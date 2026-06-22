@@ -2752,6 +2752,145 @@ def test_scorecard_d7_baseline_bootstrap_disable_suppresses_delta_ci():
     assert "system_minus_baseline_ci" not in baseline
 
 
+def test_scorecard_d7_span_overlap_scores_near_boundary_match():
+    content = "0123456789abcdefghij0123456789"
+    doc = Document(id="d1", name="d.txt", content=content)
+    state = ProjectState(
+        config=ProjectConfig(
+            methodology=Methodology.THEMATIC_ANALYSIS,
+            extra={
+                "disconfirmation_gold": [
+                    {
+                        "target_claim_id": "claim-ai",
+                        "doc_id": doc.id,
+                        "start_char": 10,
+                        "end_char": 20,
+                    }
+                ],
+            },
+        ),
+        corpus=Corpus(documents=[doc]),
+        claims=[
+            _negative_case_claim(
+                "claim-ai",
+                ClaimAnchor(doc_id=doc.id, start_char=15, end_char=25),
+            )
+        ],
+    )
+
+    d7 = phase0_scorecard(state)["disconfirmation_d7"]
+
+    assert d7["true_positives"] == 0
+    assert d7["false_positives"] == 1
+    assert d7["false_negatives"] == 1
+    overlap = d7["span_overlap"]
+    assert overlap["status"] == "scored"
+    assert overlap["metric"] == "char_span_iou_same_target_claim_doc"
+    assert overlap["gold_span_count"] == 1
+    assert overlap["predicted_span_count"] == 1
+    assert overlap["unscored_gold_count"] == 0
+    assert overlap["unscored_predicted_count"] == 0
+    assert overlap["mean_best_gold_iou"] == pytest.approx(5 / 15)
+    assert overlap["mean_best_predicted_iou"] == pytest.approx(5 / 15)
+    assert overlap["mean_best_gold_modified_hausdorff_distance"] == pytest.approx(1.5)
+    assert overlap["mean_best_predicted_modified_hausdorff_distance"] == pytest.approx(1.5)
+    assert overlap["gold_best_overlaps"] == [
+        {
+            "gold_key": "claim-ai|d1|10:20",
+            "best_predicted_key": "claim-ai|d1|15:25",
+            "best_iou": pytest.approx(5 / 15),
+            "best_modified_hausdorff_distance": pytest.approx(1.5),
+        }
+    ]
+
+
+def test_scorecard_d7_span_overlap_counts_unscored_records():
+    content = "AI failed here."
+    doc = Document(id="d1", name="d.txt", content=content)
+    state = ProjectState(
+        config=ProjectConfig(
+            methodology=Methodology.THEMATIC_ANALYSIS,
+            extra={
+                "disconfirmation_gold": [
+                    {
+                        "target_claim_id": "claim-ai",
+                        "doc_id": doc.id,
+                        "start_char": 0,
+                        "end_char": len(content),
+                    },
+                    {
+                        "target_claim_id": "claim-ai",
+                        "doc_id": doc.id,
+                        "segment_id": "seg-1",
+                    },
+                ],
+            },
+        ),
+        corpus=Corpus(documents=[doc]),
+        claims=[
+            _negative_case_claim(
+                "claim-ai",
+                ClaimAnchor(doc_id=doc.id, start_char=0, end_char=len(content)),
+            ),
+            _negative_case_claim(
+                "claim-ai",
+                ClaimAnchor(doc_id=doc.id, segment_id="seg-1"),
+            ),
+        ],
+    )
+
+    overlap = phase0_scorecard(state)["disconfirmation_d7"]["span_overlap"]
+
+    assert overlap["status"] == "scored"
+    assert overlap["gold_span_count"] == 1
+    assert overlap["predicted_span_count"] == 1
+    assert overlap["unscored_gold_count"] == 1
+    assert overlap["unscored_predicted_count"] == 1
+    assert overlap["mean_best_gold_iou"] == 1.0
+    assert overlap["mean_best_gold_modified_hausdorff_distance"] == 0.0
+
+
+def test_scorecard_d7_span_overlap_requires_same_target_claim():
+    content = "AI failed here."
+    doc = Document(id="d1", name="d.txt", content=content)
+    state = ProjectState(
+        config=ProjectConfig(
+            methodology=Methodology.THEMATIC_ANALYSIS,
+            extra={
+                "disconfirmation_gold": [
+                    {
+                        "target_claim_id": "claim-ai",
+                        "doc_id": doc.id,
+                        "start_char": 0,
+                        "end_char": len(content),
+                    }
+                ],
+            },
+        ),
+        corpus=Corpus(documents=[doc]),
+        claims=[
+            _negative_case_claim(
+                "claim-other",
+                ClaimAnchor(doc_id=doc.id, start_char=0, end_char=len(content)),
+            )
+        ],
+    )
+
+    overlap = phase0_scorecard(state)["disconfirmation_d7"]["span_overlap"]
+
+    assert overlap["status"] == "scored"
+    assert overlap["mean_best_gold_iou"] == 0.0
+    assert overlap["mean_best_gold_modified_hausdorff_distance"] is None
+    assert overlap["gold_best_overlaps"] == [
+        {
+            "gold_key": f"claim-ai|{doc.id}|0:{len(content)}",
+            "best_predicted_key": None,
+            "best_iou": 0.0,
+            "best_modified_hausdorff_distance": None,
+        }
+    ]
+
+
 def test_scorecard_invalid_d7_baseline_metadata_fails_loud():
     state = ProjectState(
         config=ProjectConfig(
