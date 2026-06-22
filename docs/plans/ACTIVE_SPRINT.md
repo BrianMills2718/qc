@@ -22,7 +22,10 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Continue through the ranked roadmap without pausing after each verified
+1. Execute Plan #118 (`D4_CODEBOOK_QUALITY_PROTOCOL_RESULT_PREFLIGHT.md`): add
+   D4 protocol/result preflight before populated D4 rubric rows are treated as
+   benchmark inputs.
+2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
 **Completed checkpoint:** D4 codebook-quality protocols can now be validated

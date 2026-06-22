@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 118 | D4 codebook quality protocol result preflight | High | Planned | `D4_CODEBOOK_QUALITY_PROTOCOL_RESULT_PREFLIGHT.md` |
 
 ## Completed Plans
 
