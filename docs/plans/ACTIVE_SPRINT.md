@@ -22,10 +22,10 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #102 (`D3_D7_IMPORTED_GOLD_BENCH_PACKAGE.md`): build a strict
-   Phase 0 benchmark-package assembly path for imported D3/D7 adjudication gold
-   outputs, preserving existing claim discipline that imported packages are
-   protocol artifacts until populated by real adjudication.
+1. Create and execute the next validity-infrastructure slice: add a
+   pre-registered adjudication protocol manifest/validator so future expert
+   labels have documented split, freeze, contamination, coder, and success
+   criteria metadata before import/scoring.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
@@ -40,6 +40,11 @@ invalid/unclear labels. These generated gold-package files are still protocol
 artifacts unless they were populated under a documented human/expert
 adjudication protocol; they are not, by themselves, expert evidence,
 methodological validity evidence, or SOTA evidence.
+Imported D3/D7 gold package files can now be assembled into a strict Phase 0
+package manifest with `make write-phase0-adjudication-package`, which validates
+versioned package inputs together before `make bench-package` scoring. This is
+repeatability/provenance infrastructure only; it does not prove that labels
+were expert-produced, held out, or methodologically adequate.
 Claim-bearing exports now also warn on empty scope records and
 population-without-sampling-frame metadata, and CSV/Markdown claim rows now carry
 per-row claim scope and corpus-boundary context without rewriting claim text;

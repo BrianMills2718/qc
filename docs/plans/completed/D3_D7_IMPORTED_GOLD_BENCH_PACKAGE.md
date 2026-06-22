@@ -1,10 +1,49 @@
 # Plan #102: D3/D7 Imported-Gold Benchmark Package
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** INV-3 adjudication response import; Phase 0 benchmark package runner
 **Blocks:** repeatable D3/D7 adjudication-package scoring; future held-out expert-evidence runs
+
+---
+
+## Outcome
+
+Implemented a strict Phase 0 manifest writer for imported adjudication gold:
+
+- `scripts/write_phase0_adjudication_package.py` validates supplied D3/D7 files
+  as versioned `schema_version=1` gold-set packages.
+- The writer requires at least one D3 or D7 package, rejects raw/non-versioned
+  gold files, and fails loudly when paired D3/D7 package provenance disagrees.
+- Output manifests are validated through the existing `Phase0BenchmarkPackage`
+  model and use manifest-relative paths where possible.
+- `make write-phase0-adjudication-package` exposes the workflow as an
+  agent-drivable target.
+- Docs identify the bridge as repeatability/provenance infrastructure, not
+  expert evidence or methodological validity evidence.
+
+Implementation commit: `b44bf1b`
+
+## Verification
+
+- TDD red: initial `python -m pytest
+  tests/test_phase0_adjudication_package.py -q` failed with
+  `ImportError: cannot import name 'write_phase0_adjudication_package'`.
+- Focused behavior: `python -m pytest
+  tests/test_phase0_adjudication_package.py tests/test_phase0_benchmark_package.py
+  tests/test_d3_gold_set.py tests/test_d7_gold_set.py -q` -> 17 passed.
+- Focused lint: `python -m ruff check
+  scripts/write_phase0_adjudication_package.py
+  tests/test_phase0_adjudication_package.py
+  scripts/run_phase0_benchmark_package.py tests/test_phase0_benchmark_package.py
+  qc_clean/core/d3_gold.py qc_clean/core/d7_gold.py` -> all checks passed.
+- Command discoverability: `make help` lists
+  `write-phase0-adjudication-package`.
+- Documentation governance: `make docs-check` passed.
+- Full gate: `make check` -> 890 passed, 1 skipped, 8 deselected; Ruff and
+  docs-check passed; type check remains not configured.
+- Commit `b44bf1b` was pushed to `main`.
 
 ---
 
@@ -75,9 +114,9 @@ Internal orchestration capability only; no cross-project boundary is created.
 
 ### Capability Validation
 
-- [ ] Input package files validate through the D3/D7 loaders.
-- [ ] Output manifest validates through `Phase0BenchmarkPackage`.
-- [ ] Relative path handling is deterministic and covered by tests.
+- [x] Input package files validate through the D3/D7 loaders.
+- [x] Output manifest validates through `Phase0BenchmarkPackage`.
+- [x] Relative path handling is deterministic and covered by tests.
 
 ---
 
@@ -136,30 +175,30 @@ Internal orchestration capability only; no cross-project boundary is created.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] At least one of `D3_GOLD` or `GOLD`/D7 gold is required.
-- [ ] Supplied D3/D7 gold files must be versioned package files accepted by
+- [x] At least one of `D3_GOLD` or `GOLD`/D7 gold is required.
+- [x] Supplied D3/D7 gold files must be versioned package files accepted by
   existing validators.
-- [ ] If both D3 and D7 packages are supplied, shared provenance fields match or
+- [x] If both D3 and D7 packages are supplied, shared provenance fields match or
   the writer fails loudly.
-- [ ] Written manifest validates through the existing `Phase0BenchmarkPackage`
+- [x] Written manifest validates through the existing `Phase0BenchmarkPackage`
   model.
-- [ ] Make target is agent-drivable and discoverable via `make help`.
-- [ ] Docs say this is package assembly/provenance only, not expert evidence or
+- [x] Make target is agent-drivable and discoverable via `make help`.
+- [x] Docs say this is package assembly/provenance only, not expert evidence or
   methodological validity evidence.
 
 > Process criteria:
-- [ ] Required focused tests pass.
-- [ ] Focused Ruff check passes.
-- [ ] `make docs-check` passes.
-- [ ] Full `make check` passes or any failure is documented with evidence.
-- [ ] Type-check status is reported.
-- [ ] Verified work is committed and pushed.
+- [x] Required focused tests pass.
+- [x] Focused Ruff check passes.
+- [x] `make docs-check` passes.
+- [x] Full `make check` passes or any failure is documented with evidence.
+- [x] Type-check status is reported.
+- [x] Verified work is committed and pushed.
 
 ---
 
 ## Open Questions
 
-- [ ] Should the writer support D4/D6/D8/D9/calibration files too? — Status:
+- [x] Should the writer support D4/D6/D8/D9/calibration files too? — Status:
   DEFERRED | Why it matters: this slice intentionally bridges imported D3/D7
   adjudication labels only; broader benchmark-package assembly belongs in a
   later general manifest-authoring lane.

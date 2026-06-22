@@ -6,7 +6,6 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 102 | D3/D7 imported-gold benchmark package | High | Planned | `D3_D7_IMPORTED_GOLD_BENCH_PACKAGE.md` |
 
 ## Completed Plans
 
@@ -105,6 +104,7 @@ Track all implementation work here.
 | INV-3 adjudication sample export | INV-3 first slice: `make adjudication-sample` exports unlabeled schema_version=1 sample packets for human/expert review inputs without claiming labels or validity evidence | `completed/INV3_ADJUDICATION_SAMPLE_EXPORT.md` |
 | INV-3 adjudication response validator | INV-3 follow-up: `make validate-adjudication-responses` validates completed sample response shape/completeness without importing labels or claiming validity evidence | `completed/INV3_ADJUDICATION_RESPONSE_VALIDATOR.md` |
 | INV-3 adjudication response import | INV-3 follow-up: `make import-adjudication-responses` converts valid completed code-application and negative-case responses into D3/D7 gold package inputs while excluding invalid/unclear labels | `completed/INV3_ADJUDICATION_RESPONSE_IMPORT.md` |
+| D3/D7 imported-gold benchmark package | Evaluation-harness/INV-3 follow-up: `make write-phase0-adjudication-package` writes a strict Phase 0 manifest from validated D3/D7 imported gold package inputs without claiming expert evidence | `completed/D3_D7_IMPORTED_GOLD_BENCH_PACKAGE.md` |
 | Corpus scope phrasing lint | Scope/report follow-up: `make lint-scope-phrasing` scans arbitrary text for risky population-generalizing phrasing under missing or under-specified corpus scope | `completed/CORPUS_SCOPE_PHRASING_LINT.md` |
 | Export audit hash manifest | Audit substrate first slice: `make export-audit-manifest` records project-state and export artifact SHA-256 hashes without claiming a full tamper-evident log | `completed/EXPORT_AUDIT_HASH_MANIFEST.md` |
 | Export audit manifest verification | Audit substrate follow-up: `make verify-export-audit-manifest` checks manifest self-hash, artifact hashes, and optional project-state hash without claiming a signed/append-only log | `completed/EXPORT_AUDIT_MANIFEST_VERIFICATION.md` |
