@@ -1,4 +1,4 @@
-.PHONY: help test test-quick test-e2e test-all bench bench-package write-phase0-adjudication-package validate-d3-gold validate-d7-gold validate-inv7-package validate-inv7-live-protocol inv7-live-preflight validate-d6-bias-protocol d6-bias-preflight validate-d4-codebook-quality-protocol d4-codebook-quality-preflight validate-d8-gt-fidelity-protocol d8-gt-fidelity-preflight validate-d9-interpretive-preference-protocol d9-interpretive-preference-preflight validate-confidence-calibration-protocol confidence-calibration-preflight validate-theoretical-sampling-protocol theoretical-sampling-preflight export-theoretical-sampling-candidates validate-d7-comparison-protocol d7-comparison-preflight validate-adjudication-responses validate-adjudication-protocol adjudication-protocol-preflight adjudication-response-preflight import-adjudication-responses lint-scope-phrasing export-audit-manifest verify-export-audit-manifest export-publish-preflight verify-export-audit-log run-d7-retrieval run-d7-live-baseline compare-d7-retrieval run-inv7-fixtures run-inv7-live-fixtures adjudication-sample check lint docs-check clean status cost errors
+.PHONY: help test test-quick test-e2e test-all bench bench-package write-phase0-adjudication-package validate-d3-gold validate-d7-gold validate-inv7-package validate-inv7-live-protocol inv7-live-preflight validate-d6-bias-protocol d6-bias-preflight validate-d4-codebook-quality-protocol d4-codebook-quality-preflight validate-d8-gt-fidelity-protocol d8-gt-fidelity-preflight validate-d9-interpretive-preference-protocol d9-interpretive-preference-preflight validate-confidence-calibration-protocol confidence-calibration-preflight validate-theoretical-sampling-protocol theoretical-sampling-preflight export-theoretical-sampling-candidates export-theoretical-sampling-results validate-d7-comparison-protocol d7-comparison-preflight validate-adjudication-responses validate-adjudication-protocol adjudication-protocol-preflight adjudication-response-preflight import-adjudication-responses lint-scope-phrasing export-audit-manifest verify-export-audit-manifest export-publish-preflight verify-export-audit-log run-d7-retrieval run-d7-live-baseline compare-d7-retrieval run-inv7-fixtures run-inv7-live-fixtures adjudication-sample check lint docs-check clean status cost errors
 
 DAYS ?= 7
 PROJECT ?= qualitative_coding
@@ -172,6 +172,24 @@ ifndef OUTPUT
 	$(error OUTPUT is required. Usage: make export-theoretical-sampling-candidates ID=project_id PROTOCOL=protocol.json OUTPUT=candidates.json [MAX=5])
 endif
 	python scripts/export_theoretical_sampling_candidates.py $(ID) --protocol $(PROTOCOL) --output $(OUTPUT) $(if $(MAX),--max-suggestions $(MAX),)
+
+export-theoretical-sampling-results:  ## Export selected theoretical-sampling candidates as a result package (PROTOCOL=protocol.json CANDIDATES=candidates.json SELECTED=candidate_id SUCCESS_CRITERION="..." OUTPUT=results.json)
+ifndef PROTOCOL
+	$(error PROTOCOL is required. Usage: make export-theoretical-sampling-results PROTOCOL=protocol.json CANDIDATES=candidates.json SELECTED=candidate_id SUCCESS_CRITERION="..." OUTPUT=results.json)
+endif
+ifndef CANDIDATES
+	$(error CANDIDATES is required. Usage: make export-theoretical-sampling-results PROTOCOL=protocol.json CANDIDATES=candidates.json SELECTED=candidate_id SUCCESS_CRITERION="..." OUTPUT=results.json)
+endif
+ifndef SELECTED
+	$(error SELECTED is required. Usage: make export-theoretical-sampling-results PROTOCOL=protocol.json CANDIDATES=candidates.json SELECTED=candidate_id SUCCESS_CRITERION="..." OUTPUT=results.json)
+endif
+ifndef SUCCESS_CRITERION
+	$(error SUCCESS_CRITERION is required. Usage: make export-theoretical-sampling-results PROTOCOL=protocol.json CANDIDATES=candidates.json SELECTED=candidate_id SUCCESS_CRITERION="..." OUTPUT=results.json)
+endif
+ifndef OUTPUT
+	$(error OUTPUT is required. Usage: make export-theoretical-sampling-results PROTOCOL=protocol.json CANDIDATES=candidates.json SELECTED=candidate_id SUCCESS_CRITERION="..." OUTPUT=results.json)
+endif
+	python scripts/export_theoretical_sampling_results.py $(PROTOCOL) --candidates-file $(CANDIDATES) --selected-candidate-id $(SELECTED) --success-criterion-met "$(SUCCESS_CRITERION)" --output $(OUTPUT) $(if $(STOPPED),--stopped-by-rule,)
 
 validate-adjudication-responses:  ## Validate completed adjudication sample responses (PACKAGE=sample.json)
 ifndef PACKAGE
