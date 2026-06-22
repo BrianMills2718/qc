@@ -1,6 +1,6 @@
 # Plan #134: D7 Live Candidate Baseline Export
 
-**Status:** In Progress
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Existing D7 retrieval export, scorecard baseline loader, and LLM handler
@@ -76,12 +76,12 @@ available.
 
 ### Capability Validation
 
-- [ ] Core live baseline exporter builds a package with model/trace/budget,
+- [x] Core live baseline exporter builds a package with model/trace/budget,
   prompt hashes, retrieval metadata, and `disconfirmation_baselines`.
-- [ ] Core exporter fails loudly when the model returns an unknown candidate ID.
-- [ ] Core exporter does not mutate `ProjectState`.
-- [ ] Script writes the same JSON to stdout and `--output`.
-- [ ] Make and `qc_cli.py` surfaces forward current script flags.
+- [x] Core exporter fails loudly when the model returns an unknown candidate ID.
+- [x] Core exporter does not mutate `ProjectState`.
+- [x] Script writes the same JSON to stdout and `--output`.
+- [x] Make and `qc_cli.py` surfaces forward current script flags.
 
 ---
 
@@ -147,26 +147,56 @@ available.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] `make run-d7-live-baseline` and
+- [x] `make run-d7-live-baseline` and
   `qc_cli.py run-d7-live-baseline` exist and delegate to the script.
-- [ ] The exporter produces a `disconfirmation_baselines` package accepted by
+- [x] The exporter produces a `disconfirmation_baselines` package accepted by
   the existing Phase 0 baseline loader.
-- [ ] Model-selected candidates are converted to exact D7 anchors from the
+- [x] Model-selected candidates are converted to exact D7 anchors from the
   existing retrieval candidates, not model-invented spans.
-- [ ] Unknown candidate IDs fail loudly.
-- [ ] Package metadata includes model, trace ID, budget, prompt hashes,
+- [x] Unknown candidate IDs fail loudly.
+- [x] Package metadata includes model, trace ID, budget, prompt hashes,
   project/corpus hashes, retrieval configuration, selected candidate count,
   and a claim-discipline note.
-- [ ] Docs preserve that this is a live baseline package generator, not a
+- [x] Docs preserve that this is a live baseline package generator, not a
   held-out D7 result or superiority claim.
 
 > Process criteria:
-- [ ] Required focused tests pass.
-- [ ] Focused Ruff check passes.
-- [ ] `make docs-check` passes.
-- [ ] Full `make check` passes or any failure is documented with evidence.
-- [ ] Type-check status is reported.
-- [ ] Verified work is committed and pushed.
+- [x] Required focused tests pass.
+- [x] Focused Ruff check passes.
+- [x] `make docs-check` passes.
+- [x] Full `make check` passes or any failure is documented with evidence.
+- [x] Type-check status is reported.
+- [x] Verified work is committed and pushed.
+
+---
+
+## Outcome
+
+Implemented and pushed as `1a29969`
+(`[Plan: D7_LIVE_CANDIDATE_BASELINE_EXPORT] Add live D7 baseline export`).
+
+Verification evidence:
+
+- TDD red:
+  `python -m pytest tests/test_d7_live_baseline.py tests/test_run_d7_live_baseline_script.py tests/test_qc_cli_d7_live_baseline.py -q`
+  initially failed during collection because `qc_clean.core.d7_live_baseline`
+  and `scripts.run_d7_live_baseline` did not exist.
+- New focused tests:
+  `python -m pytest tests/test_d7_live_baseline.py tests/test_run_d7_live_baseline_script.py tests/test_qc_cli_d7_live_baseline.py -q`
+  passed (`6 passed`).
+- Focused D7 regression tests:
+  `python -m pytest tests/test_d7_retrieval.py tests/test_run_d7_retrieval_script.py tests/test_qc_cli_d7_retrieval.py -q`
+  passed (`13 passed`).
+- Combined D7 focused tests after docs/CLI wiring:
+  `python -m pytest tests/test_d7_live_baseline.py tests/test_run_d7_live_baseline_script.py tests/test_qc_cli_d7_live_baseline.py tests/test_d7_retrieval.py tests/test_run_d7_retrieval_script.py tests/test_qc_cli_d7_retrieval.py -q`
+  passed (`19 passed`).
+- Focused Ruff:
+  `python -m ruff check qc_clean/core/d7_live_baseline.py scripts/run_d7_live_baseline.py tests/test_d7_live_baseline.py tests/test_run_d7_live_baseline_script.py tests/test_qc_cli_d7_live_baseline.py qc_cli.py`
+  passed.
+- Docs gate: `make docs-check` passed.
+- Full gate: `make check` passed (`1029 passed, 1 skipped, 8 deselected`);
+  Ruff and docs checks passed inside the gate.
+- Type check remains not configured in this repo, as reported by `make check`.
 
 ---
 

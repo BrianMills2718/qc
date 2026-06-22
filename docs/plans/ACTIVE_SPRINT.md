@@ -22,10 +22,20 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #134 (`D7_LIVE_CANDIDATE_BASELINE_EXPORT.md`): add the first
-   opt-in live D7 candidate-selection baseline package generator.
+1. Select and execute the next highest-value documented roadmap lane with a
+   fresh plan and explicit acceptance criteria.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
+
+**Completed checkpoint:** Opt-in live D7 candidate-selection baseline packages
+can now be generated through `make run-d7-live-baseline` and
+`qc_cli.py run-d7-live-baseline`. The exporter retrieves bounded D7 candidate
+passages, asks a configured live model to select existing candidate IDs through
+structured output, fails loudly on unknown candidate IDs, records prompt hashes
+plus model/trace/budget/retrieval metadata, and writes a scorecard-compatible
+`disconfirmation_baselines` package. This is live-baseline package generation
+only, not a committed held-out D7 result, unbounded generic ChatGPT baseline,
+methodological-validity evidence, or superiority evidence.
 
 **Completed checkpoint:** Structural and opt-in live INV-7 fixture package
 generation can now be run through canonical local CLI commands:
