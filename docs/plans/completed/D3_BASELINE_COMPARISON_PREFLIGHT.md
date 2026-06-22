@@ -1,6 +1,6 @@
 # Plan #176: D3 Baseline Comparison Preflight
 
-**Status:** Planned
+**Status:** Completed
 **Type:** implementation
 **Priority:** High
 **Blocked By:** D3 baseline comparison protocol validator
@@ -50,7 +50,8 @@ protocol drift.
 - `qc_clean/core/d7_comparison_preflight.py` and
   `scripts/preflight_d7_comparison.py` - analogous D7 preflight pattern.
 - `docs/EVALUATION_HARNESS.md` and `docs/PROJECT_THEORY_AND_GOALS.md` - D3
-  comparison protocol exists but preflight/score-time guards remain future work.
+  comparison protocol existed but preflight/score-time guards remained future
+  work at plan start.
 
 ---
 
@@ -71,12 +72,12 @@ Internal preflight capability only; no cross-project boundary is created.
 
 ### Capability Validation
 
-- [ ] Matching protocol/gold/baseline packages produce a passing report.
-- [ ] Gold metadata mismatches produce explicit errors.
-- [ ] Missing, unexpected, or duplicate baseline names produce explicit errors.
-- [ ] Baseline mode/model/application-count mismatches produce explicit errors.
-- [ ] Optional prediction-file SHA-256 locks are enforced.
-- [ ] Script emits machine-readable JSON and exits 0/1.
+- [x] Matching protocol/gold/baseline packages produce a passing report.
+- [x] Gold metadata mismatches produce explicit errors.
+- [x] Missing, unexpected, or duplicate baseline names produce explicit errors.
+- [x] Baseline mode/model/application-count mismatches produce explicit errors.
+- [x] Optional prediction-file SHA-256 locks are enforced.
+- [x] Script emits machine-readable JSON and exits 0/1.
 
 ---
 
@@ -127,25 +128,61 @@ Internal preflight capability only; no cross-project boundary is created.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] `preflight_d3_comparison_payloads()` returns pass/fail reports.
-- [ ] `scripts/preflight_d3_comparison.py` accepts protocol, gold, and one or
+- [x] `preflight_d3_comparison_payloads()` returns pass/fail reports.
+- [x] `scripts/preflight_d3_comparison.py` accepts protocol, gold, and one or
   more prediction files and emits JSON.
-- [ ] `make d3-comparison-preflight ...` is available.
-- [ ] Preflight validates protocol/gold/baseline package shapes before
+- [x] `make d3-comparison-preflight ...` is available.
+- [x] Preflight validates protocol/gold/baseline package shapes before
   cross-checking metadata.
-- [ ] Preflight enforces expected baseline names and optional file hashes.
-- [ ] Docs state this is protocol/provenance only and not score-time
+- [x] Preflight enforces expected baseline names and optional file hashes.
+- [x] Docs state this is protocol/provenance only and not score-time
   enforcement, held-out D3 evidence, expert parity, superiority, or SOTA.
 
 > Process criteria:
-- [ ] TDD red state observed before implementation.
-- [ ] Focused tests pass.
-- [ ] Focused Ruff check passes.
-- [ ] Make dry-run confirms target wiring.
-- [ ] `make docs-check` passes.
-- [ ] `make check` passes.
-- [ ] Plan is moved to completed with verification evidence.
-- [ ] Verified implementation is committed and pushed.
+- [x] TDD red state observed before implementation.
+- [x] Focused tests pass.
+- [x] Focused Ruff check passes.
+- [x] Make dry-run confirms target wiring.
+- [x] `make docs-check` passes.
+- [x] `make check` passes.
+- [x] Plan is moved to completed with verification evidence.
+- [x] Verified implementation is committed and pushed.
+
+---
+
+## Outcome
+
+Implemented and pushed in `8b6e7d9`:
+
+- `qc_clean/core/d3_comparison_preflight.py` defines schema_version=1
+  pass/fail reports and cross-checks D3 comparison protocol, versioned D3 gold,
+  and versioned D3 baseline prediction packages.
+- `scripts/preflight_d3_comparison.py` emits machine-readable JSON and exits 0
+  on pass / 1 on fail.
+- `make d3-comparison-preflight PROTOCOL=... GOLD=... PREDICTIONS="..."`
+  forwards to the canonical script.
+- Docs now state the new surface is protocol/provenance/preflight
+  infrastructure only; D3 score-time enforcement remains future work.
+
+Verification:
+
+- Red state observed first:
+  `python -m pytest tests/test_d3_comparison_preflight.py -q` failed with
+  `ModuleNotFoundError` before implementation.
+- Focused tests:
+  `python -m pytest tests/test_d3_comparison_preflight.py tests/test_d3_comparison_protocol.py tests/test_d3_baseline_package.py -q`
+  passed: 20 passed.
+- Focused lint:
+  `python -m ruff check qc_clean/core/d3_comparison_preflight.py scripts/preflight_d3_comparison.py tests/test_d3_comparison_preflight.py`
+  passed.
+- Make dry-run:
+  `make -n d3-comparison-preflight PROTOCOL=protocol.json GOLD=d3_gold.json PREDICTIONS="a.json b.json"`
+  forwarded to `python scripts/preflight_d3_comparison.py protocol.json
+  d3_gold.json a.json b.json`.
+- `make docs-check` passed.
+- `git diff --check` passed.
+- `make check` passed: 1166 passed, 1 skipped, 8 deselected; Ruff passed;
+  docs checks passed; type check remains not configured.
 
 ---
 

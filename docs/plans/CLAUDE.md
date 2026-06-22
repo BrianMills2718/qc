@@ -6,12 +6,12 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 176 | D3 baseline comparison preflight | High | Planned | `D3_BASELINE_COMPARISON_PREFLIGHT.md` |
 
 ## Completed Plans
 
 | Name | Outcome | Record |
 |------|---------|--------|
+| D3 baseline comparison preflight | D3 comparison preflight now cross-checks registered protocols, versioned D3 gold packages, and versioned D3 baseline packages before scoring workflows, while leaving score-time enforcement deferred | `completed/D3_BASELINE_COMPARISON_PREFLIGHT.md` |
 | D3 baseline comparison protocol | D3 baseline comparison protocols can now validate pre-run gold/baseline intent, held-out provenance flags, hash locks, success criteria, and optional exact/span metric criteria without yet adding preflight or score-time enforcement | `completed/D3_BASELINE_COMPARISON_PROTOCOL.md` |
 | D3 baseline span-overlap diagnostics | D3 baseline rows now include additive same-code/document span-IoU and Modified Hausdorff diagnostics without changing exact baseline scores, deltas, or bootstrap behavior | `completed/D3_BASELINE_SPAN_OVERLAP_DIAGNOSTICS.md` |
 | INV-7 score-time preflight guard | `make bench` / `qc_cli.py bench` can now optionally enforce INV-7 live protocol/result preflight before scoring supplied `PROMPT_INJECTION=` packages and record passing preflight/input provenance while preserving unguarded scoring compatibility | `completed/INV7_SCORE_TIME_PREFLIGHT_GUARD.md` |
