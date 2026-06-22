@@ -61,6 +61,65 @@ def test_compare_d7_retrieval_guard_includes_preflight_report(tmp_path, monkeypa
     assert written["preflight_report"]["status"] == "pass"
 
 
+def test_compare_d7_retrieval_includes_input_hashes_and_command_provenance(
+    tmp_path,
+    monkeypatch,
+    capsys,
+):
+    state, store = _saved_state(tmp_path)
+    package = _prediction_package(state)
+    prediction_path = _write_json(tmp_path / "predictions.json", package)
+    gold = _gold_package(package)
+    gold_path = _write_json(tmp_path / "gold.json", gold)
+    protocol = _protocol_for(
+        package,
+        gold,
+        prediction_file_sha256=_sha256_file(prediction_path),
+    )
+    protocol_path = _write_json(tmp_path / "protocol.json", protocol)
+    output_path = tmp_path / "report.json"
+    monkeypatch.setattr(compare_d7_retrieval, "ProjectStore", lambda: store)
+
+    exit_code = compare_d7_retrieval.main([
+        state.id,
+        "--gold-file",
+        str(gold_path),
+        "--predictions-file",
+        str(prediction_path),
+        "--protocol-package",
+        str(protocol_path),
+        "--output",
+        str(output_path),
+    ])
+
+    output = json.loads(capsys.readouterr().out)
+    written = json.loads(output_path.read_text(encoding="utf-8"))
+    hashes = output["_meta"]["input_hashes"]
+    command = output["_meta"]["command"]
+    assert exit_code == 0
+    assert output["_meta"] == written["_meta"]
+    assert hashes["hash_algorithm"] == "sha256"
+    assert hashes["project_id"] == state.id
+    assert hashes["project_state_sha256"] == _sha256_jsonable(
+        state.model_dump(mode="json")
+    )
+    assert hashes["corpus_sha256"] == _sha256_jsonable(
+        state.corpus.model_dump(mode="json")
+    )
+    assert hashes["gold_file_sha256"] == _sha256_file(gold_path)
+    assert hashes["prediction_files"] == [
+        {"path": str(prediction_path), "sha256": _sha256_file(prediction_path)}
+    ]
+    assert hashes["protocol_file_sha256"] == _sha256_file(protocol_path)
+    assert command == {
+        "project_id": state.id,
+        "gold_file": str(gold_path),
+        "prediction_files": [str(prediction_path)],
+        "protocol_package": str(protocol_path),
+        "output": str(output_path),
+    }
+
+
 def test_compare_d7_retrieval_guard_includes_metric_criteria_results(
     tmp_path,
     monkeypatch,
@@ -260,6 +319,8 @@ def test_compare_d7_retrieval_without_protocol_remains_compatible(tmp_path, monk
     assert exit_code == 0
     assert output["report_type"] == "qualitative_coding.d7_retrieval_comparison"
     assert "preflight_report" not in output
+    assert output["_meta"]["input_hashes"]["protocol_file_sha256"] is None
+    assert output["_meta"]["command"]["protocol_package"] is None
 
 
 def _saved_state(tmp_path) -> tuple[ProjectState, ProjectStore]:
@@ -464,3 +525,9 @@ def _write_json(path, payload: dict) -> object:
 
 def _sha256_file(path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _sha256_jsonable(payload) -> str:
+    return hashlib.sha256(
+        json.dumps(payload, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    ).hexdigest()

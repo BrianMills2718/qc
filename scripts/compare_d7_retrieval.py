@@ -24,6 +24,7 @@ from qc_clean.core.d7_comparison_protocol import (
 )
 from qc_clean.core.d7_retrieval import compare_d7_retrieval_predictions
 from qc_clean.core.persistence.project_store import ProjectStore
+from qc_clean.schemas.domain import ProjectState
 from scripts.bench_phase0 import load_d7_gold_file
 
 
@@ -90,6 +91,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         report["preflight_report"] = preflight_report.model_dump(mode="json")
     if metric_criteria_report is not None:
         report["metric_criteria_report"] = metric_criteria_report.model_dump(mode="json")
+    report["_meta"] = {
+        "input_hashes": _comparison_input_hashes(args, state),
+        "command": _comparison_command_provenance(args),
+    }
     text = json.dumps(report, indent=2)
     if args.output:
         args.output.write_text(text, encoding="utf-8")
@@ -121,7 +126,7 @@ def _run_preflight_if_requested(
         return None
     prediction_hashes: dict[str, str] = {}
     for path, package in zip(args.predictions_file, prediction_packages, strict=True):
-        prediction_hash = _sha256_file(path)
+        prediction_hash = _sha256_file(path, label="prediction")
         for baseline_name in _baseline_names(package):
             prediction_hashes[baseline_name] = prediction_hash
     return preflight_d7_comparison_payloads(
@@ -171,12 +176,59 @@ def _baseline_names(payload: dict[str, Any]) -> list[str]:
     return names
 
 
-def _sha256_file(path: Path) -> str:
+def _comparison_input_hashes(
+    args: argparse.Namespace,
+    state: ProjectState,
+) -> dict[str, Any]:
+    """Return deterministic input hashes for one D7 comparison report."""
+    return {
+        "hash_algorithm": "sha256",
+        "project_id": args.project_id,
+        "project_state_sha256": _sha256_jsonable(state.model_dump(mode="json")),
+        "corpus_sha256": _sha256_jsonable(state.corpus.model_dump(mode="json")),
+        "gold_file_sha256": _sha256_file(args.gold_file, label="gold"),
+        "prediction_files": [
+            {
+                "path": str(path),
+                "sha256": _sha256_file(path, label="prediction"),
+            }
+            for path in args.predictions_file
+        ],
+        "protocol_file_sha256": (
+            _sha256_file(args.protocol_package, label="protocol")
+            if args.protocol_package is not None
+            else None
+        ),
+    }
+
+
+def _comparison_command_provenance(args: argparse.Namespace) -> dict[str, Any]:
+    """Return command-path provenance for one D7 comparison report."""
+    return {
+        "project_id": args.project_id,
+        "gold_file": str(args.gold_file),
+        "prediction_files": [str(path) for path in args.predictions_file],
+        "protocol_package": (
+            str(args.protocol_package) if args.protocol_package is not None else None
+        ),
+        "output": str(args.output) if args.output is not None else None,
+    }
+
+
+def _sha256_jsonable(payload: Any) -> str:
+    """Hash a JSON-serializable object with canonical JSON and SHA-256."""
+    canonical = json.dumps(payload, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+
+def _sha256_file(path: Path, *, label: str = "prediction") -> str:
     """Hash file bytes with SHA-256."""
     try:
         return hashlib.sha256(path.read_bytes()).hexdigest()
     except OSError as exc:
-        raise ValueError(f"D7 retrieval prediction file '{path}' could not be hashed: {exc}") from exc
+        raise ValueError(
+            f"D7 comparison {label} file '{path}' could not be hashed: {exc}"
+        ) from exc
 
 
 if __name__ == "__main__":
