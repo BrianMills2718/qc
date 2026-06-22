@@ -1096,6 +1096,55 @@ class TestProjectExporter:
         assert result == 1
         assert "--verify-audit-manifest requires --audit-manifest" in capsys.readouterr().err
 
+    def test_project_export_command_rejects_publish_preflight_without_manifest(
+        self,
+        tmp_store,
+        sample_state,
+        capsys,
+    ):
+        from qc_clean.core.cli.commands.project import _export_project
+
+        tmp_store.save(sample_state)
+        args = MagicMock(
+            project_id=sample_state.id,
+            format="json",
+            output_file=None,
+            output_dir=None,
+            audit_manifest=None,
+            verify_audit_manifest=False,
+            publish_preflight=True,
+        )
+
+        result = _export_project(tmp_store, args)
+
+        assert result == 1
+        assert "--publish-preflight requires --audit-manifest" in capsys.readouterr().err
+
+    def test_project_export_command_rejects_scope_lint_without_publish_preflight(
+        self,
+        tmp_store,
+        sample_state,
+        capsys,
+    ):
+        from qc_clean.core.cli.commands.project import _export_project
+
+        tmp_store.save(sample_state)
+        args = MagicMock(
+            project_id=sample_state.id,
+            format="markdown",
+            output_file=None,
+            output_dir=None,
+            audit_manifest="manifest.json",
+            verify_audit_manifest=False,
+            publish_preflight=False,
+            scope_lint=True,
+        )
+
+        result = _export_project(tmp_store, args)
+
+        assert result == 1
+        assert "--scope-lint requires --publish-preflight" in capsys.readouterr().err
+
     def test_project_export_command_verifies_audit_manifest(
         self,
         tmp_path,
@@ -1123,6 +1172,71 @@ class TestProjectExporter:
         assert result == 0
         assert manifest.exists()
         assert "Verified export audit manifest" in output
+
+    def test_project_export_command_runs_publish_preflight(
+        self,
+        tmp_path,
+        tmp_store,
+        sample_state,
+        capsys,
+    ):
+        from qc_clean.core.cli.commands.project import _export_project
+
+        tmp_store.save(sample_state)
+        out = tmp_path / "report.md"
+        manifest = tmp_path / "report.manifest.json"
+        args = MagicMock(
+            project_id=sample_state.id,
+            format="markdown",
+            output_file=str(out),
+            output_dir=None,
+            audit_manifest=str(manifest),
+            verify_audit_manifest=False,
+            publish_preflight=True,
+            scope_lint=False,
+        )
+
+        result = _export_project(tmp_store, args)
+        output = capsys.readouterr().out
+
+        assert result == 0
+        assert manifest.exists()
+        assert "Export publish preflight passed" in output
+
+    def test_project_export_command_scope_lint_blocks_risky_markdown(
+        self,
+        tmp_path,
+        tmp_store,
+        sample_state,
+        capsys,
+    ):
+        from qc_clean.core.cli.commands.project import _export_project
+
+        sample_state.synthesis = Synthesis(
+            executive_summary="Across operations teams, AI changes workflow priorities.",
+            key_findings=["These findings should generalize to the broader population."],
+        )
+        tmp_store.save(sample_state)
+        out = tmp_path / "report.md"
+        manifest = tmp_path / "report.manifest.json"
+        args = MagicMock(
+            project_id=sample_state.id,
+            format="markdown",
+            output_file=str(out),
+            output_dir=None,
+            audit_manifest=str(manifest),
+            verify_audit_manifest=False,
+            publish_preflight=True,
+            scope_lint=True,
+        )
+
+        result = _export_project(tmp_store, args)
+        error = capsys.readouterr().err
+
+        assert result == 1
+        assert manifest.exists()
+        assert "Export publish preflight failed" in error
+        assert "scope_lint_missing_corpus_scope_generalization" in error
 
     def test_project_export_command_writes_audit_event_log(
         self,
@@ -1197,6 +1311,46 @@ class TestProjectExporter:
         assert db_report["status"] == "verified"
         assert db_report["event_count"] == 2
         assert "Export audit event DB" in output
+
+    def test_project_export_command_logs_publish_preflight_event(
+        self,
+        tmp_path,
+        tmp_store,
+        sample_state,
+    ):
+        from qc_clean.core.cli.commands.project import _export_project
+        from qc_clean.core.export.audit_event_log import verify_export_audit_event_db
+
+        tmp_store.save(sample_state)
+        out = tmp_path / "report.md"
+        manifest = tmp_path / "report.manifest.json"
+        audit_log = tmp_path / "export_audit_events.jsonl"
+        audit_db = tmp_path / "export_audit_events.sqlite"
+        args = MagicMock(
+            project_id=sample_state.id,
+            format="markdown",
+            output_file=str(out),
+            output_dir=None,
+            audit_manifest=str(manifest),
+            verify_audit_manifest=False,
+            audit_log=str(audit_log),
+            audit_db=str(audit_db),
+            publish_preflight=True,
+            scope_lint=False,
+        )
+
+        result = _export_project(tmp_store, args)
+        events = _read_jsonl(audit_log)
+        db_report = verify_export_audit_event_db(audit_db).model_dump(mode="json")
+
+        assert result == 0
+        assert [event["event_type"] for event in events] == [
+            "manifest_written",
+            "publish_preflight",
+        ]
+        assert events[1]["event_status"] == "pass"
+        assert db_report["status"] == "verified"
+        assert db_report["event_count"] == 2
 
     def test_project_export_command_rejects_audit_log_without_manifest(
         self,
@@ -1494,6 +1648,30 @@ class TestCLIParsing:
         )
 
         assert args.audit_db == "events.sqlite"
+
+    def test_export_subparser_publish_preflight_flags(self):
+        from qc_cli import create_parser
+
+        parser = create_parser()
+
+        args = parser.parse_args(
+            [
+                "project",
+                "export",
+                "pid",
+                "--format",
+                "markdown",
+                "--output-file",
+                "report.md",
+                "--audit-manifest",
+                "manifest.json",
+                "--publish-preflight",
+                "--scope-lint",
+            ]
+        )
+
+        assert args.publish_preflight is True
+        assert args.scope_lint is True
 
     def test_export_subparser_qdpx(self):
         from qc_cli import create_parser

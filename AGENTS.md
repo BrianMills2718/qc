@@ -101,6 +101,7 @@ python qc_cli.py export-audit-manifest <project_id> --format markdown --artifact
 python qc_cli.py verify-export-audit-manifest manifest.json --base-dir . --project-id <project_id> --audit-log events.jsonl --audit-db events.sqlite  # Canonical CLI wrapper for export audit manifest verification
 python qc_cli.py export-publish-preflight --manifest manifest.json --base-dir . --project-id <project_id> --audit-log events.jsonl --audit-db events.sqlite  # Canonical CLI wrapper for export publish preflight
 python qc_cli.py export-publish-preflight --manifest manifest.json --base-dir . --project-id <project_id> --scope-lint  # Canonical CLI wrapper with optional scope phrasing preflight
+python qc_cli.py project export <project_id> --format markdown --output-file report.md --audit-manifest manifest.json --publish-preflight --scope-lint  # Inline export manifest + publish preflight gate
 python qc_cli.py verify-export-audit-log export_audit_events.jsonl  # Canonical CLI wrapper for export audit event-log verification
 python qc_cli.py mirror-export-audit-db export_audit_events.jsonl --db export_audit_events.sqlite  # Canonical CLI wrapper for export audit SQLite mirroring
 python qc_cli.py verify-export-audit-db export_audit_events.sqlite  # Canonical CLI wrapper for export audit SQLite verification

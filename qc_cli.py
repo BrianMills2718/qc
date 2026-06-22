@@ -92,6 +92,7 @@ Examples:
   qc_cli validate-inv7-live-protocol inv7_protocol.json
   qc_cli inv7-live-preflight inv7_protocol.json inv7_live.json
   qc_cli project export <project_id> --format markdown --output-file report.md
+  qc_cli project export <project_id> --format markdown --output-file report.md --audit-manifest manifest.json --publish-preflight --scope-lint
   qc_cli status --server
         """
     )
@@ -1305,6 +1306,16 @@ Examples:
         '--verify-audit-manifest',
         action='store_true',
         help='Immediately verify the written audit manifest against exported artifacts',
+    )
+    proj_export.add_argument(
+        '--publish-preflight',
+        action='store_true',
+        help='Run export publish preflight after writing the audit manifest',
+    )
+    proj_export.add_argument(
+        '--scope-lint',
+        action='store_true',
+        help='With --publish-preflight, lint textual artifacts for unsafe corpus-scope phrasing',
     )
 
     proj_adjudication = project_subparsers.add_parser(

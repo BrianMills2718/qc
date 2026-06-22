@@ -342,8 +342,16 @@ def _export_project(store: ProjectStore, args) -> int:
     audit_log = vars(args).get("audit_log")
     audit_db = vars(args).get("audit_db")
     verify_audit_manifest = bool(vars(args).get("verify_audit_manifest", False))
+    publish_preflight = bool(vars(args).get("publish_preflight", False))
+    scope_lint = bool(vars(args).get("scope_lint", False))
     if verify_audit_manifest and not audit_manifest:
         print("--verify-audit-manifest requires --audit-manifest", file=sys.stderr)
+        return 1
+    if publish_preflight and not audit_manifest:
+        print("--publish-preflight requires --audit-manifest", file=sys.stderr)
+        return 1
+    if scope_lint and not publish_preflight:
+        print("--scope-lint requires --publish-preflight", file=sys.stderr)
         return 1
     if audit_log and not audit_manifest:
         print("--audit-log requires --audit-manifest", file=sys.stderr)
@@ -388,6 +396,8 @@ def _export_project(store: ProjectStore, args) -> int:
                 verify_audit_manifest,
                 audit_log,
                 audit_db,
+                publish_preflight,
+                scope_lint,
             )
     except Exception as e:
         print(f"Export failed: {e}", file=sys.stderr)
@@ -404,6 +414,8 @@ def _write_and_optionally_verify_export_manifest(
     verify: bool,
     audit_log: str | None = None,
     audit_db: str | None = None,
+    publish_preflight: bool = False,
+    scope_lint: bool = False,
 ) -> None:
     """Write an export audit manifest and optionally verify it immediately."""
     from qc_clean.core.export.audit_event_log import (
@@ -415,6 +427,7 @@ def _write_and_optionally_verify_export_manifest(
         verify_export_audit_manifest_payload,
         write_export_audit_manifest,
     )
+    from qc_clean.core.export.publish_preflight import run_export_publish_preflight
 
     manifest_path = Path(manifest_output)
     base_dir = manifest_path.parent if str(manifest_path.parent) else Path(".")
@@ -435,6 +448,7 @@ def _write_and_optionally_verify_export_manifest(
             payload=manifest.model_dump(mode="json"),
         )
 
+    verification_error = None
     if verify:
         report = verify_export_audit_manifest_payload(
             manifest,
@@ -449,7 +463,6 @@ def _write_and_optionally_verify_export_manifest(
                 manifest_path=manifest_path,
                 payload=report.model_dump(mode="json"),
             )
-        verification_error = None
         if report.status != "verified":
             messages = "; ".join(failure.message for failure in report.failures)
             verification_error = RuntimeError(
@@ -457,16 +470,41 @@ def _write_and_optionally_verify_export_manifest(
             )
         else:
             print("Verified export audit manifest")
-        if audit_log and audit_db:
-            mirror_export_audit_event_log_to_sqlite(audit_log, audit_db)
-            print(f"Export audit event DB: {audit_db}")
-        if verification_error is not None:
-            raise verification_error
-    elif audit_log and audit_db:
+
+    preflight_error = None
+    if verification_error is None and publish_preflight:
+        preflight_report = run_export_publish_preflight(
+            manifest_path,
+            base_dir=base_dir,
+            state=state,
+            scope_lint=scope_lint,
+        )
+        if audit_log:
+            append_export_audit_event(
+                audit_log,
+                event_type="publish_preflight",
+                event_status=preflight_report.status,
+                manifest_path=manifest_path,
+                payload=preflight_report.model_dump(mode="json"),
+            )
+        if preflight_report.status != "pass":
+            messages = "; ".join(
+                f"{failure.code}: {failure.message}"
+                for failure in preflight_report.failures
+            )
+            preflight_error = RuntimeError(f"Export publish preflight failed: {messages}")
+        else:
+            print("Export publish preflight passed")
+
+    if audit_log and audit_db:
         mirror_export_audit_event_log_to_sqlite(audit_log, audit_db)
         print(f"Export audit event DB: {audit_db}")
     if audit_log:
         print(f"Export audit event log: {audit_log}")
+    if verification_error is not None:
+        raise verification_error
+    if preflight_error is not None:
+        raise preflight_error
 
 
 def _export_adjudication_sample(store: ProjectStore, args) -> int:
