@@ -52,6 +52,7 @@ def test_bench_phase0_includes_input_hashes_without_external_files(
         bench_phase0.corpus_hash_payload(persisted)
     )
     assert hashes["d3_gold_file_sha256"] is None
+    assert hashes["d3_baselines_file_sha256"] is None
     assert hashes["gold_file_sha256"] is None
     assert hashes["d7_baselines_file_sha256"] is None
     assert hashes["prompt_injection_file_sha256"] is None
@@ -84,6 +85,15 @@ def test_bench_phase0_hashes_external_input_files(
                     "end_char": len(content),
                 }
             ],
+        }),
+        encoding="utf-8",
+    )
+    d3_baselines_file = tmp_path / "d3_baselines.json"
+    d3_baselines_file.write_text(
+        json.dumps({
+            "application_baselines": [
+                {"name": "empty_application_baseline", "code_applications": []}
+            ]
         }),
         encoding="utf-8",
     )
@@ -204,6 +214,8 @@ def test_bench_phase0_hashes_external_input_files(
         state.id,
         "--d3-gold-file",
         str(d3_gold_file),
+        "--d3-baselines-file",
+        str(d3_baselines_file),
         "--gold-file",
         str(gold_file),
         "--d7-baselines-file",
@@ -228,6 +240,7 @@ def test_bench_phase0_hashes_external_input_files(
     output = json.loads(capsys.readouterr().out)
     hashes = output["_meta"]["input_hashes"]
     assert hashes["d3_gold_file_sha256"] == _sha256_file(d3_gold_file)
+    assert hashes["d3_baselines_file_sha256"] == _sha256_file(d3_baselines_file)
     assert hashes["gold_file_sha256"] == _sha256_file(gold_file)
     assert hashes["d7_baselines_file_sha256"] == _sha256_file(baselines_file)
     assert hashes["prompt_injection_file_sha256"] == _sha256_file(injection_file)
@@ -239,6 +252,7 @@ def test_bench_phase0_hashes_external_input_files(
     assert hashes["observability_db_sha256"] == _sha256_file(db_path)
     reloaded = store.load(state.id)
     assert "application_gold" not in reloaded.config.extra
+    assert "application_baselines" not in reloaded.config.extra
     assert "disconfirmation_gold" not in reloaded.config.extra
     assert "disconfirmation_baselines" not in reloaded.config.extra
     assert "prompt_injection_evaluations" not in reloaded.config.extra
@@ -298,6 +312,92 @@ def test_bench_phase0_scores_d3_from_gold_file_without_mutating_state(
     assert "gold_provenance" not in output["application_validity_d3"]
     reloaded = store.load(state.id)
     assert "application_gold" not in reloaded.config.extra
+
+
+def test_bench_phase0_scores_d3_baselines_from_file_without_mutating_state(
+    tmp_path,
+    monkeypatch,
+    capsys,
+):
+    content = "AI helped delivery. AI failed in the pilot. AI only appeared later."
+    doc = Document(id="d1", name="interview.txt", content=content)
+    gold_start = content.index("AI helped")
+    gold_end = gold_start + len("AI helped delivery.")
+    extra_start = content.index("AI only")
+    extra_end = len(content)
+    state = ProjectState(
+        id="project_d3_baseline",
+        name="D3 baseline project",
+        config=ProjectConfig(extra={}),
+        corpus=Corpus(documents=[doc]),
+        code_applications=[
+            CodeApplication(
+                code_id="AI_USE",
+                doc_id=doc.id,
+                quote_text=content[gold_start:gold_end],
+                start_char=gold_start,
+                end_char=gold_end,
+            )
+        ],
+    )
+    store = ProjectStore(projects_dir=tmp_path / "projects")
+    store.save(state)
+    d3_gold_file = tmp_path / "d3_gold.json"
+    d3_gold_file.write_text(
+        json.dumps({
+            "application_gold": [
+                {
+                    "code_id": "AI_USE",
+                    "doc_id": doc.id,
+                    "start_char": gold_start,
+                    "end_char": gold_end,
+                }
+            ],
+        }),
+        encoding="utf-8",
+    )
+    d3_baselines_file = tmp_path / "d3_baselines.json"
+    d3_baselines_file.write_text(
+        json.dumps({
+            "application_baselines": [
+                {
+                    "name": "single_prompt",
+                    "code_applications": [
+                        {
+                            "code_id": "AI_USE",
+                            "doc_id": doc.id,
+                            "start_char": extra_start,
+                            "end_char": extra_end,
+                        }
+                    ],
+                }
+            ],
+        }),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(bench_phase0, "ProjectStore", lambda: store)
+
+    exit_code = bench_phase0.main([
+        state.id,
+        "--d3-gold-file",
+        str(d3_gold_file),
+        "--d3-baselines-file",
+        str(d3_baselines_file),
+    ])
+
+    assert exit_code == 0
+    output = json.loads(capsys.readouterr().out)
+    baseline = output["application_validity_d3"]["baselines"]["single_prompt"]
+    assert baseline["true_positives"] == 0
+    assert baseline["false_positives"] == 1
+    assert baseline["false_negatives"] == 1
+    assert baseline["system_minus_baseline"]["recall"] == 1.0
+    assert output["_meta"]["input_hashes"]["d3_baselines_file_sha256"] == (
+        _sha256_file(d3_baselines_file)
+    )
+    reloaded = store.load(state.id)
+    assert "application_gold" not in reloaded.config.extra
+    assert "application_baselines" not in reloaded.config.extra
 
 
 def test_bench_phase0_scores_d3_from_versioned_gold_package(
@@ -427,6 +527,15 @@ def test_bench_phase0_artifact_manifest_records_external_inputs(
     state = ProjectState(id="project_artifact_inputs", name="Artifact inputs", corpus=Corpus(documents=[doc]))
     store = ProjectStore(projects_dir=tmp_path / "projects")
     store.save(state)
+    d3_baselines_file = tmp_path / "d3_baselines.json"
+    d3_baselines_file.write_text(
+        json.dumps({
+            "application_baselines": [
+                {"name": "empty_application_baseline", "code_applications": []}
+            ]
+        }),
+        encoding="utf-8",
+    )
     gold_file = tmp_path / "gold.json"
     gold_file.write_text(
         json.dumps({
@@ -543,6 +652,8 @@ def test_bench_phase0_artifact_manifest_records_external_inputs(
 
     exit_code = bench_phase0.main([
         state.id,
+        "--d3-baselines-file",
+        str(d3_baselines_file),
         "--gold-file",
         str(gold_file),
         "--d7-baselines-file",
@@ -571,6 +682,9 @@ def test_bench_phase0_artifact_manifest_records_external_inputs(
     stdout_scorecard = json.loads(capsys.readouterr().out)
     manifest = json.loads((_single_artifact_dir(artifact_root) / "manifest.json").read_text(encoding="utf-8"))
     assert manifest["input_hashes"] == stdout_scorecard["_meta"]["input_hashes"]
+    assert manifest["input_hashes"]["d3_baselines_file_sha256"] == (
+        _sha256_file(d3_baselines_file)
+    )
     assert manifest["input_hashes"]["gold_file_sha256"] == _sha256_file(gold_file)
     assert manifest["input_hashes"]["d7_baselines_file_sha256"] == _sha256_file(baselines_file)
     assert manifest["input_hashes"]["prompt_injection_file_sha256"] == _sha256_file(injection_file)
@@ -586,6 +700,7 @@ def test_bench_phase0_artifact_manifest_records_external_inputs(
         _sha256_file(calibration_file)
     )
     assert manifest["input_hashes"]["observability_db_sha256"] == _sha256_file(db_path)
+    assert manifest["command"]["d3_baselines_file"] == str(d3_baselines_file)
     assert manifest["command"]["gold_file"] == str(gold_file)
     assert manifest["command"]["d7_baselines_file"] == str(baselines_file)
     assert manifest["command"]["prompt_injection_file"] == str(injection_file)
@@ -881,6 +996,26 @@ def test_bench_phase0_invalid_gold_file_fails_loud(tmp_path, monkeypatch, capsys
     output = json.loads(capsys.readouterr().out)
     assert "error" in output
     assert "D7 gold file" in output["error"]
+
+
+def test_bench_phase0_invalid_d3_baselines_file_fails_loud(tmp_path, monkeypatch, capsys):
+    state = ProjectState(id="project_bad_d3_baselines", name="Bad D3 baselines")
+    store = ProjectStore(projects_dir=tmp_path / "projects")
+    store.save(state)
+    baselines_file = tmp_path / "d3_baselines.json"
+    baselines_file.write_text(json.dumps({"unexpected": []}), encoding="utf-8")
+    monkeypatch.setattr(bench_phase0, "ProjectStore", lambda: store)
+
+    exit_code = bench_phase0.main([
+        state.id,
+        "--d3-baselines-file",
+        str(baselines_file),
+    ])
+
+    assert exit_code == 1
+    output = json.loads(capsys.readouterr().out)
+    assert "error" in output
+    assert "D3 baselines file" in output["error"]
 
 
 def test_bench_phase0_invalid_d7_baselines_file_fails_loud(tmp_path, monkeypatch, capsys):

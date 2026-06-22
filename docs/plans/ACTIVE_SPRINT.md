@@ -44,7 +44,10 @@ scorecard path. D3 and D7 scorecards now report exact-key binary system-vs-gold
 percent agreement, Cohen's κ, Gwet's AC1, and prevalence metadata. D3/D7
 scorecards also compare exact recall/precision/F1 against supplied
 versioned-package human-human metrics when present and surface supplied
-human-human κ/α/AC1 metadata separately. Phase 0 now also scores externally
+human-human κ/α/AC1 metadata separately. D3 scorecards can now also score
+externally supplied application baseline predictions through `D3_BASELINES=` /
+`--d3-baselines-file`, reporting exact-key system-minus-baseline deltas and
+local paired bootstrap intervals when D3 gold is present. Phase 0 now also scores externally
 supplied D4 codebook-quality rubric outcomes through `CODEBOOK_QUALITY=` /
 `--codebook-quality-file`. D5 reliability now
 surfaces Gwet's AC1 for LLM-pass codebook-discovery, positive application-cell,

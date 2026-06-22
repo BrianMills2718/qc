@@ -2,7 +2,8 @@
 """Evaluation-harness Phase 0: print a grounding/reliability scorecard for a project.
 
 Usage:
-    python scripts/bench_phase0.py <project_id> [--d3-gold-file d3_gold.json] [--gold-file gold.json]
+    python scripts/bench_phase0.py <project_id> [--d3-gold-file d3_gold.json]
+        [--d3-baselines-file baselines.json] [--gold-file gold.json]
         [--d7-baselines-file baselines.json] [--prompt-injection-file inv7.json]
         [--bias-counterfactual-file bias.json]
         [--codebook-quality-file quality.json]
@@ -48,6 +49,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument(
         "--d3-gold-file",
         help="Optional D3 application-validity gold JSON file; applied in memory only",
+    )
+    parser.add_argument(
+        "--d3-baselines-file",
+        help="Optional D3 baseline prediction JSON file; applied in memory only",
     )
     parser.add_argument(
         "--gold-file",
@@ -119,6 +124,16 @@ def main(argv: Sequence[str] | None = None) -> int:
         state = state.model_copy(deep=True)
         state.config.extra = dict(state.config.extra)
         state.config.extra["application_gold"] = d3_gold
+
+    if args.d3_baselines_file:
+        try:
+            d3_baselines = load_d3_baselines_file(Path(args.d3_baselines_file))
+        except ValueError as exc:
+            print(json.dumps({"error": str(exc)}))
+            return 1
+        state = state.model_copy(deep=True)
+        state.config.extra = dict(state.config.extra)
+        state.config.extra["application_baselines"] = d3_baselines
 
     if args.gold_file:
         try:
@@ -220,6 +235,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     card.setdefault("_meta", {})["input_hashes"] = phase0_input_hashes(
         loaded_state,
         d3_gold_file=Path(args.d3_gold_file) if args.d3_gold_file else None,
+        d3_baselines_file=(
+            Path(args.d3_baselines_file) if args.d3_baselines_file else None
+        ),
         gold_file=Path(args.gold_file) if args.gold_file else None,
         d7_baselines_file=Path(args.d7_baselines_file) if args.d7_baselines_file else None,
         prompt_injection_file=Path(args.prompt_injection_file) if args.prompt_injection_file else None,
@@ -347,6 +365,9 @@ def phase0_command_provenance(args: argparse.Namespace) -> dict[str, Any]:
         "entrypoint": "scripts/bench_phase0.py",
         "project_id": args.project_id,
         "d3_gold_file": str(Path(args.d3_gold_file)) if args.d3_gold_file else None,
+        "d3_baselines_file": (
+            str(Path(args.d3_baselines_file)) if args.d3_baselines_file else None
+        ),
         "gold_file": str(Path(args.gold_file)) if args.gold_file else None,
         "d7_baselines_file": (
             str(Path(args.d7_baselines_file)) if args.d7_baselines_file else None
@@ -412,6 +433,7 @@ def phase0_input_hashes(
     state,
     *,
     d3_gold_file: Path | None,
+    d3_baselines_file: Path | None,
     gold_file: Path | None,
     d7_baselines_file: Path | None,
     prompt_injection_file: Path | None,
@@ -430,6 +452,9 @@ def phase0_input_hashes(
         "corpus_sha256": sha256_jsonable(corpus_hash_payload(state)),
         "d3_gold_file_sha256": (
             sha256_file(d3_gold_file) if d3_gold_file else None
+        ),
+        "d3_baselines_file_sha256": (
+            sha256_file(d3_baselines_file) if d3_baselines_file else None
         ),
         "gold_file_sha256": sha256_file(gold_file) if gold_file else None,
         "d7_baselines_file_sha256": (
@@ -520,6 +545,25 @@ def load_d3_gold_file(path: Path) -> Any:
         return application_gold_payload_for_scorecard(raw)
     except ValueError as exc:
         raise ValueError(f"D3 gold file '{path}' is invalid: {exc}") from exc
+
+
+def load_d3_baselines_file(path: Path) -> Any:
+    """Load and shape-check an external D3 baseline prediction file."""
+    try:
+        raw = json.loads(path.read_text(encoding="utf-8"))
+    except OSError as exc:
+        raise ValueError(f"D3 baselines file '{path}' could not be read: {exc}") from exc
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"D3 baselines file '{path}' is not valid JSON: {exc}") from exc
+
+    if isinstance(raw, list):
+        return raw
+    if isinstance(raw, dict) and isinstance(raw.get("application_baselines"), list):
+        return raw["application_baselines"]
+    raise ValueError(
+        "D3 baselines file must be a JSON list of baseline predictions or an "
+        "object with an 'application_baselines' list"
+    )
 
 
 def load_d7_baselines_file(path: Path) -> Any:

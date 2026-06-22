@@ -48,6 +48,18 @@ def test_phase0_benchmark_package_forwards_relative_inputs(
         }),
         encoding="utf-8",
     )
+    d3_baselines = package_dir / "d3_baselines.json"
+    d3_baselines.write_text(
+        json.dumps({
+            "application_baselines": [
+                {
+                    "name": "empty_application_baseline",
+                    "code_applications": [],
+                }
+            ]
+        }),
+        encoding="utf-8",
+    )
     quality = package_dir / "quality.json"
     quality.write_text(
         json.dumps({
@@ -69,6 +81,7 @@ def test_phase0_benchmark_package_forwards_relative_inputs(
             "schema_version": 1,
             "project_id": state.id,
             "d3_gold_file": "d3_gold.json",
+            "d3_baselines_file": "d3_baselines.json",
             "codebook_quality_file": "quality.json",
         }),
         encoding="utf-8",
@@ -81,12 +94,17 @@ def test_phase0_benchmark_package_forwards_relative_inputs(
     output = json.loads(capsys.readouterr().out)
     assert output["application_validity_d3"]["status"] == "scored"
     assert output["application_validity_d3"]["recall"] == 1.0
+    baseline = output["application_validity_d3"]["baselines"]["empty_application_baseline"]
+    assert baseline["false_negatives"] == 1
+    assert baseline["system_minus_baseline"]["recall"] == 1.0
     assert output["codebook_quality_d4"]["status"] == "scored"
     hashes = output["_meta"]["input_hashes"]
     assert hashes["d3_gold_file_sha256"] == bench_phase0.sha256_file(d3_gold)
+    assert hashes["d3_baselines_file_sha256"] == bench_phase0.sha256_file(d3_baselines)
     assert hashes["codebook_quality_file_sha256"] == bench_phase0.sha256_file(quality)
     reloaded = store.load(state.id)
     assert "application_gold" not in reloaded.config.extra
+    assert "application_baselines" not in reloaded.config.extra
     assert "codebook_quality_evaluations" not in reloaded.config.extra
 
 
@@ -156,6 +174,7 @@ def test_phase0_package_to_bench_argv_resolves_relative_paths(tmp_path):
         schema_version=1,
         project_id="project",
         d3_gold_file="gold/d3.json",
+        d3_baselines_file="baselines/d3.json",
         trace_id="trace-123",
     )
 
@@ -165,6 +184,8 @@ def test_phase0_package_to_bench_argv_resolves_relative_paths(tmp_path):
         "project",
         "--d3-gold-file",
         str(tmp_path / "gold" / "d3.json"),
+        "--d3-baselines-file",
+        str(tmp_path / "baselines" / "d3.json"),
         "--trace-id",
         "trace-123",
     ]

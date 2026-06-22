@@ -362,6 +362,181 @@ def test_scorecard_scores_d3_application_gold_exact_span_and_code():
     assert overlap["mean_best_predicted_modified_hausdorff_distance"] is not None
 
 
+def test_scorecard_scores_d3_baselines_against_same_gold():
+    content = "AI helped here. AI failed later. AI only appeared."
+    doc = Document(id="d1", name="d.txt", content=content)
+    first_start = content.index("AI helped")
+    first_end = first_start + len("AI helped here.")
+    second_start = content.index("AI failed")
+    second_end = second_start + len("AI failed later.")
+    extra_start = content.index("AI only")
+    extra_end = len(content)
+    state = ProjectState(
+        config=ProjectConfig(
+            methodology=Methodology.THEMATIC_ANALYSIS,
+            extra={
+                "application_gold": [
+                    {
+                        "code_id": "AI_USE",
+                        "doc_id": doc.id,
+                        "start_char": first_start,
+                        "end_char": first_end,
+                    },
+                    {
+                        "code_id": "AI_USE",
+                        "doc_id": doc.id,
+                        "start_char": second_start,
+                        "end_char": second_end,
+                    },
+                ],
+                "application_baselines": [
+                    {
+                        "name": "single_prompt",
+                        "description": "Generic one-shot baseline.",
+                        "code_applications": [
+                            {
+                                "code_id": "AI_USE",
+                                "doc_id": doc.id,
+                                "start_char": second_start,
+                                "end_char": second_end,
+                            },
+                            {
+                                "code_id": "AI_USE",
+                                "doc_id": doc.id,
+                                "start_char": extra_start,
+                                "end_char": extra_end,
+                            },
+                        ],
+                    }
+                ],
+            },
+        ),
+        corpus=Corpus(documents=[doc]),
+        code_applications=[
+            CodeApplication(
+                code_id="AI_USE",
+                doc_id=doc.id,
+                quote_text=content[first_start:first_end],
+                start_char=first_start,
+                end_char=first_end,
+            )
+        ],
+    )
+
+    d3 = phase0_scorecard(state)["application_validity_d3"]
+
+    baseline = d3["baselines"]["single_prompt"]
+    assert d3["recall"] == 0.5
+    assert d3["precision"] == 1.0
+    assert d3["f1"] == pytest.approx(2 / 3)
+    assert baseline["description"] == "Generic one-shot baseline."
+    assert baseline["true_positives"] == 1
+    assert baseline["false_positives"] == 1
+    assert baseline["false_negatives"] == 1
+    assert baseline["recall"] == 0.5
+    assert baseline["precision"] == 0.5
+    assert baseline["f1"] == 0.5
+    assert baseline["recall_ci"]["method"] == "wilson"
+    assert baseline["precision_ci"]["method"] == "wilson"
+    assert d3["f1_bootstrap_ci"]["method"] == "key_universe_bootstrap"
+    assert baseline["f1_bootstrap_ci"]["method"] == "key_universe_bootstrap"
+    assert baseline["f1_bootstrap_ci"]["samples"] == d3["f1_bootstrap_ci"]["samples"]
+    delta_ci = baseline["system_minus_baseline_ci"]
+    assert delta_ci["method"] == "paired_key_universe_bootstrap"
+    assert delta_ci["samples"] == d3["f1_bootstrap_ci"]["samples"]
+    assert delta_ci["seed"] == d3["f1_bootstrap_ci"]["seed"]
+    assert set(delta_ci["deltas"]) == {"recall", "precision", "f1"}
+    for interval in delta_ci["deltas"].values():
+        assert interval["lower"] <= interval["upper"]
+    assert baseline["matched_gold_keys"] == [f"AI_USE|{doc.id}|{second_start}:{second_end}"]
+    assert baseline["missed_gold_keys"] == [f"AI_USE|{doc.id}|{first_start}:{first_end}"]
+    assert baseline["extra_predicted_keys"] == [f"AI_USE|{doc.id}|{extra_start}:{extra_end}"]
+    assert baseline["system_minus_baseline"]["recall"] == 0.0
+    assert baseline["system_minus_baseline"]["precision"] == 0.5
+    assert baseline["system_minus_baseline"]["f1"] == pytest.approx(1 / 6)
+    assert "local paired exact-key bootstrap intervals" in d3["baseline_note"]
+
+
+def test_scorecard_d3_baseline_bootstrap_disable_suppresses_delta_ci():
+    content = "AI helped here. AI failed later."
+    doc = Document(id="d1", name="d.txt", content=content)
+    first_start = content.index("AI helped")
+    first_end = first_start + len("AI helped here.")
+    second_start = content.index("AI failed")
+    second_end = len(content)
+    state = ProjectState(
+        config=ProjectConfig(
+            methodology=Methodology.THEMATIC_ANALYSIS,
+            extra={
+                "phase0_exact_bootstrap": {"enabled": False},
+                "application_gold": [
+                    {
+                        "code_id": "AI_USE",
+                        "doc_id": doc.id,
+                        "start_char": first_start,
+                        "end_char": first_end,
+                    },
+                    {
+                        "code_id": "AI_USE",
+                        "doc_id": doc.id,
+                        "start_char": second_start,
+                        "end_char": second_end,
+                    },
+                ],
+                "application_baselines": [
+                    {
+                        "name": "single_prompt",
+                        "code_applications": [
+                            {
+                                "code_id": "AI_USE",
+                                "doc_id": doc.id,
+                                "start_char": second_start,
+                                "end_char": second_end,
+                            }
+                        ],
+                    }
+                ],
+            },
+        ),
+        corpus=Corpus(documents=[doc]),
+        code_applications=[
+            CodeApplication(
+                code_id="AI_USE",
+                doc_id=doc.id,
+                quote_text=content[first_start:first_end],
+                start_char=first_start,
+                end_char=first_end,
+            )
+        ],
+    )
+
+    d3 = phase0_scorecard(state)["application_validity_d3"]
+    baseline = d3["baselines"]["single_prompt"]
+
+    assert "f1_bootstrap_ci" not in d3
+    assert "f1_bootstrap_ci" not in baseline
+    assert "system_minus_baseline_ci" not in baseline
+
+
+def test_scorecard_invalid_d3_baseline_metadata_fails_loud():
+    state = ProjectState(
+        config=ProjectConfig(
+            extra={
+                "application_gold": [
+                    {"code_id": "AI_USE", "doc_id": "d1", "segment_id": "s1"},
+                ],
+                "application_baselines": [
+                    {"name": "duplicate", "code_applications": []},
+                    {"name": "duplicate", "code_applications": []},
+                ],
+            }
+        )
+    )
+
+    with pytest.raises(ValueError, match="Duplicate D3 baseline"):
+        phase0_scorecard(state)
+
+
 def test_scorecard_d3_compares_exact_metrics_to_human_ceiling_package():
     content = "AI helped here."
     doc = Document(id="d1", name="d.txt", content=content)

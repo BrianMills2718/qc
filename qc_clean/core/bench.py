@@ -37,6 +37,7 @@ from qc_clean.schemas.domain import ClaimAnchor, ClaimKind, ProjectState
 
 
 _D3_GOLD_EXTRA_KEY = "application_gold"
+_D3_BASELINES_EXTRA_KEY = "application_baselines"
 _D7_GOLD_EXTRA_KEY = "disconfirmation_gold"
 _D7_BASELINES_EXTRA_KEY = "disconfirmation_baselines"
 _RUN_TIMING_EXTRA_KEY = "run_timing"
@@ -396,6 +397,24 @@ class DisconfirmationBaselinePrediction(BaseModel):
         """Require a stable baseline key for scorecard output."""
         if not self.name.strip():
             raise ValueError("D7 baseline name must be non-empty")
+        self.name = self.name.strip()
+        return self
+
+
+class ApplicationBaselinePrediction(BaseModel):
+    """Baseline code-application predictions used for D3 comparison."""
+
+    name: str = Field(description="Stable baseline name, such as single_prompt_chatgpt")
+    description: str = Field(default="", description="Optional human-readable baseline description")
+    code_applications: list[ApplicationGoldAnchor] = Field(
+        description="Baseline-predicted code applications using the D3 exact anchor schema"
+    )
+
+    @model_validator(mode="after")
+    def require_nonempty_name(self) -> "ApplicationBaselinePrediction":
+        """Require a stable baseline key for scorecard output."""
+        if not self.name.strip():
+            raise ValueError("D3 baseline name must be non-empty")
         self.name = self.name.strip()
         return self
 
@@ -1923,6 +1942,47 @@ def _percentile(sorted_values: list[float], percentile: float) -> float:
     )
 
 
+def _score_d3_baselines(
+    gold_keys: set[str],
+    baselines: list[ApplicationBaselinePrediction],
+    system_score: Dict[str, Any],
+    *,
+    system_predicted_keys: set[str],
+    system_unscored_predicted: list[str],
+    bootstrap_config: ExactScoreBootstrapConfig | None = None,
+) -> Dict[str, Dict[str, Any]]:
+    """Score D3 baselines and include point deltas versus the system."""
+    bootstrap_config = bootstrap_config or ExactScoreBootstrapConfig()
+    scored: Dict[str, Dict[str, Any]] = {}
+    for baseline in baselines:
+        predicted_keys = {
+            _key_for_application_gold(anchor) for anchor in baseline.code_applications
+        }
+        baseline_score = _exact_anchor_score(
+            gold_keys,
+            predicted_keys,
+            [],
+            bootstrap_config=bootstrap_config,
+        )
+        baseline_score["description"] = baseline.description
+        baseline_score["system_minus_baseline"] = {
+            "recall": system_score["recall"] - baseline_score["recall"],
+            "precision": system_score["precision"] - baseline_score["precision"],
+            "f1": system_score["f1"] - baseline_score["f1"],
+        }
+        if bootstrap_config.enabled:
+            baseline_score["system_minus_baseline_ci"] = _exact_anchor_delta_bootstrap_ci(
+                gold_keys,
+                system_predicted_keys,
+                system_unscored_predicted,
+                predicted_keys,
+                [],
+                bootstrap_config=bootstrap_config,
+            )
+        scored[baseline.name] = baseline_score
+    return dict(sorted(scored.items()))
+
+
 def _score_d7_baselines(
     gold_keys: set[str],
     baselines: list[DisconfirmationBaselinePrediction],
@@ -2002,6 +2062,29 @@ def _d7_baselines(state: ProjectState) -> list[DisconfirmationBaselinePrediction
     return baselines
 
 
+def _d3_baselines(state: ProjectState) -> list[ApplicationBaselinePrediction]:
+    """Load D3 baseline predictions from project config metadata."""
+    raw = state.config.extra.get(_D3_BASELINES_EXTRA_KEY)
+    if raw is None:
+        return []
+    if isinstance(raw, dict) and _D3_BASELINES_EXTRA_KEY in raw:
+        raw = raw[_D3_BASELINES_EXTRA_KEY]
+    if not isinstance(raw, list):
+        raise ValueError(
+            f"ProjectState.config.extra['{_D3_BASELINES_EXTRA_KEY}'] must be a list "
+            "of D3 baseline prediction records"
+        )
+    try:
+        baselines = [ApplicationBaselinePrediction.model_validate(item) for item in raw]
+    except ValidationError as exc:
+        raise ValueError(f"Invalid D3 baseline prediction metadata: {exc}") from exc
+    names = [baseline.name for baseline in baselines]
+    duplicates = sorted(name for name, count in Counter(names).items() if count > 1)
+    if duplicates:
+        raise ValueError("Duplicate D3 baseline name(s): " + ", ".join(duplicates))
+    return baselines
+
+
 def _d7_gold_provenance(state: ProjectState) -> dict[str, Any] | None:
     """Return compact D7 gold-set package provenance when available."""
     raw = state.config.extra.get(_D7_GOLD_EXTRA_KEY)
@@ -2046,11 +2129,12 @@ def application_validity_d3_scorecard(state: ProjectState) -> Dict[str, Any]:
 
     gold_keys = {_key_for_application_gold(anchor) for anchor in gold}
     predicted_keys, unscored_predicted = _predicted_application_keys(state)
+    bootstrap_config = _exact_bootstrap_config(state)
     score = _exact_anchor_score(
         gold_keys,
         predicted_keys,
         unscored_predicted,
-        bootstrap_config=_exact_bootstrap_config(state),
+        bootstrap_config=bootstrap_config,
     )
     card: Dict[str, Any] = {
         "status": "scored",
@@ -2081,6 +2165,22 @@ def application_validity_d3_scorecard(state: ProjectState) -> Dict[str, Any]:
         dimension="D3",
     )
     card["span_overlap"] = _d3_span_overlap_score(gold, state)
+    baselines = _d3_baselines(state)
+    if baselines:
+        card["baselines"] = _score_d3_baselines(
+            gold_keys,
+            baselines,
+            score,
+            system_predicted_keys=predicted_keys,
+            system_unscored_predicted=unscored_predicted,
+            bootstrap_config=bootstrap_config,
+        )
+        card["baseline_note"] = (
+            "Baseline scores use the same exact D3 code/source-anchor matching as "
+            "the system. System deltas include local paired exact-key bootstrap "
+            "intervals; superiority or expert parity still requires held-out data "
+            "and prompt_eval-backed testing."
+        )
     return card
 
 
