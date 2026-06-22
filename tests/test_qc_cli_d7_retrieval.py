@@ -10,6 +10,7 @@ from scripts import (
     validate_d3_gold_set,
     validate_d7_baseline_package,
     validate_d7_gold_set,
+    verify_d7_comparison_artifact,
 )
 
 
@@ -147,6 +148,28 @@ def test_qc_cli_compare_d7_retrieval_forwards_flags(monkeypatch):
         "--artifact-dir",
         "benchmark_results",
     ]
+
+
+def test_qc_cli_verify_d7_comparison_artifact_forwards_path(monkeypatch):
+    captured = {}
+
+    def fake_main(argv):
+        captured["argv"] = argv
+        return 0
+
+    monkeypatch.setattr(verify_d7_comparison_artifact, "main", fake_main)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "qc_cli.py",
+            "verify-d7-comparison-artifact",
+            "benchmark_results/run/manifest.json",
+        ],
+    )
+
+    assert qc_cli.main() == 0
+    assert captured["argv"] == ["benchmark_results/run/manifest.json"]
 
 
 def test_qc_cli_validate_d7_baseline_package_forwards_path(monkeypatch):

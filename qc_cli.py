@@ -50,6 +50,7 @@ Examples:
   qc_cli run-d7-live-baseline <project_id> --output live_baseline.json --model gpt-5-mini
   qc_cli validate-d7-baseline-package baseline.json
   qc_cli compare-d7-retrieval <project_id> --gold-file d7_gold.json --predictions-file predictions.json --artifact-dir benchmark_results
+  qc_cli verify-d7-comparison-artifact benchmark_results/run/manifest.json
   qc_cli run-inv7-fixtures --output inv7.json
   qc_cli run-inv7-live-fixtures --output inv7_live.json --model gpt-5-mini
   qc_cli validate-inv7-package inv7.json
@@ -307,6 +308,16 @@ Examples:
     d7_comparison_parser.add_argument(
         '--artifact-dir',
         help='Optional root directory for a versioned D7 comparison artifact package',
+    )
+
+    d7_artifact_verifier_parser = subparsers.add_parser(
+        'verify-d7-comparison-artifact',
+        help='Verify a D7 comparison artifact package',
+        description='Verify a D7 comparison artifact directory or manifest file',
+    )
+    d7_artifact_verifier_parser.add_argument(
+        'artifact',
+        help='D7 comparison artifact directory or manifest.json path',
     )
 
     # D3/D7 gold-set validation commands
@@ -651,6 +662,8 @@ def main() -> int:
             return handle_run_d7_live_baseline_command(args)
         elif args.command == 'compare-d7-retrieval':
             return handle_compare_d7_retrieval_command(args)
+        elif args.command == 'verify-d7-comparison-artifact':
+            return handle_verify_d7_comparison_artifact_command(args)
         elif args.command == 'validate-d3-gold':
             return handle_validate_d3_gold_command(args)
         elif args.command == 'validate-d7-gold':
@@ -840,6 +853,13 @@ def handle_compare_d7_retrieval_command(args) -> int:
     if args.artifact_dir is not None:
         argv.extend(["--artifact-dir", args.artifact_dir])
     return compare_d7_retrieval.main(argv)
+
+
+def handle_verify_d7_comparison_artifact_command(args) -> int:
+    """Verify a D7 comparison artifact through the canonical CLI."""
+    from scripts import verify_d7_comparison_artifact
+
+    return verify_d7_comparison_artifact.main([args.artifact])
 
 
 def handle_validate_d3_gold_command(args) -> int:
