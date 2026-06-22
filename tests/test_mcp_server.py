@@ -532,6 +532,82 @@ class TestReview:
         result = json.loads(qc_mcp_server.qc_review_summary("nope"))
         assert "error" in result
 
+    def test_review_claims(self, completed_project, tmp_store):
+        completed_project.claims = [
+            AnalyticClaim(
+                id="claim-review-mcp",
+                claim_kind=ClaimKind.SYNTHESIS_FINDING,
+                source_stage="synthesis",
+                claim_text="AI adoption changes workflow.",
+                scope=ClaimScope(corpus_level=True, code_ids=["C1"]),
+                origin_object_type="synthesis_key_finding",
+                origin_object_id="finding:0",
+                support_status=ClaimSupportStatus.NEEDS_ANCHOR,
+            )
+        ]
+        tmp_store.save(completed_project)
+
+        result = json.loads(qc_mcp_server.qc_review_claims("proj-done"))
+
+        assert result["project_id"] == "proj-done"
+        assert result["project_name"] == "Completed Study"
+        assert result["pipeline_status"] == "completed"
+        assert result["summary"]["claims_count"] == 1
+        assert result["can_resume"] is False
+        assert result["returned"] == 1
+        assert result["total_claims"] == 1
+        claim = result["claims"][0]
+        assert claim["id"] == "claim-review-mcp"
+        assert claim["kind"] == "synthesis_finding"
+        assert claim["source_stage"] == "synthesis"
+        assert claim["support_status"] == "needs_anchor"
+        assert claim["adjudication_status"] == "pending"
+        assert claim["claim_text"] == "AI adoption changes workflow."
+        assert claim["scope"]["corpus_level"] is True
+        assert claim["scope"]["code_ids"] == ["C1"]
+        assert claim["supporting_anchors"] == 0
+        assert claim["contrary_anchors"] == 0
+        assert claim["revision_history_count"] == 0
+        assert claim["created_by"] == "llm"
+
+    def test_review_claims_limit(self, completed_project, tmp_store):
+        completed_project.claims = [
+            AnalyticClaim(
+                id="claim-1",
+                claim_kind=ClaimKind.CODE,
+                source_stage="thematic_coding",
+                claim_text="Claim 1.",
+                scope=ClaimScope(code_ids=["C1"]),
+                origin_object_type="code",
+                origin_object_id="C1",
+            ),
+            AnalyticClaim(
+                id="claim-2",
+                claim_kind=ClaimKind.CODE,
+                source_stage="thematic_coding",
+                claim_text="Claim 2.",
+                scope=ClaimScope(code_ids=["C2"]),
+                origin_object_type="code",
+                origin_object_id="C2",
+            ),
+        ]
+        tmp_store.save(completed_project)
+
+        limited = json.loads(qc_mcp_server.qc_review_claims("proj-done", limit=1))
+        negative = json.loads(qc_mcp_server.qc_review_claims("proj-done", limit=-5))
+
+        assert limited["returned"] == 1
+        assert limited["total_claims"] == 2
+        assert limited["limit"] == 1
+        assert limited["claims"][0]["id"] == "claim-1"
+        assert negative["returned"] == 0
+        assert negative["total_claims"] == 2
+        assert negative["limit"] == 0
+
+    def test_review_claims_not_found(self, tmp_store):
+        result = json.loads(qc_mcp_server.qc_review_claims("nope"))
+        assert "error" in result
+
     def test_approve_all_codes(self, completed_project, tmp_store):
         result = json.loads(qc_mcp_server.qc_approve_all_codes("proj-done"))
         assert result["approved"] == 2

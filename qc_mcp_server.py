@@ -231,6 +231,55 @@ def qc_get_claims(project_id: str, limit: int = 50) -> str:
     }, indent=2)
 
 
+def _claim_review_row(claim) -> Dict[str, Any]:
+    """Return one bounded claim row for review surfaces."""
+    return {
+        "id": claim.id,
+        "kind": claim.claim_kind.value,
+        "source_stage": claim.source_stage,
+        "support_status": claim.support_status.value,
+        "adjudication_status": claim.adjudication_status.value,
+        "claim_text": claim.claim_text,
+        "scope": claim.scope.model_dump(mode="json"),
+        "origin_object_type": claim.origin_object_type,
+        "origin_object_id": claim.origin_object_id,
+        "supporting_anchors": len(claim.supporting_anchors),
+        "contrary_anchors": len(claim.contrary_anchors),
+        "revision_history_count": len(claim.revision_history),
+        "created_by": claim.created_by.value,
+        "created_at": claim.created_at,
+    }
+
+
+@mcp.tool()
+def qc_review_claims(project_id: str, limit: int = 100) -> str:
+    """List analytic claims as bounded review targets.
+
+    Args:
+        project_id: The project ID
+        limit: Maximum claim rows to return, capped at 100
+    """
+    try:
+        state = store.load(project_id)
+    except FileNotFoundError:
+        return json.dumps({"error": f"Project '{project_id}' not found."})
+
+    safe_limit = min(max(0, limit), 100)
+    rm = ReviewManager(state)
+    claims = [_claim_review_row(claim) for claim in state.claims[:safe_limit]]
+    return json.dumps({
+        "project_id": state.id,
+        "project_name": state.name,
+        "pipeline_status": state.pipeline_status.value,
+        "claims": claims,
+        "returned": len(claims),
+        "total_claims": len(state.claims),
+        "limit": safe_limit,
+        "summary": rm.get_review_summary().model_dump(mode="json"),
+        "can_resume": rm.can_resume(),
+    }, indent=2)
+
+
 @mcp.tool()
 def qc_get_codebook(project_id: str) -> str:
     """Get the codebook (all codes) for a project.

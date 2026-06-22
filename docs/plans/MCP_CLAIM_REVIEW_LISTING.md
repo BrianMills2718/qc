@@ -1,6 +1,6 @@
 # Plan #80: MCP Claim Review Listing
 
-**Status:** Planned
+**Status:** Implemented
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Plan #78 claim review API listing; Plan #79 MCP claim review decisions
@@ -100,20 +100,25 @@ capability or claim expert adjudication.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] MCP `qc_review_claims` returns claim review rows with status, scope,
+- [x] MCP `qc_review_claims` returns claim review rows with status, scope,
   anchor counts, revision counts, and creation metadata.
-- [ ] Response includes project metadata, review summary, total/returned counts,
+- [x] Response includes project metadata, review summary, total/returned counts,
   and `can_resume`.
-- [ ] Limit handling is deterministic and non-negative.
-- [ ] Missing projects return an error payload.
-- [ ] Docs preserve the distinction between agent-drivable review plumbing and
+- [x] Limit handling is deterministic and non-negative.
+- [x] Missing projects return an error payload.
+- [x] Docs preserve the distinction between agent-drivable review plumbing and
   expert-reviewed validity evidence.
 
 > Process criteria:
-- [ ] Required tests pass
-- [ ] Full test suite passes
-- [ ] Type check status is reported
-- [ ] Docs updated
+- [x] Required tests pass
+- [x] Full test suite passes
+- [x] Type check status is reported
+- [x] Docs updated
+
+## Verification
+
+- `python -m pytest tests/test_mcp_server.py::TestReview::test_review_claims tests/test_mcp_server.py::TestReview::test_review_claims_limit tests/test_mcp_server.py::TestReview::test_review_claims_not_found tests/test_mcp_server.py::TestReview::test_review_decisions_claim -q` — 4 passed.
+- `make check` — 799 passed, 1 skipped, 8 deselected; lint/docs passed; type check not yet configured.
 
 ---
 
