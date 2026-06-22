@@ -1098,6 +1098,134 @@ class TestExport:
         assert verification["status"] == "verified"
         assert verification["event_count"] == 2
 
+    def test_export_publish_preflight_requires_audit_manifest(
+        self,
+        completed_project,
+        tmp_store,
+    ):
+        result = json.loads(
+            qc_mcp_server.qc_export_markdown(
+                "proj-done",
+                output_file="report.md",
+                publish_preflight=True,
+            )
+        )
+
+        assert "error" in result
+        assert "publish_preflight=True requires audit_manifest=True" in result["error"]
+
+    def test_export_scope_lint_requires_publish_preflight(
+        self,
+        completed_project,
+        tmp_store,
+    ):
+        result = json.loads(
+            qc_mcp_server.qc_export_markdown(
+                "proj-done",
+                output_file="report.md",
+                audit_manifest=True,
+                scope_lint=True,
+            )
+        )
+
+        assert "error" in result
+        assert "scope_lint=True requires publish_preflight=True" in result["error"]
+
+    def test_export_markdown_with_publish_preflight(
+        self,
+        completed_project,
+        tmp_store,
+        tmp_path,
+        monkeypatch,
+    ):
+        exports_dir = (tmp_path / "exports").resolve()
+        monkeypatch.setattr(qc_mcp_server, "EXPORTS_DIR", exports_dir)
+
+        result = json.loads(
+            qc_mcp_server.qc_export_markdown(
+                "proj-done",
+                output_file="../../report.md",
+                audit_manifest=True,
+                publish_preflight=True,
+            )
+        )
+
+        assert result["format"] == "markdown"
+        assert Path(result["exported_to"]).parent == exports_dir
+        assert result["publish_preflight"]["status"] == "pass"
+        assert Path(result["audit_manifest"]).exists()
+
+    def test_export_markdown_scope_lint_blocks_risky_text(
+        self,
+        completed_project,
+        tmp_store,
+        tmp_path,
+        monkeypatch,
+    ):
+        exports_dir = (tmp_path / "exports").resolve()
+        monkeypatch.setattr(qc_mcp_server, "EXPORTS_DIR", exports_dir)
+        completed_project.synthesis = Synthesis(
+            executive_summary="Across operations teams, AI changes workflow priorities.",
+            key_findings=["These findings should generalize to the broader population."],
+        )
+        tmp_store.save(completed_project)
+
+        result = json.loads(
+            qc_mcp_server.qc_export_markdown(
+                "proj-done",
+                output_file="../../report.md",
+                audit_manifest=True,
+                publish_preflight=True,
+                scope_lint=True,
+            )
+        )
+
+        assert "error" in result
+        assert "Export publish preflight failed" in result["error"]
+        assert result["publish_preflight"]["status"] == "fail"
+        assert any(
+            failure["code"] == "scope_lint_missing_corpus_scope_generalization"
+            for failure in result["publish_preflight"]["failures"]
+        )
+        assert Path(result["exported_to"]).parent == exports_dir
+        assert Path(result["audit_manifest"]).parent == exports_dir
+
+    def test_export_json_publish_preflight_event_log_and_db(
+        self,
+        completed_project,
+        tmp_store,
+        tmp_path,
+        monkeypatch,
+    ):
+        from qc_clean.core.export.audit_event_log import verify_export_audit_event_db
+
+        exports_dir = (tmp_path / "exports").resolve()
+        monkeypatch.setattr(qc_mcp_server, "EXPORTS_DIR", exports_dir)
+
+        result = json.loads(
+            qc_mcp_server.qc_export_json(
+                "proj-done",
+                output_file="../../export.json",
+                audit_manifest=True,
+                publish_preflight=True,
+                audit_event_log=True,
+                audit_event_db=True,
+            )
+        )
+        events = _read_jsonl(Path(result["audit_event_log"]))
+        verification = verify_export_audit_event_db(result["audit_event_db"]).model_dump(
+            mode="json"
+        )
+
+        assert result["publish_preflight"]["status"] == "pass"
+        assert [event["event_type"] for event in events] == [
+            "manifest_written",
+            "publish_preflight",
+        ]
+        assert events[1]["event_status"] == "pass"
+        assert verification["status"] == "verified"
+        assert verification["event_count"] == 2
+
     def test_export_audit_event_log_requires_audit_manifest(
         self,
         completed_project,

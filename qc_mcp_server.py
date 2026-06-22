@@ -33,6 +33,7 @@ from qc_clean.core.export.audit_manifest import (
     verify_export_audit_manifest_payload,
     write_export_audit_manifest,
 )
+from qc_clean.core.export.publish_preflight import run_export_publish_preflight
 from qc_clean.core.export.data_exporter import ProjectExporter
 from qc_clean.core.claims import summarize_claim_ledger, summarize_disconfirmation_coverage
 from qc_clean.core.pipeline.review import ReviewManager
@@ -122,10 +123,16 @@ def _with_optional_export_audit(
     verify_audit_manifest: bool,
     audit_event_log: bool,
     audit_event_db: bool,
+    publish_preflight: bool,
+    scope_lint: bool,
 ) -> dict[str, Any]:
     """Add optional export-audit manifest and verification fields to an MCP payload."""
     if verify_audit_manifest and not audit_manifest:
         return {"error": "verify_audit_manifest=True requires audit_manifest=True"}
+    if publish_preflight and not audit_manifest:
+        return {"error": "publish_preflight=True requires audit_manifest=True"}
+    if scope_lint and not publish_preflight:
+        return {"error": "scope_lint=True requires publish_preflight=True"}
     if audit_event_log and not audit_manifest:
         return {"error": "audit_event_log=True requires audit_manifest=True"}
     if audit_event_db and not audit_event_log:
@@ -171,6 +178,24 @@ def _with_optional_export_audit(
         payload["audit_verification"] = report.model_dump(mode="json")
         if report.status != "verified":
             payload["error"] = "Export audit manifest verification failed"
+    if publish_preflight:
+        preflight_report = run_export_publish_preflight(
+            manifest_path,
+            base_dir=EXPORTS_DIR,
+            state=state,
+            scope_lint=scope_lint,
+        )
+        if event_log_path:
+            append_export_audit_event(
+                event_log_path,
+                event_type="publish_preflight",
+                event_status=preflight_report.status,
+                manifest_path=manifest_path,
+                payload=preflight_report.model_dump(mode="json"),
+            )
+        payload["publish_preflight"] = preflight_report.model_dump(mode="json")
+        if preflight_report.status != "pass":
+            payload["error"] = "Export publish preflight failed"
     if event_log_path and event_db_path:
         mirror_export_audit_event_log_to_sqlite(event_log_path, event_db_path)
         payload["audit_event_db"] = event_db_path
@@ -623,6 +648,8 @@ def qc_export_markdown(
     verify_audit_manifest: bool = False,
     audit_event_log: bool = False,
     audit_event_db: bool = False,
+    publish_preflight: bool = False,
+    scope_lint: bool = False,
 ) -> str:
     """Export a project as a human-readable Markdown report.
 
@@ -636,6 +663,9 @@ def qc_export_markdown(
         verify_audit_manifest: Whether to verify the sidecar immediately
         audit_event_log: Whether to append confined export-audit event-log records
         audit_event_db: Whether to mirror confined event-log records into SQLite
+        publish_preflight: Whether to run confined export publish preflight
+        scope_lint: Whether publish preflight should lint textual artifacts for
+            unsafe corpus-scope phrasing
     """
     try:
         state = store.load(project_id)
@@ -653,6 +683,8 @@ def qc_export_markdown(
         verify_audit_manifest=verify_audit_manifest,
         audit_event_log=audit_event_log,
         audit_event_db=audit_event_db,
+        publish_preflight=publish_preflight,
+        scope_lint=scope_lint,
     )
     return json.dumps(payload)
 
@@ -665,6 +697,8 @@ def qc_export_json(
     verify_audit_manifest: bool = False,
     audit_event_log: bool = False,
     audit_event_db: bool = False,
+    publish_preflight: bool = False,
+    scope_lint: bool = False,
 ) -> str:
     """Export a project's full state as JSON.
 
@@ -675,6 +709,9 @@ def qc_export_json(
         verify_audit_manifest: Whether to verify the sidecar immediately
         audit_event_log: Whether to append confined export-audit event-log records
         audit_event_db: Whether to mirror confined event-log records into SQLite
+        publish_preflight: Whether to run confined export publish preflight
+        scope_lint: Whether publish preflight should lint textual artifacts for
+            unsafe corpus-scope phrasing
     """
     try:
         state = store.load(project_id)
@@ -692,6 +729,8 @@ def qc_export_json(
         verify_audit_manifest=verify_audit_manifest,
         audit_event_log=audit_event_log,
         audit_event_db=audit_event_db,
+        publish_preflight=publish_preflight,
+        scope_lint=scope_lint,
     )
     return json.dumps(payload)
 
