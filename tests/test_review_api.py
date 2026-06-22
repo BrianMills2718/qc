@@ -131,6 +131,31 @@ def client(tmp_store, review_project, monkeypatch):
     return TestClient(server._app)
 
 
+def _replace_with_two_claims(tmp_store, review_project):
+    """Replace the review fixture claim ledger with two ordered claims."""
+    review_project.claims = [
+        AnalyticClaim(
+            id="claim-1",
+            claim_kind=ClaimKind.CODE,
+            source_stage="thematic_coding",
+            claim_text="Claim 1.",
+            scope=ClaimScope(code_ids=["C1"]),
+            origin_object_type="code",
+            origin_object_id="C1",
+        ),
+        AnalyticClaim(
+            id="claim-2",
+            claim_kind=ClaimKind.CODE,
+            source_stage="thematic_coding",
+            claim_text="Claim 2.",
+            scope=ClaimScope(code_ids=["C2"]),
+            origin_object_type="code",
+            origin_object_id="C2",
+        ),
+    ]
+    tmp_store.save(review_project)
+
+
 class TestReviewUIPage:
     def test_serves_html(self, client):
         resp = client.get("/review/test-project-123")
@@ -198,31 +223,12 @@ class TestClaimLedgerEndpoint:
         assert data["returned"] == 1
         assert data["total_claims"] == 1
         assert data["limit"] == 100
+        assert data["offset"] == 0
 
     def test_get_project_claims_limit_parameter(
         self, client, tmp_store, review_project
     ):
-        review_project.claims = [
-            AnalyticClaim(
-                id="claim-1",
-                claim_kind=ClaimKind.CODE,
-                source_stage="thematic_coding",
-                claim_text="Claim 1.",
-                scope=ClaimScope(code_ids=["C1"]),
-                origin_object_type="code",
-                origin_object_id="C1",
-            ),
-            AnalyticClaim(
-                id="claim-2",
-                claim_kind=ClaimKind.CODE,
-                source_stage="thematic_coding",
-                claim_text="Claim 2.",
-                scope=ClaimScope(code_ids=["C2"]),
-                origin_object_type="code",
-                origin_object_id="C2",
-            ),
-        ]
-        tmp_store.save(review_project)
+        _replace_with_two_claims(tmp_store, review_project)
 
         limited = client.get("/projects/test-project-123/claims?limit=1")
         negative = client.get("/projects/test-project-123/claims?limit=-5")
@@ -240,6 +246,45 @@ class TestClaimLedgerEndpoint:
         assert negative_data["total_claims"] == 2
         assert negative_data["limit"] == 0
         assert negative_data["claims"] == []
+
+    def test_get_project_claims_offset_parameter(
+        self, client, tmp_store, review_project
+    ):
+        _replace_with_two_claims(tmp_store, review_project)
+
+        resp = client.get("/projects/test-project-123/claims?limit=1&offset=1")
+
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["returned"] == 1
+        assert data["total_claims"] == 2
+        assert data["limit"] == 1
+        assert data["offset"] == 1
+        assert data["claims"][0]["id"] == "claim-2"
+
+    def test_get_project_claims_offset_bounds(
+        self, client, tmp_store, review_project
+    ):
+        _replace_with_two_claims(tmp_store, review_project)
+
+        negative = client.get("/projects/test-project-123/claims?limit=1&offset=-5")
+        beyond_end = client.get("/projects/test-project-123/claims?limit=1&offset=99")
+
+        assert negative.status_code == 200
+        negative_data = negative.json()
+        assert negative_data["returned"] == 1
+        assert negative_data["total_claims"] == 2
+        assert negative_data["limit"] == 1
+        assert negative_data["offset"] == 0
+        assert negative_data["claims"][0]["id"] == "claim-1"
+
+        assert beyond_end.status_code == 200
+        beyond_end_data = beyond_end.json()
+        assert beyond_end_data["returned"] == 0
+        assert beyond_end_data["total_claims"] == 2
+        assert beyond_end_data["limit"] == 1
+        assert beyond_end_data["offset"] == 99
+        assert beyond_end_data["claims"] == []
 
     def test_get_project_claims_includes_anchor_details(
         self, client, tmp_store, review_project

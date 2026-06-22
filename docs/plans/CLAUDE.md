@@ -6,7 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 203 | Claim ledger API offset pagination | High | Planned | `CLAIM_LEDGER_API_OFFSET_PAGINATION.md` |
+| 203 | Claim ledger API offset pagination | High | In Progress | `CLAIM_LEDGER_API_OFFSET_PAGINATION.md` |
 
 ## Completed Plans
 

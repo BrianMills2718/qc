@@ -181,7 +181,7 @@ read `CLAUDE.md` directly.
 1. Feed transcript files (txt/docx/pdf/rtf) to the pipeline
 2. Default 7-stage pipeline: Ingest → Thematic Coding → Perspective Analysis → Relationship Mapping → Synthesis → Cross-Interview → Negative Case (disconfirmation runs last; INV-6)
 3. Human review via CLI or browser; IRR via `project irr`
-4. Inspect claim ledger via `project claims` or `/projects/{project_id}/claims?limit=100`
+4. Inspect claim ledger via `project claims` or `/projects/{project_id}/claims?limit=100&offset=0`
 5. Export to JSON/CSV/Markdown/QDPX
 
 ## Machine-Readable Governance

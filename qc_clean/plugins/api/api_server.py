@@ -739,7 +739,11 @@ class QCAPIServer:
             return scope_payload(state)
 
         @self._app.get("/projects/{project_id}/claims")
-        async def get_project_claims(project_id: str, limit: int = 100):
+        async def get_project_claims(
+            project_id: str,
+            limit: int = 100,
+            offset: int = 0,
+        ):
             """Get claim-ledger summary and bounded claim rows for a project."""
             from qc_clean.core.claims import (
                 summarize_claim_ledger,
@@ -753,6 +757,7 @@ class QCAPIServer:
                 raise HTTPException(status_code=404, detail=f"Project not found: {project_id}")
             max_rows = max(0, int(self.config.get("claim_ledger_api_max_rows", 100)))
             bounded_limit = min(max(0, limit), max_rows)
+            bounded_offset = max(0, offset)
             rows = [
                 {
                     "id": claim.id,
@@ -773,7 +778,9 @@ class QCAPIServer:
                         claim.contrary_anchors
                     ),
                 }
-                for claim in state.claims[:bounded_limit]
+                for claim in state.claims[
+                    bounded_offset : bounded_offset + bounded_limit
+                ]
             ]
             return {
                 "project": state.name,
@@ -782,6 +789,7 @@ class QCAPIServer:
                 "returned": len(rows),
                 "total_claims": len(state.claims),
                 "limit": bounded_limit,
+                "offset": bounded_offset,
                 "claims": rows,
             }
 

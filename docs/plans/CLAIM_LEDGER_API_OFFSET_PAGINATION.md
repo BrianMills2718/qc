@@ -1,6 +1,6 @@
 # Plan #203: Claim Ledger API Offset Pagination
 
-**Status:** Planned
+**Status:** In Progress
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Claim Ledger API Limit Metadata
