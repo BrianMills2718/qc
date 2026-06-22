@@ -1,6 +1,6 @@
 # Plan #133: INV-7 Fixture CLI Surfaces
 
-**Status:** In Progress
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Existing structural and live INV-7 fixture scripts
@@ -64,10 +64,10 @@ Internal CLI wrapper capability only; no new cross-project boundary is created.
 
 ### Capability Validation
 
-- [ ] `qc_cli.py run-inv7-fixtures` accepts and forwards `--output`.
-- [ ] `qc_cli.py run-inv7-live-fixtures` accepts and forwards `--output`,
+- [x] `qc_cli.py run-inv7-fixtures` accepts and forwards `--output`.
+- [x] `qc_cli.py run-inv7-live-fixtures` accepts and forwards `--output`,
   `--model`, `--trace-id`, and `--max-budget`.
-- [ ] Existing INV-7 fixture runner tests continue to pass.
+- [x] Existing INV-7 fixture runner tests continue to pass.
 
 ---
 
@@ -122,20 +122,45 @@ Internal CLI wrapper capability only; no new cross-project boundary is created.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] `qc_cli.py run-inv7-fixtures --output ...` exists and delegates to the
+- [x] `qc_cli.py run-inv7-fixtures --output ...` exists and delegates to the
   structural fixture script.
-- [ ] `qc_cli.py run-inv7-live-fixtures --output ...` exists and delegates to
+- [x] `qc_cli.py run-inv7-live-fixtures --output ...` exists and delegates to
   the live fixture script without duplicating live-call behavior.
-- [ ] Docs list these commands and preserve the caveat that fixtures are not
+- [x] Docs list these commands and preserve the caveat that fixtures are not
   prompt-injection robustness proof.
 
 > Process criteria:
-- [ ] Required focused tests pass.
-- [ ] Focused Ruff check passes.
-- [ ] `make docs-check` passes.
-- [ ] Full `make check` passes or any failure is documented with evidence.
-- [ ] Type-check status is reported.
-- [ ] Verified work is committed and pushed.
+- [x] Required focused tests pass.
+- [x] Focused Ruff check passes.
+- [x] `make docs-check` passes.
+- [x] Full `make check` passes or any failure is documented with evidence.
+- [x] Type-check status is reported.
+- [x] Verified work is committed and pushed.
+
+---
+
+## Outcome
+
+Implemented and pushed as `5aeab4e`
+(`[Plan: INV7_FIXTURE_CLI_SURFACES] Add INV-7 fixture wrappers`).
+
+Verification evidence:
+
+- TDD red: `python -m pytest tests/test_qc_cli_inv7_fixtures.py -q`
+  initially failed because argparse rejected `run-inv7-fixtures` and
+  `run-inv7-live-fixtures` as unknown commands.
+- Focused wrapper tests: `python -m pytest tests/test_qc_cli_inv7_fixtures.py -q`
+  passed (`2 passed`).
+- Focused wrapper + runner tests:
+  `python -m pytest tests/test_qc_cli_inv7_fixtures.py tests/test_inv7_fixture_runner.py -q`
+  passed (`8 passed`).
+- Focused Ruff:
+  `python -m ruff check qc_cli.py tests/test_qc_cli_inv7_fixtures.py`
+  passed.
+- Docs gate: `make docs-check` passed.
+- Full gate: `make check` passed (`1023 passed, 1 skipped, 8 deselected`);
+  Ruff and docs checks passed inside the gate.
+- Type check remains not configured in this repo, as reported by `make check`.
 
 ---
 

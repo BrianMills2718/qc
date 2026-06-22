@@ -22,10 +22,18 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #133 (`INV7_FIXTURE_CLI_SURFACES.md`): expose structural and
-   live INV-7 fixture runners through canonical `qc_cli.py` commands.
+1. Select and execute the next highest-value documented roadmap lane with a
+   fresh plan and explicit acceptance criteria.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
+
+**Completed checkpoint:** Structural and opt-in live INV-7 fixture package
+generation can now be run through canonical local CLI commands:
+`qc_cli.py run-inv7-fixtures` and `qc_cli.py run-inv7-live-fixtures`. These
+commands delegate to existing scripts and preserve script-owned fixture
+generation, live model calls, summaries, and output writing. This is fixture
+orchestration/provenance only, not prompt-injection robustness proof or
+committed live benchmark evidence.
 
 **Completed checkpoint:** `scripts/run_d7_retrieval.py` now has direct
 script-boundary tests for successful stdout/`--output` parity, missing-project
