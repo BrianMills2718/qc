@@ -6,6 +6,7 @@ import qc_cli
 from scripts import (
     compare_d7_retrieval,
     run_d7_retrieval,
+    validate_d3_baseline_package,
     validate_d3_gold_set,
     validate_d7_baseline_package,
     validate_d7_gold_set,
@@ -164,6 +165,28 @@ def test_qc_cli_validate_d7_baseline_package_forwards_path(monkeypatch):
 
     assert qc_cli.main() == 7
     assert captured["argv"] == ["baseline.json"]
+
+
+def test_qc_cli_validate_d3_baseline_package_forwards_path(monkeypatch):
+    captured = {}
+
+    def fake_main(argv):
+        captured["argv"] = argv
+        return 8
+
+    monkeypatch.setattr(validate_d3_baseline_package, "main", fake_main)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "qc_cli.py",
+            "validate-d3-baseline-package",
+            "d3_baseline.json",
+        ],
+    )
+
+    assert qc_cli.main() == 8
+    assert captured["argv"] == ["d3_baseline.json"]
 
 
 def test_qc_cli_validate_d3_gold_forwards_path(monkeypatch):

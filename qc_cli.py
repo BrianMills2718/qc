@@ -45,6 +45,7 @@ Examples:
   qc_cli bench-package phase0_package.json
   qc_cli validate-d3-gold d3_gold.json
   qc_cli validate-d7-gold d7_gold.json
+  qc_cli validate-d3-baseline-package d3_baseline.json
   qc_cli run-d7-retrieval <project_id> --output predictions.json
   qc_cli run-d7-live-baseline <project_id> --output live_baseline.json --model gpt-5-mini
   qc_cli validate-d7-baseline-package baseline.json
@@ -314,6 +315,17 @@ Examples:
         help='Path to the D7 gold-set JSON file',
     )
 
+    # D3 baseline package validation command
+    d3_baseline_validator_parser = subparsers.add_parser(
+        'validate-d3-baseline-package',
+        help='Validate a D3 baseline prediction package',
+        description='Validate a versioned D3 application-baseline prediction package',
+    )
+    d3_baseline_validator_parser.add_argument(
+        'package_file',
+        help='Path to the D3 baseline package JSON file',
+    )
+
     # D7 baseline package validation command
     d7_baseline_validator_parser = subparsers.add_parser(
         'validate-d7-baseline-package',
@@ -576,6 +588,8 @@ def main() -> int:
             return handle_validate_d3_gold_command(args)
         elif args.command == 'validate-d7-gold':
             return handle_validate_d7_gold_command(args)
+        elif args.command == 'validate-d3-baseline-package':
+            return handle_validate_d3_baseline_package_command(args)
         elif args.command == 'validate-d7-baseline-package':
             return handle_validate_d7_baseline_package_command(args)
         elif args.command == 'run-inv7-fixtures':
@@ -758,6 +772,13 @@ def handle_validate_d7_gold_command(args) -> int:
     from scripts import validate_d7_gold_set
 
     return validate_d7_gold_set.main([args.gold_set])
+
+
+def handle_validate_d3_baseline_package_command(args) -> int:
+    """Validate a D3 baseline package through the canonical CLI."""
+    from scripts import validate_d3_baseline_package
+
+    return validate_d3_baseline_package.main([args.package_file])
 
 
 def handle_validate_d7_baseline_package_command(args) -> int:
