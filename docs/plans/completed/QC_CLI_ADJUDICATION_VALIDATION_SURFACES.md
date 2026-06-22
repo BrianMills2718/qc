@@ -1,6 +1,6 @@
 # Plan #188: QC CLI Adjudication Validation Surfaces
 
-**Status:** Planned
+**Status:** Completed
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Adjudication validation/preflight scripts
@@ -74,11 +74,11 @@ Internal CLI delegation only; no cross-project boundary is created.
 
 ### Capability Validation
 
-- [ ] Each command parses through `qc_cli.py`.
-- [ ] Each handler delegates to the matching script `main()`.
-- [ ] Positional arguments are forwarded exactly.
-- [ ] No validation logic is duplicated in `qc_cli.py`.
-- [ ] Docs state these are process/provenance checks only, not labels,
+- [x] Each command parses through `qc_cli.py`.
+- [x] Each handler delegates to the matching script `main()`.
+- [x] Positional arguments are forwarded exactly.
+- [x] No validation logic is duplicated in `qc_cli.py`.
+- [x] Docs state these are process/provenance checks only, not labels,
   correctness estimates, validity evidence, or benchmark results.
 
 ---
@@ -137,27 +137,27 @@ Internal CLI delegation only; no cross-project boundary is created.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] `qc_cli.py validate-adjudication-protocol protocol.json` delegates to
+- [x] `qc_cli.py validate-adjudication-protocol protocol.json` delegates to
   `scripts.validate_adjudication_protocol.main(["protocol.json"])`.
-- [ ] `qc_cli.py adjudication-protocol-preflight protocol.json sample.json`
+- [x] `qc_cli.py adjudication-protocol-preflight protocol.json sample.json`
   delegates to `scripts.preflight_adjudication_protocol_sample.main(...)`.
-- [ ] `qc_cli.py validate-adjudication-responses responses.json` delegates to
+- [x] `qc_cli.py validate-adjudication-responses responses.json` delegates to
   `scripts.validate_adjudication_responses.main(["responses.json"])`.
-- [ ] `qc_cli.py adjudication-response-preflight protocol.json sample.json responses.json`
+- [x] `qc_cli.py adjudication-response-preflight protocol.json sample.json responses.json`
   delegates to `scripts.preflight_adjudication_responses.main(...)`.
-- [ ] Existing Make/script behavior is unchanged.
-- [ ] Docs/CLAUDE mention the top-level CLI aliases without implying expert
+- [x] Existing Make/script behavior is unchanged.
+- [x] Docs/CLAUDE mention the top-level CLI aliases without implying expert
   labels, correctness estimates, validity evidence, or benchmark results.
 
 > Process criteria:
-- [ ] TDD red state observed before implementation.
-- [ ] Focused tests pass.
-- [ ] Focused Ruff check passes.
-- [ ] `make docs-check` passes.
-- [ ] `git diff --check` passes.
-- [ ] `make check` passes.
-- [ ] Plan is moved to completed with verification evidence.
-- [ ] Verified implementation is committed and pushed.
+- [x] TDD red state observed before implementation.
+- [x] Focused tests pass.
+- [x] Focused Ruff check passes.
+- [x] `make docs-check` passes.
+- [x] `git diff --check` passes.
+- [x] `make check` passes.
+- [x] Plan is moved to completed with verification evidence.
+- [x] Verified implementation is committed and pushed.
 
 ---
 
@@ -170,3 +170,32 @@ Internal CLI delegation only; no cross-project boundary is created.
 | Wrong script called | Handler imports wrong module | Test each wrapper with monkeypatched canonical script. |
 | Validation duplicated in `qc_cli.py` | Handler reimplements script logic | Keep handler as argv delegation only. |
 | Docs overclaim | Process checks sound like labels/evidence | Keep process/provenance caveats. |
+
+---
+
+## Outcome
+
+Implemented in commit `d191de7e` and pushed to `main`.
+
+`qc_cli.py` now exposes top-level wrappers for adjudication protocol validation,
+protocol/sample preflight, response validation, and response preflight. Each
+handler delegates positional paths to the matching canonical script `main()`
+without duplicating validation logic.
+
+Verification evidence:
+
+- TDD red state: focused tests initially failed with argparse rejecting all
+  four commands as invalid choices.
+- `python -m pytest tests/test_qc_cli_adjudication_surfaces.py tests/test_qc_cli_bench.py -q`:
+  11 passed.
+- `python -m ruff check qc_cli.py tests/test_qc_cli_adjudication_surfaces.py`:
+  passed.
+- `make docs-check`: passed.
+- `git diff --check`: passed.
+- `make check`: 1207 passed, 1 skipped, 8 deselected; Ruff and docs-check
+  passed; type check remains not configured.
+
+Claim discipline: these are top-level CLI aliases for existing
+process/provenance checks only. They do not create expert labels, correctness
+estimates, validity evidence, benchmark results, parity/superiority evidence,
+or SOTA claims.

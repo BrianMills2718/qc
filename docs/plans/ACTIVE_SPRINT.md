@@ -26,14 +26,19 @@ highest-value documented lane.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Plan #188 is active: add top-level `qc_cli.py` wrappers
-for existing adjudication validation/preflight scripts:
+**Active checkpoint:** Select and plan the next deterministic, high-value
+roadmap lane from `docs/PROJECT_THEORY_AND_GOALS.md` and
+`docs/EVALUATION_HARNESS.md`; no implementation slice is currently active
+after Plan #188 closeout.
+
+**Completed checkpoint:** `qc_cli.py` now wraps the existing adjudication
+validation/preflight scripts through top-level commands:
 `validate-adjudication-protocol`, `adjudication-protocol-preflight`,
-`validate-adjudication-responses`, and `adjudication-response-preflight`. This
-slice should add parser/dispatch/handler support, forward positional paths
-without duplicating validation logic, update docs/CLAUDE caveats, and avoid any
-claim that CLI parity creates labels, correctness estimates, validity evidence,
-or benchmark results.
+`validate-adjudication-responses`, and `adjudication-response-preflight`. Each
+wrapper delegates positional paths to the canonical script `main()` without
+duplicating validation logic. These are process/provenance checks only; they do
+not create expert labels, correctness estimates, validity evidence, benchmark
+results, parity/superiority evidence, or SOTA claims.
 
 **Completed checkpoint:** `qc_cli.py write-phase0-adjudication-package` now
 wraps the canonical `scripts/write_phase0_adjudication_package.py` entrypoint.
