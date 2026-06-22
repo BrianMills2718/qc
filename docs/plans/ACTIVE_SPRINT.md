@@ -26,10 +26,14 @@ highest-value documented lane.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Select and plan the next deterministic, high-value
-roadmap lane from `docs/PROJECT_THEORY_AND_GOALS.md` and
-`docs/EVALUATION_HARNESS.md`; no implementation slice is currently active
-after Plan #184 closeout.
+**Active checkpoint:** Plan #185 is active: add
+`inv7_live_protocol_file` support to strict Phase 0 package manifests so
+package-driven runs preserve the existing INV-7 live protocol/result preflight
+guard. This slice should accept the manifest field, resolve it relative to the
+package file, forward `--inv7-live-protocol-file` to `bench_phase0`, keep
+unknown-key rejection for unsupported fields, update docs/CLAUDE caveats, and
+avoid any claim that package support creates prompt-injection robustness,
+model-obedience, methodological-validity, or SOTA evidence.
 
 **Completed checkpoint:** Phase 0 scorecard/timing/manifest artifact packages
 can now be verified through `scripts/verify_phase0_benchmark_artifact.py`,

@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 185 | Phase 0 package INV-7 protocol support | High | Planned | `PHASE0_PACKAGE_INV7_PROTOCOL_SUPPORT.md` |
 
 ## Completed Plans
 
