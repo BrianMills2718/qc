@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 176 | D3 baseline comparison preflight | High | Planned | `D3_BASELINE_COMPARISON_PREFLIGHT.md` |
 
 ## Completed Plans
 

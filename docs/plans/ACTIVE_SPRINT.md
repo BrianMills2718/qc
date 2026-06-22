@@ -26,8 +26,12 @@ highest-value documented lane.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Select and plan the next deterministic, high-value
-roadmap lane. No implementation plan is currently active.
+**Active checkpoint:** Plan #176 is active: add D3 comparison preflight across a
+registered D3 comparison protocol, versioned D3 gold package, and versioned D3
+baseline packages. This slice is protocol/provenance only; it must not add
+`make bench D3_PROTOCOL=...`, score-time enforcement, held-out D3 evidence,
+expert parity, superiority evidence, methodological-validity evidence, or SOTA
+claims.
 
 **Completed checkpoint:** D3 baseline comparison protocols can now be validated
 through `qc_clean/core/d3_comparison_protocol.py`,
