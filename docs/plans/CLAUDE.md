@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 91 | INV-3 adjudication sample export | High | Planned | `INV3_ADJUDICATION_SAMPLE_EXPORT.md` |
 
 ## Completed Plans
 
