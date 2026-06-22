@@ -43,6 +43,7 @@ Examples:
   qc_cli project run <project_id>
   qc_cli bench <project_id>
   qc_cli bench-package phase0_package.json
+  qc_cli verify-phase0-benchmark-artifact benchmark_results/run/manifest.json
   qc_cli validate-d3-gold d3_gold.json
   qc_cli validate-d7-gold d7_gold.json
   qc_cli validate-d3-baseline-package d3_baseline.json
@@ -237,6 +238,16 @@ Examples:
     bench_package_parser.add_argument(
         'package_file',
         help='Path to the Phase 0 benchmark package JSON manifest',
+    )
+
+    phase0_artifact_verifier_parser = subparsers.add_parser(
+        'verify-phase0-benchmark-artifact',
+        help='Verify a Phase 0 benchmark artifact package',
+        description='Verify a Phase 0 benchmark artifact directory or manifest file',
+    )
+    phase0_artifact_verifier_parser.add_argument(
+        'artifact',
+        help='Phase 0 benchmark artifact directory or manifest.json path',
     )
 
     # D7 retrieval export command
@@ -708,6 +719,8 @@ def main() -> int:
             return handle_bench_command(args)
         elif args.command == 'bench-package':
             return handle_bench_package_command(args)
+        elif args.command == 'verify-phase0-benchmark-artifact':
+            return handle_verify_phase0_benchmark_artifact_command(args)
         elif args.command == 'run-d7-retrieval':
             return handle_run_d7_retrieval_command(args)
         elif args.command == 'run-d7-live-baseline':
@@ -834,6 +847,13 @@ def handle_bench_package_command(args) -> int:
     from scripts import run_phase0_benchmark_package
 
     return run_phase0_benchmark_package.main([args.package_file])
+
+
+def handle_verify_phase0_benchmark_artifact_command(args) -> int:
+    """Verify a Phase 0 benchmark artifact through the canonical CLI."""
+    from scripts import verify_phase0_benchmark_artifact
+
+    return verify_phase0_benchmark_artifact.main([args.artifact])
 
 
 def handle_run_d7_retrieval_command(args) -> int:

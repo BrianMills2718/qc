@@ -1,4 +1,4 @@
-.PHONY: help test test-quick test-e2e test-all bench bench-package write-phase0-adjudication-package validate-d3-gold validate-d7-gold validate-d3-baseline-package validate-d7-baseline-package validate-inv7-package validate-inv7-live-protocol inv7-live-preflight validate-d6-bias-protocol d6-bias-preflight validate-d4-codebook-quality-protocol d4-codebook-quality-preflight validate-d8-gt-fidelity-protocol d8-gt-fidelity-preflight validate-d9-interpretive-preference-protocol d9-interpretive-preference-preflight validate-confidence-calibration-protocol confidence-calibration-preflight validate-theoretical-sampling-protocol theoretical-sampling-preflight export-theoretical-sampling-candidates export-theoretical-sampling-results validate-d3-comparison-protocol d3-comparison-preflight validate-d7-comparison-protocol d7-comparison-preflight validate-adjudication-responses validate-adjudication-protocol adjudication-protocol-preflight adjudication-response-preflight import-adjudication-responses lint-scope-phrasing lint-prompt-overrides export-audit-manifest verify-export-audit-manifest export-publish-preflight verify-export-audit-log mirror-export-audit-db verify-export-audit-db run-d7-retrieval run-d7-live-baseline compare-d7-retrieval write-d7-comparison-package compare-d7-package verify-d7-comparison-artifact run-inv7-fixtures run-inv7-live-fixtures adjudication-sample check lint docs-check clean status cost errors
+.PHONY: help test test-quick test-e2e test-all bench bench-package verify-phase0-benchmark-artifact write-phase0-adjudication-package validate-d3-gold validate-d7-gold validate-d3-baseline-package validate-d7-baseline-package validate-inv7-package validate-inv7-live-protocol inv7-live-preflight validate-d6-bias-protocol d6-bias-preflight validate-d4-codebook-quality-protocol d4-codebook-quality-preflight validate-d8-gt-fidelity-protocol d8-gt-fidelity-preflight validate-d9-interpretive-preference-protocol d9-interpretive-preference-preflight validate-confidence-calibration-protocol confidence-calibration-preflight validate-theoretical-sampling-protocol theoretical-sampling-preflight export-theoretical-sampling-candidates export-theoretical-sampling-results validate-d3-comparison-protocol d3-comparison-preflight validate-d7-comparison-protocol d7-comparison-preflight validate-adjudication-responses validate-adjudication-protocol adjudication-protocol-preflight adjudication-response-preflight import-adjudication-responses lint-scope-phrasing lint-prompt-overrides export-audit-manifest verify-export-audit-manifest export-publish-preflight verify-export-audit-log mirror-export-audit-db verify-export-audit-db run-d7-retrieval run-d7-live-baseline compare-d7-retrieval write-d7-comparison-package compare-d7-package verify-d7-comparison-artifact run-inv7-fixtures run-inv7-live-fixtures adjudication-sample check lint docs-check clean status cost errors
 
 DAYS ?= 7
 PROJECT ?= qualitative_coding
@@ -28,6 +28,12 @@ ifndef PACKAGE
 	$(error PACKAGE is required. Usage: make bench-package PACKAGE=phase0_package.json)
 endif
 	python scripts/run_phase0_benchmark_package.py $(PACKAGE)
+
+verify-phase0-benchmark-artifact:  ## Verify a Phase 0 benchmark artifact package (ARTIFACT=run-dir-or-manifest.json)
+ifndef ARTIFACT
+	$(error ARTIFACT is required. Usage: make verify-phase0-benchmark-artifact ARTIFACT=benchmark_results/run-dir)
+endif
+	python scripts/verify_phase0_benchmark_artifact.py $(ARTIFACT)
 
 write-phase0-adjudication-package:  ## Write Phase 0 package manifest from D3/D7 adjudication gold (ID=<project_id> OUTPUT=phase0_package.json [D3_GOLD=d3.json] [GOLD=d7.json])
 ifndef ID
