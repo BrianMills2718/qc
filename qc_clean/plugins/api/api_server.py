@@ -131,6 +131,7 @@ class QCAPIServer:
         
         from fastapi import HTTPException, BackgroundTasks
         from pydantic import BaseModel, ConfigDict, Field
+        from qc_clean.core.claims import format_claim_anchor_details
         from qc_clean.schemas.domain import ClaimKind, CorpusScope, ProjectState, ReviewAction
         
         # Health check endpoint
@@ -217,6 +218,12 @@ class QCAPIServer:
                 "origin_object_id": claim.origin_object_id,
                 "supporting_anchors": len(claim.supporting_anchors),
                 "contrary_anchors": len(claim.contrary_anchors),
+                "supporting_anchor_details": format_claim_anchor_details(
+                    claim.supporting_anchors
+                ),
+                "contrary_anchor_details": format_claim_anchor_details(
+                    claim.contrary_anchors
+                ),
                 "revision_history_count": len(claim.revision_history),
                 "created_by": claim.created_by.value,
                 "created_at": claim.created_at,

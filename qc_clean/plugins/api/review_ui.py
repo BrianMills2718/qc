@@ -79,6 +79,11 @@ a { color: #2563eb; }
 .claim-meta { display: flex; gap: 8px; flex-wrap: wrap; font-size: 12px; color: #666; margin-bottom: 8px; }
 .claim-pill { padding: 1px 6px; border-radius: 4px; background: #f3f4f6; }
 .claim-scope { font-size: 12px; color: #777; margin-top: 4px; }
+.anchor-list { margin-top: 8px; display: flex; flex-direction: column; gap: 6px; }
+.anchor-row { border: 1px solid #e5e7eb; border-radius: 6px; padding: 6px 8px; background: #fafafa; }
+.anchor-title { font-size: 11px; font-weight: 600; color: #555; margin-bottom: 3px; }
+.anchor-quote { font-size: 12px; color: #333; }
+.anchor-meta { font-size: 11px; color: #777; margin-top: 3px; }
 
 /* Modify fields */
 .modify-fields { margin-top: 8px; display: flex; flex-direction: column; gap: 6px; }
@@ -448,6 +453,8 @@ function renderClaimCard(claim) {
   if (claim.origin_object_type || claim.origin_object_id) {
     html += '<div class="claim-scope">Origin: ' + escapeHtml((claim.origin_object_type || "") + " " + (claim.origin_object_id || "")) + '</div>';
   }
+  html += renderAnchorDetails("Supporting evidence", claim.supporting_anchor_details || []);
+  html += renderAnchorDetails("Contrary evidence", claim.contrary_anchor_details || []);
   if (action === "modify") {
     const nv = d.new_value || {};
     html += '<div class="modify-fields">';
@@ -464,6 +471,25 @@ function renderClaimCard(claim) {
           escapeAttr(d ? d.rationale || "" : "") +
           '" onchange="updateRationale(\'' + claim.id + '\',this.value)">';
   html += '</div>';
+  html += '</div>';
+  return html;
+}
+
+function renderAnchorDetails(label, anchors) {
+  if (!anchors || !anchors.length) return "";
+  let html = '<div class="anchor-list">';
+  for (const anchor of anchors) {
+    const span = (anchor.start_char !== null && anchor.start_char !== undefined)
+      ? anchor.start_char + "-" + anchor.end_char
+      : "unpositioned";
+    const hash = anchor.quote_hash ? " hash " + anchor.quote_hash : "";
+    const app = anchor.code_application_id ? " app " + anchor.code_application_id : "";
+    html += '<div class="anchor-row">';
+    html += '<div class="anchor-title">' + escapeHtml(label) + '</div>';
+    html += '<div class="anchor-quote">' + escapeHtml(anchor.quote_text || "") + '</div>';
+    html += '<div class="anchor-meta">' + escapeHtml((anchor.doc_id || "unknown doc") + " " + span + hash + app) + '</div>';
+    html += '</div>';
+  }
   html += '</div>';
   return html;
 }

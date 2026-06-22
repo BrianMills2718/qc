@@ -70,6 +70,7 @@ capability.
 ## Files Affected
 
 - `qc_clean/plugins/api/api_server.py` (modify)
+- `qc_clean/core/claims.py` (modify)
 - `qc_mcp_server.py` (modify)
 - `qc_clean/plugins/api/review_ui.py` (modify)
 - `tests/test_review_api.py` (modify)

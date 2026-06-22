@@ -35,7 +35,11 @@ from qc_clean.core.export.audit_manifest import (
 )
 from qc_clean.core.export.publish_preflight import run_export_publish_preflight
 from qc_clean.core.export.data_exporter import ProjectExporter
-from qc_clean.core.claims import summarize_claim_ledger, summarize_disconfirmation_coverage
+from qc_clean.core.claims import (
+    format_claim_anchor_details,
+    summarize_claim_ledger,
+    summarize_disconfirmation_coverage,
+)
 from qc_clean.core.pipeline.review import ReviewManager
 from qc_clean.core.pipeline.pipeline_factory import create_pipeline, create_incremental_pipeline
 from qc_clean.core.pipeline.pipeline_engine import PipelineContext
@@ -366,6 +370,12 @@ def _claim_review_row(claim) -> Dict[str, Any]:
         "origin_object_id": claim.origin_object_id,
         "supporting_anchors": len(claim.supporting_anchors),
         "contrary_anchors": len(claim.contrary_anchors),
+        "supporting_anchor_details": format_claim_anchor_details(
+            claim.supporting_anchors
+        ),
+        "contrary_anchor_details": format_claim_anchor_details(
+            claim.contrary_anchors
+        ),
         "revision_history_count": len(claim.revision_history),
         "created_by": claim.created_by.value,
         "created_at": claim.created_at,

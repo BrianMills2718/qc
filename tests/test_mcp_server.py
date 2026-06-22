@@ -17,6 +17,7 @@ from qc_clean.schemas.domain import (
     AnalysisMemo,
     AnalysisPhaseResult,
     ClaimAdjudicationStatus,
+    ClaimAnchor,
     ClaimKind,
     ClaimScope,
     ClaimSupportStatus,
@@ -680,6 +681,16 @@ class TestReview:
                 origin_object_type="negative_case",
                 origin_object_id="negative_case:0:AI Adoption",
                 support_status=ClaimSupportStatus.NEEDS_ANCHOR,
+                contrary_anchors=[
+                    ClaimAnchor(
+                        doc_id="d2",
+                        start_char=11,
+                        end_char=35,
+                        quote_text="AI adoption failed here",
+                        quote_hash="def456",
+                        code_application_id="A2",
+                    )
+                ],
             ),
         ]
         tmp_store.save(completed_project)
@@ -697,6 +708,18 @@ class TestReview:
         assert negative_case["kind"] == "negative_case"
         assert negative_case["scope"]["claim_ids"] == ["claim-normal"]
         assert negative_case["scope"]["code_ids"] == ["C1"]
+        assert negative_case["contrary_anchors"] == 1
+        assert negative_case["contrary_anchor_details"] == [
+            {
+                "doc_id": "d2",
+                "start_char": 11,
+                "end_char": 35,
+                "quote_hash": "def456",
+                "quote_text": "AI adoption failed here",
+                "segment_id": None,
+                "code_application_id": "A2",
+            }
+        ]
 
     def test_review_negative_cases_limit(self, completed_project, tmp_store):
         completed_project.claims = [

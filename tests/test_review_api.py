@@ -13,6 +13,7 @@ from qc_clean.plugins.api.api_server import QCAPIServer
 from qc_clean.core.persistence.project_store import ProjectStore
 from qc_clean.schemas.domain import (
     AnalyticClaim,
+    ClaimAnchor,
     ClaimKind,
     ClaimScope,
     Code,
@@ -165,6 +166,14 @@ class TestReviewUIPage:
         assert '"/projects/" + PROJECT_ID + "/review/negative-cases"' in resp.text
         assert "function renderNegativeCases" in resp.text
         assert "renderClaimCard(negativeCase)" in resp.text
+
+    def test_review_page_exposes_anchor_detail_rendering(self, client):
+        resp = client.get("/review/test-project-123")
+
+        assert resp.status_code == 200
+        assert "function renderAnchorDetails" in resp.text
+        assert "contrary_anchor_details" in resp.text
+        assert "supporting_anchor_details" in resp.text
 
     def test_404_for_missing_project(self, client):
         resp = client.get("/review/nonexistent")
@@ -325,6 +334,16 @@ class TestReviewNegativeCasesEndpoint:
                 scope=ClaimScope(claim_ids=["claim-normal"], code_ids=["C1"]),
                 origin_object_type="negative_case",
                 origin_object_id="negative_case:0:Theme A",
+                contrary_anchors=[
+                    ClaimAnchor(
+                        doc_id="d1",
+                        start_char=7,
+                        end_char=29,
+                        quote_text="counterexample evidence",
+                        quote_hash="abc123",
+                        code_application_id="A1",
+                    )
+                ],
             ),
         ]
         tmp_store.save(review_project)
@@ -342,6 +361,18 @@ class TestReviewNegativeCasesEndpoint:
         assert negative_case["scope"]["claim_ids"] == ["claim-normal"]
         assert negative_case["scope"]["code_ids"] == ["C1"]
         assert negative_case["claim_text"] == "Negative case for Theme A: counterexample."
+        assert negative_case["contrary_anchors"] == 1
+        assert negative_case["contrary_anchor_details"] == [
+            {
+                "doc_id": "d1",
+                "start_char": 7,
+                "end_char": 29,
+                "quote_hash": "abc123",
+                "quote_text": "counterexample evidence",
+                "segment_id": None,
+                "code_application_id": "A1",
+            }
+        ]
 
     def test_404_for_missing_project(self, client):
         resp = client.get("/projects/nonexistent/review/negative-cases")

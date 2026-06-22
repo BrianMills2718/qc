@@ -477,6 +477,32 @@ def format_claim_scope_summary(scope: ClaimScope) -> str:
     return ";".join(parts) if parts else "unspecified"
 
 
+def format_claim_anchor_details(
+    anchors: Iterable[ClaimAnchor],
+    *,
+    limit: int = 5,
+    quote_max_chars: int = 240,
+) -> list[dict[str, Any]]:
+    """Return bounded source-anchor details for review payloads."""
+    safe_limit = max(0, limit)
+    safe_quote_max = max(0, quote_max_chars)
+    details: list[dict[str, Any]] = []
+    for anchor in list(anchors)[:safe_limit]:
+        quote_text = anchor.quote_text or ""
+        if len(quote_text) > safe_quote_max:
+            quote_text = quote_text[:safe_quote_max] + "..."
+        details.append({
+            "doc_id": anchor.doc_id,
+            "start_char": anchor.start_char,
+            "end_char": anchor.end_char,
+            "quote_hash": anchor.quote_hash,
+            "quote_text": quote_text,
+            "segment_id": anchor.segment_id,
+            "code_application_id": anchor.code_application_id,
+        })
+    return details
+
+
 def disconfirmation_targets(
     state: ProjectState,
     limit: int | None = None,
