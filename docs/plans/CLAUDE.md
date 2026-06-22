@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 90 | Negative case review surfaces | High | Planned | `NEGATIVE_CASE_REVIEW_SURFACES.md` |
 
 ## Completed Plans
 
