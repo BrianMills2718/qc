@@ -1,10 +1,31 @@
 # Plan #149: INV-7 Validation CLI Surfaces
 
-**Status:** In Progress
+**Status:** Complete
 **Type:** implementation
 **Priority:** Medium
 **Blocked By:** INV-7 package/protocol/preflight validators
 **Blocks:** agent-drivable INV-7 package validation workflows
+
+---
+
+## Outcome
+
+The top-level CLI now exposes:
+- `qc_cli.py validate-inv7-package <package_file>`
+- `qc_cli.py validate-inv7-live-protocol <protocol_file>`
+- `qc_cli.py inv7-live-preflight <protocol_file> <package_file>`
+
+Each command delegates directly to its canonical script and preserves
+script-owned JSON output and exit-code semantics. This is CLI parity/process
+validation only; it is not prompt-injection robustness evidence, model-obedience
+evidence, or methodological-validity evidence.
+
+**Verification:** `python -m pytest tests/test_qc_cli_inv7_fixtures.py
+tests/test_inv7_prompt_injection_package.py tests/test_inv7_live_protocol.py
+tests/test_inv7_live_preflight.py -q` passed (23 tests), targeted Ruff passed,
+and `make docs-check` passed. Final `make check` passed (1084 passed, 1
+skipped, 8 deselected; Ruff/docs-check passed). Type checking is not configured
+in this repo.
 
 ---
 
@@ -104,18 +125,18 @@ the top-level CLI. It does not create a new validation capability.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] `qc_cli.py validate-inv7-package <package_file>` is available.
-- [ ] `qc_cli.py validate-inv7-live-protocol <protocol_file>` is available.
-- [ ] `qc_cli.py inv7-live-preflight <protocol_file> <package_file>` is available.
-- [ ] Wrappers delegate to canonical scripts without duplicating validation logic.
-- [ ] Script-owned JSON output and exit codes are preserved.
-- [ ] Docs state these are process/provenance checks only, not prompt-injection robustness evidence.
+- [x] `qc_cli.py validate-inv7-package <package_file>` is available.
+- [x] `qc_cli.py validate-inv7-live-protocol <protocol_file>` is available.
+- [x] `qc_cli.py inv7-live-preflight <protocol_file> <package_file>` is available.
+- [x] Wrappers delegate to canonical scripts without duplicating validation logic.
+- [x] Script-owned JSON output and exit codes are preserved.
+- [x] Docs state these are process/provenance checks only, not prompt-injection robustness evidence.
 
 > Process criteria:
-- [ ] Focused tests pass.
-- [ ] Full test suite passes (`make check`).
-- [ ] Type check status is reported.
-- [ ] Docs updated.
+- [x] Focused tests pass (`python -m pytest tests/test_qc_cli_inv7_fixtures.py tests/test_inv7_prompt_injection_package.py tests/test_inv7_live_protocol.py tests/test_inv7_live_preflight.py -q`: 23 passed).
+- [x] Full test suite passes (`make check`: 1084 passed, 1 skipped, 8 deselected; Ruff/docs-check passed).
+- [x] Type check status is reported (`make check`: type check not yet configured).
+- [x] Docs updated.
 
 ---
 

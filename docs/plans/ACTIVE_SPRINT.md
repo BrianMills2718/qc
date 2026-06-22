@@ -22,10 +22,17 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Plan #149: add top-level CLI wrappers for INV-7 package validation,
-   live-protocol validation, and live preflight.
+1. Select the next highest-value documented roadmap lane from
+   `docs/PROJECT_THEORY_AND_GOALS.md` and `docs/EVALUATION_HARNESS.md`.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
+
+**Completed checkpoint:** `qc_cli.py validate-inv7-package`,
+`qc_cli.py validate-inv7-live-protocol`, and `qc_cli.py inv7-live-preflight`
+now delegate to the canonical INV-7 validation/preflight scripts while
+preserving script-owned JSON output and exit codes. This is CLI parity and
+process/provenance validation only, not prompt-injection robustness evidence,
+model-obedience evidence, methodological-validity evidence, or SOTA evidence.
 
 **Completed checkpoint:** `qc_cli.py validate-d3-baseline-package
 <package_file>` now delegates to the canonical D3 baseline package validator
