@@ -22,13 +22,19 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #111 (`D7_RETRIEVAL_COMPARISON_PROTOCOL_PREFLIGHT.md`):
-   preflight D7 retrieval comparison gold/prediction packages against a
-   registered protocol before scoring.
-2. Continue through the ranked roadmap without pausing after each verified
+1. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Completed checkpoint:** Pre-run live INV-7 protocol packages can now be
+**Completed checkpoint:** D7 retrieval prediction packages now carry
+project/corpus/state/trace/budget provenance, and D7 retrieval comparisons can
+be protocol-gated before scoring with `make validate-d7-comparison-protocol
+PROTOCOL=...` and `make d7-comparison-preflight PROTOCOL=... GOLD=...
+PREDICTIONS="..."`. The preflight requires versioned D7 gold and checks gold
+metadata, project/corpus/state hashes, expected baseline names, retrieval
+configuration, trace ID, budget, and optional prediction-file SHA-256 locks.
+This is comparison provenance only, not held-out D7 evidence, live-baseline
+evidence, methodological-validity evidence, or superiority evidence. Pre-run
+live INV-7 protocol packages can now be
 preflighted against concrete live result packages with
 `make inv7-live-preflight PROTOCOL=... PACKAGE=...`, checking protocol/package
 schema validity, live-result mode, split/fixture/model/trace/freeze/

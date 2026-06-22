@@ -1,12 +1,24 @@
 # Plan #111: D7 Retrieval Comparison Protocol Preflight
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** D7 gold-set scaffold; D7 retrieval-mode export/comparison
 **Blocks:** safer held-out D7 retrieval/live-baseline comparison runs
 
 ---
+
+## Outcome
+
+Implemented D7 retrieval comparison protocol validation and preflight. D7
+retrieval prediction packages now carry project/corpus/state/trace/budget
+provenance; `make validate-d7-comparison-protocol PROTOCOL=...` validates
+registered comparison metadata; and `make d7-comparison-preflight PROTOCOL=...
+GOLD=... PREDICTIONS="..."` cross-checks versioned D7 gold and retrieval
+prediction packages before scoring. Verification: focused D7 tests passed
+(`22 passed`), focused Ruff passed, `make docs-check` passed, both new Make
+targets dry-ran to the expected scripts, and full `make check` passed (`939
+passed, 1 skipped, 8 deselected`; Ruff/docs clean; type check not configured).
 
 ## Gap
 
@@ -89,15 +101,15 @@ Internal preflight capability only; no cross-project boundary is created.
 
 ### Capability Validation
 
-- [ ] Protocol validator accepts a valid held-out comparison protocol.
-- [ ] Protocol validator rejects invalid held-out flags, duplicate expected
+- [x] Protocol validator accepts a valid held-out comparison protocol.
+- [x] Protocol validator rejects invalid held-out flags, duplicate expected
   baseline names, malformed hashes, and incomplete embedding expectations.
-- [ ] Retrieval export packages include project/corpus/state/trace/budget
+- [x] Retrieval export packages include project/corpus/state/trace/budget
   provenance.
-- [ ] Matching protocol/gold/predictions pass preflight.
-- [ ] Gold provenance mismatches fail loud.
-- [ ] Prediction provenance/config/file-hash mismatches fail loud.
-- [ ] CLI/Make targets emit machine-readable pass/fail output.
+- [x] Matching protocol/gold/predictions pass preflight.
+- [x] Gold provenance mismatches fail loud.
+- [x] Prediction provenance/config/file-hash mismatches fail loud.
+- [x] CLI/Make targets emit machine-readable pass/fail output.
 
 ---
 
@@ -169,37 +181,37 @@ Internal preflight capability only; no cross-project boundary is created.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] Retrieval prediction packages carry project/corpus/state/trace/budget
+- [x] Retrieval prediction packages carry project/corpus/state/trace/budget
   provenance.
-- [ ] Valid D7 comparison protocols validate.
-- [ ] Invalid held-out protocol metadata fails loud.
-- [ ] Protocol/gold mismatch fails loud.
-- [ ] Protocol/prediction provenance and retrieval-config mismatches fail loud.
-- [ ] Optional prediction file SHA-256 locks fail loud on mismatch.
-- [ ] `make validate-d7-comparison-protocol PROTOCOL=...` is discoverable and
+- [x] Valid D7 comparison protocols validate.
+- [x] Invalid held-out protocol metadata fails loud.
+- [x] Protocol/gold mismatch fails loud.
+- [x] Protocol/prediction provenance and retrieval-config mismatches fail loud.
+- [x] Optional prediction file SHA-256 locks fail loud on mismatch.
+- [x] `make validate-d7-comparison-protocol PROTOCOL=...` is discoverable and
   dry-runs correctly.
-- [ ] `make d7-comparison-preflight PROTOCOL=... GOLD=... PREDICTIONS="..."`
+- [x] `make d7-comparison-preflight PROTOCOL=... GOLD=... PREDICTIONS="..."`
   is discoverable and dry-runs correctly.
-- [ ] Docs state this is process/provenance metadata only, not held-out D7
+- [x] Docs state this is process/provenance metadata only, not held-out D7
   validity evidence, live-baseline evidence, or superiority evidence.
 
 > Process criteria:
-- [ ] Required focused tests pass.
-- [ ] Focused Ruff check passes.
-- [ ] `make docs-check` passes.
-- [ ] Full `make check` passes or any failure is documented with evidence.
-- [ ] Type-check status is reported.
-- [ ] Verified work is committed and pushed.
+- [x] Required focused tests pass.
+- [x] Focused Ruff check passes.
+- [x] `make docs-check` passes.
+- [x] Full `make check` passes or any failure is documented with evidence.
+- [x] Type-check status is reported.
+- [x] Verified work is committed and pushed.
 
 ---
 
 ## Open Questions
 
-- [ ] Should preflight invoke `compare-d7-retrieval` automatically after
+- [x] Should preflight invoke `compare-d7-retrieval` automatically after
   passing? — Status: DEFERRED | Why it matters: this plan is a pre-scoring
   provenance gate. Automatic score execution can be a later wrapper once the
   protocol is stable.
-- [ ] Should protocols require prediction-file SHA-256 locks before prediction
+- [x] Should protocols require prediction-file SHA-256 locks before prediction
   files exist? — Status: DEFERRED | Why it matters: pre-run protocols cannot
   know output hashes. This slice supports optional post-run file locks and
   requires metadata/config matching in all cases.
