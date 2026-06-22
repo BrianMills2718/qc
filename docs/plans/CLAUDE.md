@@ -6,7 +6,6 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| #75 | D10 Tool-Call Costs | High | In Progress | `D10_TOOL_CALL_COSTS.md` |
 
 ## Completed Plans
 
@@ -39,6 +38,7 @@ Track all implementation work here.
 | INV-11 review decisions inactive on invalidation | Review decisions targeting claims removed by incremental invalidation are retained as inactive audit history | `completed/INV11_REVIEW_DECISION_INACTIVE_ON_INVALIDATION.md` |
 | Review summary active inactive counts | Review summaries and CLI now distinguish active decisions from historical inactive decisions | `completed/REVIEW_SUMMARY_ACTIVE_INACTIVE_COUNTS.md` |
 | D10 cost latency scorecard | Evaluation-harness follow-up: `make bench` now reports D10 cost/latency from real llm_client observability rows | `completed/D10_COST_LATENCY_SCORECARD.md` |
+| D10 tool-call costs | Evaluation-harness follow-up: D10 cost/latency now includes optional observed tool-call accounting and combined local totals without changing LLM-only fields | `completed/D10_TOOL_CALL_COSTS.md` |
 | D7 baseline comparison | Evaluation-harness follow-up: `make bench` can score externally supplied D7 baseline predictions against the same gold as the system | `completed/D7_BASELINE_COMPARISON.md` |
 | D10 wall-clock runtime | Evaluation-harness follow-up: `project run` records last-run wall-clock metadata and `make bench` reports `wall_clock_d10` | `completed/D10_WALL_CLOCK_RUNTIME.md` |
 | D10 timing artifact | Evaluation-harness follow-up: Phase 0 artifact packages now include a hash-recorded `timing_d10.json` file without claiming public benchmark timing evidence | `completed/D10_TIMING_ARTIFACT.md` |

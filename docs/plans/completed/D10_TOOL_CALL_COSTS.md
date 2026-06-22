@@ -8,6 +8,25 @@
 
 ---
 
+## Outcome
+
+D10 `cost_latency_d10` now preserves existing LLM-only fields and adds optional
+observed `tool_calls` accounting when matching real `tool_calls` rows exist.
+The scorecard reports tool call counts, success/error counts, tool cost,
+duration summaries, and tool/operation/task breakdowns, plus explicit
+`combined_observed_*` totals. Missing or unmatched tool-call rows are reported
+as `not_available` without suppressing scored LLM rows. This is local
+observability accounting only; it is not public benchmark timing evidence.
+
+**Verification:** `python -m pytest tests/test_bench_phase0.py
+tests/test_bench_phase0_script.py::test_bench_phase0_includes_d10_from_observability_db
+-q` passed (61 tests); `python -m ruff check qc_clean/core/bench.py
+tests/test_bench_phase0.py` passed; final `make check` passed (783 passed, 1
+skipped, 8 deselected; Ruff/docs-check passed). Type checking is not configured
+in this repo.
+
+---
+
 ## Gap
 
 **Current:** D10 `cost_latency_d10` reports real LLM costs and observed LLM-call
