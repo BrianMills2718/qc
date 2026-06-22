@@ -22,16 +22,17 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Select and plan the next deterministic, high-value roadmap lane.
+1. Execute Plan #170: D7 span-overlap diagnostics.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Select the next deterministic roadmap lane from the
-remaining documented gaps. Candidate lanes include INV-2/D7 evaluation-policy
-scaffolding that does not fabricate gold labels, default-policy follow-ups for
-INV-11, populated theoretical-sampling protocol/result evidence if concrete
-inputs exist, or another protocol/accounting lane that can be verified without
-external evidence.
+**Active checkpoint:** Plan #170 is active. Add a diagnostic-only
+`disconfirmation_d7.span_overlap` section that compares character-offset
+contrary-evidence anchors over the same target claim and document, reusing the
+existing D3 IoU/Modified Hausdorff span-overlap machinery where practical.
+Exact D7 TP/FP/FN, intervals, agreement metadata, and baseline scores must
+remain unchanged; this lane is local error-analysis metadata only, not semantic
+disconfirmation validity, held-out evidence, expert parity, or SOTA evidence.
 
 **Completed checkpoint:** A protocol-guarded built-in INV-7 live canary
 fixture-set v2 artifact is committed at
