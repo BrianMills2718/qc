@@ -17,7 +17,10 @@ from qc_clean.core.export.audit_manifest import (
     load_export_audit_manifest,
     verify_export_audit_manifest_payload,
 )
-from qc_clean.core.export.audit_event_log import append_export_audit_event
+from qc_clean.core.export.audit_event_log import (
+    append_export_audit_event,
+    mirror_export_audit_event_log_to_sqlite,
+)
 from qc_clean.core.persistence.project_store import ProjectStore
 
 
@@ -41,7 +44,15 @@ def main(argv: Sequence[str] | None = None) -> int:
         type=Path,
         help="Optional export audit event JSONL log to append a manifest_verified event",
     )
+    parser.add_argument(
+        "--audit-db",
+        type=Path,
+        help="Optional SQLite mirror for the audit event log; requires --audit-log",
+    )
     args = parser.parse_args(argv)
+    if args.audit_db and not args.audit_log:
+        print(json.dumps({"status": "error", "error": "--audit-db requires --audit-log"}, indent=2))
+        return 1
 
     try:
         manifest = load_export_audit_manifest(args.manifest)
@@ -73,6 +84,8 @@ def main(argv: Sequence[str] | None = None) -> int:
                 manifest_path=args.manifest,
                 payload=report.model_dump(mode="json"),
             )
+            if args.audit_db:
+                mirror_export_audit_event_log_to_sqlite(args.audit_log, args.audit_db)
         except (OSError, ValueError) as exc:
             print(json.dumps({"status": "error", "error": str(exc)}, indent=2))
             return 1

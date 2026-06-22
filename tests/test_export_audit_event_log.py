@@ -4,6 +4,7 @@ import json
 
 from qc_clean.core.export.audit_event_log import (
     append_export_audit_event,
+    verify_export_audit_event_db,
     verify_export_audit_event_log,
 )
 from qc_clean.core.persistence.project_store import ProjectStore
@@ -96,6 +97,7 @@ def test_export_audit_scripts_write_opt_in_events(tmp_path, capsys):
     report_path.write_text("# Report\n", encoding="utf-8")
     manifest_path = tmp_path / "manifest.json"
     log_path = tmp_path / "export_audit_events.jsonl"
+    db_path = tmp_path / "export_audit_events.sqlite"
 
     write_exit = write_export_audit_manifest.main(
         [
@@ -112,6 +114,8 @@ def test_export_audit_scripts_write_opt_in_events(tmp_path, capsys):
             str(projects_dir),
             "--audit-log",
             str(log_path),
+            "--audit-db",
+            str(db_path),
         ]
     )
     write_payload = json.loads(capsys.readouterr().out)
@@ -127,6 +131,8 @@ def test_export_audit_scripts_write_opt_in_events(tmp_path, capsys):
             str(projects_dir),
             "--audit-log",
             str(log_path),
+            "--audit-db",
+            str(db_path),
         ]
     )
     verify_payload = json.loads(capsys.readouterr().out)
@@ -143,12 +149,15 @@ def test_export_audit_scripts_write_opt_in_events(tmp_path, capsys):
             str(projects_dir),
             "--audit-log",
             str(log_path),
+            "--audit-db",
+            str(db_path),
         ]
     )
     preflight_payload = json.loads(capsys.readouterr().out)
 
     log_exit = verify_log_script.main([str(log_path)])
     log_report = json.loads(capsys.readouterr().out)
+    db_report = verify_export_audit_event_db(db_path).model_dump(mode="json")
     events = _read_jsonl(log_path)
 
     assert write_exit == 0
@@ -170,6 +179,73 @@ def test_export_audit_scripts_write_opt_in_events(tmp_path, capsys):
     assert log_exit == 0
     assert log_report["status"] == "verified"
     assert log_report["event_count"] == 3
+    assert db_report["status"] == "verified"
+    assert db_report["event_count"] == 3
+
+
+def test_export_audit_scripts_reject_audit_db_without_log(tmp_path, capsys):
+    from scripts import export_publish_preflight
+    from scripts import verify_export_audit_manifest
+    from scripts import write_export_audit_manifest
+
+    projects_dir = tmp_path / "projects"
+    store = ProjectStore(projects_dir=projects_dir)
+    state = ProjectState(id="event-db-project", name="Event DB Project")
+    store.save(state)
+    report_path = tmp_path / "report.md"
+    report_path.write_text("# Report\n", encoding="utf-8")
+    manifest_path = tmp_path / "manifest.json"
+    db_path = tmp_path / "export_audit_events.sqlite"
+
+    write_exit = write_export_audit_manifest.main(
+        [
+            state.id,
+            "--format",
+            "markdown",
+            "--artifact",
+            str(report_path),
+            "--output",
+            str(manifest_path),
+            "--base-dir",
+            str(tmp_path),
+            "--projects-dir",
+            str(projects_dir),
+            "--audit-db",
+            str(db_path),
+        ]
+    )
+    write_payload = json.loads(capsys.readouterr().out)
+
+    manifest_path.write_text(
+        json.dumps({"package_type": "not_a_manifest"}),
+        encoding="utf-8",
+    )
+    verify_exit = verify_export_audit_manifest.main(
+        [
+            str(manifest_path),
+            "--audit-db",
+            str(db_path),
+        ]
+    )
+    verify_payload = json.loads(capsys.readouterr().out)
+
+    preflight_exit = export_publish_preflight.main(
+        [
+            "--manifest",
+            str(manifest_path),
+            "--audit-db",
+            str(db_path),
+        ]
+    )
+    preflight_payload = json.loads(capsys.readouterr().out)
+
+    assert write_exit == 1
+    assert verify_exit == 1
+    assert preflight_exit == 1
+    assert "--audit-db requires --audit-log" in write_payload["error"]
+    assert "--audit-db requires --audit-log" in verify_payload["error"]
+    assert "--audit-db requires --audit-log" in preflight_payload["error"]
+    assert not db_path.exists()
 
 
 def _read_jsonl(path):

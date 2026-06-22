@@ -66,9 +66,9 @@ make adjudication-response-preflight PROTOCOL=protocol.json SAMPLE=sample.json R
 make import-adjudication-responses PACKAGE=sample.json GOLD_SET_ID=study-v1 DATASET_NAME="Study dev labels" CODER_COUNT=1 ADJUDICATOR=coder-1 PROTOCOL="Single adjudicator review" PREFLIGHT_PROTOCOL=protocol.json PREFLIGHT_SAMPLE=sample.json D3_OUTPUT=d3_gold.json D7_OUTPUT=d7_gold.json  # Convert valid responses to D3/D7 gold package inputs with an import-time provenance guard
 make write-phase0-adjudication-package ID=<project_id> OUTPUT=phase0_package.json D3_GOLD=d3_gold.json GOLD=d7_gold.json  # Write strict Phase 0 package manifest for imported D3/D7 gold
 make lint-scope-phrasing ID=<project_id> INPUT=report.md  # Lint arbitrary text for unsafe population-generalizing scope phrasing
-make export-audit-manifest ID=<project_id> FORMAT=markdown ARTIFACTS="report.md" OUTPUT=manifest.json  # Write export artifact hash manifest
-make verify-export-audit-manifest MANIFEST=manifest.json BASE_DIR=. ID=<project_id>  # Verify manifest self-hash, artifact hashes, and optional project-state hash
-make export-publish-preflight MANIFEST=manifest.json BASE_DIR=. ID=<project_id>  # Strict local publish/handoff preflight requiring a verified export manifest
+make export-audit-manifest ID=<project_id> FORMAT=markdown ARTIFACTS="report.md" OUTPUT=manifest.json AUDIT_LOG=events.jsonl AUDIT_DB=events.sqlite  # Write export artifact hash manifest and optional audit event mirror
+make verify-export-audit-manifest MANIFEST=manifest.json BASE_DIR=. ID=<project_id> AUDIT_LOG=events.jsonl AUDIT_DB=events.sqlite  # Verify manifest and optionally mirror the verification event
+make export-publish-preflight MANIFEST=manifest.json BASE_DIR=. ID=<project_id> AUDIT_LOG=events.jsonl AUDIT_DB=events.sqlite  # Strict local publish/handoff preflight with optional mirrored event
 make verify-export-audit-log LOG=export_audit_events.jsonl  # Verify opt-in local hash-linked export audit event log
 make mirror-export-audit-db LOG=export_audit_events.jsonl DB=export_audit_events.sqlite  # Mirror verified event log into local SQLite
 make verify-export-audit-db DB=export_audit_events.sqlite  # Verify local SQLite export audit event mirror

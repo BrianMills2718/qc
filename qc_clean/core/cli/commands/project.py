@@ -307,12 +307,16 @@ def _export_project(store: ProjectStore, args) -> int:
     overwrite = not bool(vars(args).get("no_overwrite", False))
     audit_manifest = vars(args).get("audit_manifest")
     audit_log = vars(args).get("audit_log")
+    audit_db = vars(args).get("audit_db")
     verify_audit_manifest = bool(vars(args).get("verify_audit_manifest", False))
     if verify_audit_manifest and not audit_manifest:
         print("--verify-audit-manifest requires --audit-manifest", file=sys.stderr)
         return 1
     if audit_log and not audit_manifest:
         print("--audit-log requires --audit-manifest", file=sys.stderr)
+        return 1
+    if audit_db and not audit_log:
+        print("--audit-db requires --audit-log", file=sys.stderr)
         return 1
 
     try:
@@ -350,6 +354,7 @@ def _export_project(store: ProjectStore, args) -> int:
                 audit_manifest,
                 verify_audit_manifest,
                 audit_log,
+                audit_db,
             )
     except Exception as e:
         print(f"Export failed: {e}", file=sys.stderr)
@@ -365,9 +370,13 @@ def _write_and_optionally_verify_export_manifest(
     manifest_output: str,
     verify: bool,
     audit_log: str | None = None,
+    audit_db: str | None = None,
 ) -> None:
     """Write an export audit manifest and optionally verify it immediately."""
-    from qc_clean.core.export.audit_event_log import append_export_audit_event
+    from qc_clean.core.export.audit_event_log import (
+        append_export_audit_event,
+        mirror_export_audit_event_log_to_sqlite,
+    )
     from qc_clean.core.export.audit_manifest import (
         build_export_audit_manifest,
         verify_export_audit_manifest_payload,
@@ -407,10 +416,22 @@ def _write_and_optionally_verify_export_manifest(
                 manifest_path=manifest_path,
                 payload=report.model_dump(mode="json"),
             )
+        verification_error = None
         if report.status != "verified":
             messages = "; ".join(failure.message for failure in report.failures)
-            raise RuntimeError(f"Export audit manifest verification failed: {messages}")
-        print("Verified export audit manifest")
+            verification_error = RuntimeError(
+                f"Export audit manifest verification failed: {messages}"
+            )
+        else:
+            print("Verified export audit manifest")
+        if audit_log and audit_db:
+            mirror_export_audit_event_log_to_sqlite(audit_log, audit_db)
+            print(f"Export audit event DB: {audit_db}")
+        if verification_error is not None:
+            raise verification_error
+    elif audit_log and audit_db:
+        mirror_export_audit_event_log_to_sqlite(audit_log, audit_db)
+        print(f"Export audit event DB: {audit_db}")
     if audit_log:
         print(f"Export audit event log: {audit_log}")
 

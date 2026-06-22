@@ -272,7 +272,7 @@ endif
 lint-prompt-overrides:  ## Check prompt override source uses against registry declarations
 	python scripts/check_prompt_override_registry.py
 
-export-audit-manifest:  ## Write export hash manifest (ID=<project_id> FORMAT=json|csv|markdown|qdpx ARTIFACTS="file..." OUTPUT=manifest.json [AUDIT_LOG=events.jsonl])
+export-audit-manifest:  ## Write export hash manifest (ID=<project_id> FORMAT=json|csv|markdown|qdpx ARTIFACTS="file..." OUTPUT=manifest.json [AUDIT_LOG=events.jsonl] [AUDIT_DB=events.sqlite])
 ifndef ID
 	$(error ID is required. Usage: make export-audit-manifest ID=<project_id> FORMAT=markdown ARTIFACTS="report.md" OUTPUT=manifest.json)
 endif
@@ -285,19 +285,19 @@ endif
 ifndef OUTPUT
 	$(error OUTPUT is required. Usage: make export-audit-manifest ID=<project_id> FORMAT=markdown ARTIFACTS="report.md" OUTPUT=manifest.json)
 endif
-	python scripts/write_export_audit_manifest.py $(ID) --format $(FORMAT) $(foreach file,$(ARTIFACTS),--artifact $(file)) --output $(OUTPUT) $(if $(BASE_DIR),--base-dir $(BASE_DIR),) $(if $(PROJECTS_DIR),--projects-dir $(PROJECTS_DIR),) $(if $(AUDIT_LOG),--audit-log $(AUDIT_LOG),)
+	python scripts/write_export_audit_manifest.py $(ID) --format $(FORMAT) $(foreach file,$(ARTIFACTS),--artifact $(file)) --output $(OUTPUT) $(if $(BASE_DIR),--base-dir $(BASE_DIR),) $(if $(PROJECTS_DIR),--projects-dir $(PROJECTS_DIR),) $(if $(AUDIT_LOG),--audit-log $(AUDIT_LOG),) $(if $(AUDIT_DB),--audit-db $(AUDIT_DB),)
 
-verify-export-audit-manifest:  ## Verify export hash manifest (MANIFEST=manifest.json [BASE_DIR=exports] [ID=<project_id>] [AUDIT_LOG=events.jsonl])
+verify-export-audit-manifest:  ## Verify export hash manifest (MANIFEST=manifest.json [BASE_DIR=exports] [ID=<project_id>] [AUDIT_LOG=events.jsonl] [AUDIT_DB=events.sqlite])
 ifndef MANIFEST
 	$(error MANIFEST is required. Usage: make verify-export-audit-manifest MANIFEST=manifest.json)
 endif
-	python scripts/verify_export_audit_manifest.py $(MANIFEST) $(if $(BASE_DIR),--base-dir $(BASE_DIR),) $(if $(ID),--project-id $(ID),) $(if $(PROJECTS_DIR),--projects-dir $(PROJECTS_DIR),) $(if $(AUDIT_LOG),--audit-log $(AUDIT_LOG),)
+	python scripts/verify_export_audit_manifest.py $(MANIFEST) $(if $(BASE_DIR),--base-dir $(BASE_DIR),) $(if $(ID),--project-id $(ID),) $(if $(PROJECTS_DIR),--projects-dir $(PROJECTS_DIR),) $(if $(AUDIT_LOG),--audit-log $(AUDIT_LOG),) $(if $(AUDIT_DB),--audit-db $(AUDIT_DB),)
 
-export-publish-preflight:  ## Strict publish preflight requiring a valid export manifest (MANIFEST=manifest.json [BASE_DIR=exports] [ID=<project_id>] [AUDIT_LOG=events.jsonl])
+export-publish-preflight:  ## Strict publish preflight requiring a valid export manifest (MANIFEST=manifest.json [BASE_DIR=exports] [ID=<project_id>] [AUDIT_LOG=events.jsonl] [AUDIT_DB=events.sqlite])
 ifndef MANIFEST
 	$(error MANIFEST is required. Usage: make export-publish-preflight MANIFEST=manifest.json)
 endif
-	python scripts/export_publish_preflight.py --manifest $(MANIFEST) $(if $(BASE_DIR),--base-dir $(BASE_DIR),) $(if $(ID),--project-id $(ID),) $(if $(PROJECTS_DIR),--projects-dir $(PROJECTS_DIR),) $(if $(AUDIT_LOG),--audit-log $(AUDIT_LOG),)
+	python scripts/export_publish_preflight.py --manifest $(MANIFEST) $(if $(BASE_DIR),--base-dir $(BASE_DIR),) $(if $(ID),--project-id $(ID),) $(if $(PROJECTS_DIR),--projects-dir $(PROJECTS_DIR),) $(if $(AUDIT_LOG),--audit-log $(AUDIT_LOG),) $(if $(AUDIT_DB),--audit-db $(AUDIT_DB),)
 
 verify-export-audit-log:  ## Verify local export audit event log (LOG=events.jsonl)
 ifndef LOG

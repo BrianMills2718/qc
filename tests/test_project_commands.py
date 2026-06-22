@@ -843,6 +843,41 @@ class TestProjectExporter:
         assert verification["status"] == "verified"
         assert "Export audit event log" in output
 
+    def test_project_export_command_writes_audit_event_db(
+        self,
+        tmp_path,
+        tmp_store,
+        sample_state,
+        capsys,
+    ):
+        from qc_clean.core.cli.commands.project import _export_project
+        from qc_clean.core.export.audit_event_log import verify_export_audit_event_db
+
+        tmp_store.save(sample_state)
+        out = tmp_path / "report.md"
+        manifest = tmp_path / "report.manifest.json"
+        audit_log = tmp_path / "export_audit_events.jsonl"
+        audit_db = tmp_path / "export_audit_events.sqlite"
+        args = MagicMock(
+            project_id=sample_state.id,
+            format="markdown",
+            output_file=str(out),
+            output_dir=None,
+            audit_manifest=str(manifest),
+            verify_audit_manifest=True,
+            audit_log=str(audit_log),
+            audit_db=str(audit_db),
+        )
+
+        result = _export_project(tmp_store, args)
+        output = capsys.readouterr().out
+        db_report = verify_export_audit_event_db(audit_db).model_dump(mode="json")
+
+        assert result == 0
+        assert db_report["status"] == "verified"
+        assert db_report["event_count"] == 2
+        assert "Export audit event DB" in output
+
     def test_project_export_command_rejects_audit_log_without_manifest(
         self,
         tmp_store,
@@ -866,6 +901,31 @@ class TestProjectExporter:
 
         assert result == 1
         assert "--audit-log requires --audit-manifest" in capsys.readouterr().err
+
+    def test_project_export_command_rejects_audit_db_without_log(
+        self,
+        tmp_store,
+        sample_state,
+        capsys,
+    ):
+        from qc_clean.core.cli.commands.project import _export_project
+
+        tmp_store.save(sample_state)
+        args = MagicMock(
+            project_id=sample_state.id,
+            format="json",
+            output_file=None,
+            output_dir=None,
+            audit_manifest="manifest.json",
+            verify_audit_manifest=False,
+            audit_log=None,
+            audit_db="events.sqlite",
+        )
+
+        result = _export_project(tmp_store, args)
+
+        assert result == 1
+        assert "--audit-db requires --audit-log" in capsys.readouterr().err
 
 
 # ---------------------------------------------------------------------------
@@ -996,6 +1056,31 @@ class TestCLIParsing:
         )
 
         assert args.audit_log == "events.jsonl"
+
+    def test_export_subparser_audit_db_flag(self):
+        from qc_cli import create_parser
+
+        parser = create_parser()
+
+        args = parser.parse_args(
+            [
+                "project",
+                "export",
+                "pid",
+                "--format",
+                "markdown",
+                "--output-file",
+                "report.md",
+                "--audit-manifest",
+                "manifest.json",
+                "--audit-log",
+                "events.jsonl",
+                "--audit-db",
+                "events.sqlite",
+            ]
+        )
+
+        assert args.audit_db == "events.sqlite"
 
     def test_export_subparser_qdpx(self):
         from qc_cli import create_parser
