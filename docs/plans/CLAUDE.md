@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 168 | INV-7 custom prompt override fixtures | High | Planned | `INV7_CUSTOM_PROMPT_OVERRIDE_FIXTURES.md` |
 
 ## Completed Plans
 

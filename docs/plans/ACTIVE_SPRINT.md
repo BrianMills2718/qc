@@ -26,11 +26,12 @@ highest-value documented lane.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Select the next deterministic roadmap lane from the
-remaining documented gaps. Candidate lanes include default-policy follow-ups for
-INV-11, broader INV-7 custom-prompt/live benchmark work, INV-2/D7
-evaluation-policy scaffolding that does not fabricate gold labels, or another
-protocol/accounting lane that can be verified without external evidence.
+**Active checkpoint:** Plan #168 is active: expand the built-in INV-7
+structural and opt-in live fixture sets to cover registered custom prompt
+override surfaces (`thematic_coding` and `gt_constant_comparison`) using the
+production `render_prompt_override()` wrapper. This is fixture coverage only,
+not prompt-injection robustness, model-obedience, methodological-validity, or
+SOTA evidence.
 
 **Completed checkpoint:** Grounded-theory projects can now opt into
 `--refresh-higher-order` for `project recode` and
