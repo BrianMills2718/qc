@@ -49,13 +49,15 @@ surfaces Gwet's AC1 for LLM-pass codebook-discovery, positive application-cell,
 and segment-decision consistency when IRR results exist, with rating prevalence
 tables and deterministic local row-bootstrap intervals in the Phase 0 scorecard.
 Phase 0 also now scores externally supplied D6 counterfactual identity-swap
-outcomes through `BIAS_COUNTERFACTUAL=` / `--bias-counterfactual-file`. This
-remains a
+outcomes through `BIAS_COUNTERFACTUAL=` / `--bias-counterfactual-file`. Phase 0
+now scores externally supplied D9 forced-choice interpretive-preference outcomes
+through `PREFERENCE=` / `--interpretive-preference-file`. This remains a
 gold-dependent exact-score/provenance/uncertainty, human-ceiling-comparison, and
-canary-fixture/counterfactual-accounting substrate, not a populated held-out
+canary-fixture/counterfactual/preference-accounting substrate, not a populated held-out
 benchmark, full D3/D7 validity, populated D4 LLM-judge/blind-expert evaluation,
 populated D6 bias audit, populated κ/α/AC1 human agreement benchmark,
 populated human-ceiling agreement,
+populated D9 blind expert preference benchmark,
 held-out live-baseline result,
 committed/scored live adversarial prompt-injection benchmark, or expert-parity/SOTA
 evidence.

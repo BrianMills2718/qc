@@ -57,6 +57,7 @@ def test_bench_phase0_includes_input_hashes_without_external_files(
     assert hashes["prompt_injection_file_sha256"] is None
     assert hashes["bias_counterfactual_file_sha256"] is None
     assert hashes["codebook_quality_file_sha256"] is None
+    assert hashes["interpretive_preference_file_sha256"] is None
     assert hashes["observability_db_sha256"] is None
 
 
@@ -150,6 +151,19 @@ def test_bench_phase0_hashes_external_input_files(
         }),
         encoding="utf-8",
     )
+    preference_file = tmp_path / "interpretive_preference.json"
+    preference_file.write_text(
+        json.dumps({
+            "interpretive_preference_evaluations": [
+                {
+                    "case_id": "latent-1",
+                    "evaluator": "expert-a",
+                    "preferred": "system",
+                }
+            ]
+        }),
+        encoding="utf-8",
+    )
     db_path = tmp_path / "observability.db"
     _create_llm_observability_db(db_path)
     monkeypatch.setattr(bench_phase0, "ProjectStore", lambda: store)
@@ -168,6 +182,8 @@ def test_bench_phase0_hashes_external_input_files(
         str(bias_file),
         "--codebook-quality-file",
         str(quality_file),
+        "--interpretive-preference-file",
+        str(preference_file),
         "--observability-db",
         str(db_path),
     ])
@@ -181,6 +197,7 @@ def test_bench_phase0_hashes_external_input_files(
     assert hashes["prompt_injection_file_sha256"] == _sha256_file(injection_file)
     assert hashes["bias_counterfactual_file_sha256"] == _sha256_file(bias_file)
     assert hashes["codebook_quality_file_sha256"] == _sha256_file(quality_file)
+    assert hashes["interpretive_preference_file_sha256"] == _sha256_file(preference_file)
     assert hashes["observability_db_sha256"] == _sha256_file(db_path)
     reloaded = store.load(state.id)
     assert "application_gold" not in reloaded.config.extra
@@ -189,6 +206,7 @@ def test_bench_phase0_hashes_external_input_files(
     assert "prompt_injection_evaluations" not in reloaded.config.extra
     assert "bias_counterfactual_evaluations" not in reloaded.config.extra
     assert "codebook_quality_evaluations" not in reloaded.config.extra
+    assert "interpretive_preference_evaluations" not in reloaded.config.extra
 
 
 def test_bench_phase0_scores_d3_from_gold_file_without_mutating_state(
@@ -435,6 +453,19 @@ def test_bench_phase0_artifact_manifest_records_external_inputs(
         }),
         encoding="utf-8",
     )
+    preference_file = tmp_path / "interpretive_preference.json"
+    preference_file.write_text(
+        json.dumps({
+            "interpretive_preference_evaluations": [
+                {
+                    "case_id": "latent-1",
+                    "evaluator": "expert-a",
+                    "preferred": "system",
+                }
+            ]
+        }),
+        encoding="utf-8",
+    )
     db_path = tmp_path / "observability.db"
     _create_llm_observability_db(db_path)
     artifact_root = tmp_path / "benchmark_results"
@@ -452,6 +483,8 @@ def test_bench_phase0_artifact_manifest_records_external_inputs(
         str(bias_file),
         "--codebook-quality-file",
         str(quality_file),
+        "--interpretive-preference-file",
+        str(preference_file),
         "--observability-db",
         str(db_path),
         "--trace-id",
@@ -469,12 +502,16 @@ def test_bench_phase0_artifact_manifest_records_external_inputs(
     assert manifest["input_hashes"]["prompt_injection_file_sha256"] == _sha256_file(injection_file)
     assert manifest["input_hashes"]["bias_counterfactual_file_sha256"] == _sha256_file(bias_file)
     assert manifest["input_hashes"]["codebook_quality_file_sha256"] == _sha256_file(quality_file)
+    assert manifest["input_hashes"]["interpretive_preference_file_sha256"] == (
+        _sha256_file(preference_file)
+    )
     assert manifest["input_hashes"]["observability_db_sha256"] == _sha256_file(db_path)
     assert manifest["command"]["gold_file"] == str(gold_file)
     assert manifest["command"]["d7_baselines_file"] == str(baselines_file)
     assert manifest["command"]["prompt_injection_file"] == str(injection_file)
     assert manifest["command"]["bias_counterfactual_file"] == str(bias_file)
     assert manifest["command"]["codebook_quality_file"] == str(quality_file)
+    assert manifest["command"]["interpretive_preference_file"] == str(preference_file)
     assert manifest["command"]["observability_db"] == str(db_path)
     assert manifest["command"]["trace_id"] == "trace-123"
 
@@ -1034,6 +1071,85 @@ def test_bench_phase0_invalid_codebook_quality_file_fails_loud(
     output = json.loads(capsys.readouterr().out)
     assert "error" in output
     assert "Codebook quality file" in output["error"]
+
+
+def test_bench_phase0_scores_interpretive_preference_from_file_without_mutating_state(
+    tmp_path,
+    monkeypatch,
+    capsys,
+):
+    state = ProjectState(
+        id="project_d9",
+        name="D9 project",
+        config=ProjectConfig(extra={}),
+    )
+    store = ProjectStore(projects_dir=tmp_path / "projects")
+    store.save(state)
+    preference_file = tmp_path / "interpretive_preference.json"
+    preference_file.write_text(
+        json.dumps({
+            "interpretive_preference_evaluations": [
+                {
+                    "case_id": "latent-1",
+                    "evaluator": "expert-a",
+                    "preferred": "system",
+                },
+                {
+                    "case_id": "latent-2",
+                    "evaluator": "expert-b",
+                    "preferred": "human",
+                },
+                {
+                    "case_id": "latent-3",
+                    "evaluator": "expert-b",
+                    "preferred": "tie",
+                },
+            ],
+        }),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(bench_phase0, "ProjectStore", lambda: store)
+
+    exit_code = bench_phase0.main([
+        state.id,
+        "--interpretive-preference-file",
+        str(preference_file),
+    ])
+
+    assert exit_code == 0
+    output = json.loads(capsys.readouterr().out)
+    d9 = output["interpretive_preference_d9"]
+    assert d9["status"] == "scored"
+    assert d9["system_wins"] == 1
+    assert d9["human_wins"] == 1
+    assert d9["ties"] == 1
+    assert d9["system_preference_rate"] == pytest.approx(0.5)
+    reloaded = store.load(state.id)
+    assert "interpretive_preference_evaluations" not in reloaded.config.extra
+
+
+def test_bench_phase0_invalid_interpretive_preference_file_fails_loud(
+    tmp_path,
+    monkeypatch,
+    capsys,
+):
+    state = ProjectState(id="project_bad_d9", name="Bad D9")
+    store = ProjectStore(projects_dir=tmp_path / "projects")
+    store.save(state)
+    preference_file = tmp_path / "interpretive_preference.json"
+    preference_file.write_text(json.dumps({"unexpected": []}), encoding="utf-8")
+    monkeypatch.setattr(bench_phase0, "ProjectStore", lambda: store)
+
+    exit_code = bench_phase0.main([
+        state.id,
+        "--interpretive-preference-file",
+        str(preference_file),
+    ])
+
+    assert exit_code == 1
+    output = json.loads(capsys.readouterr().out)
+    assert "error" in output
+    assert "Interpretive preference file" in output["error"]
 
 
 def test_bench_phase0_includes_d10_from_observability_db(

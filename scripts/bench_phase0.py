@@ -6,6 +6,7 @@ Usage:
         [--d7-baselines-file baselines.json] [--prompt-injection-file inv7.json]
         [--bias-counterfactual-file bias.json]
         [--codebook-quality-file quality.json]
+        [--interpretive-preference-file preference.json]
         [--output scorecard.json]
 
 Agent-drivable: emits JSON to stdout (and optionally a file). See
@@ -65,6 +66,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument(
         "--codebook-quality-file",
         help="Optional D4 codebook-quality rubric outcome JSON file; applied in memory only",
+    )
+    parser.add_argument(
+        "--interpretive-preference-file",
+        help="Optional D9 blind forced-choice preference outcome JSON file; applied in memory only",
     )
     parser.add_argument(
         "--observability-db",
@@ -159,6 +164,20 @@ def main(argv: Sequence[str] | None = None) -> int:
         state.config.extra = dict(state.config.extra)
         state.config.extra["codebook_quality_evaluations"] = codebook_quality_results
 
+    if args.interpretive_preference_file:
+        try:
+            interpretive_preference_results = load_interpretive_preference_file(
+                Path(args.interpretive_preference_file)
+            )
+        except ValueError as exc:
+            print(json.dumps({"error": str(exc)}))
+            return 1
+        state = state.model_copy(deep=True)
+        state.config.extra = dict(state.config.extra)
+        state.config.extra["interpretive_preference_evaluations"] = (
+            interpretive_preference_results
+        )
+
     try:
         card = phase0_scorecard(state)
     except ValueError as exc:
@@ -175,6 +194,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         ),
         codebook_quality_file=(
             Path(args.codebook_quality_file) if args.codebook_quality_file else None
+        ),
+        interpretive_preference_file=(
+            Path(args.interpretive_preference_file)
+            if args.interpretive_preference_file
+            else None
         ),
         observability_db=args.observability_db,
     )
@@ -298,6 +322,11 @@ def phase0_command_provenance(args: argparse.Namespace) -> dict[str, Any]:
         "codebook_quality_file": (
             str(Path(args.codebook_quality_file)) if args.codebook_quality_file else None
         ),
+        "interpretive_preference_file": (
+            str(Path(args.interpretive_preference_file))
+            if args.interpretive_preference_file
+            else None
+        ),
         "observability_db": str(args.observability_db) if args.observability_db else None,
         "trace_id": args.trace_id,
         "output": args.output,
@@ -340,6 +369,7 @@ def phase0_input_hashes(
     prompt_injection_file: Path | None,
     bias_counterfactual_file: Path | None,
     codebook_quality_file: Path | None,
+    interpretive_preference_file: Path | None,
     observability_db: Path | None,
 ) -> dict[str, Any]:
     """Return deterministic SHA-256 input hashes for Phase 0 bench output."""
@@ -363,6 +393,11 @@ def phase0_input_hashes(
         ),
         "codebook_quality_file_sha256": (
             sha256_file(codebook_quality_file) if codebook_quality_file else None
+        ),
+        "interpretive_preference_file_sha256": (
+            sha256_file(interpretive_preference_file)
+            if interpretive_preference_file
+            else None
         ),
         "observability_db_sha256": sha256_file(observability_db),
     }
@@ -504,6 +539,27 @@ def load_codebook_quality_file(path: Path) -> Any:
     raise ValueError(
         "Codebook quality file must be a JSON list of rubric outcomes or an "
         "object with a 'codebook_quality_evaluations' list"
+    )
+
+
+def load_interpretive_preference_file(path: Path) -> Any:
+    """Load and shape-check an external D9 preference result file."""
+    try:
+        raw = json.loads(path.read_text(encoding="utf-8"))
+    except OSError as exc:
+        raise ValueError(f"Interpretive preference file '{path}' could not be read: {exc}") from exc
+    except json.JSONDecodeError as exc:
+        raise ValueError(
+            f"Interpretive preference file '{path}' is not valid JSON: {exc}"
+        ) from exc
+
+    if isinstance(raw, list):
+        return raw
+    if isinstance(raw, dict) and isinstance(raw.get("interpretive_preference_evaluations"), list):
+        return raw["interpretive_preference_evaluations"]
+    raise ValueError(
+        "Interpretive preference file must be a JSON list of forced-choice outcomes "
+        "or an object with an 'interpretive_preference_evaluations' list"
     )
 
 

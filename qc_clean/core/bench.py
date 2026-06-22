@@ -42,6 +42,7 @@ _RUN_TIMING_EXTRA_KEY = "run_timing"
 _PROMPT_INJECTION_EXTRA_KEY = "prompt_injection_evaluations"
 _BIAS_COUNTERFACTUAL_EXTRA_KEY = "bias_counterfactual_evaluations"
 _CODEBOOK_QUALITY_EXTRA_KEY = "codebook_quality_evaluations"
+_INTERPRETIVE_PREFERENCE_EXTRA_KEY = "interpretive_preference_evaluations"
 _EXACT_BOOTSTRAP_EXTRA_KEY = "phase0_exact_bootstrap"
 _RELIABILITY_BOOTSTRAP_EXTRA_KEY = "phase0_reliability_bootstrap"
 DEFAULT_OBSERVABILITY_DB_PATH = Path.home() / "projects" / "data" / "llm_observability.db"
@@ -256,6 +257,37 @@ class CodebookQualityEvaluation(BaseModel):
         return self
 
 
+class InterpretivePreferenceEvaluation(BaseModel):
+    """External D9 blind forced-choice preference outcome."""
+
+    case_id: str = Field(description="Stable ID for the interpretive-depth comparison case")
+    evaluator: str = Field(
+        default="unspecified",
+        description="Evaluator identifier or redacted label",
+    )
+    preferred: str = Field(
+        description="Forced-choice preference: system, human, or tie"
+    )
+    criterion: str = Field(
+        default="interpretive_depth",
+        description="Preference criterion, such as interpretive_depth",
+    )
+    notes: str = Field(default="", description="Optional human-readable notes")
+
+    @model_validator(mode="after")
+    def require_valid_preference_outcome(self) -> "InterpretivePreferenceEvaluation":
+        """Normalize stable keys and reject unusable forced-choice labels."""
+        self.case_id = self.case_id.strip()
+        if not self.case_id:
+            raise ValueError("interpretive preference case_id must be non-empty")
+        self.evaluator = self.evaluator.strip() or "unspecified"
+        self.criterion = self.criterion.strip() or "interpretive_depth"
+        self.preferred = self.preferred.strip().lower()
+        if self.preferred not in {"system", "human", "tie"}:
+            raise ValueError("interpretive preference preferred must be system, human, or tie")
+        return self
+
+
 class DisconfirmationBaselinePrediction(BaseModel):
     """Baseline contrary-evidence predictions used for D7 comparison."""
 
@@ -321,6 +353,8 @@ def phase0_scorecard(state: ProjectState) -> Dict[str, Any]:
         "codebook_quality_d4": codebook_quality_scorecard(state),
         # D7 — disconfirmation quality when human/adjudicated gold is present.
         "disconfirmation_d7": disconfirmation_d7_scorecard(state),
+        # D9 — externally supplied blind forced-choice interpretive preference outcomes.
+        "interpretive_preference_d9": interpretive_preference_scorecard(state),
         # INV-4 — category adequacy diagnostic, not proof of GT saturation.
         "category_saturation": assess_category_saturation(state).model_dump(),
         # INV-7 — prompt-injection fixture results when an external evaluator provides them.
@@ -900,6 +934,101 @@ def _numeric_summary(values: list[float]) -> dict[str, float | None]:
         "mean": sum(values) / len(values),
         "min": min(values),
         "max": max(values),
+    }
+
+
+def interpretive_preference_scorecard(state: ProjectState) -> Dict[str, Any]:
+    """Score externally supplied D9 forced-choice preference outcomes."""
+    evaluations = _interpretive_preference_evaluations(state)
+    if not evaluations:
+        return {
+            "status": "not_available",
+            "reason": (
+                "No interpretive-preference outcomes found at "
+                f"ProjectState.config.extra['{_INTERPRETIVE_PREFERENCE_EXTRA_KEY}']; "
+                "scoring requires externally supplied blind forced-choice outcomes."
+            ),
+            "note": (
+                "Absence of D9 preference data is not evidence of interpretive-depth "
+                "parity; blind expert preference evaluation is separate from ordinary "
+                "Phase 0 scoring."
+            ),
+        }
+
+    return {
+        "status": "scored",
+        "source": f"ProjectState.config.extra['{_INTERPRETIVE_PREFERENCE_EXTRA_KEY}']",
+        **_interpretive_preference_summary(evaluations),
+        "by_evaluator": _interpretive_preference_grouped_summary(
+            evaluations,
+            key_fn=lambda evaluation: evaluation.evaluator,
+        ),
+        "by_criterion": _interpretive_preference_grouped_summary(
+            evaluations,
+            key_fn=lambda evaluation: evaluation.criterion,
+        ),
+        "note": (
+            "Scores externally supplied forced-choice preference outcomes. This is "
+            "a measurement substrate, not blind expert-parity evidence, a "
+            "pre-registered non-inferiority result, or a SOTA claim."
+        ),
+    }
+
+
+def _interpretive_preference_evaluations(
+    state: ProjectState,
+) -> list[InterpretivePreferenceEvaluation]:
+    """Load D9 forced-choice preference outcomes from project config metadata."""
+    raw = state.config.extra.get(_INTERPRETIVE_PREFERENCE_EXTRA_KEY)
+    if raw is None:
+        return []
+    if isinstance(raw, dict) and _INTERPRETIVE_PREFERENCE_EXTRA_KEY in raw:
+        raw = raw[_INTERPRETIVE_PREFERENCE_EXTRA_KEY]
+    if not isinstance(raw, list):
+        raise ValueError(
+            f"ProjectState.config.extra['{_INTERPRETIVE_PREFERENCE_EXTRA_KEY}'] "
+            "must be a list of interpretive-preference outcomes"
+        )
+    try:
+        return [InterpretivePreferenceEvaluation.model_validate(item) for item in raw]
+    except ValidationError as exc:
+        raise ValueError(f"Invalid interpretive_preference_evaluations metadata: {exc}") from exc
+
+
+def _interpretive_preference_summary(
+    evaluations: list[InterpretivePreferenceEvaluation],
+) -> dict[str, Any]:
+    """Return D9 preference counts, rates, and confidence interval."""
+    total = len(evaluations)
+    counts = Counter(evaluation.preferred for evaluation in evaluations)
+    system_wins = counts["system"]
+    human_wins = counts["human"]
+    ties = counts["tie"]
+    non_tie_cases = system_wins + human_wins
+    return {
+        "total_cases": total,
+        "system_wins": system_wins,
+        "human_wins": human_wins,
+        "ties": ties,
+        "non_tie_cases": non_tie_cases,
+        "tie_rate": _safe_div(ties, total),
+        "system_preference_rate": _safe_div_or_none(system_wins, non_tie_cases),
+        "system_preference_ci": _wilson_interval(system_wins, non_tie_cases),
+    }
+
+
+def _interpretive_preference_grouped_summary(
+    evaluations: list[InterpretivePreferenceEvaluation],
+    *,
+    key_fn: Any,
+) -> dict[str, dict[str, Any]]:
+    """Summarize D9 preference outcomes by a stable grouping key."""
+    grouped: dict[str, list[InterpretivePreferenceEvaluation]] = {}
+    for evaluation in evaluations:
+        grouped.setdefault(key_fn(evaluation), []).append(evaluation)
+    return {
+        group_key: _interpretive_preference_summary(group)
+        for group_key, group in sorted(grouped.items())
     }
 
 

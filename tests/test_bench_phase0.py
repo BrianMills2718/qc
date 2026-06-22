@@ -547,6 +547,92 @@ def test_scorecard_invalid_codebook_quality_metadata_fails_loud():
         phase0_scorecard(state)
 
 
+def test_scorecard_reports_interpretive_preference_unavailable_without_eval_data():
+    state = ProjectState(
+        name="no-preference-eval",
+        config=ProjectConfig(methodology=Methodology.THEMATIC_ANALYSIS),
+        corpus=Corpus(documents=[Document(name="d.txt", content="Participant text.")]),
+    )
+
+    d9 = phase0_scorecard(state)["interpretive_preference_d9"]
+
+    assert d9["status"] == "not_available"
+    assert "interpretive_preference_evaluations" in d9["reason"]
+    assert "not evidence" in d9["note"]
+
+
+def test_scorecard_scores_interpretive_preference_outcomes():
+    state = ProjectState(
+        name="preference-eval",
+        config=ProjectConfig(
+            methodology=Methodology.THEMATIC_ANALYSIS,
+            extra={
+                "interpretive_preference_evaluations": [
+                    {
+                        "case_id": "latent-1",
+                        "evaluator": "expert-a",
+                        "preferred": "system",
+                    },
+                    {
+                        "case_id": "latent-2",
+                        "evaluator": "expert-a",
+                        "preferred": "human",
+                    },
+                    {
+                        "case_id": "latent-3",
+                        "evaluator": "expert-b",
+                        "preferred": "tie",
+                        "criterion": "latent_meaning",
+                    },
+                    {
+                        "case_id": "latent-4",
+                        "evaluator": "expert-b",
+                        "preferred": "system",
+                        "criterion": "latent_meaning",
+                    },
+                ],
+            },
+        ),
+    )
+
+    d9 = phase0_scorecard(state)["interpretive_preference_d9"]
+
+    assert d9["status"] == "scored"
+    assert d9["total_cases"] == 4
+    assert d9["system_wins"] == 2
+    assert d9["human_wins"] == 1
+    assert d9["ties"] == 1
+    assert d9["non_tie_cases"] == 3
+    assert d9["tie_rate"] == pytest.approx(0.25)
+    assert d9["system_preference_rate"] == pytest.approx(2 / 3)
+    assert d9["system_preference_ci"]["method"] == "wilson"
+    assert d9["system_preference_ci"]["successes"] == 2
+    assert d9["system_preference_ci"]["denominator"] == 3
+    assert d9["by_evaluator"]["expert-a"]["system_preference_rate"] == pytest.approx(0.5)
+    assert d9["by_evaluator"]["expert-b"]["tie_rate"] == pytest.approx(0.5)
+    assert d9["by_criterion"]["latent_meaning"]["non_tie_cases"] == 1
+    assert "not blind expert-parity evidence" in d9["note"]
+
+
+def test_scorecard_invalid_interpretive_preference_metadata_fails_loud():
+    state = ProjectState(
+        config=ProjectConfig(
+            extra={
+                "interpretive_preference_evaluations": [
+                    {
+                        "case_id": "latent-1",
+                        "evaluator": "expert-a",
+                        "preferred": "machine",
+                    }
+                ]
+            }
+        ),
+    )
+
+    with pytest.raises(ValueError, match="interpretive_preference_evaluations"):
+        phase0_scorecard(state)
+
+
 def test_scorecard_d3_f1_bootstrap_configurable_and_disableable():
     content = "AI helped here."
     doc = Document(id="d1", name="d.txt", content=content)
