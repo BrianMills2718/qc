@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 53 | Confidence calibration scorecard | High | Planned | `CONFIDENCE_CALIBRATION_SCORECARD.md` |
 
 ## Completed Plans
 
