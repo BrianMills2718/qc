@@ -1,12 +1,37 @@
 # Plan #201: Claim Ledger Scope Read Surfaces
 
-**Status:** In Progress
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Claim Ledger Anchor Detail Read Surfaces
 **Blocks:** INV-9 agent-drivable claim interpretation
 
 ---
+
+## Outcome
+
+Completed 2026-06-22. General claim-ledger read surfaces now expose claim
+scope without requiring review mode: API `/projects/{project_id}/claims`
+includes serialized scope, MCP `qc_get_claims` includes the same scope payload,
+and CLI `project claims --show-scope` prints compact scope summaries while the
+default CLI output remains compact. This is structural scope visibility only;
+it is not claim truth, expert adjudication, D7 evidence, disconfirmation
+validity, or SOTA evidence.
+
+## Verification
+
+- TDD red: focused tests initially failed on missing API/MCP `scope` fields and
+  missing CLI `--show-scope` parser/output behavior.
+- Focused tests:
+  `python -m pytest tests/test_review_api.py tests/test_mcp_server.py tests/test_project_commands.py -q`
+  (`191 passed`).
+- Focused Ruff:
+  `python -m ruff check qc_clean/plugins/api/api_server.py qc_mcp_server.py qc_clean/core/cli/commands/project.py qc_cli.py tests/test_review_api.py tests/test_mcp_server.py tests/test_project_commands.py`.
+- Docs gate: `make docs-check`.
+- Full gate: `make check` (`1268 passed, 1 skipped, 8 deselected`; type check
+  not configured).
+- Implementation commit pushed:
+  `afc6ef39 [Plan: CLAIM_SCOPE] Expose claim read scope details`.
 
 ## Gap
 
@@ -130,21 +155,21 @@ create a cross-project boundary, registry entry, or new evaluation capability.
 
 Feature-level criteria:
 
-- [ ] API `/projects/{project_id}/claims` rows include serialized `scope`.
-- [ ] MCP `qc_get_claims` rows include the same serialized `scope`.
-- [ ] CLI `project claims` default output remains compact.
-- [ ] CLI `project claims --show-scope` prints compact scope summaries for
+- [x] API `/projects/{project_id}/claims` rows include serialized `scope`.
+- [x] MCP `qc_get_claims` rows include the same serialized `scope`.
+- [x] CLI `project claims` default output remains compact.
+- [x] CLI `project claims --show-scope` prints compact scope summaries for
   each displayed claim.
-- [ ] Docs state this is structural scope visibility, not claim-validity
+- [x] Docs state this is structural scope visibility, not claim-validity
   evidence, human/expert adjudication, D7 evidence, or SOTA.
 
 Process criteria:
 
-- [ ] Required focused tests pass.
-- [ ] Focused Ruff passes.
-- [ ] `make docs-check` passes.
-- [ ] `make check` passes or any failure is documented with evidence.
-- [ ] Verified work is committed and pushed.
+- [x] Required focused tests pass.
+- [x] Focused Ruff passes.
+- [x] `make docs-check` passes.
+- [x] `make check` passes or any failure is documented with evidence.
+- [x] Verified work is committed and pushed.
 
 ---
 
@@ -158,5 +183,6 @@ Process criteria:
 
 ## Notes
 
+Used existing `ClaimScope` serialization and `format_claim_scope_summary()`.
 Do not expand scope visibility into claim truth assertions. Scope tells users
 what a claim purports to cover; it does not prove that coverage is valid.

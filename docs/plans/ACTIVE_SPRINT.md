@@ -26,13 +26,16 @@ highest-value documented lane.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Plan #201
-`CLAIM_LEDGER_SCOPE_READ_SURFACES.md` is active. Extend serialized or compact
-`ClaimScope` visibility from review rows to general claim-ledger read surfaces:
-API `/projects/{project_id}/claims`, MCP `qc_get_claims`, and opt-in CLI
-`project claims --show-scope`. This is structural scope visibility only, not
-claim-validity evidence, human/expert adjudication, held-out D7 evidence, or a
-SOTA claim.
+**Active checkpoint:** No implementation plan is active. Select and plan the
+next deterministic roadmap lane before editing code.
+
+**Completed checkpoint:** Plan #201
+`completed/CLAIM_LEDGER_SCOPE_READ_SURFACES.md` extended `ClaimScope`
+visibility from review rows to general claim-ledger read surfaces: API
+`/projects/{project_id}/claims`, MCP `qc_get_claims`, and opt-in CLI
+`project claims --show-scope`. It is structural scope visibility only, not
+claim-validity evidence, human/expert adjudication, held-out D7 evidence,
+semantic disconfirmation validity, or SOTA.
 
 **Completed checkpoint:** Plan #200
 `completed/CLAIM_LEDGER_ANCHOR_DETAIL_READ_SURFACES.md` extended bounded
