@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 94 | Export audit hash manifest | High | Planned | `EXPORT_AUDIT_HASH_MANIFEST.md` |
 
 ## Completed Plans
 

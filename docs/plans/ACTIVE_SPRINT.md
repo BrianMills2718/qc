@@ -22,9 +22,9 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Create and execute the next high-value lane: deterministic export-audit hash
-   manifest for JSON/CSV/Markdown/QDPX outputs as a first slice toward the
-   tamper-evident audit substrate, without claiming a full append-only audit log.
+1. Execute Plan #94 (`EXPORT_AUDIT_HASH_MANIFEST.md`): add a deterministic
+   export-audit hash manifest for JSON/CSV/Markdown/QDPX outputs as a first
+   integrity/provenance slice without claiming a full append-only audit log.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
