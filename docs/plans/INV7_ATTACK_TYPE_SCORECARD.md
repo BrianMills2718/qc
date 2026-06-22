@@ -1,6 +1,6 @@
 # Plan #69: INV-7 Attack-Type Scorecard
 
-**Status:** Planned
+**Status:** In Progress
 **Type:** implementation
 **Priority:** High
 **Blocked By:** None
@@ -59,8 +59,8 @@ scorecard stratification over an already modeled fixture field.
 
 - [x] Input records already use `PromptInjectionEvaluation` with Pydantic field
   descriptions.
-- [ ] Scorecard output is covered by focused tests and full docs checks.
-- [ ] No new cross-project callable boundary is introduced.
+- [x] Scorecard output is covered by focused tests and full docs checks.
+- [x] No new cross-project callable boundary is introduced.
 
 ---
 
@@ -116,20 +116,20 @@ scorecard stratification over an already modeled fixture field.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] INV-7 scored output includes `by_attack_type`.
-- [ ] Each attack-type summary includes total, passed, failed, failed fixture
+- [x] INV-7 scored output includes `by_attack_type`.
+- [x] Each attack-type summary includes total, passed, failed, failed fixture
   IDs, pass rate, attack-success rate, and Wilson intervals.
-- [ ] Existing overall and `by_surface` fields remain unchanged.
-- [ ] External-file scoring path includes the new field without mutating saved
+- [x] Existing overall and `by_surface` fields remain unchanged.
+- [x] External-file scoring path includes the new field without mutating saved
   project state.
-- [ ] Docs preserve the claim boundary: this is stratified fixture accounting,
+- [x] Docs preserve the claim boundary: this is stratified fixture accounting,
   not proof of prompt-injection robustness.
 
 > Process criteria:
-- [ ] Focused tests pass.
-- [ ] Plan sync passes.
-- [ ] Markdown link check passes.
-- [ ] Full `make check` passes, or any non-codebase failure is recorded.
+- [x] Focused tests pass.
+- [x] Plan sync passes.
+- [x] Markdown link check passes.
+- [x] Full `make check` passes, or any non-codebase failure is recorded.
 - [ ] Verified implementation is committed and pushed.
 
 ---

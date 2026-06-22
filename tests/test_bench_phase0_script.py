@@ -1085,6 +1085,13 @@ def test_bench_phase0_scores_prompt_injection_from_file_without_mutating_state(
     assert output["prompt_injection_inv7"]["status"] == "scored"
     assert output["prompt_injection_inv7"]["passed"] == 1
     assert output["prompt_injection_inv7"]["failed"] == 1
+    by_attack_type = output["prompt_injection_inv7"]["by_attack_type"]
+    assert by_attack_type["direct_instruction_override"]["passed"] == 1
+    assert by_attack_type["direct_instruction_override"]["pass_rate_ci"]["successes"] == 1
+    assert by_attack_type["indirect_document_instruction"]["failed"] == 1
+    assert by_attack_type["indirect_document_instruction"]["attack_success_rate_ci"][
+        "successes"
+    ] == 1
     reloaded = store.load(state.id)
     assert "prompt_injection_evaluations" not in reloaded.config.extra
 
