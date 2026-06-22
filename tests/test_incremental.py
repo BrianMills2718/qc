@@ -15,6 +15,7 @@ import pytest
 from qc_clean.core.pipeline.pipeline_engine import PipelineContext
 from qc_clean.core.pipeline.stages.incremental_coding import (
     IncrementalCodingStage,
+    RebuildGTOpenCodesContextStage,
     RebuildThematicPhase1ContextStage,
     _format_codebook_for_prompt,
 )
@@ -350,6 +351,24 @@ class TestIncrementalCodingStage:
         assert hierarchy.total_codes == 2
         assert [code.id for code in hierarchy.codes] == ["AI_ADOPTION", "WORKFLOW_CHANGE"]
 
+    def test_rebuild_gt_open_codes_context_stage_uses_current_codebook(self):
+        state = _make_state_with_codes()
+        state.codebook.codes[0].properties = ["adoption pattern"]
+        state.codebook.codes[0].dimensions = ["none to extensive"]
+        state.codebook.codes[0].reasoning = "Participants directly describe use."
+        ctx = PipelineContext()
+
+        asyncio.run(RebuildGTOpenCodesContextStage().execute(state, ctx))
+
+        assert ctx.gt_open_codes is not None
+        assert [code.code_name for code in ctx.gt_open_codes] == [
+            "AI Adoption",
+            "Workflow Change",
+        ]
+        assert ctx.gt_open_codes[0].properties == ["adoption pattern"]
+        assert "AI Adoption" in ctx.gt_open_codes_text
+        assert "adoption pattern" in ctx.gt_open_codes_text
+
     def test_stage_name(self):
         assert IncrementalCodingStage().name() == "incremental_coding"
 
@@ -421,12 +440,21 @@ class TestIncrementalPipeline:
             "negative_case_analysis",
         ]
 
-    def test_refresh_pipeline_rejects_grounded_theory(self):
-        with pytest.raises(ValueError, match="only supported for default/thematic"):
-            create_incremental_pipeline(
-                "grounded_theory",
-                refresh_higher_order=True,
-            )
+    def test_creates_gt_refresh_pipeline(self):
+        pipeline = create_incremental_pipeline(
+            "grounded_theory",
+            refresh_higher_order=True,
+        )
+        stage_names = [s.name() for s in pipeline.stages]
+        assert stage_names == [
+            "incremental_coding",
+            "rebuild_gt_open_codes_context",
+            "gt_axial_coding",
+            "gt_selective_coding",
+            "gt_theory_integration",
+            "cross_interview",
+            "negative_case_analysis",
+        ]
 
     def test_creates_gt_pipeline(self):
         pipeline = create_incremental_pipeline("grounded_theory")

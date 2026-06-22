@@ -809,14 +809,6 @@ def _recode_project(store: ProjectStore, args) -> int:
         return 1
 
     refresh_higher_order = bool(getattr(args, "refresh_higher_order", False))
-    if refresh_higher_order and state.config.methodology == Methodology.GROUNDED_THEORY:
-        print(
-            "--refresh-higher-order is only supported for default/thematic "
-            "projects in this INV-11 slice; grounded-theory refresh requires a "
-            "separate GT context reconstruction pipeline.",
-            file=sys.stderr,
-        )
-        return 1
 
     from qc_clean.core.pipeline.pipeline_factory import create_incremental_pipeline
 
@@ -843,7 +835,11 @@ def _recode_project(store: ProjectStore, args) -> int:
     print(f"  Uncoded documents: {len(uncoded)}")
     print(f"  Model: {model_name}")
     if refresh_higher_order:
-        print("  Refresh higher-order: enabled (thematic perspective/relationship/synthesis)")
+        if state.config.methodology == Methodology.GROUNDED_THEORY:
+            scope = "GT axial/selective/theory"
+        else:
+            scope = "thematic perspective/relationship/synthesis"
+        print(f"  Refresh higher-order: enabled ({scope})")
     print()
 
     # Reset pipeline status for the incremental run

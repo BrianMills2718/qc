@@ -22,6 +22,7 @@ from qc_clean.schemas.adapters import (
     code_hierarchy_to_applications,
     code_hierarchy_to_codebook,
     codebook_to_code_hierarchy,
+    codebook_to_open_codes,
     entity_mapping_to_entities,
     project_state_to_cross_interview_input,
     speaker_analysis_to_perspectives,
@@ -196,6 +197,53 @@ class TestCodebookToCodeHierarchy:
         assert hierarchy.codes == []
         assert hierarchy.total_codes == 0
         assert hierarchy.analysis_confidence == 0.0
+
+
+class TestCodebookToOpenCodes:
+    def test_preserves_gt_recode_refresh_context_fields(self):
+        codebook = Codebook(
+            codes=[
+                Code(
+                    id="AI_USAGE",
+                    name="AI Usage",
+                    description="Use of AI tools.",
+                    properties=["frequency"],
+                    dimensions=["daily to occasional"],
+                    parent_id=None,
+                    level=0,
+                    example_quotes=["I use AI daily."],
+                    mention_count=5,
+                    confidence=0.8,
+                    reasoning="Frequent direct mentions.",
+                ),
+                Code(
+                    id="AI_LIMITS",
+                    name="AI Limitations",
+                    description="Limits of AI.",
+                    properties=["risk"],
+                    dimensions=["minor to severe"],
+                    parent_id="AI_USAGE",
+                    level=1,
+                    example_quotes=["AI hallucinates."],
+                    mention_count=2,
+                    confidence=0.6,
+                    reasoning="Participants named constraints.",
+                ),
+            ],
+        )
+
+        open_codes = codebook_to_open_codes(codebook)
+
+        assert [code.code_name for code in open_codes] == ["AI Usage", "AI Limitations"]
+        assert open_codes[0].properties == ["frequency"]
+        assert open_codes[0].dimensions == ["daily to occasional"]
+        assert open_codes[0].supporting_quotes == ["I use AI daily."]
+        assert open_codes[0].frequency == 5
+        assert open_codes[0].confidence == 0.8
+        assert open_codes[0].reasoning == "Frequent direct mentions."
+        assert open_codes[0].child_codes == ["AI_LIMITS"]
+        assert open_codes[1].parent_id == "AI_USAGE"
+        assert open_codes[1].level == 1
 
 
 class TestCodeHierarchyToApplications:

@@ -15,7 +15,7 @@ from qc_clean.core.grounding import MatchStatus, resolve_and_anchor, warn_unanch
 from qc_clean.core.prompting import format_untrusted_data_block, format_untrusted_documents
 from qc_clean.core.pipeline.irr import normalize_code_name
 from qc_clean.core.pipeline.saturation import calculate_codebook_change
-from qc_clean.schemas.adapters import codebook_to_code_hierarchy
+from qc_clean.schemas.adapters import codebook_to_code_hierarchy, codebook_to_open_codes
 from qc_clean.schemas.analysis_schemas import CodeHierarchy
 from qc_clean.schemas.domain import (
     AnalysisMemo,
@@ -165,6 +165,30 @@ class RebuildThematicPhase1ContextStage(PipelineStage):
         logger.info(
             "Rebuilt thematic Phase 1 context from current codebook: codes=%d",
             len(hierarchy.codes),
+        )
+        return state
+
+
+class RebuildGTOpenCodesContextStage(PipelineStage):
+    """Reconstruct GT open-code context from the current codebook."""
+
+    def name(self) -> str:
+        return "rebuild_gt_open_codes_context"
+
+    def can_execute(self, state: ProjectState) -> bool:
+        return len(state.codebook.codes) > 0
+
+    async def execute(self, state: ProjectState, ctx: PipelineContext) -> ProjectState:
+        from qc_clean.core.pipeline.stages.gt_constant_comparison import (
+            _format_codes_for_analysis,
+        )
+
+        open_codes = codebook_to_open_codes(state.codebook)
+        ctx.gt_open_codes = open_codes
+        ctx.gt_open_codes_text = _format_codes_for_analysis(open_codes)
+        logger.info(
+            "Rebuilt GT open-code context from current codebook: codes=%d",
+            len(open_codes),
         )
         return state
 

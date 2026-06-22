@@ -290,6 +290,11 @@ def codebook_to_open_codes(codebook: Codebook) -> list:
     """Convert domain Codebook back to GT OpenCode list (lazy import to avoid circular)."""
     from qc_clean.schemas.gt_schemas import OpenCode
 
+    children_by_parent: dict[str, list[str]] = {}
+    for code in codebook.codes:
+        if code.parent_id:
+            children_by_parent.setdefault(code.parent_id, []).append(code.id)
+
     open_codes = []
     for code in codebook.codes:
         oc = OpenCode(
@@ -300,9 +305,10 @@ def codebook_to_open_codes(codebook: Codebook) -> list:
             supporting_quotes=code.example_quotes,
             frequency=code.mention_count,
             confidence=code.confidence,
+            reasoning=code.reasoning,
             parent_id=code.parent_id,
             level=code.level,
-            child_codes=[],
+            child_codes=children_by_parent.get(code.id, []),
         )
         open_codes.append(oc)
     return open_codes

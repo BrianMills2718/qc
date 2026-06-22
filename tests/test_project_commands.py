@@ -327,7 +327,7 @@ class TestProjectRecode:
             "refresh_higher_order": True,
         }
 
-    def test_recode_refresh_higher_order_rejects_grounded_theory_before_pipeline(
+    def test_recode_refresh_higher_order_allows_grounded_theory(
         self,
         tmp_store,
         monkeypatch,
@@ -347,13 +347,20 @@ class TestProjectRecode:
             ],
         )
         tmp_store.save(state)
+        seen = {}
 
-        def fail_if_called(*args, **kwargs):
-            raise AssertionError("GT refresh must fail before pipeline creation")
+        def fake_create_incremental_pipeline(
+            methodology,
+            on_stage_complete,
+            refresh_higher_order=False,
+        ):
+            seen["methodology"] = methodology
+            seen["refresh_higher_order"] = refresh_higher_order
+            return AnalysisPipeline(stages=[], on_stage_complete=on_stage_complete)
 
         monkeypatch.setattr(
             "qc_clean.core.pipeline.pipeline_factory.create_incremental_pipeline",
-            fail_if_called,
+            fake_create_incremental_pipeline,
         )
 
         result = project_commands._recode_project(
@@ -365,8 +372,14 @@ class TestProjectRecode:
             ),
         )
 
-        assert result == 1
-        assert "only supported for default/thematic" in capsys.readouterr().err
+        assert result == 0
+        assert seen == {
+            "methodology": Methodology.GROUNDED_THEORY.value,
+            "refresh_higher_order": True,
+        }
+        captured = capsys.readouterr()
+        assert "GT axial/selective/theory" in captured.out
+        assert captured.err == ""
 
 
 # ---------------------------------------------------------------------------

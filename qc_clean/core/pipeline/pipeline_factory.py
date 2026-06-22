@@ -91,18 +91,35 @@ def create_incremental_pipeline(
     """
     from .stages.incremental_coding import (
         IncrementalCodingStage,
+        RebuildGTOpenCodesContextStage,
         RebuildThematicPhase1ContextStage,
     )
     from .stages.cross_interview import CrossInterviewStage
     from .stages.negative_case import NegativeCaseStage
 
     is_gt = methodology == Methodology.GROUNDED_THEORY.value or methodology == "grounded_theory"
+
     if refresh_higher_order and is_gt:
-        raise ValueError(
-            "refresh_higher_order is only supported for default/thematic "
-            "incremental recode; grounded-theory refresh requires a separate "
-            "GT context reconstruction pipeline."
+        from .stages.gt_axial_coding import GTAxialCodingStage
+        from .stages.gt_selective_coding import GTSelectiveCodingStage
+        from .stages.gt_theory_integration import GTTheoryIntegrationStage
+
+        stages = [
+            IncrementalCodingStage(emit_invalidation_warning=False),
+            RebuildGTOpenCodesContextStage(),
+            GTAxialCodingStage(),
+            GTSelectiveCodingStage(),
+            GTTheoryIntegrationStage(),
+            CrossInterviewStage(),
+            # Disconfirmation runs last so it covers refreshed claim rows.
+            NegativeCaseStage(),
+        ]
+
+        logger.info(
+            "Created incremental %s GT refresh pipeline with %d stages",
+            methodology, len(stages),
         )
+        return AnalysisPipeline(stages=stages, on_stage_complete=on_stage_complete)
 
     if refresh_higher_order:
         from .stages.perspective import PerspectiveStage
@@ -129,7 +146,7 @@ def create_incremental_pipeline(
     # Incremental pipeline only includes stages that work from state data.
     # Perspective/Relationship/Synthesis (default) and Axial/Selective/Theory
     # (GT) depend on ctx fields populated by their respective coding stages,
-    # which are not re-run during incremental coding.
+    # which are not re-run during the default hard-invalidation path.
     stages = [
         IncrementalCodingStage(),
         CrossInterviewStage(),

@@ -510,8 +510,8 @@ Examples:
         '--refresh-higher-order',
         action='store_true',
         help=(
-            'With --recode, refresh thematic perspective/relationship/synthesis '
-            'outputs after incremental coding (default/thematic projects only)'
+            'With --recode, refresh methodology-specific higher-order outputs '
+            'after incremental coding'
         ),
     )
 
@@ -580,8 +580,8 @@ Examples:
         '--refresh-higher-order',
         action='store_true',
         help=(
-            'Refresh thematic perspective/relationship/synthesis outputs after '
-            'incremental coding (default/thematic projects only)'
+            'Refresh methodology-specific higher-order outputs after '
+            'incremental coding'
         ),
     )
 
