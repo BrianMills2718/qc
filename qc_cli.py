@@ -53,6 +53,16 @@ Examples:
   qc_cli theoretical-sampling-preflight theoretical_sampling_protocol.json --candidates-file candidates.json --results-file results.json
   qc_cli export-theoretical-sampling-candidates <project_id> --protocol theoretical_sampling_protocol.json --output candidates.json
   qc_cli export-theoretical-sampling-results theoretical_sampling_protocol.json --candidates-file candidates.json --selected-candidate-id candidate-1 --success-criterion-met "gap covered" --output results.json
+  qc_cli validate-d4-codebook-quality-protocol d4_protocol.json
+  qc_cli d4-codebook-quality-preflight d4_protocol.json --quality-file quality.json
+  qc_cli validate-d6-bias-protocol d6_protocol.json
+  qc_cli d6-bias-preflight d6_protocol.json --stratified-file stratified.json --counterfactual-file counterfactual.json
+  qc_cli validate-d8-gt-fidelity-protocol d8_protocol.json
+  qc_cli d8-gt-fidelity-preflight d8_protocol.json --gt-fidelity-file gt_fidelity.json
+  qc_cli validate-d9-interpretive-preference-protocol d9_protocol.json
+  qc_cli d9-interpretive-preference-preflight d9_protocol.json --preference-file preference.json
+  qc_cli validate-confidence-calibration-protocol confidence_protocol.json
+  qc_cli confidence-calibration-preflight confidence_protocol.json --calibration-file calibration.json
   qc_cli verify-phase0-benchmark-artifact benchmark_results/run/manifest.json
   qc_cli validate-d3-gold d3_gold.json
   qc_cli validate-d7-gold d7_gold.json
@@ -509,6 +519,130 @@ Examples:
     theoretical_sampling_results_parser.add_argument(
         '--output',
         help='Optional JSON output path',
+    )
+
+    d4_protocol_validator_parser = subparsers.add_parser(
+        'validate-d4-codebook-quality-protocol',
+        help='Validate a D4 codebook-quality protocol package',
+        description='Validate a schema_version=1 D4 codebook-quality protocol package',
+    )
+    d4_protocol_validator_parser.add_argument(
+        'protocol',
+        help='Path to a schema_version=1 D4 codebook-quality protocol JSON',
+    )
+
+    d4_preflight_parser = subparsers.add_parser(
+        'd4-codebook-quality-preflight',
+        help='Preflight D4 codebook-quality results',
+        description='Preflight D4 codebook-quality results against a registered protocol',
+    )
+    d4_preflight_parser.add_argument(
+        'protocol',
+        help='Path to a schema_version=1 D4 codebook-quality protocol JSON',
+    )
+    d4_preflight_parser.add_argument(
+        '--quality-file',
+        help='Optional D4 codebook-quality result JSON file',
+    )
+
+    d6_protocol_validator_parser = subparsers.add_parser(
+        'validate-d6-bias-protocol',
+        help='Validate a D6 bias protocol package',
+        description='Validate a schema_version=1 D6 bias protocol package',
+    )
+    d6_protocol_validator_parser.add_argument(
+        'protocol',
+        help='Path to a schema_version=1 D6 bias protocol JSON',
+    )
+
+    d6_preflight_parser = subparsers.add_parser(
+        'd6-bias-preflight',
+        help='Preflight D6 bias results',
+        description='Preflight D6 bias results against a registered protocol',
+    )
+    d6_preflight_parser.add_argument(
+        'protocol',
+        help='Path to a schema_version=1 D6 bias protocol JSON',
+    )
+    d6_preflight_parser.add_argument(
+        '--stratified-file',
+        help='Optional D6 stratified correctness/error result JSON file',
+    )
+    d6_preflight_parser.add_argument(
+        '--counterfactual-file',
+        help='Optional D6 counterfactual identity-swap result JSON file',
+    )
+
+    d8_protocol_validator_parser = subparsers.add_parser(
+        'validate-d8-gt-fidelity-protocol',
+        help='Validate a D8 GT-fidelity protocol package',
+        description='Validate a schema_version=1 D8 GT-fidelity protocol package',
+    )
+    d8_protocol_validator_parser.add_argument(
+        'protocol',
+        help='Path to a schema_version=1 D8 GT-fidelity protocol JSON',
+    )
+
+    d8_preflight_parser = subparsers.add_parser(
+        'd8-gt-fidelity-preflight',
+        help='Preflight D8 GT-fidelity results',
+        description='Preflight D8 GT-fidelity results against a registered protocol',
+    )
+    d8_preflight_parser.add_argument(
+        'protocol',
+        help='Path to a schema_version=1 D8 GT-fidelity protocol JSON',
+    )
+    d8_preflight_parser.add_argument(
+        '--gt-fidelity-file',
+        help='Optional D8 GT-fidelity result JSON file',
+    )
+
+    d9_protocol_validator_parser = subparsers.add_parser(
+        'validate-d9-interpretive-preference-protocol',
+        help='Validate a D9 interpretive-preference protocol package',
+        description='Validate a schema_version=1 D9 interpretive-preference protocol package',
+    )
+    d9_protocol_validator_parser.add_argument(
+        'protocol',
+        help='Path to a schema_version=1 D9 interpretive-preference protocol JSON',
+    )
+
+    d9_preflight_parser = subparsers.add_parser(
+        'd9-interpretive-preference-preflight',
+        help='Preflight D9 interpretive-preference results',
+        description='Preflight D9 interpretive-preference results against a registered protocol',
+    )
+    d9_preflight_parser.add_argument(
+        'protocol',
+        help='Path to a schema_version=1 D9 interpretive-preference protocol JSON',
+    )
+    d9_preflight_parser.add_argument(
+        '--preference-file',
+        help='Optional D9 interpretive-preference result JSON file',
+    )
+
+    confidence_protocol_validator_parser = subparsers.add_parser(
+        'validate-confidence-calibration-protocol',
+        help='Validate a confidence-calibration protocol package',
+        description='Validate a schema_version=1 confidence-calibration protocol package',
+    )
+    confidence_protocol_validator_parser.add_argument(
+        'protocol',
+        help='Path to a schema_version=1 confidence-calibration protocol JSON',
+    )
+
+    confidence_preflight_parser = subparsers.add_parser(
+        'confidence-calibration-preflight',
+        help='Preflight confidence-calibration results',
+        description='Preflight confidence-calibration results against a registered protocol',
+    )
+    confidence_preflight_parser.add_argument(
+        'protocol',
+        help='Path to a schema_version=1 confidence-calibration protocol JSON',
+    )
+    confidence_preflight_parser.add_argument(
+        '--calibration-file',
+        help='Optional confidence-calibration result JSON file',
     )
 
     phase0_artifact_verifier_parser = subparsers.add_parser(
@@ -1010,6 +1144,26 @@ def main() -> int:
             return handle_export_theoretical_sampling_candidates_command(args)
         elif args.command == 'export-theoretical-sampling-results':
             return handle_export_theoretical_sampling_results_command(args)
+        elif args.command == 'validate-d4-codebook-quality-protocol':
+            return handle_validate_d4_codebook_quality_protocol_command(args)
+        elif args.command == 'd4-codebook-quality-preflight':
+            return handle_d4_codebook_quality_preflight_command(args)
+        elif args.command == 'validate-d6-bias-protocol':
+            return handle_validate_d6_bias_protocol_command(args)
+        elif args.command == 'd6-bias-preflight':
+            return handle_d6_bias_preflight_command(args)
+        elif args.command == 'validate-d8-gt-fidelity-protocol':
+            return handle_validate_d8_gt_fidelity_protocol_command(args)
+        elif args.command == 'd8-gt-fidelity-preflight':
+            return handle_d8_gt_fidelity_preflight_command(args)
+        elif args.command == 'validate-d9-interpretive-preference-protocol':
+            return handle_validate_d9_interpretive_preference_protocol_command(args)
+        elif args.command == 'd9-interpretive-preference-preflight':
+            return handle_d9_interpretive_preference_preflight_command(args)
+        elif args.command == 'validate-confidence-calibration-protocol':
+            return handle_validate_confidence_calibration_protocol_command(args)
+        elif args.command == 'confidence-calibration-preflight':
+            return handle_confidence_calibration_preflight_command(args)
         elif args.command == 'verify-phase0-benchmark-artifact':
             return handle_verify_phase0_benchmark_artifact_command(args)
         elif args.command == 'run-d7-retrieval':
@@ -1280,6 +1434,93 @@ def handle_export_theoretical_sampling_results_command(args) -> int:
     if args.output is not None:
         argv.extend(["--output", args.output])
     return export_theoretical_sampling_results.main(argv)
+
+
+def handle_validate_d4_codebook_quality_protocol_command(args) -> int:
+    """Validate a D4 codebook-quality protocol through the canonical CLI."""
+    from scripts import validate_d4_codebook_quality_protocol
+
+    return validate_d4_codebook_quality_protocol.main([args.protocol])
+
+
+def handle_d4_codebook_quality_preflight_command(args) -> int:
+    """Preflight D4 codebook-quality results through the canonical CLI."""
+    from scripts import preflight_d4_codebook_quality_protocol
+
+    argv = [args.protocol]
+    if args.quality_file is not None:
+        argv.extend(["--quality-file", args.quality_file])
+    return preflight_d4_codebook_quality_protocol.main(argv)
+
+
+def handle_validate_d6_bias_protocol_command(args) -> int:
+    """Validate a D6 bias protocol through the canonical CLI."""
+    from scripts import validate_d6_bias_protocol
+
+    return validate_d6_bias_protocol.main([args.protocol])
+
+
+def handle_d6_bias_preflight_command(args) -> int:
+    """Preflight D6 bias results through the canonical CLI."""
+    from scripts import preflight_d6_bias_protocol
+
+    argv = [args.protocol]
+    if args.stratified_file is not None:
+        argv.extend(["--stratified-file", args.stratified_file])
+    if args.counterfactual_file is not None:
+        argv.extend(["--counterfactual-file", args.counterfactual_file])
+    return preflight_d6_bias_protocol.main(argv)
+
+
+def handle_validate_d8_gt_fidelity_protocol_command(args) -> int:
+    """Validate a D8 GT-fidelity protocol through the canonical CLI."""
+    from scripts import validate_d8_gt_fidelity_protocol
+
+    return validate_d8_gt_fidelity_protocol.main([args.protocol])
+
+
+def handle_d8_gt_fidelity_preflight_command(args) -> int:
+    """Preflight D8 GT-fidelity results through the canonical CLI."""
+    from scripts import preflight_d8_gt_fidelity_protocol
+
+    argv = [args.protocol]
+    if args.gt_fidelity_file is not None:
+        argv.extend(["--gt-fidelity-file", args.gt_fidelity_file])
+    return preflight_d8_gt_fidelity_protocol.main(argv)
+
+
+def handle_validate_d9_interpretive_preference_protocol_command(args) -> int:
+    """Validate a D9 interpretive-preference protocol through the canonical CLI."""
+    from scripts import validate_d9_interpretive_preference_protocol
+
+    return validate_d9_interpretive_preference_protocol.main([args.protocol])
+
+
+def handle_d9_interpretive_preference_preflight_command(args) -> int:
+    """Preflight D9 interpretive-preference results through the canonical CLI."""
+    from scripts import preflight_d9_interpretive_preference_protocol
+
+    argv = [args.protocol]
+    if args.preference_file is not None:
+        argv.extend(["--preference-file", args.preference_file])
+    return preflight_d9_interpretive_preference_protocol.main(argv)
+
+
+def handle_validate_confidence_calibration_protocol_command(args) -> int:
+    """Validate a confidence-calibration protocol through the canonical CLI."""
+    from scripts import validate_confidence_calibration_protocol
+
+    return validate_confidence_calibration_protocol.main([args.protocol])
+
+
+def handle_confidence_calibration_preflight_command(args) -> int:
+    """Preflight confidence-calibration results through the canonical CLI."""
+    from scripts import preflight_confidence_calibration_protocol
+
+    argv = [args.protocol]
+    if args.calibration_file is not None:
+        argv.extend(["--calibration-file", args.calibration_file])
+    return preflight_confidence_calibration_protocol.main(argv)
 
 
 def handle_verify_phase0_benchmark_artifact_command(args) -> int:

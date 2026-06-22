@@ -355,12 +355,14 @@ broader held-out live adversarial prompt-injection benchmark beyond the built-in
 benchmark timing evidence with controlled environment/baseline context, full D3 Krippendorff's α/semantic agreement,
 or true GT saturation assessment has been run.
 
-D4 protocol validation/preflight, D8 protocol validation/result preflight, D9
-protocol validation/result preflight/score-time guard, and
-confidence-calibration protocol validation/result preflight/score-time guard are
-process/provenance checking only. They do not
+D4 protocol validation/preflight, D6 protocol validation/result preflight, D8
+protocol validation/result preflight, D9 protocol validation/result
+preflight/score-time guard, and confidence-calibration protocol
+validation/result preflight/score-time guard are available through Make/scripts
+and top-level `qc_cli.py` wrappers. They are process/provenance checking only.
+They do not
 constitute blind expert-panel evidence, LLM-judge evidence, codebook-quality
-evidence, GT-fidelity evidence, blind expert-parity evidence,
+evidence, bias-audit evidence, GT-fidelity evidence, blind expert-parity evidence,
 interpretive-depth evidence, calibration evidence, methodological-validity
 evidence, or SOTA evidence.
 
@@ -561,6 +563,11 @@ Sequencing rule: **the evaluation harness is the keystone** (it proves the SOTA 
    available through top-level `qc_cli.py` wrappers; these are process checks
    only, not labels, correctness estimates, validity evidence, or benchmark
    results.
+   The D4/D6/D8/D9/confidence protocol validation and result-preflight scripts
+   are also available through top-level `qc_cli.py` wrappers; these are CLI
+   parity surfaces for existing process/provenance checks only, not populated
+   labels, expert ratings, bias-audit outcomes, calibration evidence,
+   methodological-validity evidence, parity evidence, or SOTA evidence.
    D3 now also has an externally fed baseline-comparison substrate through
    `D3_BASELINES=...` with per-baseline local span-overlap diagnostics and
    pre-run protocol validation through `make validate-d3-comparison-protocol`

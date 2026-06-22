@@ -174,14 +174,24 @@ python qc_cli.py validate-d3-gold d3_gold.json
 python qc_cli.py validate-d7-gold d7_gold.json
 make write-phase0-adjudication-package ID=<project_id> OUTPUT=phase0_package.json D3_GOLD=d3_gold.json GOLD=d7_gold.json
 make lint-scope-phrasing ID=<project_id> INPUT=report.md
+python qc_cli.py validate-d4-codebook-quality-protocol protocol.json
+python qc_cli.py d4-codebook-quality-preflight protocol.json --quality-file quality.json
+python qc_cli.py validate-d6-bias-protocol protocol.json
+python qc_cli.py d6-bias-preflight protocol.json --stratified-file bias_stratified.json --counterfactual-file bias_counterfactual.json
 make validate-d8-gt-fidelity-protocol PROTOCOL=protocol.json
 make d8-gt-fidelity-preflight PROTOCOL=protocol.json GT_FIDELITY=gt_fidelity.json
+python qc_cli.py validate-d8-gt-fidelity-protocol protocol.json
+python qc_cli.py d8-gt-fidelity-preflight protocol.json --gt-fidelity-file gt_fidelity.json
 make bench ID=<project_id> D8_PROTOCOL=protocol.json GT_FIDELITY=gt_fidelity.json
 make validate-d9-interpretive-preference-protocol PROTOCOL=protocol.json
 make d9-interpretive-preference-preflight PROTOCOL=protocol.json PREFERENCE=preference.json
+python qc_cli.py validate-d9-interpretive-preference-protocol protocol.json
+python qc_cli.py d9-interpretive-preference-preflight protocol.json --preference-file preference.json
 make bench ID=<project_id> D9_PROTOCOL=protocol.json PREFERENCE=preference.json
 make validate-confidence-calibration-protocol PROTOCOL=protocol.json
 make confidence-calibration-preflight PROTOCOL=protocol.json CALIBRATION=calibration.json
+python qc_cli.py validate-confidence-calibration-protocol protocol.json
+python qc_cli.py confidence-calibration-preflight protocol.json --calibration-file calibration.json
 make bench ID=<project_id> CONFIDENCE_PROTOCOL=protocol.json CALIBRATION=calibration.json
 make export-audit-manifest ID=<project_id> FORMAT=markdown ARTIFACTS="report.md" OUTPUT=manifest.json AUDIT_LOG=export_audit_events.jsonl AUDIT_DB=export_audit_events.sqlite
 make verify-export-audit-manifest MANIFEST=manifest.json BASE_DIR=. ID=<project_id> AUDIT_LOG=export_audit_events.jsonl AUDIT_DB=export_audit_events.sqlite
@@ -453,13 +463,28 @@ python qc_cli.py bench <project_id>     # Same Phase 0 scorecard through the can
 python qc_cli.py bench-package phase0_package.json  # Run a strict Phase 0 package manifest through the canonical CLI, including package-local projects_dir when supplied
 make validate-d4-codebook-quality-protocol PROTOCOL=protocol.json  # Validate pre-evaluation D4 rubric protocol metadata
 make d4-codebook-quality-preflight PROTOCOL=protocol.json QUALITY=quality.json  # Preflight D4 result file against protocol
+python qc_cli.py validate-d4-codebook-quality-protocol protocol.json  # Canonical CLI wrapper for D4 protocol validation
+python qc_cli.py d4-codebook-quality-preflight protocol.json --quality-file quality.json  # Canonical CLI wrapper for D4 protocol/result preflight
 make bench ID=<project_id> D4_PROTOCOL=protocol.json CODEBOOK_QUALITY=quality.json  # Guard D4 scoring with protocol preflight
 make validate-d6-bias-protocol PROTOCOL=protocol.json  # Validate pre-run D6 bias-audit protocol metadata
 make d6-bias-preflight PROTOCOL=protocol.json STRATIFIED=bias_stratified.json COUNTERFACTUAL=bias_counterfactual.json  # Preflight D6 result files against protocol
+python qc_cli.py validate-d6-bias-protocol protocol.json  # Canonical CLI wrapper for D6 protocol validation
+python qc_cli.py d6-bias-preflight protocol.json --stratified-file bias_stratified.json --counterfactual-file bias_counterfactual.json  # Canonical CLI wrapper for D6 protocol/result preflight
 make bench ID=<project_id> D6_PROTOCOL=protocol.json BIAS_STRATIFIED=bias_stratified.json BIAS_COUNTERFACTUAL=bias_counterfactual.json  # Guard D6 scoring with protocol preflight
+make validate-d8-gt-fidelity-protocol PROTOCOL=protocol.json  # Validate pre-evaluation D8 GT-fidelity protocol metadata
+make d8-gt-fidelity-preflight PROTOCOL=protocol.json GT_FIDELITY=gt_fidelity.json  # Preflight D8 result file against protocol
+python qc_cli.py validate-d8-gt-fidelity-protocol protocol.json  # Canonical CLI wrapper for D8 protocol validation
+python qc_cli.py d8-gt-fidelity-preflight protocol.json --gt-fidelity-file gt_fidelity.json  # Canonical CLI wrapper for D8 protocol/result preflight
+make bench ID=<project_id> D8_PROTOCOL=protocol.json GT_FIDELITY=gt_fidelity.json  # Guard D8 scoring with protocol preflight
+make validate-d9-interpretive-preference-protocol PROTOCOL=protocol.json  # Validate pre-evaluation D9 preference protocol metadata
+make d9-interpretive-preference-preflight PROTOCOL=protocol.json PREFERENCE=preference.json  # Preflight D9 result file against protocol
+python qc_cli.py validate-d9-interpretive-preference-protocol protocol.json  # Canonical CLI wrapper for D9 protocol validation
+python qc_cli.py d9-interpretive-preference-preflight protocol.json --preference-file preference.json  # Canonical CLI wrapper for D9 protocol/result preflight
 make bench ID=<project_id> D9_PROTOCOL=protocol.json PREFERENCE=preference.json  # Guard D9 scoring with protocol preflight
 make validate-confidence-calibration-protocol PROTOCOL=protocol.json  # Validate pre-evaluation confidence-calibration protocol metadata
 make confidence-calibration-preflight PROTOCOL=protocol.json CALIBRATION=calibration.json  # Preflight calibration result file against protocol
+python qc_cli.py validate-confidence-calibration-protocol protocol.json  # Canonical CLI wrapper for confidence-calibration protocol validation
+python qc_cli.py confidence-calibration-preflight protocol.json --calibration-file calibration.json  # Canonical CLI wrapper for confidence-calibration protocol/result preflight
 make bench ID=<project_id> CONFIDENCE_PROTOCOL=protocol.json CALIBRATION=calibration.json  # Guard calibration scoring with protocol preflight
 make bench ID=<project_id> GOLD=gold.json BASELINES=baselines.json  # Add external D7 gold/baselines without mutating project state
 make bench ID=<project_id> BIAS_STRATIFIED=bias_stratified.json  # Add external D6 stratified correctness rows without mutating state
