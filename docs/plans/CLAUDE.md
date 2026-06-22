@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 57 | D3 baseline comparison scorecard | High | Planned | `D3_BASELINE_COMPARISON_SCORECARD.md` |
 
 ## Completed Plans
 
