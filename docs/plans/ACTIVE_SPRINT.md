@@ -26,12 +26,18 @@ highest-value documented lane.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Plan #193 is active: add top-level `qc_cli.py` wrappers
-for D3/D7 comparison protocol validation and comparison preflight scripts. This
-slice should forward protocol, gold, and ordered prediction paths to the
-canonical scripts without duplicating protocol/preflight logic or claiming
+**Active checkpoint:** No implementation plan is active. Select and plan the
+next deterministic roadmap lane before editing code.
+
+**Completed checkpoint:** `qc_cli.py` now wraps D3/D7 comparison protocol
+validation and comparison-preflight scripts through top-level commands:
+`validate-d3-comparison-protocol`, `d3-comparison-preflight`,
+`validate-d7-comparison-protocol`, and `d7-comparison-preflight`. Each wrapper
+delegates exact argv to the canonical script and preserves protocol, gold, and
+ordered prediction paths without duplicating protocol/preflight logic. These are
+protocol/preflight/provenance CLI parity surfaces only; they do not create
 held-out D3/D7 evidence, methodological-validity evidence, parity/superiority
-evidence, or SOTA.
+evidence, or SOTA claims.
 
 **Completed checkpoint:** `ProjectConfig.auto_refresh_higher_order_on_recode`
 now records a durable project-level recode refresh default. New projects can opt

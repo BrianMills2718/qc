@@ -1,10 +1,45 @@
 # Plan #193: QC CLI D3/D7 Comparison Protocol Surfaces
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** D3/D7 comparison protocol and preflight scripts
 **Blocks:** Top-level CLI parity for D3/D7 comparison preflight workflows
+
+---
+
+## Outcome
+
+Implementation commit: `f54d6787`
+
+`qc_cli.py` now exposes four top-level D3/D7 comparison protocol/preflight
+wrappers:
+
+- `validate-d3-comparison-protocol <protocol>`
+- `d3-comparison-preflight <protocol> <gold> <predictions...>`
+- `validate-d7-comparison-protocol <protocol>`
+- `d7-comparison-preflight <protocol> <gold> <predictions...>`
+
+Each command delegates directly to the matching canonical script `main()` and
+forwards protocol, gold, and ordered prediction paths exactly. Documentation
+now identifies these as protocol/preflight/provenance surfaces only, not
+held-out D3/D7 evidence, methodological-validity evidence, parity/superiority
+evidence, or SOTA support.
+
+Verification:
+
+- TDD red state observed: the new wrapper test failed four cases with
+  invalid-command parser errors before implementation.
+- Focused tests:
+  `python -m pytest tests/test_qc_cli_d3_d7_comparison_protocol_surfaces.py tests/test_d3_comparison_protocol.py tests/test_d3_comparison_preflight.py tests/test_d7_comparison_protocol.py tests/test_d7_comparison_preflight.py -q`
+  -> `37 passed`.
+- Focused Ruff:
+  `python -m ruff check qc_cli.py tests/test_qc_cli_d3_d7_comparison_protocol_surfaces.py`
+  -> passed.
+- `make docs-check` -> passed.
+- `git diff --check` -> passed.
+- `make check` -> `1237 passed, 1 skipped, 8 deselected`; Ruff and docs gates
+  passed; type check is still not configured.
 
 ---
 
@@ -93,11 +128,11 @@ Internal CLI delegation only; no cross-project boundary is created.
 
 ### Capability Validation
 
-- [ ] Each command parses through `qc_cli.py`.
-- [ ] Each handler delegates to the matching script `main()`.
-- [ ] Protocol and gold positional paths are forwarded exactly.
-- [ ] Repeated prediction paths are forwarded in order.
-- [ ] Docs state these are protocol/preflight/provenance surfaces only, not
+- [x] Each command parses through `qc_cli.py`.
+- [x] Each handler delegates to the matching script `main()`.
+- [x] Protocol and gold positional paths are forwarded exactly.
+- [x] Repeated prediction paths are forwarded in order.
+- [x] Docs state these are protocol/preflight/provenance surfaces only, not
   held-out comparison evidence or SOTA support.
 
 ---
@@ -119,14 +154,14 @@ Internal CLI delegation only; no cross-project boundary is created.
 
 ### Steps
 
-1. Add failing wrapper tests that monkeypatch each canonical script `main()` and
+1. [x] Add failing wrapper tests that monkeypatch each canonical script `main()` and
    assert exact argv forwarding.
-2. Add parser, dispatch, and handler entries in `qc_cli.py`.
-3. Update docs/CLAUDE with the top-level CLI surfaces and caveats.
-4. Regenerate `AGENTS.md`.
-5. Run focused tests, focused Ruff, docs checks, whitespace checks, and full
+2. [x] Add parser, dispatch, and handler entries in `qc_cli.py`.
+3. [x] Update docs/CLAUDE with the top-level CLI surfaces and caveats.
+4. [x] Regenerate `AGENTS.md`.
+5. [x] Run focused tests, focused Ruff, docs checks, whitespace checks, and full
    `make check`.
-6. Commit/push implementation, then close this plan.
+6. [x] Commit/push implementation, then close this plan.
 
 ---
 
@@ -153,23 +188,23 @@ Internal CLI delegation only; no cross-project boundary is created.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] All four `qc_cli.py` commands parse successfully.
-- [ ] Each handler calls the matching canonical script `main()`.
-- [ ] Supplied arguments are forwarded exactly in canonical script form.
-- [ ] Prediction package paths preserve order.
-- [ ] Existing Make/script behavior is unchanged.
-- [ ] Docs/CLAUDE mention the top-level CLI aliases without implying held-out
+- [x] All four `qc_cli.py` commands parse successfully.
+- [x] Each handler calls the matching canonical script `main()`.
+- [x] Supplied arguments are forwarded exactly in canonical script form.
+- [x] Prediction package paths preserve order.
+- [x] Existing Make/script behavior is unchanged.
+- [x] Docs/CLAUDE mention the top-level CLI aliases without implying held-out
   D3/D7 evidence, validity evidence, parity/superiority evidence, or SOTA.
 
 > Process criteria:
-- [ ] TDD red state observed before implementation.
-- [ ] Focused tests pass.
-- [ ] Focused Ruff check passes.
-- [ ] `make docs-check` passes.
-- [ ] `git diff --check` passes.
-- [ ] `make check` passes.
-- [ ] Plan is moved to completed with verification evidence.
-- [ ] Verified implementation is committed and pushed.
+- [x] TDD red state observed before implementation.
+- [x] Focused tests pass.
+- [x] Focused Ruff check passes.
+- [x] `make docs-check` passes.
+- [x] `git diff --check` passes.
+- [x] `make check` passes.
+- [x] Plan is moved to completed with verification evidence.
+- [x] Verified implementation is committed and pushed.
 
 ---
 
