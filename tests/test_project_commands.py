@@ -40,6 +40,15 @@ from qc_clean.core.persistence.project_store import ProjectStore
 from qc_clean.core.pipeline.pipeline_engine import AnalysisPipeline, PipelineStage
 
 
+def _read_jsonl(path: Path) -> list[dict]:
+    """Read a JSONL file for test assertions."""
+    return [
+        json.loads(line)
+        for line in path.read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+
+
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
@@ -595,6 +604,69 @@ class TestProjectExporter:
         assert manifest.exists()
         assert "Verified export audit manifest" in output
 
+    def test_project_export_command_writes_audit_event_log(
+        self,
+        tmp_path,
+        tmp_store,
+        sample_state,
+        capsys,
+    ):
+        from qc_clean.core.cli.commands.project import _export_project
+        from qc_clean.core.export.audit_event_log import verify_export_audit_event_log
+
+        tmp_store.save(sample_state)
+        out = tmp_path / "report.md"
+        manifest = tmp_path / "report.manifest.json"
+        audit_log = tmp_path / "export_audit_events.jsonl"
+        args = MagicMock(
+            project_id=sample_state.id,
+            format="markdown",
+            output_file=str(out),
+            output_dir=None,
+            audit_manifest=str(manifest),
+            verify_audit_manifest=True,
+            audit_log=str(audit_log),
+        )
+
+        result = _export_project(tmp_store, args)
+        output = capsys.readouterr().out
+        events = _read_jsonl(audit_log)
+        verification = verify_export_audit_event_log(audit_log).model_dump(mode="json")
+
+        assert result == 0
+        assert manifest.exists()
+        assert [event["event_type"] for event in events] == [
+            "manifest_written",
+            "manifest_verified",
+        ]
+        assert events[1]["previous_event_sha256"] == events[0]["event_sha256"]
+        assert verification["status"] == "verified"
+        assert "Export audit event log" in output
+
+    def test_project_export_command_rejects_audit_log_without_manifest(
+        self,
+        tmp_store,
+        sample_state,
+        capsys,
+    ):
+        from qc_clean.core.cli.commands.project import _export_project
+
+        tmp_store.save(sample_state)
+        args = MagicMock(
+            project_id=sample_state.id,
+            format="json",
+            output_file=None,
+            output_dir=None,
+            audit_manifest=None,
+            verify_audit_manifest=False,
+            audit_log="events.jsonl",
+        )
+
+        result = _export_project(tmp_store, args)
+
+        assert result == 1
+        assert "--audit-log requires --audit-manifest" in capsys.readouterr().err
+
 
 # ---------------------------------------------------------------------------
 # Tests: CLI argument parsing
@@ -661,6 +733,29 @@ class TestCLIParsing:
 
         assert args.audit_manifest == "manifest.json"
         assert args.verify_audit_manifest is True
+
+    def test_export_subparser_audit_log_flag(self):
+        from qc_cli import create_parser
+
+        parser = create_parser()
+
+        args = parser.parse_args(
+            [
+                "project",
+                "export",
+                "pid",
+                "--format",
+                "markdown",
+                "--output-file",
+                "report.md",
+                "--audit-manifest",
+                "manifest.json",
+                "--audit-log",
+                "events.jsonl",
+            ]
+        )
+
+        assert args.audit_log == "events.jsonl"
 
     def test_export_subparser_qdpx(self):
         from qc_cli import create_parser

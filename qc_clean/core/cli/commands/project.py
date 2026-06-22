@@ -293,9 +293,13 @@ def _export_project(store: ProjectStore, args) -> int:
     output_file = getattr(args, "output_file", None)
     output_dir = getattr(args, "output_dir", None)
     audit_manifest = vars(args).get("audit_manifest")
+    audit_log = vars(args).get("audit_log")
     verify_audit_manifest = bool(vars(args).get("verify_audit_manifest", False))
     if verify_audit_manifest and not audit_manifest:
         print("--verify-audit-manifest requires --audit-manifest", file=sys.stderr)
+        return 1
+    if audit_log and not audit_manifest:
+        print("--audit-log requires --audit-manifest", file=sys.stderr)
         return 1
 
     try:
@@ -332,6 +336,7 @@ def _export_project(store: ProjectStore, args) -> int:
                 artifact_paths,
                 audit_manifest,
                 verify_audit_manifest,
+                audit_log,
             )
     except Exception as e:
         print(f"Export failed: {e}", file=sys.stderr)
@@ -346,8 +351,10 @@ def _write_and_optionally_verify_export_manifest(
     artifact_paths: list[str],
     manifest_output: str,
     verify: bool,
+    audit_log: str | None = None,
 ) -> None:
     """Write an export audit manifest and optionally verify it immediately."""
+    from qc_clean.core.export.audit_event_log import append_export_audit_event
     from qc_clean.core.export.audit_manifest import (
         build_export_audit_manifest,
         verify_export_audit_manifest_payload,
@@ -364,6 +371,14 @@ def _write_and_optionally_verify_export_manifest(
     )
     written = write_export_audit_manifest(manifest, manifest_path)
     print(f"Export audit manifest: {written}")
+    if audit_log:
+        append_export_audit_event(
+            audit_log,
+            event_type="manifest_written",
+            event_status="success",
+            manifest_path=manifest_path,
+            payload=manifest.model_dump(mode="json"),
+        )
 
     if verify:
         report = verify_export_audit_manifest_payload(
@@ -371,10 +386,20 @@ def _write_and_optionally_verify_export_manifest(
             base_dir=base_dir,
             state=state,
         )
+        if audit_log:
+            append_export_audit_event(
+                audit_log,
+                event_type="manifest_verified",
+                event_status=report.status,
+                manifest_path=manifest_path,
+                payload=report.model_dump(mode="json"),
+            )
         if report.status != "verified":
             messages = "; ".join(failure.message for failure in report.failures)
             raise RuntimeError(f"Export audit manifest verification failed: {messages}")
         print("Verified export audit manifest")
+    if audit_log:
+        print(f"Export audit event log: {audit_log}")
 
 
 def _export_adjudication_sample(store: ProjectStore, args) -> int:

@@ -282,6 +282,7 @@ Examples:
     proj_export.add_argument('--output-file', help='Output file path (for json/markdown/qdpx)')
     proj_export.add_argument('--output-dir', help='Output directory (for csv)')
     proj_export.add_argument('--audit-manifest', help='Optional export audit manifest output path')
+    proj_export.add_argument('--audit-log', help='Optional export audit event JSONL log path; requires --audit-manifest')
     proj_export.add_argument(
         '--verify-audit-manifest',
         action='store_true',

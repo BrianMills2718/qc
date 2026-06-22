@@ -47,6 +47,16 @@ import qc_mcp_server
 # Fixtures
 # ---------------------------------------------------------------------------
 
+
+def _read_jsonl(path: Path) -> list[dict]:
+    """Read a JSONL file for test assertions."""
+    return [
+        json.loads(line)
+        for line in path.read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+
+
 @pytest.fixture
 def tmp_store(tmp_path: Path):
     """Replace global store with one backed by tmp_path."""
@@ -987,6 +997,58 @@ class TestExport:
         assert result["format"] == "json"
         assert result["audit_verification"]["status"] == "verified"
         assert Path(result["audit_manifest"]).exists()
+
+    def test_export_json_with_audit_event_log(
+        self,
+        completed_project,
+        tmp_store,
+        tmp_path,
+        monkeypatch,
+    ):
+        from qc_clean.core.export.audit_event_log import verify_export_audit_event_log
+
+        exports_dir = (tmp_path / "exports").resolve()
+        monkeypatch.setattr(qc_mcp_server, "EXPORTS_DIR", exports_dir)
+
+        result = json.loads(
+            qc_mcp_server.qc_export_json(
+                "proj-done",
+                output_file="../../export.json",
+                audit_manifest=True,
+                verify_audit_manifest=True,
+                audit_event_log=True,
+            )
+        )
+        events = _read_jsonl(Path(result["audit_event_log"]))
+        verification = verify_export_audit_event_log(result["audit_event_log"]).model_dump(
+            mode="json"
+        )
+
+        assert result["format"] == "json"
+        assert Path(result["audit_event_log"]).parent == exports_dir
+        assert Path(result["audit_event_log"]).name == "export.audit_events.jsonl"
+        assert [event["event_type"] for event in events] == [
+            "manifest_written",
+            "manifest_verified",
+        ]
+        assert events[1]["previous_event_sha256"] == events[0]["event_sha256"]
+        assert verification["status"] == "verified"
+
+    def test_export_audit_event_log_requires_audit_manifest(
+        self,
+        completed_project,
+        tmp_store,
+    ):
+        result = json.loads(
+            qc_mcp_server.qc_export_markdown(
+                "proj-done",
+                output_file="report.md",
+                audit_event_log=True,
+            )
+        )
+
+        assert "error" in result
+        assert "audit_event_log=True requires audit_manifest=True" in result["error"]
 
     def test_export_verify_requires_audit_manifest(self, completed_project, tmp_store):
         result = json.loads(
