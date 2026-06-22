@@ -2,9 +2,14 @@
 
 from __future__ import annotations
 
+import asyncio
 import hashlib
 import json
 
+from qc_clean.core.d7_live_baseline import (
+    D7LiveCandidateSelection,
+    export_d7_live_candidate_baseline_async,
+)
 from qc_clean.core.d7_retrieval import export_d7_retrieval_baseline
 from qc_clean.core.persistence.project_store import ProjectStore
 from qc_clean.core.segmentation import segment_corpus
@@ -91,6 +96,41 @@ def test_compare_d7_retrieval_guard_blocks_failed_preflight_and_writes_no_output
     assert not output_path.exists()
 
 
+def test_compare_d7_retrieval_guard_accepts_live_baseline_package(tmp_path, monkeypatch, capsys):
+    state, store = _saved_state(tmp_path)
+    package = _live_prediction_package(state)
+    prediction_path = _write_json(tmp_path / "live_baseline.json", package)
+    gold = _gold_package_from_metadata(package["live_baseline_run"])
+    gold_path = _write_json(tmp_path / "gold.json", gold)
+    protocol = _protocol_for_live(
+        package,
+        gold,
+        prediction_file_sha256=_sha256_file(prediction_path),
+    )
+    protocol_path = _write_json(tmp_path / "protocol.json", protocol)
+    output_path = tmp_path / "report.json"
+    monkeypatch.setattr(compare_d7_retrieval, "ProjectStore", lambda: store)
+
+    exit_code = compare_d7_retrieval.main([
+        state.id,
+        "--gold-file",
+        str(gold_path),
+        "--predictions-file",
+        str(prediction_path),
+        "--protocol-package",
+        str(protocol_path),
+        "--output",
+        str(output_path),
+    ])
+
+    output = json.loads(capsys.readouterr().out)
+    written = json.loads(output_path.read_text(encoding="utf-8"))
+    assert exit_code == 0
+    assert output["preflight_report"]["status"] == "pass"
+    assert written["preflight_report"]["status"] == "pass"
+    assert output["disconfirmation_d7"]["baselines"]
+
+
 def test_compare_d7_retrieval_without_protocol_remains_compatible(tmp_path, monkeypatch, capsys):
     state, store = _saved_state(tmp_path)
     package = _prediction_package(state)
@@ -128,8 +168,29 @@ def _prediction_package(state: ProjectState) -> dict:
     )
 
 
+def _live_prediction_package(state: ProjectState) -> dict:
+    async def fake_selector(*, candidates, **_kwargs):
+        return D7LiveCandidateSelection(
+            selected_candidate_ids=[candidates[0].id],
+            rationale="Candidate directly contradicts the claim.",
+        )
+
+    return asyncio.run(export_d7_live_candidate_baseline_async(
+        state,
+        model_name="fake-live-model",
+        candidates_per_claim=1,
+        trace_id="qualitative_coding/d7-live-baseline/project-d7",
+        max_budget=1.0,
+        candidate_selector=fake_selector,
+    ))
+
+
 def _gold_package(package: dict) -> dict:
     metadata = package["retrieval_run"]
+    return _gold_package_from_metadata(metadata)
+
+
+def _gold_package_from_metadata(metadata: dict) -> dict:
     return {
         "schema_version": 1,
         "gold_set_id": "d7-heldout-v1",
@@ -191,6 +252,62 @@ def _protocol_for(
         ],
         "success_criteria": [
             "Score retrieval predictions against the registered held-out D7 gold package."
+        ],
+        "caution": (
+            "D7 comparison protocol validation is process metadata only; it is not "
+            "held-out D7 evidence, live-baseline evidence, or superiority evidence."
+        ),
+    }
+
+
+def _protocol_for_live(
+    package: dict,
+    gold: dict,
+    *,
+    prediction_file_sha256: str | None,
+) -> dict:
+    metadata = package["live_baseline_run"]
+    baseline_name = package["disconfirmation_baselines"][0]["name"]
+    protocol = _protocol_for_metadata(metadata, baseline_name, gold, prediction_file_sha256)
+    protocol["expected_predictions"][0]["baseline_mode"] = metadata["baseline_mode"]
+    protocol["expected_predictions"][0]["model"] = metadata["model"]
+    return protocol
+
+
+def _protocol_for_metadata(
+    metadata: dict,
+    baseline_name: str,
+    gold: dict,
+    prediction_file_sha256: str | None,
+) -> dict:
+    return {
+        "schema_version": 1,
+        "package_type": "qualitative_coding.d7_retrieval_comparison_protocol",
+        "protocol_id": "d7-heldout-comparison-v1",
+        "project_id": metadata["project_id"],
+        "dataset_name": gold["dataset_name"],
+        "split": gold["split"],
+        "gold_set_id": gold["gold_set_id"],
+        "corpus_sha256": gold["corpus_sha256"],
+        "project_state_sha256": gold["project_state_sha256"],
+        "prompt_frozen": gold["prompt_frozen"],
+        "contamination_checked": gold["contamination_checked"],
+        "registered_before_run": True,
+        "expected_predictions": [
+            {
+                "baseline_name": baseline_name,
+                "retrieval_mode": metadata["retrieval_mode"],
+                "candidates_per_claim": metadata["candidates_per_claim"],
+                "max_targets": metadata["max_targets"],
+                "embedding_model": metadata["embedding_model"],
+                "embedding_dimensions": metadata["embedding_dimensions"],
+                "trace_id": metadata["trace_id"],
+                "max_budget": metadata["max_budget"],
+                "prediction_file_sha256": prediction_file_sha256,
+            }
+        ],
+        "success_criteria": [
+            "Score retrieval/live predictions against the registered held-out D7 gold package."
         ],
         "caution": (
             "D7 comparison protocol validation is process metadata only; it is not "

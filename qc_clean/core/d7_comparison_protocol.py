@@ -23,6 +23,14 @@ class D7ExpectedRetrievalPrediction(BaseModel):
     """One expected D7 retrieval prediction package/baseline."""
 
     baseline_name: str = Field(description="Expected baseline record name")
+    baseline_mode: Literal["retrieval", "live_candidate_selector"] = Field(
+        default="retrieval",
+        description="Expected prediction package mode",
+    )
+    model: str | None = Field(
+        default=None,
+        description="Expected live model for live_candidate_selector baselines",
+    )
     retrieval_mode: str = Field(description="Expected retrieval mode")
     candidates_per_claim: int = Field(description="Expected candidate limit per claim")
     max_targets: int = Field(description="Expected maximum target claims considered")
@@ -46,6 +54,10 @@ class D7ExpectedRetrievalPrediction(BaseModel):
         """Enforce meaningful retrieval expectation metadata."""
         if not self.baseline_name.strip():
             raise ValueError("D7 expected baseline_name must be non-empty")
+        if self.model is not None and not self.model.strip():
+            raise ValueError("D7 expected model must be non-empty when supplied")
+        if self.baseline_mode == "live_candidate_selector" and not self.model:
+            raise ValueError("D7 live candidate-selector expectations require model")
         if not self.retrieval_mode.strip():
             raise ValueError("D7 expected retrieval_mode must be non-empty")
         if self.candidates_per_claim < 1:

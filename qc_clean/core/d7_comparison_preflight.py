@@ -12,8 +12,11 @@ from qc_clean.core.d7_comparison_protocol import (
     validate_d7_comparison_protocol_payload,
 )
 from qc_clean.core.d7_gold import D7GoldSetPackage, validate_d7_gold_set_payload
+from qc_clean.core.d7_live_baseline import D7LiveBaselinePackage
 from qc_clean.core.d7_retrieval import D7RetrievalBaselinePackage
 
+
+D7PredictionPackage = D7RetrievalBaselinePackage | D7LiveBaselinePackage
 
 D7_COMPARISON_PREFLIGHT_CAUTION = (
     "D7 comparison preflight is process metadata only; it is not a held-out D7 "
@@ -107,9 +110,9 @@ def _validate_gold(
 def _validate_predictions(
     payloads: list[Any],
     errors: list[D7ComparisonPreflightError],
-) -> list[D7RetrievalBaselinePackage]:
+) -> list[D7PredictionPackage]:
     """Validate retrieval prediction packages and append preflight errors."""
-    packages: list[D7RetrievalBaselinePackage] = []
+    packages: list[D7PredictionPackage] = []
     if not payloads:
         errors.append(
             D7ComparisonPreflightError(
@@ -121,11 +124,20 @@ def _validate_predictions(
     for index, payload in enumerate(payloads, start=1):
         try:
             packages.append(D7RetrievalBaselinePackage.model_validate(payload))
-        except ValidationError as exc:
+            continue
+        except ValidationError as retrieval_exc:
+            try:
+                packages.append(D7LiveBaselinePackage.model_validate(payload))
+                continue
+            except ValidationError as live_exc:
+                message = (
+                    "Invalid D7 prediction package. Retrieval package error: "
+                    f"{retrieval_exc}; live baseline package error: {live_exc}"
+                )
             errors.append(
                 D7ComparisonPreflightError(
                     field=f"prediction_package[{index}]",
-                    message=f"Invalid D7 retrieval prediction package: {exc}",
+                    message=message,
                 )
             )
     return packages
@@ -158,12 +170,12 @@ def _check_gold_matches_protocol(
 
 def _check_predictions_match_protocol(
     protocol: D7ComparisonProtocolPackage,
-    predictions: list[D7RetrievalBaselinePackage],
+    predictions: list[D7PredictionPackage],
     file_hashes_by_baseline: Mapping[str, str],
     errors: list[D7ComparisonPreflightError],
 ) -> None:
     """Append errors for prediction metadata/config drift from the protocol."""
-    actual_by_name: dict[str, D7RetrievalBaselinePackage] = {}
+    actual_by_name: dict[str, D7PredictionPackage] = {}
     duplicate_names: set[str] = set()
     for package in predictions:
         for baseline in package.disconfirmation_baselines:
@@ -206,37 +218,39 @@ def _check_predictions_match_protocol(
 def _check_prediction_package(
     protocol: D7ComparisonProtocolPackage,
     expected: D7ExpectedRetrievalPrediction,
-    package: D7RetrievalBaselinePackage,
+    package: D7PredictionPackage,
     file_hashes_by_baseline: Mapping[str, str],
     errors: list[D7ComparisonPreflightError],
 ) -> None:
     """Append errors for one expected prediction package."""
-    metadata = package.retrieval_run
-    _check_equal("project_id", protocol.project_id, metadata.project_id, errors)
-    _check_equal("corpus_sha256", protocol.corpus_sha256, metadata.corpus_sha256, errors)
+    metadata = _prediction_metadata(package)
+    _check_equal("project_id", protocol.project_id, metadata["project_id"], errors)
+    _check_equal("corpus_sha256", protocol.corpus_sha256, metadata["corpus_sha256"], errors)
     _check_equal(
         "project_state_sha256",
         protocol.project_state_sha256,
-        metadata.project_state_sha256,
+        metadata["project_state_sha256"],
         errors,
     )
-    _check_equal("retrieval_mode", expected.retrieval_mode, metadata.retrieval_mode, errors)
+    _check_equal("baseline_mode", expected.baseline_mode, metadata["baseline_mode"], errors)
+    _check_equal("model", expected.model, metadata["model"], errors)
+    _check_equal("retrieval_mode", expected.retrieval_mode, metadata["retrieval_mode"], errors)
     _check_equal(
         "candidates_per_claim",
         expected.candidates_per_claim,
-        metadata.candidates_per_claim,
+        metadata["candidates_per_claim"],
         errors,
     )
-    _check_equal("max_targets", expected.max_targets, metadata.max_targets, errors)
-    _check_equal("embedding_model", expected.embedding_model, metadata.embedding_model, errors)
+    _check_equal("max_targets", expected.max_targets, metadata["max_targets"], errors)
+    _check_equal("embedding_model", expected.embedding_model, metadata["embedding_model"], errors)
     _check_equal(
         "embedding_dimensions",
         expected.embedding_dimensions,
-        metadata.embedding_dimensions,
+        metadata["embedding_dimensions"],
         errors,
     )
-    _check_equal("trace_id", expected.trace_id, metadata.trace_id, errors)
-    _check_equal("max_budget", expected.max_budget, metadata.max_budget, errors)
+    _check_equal("trace_id", expected.trace_id, metadata["trace_id"], errors)
+    _check_equal("max_budget", expected.max_budget, metadata["max_budget"], errors)
     if expected.prediction_file_sha256 is not None:
         actual_hash = file_hashes_by_baseline.get(expected.baseline_name)
         if actual_hash is None:
@@ -262,6 +276,41 @@ def _check_prediction_package(
             )
 
 
+def _prediction_metadata(package: D7PredictionPackage) -> dict[str, Any]:
+    """Return normalized metadata shared by retrieval and live prediction packages."""
+    if isinstance(package, D7RetrievalBaselinePackage):
+        metadata = package.retrieval_run
+        return {
+            "baseline_mode": "retrieval",
+            "model": None,
+            "project_id": metadata.project_id,
+            "project_state_sha256": metadata.project_state_sha256,
+            "corpus_sha256": metadata.corpus_sha256,
+            "retrieval_mode": metadata.retrieval_mode,
+            "embedding_model": metadata.embedding_model,
+            "embedding_dimensions": metadata.embedding_dimensions,
+            "max_targets": metadata.max_targets,
+            "candidates_per_claim": metadata.candidates_per_claim,
+            "trace_id": metadata.trace_id,
+            "max_budget": metadata.max_budget,
+        }
+    metadata = package.live_baseline_run
+    return {
+        "baseline_mode": metadata.baseline_mode,
+        "model": metadata.model,
+        "project_id": metadata.project_id,
+        "project_state_sha256": metadata.project_state_sha256,
+        "corpus_sha256": metadata.corpus_sha256,
+        "retrieval_mode": metadata.retrieval_mode,
+        "embedding_model": metadata.embedding_model,
+        "embedding_dimensions": metadata.embedding_dimensions,
+        "max_targets": metadata.max_targets,
+        "candidates_per_claim": metadata.candidates_per_claim,
+        "trace_id": metadata.trace_id,
+        "max_budget": metadata.max_budget,
+    }
+
+
 def _check_equal(
     field: str,
     expected: Any,
@@ -282,7 +331,7 @@ def _build_report(
     *,
     protocol: D7ComparisonProtocolPackage | None,
     gold: D7GoldSetPackage | None,
-    predictions: list[D7RetrievalBaselinePackage],
+    predictions: list[D7PredictionPackage],
     errors: list[D7ComparisonPreflightError],
 ) -> D7ComparisonPreflightReport:
     """Build the final preflight report."""
