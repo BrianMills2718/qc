@@ -1,6 +1,6 @@
 # Plan #77: Corpus Scope Completeness Warnings
 
-**Status:** Planned
+**Status:** Implemented
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Plan #16 corpus scope contract; Plan #72 corpus scope machine-readable warnings; Plan #76 corpus scope create surfaces
@@ -107,21 +107,26 @@ cross-project callable capability.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] Missing-scope warnings remain unchanged for claim-bearing exports with no
+- [x] Missing-scope warnings remain unchanged for claim-bearing exports with no
   `corpus_scope`.
-- [ ] Claim-bearing exports with an empty `CorpusScope()` emit
+- [x] Claim-bearing exports with an empty `CorpusScope()` emit
   `empty_corpus_scope` warnings in JSON/CSV/Markdown.
-- [ ] Claim-bearing exports with `population` but no `sampling_frame` emit
+- [x] Claim-bearing exports with `population` but no `sampling_frame` emit
   `missing_sampling_frame` warnings in JSON/CSV/Markdown.
-- [ ] Complete scope records do not emit scope warnings.
-- [ ] Warning messages state the boundary limitation without claiming sample
+- [x] Complete scope records do not emit scope warnings.
+- [x] Warning messages state the boundary limitation without claiming sample
   validity or invalidity.
 
 > Process criteria:
-- [ ] Required tests pass
-- [ ] Full test suite passes
-- [ ] Type check status is reported
-- [ ] Docs updated
+- [x] Required tests pass
+- [x] Full test suite passes
+- [x] Type check status is reported
+- [x] Docs updated
+
+## Verification
+
+- `python -m pytest tests/test_claim_ledger_exports.py -q` — 13 passed.
+- `make check` — 791 passed, 1 skipped, 8 deselected; lint/docs passed; type check not yet configured.
 
 ---
 

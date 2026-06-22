@@ -29,6 +29,16 @@ MISSING_CORPUS_SCOPE_WARNING_MESSAGE = (
     "the loaded documents only; do not generalize to a population without "
     "a stated and defensible sampling frame."
 )
+EMPTY_CORPUS_SCOPE_WARNING_MESSAGE = (
+    "A corpus scope record exists, but no scope details are specified. Treat "
+    "claim-bearing exports as bounded to the loaded documents only until the "
+    "phenomenon, population, sampling frame, criteria, or caveats are recorded."
+)
+MISSING_SAMPLING_FRAME_WARNING_MESSAGE = (
+    "A corpus population is recorded without a sampling frame. Do not treat "
+    "the population field as a defensible generalization boundary until the "
+    "selection basis is stated."
+)
 
 
 def _safe_filename_stem(value: str, fallback: str = "project") -> str:
@@ -42,18 +52,54 @@ def _default_export_path(project_name: str, suffix: str) -> Path:
     return Path(f"{_safe_filename_stem(project_name)}{suffix}")
 
 
-def _missing_corpus_scope_export_warning(
+def _corpus_scope_export_warnings(
     state: ProjectState,
-) -> Optional[Dict[str, Any]]:
-    """Return report-boundary warning metadata for claim exports without scope."""
-    if not state.claims or state.corpus_scope:
-        return None
-    return {
-        "code": "missing_corpus_scope",
-        "message": MISSING_CORPUS_SCOPE_WARNING_MESSAGE,
-        "applies_to": "claim_ledger",
-        "claim_count": len(state.claims),
-    }
+) -> List[Dict[str, Any]]:
+    """Return report-boundary warning metadata for claim-bearing exports."""
+    if not state.claims:
+        return []
+
+    if state.corpus_scope is None:
+        return [
+            {
+                "code": "missing_corpus_scope",
+                "message": MISSING_CORPUS_SCOPE_WARNING_MESSAGE,
+                "applies_to": "claim_ledger",
+                "claim_count": len(state.claims),
+            }
+        ]
+
+    scope = state.corpus_scope
+    warnings: List[Dict[str, Any]] = []
+    has_detail = any(
+        [
+            scope.phenomenon,
+            scope.population,
+            scope.sampling_frame,
+            scope.inclusion_criteria,
+            scope.exclusion_criteria,
+            scope.notes,
+        ]
+    )
+    if not has_detail:
+        warnings.append(
+            {
+                "code": "empty_corpus_scope",
+                "message": EMPTY_CORPUS_SCOPE_WARNING_MESSAGE,
+                "applies_to": "claim_ledger",
+                "claim_count": len(state.claims),
+            }
+        )
+    if scope.population and not scope.sampling_frame:
+        warnings.append(
+            {
+                "code": "missing_sampling_frame",
+                "message": MISSING_SAMPLING_FRAME_WARNING_MESSAGE,
+                "applies_to": "claim_ledger",
+                "claim_count": len(state.claims),
+            }
+        )
+    return warnings
 
 
 # ---------------------------------------------------------------------------
@@ -68,8 +114,8 @@ class ProjectExporter:
         path = Path(output_file) if output_file else _default_export_path(state.name, ".json")
         path.parent.mkdir(parents=True, exist_ok=True)
         payload = state.model_dump(mode="json")
-        if warning := _missing_corpus_scope_export_warning(state):
-            payload["export_warnings"] = [warning]
+        if warnings := _corpus_scope_export_warnings(state):
+            payload["export_warnings"] = warnings
         path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
         logger.info("Exported JSON to %s", path)
         return str(path)
@@ -175,17 +221,18 @@ class ProjectExporter:
                     ])
             paths.append(str(claims_path))
 
-        if warning := _missing_corpus_scope_export_warning(state):
+        if warnings := _corpus_scope_export_warnings(state):
             warnings_path = out / "export_warnings.csv"
             with open(warnings_path, "w", newline="", encoding="utf-8") as f:
                 writer = csv.writer(f)
                 writer.writerow(["code", "message", "applies_to", "claim_count"])
-                writer.writerow([
-                    warning["code"],
-                    warning["message"],
-                    warning["applies_to"],
-                    warning["claim_count"],
-                ])
+                for warning in warnings:
+                    writer.writerow([
+                        warning["code"],
+                        warning["message"],
+                        warning["applies_to"],
+                        warning["claim_count"],
+                    ])
             paths.append(str(warnings_path))
 
         # -- irr_matrix.csv (only if IRR has been run) --
@@ -274,6 +321,7 @@ class ProjectExporter:
                 _a(f"> - {w}")
             _a("")
 
+        scope_warnings = _corpus_scope_export_warnings(state)
         if state.corpus_scope:
             scope = state.corpus_scope
             _a("## Corpus Scope")
@@ -306,11 +354,16 @@ class ProjectExporter:
                 wrote_scope_detail = True
             if not wrote_scope_detail:
                 _a("Scope record exists, but no scope details are specified.")
+            if scope_warnings:
+                _a("")
+                for warning in scope_warnings:
+                    _a(warning["message"])
             _a("")
-        elif state.claims:
+        elif scope_warnings:
             _a("## Corpus Scope")
             _a("")
-            _a(MISSING_CORPUS_SCOPE_WARNING_MESSAGE)
+            for warning in scope_warnings:
+                _a(warning["message"])
             _a("")
 
         # Executive summary
