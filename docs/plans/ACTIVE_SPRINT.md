@@ -22,9 +22,11 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Choose the next highest-value unmet evaluation-harness lane that can be
-   advanced without pretending held-out expert data exists.
-2. Continue through the ranked roadmap without pausing after each verified
+1. Execute Plan #72, corpus-scope machine-readable warnings, without claiming
+   sampling adequacy or population-validity evidence.
+2. Choose the next highest-value unmet evaluation-harness or scope-discipline
+   lane that can be advanced without pretending held-out expert data exists.
+3. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
 **Completed checkpoint:** D1 grounding and D2 coverage/examined rates now report
