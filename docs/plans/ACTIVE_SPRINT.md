@@ -22,7 +22,10 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Continue through the ranked roadmap without pausing after each verified
+1. Execute Plan #115 (`D6_BIAS_PROTOCOL_RESULT_PREFLIGHT.md`): add a
+   protocol/result preflight for concrete D6 stratified and counterfactual
+   files before score-time guard integration.
+2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
 **Completed checkpoint:** D6 bias-audit protocols can now be validated with

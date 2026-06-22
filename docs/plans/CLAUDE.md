@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 115 | D6 bias protocol result preflight | High | Planned | `D6_BIAS_PROTOCOL_RESULT_PREFLIGHT.md` |
 
 ## Completed Plans
 
