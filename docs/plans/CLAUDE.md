@@ -6,7 +6,6 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 53 | Confidence calibration scorecard | High | Planned | `CONFIDENCE_CALIBRATION_SCORECARD.md` |
 
 ## Completed Plans
 
@@ -64,6 +63,7 @@ Track all implementation work here.
 | D4 codebook quality scorecard | Evaluation-harness follow-up: `make bench CODEBOOK_QUALITY=...` scores externally supplied rubric outcomes without claiming blind expert-panel evidence | `completed/D4_CODEBOOK_QUALITY_SCORECARD.md` |
 | D9 interpretive preference scorecard | Evaluation-harness follow-up: `make bench PREFERENCE=...` scores externally supplied forced-choice preference outcomes without claiming blind expert-parity evidence | `completed/D9_INTERPRETIVE_PREFERENCE_SCORECARD.md` |
 | D8 GT fidelity scorecard | Evaluation-harness follow-up: `make bench GT_FIDELITY=...` scores externally supplied GT-fidelity rubric outcomes without claiming full GT or methodological saturation | `completed/D8_GT_FIDELITY_SCORECARD.md` |
+| Confidence calibration scorecard | Evaluation-harness follow-up: `make bench CALIBRATION=...` scores externally supplied confidence/correctness records without claiming calibrated confidence | `completed/CONFIDENCE_CALIBRATION_SCORECARD.md` |
 
 ## Status Key
 

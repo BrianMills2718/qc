@@ -1,10 +1,32 @@
 # Plan #53: Confidence Calibration Scorecard
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** None
 **Blocks:** Confidence-calibration measurement substrate
+
+---
+
+## Outcome
+
+Implemented the deterministic Phase 0 `confidence_calibration` scorecard for
+externally supplied confidence/correctness records. The bench surface now
+accepts `CALIBRATION=calibration.json` / `--confidence-calibration-file`,
+hashes the calibration file in `_meta.input_hashes`, records it in artifact
+command provenance, and keeps the file input in memory without mutating saved
+project state. The scorecard reports total records, accuracy, mean confidence,
+Brier score, fixed 10-bin expected calibration error, calibration bins, and
+per-surface summaries. Docs state that confidence remains uncalibrated until a
+populated held-out calibration benchmark exists.
+
+## Verification
+
+- `python -m pytest tests/test_bench_phase0.py tests/test_bench_phase0_script.py tests/test_qc_cli_bench.py -q` - 76 passed.
+- `python -m ruff check qc_clean/core/bench.py scripts/bench_phase0.py qc_cli.py tests/test_bench_phase0.py tests/test_bench_phase0_script.py tests/test_qc_cli_bench.py` - passed.
+- `python scripts/check_markdown_links.py` - passed.
+- `python scripts/sync_plan_status.py --check` - passed.
+- `make check` - 757 passed, 1 skipped, 8 deselected; Ruff and docs checks passed; type check not yet configured.
 
 ---
 
@@ -66,10 +88,10 @@ Internal scorecard capability only; no cross-project boundary is created.
 
 ### Capability Validation
 
-- [ ] Calibration records are Pydantic-validated and fail loudly when malformed.
-- [ ] Confidence values are constrained to 0-1.
-- [ ] Brier score and expected calibration error are computed deterministically.
-- [ ] External files are hashed in `_meta.input_hashes` and recorded in artifact command provenance.
+- [x] Calibration records are Pydantic-validated and fail loudly when malformed.
+- [x] Confidence values are constrained to 0-1.
+- [x] Brier score and expected calibration error are computed deterministically.
+- [x] External files are hashed in `_meta.input_hashes` and recorded in artifact command provenance.
 
 ---
 
@@ -135,24 +157,24 @@ Internal scorecard capability only; no cross-project boundary is created.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] Scorecard has `confidence_calibration` with explicit unavailable state
+- [x] Scorecard has `confidence_calibration` with explicit unavailable state
   when no calibration records exist.
-- [ ] Scored output reports total records, accuracy, mean confidence, Brier
+- [x] Scored output reports total records, accuracy, mean confidence, Brier
   score, expected calibration error, fixed calibration bins, and per-surface
   summaries.
-- [ ] External calibration JSON file can be supplied through Make, script, and
+- [x] External calibration JSON file can be supplied through Make, script, and
   `qc_cli` without mutating saved project state.
-- [ ] Phase 0 input hashes and artifact command provenance include the
+- [x] Phase 0 input hashes and artifact command provenance include the
   calibration external file.
-- [ ] Docs preserve the caveat that confidence remains uncalibrated until a
+- [x] Docs preserve the caveat that confidence remains uncalibrated until a
   populated held-out calibration benchmark exists.
 
 > Process criteria:
-- [ ] Required tests pass
-- [ ] Full test suite passes
-- [ ] Type check status reported
-- [ ] Docs updated
-- [ ] Plan completed, committed, and pushed
+- [x] Required tests pass
+- [x] Full test suite passes
+- [x] Type check status reported
+- [x] Docs updated
+- [x] Plan completed, committed, and pushed
 
 ---
 
