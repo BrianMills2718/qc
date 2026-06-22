@@ -1,10 +1,28 @@
 # Plan #45: D5 Gwet AC1 Reliability Scorecard
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** None
 **Blocks:** D5 prevalence-aware reliability reporting
+
+---
+
+## Outcome
+
+Implemented Gwet's AC1 for binary code/application agreement matrices and
+categorical segment-decision matrices. `IRRResult` now stores AC1 for
+codebook-discovery, positive segment x code cells, and segment-decision rows.
+`project irr`, Markdown export, and `make bench` surface AC1 when present while
+preserving the consistency-not-validity caveat.
+
+**Verification:** `python -m pytest tests/test_irr_application_level.py
+tests/test_bench_phase0.py -q` (41 passed); `python -m ruff check
+qc_clean/core/pipeline/irr.py qc_clean/schemas/domain.py qc_clean/core/bench.py
+qc_clean/core/cli/commands/project.py qc_clean/core/export/data_exporter.py
+tests/test_irr_application_level.py tests/test_bench_phase0.py`; `make check`
+(731 passed, 1 skipped, 8 deselected; Ruff and docs checks passed; type check
+not yet configured).
 
 ---
 
@@ -63,12 +81,12 @@ Internal scorecard capability only; no cross-project boundary is created.
 
 ### Capability Validation
 
-- [ ] Binary AC1 computes perfect, partial, and prevalence-skewed examples.
-- [ ] Categorical AC1 computes segment-decision agreement.
-- [ ] `run_irr_analysis(..., application_level=True)` populates AC1 fields.
-- [ ] `make bench` reliability section surfaces AC1 for codebook-discovery,
+- [x] Binary AC1 computes perfect, partial, and prevalence-skewed examples.
+- [x] Categorical AC1 computes segment-decision agreement.
+- [x] `run_irr_analysis(..., application_level=True)` populates AC1 fields.
+- [x] `make bench` reliability section surfaces AC1 for codebook-discovery,
   positive application cells, and segment decisions when present.
-- [ ] Docs preserve the consistency-not-validity caveat.
+- [x] Docs preserve the consistency-not-validity caveat.
 
 ---
 
@@ -123,25 +141,25 @@ Internal scorecard capability only; no cross-project boundary is created.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] AC1 helpers are deterministic pure functions.
-- [ ] `IRRResult` carries AC1 fields without breaking existing serialized data.
-- [ ] `run_irr_analysis` populates AC1 for available matrices.
-- [ ] Phase 0 scorecard surfaces codebook-discovery, application-positive, and
+- [x] AC1 helpers are deterministic pure functions.
+- [x] `IRRResult` carries AC1 fields without breaking existing serialized data.
+- [x] `run_irr_analysis` populates AC1 for available matrices.
+- [x] Phase 0 scorecard surfaces codebook-discovery, application-positive, and
   segment-decision AC1 fields when present.
-- [ ] No human-IRR, validity, or expert-parity claim is introduced.
+- [x] No human-IRR, validity, or expert-parity claim is introduced.
 
 > Process criteria:
-- [ ] Required tests pass
-- [ ] Full test suite passes
-- [ ] Type check status reported
-- [ ] Docs updated
-- [ ] Plan completed, committed, and pushed
+- [x] Required tests pass
+- [x] Full test suite passes
+- [x] Type check status reported
+- [x] Docs updated
+- [x] Plan completed, committed, and pushed
 
 ---
 
 ## Open Questions
 
-- [ ] Should D5 bootstrap confidence intervals be computed for AC1 in this repo
+- [x] Should D5 bootstrap confidence intervals be computed for AC1 in this repo
   or delegated to `prompt_eval`? — Status: DEFERRED | Why it matters: the
   harness calls for bootstrap CIs, but the existing local Phase 0 scorecard only
   has exact-key bootstrap machinery for D3/D7, so AC1 CIs should be a separate
