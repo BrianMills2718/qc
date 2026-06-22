@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| #70 | D10 timing artifact | High | Planned | `D10_TIMING_ARTIFACT.md` |
 
 ## Completed Plans
 
