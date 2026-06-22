@@ -22,11 +22,21 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #139 (`THEORETICAL_SAMPLING_RESULT_EXPORT.md`): export
-   schema_version=1 theoretical-sampling result packages from explicit selected
-   candidate IDs.
+1. Select the next highest-value documented roadmap lane from
+   `docs/PROJECT_THEORY_AND_GOALS.md` and `docs/EVALUATION_HARNESS.md`.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
+
+**Completed checkpoint:** Explicit selected candidate IDs can now be recorded as
+schema_version=1 theoretical-sampling result packages through
+`make export-theoretical-sampling-results` /
+`scripts/export_theoretical_sampling_results.py`. The exporter validates the
+registered protocol and candidate package, rejects unknown selected IDs and
+unregistered success criteria, derives addressed gap codes/types from selected
+candidates, and writes packages compatible with `make theoretical-sampling-preflight`.
+This is result-package/provenance export only, not candidate-selection judgment,
+new data collection, sampling-frame adequacy evidence, methodological
+saturation evidence, full grounded-theory evidence, or SOTA evidence.
 
 **Completed checkpoint:** Loaded-document theoretical-sampling candidate
 packages can now be exported through

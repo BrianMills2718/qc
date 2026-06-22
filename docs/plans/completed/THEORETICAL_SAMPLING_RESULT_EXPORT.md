@@ -1,10 +1,46 @@
 # Plan #139: Theoretical Sampling Result Export
 
-**Status:** In Progress
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** #138
 **Blocks:** Auditable theoretical-sampling selection/result packages
+
+---
+
+## Outcome
+
+Implemented across:
+
+- `e41a64d` (`[Plan: THEORETICAL_SAMPLING_RESULT_EXPORT] Add result export`)
+  for core exporter, script, Make target, and tests.
+- `5ca66e6` (`[Plan: THEORETICAL_SAMPLING_RESULT_EXPORT] Add result export`)
+  for canonical docs and generated `AGENTS.md` sync.
+
+The repo now exports schema_version=1 theoretical-sampling result packages from
+explicit selected candidate IDs via `make export-theoretical-sampling-results`
+/ `scripts/export_theoretical_sampling_results.py`. Result packages derive
+addressed gap codes/types from selected candidates, require success criteria
+from the registered protocol, and are compatible with
+`make theoretical-sampling-preflight`.
+
+This is result-package/provenance export only. It is not candidate-selection
+judgment, new data collection, sampling-frame adequacy evidence,
+methodological saturation evidence, full grounded-theory evidence, or SOTA
+evidence.
+
+Verification:
+
+- TDD red captured: missing `qc_clean.core.theoretical_sampling_results`
+  module and missing `scripts.export_theoretical_sampling_results` import before
+  implementation.
+- `python -m pytest tests/test_theoretical_sampling_result_export.py tests/test_export_theoretical_sampling_results_script.py tests/test_theoretical_sampling_preflight.py -q`
+  passed (`10 passed`).
+- `python -m ruff check qc_clean/core/theoretical_sampling_results.py scripts/export_theoretical_sampling_results.py tests/test_theoretical_sampling_result_export.py tests/test_export_theoretical_sampling_results_script.py`
+  passed.
+- `make docs-check` passed.
+- `make check` passed (`1051 passed, 1 skipped, 8 deselected`); type check is
+  not yet configured in this repo.
 
 ---
 
@@ -65,11 +101,11 @@ GT-fidelity.
 
 ### Capability Validation
 
-- [ ] Result package validates with `TheoreticalSamplingResultPackage`.
-- [ ] Export fails loudly when selected IDs are not in the candidate package.
-- [ ] Export derives addressed gap codes/types from selected candidates.
-- [ ] Script writes identical stdout/file JSON and returns JSON errors.
-- [ ] Make target exposes the exporter.
+- [x] Result package validates with `TheoreticalSamplingResultPackage`.
+- [x] Export fails loudly when selected IDs are not in the candidate package.
+- [x] Export derives addressed gap codes/types from selected candidates.
+- [x] Script writes identical stdout/file JSON and returns JSON errors.
+- [x] Make target exposes the exporter.
 
 ---
 
@@ -128,21 +164,21 @@ GT-fidelity.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] Core exporter writes schema_version=1 result packages.
-- [ ] Result packages are preflight-compatible with Plan #137.
-- [ ] Export fails loudly for unknown selected IDs and unregistered success
+- [x] Core exporter writes schema_version=1 result packages.
+- [x] Result packages are preflight-compatible with Plan #137.
+- [x] Export fails loudly for unknown selected IDs and unregistered success
   criteria.
-- [ ] Script and Make target are agent-drivable.
-- [ ] Docs preserve that this is result-package/provenance only, not sampling
+- [x] Script and Make target are agent-drivable.
+- [x] Docs preserve that this is result-package/provenance only, not sampling
   execution, sampling adequacy, or saturation evidence.
 
 > Process criteria:
-- [ ] Required focused tests pass.
-- [ ] Focused Ruff check passes.
-- [ ] `make docs-check` passes.
-- [ ] Full `make check` passes or any failure is documented with evidence.
-- [ ] Type-check status is reported.
-- [ ] Verified work is committed and pushed.
+- [x] Required focused tests pass.
+- [x] Focused Ruff check passes.
+- [x] `make docs-check` passes.
+- [x] Full `make check` passes or any failure is documented with evidence.
+- [x] Type-check status is reported.
+- [x] Verified work is committed and pushed.
 
 ---
 
