@@ -6,7 +6,6 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| #73 | D2 Coded Segment Rate | High | In Progress | `D2_CODED_SEGMENT_RATE.md` |
 
 ## Completed Plans
 
@@ -83,6 +82,7 @@ Track all implementation work here.
 | INV-7 prompt-injection Wilson intervals | Evaluation-harness follow-up: INV-7 prompt-injection fixture scorecards report Wilson intervals for pass and attack-success rates without claiming prompt-injection robustness | `completed/INV7_PROMPT_INJECTION_WILSON_INTERVALS.md` |
 | INV-7 attack-type scorecard | Evaluation-harness follow-up: INV-7 prompt-injection fixture scorecards report by-attack-type pass and attack-success summaries without claiming prompt-injection robustness | `completed/INV7_ATTACK_TYPE_SCORECARD.md` |
 | D1/D2 structural rate Wilson intervals | Evaluation-harness follow-up: Phase 0 grounding, coverage, and examined rates report Wilson intervals without claiming validity evidence | `completed/D1_D2_STRUCTURAL_RATE_WILSON_INTERVALS.md` |
+| D2 coded segment rate | Evaluation-harness follow-up: Phase 0 D2 coverage reports coded-segment rate and Wilson intervals over examined decisions only | `completed/D2_CODED_SEGMENT_RATE.md` |
 | Confidence calibration bootstrap intervals | Evaluation-harness follow-up: confidence-calibration scorecards report deterministic local bootstrap intervals for Brier score and ECE without claiming calibrated confidence | `completed/CONFIDENCE_CALIBRATION_BOOTSTRAP_INTERVALS.md` |
 
 ## Status Key

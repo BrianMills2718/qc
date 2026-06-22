@@ -8,6 +8,23 @@
 
 ---
 
+## Outcome
+
+Phase 0 D2 coverage scorecards now include `coded_segment_rate` and
+`coded_segment_rate_ci`. The rate is computed as `coded_segments /
+examined_segments`, and traversal-mode projects with no segment decisions report
+an undefined denominator rather than treating untouched text as no-code. This is
+local examined-decision accounting only; it does not validate analytic coding or
+population prevalence.
+
+**Verification:** `python -m pytest tests/test_bench_phase0.py
+tests/test_segmentation.py -q` passed (68 tests);
+`python -m ruff check qc_clean/core/bench.py tests/test_bench_phase0.py`
+passed; final `make check` passed (781 passed, 1 skipped, 8 deselected;
+Ruff/docs-check passed). Type checking is not configured in this repo.
+
+---
+
 ## Gap
 
 **Current:** Phase 0 D2 coverage reports traversal coverage, examined segments,
