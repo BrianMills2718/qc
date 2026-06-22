@@ -22,12 +22,10 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #81, segment-derived speaker for anchored quotes, without
-   treating speaker labels as cryptographic anchors.
-2. Choose the next highest-value unmet evaluation-harness, review, or
+1. Choose the next highest-value unmet evaluation-harness, review, grounding, or
    scope-discipline lane that can be advanced without pretending held-out expert
    data exists.
-3. Continue through the ranked roadmap without pausing after each verified
+2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
 **Completed checkpoint:** Corpus-scope warning propagation now covers Markdown,
@@ -43,6 +41,9 @@ MCP now exposes `qc_review_decisions` for agent-driven review decisions,
 including claim targets with rationale preservation, while keeping the old
 `qc_review_codes` tool compatible. MCP also exposes `qc_review_claims` as a
 bounded claim-review target listing for agent workflows.
+Example-quote anchoring now derives `speaker` from containing same-document
+segments when available; speaker attribution remains best-effort and is not part
+of hash verification.
 Phase 0 scorecards and artifact manifests now include
 run-configuration hashes for persisted methodology/model/config metadata while
 marking prompt hashes as not-run. D10 cost/latency now preserves LLM-only fields

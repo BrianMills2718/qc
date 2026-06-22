@@ -1,6 +1,6 @@
 # Plan #81: Segment-Derived Speaker For Anchored Quotes
 
-**Status:** Implemented
+**Status:** Completed
 **Type:** implementation
 **Priority:** High
 **Blocked By:** INV-1 span anchoring; INV-8 segment universe
@@ -129,6 +129,14 @@ shared capability.
 - `python -m pytest tests/test_grounding.py -q` — 15 passed.
 - `python -m pytest tests/test_grounding.py tests/test_incremental.py tests/test_incremental_staleness_inv11.py -q` — 37 passed.
 - `make check` — 801 passed, 1 skipped, 8 deselected; lint/docs passed; type check not yet configured.
+
+## Outcome
+
+`resolve_and_anchor` can now accept a segment universe and copy the speaker from
+a containing same-document segment onto the anchored `CodeApplication`. Thematic
+and incremental example-quote paths pass `state.segments`, while callers without
+segments remain compatible. Speaker attribution remains best-effort when no
+speaker-labeled containing segment exists.
 
 ---
 
