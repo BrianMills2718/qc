@@ -26,11 +26,17 @@ highest-value documented lane.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Plan #195 is active: add top-level `qc_cli.py` wrappers
-for scope-phrasing and prompt-override governance lint checks. This slice should
-delegate to the canonical scripts without changing scope-lint rules,
+**Active checkpoint:** No implementation plan is active. Select and plan the
+next deterministic roadmap lane before editing code.
+
+**Completed checkpoint:** `qc_cli.py` now wraps the scope-phrasing and
+prompt-override governance lint scripts through top-level commands:
+`lint-scope-phrasing` and `lint-prompt-overrides`. The wrappers delegate exact
+argv to the canonical scripts without changing scope-lint rules,
 prompt-override registry rules, prompt rendering, corpus-scope semantics, or
-claim discipline.
+claim discipline. These are governance lint CLI parity surfaces only; they do
+not prove sampling-frame adequacy, prompt-injection robustness, model
+obedience, methodological validity, or SOTA claims.
 
 **Completed checkpoint:** `qc_cli.py` now wraps the standalone export-audit
 scripts through top-level commands: `export-audit-manifest`,

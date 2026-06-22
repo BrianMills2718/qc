@@ -1,10 +1,43 @@
 # Plan #195: QC CLI Governance Lint Surfaces
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Existing scope-phrasing and prompt-override lint scripts
 **Blocks:** Top-level CLI parity for local governance lint checks
+
+---
+
+## Outcome
+
+Implementation commit: `935d2c58`
+
+`qc_cli.py` now exposes two top-level governance lint wrappers:
+
+- `lint-scope-phrasing <project_id> (--input-file <path> | --text <text>) [--projects-dir <dir>]`
+- `lint-prompt-overrides [--root <path>]`
+
+Each wrapper delegates directly to the matching canonical script `main()` and
+forwards the supplied input mode and optional paths without reimplementing
+scope-lint or prompt-override registry logic. Documentation identifies these as
+governance lint surfaces only, not sampling-frame adequacy evidence,
+prompt-injection robustness, model obedience, methodological validity, or SOTA
+support.
+
+Verification:
+
+- TDD red state observed: the new wrapper test failed three cases with
+  invalid-command parser errors before implementation.
+- Focused tests:
+  `python -m pytest tests/test_qc_cli_governance_lint_surfaces.py tests/test_scope_phrasing_lint.py tests/test_prompt_override_registry.py -q`
+  -> `13 passed`.
+- Focused Ruff:
+  `python -m ruff check qc_cli.py tests/test_qc_cli_governance_lint_surfaces.py`
+  -> passed.
+- `make docs-check` -> passed.
+- `git diff --check` -> passed.
+- `make check` -> `1246 passed, 1 skipped, 8 deselected`; Ruff and docs gates
+  passed; type check is still not configured.
 
 ---
 
@@ -77,11 +110,11 @@ Internal CLI delegation only; no cross-project boundary is created.
 
 ### Capability Validation
 
-- [ ] Each command parses through `qc_cli.py`.
-- [ ] Each handler delegates to the matching script `main()`.
-- [ ] Mutually exclusive scope-lint inputs stay enforced by `argparse`.
-- [ ] Optional path flags are forwarded only when supplied.
-- [ ] Docs state these are governance lint surfaces only, not validity,
+- [x] Each command parses through `qc_cli.py`.
+- [x] Each handler delegates to the matching script `main()`.
+- [x] Mutually exclusive scope-lint inputs stay enforced by `argparse`.
+- [x] Optional path flags are forwarded only when supplied.
+- [x] Docs state these are governance lint surfaces only, not validity,
   sampling-frame, prompt-injection robustness, or model-obedience evidence.
 
 ---
@@ -102,14 +135,14 @@ Internal CLI delegation only; no cross-project boundary is created.
 
 ### Steps
 
-1. Add failing wrapper tests that monkeypatch each canonical script `main()` and
+1. [x] Add failing wrapper tests that monkeypatch each canonical script `main()` and
    assert exact argv forwarding.
-2. Add parser, dispatch, and handler entries in `qc_cli.py`.
-3. Update docs/CLAUDE with the top-level CLI surfaces and caveats.
-4. Regenerate `AGENTS.md`.
-5. Run focused tests, focused Ruff, docs checks, whitespace checks, and full
+2. [x] Add parser, dispatch, and handler entries in `qc_cli.py`.
+3. [x] Update docs/CLAUDE with the top-level CLI surfaces and caveats.
+4. [x] Regenerate `AGENTS.md`.
+5. [x] Run focused tests, focused Ruff, docs checks, whitespace checks, and full
    `make check`.
-6. Commit/push implementation, then close this plan.
+6. [x] Commit/push implementation, then close this plan.
 
 ---
 
@@ -136,23 +169,23 @@ Internal CLI delegation only; no cross-project boundary is created.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] Both `qc_cli.py` commands parse successfully.
-- [ ] Each handler calls the matching canonical script `main()`.
-- [ ] Supplied arguments are forwarded exactly in canonical script form.
-- [ ] Existing Make/script behavior is unchanged.
-- [ ] Docs/CLAUDE mention the top-level CLI aliases without implying sampling
+- [x] Both `qc_cli.py` commands parse successfully.
+- [x] Each handler calls the matching canonical script `main()`.
+- [x] Supplied arguments are forwarded exactly in canonical script form.
+- [x] Existing Make/script behavior is unchanged.
+- [x] Docs/CLAUDE mention the top-level CLI aliases without implying sampling
   adequacy, prompt-injection robustness, model obedience, methodological
   validity, or SOTA.
 
 > Process criteria:
-- [ ] TDD red state observed before implementation.
-- [ ] Focused tests pass.
-- [ ] Focused Ruff check passes.
-- [ ] `make docs-check` passes.
-- [ ] `git diff --check` passes.
-- [ ] `make check` passes.
-- [ ] Plan is moved to completed with verification evidence.
-- [ ] Verified implementation is committed and pushed.
+- [x] TDD red state observed before implementation.
+- [x] Focused tests pass.
+- [x] Focused Ruff check passes.
+- [x] `make docs-check` passes.
+- [x] `git diff --check` passes.
+- [x] `make check` passes.
+- [x] Plan is moved to completed with verification evidence.
+- [x] Verified implementation is committed and pushed.
 
 ---
 
