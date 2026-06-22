@@ -1,6 +1,6 @@
 # Plan #75: D10 Tool-Call Costs
 
-**Status:** Planned
+**Status:** In Progress
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Plan #27 D10 cost latency scorecard
@@ -110,20 +110,20 @@ cross-project callable capability.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] D10 retains existing LLM-only fields and values.
-- [ ] Matching `tool_calls` rows produce a scored `tool_calls` subsection.
-- [ ] Missing or unmatched `tool_calls` data is reported as `not_available`
+- [x] D10 retains existing LLM-only fields and values.
+- [x] Matching `tool_calls` rows produce a scored `tool_calls` subsection.
+- [x] Missing or unmatched `tool_calls` data is reported as `not_available`
   without suppressing scored LLM rows.
-- [ ] Combined observed cost/duration fields include tool totals only when tool
+- [x] Combined observed cost/duration fields include tool totals only when tool
   calls are scored.
-- [ ] Docs state tool-call D10 is local observability accounting, not public
+- [x] Docs state tool-call D10 is local observability accounting, not public
   benchmark timing evidence.
 
 > Process criteria:
-- [ ] Required tests pass
-- [ ] Full test suite passes
-- [ ] Type check status is reported
-- [ ] Docs updated
+- [x] Required tests pass (`python -m pytest tests/test_bench_phase0.py tests/test_bench_phase0_script.py::test_bench_phase0_includes_d10_from_observability_db -q`: 61 passed)
+- [x] Full test suite passes (`make check`: 783 passed, 1 skipped, 8 deselected; Ruff/docs-check passed)
+- [x] Type check status is reported (`make check`: type check not yet configured)
+- [x] Docs updated
 
 ---
 

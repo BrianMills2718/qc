@@ -949,6 +949,23 @@ def d10_cost_latency_scorecard(
     summed_latency = sum(latencies)
     document_count = state.corpus.num_documents
     errored_calls = sum(1 for row in rows if _row_has_error(row))
+    tool_calls = _d10_tool_calls_scorecard(
+        db_path,
+        project=project,
+        trace_match=trace_match,
+    )
+    tool_cost = (
+        _float_or_zero(tool_calls.get("total_tool_cost_usd"))
+        if tool_calls.get("status") == "scored"
+        else 0.0
+    )
+    tool_duration = (
+        _float_or_zero(tool_calls.get("summed_duration_s"))
+        if tool_calls.get("status") == "scored"
+        else 0.0
+    )
+    combined_cost = total_cost + tool_cost
+    combined_duration = summed_latency + tool_duration
 
     return {
         "status": "scored",
@@ -969,6 +986,17 @@ def d10_cost_latency_scorecard(
         "document_count": document_count,
         "cost_per_document_usd": _safe_div_or_none(total_cost, document_count),
         "latency_per_document_s": _safe_div_or_none(summed_latency, document_count),
+        "tool_calls": tool_calls,
+        "combined_observed_cost_usd": combined_cost,
+        "combined_observed_duration_s": combined_duration,
+        "combined_observed_cost_per_document_usd": _safe_div_or_none(
+            combined_cost,
+            document_count,
+        ),
+        "combined_observed_duration_per_document_s": _safe_div_or_none(
+            combined_duration,
+            document_count,
+        ),
         "first_timestamp": min(str(row["timestamp"]) for row in rows),
         "last_timestamp": max(str(row["timestamp"]) for row in rows),
         "models": dict(sorted(Counter(str(row["model"] or "") for row in rows).items())),
@@ -977,6 +1005,59 @@ def d10_cost_latency_scorecard(
             "D10 uses summed observed LLM-call latency and real logged cost from "
             "llm_client; it is not full pipeline wall-clock time and is not a "
             "baseline comparison."
+        ),
+    }
+
+
+def _d10_tool_calls_scorecard(
+    db_path: Path,
+    *,
+    project: str,
+    trace_match: Dict[str, str],
+) -> Dict[str, Any]:
+    """Summarize matching tool_calls rows without making them mandatory."""
+    try:
+        rows = _fetch_d10_tool_rows(db_path, project=project, trace_match=trace_match)
+    except sqlite3.Error as exc:
+        return {
+            "status": "not_available",
+            "reason": str(exc),
+            "note": (
+                "Tool-call D10 accounting requires matching tool_calls rows; "
+                "LLM-only D10 fields remain scored separately."
+            ),
+        }
+    if not rows:
+        return {
+            "status": "not_available",
+            "reason": "No tool_calls rows matched the project and trace selector.",
+            "note": (
+                "No tool-call cost/duration is added without matching real "
+                "tool_calls observability rows."
+            ),
+        }
+
+    durations = [_int_or_zero(row["duration_ms"]) / 1000 for row in rows]
+    total_duration = sum(durations)
+    total_cost = sum(_float_or_zero(row["cost"]) for row in rows)
+    errored = sum(1 for row in rows if _tool_row_has_error(row))
+    return {
+        "status": "scored",
+        "call_count": len(rows),
+        "successful_calls": len(rows) - errored,
+        "errored_calls": errored,
+        "total_tool_cost_usd": total_cost,
+        "summed_duration_s": total_duration,
+        "mean_duration_s": _safe_div(total_duration, len(rows)),
+        "max_duration_s": max(durations) if durations else 0.0,
+        "first_timestamp": min(str(row["timestamp"]) for row in rows),
+        "last_timestamp": max(str(row["timestamp"]) for row in rows),
+        "tools": dict(sorted(Counter(str(row["tool_name"] or "") for row in rows).items())),
+        "operations": dict(sorted(Counter(str(row["operation"] or "") for row in rows).items())),
+        "tasks": dict(sorted(Counter(str(row["task"] or "") for row in rows).items())),
+        "note": (
+            "Tool-call costs/durations are summed from real tool_calls rows and "
+            "included only in combined observed D10 totals."
         ),
     }
 
@@ -1085,11 +1166,75 @@ def _fetch_d10_llm_rows(
         conn.close()
 
 
+def _fetch_d10_tool_rows(
+    db_path: Path,
+    *,
+    project: str,
+    trace_match: Dict[str, str],
+) -> list[sqlite3.Row]:
+    """Fetch optional D10 tool rows from the observability database."""
+    conn = sqlite3.connect(str(db_path))
+    conn.row_factory = sqlite3.Row
+    try:
+        table_exists = conn.execute(
+            "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'tool_calls'"
+        ).fetchone()
+        if table_exists is None:
+            raise sqlite3.OperationalError("tool_calls table not found")
+        required = {
+            "timestamp",
+            "project",
+            "tool_name",
+            "operation",
+            "status",
+            "duration_ms",
+            "task",
+            "trace_id",
+            "cost",
+        }
+        columns = {str(row[1]) for row in conn.execute("PRAGMA table_info(tool_calls)").fetchall()}
+        missing = sorted(required - columns)
+        if missing:
+            raise sqlite3.OperationalError(
+                "tool_calls table missing required D10 column(s): " + ", ".join(missing)
+            )
+
+        error_select = ""
+        if "error_type" in columns:
+            error_select += ", error_type"
+        if "error_message" in columns:
+            error_select += ", error_message"
+        trace_clause = "trace_id = ?" if trace_match["mode"] == "exact" else "trace_id LIKE ?"
+        trace_value = trace_match["value"] if trace_match["mode"] == "exact" else f"{trace_match['value']}%"
+        query = f"""
+            SELECT timestamp, tool_name, operation, status, duration_ms, task,
+                   trace_id, cost{error_select}
+            FROM tool_calls
+            WHERE project = ?
+              AND {trace_clause}
+            ORDER BY timestamp ASC
+        """
+        return list(conn.execute(query, (project, trace_value)).fetchall())
+    finally:
+        conn.close()
+
+
 def _row_has_error(row: sqlite3.Row) -> bool:
     """Return true when an observability row records an error-like field."""
     return any(
         key in row.keys() and row[key]
         for key in ("error", "error_type", "validation_errors")
+    )
+
+
+def _tool_row_has_error(row: sqlite3.Row) -> bool:
+    """Return true when a tool observability row records an error status/field."""
+    status = str(row["status"] or "").lower()
+    if status not in {"success", "succeeded", "ok", "completed"}:
+        return True
+    return any(
+        key in row.keys() and row[key]
+        for key in ("error_type", "error_message")
     )
 
 

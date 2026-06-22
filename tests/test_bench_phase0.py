@@ -1616,6 +1616,117 @@ def test_d10_cost_latency_scores_matching_project_trace_rows(tmp_path):
         "qualitative_coding.negative_case_analysis": 1,
         "qualitative_coding.thematic_coding": 1,
     }
+    assert d10["tool_calls"]["status"] == "not_available"
+    assert d10["combined_observed_cost_usd"] == pytest.approx(d10["total_cost_usd"])
+    assert d10["combined_observed_duration_s"] == pytest.approx(d10["summed_latency_s"])
+
+
+def test_d10_cost_latency_includes_matching_tool_calls(tmp_path):
+    db_path = tmp_path / "observability.db"
+    _create_llm_observability_db(db_path)
+    _create_tool_observability_table(db_path)
+    state = ProjectState(
+        id="project-cost",
+        name="Cost",
+        corpus=Corpus(documents=[
+            Document(name="a.txt", content="A"),
+            Document(name="b.txt", content="B"),
+        ]),
+    )
+    trace_prefix = f"qualitative_coding/project/{state.id}"
+    _insert_llm_call(
+        db_path,
+        project="qualitative_coding",
+        task="qualitative_coding.thematic_coding",
+        trace_id=trace_prefix,
+        model="gpt-5-mini",
+        cost=0.30,
+        marginal_cost=0.24,
+        latency_s=4.0,
+        prompt_tokens=100,
+        completion_tokens=50,
+        total_tokens=150,
+    )
+    _insert_tool_call(
+        db_path,
+        project="qualitative_coding",
+        task="qualitative_coding.retrieval",
+        trace_id=trace_prefix,
+        tool_name="open_web_retrieval",
+        operation="search",
+        status="success",
+        duration_ms=250,
+        cost=0.02,
+    )
+    _insert_tool_call(
+        db_path,
+        project="qualitative_coding",
+        task="qualitative_coding.retrieval",
+        trace_id=f"{trace_prefix}/nested",
+        tool_name="open_web_retrieval",
+        operation="fetch",
+        status="error",
+        duration_ms=750,
+        cost=0.05,
+        error_type="timeout",
+    )
+    _insert_tool_call(
+        db_path,
+        project="qualitative_coding",
+        task="qualitative_coding.retrieval",
+        trace_id="qualitative_coding/project/other",
+        tool_name="ignored",
+        operation="search",
+        status="success",
+        duration_ms=999,
+        cost=9.99,
+    )
+
+    d10 = d10_cost_latency_scorecard(state, db_path)
+    tools = d10["tool_calls"]
+
+    assert tools["status"] == "scored"
+    assert tools["call_count"] == 2
+    assert tools["successful_calls"] == 1
+    assert tools["errored_calls"] == 1
+    assert tools["total_tool_cost_usd"] == pytest.approx(0.07)
+    assert tools["summed_duration_s"] == pytest.approx(1.0)
+    assert tools["mean_duration_s"] == pytest.approx(0.5)
+    assert tools["max_duration_s"] == pytest.approx(0.75)
+    assert tools["tools"] == {"open_web_retrieval": 2}
+    assert tools["operations"] == {"fetch": 1, "search": 1}
+    assert tools["tasks"] == {"qualitative_coding.retrieval": 2}
+    assert d10["combined_observed_cost_usd"] == pytest.approx(0.37)
+    assert d10["combined_observed_duration_s"] == pytest.approx(5.0)
+    assert d10["combined_observed_cost_per_document_usd"] == pytest.approx(0.185)
+    assert d10["combined_observed_duration_per_document_s"] == pytest.approx(2.5)
+
+
+def test_d10_cost_latency_marks_tool_calls_unavailable_when_table_missing(tmp_path):
+    db_path = tmp_path / "observability.db"
+    _create_llm_observability_db(db_path)
+    state = ProjectState(id="project-cost", name="Cost")
+    _insert_llm_call(
+        db_path,
+        project="qualitative_coding",
+        task="qualitative_coding.thematic_coding",
+        trace_id=f"qualitative_coding/project/{state.id}",
+        model="gpt-5-mini",
+        cost=0.30,
+        marginal_cost=0.24,
+        latency_s=4.0,
+        prompt_tokens=100,
+        completion_tokens=50,
+        total_tokens=150,
+    )
+
+    d10 = d10_cost_latency_scorecard(state, db_path)
+
+    assert d10["status"] == "scored"
+    assert d10["tool_calls"]["status"] == "not_available"
+    assert "tool_calls table not found" in d10["tool_calls"]["reason"]
+    assert d10["combined_observed_cost_usd"] == pytest.approx(d10["total_cost_usd"])
+    assert d10["combined_observed_duration_s"] == pytest.approx(d10["summed_latency_s"])
 
 
 def test_d10_cost_latency_uses_explicit_trace_id(tmp_path):
@@ -2465,6 +2576,31 @@ def _create_llm_observability_db(path) -> None:
         conn.close()
 
 
+def _create_tool_observability_table(path) -> None:
+    conn = sqlite3.connect(path)
+    try:
+        conn.execute(
+            """
+            CREATE TABLE tool_calls (
+                timestamp TEXT,
+                project TEXT,
+                tool_name TEXT,
+                operation TEXT,
+                status TEXT,
+                duration_ms INTEGER,
+                task TEXT,
+                trace_id TEXT,
+                cost REAL,
+                error_type TEXT,
+                error_message TEXT
+            )
+            """
+        )
+        conn.commit()
+    finally:
+        conn.close()
+
+
 def _insert_llm_call(
     db_path,
     *,
@@ -2503,6 +2639,49 @@ def _insert_llm_call(
                 task,
                 trace_id,
                 marginal_cost,
+            ),
+        )
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def _insert_tool_call(
+    db_path,
+    *,
+    project: str,
+    task: str,
+    trace_id: str,
+    tool_name: str,
+    operation: str,
+    status: str,
+    duration_ms: int,
+    cost: float,
+    error_type: str | None = None,
+    error_message: str | None = None,
+) -> None:
+    conn = sqlite3.connect(db_path)
+    try:
+        conn.execute(
+            """
+            INSERT INTO tool_calls (
+                timestamp, project, tool_name, operation, status, duration_ms,
+                task, trace_id, cost, error_type, error_message
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                "2026-06-21T00:00:00",
+                project,
+                tool_name,
+                operation,
+                status,
+                duration_ms,
+                task,
+                trace_id,
+                cost,
+                error_type,
+                error_message,
             ),
         )
         conn.commit()
