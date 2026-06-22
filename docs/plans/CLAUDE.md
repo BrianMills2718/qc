@@ -6,7 +6,6 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 114 | D6 bias protocol package | High | Planned | `D6_BIAS_PROTOCOL_PACKAGE.md` |
 
 ## Completed Plans
 
@@ -87,6 +86,7 @@ Track all implementation work here.
 | D5 reliability bootstrap intervals | Evaluation-harness follow-up: `make bench` surfaces deterministic local row-bootstrap intervals for D5 LLM-pass percent agreement and AC1 without claiming human IRR | `completed/D5_RELIABILITY_BOOTSTRAP_INTERVALS.md` |
 | D6 counterfactual bias scorecard | Evaluation-harness follow-up: `make bench BIAS_COUNTERFACTUAL=...` scores externally supplied identity-swap outcomes without claiming a populated bias audit | `completed/D6_COUNTERFACTUAL_BIAS_SCORECARD.md` |
 | D6 stratified bias scorecard | Evaluation-harness follow-up: `make bench BIAS_STRATIFIED=...` scores externally supplied stratified correctness/error diagnostics without claiming a populated bias audit | `completed/D6_STRATIFIED_BIAS_SCORECARD.md` |
+| D6 bias protocol package | Evaluation-harness follow-up: `make validate-d6-bias-protocol` validates pre-run D6 bias-audit protocol metadata without claiming a populated bias audit | `completed/D6_BIAS_PROTOCOL_PACKAGE.md` |
 | Human agreement metadata scorecard | Evaluation-harness follow-up: D3/D7 human-ceiling sections now surface supplied human-human κ/α/AC1 metadata without claiming system agreement-vs-gold | `completed/HUMAN_AGREEMENT_METADATA_SCORECARD.md` |
 | D4 codebook quality scorecard | Evaluation-harness follow-up: `make bench CODEBOOK_QUALITY=...` scores externally supplied rubric outcomes without claiming blind expert-panel evidence | `completed/D4_CODEBOOK_QUALITY_SCORECARD.md` |
 | D9 interpretive preference scorecard | Evaluation-harness follow-up: `make bench PREFERENCE=...` scores externally supplied forced-choice preference outcomes without claiming blind expert-parity evidence | `completed/D9_INTERPRETIVE_PREFERENCE_SCORECARD.md` |

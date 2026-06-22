@@ -1,10 +1,39 @@
 # Plan #114: D6 Bias Protocol Package
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Plan #113 D6 stratified bias scorecard
 **Blocks:** Populated INV-5 bias-audit workflow
+
+---
+
+## Outcome
+
+Implemented in commit `be827ff` and pushed to `main`. The repo now has a
+schema_version=1 D6 bias-audit protocol validator at
+`qc_clean/core/d6_bias_protocol.py`, a machine-readable validator CLI at
+`scripts/validate_d6_bias_protocol.py`, and the Make target
+`make validate-d6-bias-protocol PROTOCOL=protocol.json`. The validator enforces
+ethical respondent-attribute policy, frozen case-set metadata, configured D6
+dimensions, matching stratified/counterfactual strategies, held-out freeze/
+contamination/registration/project-state-hash gates, and dimension-covered
+success criteria. Docs frame this as protocol/provenance only, not populated
+bias-audit evidence or causal proof.
+
+Verification evidence:
+- TDD red slice: `python -m pytest tests/test_d6_bias_protocol.py -q` initially
+  failed because `qc_clean.core.d6_bias_protocol` did not exist.
+- Focused tests: `python -m pytest tests/test_d6_bias_protocol.py -q` -> `6
+  passed`.
+- Focused Ruff: `python -m ruff check qc_clean/core/d6_bias_protocol.py
+  scripts/validate_d6_bias_protocol.py tests/test_d6_bias_protocol.py` ->
+  passed.
+- Make dry run: `make -n validate-d6-bias-protocol PROTOCOL=protocol.json`
+  routes to `python scripts/validate_d6_bias_protocol.py protocol.json`.
+- Docs gate: `make docs-check` passed.
+- Full gate: `make check` -> `953 passed, 1 skipped, 8 deselected`; Ruff and
+  docs checks passed; type check is still not configured.
 
 ---
 
@@ -74,15 +103,15 @@ created.
 
 ### Capability Validation
 
-- [ ] Valid held-out D6 protocol packages are accepted.
-- [ ] Held-out protocols require prompt/model freeze, contamination check,
+- [x] Valid held-out D6 protocol packages are accepted.
+- [x] Held-out protocols require prompt/model freeze, contamination check,
   pre-run registration, project-state hash, and at least one D6 dimension.
-- [ ] Protocols require an ethical attribute policy and a non-empty attribute
+- [x] Protocols require an ethical attribute policy and a non-empty attribute
   strategy before stratified metrics can be configured.
-- [ ] Counterfactual dimensions require a counterfactual strategy.
-- [ ] Success criteria must cover every configured D6 dimension.
-- [ ] Duplicate dimensions and malformed hashes fail loud.
-- [ ] CLI emits machine-readable JSON for valid and invalid packages.
+- [x] Counterfactual dimensions require a counterfactual strategy.
+- [x] Success criteria must cover every configured D6 dimension.
+- [x] Duplicate dimensions and malformed hashes fail loud.
+- [x] CLI emits machine-readable JSON for valid and invalid packages.
 
 ---
 
@@ -177,30 +206,30 @@ Deferred by design:
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] A schema_version=1 D6 protocol JSON can be validated by importable code.
-- [ ] `make validate-d6-bias-protocol PROTOCOL=protocol.json` emits JSON and
+- [x] A schema_version=1 D6 protocol JSON can be validated by importable code.
+- [x] `make validate-d6-bias-protocol PROTOCOL=protocol.json` emits JSON and
   returns non-zero on invalid packages.
-- [ ] Held-out protocols require prompt freeze, contamination check,
+- [x] Held-out protocols require prompt freeze, contamination check,
   pre-run registration, and project-state hash.
-- [ ] Stratified D6 dimensions require ethical attribute policy and stratified
+- [x] Stratified D6 dimensions require ethical attribute policy and stratified
   strategy metadata.
-- [ ] Counterfactual D6 dimensions require counterfactual strategy metadata.
-- [ ] Success criteria are required for every configured dimension.
-- [ ] Docs state protocol validation is process/provenance only.
+- [x] Counterfactual D6 dimensions require counterfactual strategy metadata.
+- [x] Success criteria are required for every configured dimension.
+- [x] Docs state protocol validation is process/provenance only.
 
 > Process criteria:
-- [ ] Required focused tests pass.
-- [ ] Focused Ruff check passes.
-- [ ] `make docs-check` passes.
-- [ ] Full `make check` passes or any failure is documented with evidence.
-- [ ] Type-check status is reported.
-- [ ] Verified work is committed and pushed.
+- [x] Required focused tests pass.
+- [x] Focused Ruff check passes.
+- [x] `make docs-check` passes.
+- [x] Full `make check` passes or any failure is documented with evidence.
+- [x] Type-check status is reported.
+- [x] Verified work is committed and pushed.
 
 ---
 
 ## Open Questions
 
-- [ ] Should the eventual scorecard enforce protocol thresholds such as
+- [x] Should the eventual scorecard enforce protocol thresholds such as
   `minimum_group_size`? — Status: DEFERRED | This plan records thresholds in
   protocol metadata only; enforcement belongs in the later protocol/result
   preflight or benchmark-runner slice.

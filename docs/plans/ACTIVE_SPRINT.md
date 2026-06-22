@@ -22,11 +22,18 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #114 (`D6_BIAS_PROTOCOL_PACKAGE.md`): add a D6 bias-audit
-   protocol package validator before any populated D6 rows are treated as
-   benchmark evidence.
-2. Continue through the ranked roadmap without pausing after each verified
+1. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
+
+**Completed checkpoint:** D6 bias-audit protocols can now be validated with
+`make validate-d6-bias-protocol PROTOCOL=...` /
+`scripts/validate_d6_bias_protocol.py`. The validator checks schema_version=1
+protocol metadata, ethical respondent-attribute policy, frozen case-set
+metadata, configured stratified/counterfactual dimensions, matching strategies,
+held-out prompt/model freeze, contamination check, pre-run registration,
+project-state hash, and success criteria coverage. This is protocol/provenance
+metadata only, not a populated bias audit, causal proof, held-out correctness
+evidence, methodological-validity evidence, or a bias-free claim.
 
 **Completed checkpoint:** Phase 0 now scores externally supplied D6 stratified
 correctness/error rows through `make bench BIAS_STRATIFIED=...`,
