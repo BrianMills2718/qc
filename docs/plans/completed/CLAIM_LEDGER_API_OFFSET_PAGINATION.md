@@ -1,12 +1,37 @@
 # Plan #203: Claim Ledger API Offset Pagination
 
-**Status:** In Progress
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Claim Ledger API Limit Metadata
 **Blocks:** INV-9 agent-drivable claim interpretation
 
 ---
+
+## Outcome
+
+Completed 2026-06-22. API `/projects/{project_id}/claims` now accepts an
+`offset` query parameter, clamps negative offsets to zero, returns applied
+`offset` metadata, and slices claim rows with the existing bounded `limit` page
+size. Offsets beyond the ledger return an empty page with `returned: 0` and the
+unchanged `total_claims` count. This is API pagination/accounting only; it is
+not claim truth, expert adjudication, D7 evidence, disconfirmation validity, or
+SOTA evidence.
+
+## Verification
+
+- TDD red: `python -m pytest tests/test_review_api.py -q` initially failed on
+  missing `offset` metadata for default, positive-offset, and bounded-offset
+  tests.
+- Focused tests: `python -m pytest tests/test_review_api.py -q` (`42 passed`).
+- Focused Ruff:
+  `python -m ruff check qc_clean/plugins/api/api_server.py tests/test_review_api.py`.
+- Docs gate: `make docs-check`.
+- Whitespace gate: `git diff --check`.
+- Full gate: `make check` (`1272 passed, 1 skipped, 8 deselected`; Ruff/docs
+  passed; type check not configured).
+- Implementation commit pushed:
+  `e287e289 [Plan: CLAIM_API_OFFSET] Add claim API offset pagination`.
 
 ## Gap
 
@@ -115,22 +140,22 @@ create a cross-project boundary, registry entry, or new evaluation capability.
 
 Feature-level criteria:
 
-- [ ] API `/projects/{project_id}/claims` accepts `offset`.
-- [ ] Default API behavior reports `offset: 0`.
-- [ ] Positive offsets page claim rows after the applied offset.
-- [ ] Negative offsets clamp to `offset: 0`.
-- [ ] Offsets beyond `total_claims` return an empty `claims` page with
+- [x] API `/projects/{project_id}/claims` accepts `offset`.
+- [x] Default API behavior reports `offset: 0`.
+- [x] Positive offsets page claim rows after the applied offset.
+- [x] Negative offsets clamp to `offset: 0`.
+- [x] Offsets beyond `total_claims` return an empty `claims` page with
   `returned: 0`.
-- [ ] Existing `limit`, `returned`, `total_claims`, and claim row fields remain
+- [x] Existing `limit`, `returned`, `total_claims`, and claim row fields remain
   unchanged.
 
 Process criteria:
 
-- [ ] Required focused tests pass.
-- [ ] Focused Ruff passes.
-- [ ] `make docs-check` passes.
-- [ ] `make check` passes or any failure is documented with evidence.
-- [ ] Verified work is committed and pushed.
+- [x] Required focused tests pass.
+- [x] Focused Ruff passes.
+- [x] `make docs-check` passes.
+- [x] `make check` passes or any failure is documented with evidence.
+- [x] Verified work is committed and pushed.
 
 ---
 
