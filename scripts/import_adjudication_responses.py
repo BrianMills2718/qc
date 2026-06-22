@@ -4,9 +4,11 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import sys
 from pathlib import Path
+from typing import Any
 from typing import Sequence
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -16,6 +18,10 @@ if str(REPO_ROOT) not in sys.path:
 from qc_clean.core.adjudication_import import (
     build_adjudication_gold_import,
     write_adjudication_gold_import,
+)
+from qc_clean.core.adjudication_response_preflight import (
+    AdjudicationResponsePreflightReport,
+    preflight_adjudication_responses_payloads,
 )
 
 
@@ -46,6 +52,16 @@ def main(argv: Sequence[str] | None = None) -> int:
         action="store_true",
         help="Mark train/test contamination as checked for this split",
     )
+    parser.add_argument(
+        "--protocol-package",
+        type=Path,
+        help="Optional adjudication protocol package used to preflight before import",
+    )
+    parser.add_argument(
+        "--sample-package",
+        type=Path,
+        help="Optional adjudication sample package used to preflight before import",
+    )
     parser.add_argument("--notes", default="", help="Optional adjudication notes")
     args = parser.parse_args(argv)
 
@@ -54,7 +70,21 @@ def main(argv: Sequence[str] | None = None) -> int:
         return 1
 
     try:
-        payload = json.loads(args.package.read_text(encoding="utf-8"))
+        payload = _load_json(args.package, label="response package")
+        preflight_report = _run_preflight_if_requested(args, payload)
+        if preflight_report is not None and preflight_report.status != "pass":
+            print(
+                json.dumps(
+                    {
+                        "status": "error",
+                        "error": "Adjudication response preflight failed",
+                        "preflight_report": preflight_report.model_dump(mode="json"),
+                    },
+                    indent=2,
+                )
+            )
+            return 1
+
         result = build_adjudication_gold_import(
             payload,
             gold_set_id=args.gold_set_id,
@@ -80,8 +110,47 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     report = result.report.model_dump(mode="json")
     report.update(outputs)
+    if preflight_report is not None:
+        report["preflight_report"] = preflight_report.model_dump(mode="json")
     print(json.dumps(report, indent=2))
     return 0
+
+
+def _run_preflight_if_requested(
+    args: argparse.Namespace,
+    response_payload: Any,
+) -> AdjudicationResponsePreflightReport | None:
+    """Run response preflight when both guard package paths are supplied."""
+    protocol_path = args.protocol_package
+    sample_path = args.sample_package
+    if (protocol_path is None) != (sample_path is None):
+        raise ValueError("--protocol-package and --sample-package must be supplied together")
+    if protocol_path is None or sample_path is None:
+        return None
+
+    protocol_payload = _load_json(protocol_path, label="protocol package")
+    sample_payload = _load_json(sample_path, label="sample package")
+    return preflight_adjudication_responses_payloads(
+        protocol_payload,
+        sample_payload,
+        response_payload,
+        sample_file_sha256=_sha256_file(sample_path),
+    )
+
+
+def _load_json(path: Path, *, label: str) -> Any:
+    """Load a JSON file or raise a context-rich ValueError."""
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except OSError as exc:
+        raise ValueError(f"Adjudication {label} file '{path}' could not be read: {exc}") from exc
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"Adjudication {label} file '{path}' is not valid JSON: {exc}") from exc
+
+
+def _sha256_file(path: Path) -> str:
+    """Return the SHA-256 hash for a local file."""
+    return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 if __name__ == "__main__":

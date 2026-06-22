@@ -1,5 +1,7 @@
 """Tests for importing adjudication responses into D3/D7 gold packages."""
 
+import copy
+import hashlib
 import json
 
 import pytest
@@ -160,6 +162,129 @@ def test_import_adjudication_responses_script_writes_outputs(tmp_path, capsys):
     assert validate_d7_gold_set_payload(json.loads(d7_out.read_text(encoding="utf-8")))
 
 
+def test_import_script_with_preflight_writes_outputs(tmp_path, capsys):
+    from scripts import import_adjudication_responses
+
+    protocol_path, sample_path, response_path = _write_preflight_guard_files(tmp_path)
+    d3_out = tmp_path / "d3_gold.json"
+    d7_out = tmp_path / "d7_gold.json"
+
+    exit_code = import_adjudication_responses.main(
+        [
+            str(response_path),
+            "--output-d3",
+            str(d3_out),
+            "--output-d7",
+            str(d7_out),
+            "--gold-set-id",
+            "adj-import-v1",
+            "--dataset-name",
+            "Adjudication Import Fixture",
+            "--split",
+            "dev",
+            "--coder-count",
+            "1",
+            "--adjudicator",
+            "coder-1",
+            "--protocol",
+            "Single reviewed response package fixture.",
+            "--protocol-package",
+            str(protocol_path),
+            "--sample-package",
+            str(sample_path),
+        ]
+    )
+    report = json.loads(capsys.readouterr().out)
+
+    assert exit_code == 0
+    assert report["status"] == "complete"
+    assert report["preflight_report"]["status"] == "pass"
+    assert report["d3_output"] == str(d3_out)
+    assert report["d7_output"] == str(d7_out)
+    assert validate_d3_gold_set_payload(json.loads(d3_out.read_text(encoding="utf-8")))
+    assert validate_d7_gold_set_payload(json.loads(d7_out.read_text(encoding="utf-8")))
+
+
+def test_import_script_preflight_failure_blocks_outputs(tmp_path, capsys):
+    from scripts import import_adjudication_responses
+
+    protocol_path, sample_path, response_path = _write_preflight_guard_files(
+        tmp_path,
+        mutate_response=lambda payload: payload["items"][0].update({"item_id": "wrong:item"}),
+    )
+    d3_out = tmp_path / "d3_gold.json"
+    d7_out = tmp_path / "d7_gold.json"
+
+    exit_code = import_adjudication_responses.main(
+        [
+            str(response_path),
+            "--output-d3",
+            str(d3_out),
+            "--output-d7",
+            str(d7_out),
+            "--gold-set-id",
+            "adj-import-v1",
+            "--dataset-name",
+            "Adjudication Import Fixture",
+            "--split",
+            "dev",
+            "--coder-count",
+            "1",
+            "--adjudicator",
+            "coder-1",
+            "--protocol",
+            "Single reviewed response package fixture.",
+            "--protocol-package",
+            str(protocol_path),
+            "--sample-package",
+            str(sample_path),
+        ]
+    )
+    report = json.loads(capsys.readouterr().out)
+
+    assert exit_code == 1
+    assert report["status"] == "error"
+    assert report["preflight_report"]["status"] == "fail"
+    assert "item_ids" in [error["field"] for error in report["preflight_report"]["errors"]]
+    assert not d3_out.exists()
+    assert not d7_out.exists()
+
+
+def test_import_script_rejects_one_sided_preflight_args(tmp_path, capsys):
+    from scripts import import_adjudication_responses
+
+    protocol_path, _sample_path, response_path = _write_preflight_guard_files(tmp_path)
+    d3_out = tmp_path / "d3_gold.json"
+
+    exit_code = import_adjudication_responses.main(
+        [
+            str(response_path),
+            "--output-d3",
+            str(d3_out),
+            "--gold-set-id",
+            "adj-import-v1",
+            "--dataset-name",
+            "Adjudication Import Fixture",
+            "--split",
+            "dev",
+            "--coder-count",
+            "1",
+            "--adjudicator",
+            "coder-1",
+            "--protocol",
+            "Single reviewed response package fixture.",
+            "--protocol-package",
+            str(protocol_path),
+        ]
+    )
+    report = json.loads(capsys.readouterr().out)
+
+    assert exit_code == 1
+    assert report["status"] == "error"
+    assert "protocol-package and --sample-package" in report["error"]
+    assert not d3_out.exists()
+
+
 def _completed_response_payload() -> dict:
     package = build_adjudication_sample_package(
         _import_state(),
@@ -182,6 +307,77 @@ def _completed_response_payload() -> dict:
             "adjudicator_id": "coder-1",
         }
     return package
+
+
+def _write_preflight_guard_files(
+    tmp_path,
+    *,
+    mutate_response=None,
+) -> tuple:
+    response_payload = _completed_response_payload()
+    sample_payload = _sample_payload_from_responses(response_payload)
+
+    sample_path = tmp_path / "sample.json"
+    sample_path.write_text(json.dumps(sample_payload), encoding="utf-8")
+    sample_hash = hashlib.sha256(sample_path.read_bytes()).hexdigest()
+
+    protocol_path = tmp_path / "protocol.json"
+    protocol_path.write_text(
+        json.dumps(_protocol_payload(sample_payload, sample_hash=sample_hash)),
+        encoding="utf-8",
+    )
+
+    if mutate_response is not None:
+        mutate_response(response_payload)
+    response_path = tmp_path / "responses.json"
+    response_path.write_text(json.dumps(response_payload), encoding="utf-8")
+    return protocol_path, sample_path, response_path
+
+
+def _sample_payload_from_responses(response_payload: dict) -> dict:
+    sample_payload = copy.deepcopy(response_payload)
+    for item in sample_payload["items"]:
+        item.pop("response", None)
+    return sample_payload
+
+
+def _protocol_payload(sample_payload: dict, *, sample_hash: str) -> dict:
+    return {
+        "schema_version": 1,
+        "package_type": "adjudication_protocol",
+        "protocol_id": "adj-import-protocol-v1",
+        "project_id": sample_payload["project_id"],
+        "dataset_name": "Adjudication Import Fixture",
+        "split": "dev",
+        "corpus_sha256": sample_payload["corpus_sha256"],
+        "project_state_sha256": sample_payload["project_state_sha256"],
+        "prompt_frozen": False,
+        "contamination_checked": False,
+        "registered_before_labeling": True,
+        "coder_count": 1,
+        "adjudicator": "coder-1",
+        "coder_qualification": "Fixture coder.",
+        "target_dimensions": ["d3_application_validity", "d7_disconfirmation"],
+        "sampling_plan": {
+            "sample_package_path": "sample.json",
+            "sample_package_sha256": sample_hash,
+            "target_item_types": ["code_application", "negative_case"],
+            "sampling_method": "Fixture sample.",
+            "planned_sample_size": 2,
+        },
+        "success_criteria": [
+            {
+                "dimension": "d3_application_validity",
+                "metric": "exact_f1",
+                "pass_condition": "Fixture only.",
+            },
+            {
+                "dimension": "d7_disconfirmation",
+                "metric": "recall",
+                "pass_condition": "Fixture only.",
+            },
+        ],
+    }
 
 
 def _import_state() -> ProjectState:

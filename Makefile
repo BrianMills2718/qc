@@ -92,7 +92,7 @@ ifndef RESPONSES
 endif
 	python scripts/preflight_adjudication_responses.py $(PROTOCOL) $(SAMPLE) $(RESPONSES)
 
-import-adjudication-responses:  ## Import completed adjudication responses to D3/D7 gold packages (PACKAGE=responses.json GOLD_SET_ID=id DATASET_NAME=name CODER_COUNT=1 ADJUDICATOR=id PROTOCOL=summary [D3_OUTPUT=d3.json] [D7_OUTPUT=d7.json])
+import-adjudication-responses:  ## Import completed adjudication responses to D3/D7 gold packages (PACKAGE=responses.json GOLD_SET_ID=id DATASET_NAME=name CODER_COUNT=1 ADJUDICATOR=id PROTOCOL=summary [PREFLIGHT_PROTOCOL=protocol.json PREFLIGHT_SAMPLE=sample.json] [D3_OUTPUT=d3.json] [D7_OUTPUT=d7.json])
 ifndef PACKAGE
 	$(error PACKAGE is required. Usage: make import-adjudication-responses PACKAGE=responses.json GOLD_SET_ID=id DATASET_NAME=name CODER_COUNT=1 ADJUDICATOR=id PROTOCOL=summary D3_OUTPUT=d3.json)
 endif
@@ -114,7 +114,7 @@ endif
 ifeq ($(strip $(D3_OUTPUT)$(D7_OUTPUT)),)
 	$(error D3_OUTPUT or D7_OUTPUT is required)
 endif
-	python scripts/import_adjudication_responses.py $(PACKAGE) $(if $(D3_OUTPUT),--output-d3 $(D3_OUTPUT),) $(if $(D7_OUTPUT),--output-d7 $(D7_OUTPUT),) --gold-set-id "$(GOLD_SET_ID)" --dataset-name "$(DATASET_NAME)" --split "$(or $(SPLIT),dev)" --coder-count "$(CODER_COUNT)" --adjudicator "$(ADJUDICATOR)" --protocol "$(PROTOCOL)" $(if $(PROMPT_FROZEN),--prompt-frozen,) $(if $(CONTAMINATION_CHECKED),--contamination-checked,) $(if $(NOTES),--notes "$(NOTES)",)
+	python scripts/import_adjudication_responses.py $(PACKAGE) $(if $(D3_OUTPUT),--output-d3 $(D3_OUTPUT),) $(if $(D7_OUTPUT),--output-d7 $(D7_OUTPUT),) --gold-set-id "$(GOLD_SET_ID)" --dataset-name "$(DATASET_NAME)" --split "$(or $(SPLIT),dev)" --coder-count "$(CODER_COUNT)" --adjudicator "$(ADJUDICATOR)" --protocol "$(PROTOCOL)" $(if $(PREFLIGHT_PROTOCOL),--protocol-package $(PREFLIGHT_PROTOCOL),) $(if $(PREFLIGHT_SAMPLE),--sample-package $(PREFLIGHT_SAMPLE),) $(if $(PROMPT_FROZEN),--prompt-frozen,) $(if $(CONTAMINATION_CHECKED),--contamination-checked,) $(if $(NOTES),--notes "$(NOTES)",)
 
 lint-scope-phrasing:  ## Lint report text for unsafe scope phrasing (ID=<project_id> INPUT=report.md)
 ifndef ID
