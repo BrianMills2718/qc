@@ -17,6 +17,8 @@ from qc_clean.schemas.domain import (
     ClaimRevision,
     Code,
     CodeApplication,
+    CodeRelationship,
+    DomainEntityRelationship,
     HumanReviewDecision,
     PipelineStatus,
     ProjectState,
@@ -52,6 +54,46 @@ class ReviewManager:
         """Get all analytic claims available for review."""
         return list(self.state.claims)
 
+    def get_pending_relationships(self) -> List[Dict]:
+        """Get code and entity relationships available for review."""
+        code_names = {code.id: code.name for code in self.state.codebook.codes}
+        entity_names = {entity.id: entity.name for entity in self.state.entities}
+        rows: List[Dict] = []
+
+        for rel in self.state.code_relationships:
+            rows.append({
+                "target_type": "code_relationship",
+                "relationship_family": "code",
+                "id": rel.id,
+                "source_id": rel.source_code_id,
+                "target_id": rel.target_code_id,
+                "source_name": code_names.get(rel.source_code_id, rel.source_code_id),
+                "target_name": code_names.get(rel.target_code_id, rel.target_code_id),
+                "relationship_type": rel.relationship_type,
+                "strength": rel.strength,
+                "evidence": list(rel.evidence),
+                "evidence_count": len(rel.evidence),
+                "conditions": list(rel.conditions),
+                "consequences": list(rel.consequences),
+            })
+
+        for rel in self.state.entity_relationships:
+            rows.append({
+                "target_type": "entity_relationship",
+                "relationship_family": "entity",
+                "id": rel.id,
+                "source_id": rel.entity_1_id,
+                "target_id": rel.entity_2_id,
+                "source_name": entity_names.get(rel.entity_1_id, rel.entity_1_id),
+                "target_name": entity_names.get(rel.entity_2_id, rel.entity_2_id),
+                "relationship_type": rel.relationship_type,
+                "strength": rel.strength,
+                "evidence": list(rel.supporting_evidence),
+                "evidence_count": len(rel.supporting_evidence),
+            })
+
+        return rows
+
     def get_review_summary(self) -> ReviewSummary:
         """Summary of what's available for review."""
         active_decisions = sum(1 for decision in self.state.review_decisions if decision.is_active)
@@ -59,6 +101,9 @@ class ReviewManager:
             codes_count=len(self.state.codebook.codes),
             applications_count=len(self.state.code_applications),
             claims_count=len(self.state.claims),
+            relationships_count=(
+                len(self.state.code_relationships) + len(self.state.entity_relationships)
+            ),
             existing_decisions=len(self.state.review_decisions),
             active_decisions=active_decisions,
             inactive_decisions=len(self.state.review_decisions) - active_decisions,
@@ -82,10 +127,15 @@ class ReviewManager:
             self._apply_codebook_decision(decision)
         elif decision.target_type == "claim":
             self._apply_claim_decision(decision)
+        elif decision.target_type == "code_relationship":
+            self._apply_code_relationship_decision(decision)
+        elif decision.target_type == "entity_relationship":
+            self._apply_entity_relationship_decision(decision)
         else:
             raise ValueError(
                 f"Unknown target_type: '{decision.target_type}'. "
-                f"Must be 'code', 'code_application', 'codebook', or 'claim'."
+                "Must be 'code', 'code_application', 'codebook', 'claim', "
+                "'code_relationship', or 'entity_relationship'."
             )
 
         self.state.touch()
@@ -302,6 +352,102 @@ class ReviewManager:
             if claim.id == claim_id:
                 return claim
         return None
+
+    def _apply_code_relationship_decision(self, decision: HumanReviewDecision) -> None:
+        rel = self._get_code_relationship(decision.target_id)
+        if rel is None:
+            raise ValueError(f"Code relationship not found: {decision.target_id}")
+
+        if decision.action == ReviewAction.APPROVE:
+            logger.info("Approved code relationship: %s", decision.target_id)
+        elif decision.action == ReviewAction.REJECT:
+            self.state.code_relationships = [
+                r for r in self.state.code_relationships if r.id != decision.target_id
+            ]
+            logger.info("Rejected code relationship: %s", decision.target_id)
+        elif decision.action == ReviewAction.MODIFY:
+            self._update_relationship_fields(
+                rel,
+                decision,
+                allowed_fields={
+                    "relationship_type",
+                    "strength",
+                    "evidence",
+                    "conditions",
+                    "consequences",
+                },
+                target_label="code_relationship",
+            )
+            logger.info("Modified code relationship: %s", decision.target_id)
+        else:
+            raise ValueError(
+                f"Action '{decision.action.value}' not supported for code_relationship targets. "
+                f"Supported: approve, reject, modify."
+            )
+
+    def _apply_entity_relationship_decision(self, decision: HumanReviewDecision) -> None:
+        rel = self._get_entity_relationship(decision.target_id)
+        if rel is None:
+            raise ValueError(f"Entity relationship not found: {decision.target_id}")
+
+        if decision.action == ReviewAction.APPROVE:
+            logger.info("Approved entity relationship: %s", decision.target_id)
+        elif decision.action == ReviewAction.REJECT:
+            self.state.entity_relationships = [
+                r for r in self.state.entity_relationships if r.id != decision.target_id
+            ]
+            logger.info("Rejected entity relationship: %s", decision.target_id)
+        elif decision.action == ReviewAction.MODIFY:
+            self._update_relationship_fields(
+                rel,
+                decision,
+                allowed_fields={"relationship_type", "strength", "supporting_evidence"},
+                target_label="entity_relationship",
+            )
+            logger.info("Modified entity relationship: %s", decision.target_id)
+        else:
+            raise ValueError(
+                f"Action '{decision.action.value}' not supported for entity_relationship targets. "
+                f"Supported: approve, reject, modify."
+            )
+
+    def _get_code_relationship(self, relationship_id: str) -> CodeRelationship | None:
+        """Return a code relationship by ID."""
+        for rel in self.state.code_relationships:
+            if rel.id == relationship_id:
+                return rel
+        return None
+
+    def _get_entity_relationship(
+        self,
+        relationship_id: str,
+    ) -> DomainEntityRelationship | None:
+        """Return an entity relationship by ID."""
+        for rel in self.state.entity_relationships:
+            if rel.id == relationship_id:
+                return rel
+        return None
+
+    def _update_relationship_fields(
+        self,
+        rel: CodeRelationship | DomainEntityRelationship,
+        decision: HumanReviewDecision,
+        *,
+        allowed_fields: set[str],
+        target_label: str,
+    ) -> None:
+        """Apply a relationship modification after rejecting unknown fields."""
+        if not decision.new_value:
+            return
+
+        unknown_fields = sorted(set(decision.new_value) - allowed_fields)
+        if unknown_fields:
+            raise ValueError(
+                f"Unsupported fields for {target_label} modify: {', '.join(unknown_fields)}"
+            )
+
+        for key, value in decision.new_value.items():
+            setattr(rel, key, value)
 
     def _bump_codebook_version(self) -> None:
         """Save current codebook to history and create new version."""

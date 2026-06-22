@@ -477,6 +477,33 @@ class QCAPIServer:
                 "summary": rm.get_review_summary().model_dump(mode="json"),
             }
 
+        @self._app.get("/projects/{project_id}/review/relationships")
+        async def get_review_relationships(project_id: str, limit: int = 100):
+            """Get code/entity relationships as review targets."""
+            from qc_clean.core.persistence.project_store import ProjectStore
+            from qc_clean.core.pipeline.review import ReviewManager
+            store = ProjectStore()
+            try:
+                state = store.load(project_id)
+            except FileNotFoundError:
+                raise HTTPException(status_code=404, detail=f"Project not found: {project_id}")
+
+            rm = ReviewManager(state)
+            bounded_limit = max(0, limit)
+            all_relationships = rm.get_pending_relationships()
+            relationships = all_relationships[:bounded_limit]
+
+            return {
+                "project_id": state.id,
+                "project_name": state.name,
+                "pipeline_status": state.pipeline_status.value,
+                "relationships": relationships,
+                "returned": len(relationships),
+                "total_relationships": len(all_relationships),
+                "limit": bounded_limit,
+                "summary": rm.get_review_summary().model_dump(mode="json"),
+            }
+
         @self._app.get("/projects/{project_id}/review")
         async def get_review_items(project_id: str):
             """Get pending review items for a project."""
@@ -521,6 +548,9 @@ class QCAPIServer:
                 "applied": result["applied"],
                 "codes_remaining": len(state.codebook.codes),
                 "claims_count": len(state.claims),
+                "relationships_count": (
+                    len(state.code_relationships) + len(state.entity_relationships)
+                ),
                 "can_resume": rm.can_resume(),
             }
 
@@ -712,6 +742,7 @@ class QCAPIServer:
             {"method": "GET", "path": "/review/{project_id}", "description": "Review UI page"},
             {"method": "GET", "path": "/projects/{project_id}/review/codes", "description": "Get codes for review UI"},
             {"method": "GET", "path": "/projects/{project_id}/review/claims", "description": "Get claims for review UI"},
+            {"method": "GET", "path": "/projects/{project_id}/review/relationships", "description": "Get relationships for review API"},
             {"method": "GET", "path": "/projects/{project_id}/review", "description": "Get review summary"},
             {"method": "POST", "path": "/projects/{project_id}/review/decisions", "description": "Submit review decisions"},
             {"method": "POST", "path": "/projects/{project_id}/review/approve-all", "description": "Approve all codes"},

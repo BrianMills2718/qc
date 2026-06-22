@@ -17,10 +17,13 @@ from qc_clean.schemas.domain import (
     ClaimScope,
     Code,
     CodeApplication,
+    CodeRelationship,
     Codebook,
     Corpus,
     CorpusScope,
+    DomainEntityRelationship,
     Document,
+    Entity,
     PipelineStatus,
     ProjectState,
     Provenance,
@@ -69,6 +72,30 @@ def review_project(tmp_store):
         ),
         codebook=Codebook(codes=codes),
         code_applications=apps,
+        code_relationships=[
+            CodeRelationship(
+                id="CR1",
+                source_code_id="C1",
+                target_code_id="C2",
+                relationship_type="supports",
+                strength=0.7,
+                evidence=["evidence 1"],
+            )
+        ],
+        entities=[
+            Entity(id="E1", name="Scheduler", entity_type="tool"),
+            Entity(id="E2", name="Front desk", entity_type="team"),
+        ],
+        entity_relationships=[
+            DomainEntityRelationship(
+                id="ER1",
+                entity_1_id="E1",
+                entity_2_id="E2",
+                relationship_type="used_by",
+                strength=0.8,
+                supporting_evidence=["evidence 2"],
+            )
+        ],
         claims=[
             AnalyticClaim(
                 id="claim-review-api",
@@ -233,6 +260,38 @@ class TestReviewClaimsEndpoint:
         assert resp.status_code == 404
 
 
+class TestReviewRelationshipsEndpoint:
+    def test_returns_relationships_for_review(self, client):
+        resp = client.get("/projects/test-project-123/review/relationships")
+
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["project_id"] == "test-project-123"
+        assert data["project_name"] == "Test Review Project"
+        assert data["pipeline_status"] == "paused_for_review"
+        assert data["summary"]["relationships_count"] == 2
+        assert data["returned"] == 2
+        assert data["total_relationships"] == 2
+        code_rel = data["relationships"][0]
+        assert code_rel["target_type"] == "code_relationship"
+        assert code_rel["id"] == "CR1"
+        assert code_rel["source_name"] == "Theme A"
+        assert code_rel["target_name"] == "Theme B"
+        assert code_rel["relationship_type"] == "supports"
+        assert code_rel["evidence_count"] == 1
+        entity_rel = data["relationships"][1]
+        assert entity_rel["target_type"] == "entity_relationship"
+        assert entity_rel["id"] == "ER1"
+        assert entity_rel["source_name"] == "Scheduler"
+        assert entity_rel["target_name"] == "Front desk"
+        assert entity_rel["relationship_type"] == "used_by"
+        assert entity_rel["evidence_count"] == 1
+
+    def test_404_for_missing_project(self, client):
+        resp = client.get("/projects/nonexistent/review/relationships")
+        assert resp.status_code == 404
+
+
 class TestReviewDecisionsEndpoint:
     def test_submit_decisions(self, client):
         resp = client.post("/projects/test-project-123/review/decisions", json={
@@ -322,6 +381,41 @@ class TestReviewDecisionsEndpoint:
         assert claim.adjudication_status == ClaimAdjudicationStatus.RETAINED
         assert claim.revision_history[-1].action == "approve"
         assert claim.revision_history[-1].rationale == "Reviewed against source evidence."
+
+    def test_relationship_decision_persists(self, client, tmp_store):
+        resp = client.post("/projects/test-project-123/review/decisions", json={
+            "decisions": [
+                {
+                    "target_type": "code_relationship",
+                    "target_id": "CR1",
+                    "action": "modify",
+                    "rationale": "Reviewer narrowed the relation.",
+                    "new_value": {
+                        "relationship_type": "moderates",
+                        "strength": 0.9,
+                        "evidence": ["reviewed evidence"],
+                    },
+                },
+                {
+                    "target_type": "entity_relationship",
+                    "target_id": "ER1",
+                    "action": "reject",
+                    "rationale": "Entity link was unsupported.",
+                },
+            ]
+        })
+
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["applied"] == 2
+        assert data["relationships_count"] == 1
+        state = tmp_store.load("test-project-123")
+        assert len(state.entity_relationships) == 0
+        assert len(state.code_relationships) == 1
+        rel = state.code_relationships[0]
+        assert rel.relationship_type == "moderates"
+        assert rel.strength == 0.9
+        assert rel.evidence == ["reviewed evidence"]
 
     def test_empty_decisions(self, client):
         resp = client.post("/projects/test-project-123/review/decisions", json={

@@ -11,9 +11,12 @@ from qc_clean.schemas.domain import (
     ClaimScope,
     Code,
     CodeApplication,
+    CodeRelationship,
     Codebook,
     Corpus,
+    DomainEntityRelationship,
     Document,
+    Entity,
     HumanReviewDecision,
     PipelineStatus,
     ProjectState,
@@ -240,6 +243,153 @@ class TestReviewManager:
             rm.apply_decision(HumanReviewDecision(
                 target_type="claim",
                 target_id="claim-1",
+                action=ReviewAction.MERGE,
+            ))
+
+    def test_relationship_review_summary_and_pending_rows(self, review_state):
+        review_state.entities = [
+            Entity(id="E1", name="Scheduler", entity_type="tool"),
+            Entity(id="E2", name="Front desk", entity_type="team"),
+        ]
+        review_state.code_relationships = [
+            CodeRelationship(
+                id="CR1",
+                source_code_id="C1",
+                target_code_id="C2",
+                relationship_type="supports",
+                strength=0.7,
+                evidence=["quote one"],
+            )
+        ]
+        review_state.entity_relationships = [
+            DomainEntityRelationship(
+                id="ER1",
+                entity_1_id="E1",
+                entity_2_id="E2",
+                relationship_type="used_by",
+                strength=0.8,
+                supporting_evidence=["quote two"],
+            )
+        ]
+        rm = ReviewManager(review_state)
+
+        summary = rm.get_review_summary()
+        rows = rm.get_pending_relationships()
+
+        assert summary.relationships_count == 2
+        assert [row["target_type"] for row in rows] == [
+            "code_relationship",
+            "entity_relationship",
+        ]
+        assert rows[0]["source_name"] == "Theme A"
+        assert rows[0]["target_name"] == "Theme B"
+        assert rows[0]["evidence_count"] == 1
+        assert rows[1]["source_name"] == "Scheduler"
+        assert rows[1]["target_name"] == "Front desk"
+
+    def test_code_relationship_review_reject_modify_and_missing_id(self, review_state):
+        review_state.code_relationships = [
+            CodeRelationship(
+                id="CR1",
+                source_code_id="C1",
+                target_code_id="C2",
+                relationship_type="supports",
+                strength=0.7,
+                evidence=["old evidence"],
+            ),
+            CodeRelationship(
+                id="CR2",
+                source_code_id="C2",
+                target_code_id="C3",
+                relationship_type="contrasts",
+                strength=0.4,
+            ),
+        ]
+        rm = ReviewManager(review_state)
+
+        rm.apply_decision(HumanReviewDecision(
+            target_type="code_relationship",
+            target_id="CR1",
+            action=ReviewAction.REJECT,
+            rationale="Not supported.",
+        ))
+        assert [rel.id for rel in review_state.code_relationships] == ["CR2"]
+
+        rm.apply_decision(HumanReviewDecision(
+            target_type="code_relationship",
+            target_id="CR2",
+            action=ReviewAction.MODIFY,
+            rationale="Narrowed after review.",
+            new_value={
+                "relationship_type": "moderates",
+                "strength": 0.9,
+                "evidence": ["updated evidence"],
+                "conditions": ["when staffing is thin"],
+                "consequences": ["handoffs change"],
+            },
+        ))
+        rel = review_state.code_relationships[0]
+        assert rel.relationship_type == "moderates"
+        assert rel.strength == 0.9
+        assert rel.evidence == ["updated evidence"]
+        assert rel.conditions == ["when staffing is thin"]
+        assert rel.consequences == ["handoffs change"]
+
+        with pytest.raises(ValueError, match="Code relationship not found"):
+            rm.apply_decision(HumanReviewDecision(
+                target_type="code_relationship",
+                target_id="missing",
+                action=ReviewAction.APPROVE,
+            ))
+
+    def test_entity_relationship_review_reject_modify_and_unsupported_action(self, review_state):
+        review_state.entity_relationships = [
+            DomainEntityRelationship(
+                id="ER1",
+                entity_1_id="E1",
+                entity_2_id="E2",
+                relationship_type="used_by",
+                strength=0.8,
+                supporting_evidence=["old evidence"],
+            ),
+            DomainEntityRelationship(
+                id="ER2",
+                entity_1_id="E2",
+                entity_2_id="E3",
+                relationship_type="reports_to",
+                strength=0.5,
+            ),
+        ]
+        rm = ReviewManager(review_state)
+
+        rm.apply_decision(HumanReviewDecision(
+            target_type="entity_relationship",
+            target_id="ER1",
+            action=ReviewAction.REJECT,
+            rationale="Rejected by reviewer.",
+        ))
+        assert [rel.id for rel in review_state.entity_relationships] == ["ER2"]
+
+        rm.apply_decision(HumanReviewDecision(
+            target_type="entity_relationship",
+            target_id="ER2",
+            action=ReviewAction.MODIFY,
+            rationale="Updated type.",
+            new_value={
+                "relationship_type": "coordinates_with",
+                "strength": 0.6,
+                "supporting_evidence": ["new evidence"],
+            },
+        ))
+        rel = review_state.entity_relationships[0]
+        assert rel.relationship_type == "coordinates_with"
+        assert rel.strength == 0.6
+        assert rel.supporting_evidence == ["new evidence"]
+
+        with pytest.raises(ValueError, match="not supported for entity_relationship targets"):
+            rm.apply_decision(HumanReviewDecision(
+                target_type="entity_relationship",
+                target_id="ER2",
                 action=ReviewAction.MERGE,
             ))
 
