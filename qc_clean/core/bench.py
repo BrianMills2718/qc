@@ -462,12 +462,20 @@ class InterpretivePreferenceEvaluation(BaseModel):
         default="unspecified",
         description="Evaluator identifier or redacted label",
     )
+    evaluator_type: str = Field(
+        default="unspecified",
+        description="Evaluator type, such as human_expert or llm_judge",
+    )
     preferred: str = Field(
         description="Forced-choice preference: system, human, or tie"
     )
     criterion: str = Field(
         default="interpretive_depth",
         description="Preference criterion, such as interpretive_depth",
+    )
+    surface: str = Field(
+        default="unspecified",
+        description="Compared surface, such as codebook or themes",
     )
     notes: str = Field(default="", description="Optional human-readable notes")
 
@@ -478,7 +486,9 @@ class InterpretivePreferenceEvaluation(BaseModel):
         if not self.case_id:
             raise ValueError("interpretive preference case_id must be non-empty")
         self.evaluator = self.evaluator.strip() or "unspecified"
+        self.evaluator_type = self.evaluator_type.strip() or "unspecified"
         self.criterion = self.criterion.strip() or "interpretive_depth"
+        self.surface = self.surface.strip() or "unspecified"
         self.preferred = self.preferred.strip().lower()
         if self.preferred not in {"system", "human", "tie"}:
             raise ValueError("interpretive preference preferred must be system, human, or tie")
