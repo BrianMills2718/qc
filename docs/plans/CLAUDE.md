@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 192 | INV-11 recode refresh policy config | High | Planned | `INV11_RECODE_REFRESH_POLICY_CONFIG.md` |
 
 ## Completed Plans
 
