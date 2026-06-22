@@ -136,3 +136,29 @@ Process criteria:
 
 This guards custom prompt renderer metadata, not default prompt behavior or
 model obedience.
+
+## Closeout Notes
+
+Completed 2026-06-22.
+
+Outcome: `render_prompt_override()` now validates declared metadata placeholder
+values before rendering. Metadata must be scalar (`str`, `int`, `float`, `bool`,
+or `None`), and string metadata must be single-line. Structured metadata and
+CR/LF-bearing metadata fail loudly before any LLM call; a GT custom-prompt
+regression covers malicious multi-line `doc_name` metadata.
+
+Checkpoints:
+
+- Plan checkpoint: `cea310f`
+- Implementation checkpoint: `1beaf35`
+
+Verification:
+
+- `python -m pytest tests/test_prompt_boundaries_inv7.py -q` (`25 passed`)
+- `python -m pytest tests/test_prompt_override_registry.py -q` (`4 passed`)
+- `make docs-check`
+- `make check` (`1108 passed, 1 skipped, 8 deselected`)
+
+Caveat: this is structural custom-prompt metadata hardening only. It does not
+prove model obedience, default prompt robustness, or a committed live
+adversarial benchmark result.

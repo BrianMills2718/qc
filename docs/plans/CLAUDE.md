@@ -6,12 +6,12 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 158 | INV-7 prompt override metadata boundary | High | Planned | `INV7_PROMPT_OVERRIDE_METADATA_BOUNDARY.md` |
 
 ## Completed Plans
 
 | Name | Outcome | Record |
 |------|---------|--------|
+| INV-7 prompt override metadata boundary | Prompt override rendering now rejects structured or multi-line metadata placeholder values before custom prompt rendering | `completed/INV7_PROMPT_OVERRIDE_METADATA_BOUNDARY.md` |
 | INV-7 prompt override data value boundary | Prompt override rendering now rejects raw/unwrapped values supplied for declared data placeholders before any LLM call | `completed/INV7_PROMPT_OVERRIDE_DATA_VALUE_BOUNDARY.md` |
 | Line ending normalization | Tracked text files are LF-normalized and `.gitattributes` now records an LF text policy; CRLF scans return no tracked text matches | `completed/LINE_ENDING_NORMALIZATION.md` |
 | Cost observability target verification | `make cost` returns real llm_client cost/embedding tables and `make errors` returns a clear recent-error summary, so no fallback replacement was needed | `completed/COST_OBSERVABILITY_TARGET_VERIFICATION.md` |

@@ -22,16 +22,17 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #158: require prompt override metadata placeholders to be
-   scalar single-line values before rendering custom prompts.
+1. Select the next highest-value documented roadmap lane from
+   `docs/PROJECT_THEORY_AND_GOALS.md` and `docs/EVALUATION_HARNESS.md`.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Plan #158
-(`docs/plans/INV7_PROMPT_OVERRIDE_METADATA_BOUNDARY.md`) continues deterministic
-INV-7 custom-prompt hardening. Declared metadata placeholders can be rendered
-unwrapped by custom templates, so this slice rejects structured metadata and
-string metadata with CR/LF before rendering.
+**Completed checkpoint:** Prompt override rendering now rejects structured
+metadata values and string metadata values containing CR/LF before rendering.
+This protects declared metadata placeholders such as GT `doc_name` from adding
+unprefixed prompt lines through custom templates. It is structural boundary
+hardening only, not model-obedience or live prompt-injection robustness
+evidence.
 
 **Completed checkpoint:** Prompt override rendering now rejects raw/unwrapped
 values supplied for declared required or optional data placeholders before any
