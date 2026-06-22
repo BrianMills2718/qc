@@ -6,7 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| #82 | INV-11 Narrow Surface Warnings | High | Planned | `INV11_NARROW_SURFACE_WARNINGS.md` |
+| #82 | INV-11 Narrow Surface Warnings | High | Implemented | `INV11_NARROW_SURFACE_WARNINGS.md` |
 
 ## Completed Plans
 

@@ -1,6 +1,6 @@
 # Plan #82: INV-11 Narrow Surface Warnings
 
-**Status:** Planned
+**Status:** Implemented
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Plan #22 INV-11 hard invalidation
@@ -103,18 +103,23 @@ new shared capability.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] MCP `qc_get_codebook` includes `data_warnings` when the state has warnings.
-- [ ] Code graph endpoint response includes `data_warnings` when the state has warnings.
-- [ ] Entity graph endpoint response includes `data_warnings` when the state has warnings.
-- [ ] Warning-free responses remain unchanged.
-- [ ] Docs state INV-11 still lacks auto-recompute, but no longer name these
+- [x] MCP `qc_get_codebook` includes `data_warnings` when the state has warnings.
+- [x] Code graph endpoint response includes `data_warnings` when the state has warnings.
+- [x] Entity graph endpoint response includes `data_warnings` when the state has warnings.
+- [x] Warning-free responses remain unchanged.
+- [x] Docs state INV-11 still lacks auto-recompute, but no longer name these
   narrow surfaces as warning gaps.
 
 > Process criteria:
-- [ ] Required tests pass
-- [ ] Full test suite passes
-- [ ] Type check status is reported
-- [ ] Docs updated
+- [x] Required tests pass
+- [x] Full test suite passes
+- [x] Type check status is reported
+- [x] Docs updated
+
+## Verification
+
+- `python -m pytest tests/test_mcp_server.py::TestInspection::test_get_codebook tests/test_mcp_server.py::TestInspection::test_get_codebook_surfaces_data_warnings tests/test_graph_ui.py::TestCodeGraphEndpoint::test_code_graph_surfaces_data_warnings tests/test_graph_ui.py::TestEntityGraphEndpoint::test_entity_graph_surfaces_data_warnings tests/test_graph_ui.py -q` — 17 passed.
+- `make check` — 804 passed, 1 skipped, 8 deselected; lint/docs passed; type check not yet configured.
 
 ---
 

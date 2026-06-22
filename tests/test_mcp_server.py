@@ -255,6 +255,14 @@ class TestInspection:
         result = json.loads(qc_mcp_server.qc_get_codebook("proj-1"))
         assert result["code_count"] == 0
 
+    def test_get_codebook_surfaces_data_warnings(self, completed_project, tmp_store):
+        completed_project.data_warnings = ["Incremental recode invalidated synthesis."]
+        tmp_store.save(completed_project)
+
+        result = json.loads(qc_mcp_server.qc_get_codebook("proj-done"))
+
+        assert result["data_warnings"] == ["Incremental recode invalidated synthesis."]
+
     def test_get_codebook_not_found(self, tmp_store):
         result = json.loads(qc_mcp_server.qc_get_codebook("nope"))
         assert "error" in result

@@ -327,12 +327,15 @@ class QCAPIServer:
                     "strength": rel.strength,
                 })
 
-            return {
+            response = {
                 "project_name": state.name,
                 "nodes": nodes,
                 "hierarchy_edges": hierarchy_edges,
                 "relationship_edges": relationship_edges,
             }
+            if state.data_warnings:
+                response["data_warnings"] = list(state.data_warnings)
+            return response
 
         @self._app.get("/projects/{project_id}/graph/entities")
         async def get_graph_entities(project_id: str):
@@ -362,11 +365,14 @@ class QCAPIServer:
                     "strength": rel.strength,
                 })
 
-            return {
+            response = {
                 "project_name": state.name,
                 "nodes": nodes,
                 "edges": edges,
             }
+            if state.data_warnings:
+                response["data_warnings"] = list(state.data_warnings)
+            return response
 
         # ----- Review UI -----
         @self._app.get("/review/{project_id}")

@@ -105,12 +105,15 @@ def _build_code_graph_response(state: ProjectState) -> dict:
             "strength": rel.strength,
         })
 
-    return {
+    response = {
         "project_name": state.name,
         "nodes": nodes,
         "hierarchy_edges": hierarchy_edges,
         "relationship_edges": relationship_edges,
     }
+    if state.data_warnings:
+        response["data_warnings"] = list(state.data_warnings)
+    return response
 
 
 def _build_entity_graph_response(state: ProjectState) -> dict:
@@ -133,11 +136,14 @@ def _build_entity_graph_response(state: ProjectState) -> dict:
             "strength": rel.strength,
         })
 
-    return {
+    response = {
         "project_name": state.name,
         "nodes": nodes,
         "edges": edges,
     }
+    if state.data_warnings:
+        response["data_warnings"] = list(state.data_warnings)
+    return response
 
 
 # ---------------------------------------------------------------------------
@@ -223,6 +229,14 @@ class TestCodeGraphEndpoint:
         assert len(resp["nodes"]) == 1
         assert len(resp["hierarchy_edges"]) == 0
 
+    def test_code_graph_surfaces_data_warnings(self):
+        state = _make_state_with_graph_data()
+        state.data_warnings = ["Incremental recode invalidated code relationships."]
+        resp = _build_code_graph_response(state)
+        assert resp["data_warnings"] == [
+            "Incremental recode invalidated code relationships."
+        ]
+
 
 class TestEntityGraphEndpoint:
 
@@ -256,3 +270,11 @@ class TestEntityGraphEndpoint:
         resp = _build_entity_graph_response(state)
         assert resp["nodes"] == []
         assert resp["edges"] == []
+
+    def test_entity_graph_surfaces_data_warnings(self):
+        state = _make_state_with_graph_data()
+        state.data_warnings = ["Incremental recode invalidated entity relationships."]
+        resp = _build_entity_graph_response(state)
+        assert resp["data_warnings"] == [
+            "Incremental recode invalidated entity relationships."
+        ]

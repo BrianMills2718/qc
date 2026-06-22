@@ -313,6 +313,7 @@ def qc_get_codebook(project_id: str) -> str:
         "codebook_version": state.codebook.version,
         "code_count": len(codes),
         "codes": codes,
+        **_warn_payload(state),
     }, indent=2)
 
 
