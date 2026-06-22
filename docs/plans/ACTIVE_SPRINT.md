@@ -22,10 +22,19 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Select the next highest-value documented roadmap lane from
-   `docs/PROJECT_THEORY_AND_GOALS.md` and `docs/EVALUATION_HARNESS.md`.
+1. Execute Plan #150: add deterministic Phase 0 claim-anchor coverage accounting
+   for INV-9 ledger entries without turning anchor presence into validity
+   evidence.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
+
+**Active checkpoint:** Plan #150 (`docs/plans/INV9_CLAIM_ANCHOR_COVERAGE_SCORECARD.md`)
+targets the INV-9 blind spot where higher-order claims can remain
+`needs_anchor` while the Phase 0 scorecard does not quantify that state. The
+slice is deterministic scorecard accounting only: it must report
+anchored/unanchored claim counts and breakdowns, and it must preserve the claim
+discipline that source anchors are not truth, human adjudication,
+disconfirmation coverage, methodological validity, or SOTA evidence.
 
 **Completed checkpoint:** `qc_cli.py validate-inv7-package`,
 `qc_cli.py validate-inv7-live-protocol`, and `qc_cli.py inv7-live-preflight`

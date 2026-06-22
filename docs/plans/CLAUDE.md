@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 150 | INV-9 claim-anchor coverage scorecard | High | Planned | `INV9_CLAIM_ANCHOR_COVERAGE_SCORECARD.md` |
 
 ## Completed Plans
 
