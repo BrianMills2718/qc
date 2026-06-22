@@ -26,8 +26,11 @@ highest-value documented lane.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** No implementation plan is active. Select and plan the
-next deterministic roadmap lane before editing code.
+**Active checkpoint:** Plan #195 is active: add top-level `qc_cli.py` wrappers
+for scope-phrasing and prompt-override governance lint checks. This slice should
+delegate to the canonical scripts without changing scope-lint rules,
+prompt-override registry rules, prompt rendering, corpus-scope semantics, or
+claim discipline.
 
 **Completed checkpoint:** `qc_cli.py` now wraps the standalone export-audit
 scripts through top-level commands: `export-audit-manifest`,

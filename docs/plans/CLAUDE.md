@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 195 | QC CLI governance lint surfaces | High | Planned | `QC_CLI_GOVERNANCE_LINT_SURFACES.md` |
 
 ## Completed Plans
 
