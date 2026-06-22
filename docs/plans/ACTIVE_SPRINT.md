@@ -42,7 +42,9 @@ structural fixture export (`make run-inv7-fixtures`) and opt-in live model
 canary fixture export (`make run-inv7-live-fixtures`) for the `PROMPT_INJECTION=`
 scorecard path. D3/D7 scorecards also compare exact recall/precision/F1 against
 supplied versioned-package human-human metrics when present and surface supplied
-human-human κ/α/AC1 metadata separately. D5 reliability now
+human-human κ/α/AC1 metadata separately. Phase 0 now also scores externally
+supplied D4 codebook-quality rubric outcomes through `CODEBOOK_QUALITY=` /
+`--codebook-quality-file`. D5 reliability now
 surfaces Gwet's AC1 for LLM-pass codebook-discovery, positive application-cell,
 and segment-decision consistency when IRR results exist, with rating prevalence
 tables and deterministic local row-bootstrap intervals in the Phase 0 scorecard.
@@ -51,8 +53,9 @@ outcomes through `BIAS_COUNTERFACTUAL=` / `--bias-counterfactual-file`. This
 remains a
 gold-dependent exact-score/provenance/uncertainty, human-ceiling-comparison, and
 canary-fixture/counterfactual-accounting substrate, not a populated held-out
-benchmark, full D3/D7 validity, populated D6 bias audit, populated κ/α/AC1 human
-agreement benchmark, populated human-ceiling agreement,
+benchmark, full D3/D7 validity, populated D4 LLM-judge/blind-expert evaluation,
+populated D6 bias audit, populated κ/α/AC1 human agreement benchmark,
+populated human-ceiling agreement,
 held-out live-baseline result,
 committed/scored live adversarial prompt-injection benchmark, or expert-parity/SOTA
 evidence.

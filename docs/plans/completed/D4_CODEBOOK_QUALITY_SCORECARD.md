@@ -1,12 +1,31 @@
 # Plan #50: D4 Codebook Quality Scorecard
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** None
 **Blocks:** D4 codebook-quality measurement substrate
 
 ---
+
+## Outcome
+
+Phase 0 scorecards now include `codebook_quality_d4`, which scores externally
+supplied rubric outcomes from
+`ProjectState.config.extra["codebook_quality_evaluations"]`,
+`make bench CODEBOOK_QUALITY=quality.json`, `scripts/bench_phase0.py
+--codebook-quality-file`, or `qc_cli.py bench --codebook-quality-file`. The
+scorecard reports evaluator-type counts, per-metric clarity/specificity/
+usefulness/grounding summaries, overall mean, and by-evaluator-type summaries.
+External D4 files are hashed in `_meta.input_hashes` and recorded in Phase 0
+artifact command provenance. The docs keep this as a local measurement substrate
+only, not blind expert-panel evidence or codebook-validity proof.
+
+**Verification:**
+- `python -m pytest tests/test_bench_phase0.py tests/test_bench_phase0_script.py tests/test_qc_cli_bench.py -q` - 61 passed.
+- `python -m ruff check qc_clean/core/bench.py scripts/bench_phase0.py qc_cli.py tests/test_bench_phase0.py tests/test_bench_phase0_script.py tests/test_qc_cli_bench.py` - passed.
+- `python scripts/check_markdown_links.py` - passed.
+- `make check` - 742 passed, 1 skipped, 8 deselected; Ruff and docs checks passed; type check not yet configured.
 
 ## Gap
 
@@ -61,10 +80,10 @@ Internal scorecard capability only; no cross-project boundary is created.
 
 ### Capability Validation
 
-- [ ] Rubric outcomes are Pydantic-validated and fail loudly when malformed.
-- [ ] Each rubric metric is constrained to the 0-1 range.
-- [ ] Overall and by-evaluator-type metric summaries are deterministic.
-- [ ] External files are hashed in `_meta.input_hashes` and recorded in artifact command provenance.
+- [x] Rubric outcomes are Pydantic-validated and fail loudly when malformed.
+- [x] Each rubric metric is constrained to the 0-1 range.
+- [x] Overall and by-evaluator-type metric summaries are deterministic.
+- [x] External files are hashed in `_meta.input_hashes` and recorded in artifact command provenance.
 
 ---
 
@@ -129,23 +148,23 @@ Internal scorecard capability only; no cross-project boundary is created.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] Scorecard has `codebook_quality_d4` with explicit unavailable state when
+- [x] Scorecard has `codebook_quality_d4` with explicit unavailable state when
   no rubric outcomes exist.
-- [ ] Scored output reports evaluator counts plus clarity, specificity,
+- [x] Scored output reports evaluator counts plus clarity, specificity,
   usefulness, grounding, and overall means.
-- [ ] External D4 JSON file can be supplied through Make, script, and `qc_cli`
+- [x] External D4 JSON file can be supplied through Make, script, and `qc_cli`
   without mutating saved project state.
-- [ ] Phase 0 input hashes and artifact command provenance include the D4
+- [x] Phase 0 input hashes and artifact command provenance include the D4
   external file.
-- [ ] Docs preserve the caveat that this is not blind expert-panel evidence or
+- [x] Docs preserve the caveat that this is not blind expert-panel evidence or
   codebook-validity proof.
 
 > Process criteria:
-- [ ] Required tests pass
-- [ ] Full test suite passes
-- [ ] Type check status reported
-- [ ] Docs updated
-- [ ] Plan completed, committed, and pushed
+- [x] Required tests pass
+- [x] Full test suite passes
+- [x] Type check status reported
+- [x] Docs updated
+- [x] Plan completed, committed, and pushed
 
 ---
 
