@@ -26,12 +26,17 @@ highest-value documented lane.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Plan #174 is active: add diagnostic-only D3 baseline
-span-overlap metadata under `application_validity_d3.baselines.<name>` using
-the existing same-code/document IoU and Modified Hausdorff machinery. This slice
-must not change exact D3 baseline scores/deltas and must not claim semantic
-application validity, held-out D3 evidence, expert parity, superiority
-evidence, or SOTA.
+**Active checkpoint:** Select and plan the next deterministic, high-value
+roadmap lane. No implementation plan is currently active.
+
+**Completed checkpoint:** D3 baseline rows now include diagnostic-only
+`span_overlap` metadata under `application_validity_d3.baselines.<name>`. The
+diagnostic compares baseline code-application anchors against D3 gold using the
+same same-code/document character-span IoU and Modified Hausdorff logic as the
+system D3 overlap section, while exact baseline TP/FP/FN, recall/precision/F1,
+system-minus-baseline deltas, and bootstrap CI behavior remain unchanged. This
+is local error-analysis metadata only, not semantic application validity,
+held-out D3 evidence, expert parity, superiority evidence, or SOTA evidence.
 
 **Completed checkpoint:** `make bench` / `qc_cli.py bench` can now optionally
 enforce INV-7 live protocol/result preflight before scoring supplied

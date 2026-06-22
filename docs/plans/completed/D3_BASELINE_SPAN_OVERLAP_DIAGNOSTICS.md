@@ -1,12 +1,41 @@
 # Plan #174: D3 Baseline Span-Overlap Diagnostics
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** D3 application-validity scorecard and D3 baseline comparison
 substrate
 **Blocks:** Better D3 baseline error analysis for future held-out adjudication
 and baseline comparison packages
+
+---
+
+## Outcome
+
+Implemented and pushed in `01086e6`
+(`[Plan: D3_BASELINE_SPAN_OVERLAP_DIAGNOSTICS] Add D3 baseline span
+diagnostics`). D3 baseline rows now include additive
+`application_validity_d3.baselines.<name>.span_overlap` diagnostics using the
+same same-code/document IoU and Modified Hausdorff machinery as the system D3
+section. Exact baseline TP/FP/FN, recall/precision/F1, system-minus-baseline
+deltas, and bootstrap CI behavior remain unchanged.
+
+Verification:
+
+- TDD red state observed: focused D3 baseline/span slice failed with 3 missing
+  `span_overlap` failures before implementation.
+- `python -m pytest tests/test_bench_phase0.py tests/test_bench_phase0_script.py -k "d3 and (baseline or span_overlap)" -q`
+  passed: 9 passed, 110 deselected.
+- `python -m ruff check qc_clean/core/bench.py tests/test_bench_phase0.py tests/test_bench_phase0_script.py`
+  passed.
+- `make docs-check` passed.
+- `git diff --check` passed.
+- `make check` passed: 1151 passed, 1 skipped, 8 deselected; Ruff and
+  docs-check passed; type check is not configured.
+
+Claim discipline: this is local error-analysis metadata only. It does not prove
+semantic application validity, populate held-out D3 evidence, establish expert
+parity, show baseline superiority/non-inferiority, or support any SOTA claim.
 
 ---
 
@@ -71,14 +100,14 @@ Internal scorecard diagnostic only; no new cross-project boundary is created.
 
 ### Capability Validation
 
-- [ ] Every scored D3 baseline row includes `span_overlap`.
-- [ ] Baseline overlap diagnostics compare only same-code/document character
+- [x] Every scored D3 baseline row includes `span_overlap`.
+- [x] Baseline overlap diagnostics compare only same-code/document character
   spans.
-- [ ] Near-boundary baseline predictions report non-zero IoU/Modified Hausdorff
+- [x] Near-boundary baseline predictions report non-zero IoU/Modified Hausdorff
   diagnostics while exact baseline TP/FP/FN remain unchanged.
-- [ ] Segment-only or missing-offset baseline/gold anchors are counted as
+- [x] Segment-only or missing-offset baseline/gold anchors are counted as
   unscored instead of guessed.
-- [ ] Existing unguarded D3 baseline exact metrics, deltas, and bootstrap CIs
+- [x] Existing unguarded D3 baseline exact metrics, deltas, and bootstrap CIs
   remain unchanged.
 
 ---
@@ -140,26 +169,26 @@ Internal scorecard diagnostic only; no new cross-project boundary is created.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] `application_validity_d3.baselines.<name>.span_overlap` appears for every
+- [x] `application_validity_d3.baselines.<name>.span_overlap` appears for every
   scored D3 baseline.
-- [ ] Baseline overlap diagnostics use same-code/document matching.
-- [ ] Near-boundary D3 baseline spans report IoU and Modified Hausdorff values
+- [x] Baseline overlap diagnostics use same-code/document matching.
+- [x] Near-boundary D3 baseline spans report IoU and Modified Hausdorff values
   while exact baseline metrics remain unchanged.
-- [ ] Unscored D3 baseline/gold anchors are counted and not inferred.
-- [ ] External `D3_BASELINES=` inputs get the same diagnostics as config-backed
+- [x] Unscored D3 baseline/gold anchors are counted and not inferred.
+- [x] External `D3_BASELINES=` inputs get the same diagnostics as config-backed
   baselines.
-- [ ] Docs preserve the caveat that this is local error-analysis metadata only,
+- [x] Docs preserve the caveat that this is local error-analysis metadata only,
   not semantic application validity, held-out D3 evidence, expert parity,
   superiority evidence, or SOTA.
 
 > Process criteria:
-- [ ] TDD red state observed before implementation.
-- [ ] Focused tests pass.
-- [ ] Focused Ruff check passes.
-- [ ] `make docs-check` passes.
-- [ ] `make check` passes.
-- [ ] Plan is moved to completed with verification evidence.
-- [ ] Verified implementation is committed and pushed.
+- [x] TDD red state observed before implementation.
+- [x] Focused tests pass.
+- [x] Focused Ruff check passes.
+- [x] `make docs-check` passes.
+- [x] `make check` passes.
+- [x] Plan is moved to completed with verification evidence.
+- [x] Verified implementation is committed and pushed.
 
 ---
 

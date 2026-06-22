@@ -6,12 +6,12 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 174 | D3 baseline span-overlap diagnostics | High | Planned | `D3_BASELINE_SPAN_OVERLAP_DIAGNOSTICS.md` |
 
 ## Completed Plans
 
 | Name | Outcome | Record |
 |------|---------|--------|
+| D3 baseline span-overlap diagnostics | D3 baseline rows now include additive same-code/document span-IoU and Modified Hausdorff diagnostics without changing exact baseline scores, deltas, or bootstrap behavior | `completed/D3_BASELINE_SPAN_OVERLAP_DIAGNOSTICS.md` |
 | INV-7 score-time preflight guard | `make bench` / `qc_cli.py bench` can now optionally enforce INV-7 live protocol/result preflight before scoring supplied `PROMPT_INJECTION=` packages and record passing preflight/input provenance while preserving unguarded scoring compatibility | `completed/INV7_SCORE_TIME_PREFLIGHT_GUARD.md` |
 | D7 comparison metric success criteria | D7 comparison protocols can now carry optional structured per-baseline metric criteria, and guarded retrieval comparison reports include additive pass/fail/missing criteria accounting without changing exact D7 scoring or preflight semantics | `completed/D7_COMPARISON_METRIC_SUCCESS_CRITERIA.md` |
 | D7 baseline span-overlap diagnostics | D7 baseline rows and retrieval comparison reports now include diagnostic-only same-target/document span-IoU and Modified Hausdorff metadata without changing exact baseline scores or deltas | `completed/D7_BASELINE_SPAN_OVERLAP_DIAGNOSTICS.md` |
