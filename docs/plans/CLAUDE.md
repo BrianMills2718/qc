@@ -6,12 +6,12 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 160 | INV-9 relationship evidence anchors | High | Planned | `INV9_RELATIONSHIP_EVIDENCE_ANCHORS.md` |
 
 ## Completed Plans
 
 | Name | Outcome | Record |
 |------|---------|--------|
+| INV-9 relationship evidence anchors | Relationship claims now resolve direct evidence strings into exact supporting anchors when uniquely grounded, while ambiguous/unresolvable evidence remains visibly unanchored | `completed/INV9_RELATIONSHIP_EVIDENCE_ANCHORS.md` |
 | INV-9 code-scoped higher-order claim anchors | Higher-order claims with explicit code scope now inherit existing exact code-application anchors while corpus-level/no-code-scope claims remain visibly unanchored | `completed/INV9_CODE_SCOPED_HIGHER_ORDER_CLAIM_ANCHORS.md` |
 | INV-7 prompt override metadata boundary | Prompt override rendering now rejects structured or multi-line metadata placeholder values before custom prompt rendering | `completed/INV7_PROMPT_OVERRIDE_METADATA_BOUNDARY.md` |
 | INV-7 prompt override data value boundary | Prompt override rendering now rejects raw/unwrapped values supplied for declared data placeholders before any LLM call | `completed/INV7_PROMPT_OVERRIDE_DATA_VALUE_BOUNDARY.md` |

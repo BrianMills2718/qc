@@ -1,10 +1,43 @@
 # Plan #160: INV-9 Relationship Evidence Anchors
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** None
 **Blocks:** None
+
+---
+
+## Outcome
+
+Relationship claims now resolve direct relationship evidence strings into exact
+supporting anchors when the evidence uniquely grounds to the loaded corpus.
+This covers `DomainEntityRelationship.supporting_evidence` and
+`CodeRelationship.evidence`. Code relationship claims still prefer scoped
+code-application anchors and skip duplicate evidence-only anchors for the same
+source span. Ambiguous or unresolvable evidence is not guessed, so otherwise
+unanchored relationship claims remain `needs_anchor`.
+
+This is structural traceability only: the anchors identify source spans attached
+to relationship evidence, not semantic proof or methodological validation of
+the higher-order relationship claim.
+
+Implementation commit: `7a5eb55`
+
+## Verification
+
+- TDD red: initial `python -m pytest tests/test_claims.py -q` failed on
+  `test_relationship_evidence_strings_resolve_to_claim_anchors` because entity
+  relationship evidence was not yet anchored.
+- `python -m pytest tests/test_claims.py -q` -> 15 passed.
+- `python -m pytest tests/test_claim_ledger_pipeline.py -q` -> 8 passed.
+- `python -m pytest tests/test_bench_phase0.py -k claim_anchor_coverage -q` ->
+  2 passed, 67 deselected.
+- `make docs-check` passed.
+- `git diff --check` passed.
+- `make check` -> 1111 passed, 1 skipped, 8 deselected; Ruff and docs-check
+  passed; type check remains not configured.
+- Commit `7a5eb55` was pushed to `main`.
 
 ---
 
@@ -114,21 +147,21 @@ cross-project capability.
 
 Feature-level criteria:
 
-- [ ] Direct relationship evidence strings with one unique corpus match create
+- [x] Direct relationship evidence strings with one unique corpus match create
   supporting anchors.
-- [ ] Relationship evidence anchors are de-duplicated with scoped
+- [x] Relationship evidence anchors are de-duplicated with scoped
   code-application anchors.
-- [ ] Ambiguous or unresolvable relationship evidence is not guessed.
-- [ ] Unsupported/no-anchor relationship claims remain `needs_anchor`.
-- [ ] Docs frame this as structural support/traceability, not claim truth or
+- [x] Ambiguous or unresolvable relationship evidence is not guessed.
+- [x] Unsupported/no-anchor relationship claims remain `needs_anchor`.
+- [x] Docs frame this as structural support/traceability, not claim truth or
   methodological validation.
 
 Process criteria:
 
-- [ ] Required focused tests pass.
-- [ ] `make docs-check` passes.
-- [ ] `make check` passes.
-- [ ] Verified increment is committed and pushed.
+- [x] Required focused tests pass.
+- [x] `make docs-check` passes.
+- [x] `make check` passes.
+- [x] Verified increment is committed and pushed.
 
 ---
 
