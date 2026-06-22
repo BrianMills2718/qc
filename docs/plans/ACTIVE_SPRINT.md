@@ -22,7 +22,9 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Continue through the ranked roadmap without pausing after each verified
+1. Execute Plan #109 (`INV7_LIVE_BENCHMARK_PROTOCOL.md`): validate pre-run
+   protocol packages for live INV-7 canary benchmark runs.
+2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
 **Completed checkpoint:** Live INV-7 fixture outputs now carry

@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 109 | INV-7 live benchmark protocol | High | Planned | `INV7_LIVE_BENCHMARK_PROTOCOL.md` |
 
 ## Completed Plans
 
