@@ -26,10 +26,13 @@ highest-value documented lane.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Select and plan the next deterministic, high-value
-roadmap lane from `docs/PROJECT_THEORY_AND_GOALS.md` and
-`docs/EVALUATION_HARNESS.md`; no implementation slice is currently active
-after Plan #186 closeout.
+**Active checkpoint:** Plan #187 is active: add a top-level
+`qc_cli.py write-phase0-adjudication-package` wrapper over the existing
+canonical `scripts/write_phase0_adjudication_package.py` entrypoint. This
+slice should add parser/dispatch/handler support, forward supplied args without
+duplicating validation logic, update docs/CLAUDE caveats, and avoid any claim
+that CLI parity creates expert labels, validity evidence, or benchmark
+evidence.
 
 **Completed checkpoint:** Strict Phase 0 package manifests can now carry
 `projects_dir`. The package runner resolves the path relative to the manifest

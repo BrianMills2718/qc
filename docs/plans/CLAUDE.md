@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 187 | QC CLI Phase 0 adjudication package writer | High | Planned | `QC_CLI_PHASE0_ADJUDICATION_PACKAGE_WRITER.md` |
 
 ## Completed Plans
 
