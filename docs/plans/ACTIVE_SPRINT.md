@@ -22,9 +22,9 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #95 (`EXPORT_AUDIT_MANIFEST_VERIFICATION.md`): verify generated
-   export-audit manifests against artifact bytes and optional project-state
-   hashes without claiming a signed or append-only audit log.
+1. Create and execute the next high-value lane: optional project-export CLI
+   integration for audit manifests, so exports can write and verify sidecar
+   manifests when requested without changing default export contracts.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
@@ -62,7 +62,10 @@ sampling-frame adequacy or validity evidence. `make export-audit-manifest` now
 writes schema_version=1 hash manifests for existing JSON/CSV/Markdown/QDPX
 export artifacts with project-state and per-file SHA-256 hashes; this is local
 integrity/provenance metadata only, not signing, append-only logging, or a full
-tamper-evident audit substrate.
+tamper-evident audit substrate. `make verify-export-audit-manifest` now checks
+manifest self-hash, artifact sizes/hashes, and optional current project-state
+hash; verification is still local integrity checking, not a signed or
+append-only audit log.
 MCP now exposes `qc_review_decisions` for agent-driven review decisions,
 including claim targets with rationale preservation, while keeping the old
 `qc_review_codes` tool compatible. MCP also exposes `qc_review_claims` as a

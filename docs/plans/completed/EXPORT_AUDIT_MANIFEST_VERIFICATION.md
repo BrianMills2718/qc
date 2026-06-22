@@ -1,10 +1,42 @@
 # Plan #95: Export Audit Manifest Verification
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Plan #94 export audit hash manifest
 **Blocks:** useful export integrity preflight; future signed/append-only audit log
+
+---
+
+## Outcome
+
+Implemented local verification for export-audit manifests. The verifier checks
+manifest self-hash, artifact existence, artifact sizes, artifact SHA-256 hashes,
+and optionally the current stored project-state hash when a project is supplied.
+It returns a structured JSON report with `verified` / `invalid` status and
+failure records. Added:
+
+- `verify_export_audit_manifest_payload`
+- `load_export_audit_manifest`
+- `scripts/verify_export_audit_manifest.py`
+- `make verify-export-audit-manifest MANIFEST=manifest.json [BASE_DIR=exports] [ID=<project_id>]`
+
+Implementation commit: `a22a3d5`
+
+## Verification
+
+- TDD red check: `python -m pytest tests/test_export_audit_manifest.py -q`
+  initially failed with `ImportError: cannot import name
+  'verify_export_audit_manifest_payload'`.
+- Focused pass: `python -m pytest tests/test_export_audit_manifest.py -q` →
+  `9 passed`.
+- Focused lint: `python -m ruff check qc_clean/core/export/audit_manifest.py scripts/write_export_audit_manifest.py scripts/verify_export_audit_manifest.py tests/test_export_audit_manifest.py` →
+  `All checks passed!`
+- Make target discovery: `make help` lists `verify-export-audit-manifest`.
+- Docs gate: `make docs-check` passed.
+- Full gate: `make check` → `859 passed, 1 skipped, 8 deselected`; Ruff and
+  docs checks passed.
+- Type-check status: `make check` reports `Type check not yet configured`.
 
 ---
 
@@ -129,26 +161,26 @@ file metadata already recorded by Plan #94.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] Matching manifest/files verify with status `verified`.
-- [ ] Manifest self-hash mismatch is detected.
-- [ ] Missing or changed artifact files are detected with structured failures.
-- [ ] Optional project-state hash mismatch is detected when `--project-id` is
+- [x] Matching manifest/files verify with status `verified`.
+- [x] Manifest self-hash mismatch is detected.
+- [x] Missing or changed artifact files are detected with structured failures.
+- [x] Optional project-state hash mismatch is detected when `--project-id` is
   supplied.
-- [ ] Script and Make target are agent-drivable and produce JSON.
-- [ ] Docs state verification is local integrity checking, not signing or a
+- [x] Script and Make target are agent-drivable and produce JSON.
+- [x] Docs state verification is local integrity checking, not signing or a
   complete tamper-evident audit substrate.
 
 > Process criteria:
-- [ ] Required focused tests pass.
-- [ ] Full `make check` passes or any failure is documented with evidence.
-- [ ] Type-check status is reported.
-- [ ] Verified work is committed and pushed.
+- [x] Required focused tests pass.
+- [x] Full `make check` passes or any failure is documented with evidence.
+- [x] Type-check status is reported.
+- [x] Verified work is committed and pushed.
 
 ---
 
 ## Open Questions
 
-- [ ] Should verification be a mandatory preflight before publishing exports? -
+- [x] Should verification be a mandatory preflight before publishing exports? -
   Status: DEFERRED | Why it matters: policy gating belongs after manifest
   generation and verification are both stable.
 
