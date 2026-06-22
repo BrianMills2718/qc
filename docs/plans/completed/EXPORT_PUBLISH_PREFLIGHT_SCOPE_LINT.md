@@ -1,6 +1,6 @@
 # Plan #196: Export Publish Preflight Scope Lint
 
-**Status:** In Progress
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Existing export publish preflight and corpus scope phrasing lint
@@ -38,6 +38,46 @@ in.
 sampling-frame adequacy, prove claim correctness, prove methodological validity,
 sign artifacts, make audit logs append-only, create external tamper evidence, or
 produce SOTA evidence.
+
+---
+
+## Outcome
+
+Plan commit: `0c7eb5e4`
+Implementation commit: `3833e141`
+
+Export publish preflight now has an explicit opt-in scope-language gate:
+
+- `scripts/export_publish_preflight.py --scope-lint`
+- `make export-publish-preflight ... SCOPE_LINT=1`
+- `qc_cli.py export-publish-preflight ... --scope-lint`
+
+When enabled, preflight requires a loaded `ProjectState`, verifies the export
+audit manifest, reads Markdown/text artifacts from verified manifests, and runs
+the existing deterministic `lint_scope_phrasing` policy against those artifacts.
+Warnings become stable `scope_lint_*` preflight failures. The default behavior
+is unchanged when `scope_lint=False`.
+
+The report now includes `scope_lint_status` and `scope_lint_reports` fields.
+These fields are local report-boundary discipline only; they are not
+sampling-frame adequacy evidence, methodological-validity evidence, audit
+signing, external tamper evidence, or SOTA evidence.
+
+Verification:
+
+- TDD red state observed: five expected failures before implementation
+  (`scope_lint` argument missing, script flag rejected, and `qc_cli.py` flag
+  rejected).
+- Focused tests:
+  `python -m pytest tests/test_export_publish_preflight.py tests/test_scope_phrasing_lint.py tests/test_qc_cli_export_audit_surfaces.py -q`
+  -> `21 passed`.
+- Focused Ruff:
+  `python -m ruff check qc_clean/core/export/publish_preflight.py scripts/export_publish_preflight.py qc_cli.py tests/test_export_publish_preflight.py tests/test_qc_cli_export_audit_surfaces.py`
+  -> passed.
+- `make docs-check` -> passed.
+- `git diff --check` -> passed.
+- `make check` -> `1250 passed, 1 skipped, 8 deselected`; Ruff and docs gates
+  passed; type check is still not configured.
 
 ---
 
@@ -83,13 +123,13 @@ created.
 
 ### Capability Validation
 
-- [ ] Default preflight behavior is unchanged when `scope_lint=False`.
-- [ ] `scope_lint=True` fails loud if no `ProjectState` is supplied.
-- [ ] Markdown/text artifacts in the manifest are linted when the flag is set.
-- [ ] Scope-lint warnings become preflight failures with stable failure codes.
-- [ ] Non-text export artifacts are not ad hoc parsed by this gate.
-- [ ] Script, Make, and `qc_cli.py` surfaces can opt into the same gate.
-- [ ] Docs state this is report-boundary discipline only, not sampling-frame
+- [x] Default preflight behavior is unchanged when `scope_lint=False`.
+- [x] `scope_lint=True` fails loud if no `ProjectState` is supplied.
+- [x] Markdown/text artifacts in the manifest are linted when the flag is set.
+- [x] Scope-lint warnings become preflight failures with stable failure codes.
+- [x] Non-text export artifacts are not ad hoc parsed by this gate.
+- [x] Script, Make, and `qc_cli.py` surfaces can opt into the same gate.
+- [x] Docs state this is report-boundary discipline only, not sampling-frame
   adequacy, methodological-validity, audit-signing, or SOTA evidence.
 
 ---
@@ -115,18 +155,18 @@ created.
 
 ### Steps
 
-1. [ ] Add failing tests for the core preflight gate: missing state, warning
+1. [x] Add failing tests for the core preflight gate: missing state, warning
    failure on risky Markdown under missing scope, pass with complete scope, and
    script flag exit behavior.
-2. [ ] Add a `qc_cli.py` wrapper-forwarding test for `--scope-lint`.
-3. [ ] Extend `run_export_publish_preflight` with an opt-in `scope_lint` flag,
+2. [x] Add a `qc_cli.py` wrapper-forwarding test for `--scope-lint`.
+3. [x] Extend `run_export_publish_preflight` with an opt-in `scope_lint` flag,
    structured scope-lint fields, and preflight failures derived from existing
    `ScopePhrasingWarning` objects.
-4. [ ] Add `--scope-lint` to the script, Make target, and `qc_cli.py` wrapper.
-5. [ ] Update docs/CLAUDE/theory/plan caveats and regenerate `AGENTS.md`.
-6. [ ] Run focused tests, focused Ruff, docs checks, whitespace checks, and full
+4. [x] Add `--scope-lint` to the script, Make target, and `qc_cli.py` wrapper.
+5. [x] Update docs/CLAUDE/theory/plan caveats and regenerate `AGENTS.md`.
+6. [x] Run focused tests, focused Ruff, docs checks, whitespace checks, and full
    `make check`.
-7. [ ] Commit/push implementation, then close this plan.
+7. [x] Commit/push implementation, then close this plan.
 
 ---
 
@@ -157,30 +197,30 @@ created.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] With `scope_lint=False`, existing publish preflight JSON remains compatible
+- [x] With `scope_lint=False`, existing publish preflight JSON remains compatible
   and does not require project state.
-- [ ] With `scope_lint=True` and no project state, preflight returns `status:
+- [x] With `scope_lint=True` and no project state, preflight returns `status:
   fail` with failure code `scope_lint_requires_project_state`.
-- [ ] With `scope_lint=True`, a manifest for Markdown/text artifacts and a
+- [x] With `scope_lint=True`, a manifest for Markdown/text artifacts and a
   missing/empty/under-specified `corpus_scope` blocks risky
   population-generalizing language with stable `scope_lint_*` failure codes.
-- [ ] With `scope_lint=True` and complete recorded scope, the same text passes
+- [x] With `scope_lint=True` and complete recorded scope, the same text passes
   the deterministic missing-scope lint.
-- [ ] Script, Make, and `qc_cli.py` surfaces all expose the same opt-in gate.
-- [ ] Documentation preserves caveats: the gate is report-boundary discipline
+- [x] Script, Make, and `qc_cli.py` surfaces all expose the same opt-in gate.
+- [x] Documentation preserves caveats: the gate is report-boundary discipline
   only, not sampling-frame adequacy evidence, methodological-validity evidence,
   audit signing, external tamper evidence, or SOTA evidence.
 
 > Process criteria:
-- [ ] Plan committed before implementation.
-- [ ] Red tests observed before implementation.
-- [ ] Focused tests pass.
-- [ ] Focused Ruff passes.
-- [ ] `make docs-check` passes.
-- [ ] `git diff --check` passes.
-- [ ] `make check` passes, or any failure is documented as unrelated with
+- [x] Plan committed before implementation.
+- [x] Red tests observed before implementation.
+- [x] Focused tests pass.
+- [x] Focused Ruff passes.
+- [x] `make docs-check` passes.
+- [x] `git diff --check` passes.
+- [x] `make check` passes, or any failure is documented as unrelated with
   evidence.
-- [ ] Implementation and closeout commits are pushed.
+- [x] Implementation and closeout commits are pushed.
 
 ---
 
@@ -198,4 +238,4 @@ created.
 
 ## Closeout
 
-Pending implementation.
+Plan closed after implementation verification.
