@@ -252,6 +252,8 @@ class GTConstantComparisonStage(PipelineStage):
                             "total_segments": len(segments),
                             "doc_name": segment["doc_name"],
                         },
+                        optional_data_placeholders={"codebook_context"},
+                        metadata_placeholders={"seg_idx", "total_segments", "doc_name"},
                     )
                 else:
                     prompt = _build_comparison_prompt(codebook, segment, seg_idx, len(segments))

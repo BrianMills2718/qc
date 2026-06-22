@@ -71,18 +71,31 @@ def render_prompt_override(
     template: str,
     required_placeholders: Iterable[str],
     values: dict[str, Any],
+    optional_data_placeholders: Iterable[str] = (),
+    metadata_placeholders: Iterable[str] = (),
 ) -> str:
     """Render a custom prompt override after checking protected placeholders."""
+    required = set(required_placeholders)
+    optional_data = set(optional_data_placeholders)
+    metadata = set(metadata_placeholders)
+    _validate_placeholder_declarations(
+        stage_name=stage_name,
+        required_placeholders=required,
+        optional_data_placeholders=optional_data,
+        metadata_placeholders=metadata,
+        value_keys=set(values),
+    )
     field_uses = _format_field_uses(stage_name, template)
     _validate_field_uses(
         stage_name=stage_name,
         field_uses=field_uses,
-        required_placeholders=set(required_placeholders),
-        allowed_placeholders=set(values),
+        required_placeholders=required,
+        allowed_placeholders=required | optional_data | metadata,
+        value_keys=set(values),
     )
     try:
         return template.format(**values)
-    except (IndexError, ValueError) as exc:
+    except (IndexError, KeyError, ValueError) as exc:
         raise ValueError(f"Prompt override for {stage_name} is not valid: {exc}") from exc
 
 
@@ -114,6 +127,7 @@ def _validate_field_uses(
     field_uses: list[_PromptFieldUse],
     required_placeholders: set[str],
     allowed_placeholders: set[str],
+    value_keys: set[str],
 ) -> set[str]:
     """Fail loudly if an override uses anything except declared bare fields."""
     invalid = sorted({
@@ -135,6 +149,13 @@ def _validate_field_uses(
             f"{', '.join(unknown)}"
         )
 
+    missing_values = sorted(field_names - value_keys)
+    if missing_values:
+        raise ValueError(
+            f"Prompt override for {stage_name} references placeholder(s) with no "
+            f"provided value: {', '.join(missing_values)}"
+        )
+
     missing = sorted(required_placeholders - field_names)
     if missing:
         raise ValueError(
@@ -143,6 +164,33 @@ def _validate_field_uses(
         )
 
     return field_names
+
+
+def _validate_placeholder_declarations(
+    *,
+    stage_name: str,
+    required_placeholders: set[str],
+    optional_data_placeholders: set[str],
+    metadata_placeholders: set[str],
+    value_keys: set[str],
+) -> None:
+    """Fail loudly when a stage exposes values without declaring their role."""
+    data_metadata_overlap = sorted(
+        (required_placeholders | optional_data_placeholders) & metadata_placeholders
+    )
+    if data_metadata_overlap:
+        raise ValueError(
+            f"Prompt override for {stage_name} has placeholder(s) declared as both "
+            f"data and metadata: {', '.join(data_metadata_overlap)}"
+        )
+
+    declared = required_placeholders | optional_data_placeholders | metadata_placeholders
+    undeclared_values = sorted(value_keys - declared)
+    if undeclared_values:
+        raise ValueError(
+            f"Prompt override for {stage_name} exposes undeclared value(s): "
+            f"{', '.join(undeclared_values)}"
+        )
 
 
 def _has_unsupported_syntax(field_use: _PromptFieldUse) -> bool:

@@ -23,6 +23,7 @@ from qc_clean.core.prompting import (
     DATA_LINE_PREFIX,
     format_untrusted_data_block,
     format_untrusted_documents,
+    render_prompt_override,
 )
 from qc_clean.schemas.analysis_schemas import (
     AnalysisSynthesis,
@@ -180,6 +181,53 @@ def test_thematic_prompt_override_rejects_undeclared_metadata_placeholder():
             asyncio.run(ThematicCodingStage().execute(state, ctx))
 
     MockLLM.return_value.extract_structured.assert_not_called()
+
+
+def test_prompt_override_rejects_undeclared_renderer_values():
+    with pytest.raises(ValueError, match="fixture_stage.*document_metadata"):
+        render_prompt_override(
+            stage_name="fixture_stage",
+            template="CUSTOM\n{combined_text}",
+            required_placeholders={"combined_text"},
+            values={
+                "combined_text": "BEGIN UNTRUSTED DATA BLOCK\nDATA> text",
+                "document_metadata": {"analyst_note": "unsafe extra channel"},
+            },
+        )
+
+
+def test_prompt_override_allows_declared_metadata_placeholders():
+    prompt = render_prompt_override(
+        stage_name="fixture_stage",
+        template="CUSTOM\n{combined_text}\nN={num_interviews}",
+        required_placeholders={"combined_text"},
+        metadata_placeholders={"num_interviews"},
+        values={
+            "combined_text": "BEGIN UNTRUSTED DATA BLOCK\nDATA> text",
+            "num_interviews": 2,
+        },
+    )
+
+    assert "N=2" in prompt
+
+
+def test_prompt_override_allows_declared_optional_data_placeholders():
+    prompt = render_prompt_override(
+        stage_name="fixture_stage",
+        template="CUSTOM\n{segment_text}\n{codebook_context}\nIDX={seg_idx}",
+        required_placeholders={"segment_text"},
+        optional_data_placeholders={"codebook_context"},
+        metadata_placeholders={"seg_idx"},
+        values={
+            "segment_text": "BEGIN UNTRUSTED DATA BLOCK\nDATA> segment",
+            "codebook_context": "BEGIN UNTRUSTED DATA BLOCK\nDATA> codebook",
+            "seg_idx": 3,
+        },
+    )
+
+    assert "DATA> segment" in prompt
+    assert "DATA> codebook" in prompt
+    assert "IDX=3" in prompt
 
 
 def test_negative_case_prompt_wraps_malicious_transcript_as_untrusted_data():

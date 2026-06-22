@@ -64,6 +64,7 @@ class ThematicCodingStage(PipelineStage):
                     "combined_text": combined_text,
                     "num_interviews": num_interviews,
                 },
+                metadata_placeholders={"num_interviews"},
             )
             logger.info("Using prompt override for thematic_coding (%d chars)", len(prompt))
         else:
