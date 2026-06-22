@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 62 | D4 codebook-quality bootstrap intervals | High | Planned | `D4_CODEBOOK_QUALITY_BOOTSTRAP_INTERVALS.md` |
 
 ## Completed Plans
 
