@@ -1,6 +1,14 @@
 # Plan #70: D10 Timing Artifact
 
-**Status:** In Progress
+**Outcome:** Complete. Phase 0 benchmark artifact packages now include
+`timing_d10.json`, which packages the local D10 `cost_latency_d10` and
+`wall_clock_d10` scorecard sections with an explicit no-public-benchmark-evidence
+caveat. `manifest.json` records `timing_file` and `timing_sha256`. Verified with
+focused artifact/D10 tests, docs checks, and full `make check` on 2026-06-21
+(`776 passed, 1 skipped, 8 deselected`; Ruff/docs checks passed; type check
+remains not configured).
+
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** D10 wall-clock runtime; Phase 0 benchmark artifacts
@@ -124,7 +132,7 @@ packaging extension around already computed D10 scorecard sections.
 - [x] Plan sync passes.
 - [x] Markdown link check passes.
 - [x] Full `make check` passes, or any non-codebase failure is recorded.
-- [ ] Verified implementation is committed and pushed.
+- [x] Verified implementation is committed and pushed.
 
 ---
 

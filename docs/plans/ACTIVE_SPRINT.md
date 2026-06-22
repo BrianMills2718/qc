@@ -22,8 +22,8 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Plan #70: Add a dedicated D10 timing file to Phase 0 artifact packages
-   without claiming public benchmark timing evidence.
+1. Choose the next highest-value unmet evaluation-harness lane that can be
+   advanced without pretending held-out expert data exists.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
