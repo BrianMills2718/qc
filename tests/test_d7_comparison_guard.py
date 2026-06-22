@@ -117,7 +117,64 @@ def test_compare_d7_retrieval_includes_input_hashes_and_command_provenance(
         "prediction_files": [str(prediction_path)],
         "protocol_package": str(protocol_path),
         "output": str(output_path),
+        "artifact_dir": None,
     }
+
+
+def test_compare_d7_retrieval_writes_artifact_package(
+    tmp_path,
+    monkeypatch,
+    capsys,
+):
+    state, store = _saved_state(tmp_path)
+    package = _prediction_package(state)
+    prediction_path = _write_json(tmp_path / "predictions.json", package)
+    gold = _gold_package(package)
+    gold_path = _write_json(tmp_path / "gold.json", gold)
+    protocol = _protocol_for(
+        package,
+        gold,
+        prediction_file_sha256=_sha256_file(prediction_path),
+    )
+    protocol_path = _write_json(tmp_path / "protocol.json", protocol)
+    output_path = tmp_path / "report.json"
+    artifact_root = tmp_path / "artifacts"
+    monkeypatch.setattr(compare_d7_retrieval, "ProjectStore", lambda: store)
+
+    exit_code = compare_d7_retrieval.main([
+        state.id,
+        "--gold-file",
+        str(gold_path),
+        "--predictions-file",
+        str(prediction_path),
+        "--protocol-package",
+        str(protocol_path),
+        "--output",
+        str(output_path),
+        "--artifact-dir",
+        str(artifact_root),
+    ])
+
+    output = json.loads(capsys.readouterr().out)
+    run_dirs = list(artifact_root.iterdir())
+    assert exit_code == 0
+    assert len(run_dirs) == 1
+    assert run_dirs[0].is_dir()
+    artifact_report_path = run_dirs[0] / "report.json"
+    artifact_manifest_path = run_dirs[0] / "manifest.json"
+    artifact_report = json.loads(artifact_report_path.read_text(encoding="utf-8"))
+    manifest = json.loads(artifact_manifest_path.read_text(encoding="utf-8"))
+    assert artifact_report == output
+    assert json.loads(output_path.read_text(encoding="utf-8")) == output
+    assert manifest["schema_version"] == 1
+    assert manifest["artifact_type"] == "qualitative_coding.d7_retrieval_comparison"
+    assert manifest["project_id"] == state.id
+    assert manifest["report_file"] == "report.json"
+    assert manifest["report_sha256"] == _sha256_file(artifact_report_path)
+    assert manifest["input_hashes"] == output["_meta"]["input_hashes"]
+    assert manifest["command"] == output["_meta"]["command"]
+    assert manifest["prompt_eval"]["status"] == "not_run"
+    assert "not held-out D7 evidence" in manifest["claim_discipline"]["caveat"]
 
 
 def test_compare_d7_retrieval_guard_includes_metric_criteria_results(
@@ -263,6 +320,44 @@ def test_compare_d7_retrieval_guard_blocks_failed_preflight_and_writes_no_output
     assert output["error"] == "D7 comparison preflight failed"
     assert output["preflight_report"]["status"] == "fail"
     assert not output_path.exists()
+
+
+def test_compare_d7_retrieval_failed_preflight_writes_no_artifact_package(
+    tmp_path,
+    monkeypatch,
+    capsys,
+):
+    state, store = _saved_state(tmp_path)
+    package = _prediction_package(state)
+    prediction_path = _write_json(tmp_path / "predictions.json", package)
+    gold = _gold_package(package)
+    gold_path = _write_json(tmp_path / "gold.json", gold)
+    protocol = _protocol_for(package, gold, prediction_file_sha256="f" * 64)
+    protocol_path = _write_json(tmp_path / "protocol.json", protocol)
+    output_path = tmp_path / "report.json"
+    artifact_root = tmp_path / "artifacts"
+    monkeypatch.setattr(compare_d7_retrieval, "ProjectStore", lambda: store)
+
+    exit_code = compare_d7_retrieval.main([
+        state.id,
+        "--gold-file",
+        str(gold_path),
+        "--predictions-file",
+        str(prediction_path),
+        "--protocol-package",
+        str(protocol_path),
+        "--output",
+        str(output_path),
+        "--artifact-dir",
+        str(artifact_root),
+    ])
+
+    output = json.loads(capsys.readouterr().out)
+    assert exit_code == 1
+    assert output["status"] == "error"
+    assert output["preflight_report"]["status"] == "fail"
+    assert not output_path.exists()
+    assert not artifact_root.exists()
 
 
 def test_compare_d7_retrieval_guard_accepts_live_baseline_package(tmp_path, monkeypatch, capsys):

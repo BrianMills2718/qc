@@ -49,7 +49,7 @@ Examples:
   qc_cli run-d7-retrieval <project_id> --output predictions.json
   qc_cli run-d7-live-baseline <project_id> --output live_baseline.json --model gpt-5-mini
   qc_cli validate-d7-baseline-package baseline.json
-  qc_cli compare-d7-retrieval <project_id> --gold-file d7_gold.json --predictions-file predictions.json
+  qc_cli compare-d7-retrieval <project_id> --gold-file d7_gold.json --predictions-file predictions.json --artifact-dir benchmark_results
   qc_cli run-inv7-fixtures --output inv7.json
   qc_cli run-inv7-live-fixtures --output inv7_live.json --model gpt-5-mini
   qc_cli validate-inv7-package inv7.json
@@ -303,6 +303,10 @@ Examples:
     d7_comparison_parser.add_argument(
         '--protocol-package',
         help='Optional D7 comparison protocol package used to preflight before scoring',
+    )
+    d7_comparison_parser.add_argument(
+        '--artifact-dir',
+        help='Optional root directory for a versioned D7 comparison artifact package',
     )
 
     # D3/D7 gold-set validation commands
@@ -833,6 +837,8 @@ def handle_compare_d7_retrieval_command(args) -> int:
         argv.extend(["--output", args.output])
     if args.protocol_package is not None:
         argv.extend(["--protocol-package", args.protocol_package])
+    if args.artifact_dir is not None:
+        argv.extend(["--artifact-dir", args.artifact_dir])
     return compare_d7_retrieval.main(argv)
 
 

@@ -126,6 +126,8 @@ def test_qc_cli_compare_d7_retrieval_forwards_flags(monkeypatch):
             "comparison.json",
             "--protocol-package",
             "protocol.json",
+            "--artifact-dir",
+            "benchmark_results",
         ],
     )
 
@@ -142,6 +144,8 @@ def test_qc_cli_compare_d7_retrieval_forwards_flags(monkeypatch):
         "comparison.json",
         "--protocol-package",
         "protocol.json",
+        "--artifact-dir",
+        "benchmark_results",
     ]
 
 

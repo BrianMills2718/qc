@@ -6,7 +6,9 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Sequence
 
@@ -26,6 +28,12 @@ from qc_clean.core.d7_retrieval import compare_d7_retrieval_predictions
 from qc_clean.core.persistence.project_store import ProjectStore
 from qc_clean.schemas.domain import ProjectState
 from scripts.bench_phase0 import load_d7_gold_file
+
+D7_COMPARISON_ARTIFACT_CAVEAT = (
+    "This D7 comparison artifact is local provenance/accounting metadata only; "
+    "it is not held-out D7 evidence, live-baseline evidence, superiority "
+    "evidence, methodological-validity evidence, or SOTA evidence."
+)
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -47,6 +55,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         "--protocol-package",
         type=Path,
         help="Optional D7 comparison protocol package used to preflight before scoring",
+    )
+    parser.add_argument(
+        "--artifact-dir",
+        type=Path,
+        help="Optional root directory for a versioned D7 comparison artifact package",
     )
     args = parser.parse_args(argv)
 
@@ -96,6 +109,17 @@ def main(argv: Sequence[str] | None = None) -> int:
         "command": _comparison_command_provenance(args),
     }
     text = json.dumps(report, indent=2)
+    if args.artifact_dir:
+        try:
+            write_d7_comparison_artifact(
+                report,
+                args.artifact_dir,
+                state=state,
+                report_text=text,
+            )
+        except (OSError, ValueError) as exc:
+            print(json.dumps({"error": str(exc)}))
+            return 1
     if args.output:
         args.output.write_text(text, encoding="utf-8")
     print(text)
@@ -212,7 +236,85 @@ def _comparison_command_provenance(args: argparse.Namespace) -> dict[str, Any]:
             str(args.protocol_package) if args.protocol_package is not None else None
         ),
         "output": str(args.output) if args.output is not None else None,
+        "artifact_dir": str(args.artifact_dir) if args.artifact_dir is not None else None,
     }
+
+
+def write_d7_comparison_artifact(
+    report: dict[str, Any],
+    artifact_root: Path,
+    *,
+    state: ProjectState,
+    generated_at: datetime | None = None,
+    report_text: str | None = None,
+) -> Path:
+    """Write a versioned D7 comparison artifact package."""
+    generated_at = _utc_generated_at(generated_at)
+    run_dir = artifact_root / d7_comparison_artifact_dir_name(state.id, generated_at)
+    if run_dir.exists():
+        raise ValueError(f"D7 comparison artifact directory already exists: {run_dir}")
+
+    report_text = report_text if report_text is not None else json.dumps(report, indent=2)
+    report_bytes = report_text.encode("utf-8")
+    manifest = d7_comparison_artifact_manifest(
+        report,
+        state=state,
+        generated_at=generated_at,
+        report_sha256=hashlib.sha256(report_bytes).hexdigest(),
+    )
+
+    run_dir.mkdir(parents=True, exist_ok=False)
+    (run_dir / "report.json").write_bytes(report_bytes)
+    (run_dir / "manifest.json").write_text(
+        json.dumps(manifest, indent=2, sort_keys=True),
+        encoding="utf-8",
+    )
+    return run_dir
+
+
+def d7_comparison_artifact_manifest(
+    report: dict[str, Any],
+    *,
+    state: ProjectState,
+    generated_at: datetime,
+    report_sha256: str,
+) -> dict[str, Any]:
+    """Build a manifest for one D7 retrieval comparison artifact package."""
+    meta = report.get("_meta", {})
+    input_hashes = meta.get("input_hashes")
+    if not isinstance(input_hashes, dict):
+        raise ValueError("D7 comparison report is missing _meta.input_hashes")
+    command = meta.get("command")
+    if not isinstance(command, dict):
+        raise ValueError("D7 comparison report is missing _meta.command")
+    return {
+        "schema_version": 1,
+        "artifact_type": "qualitative_coding.d7_retrieval_comparison",
+        "generated_at": _format_generated_at(generated_at),
+        "project_id": state.id,
+        "project_name": state.name,
+        "report_file": "report.json",
+        "report_sha256": report_sha256,
+        "input_hashes": input_hashes,
+        "command": command,
+        "claim_discipline": {
+            "caveat": D7_COMPARISON_ARTIFACT_CAVEAT,
+        },
+        "prompt_eval": {
+            "status": "not_run",
+            "owner": "prompt_eval",
+            "note": (
+                "D7 comparison artifact packaging only; held-out datasets, live "
+                "baseline runs, statistical comparisons, and experiment tracking "
+                "belong to the future prompt_eval-backed suite."
+            ),
+        },
+    }
+
+
+def d7_comparison_artifact_dir_name(project_id: str, generated_at: datetime) -> str:
+    """Return the versioned run-directory name for a D7 comparison artifact."""
+    return f"{_format_artifact_timestamp(generated_at)}-{_artifact_slug(project_id)}-d7-comparison"
 
 
 def _sha256_jsonable(payload: Any) -> str:
@@ -229,6 +331,31 @@ def _sha256_file(path: Path, *, label: str = "prediction") -> str:
         raise ValueError(
             f"D7 comparison {label} file '{path}' could not be hashed: {exc}"
         ) from exc
+
+
+def _utc_generated_at(generated_at: datetime | None) -> datetime:
+    """Normalize artifact generation time to UTC."""
+    if generated_at is None:
+        return datetime.now(timezone.utc)
+    if generated_at.tzinfo is None:
+        return generated_at.replace(tzinfo=timezone.utc)
+    return generated_at.astimezone(timezone.utc)
+
+
+def _format_generated_at(generated_at: datetime) -> str:
+    """Return an ISO-8601 UTC artifact timestamp."""
+    return _utc_generated_at(generated_at).isoformat().replace("+00:00", "Z")
+
+
+def _format_artifact_timestamp(generated_at: datetime) -> str:
+    """Return a filesystem-safe UTC artifact timestamp."""
+    return _utc_generated_at(generated_at).strftime("%Y%m%dT%H%M%S%fZ")
+
+
+def _artifact_slug(value: str) -> str:
+    """Return a filesystem-safe artifact slug."""
+    slug = re.sub(r"[^A-Za-z0-9_.-]+", "-", value.strip()).strip("-._")
+    return slug or "project"
 
 
 if __name__ == "__main__":

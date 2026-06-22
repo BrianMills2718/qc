@@ -340,7 +340,7 @@ ifndef OUTPUT
 endif
 	python scripts/run_d7_live_baseline.py $(ID) --output $(OUTPUT) $(if $(MODEL),--model $(MODEL),) --retrieval-mode $(MODE) $(if $(CANDIDATES),--candidates-per-claim $(CANDIDATES),) $(if $(TRACE_ID),--trace-id $(TRACE_ID),) $(if $(MAX_BUDGET),--max-budget $(MAX_BUDGET),)
 
-compare-d7-retrieval:  ## Compare D7 retrieval predictions (ID=<project_id> GOLD=gold.json PREDICTIONS="a.json b.json" [PROTOCOL=protocol.json] [OUTPUT=report.json])
+compare-d7-retrieval:  ## Compare D7 retrieval predictions (ID=<project_id> GOLD=gold.json PREDICTIONS="a.json b.json" [PROTOCOL=protocol.json] [OUTPUT=report.json] [ARTIFACT_DIR=benchmark_results])
 ifndef ID
 	$(error ID is required. Usage: make compare-d7-retrieval ID=<project_id> GOLD=gold.json PREDICTIONS="a.json b.json")
 endif
@@ -350,7 +350,7 @@ endif
 ifndef PREDICTIONS
 	$(error PREDICTIONS is required. Usage: make compare-d7-retrieval ID=<project_id> GOLD=gold.json PREDICTIONS="a.json b.json")
 endif
-	python scripts/compare_d7_retrieval.py $(ID) --gold-file $(GOLD) $(foreach file,$(PREDICTIONS),--predictions-file $(file)) $(if $(PROTOCOL),--protocol-package $(PROTOCOL),) $(if $(OUTPUT),--output $(OUTPUT),)
+	python scripts/compare_d7_retrieval.py $(ID) --gold-file $(GOLD) $(foreach file,$(PREDICTIONS),--predictions-file $(file)) $(if $(PROTOCOL),--protocol-package $(PROTOCOL),) $(if $(OUTPUT),--output $(OUTPUT),) $(if $(ARTIFACT_DIR),--artifact-dir $(ARTIFACT_DIR),)
 
 validate-d3-comparison-protocol:  ## Validate a D3 baseline comparison protocol (PROTOCOL=protocol.json)
 ifndef PROTOCOL
