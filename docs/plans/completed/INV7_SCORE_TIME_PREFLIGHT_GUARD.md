@@ -1,11 +1,46 @@
 # Plan #173: INV-7 Score-Time Preflight Guard
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** INV-7 live protocol/preflight package surfaces
 **Blocks:** Broader held-out live INV-7 benchmark accounting that can be
 populated later without rerouting Phase 0
+
+---
+
+## Outcome
+
+Implemented and pushed in `231d2ce`
+(`[Plan: INV7_SCORE_TIME_PREFLIGHT_GUARD] Add INV-7 score-time preflight
+guard`). `make bench`, `scripts/bench_phase0.py`, and `qc_cli.py bench` can now
+optionally enforce INV-7 live protocol/result preflight for supplied
+`PROMPT_INJECTION=` packages before scorecard, output, or artifact writes.
+Passing preflight reports are recorded at `_meta.preflight_reports.inv7_live`,
+and the protocol file is included in input hashes and artifact command
+provenance. Existing unguarded prompt-injection scoring remains compatible.
+
+Verification:
+
+- TDD red state observed: targeted slice failed before implementation with 4
+  failures.
+- `python -m pytest tests/test_bench_phase0_script.py tests/test_qc_cli_bench.py -k "inv7_live_protocol or forwards_all_phase0_flags or input_hashes_without_external" -q`
+  passed: 4 passed, 44 deselected.
+- `python -m pytest tests/test_bench_phase0_script.py tests/test_inv7_live_preflight.py tests/test_inv7_live_protocol.py tests/test_qc_cli_bench.py -k "inv7 or bench" -q`
+  passed: 58 passed.
+- `python -m ruff check scripts/bench_phase0.py qc_cli.py tests/test_bench_phase0_script.py tests/test_qc_cli_bench.py`
+  passed.
+- `make -n bench ID=project PROMPT_INJECTION=inv7.json INV7_PROTOCOL=protocol.json`
+  showed `--prompt-injection-file inv7.json --inv7-live-protocol-file protocol.json`.
+- `make docs-check` passed.
+- `git diff --check` passed.
+- `make check` passed: 1149 passed, 1 skipped, 8 deselected; Ruff and
+  docs-check passed; type check is not configured.
+
+Claim discipline: this is protocol/accounting infrastructure only. It does not
+populate a broader held-out adversarial benchmark, prove model obedience, prove
+prompt-injection robustness, establish methodological validity, or support any
+SOTA claim.
 
 ---
 
@@ -78,13 +113,13 @@ Internal score-time guard capability only; no cross-project boundary is created.
 
 ### Capability Validation
 
-- [ ] Matching live protocol/result packages score successfully.
-- [ ] Passing preflight report is recorded in `_meta.preflight_reports.inv7_live`.
-- [ ] Protocol file hash is recorded in `_meta.input_hashes`.
-- [ ] Protocol file path is recorded in artifact command provenance.
-- [ ] Failed preflight blocks stdout scorecard success, output writes, and
+- [x] Matching live protocol/result packages score successfully.
+- [x] Passing preflight report is recorded in `_meta.preflight_reports.inv7_live`.
+- [x] Protocol file hash is recorded in `_meta.input_hashes`.
+- [x] Protocol file path is recorded in artifact command provenance.
+- [x] Failed preflight blocks stdout scorecard success, output writes, and
   artifact writes.
-- [ ] Existing unguarded prompt-injection scoring remains compatible.
+- [x] Existing unguarded prompt-injection scoring remains compatible.
 
 ---
 
@@ -148,30 +183,30 @@ Internal score-time guard capability only; no cross-project boundary is created.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] `scripts/bench_phase0.py` exposes `--inv7-live-protocol-file`.
-- [ ] `make bench INV7_PROTOCOL=... PROMPT_INJECTION=...` forwards the protocol
+- [x] `scripts/bench_phase0.py` exposes `--inv7-live-protocol-file`.
+- [x] `make bench INV7_PROTOCOL=... PROMPT_INJECTION=...` forwards the protocol
   to the scorecard script.
-- [ ] `qc_cli.py bench --inv7-live-protocol-file ... --prompt-injection-file ...`
+- [x] `qc_cli.py bench --inv7-live-protocol-file ... --prompt-injection-file ...`
   forwards the protocol to the scorecard script.
-- [ ] Passing INV-7 preflight is recorded under
+- [x] Passing INV-7 preflight is recorded under
   `_meta.preflight_reports.inv7_live`.
-- [ ] Failed INV-7 preflight blocks scorecard, output, and artifact writes.
-- [ ] `_meta.input_hashes` includes `inv7_live_protocol_file_sha256`.
-- [ ] Artifact command provenance includes `inv7_live_protocol_file`.
-- [ ] Existing unguarded `PROMPT_INJECTION=` scoring remains compatible.
-- [ ] Docs state this is protocol/accounting only, not live prompt-injection
+- [x] Failed INV-7 preflight blocks scorecard, output, and artifact writes.
+- [x] `_meta.input_hashes` includes `inv7_live_protocol_file_sha256`.
+- [x] Artifact command provenance includes `inv7_live_protocol_file`.
+- [x] Existing unguarded `PROMPT_INJECTION=` scoring remains compatible.
+- [x] Docs state this is protocol/accounting only, not live prompt-injection
   robustness evidence, model-obedience proof, held-out benchmark evidence,
   methodological-validity evidence, or SOTA.
 
 > Process criteria:
-- [ ] TDD red state observed before implementation.
-- [ ] Focused tests pass.
-- [ ] Focused Ruff check passes.
-- [ ] Make dry-run confirms flag forwarding.
-- [ ] `make docs-check` passes.
-- [ ] `make check` passes.
-- [ ] Plan is moved to completed with verification evidence.
-- [ ] Verified implementation is committed and pushed.
+- [x] TDD red state observed before implementation.
+- [x] Focused tests pass.
+- [x] Focused Ruff check passes.
+- [x] Make dry-run confirms flag forwarding.
+- [x] `make docs-check` passes.
+- [x] `make check` passes.
+- [x] Plan is moved to completed with verification evidence.
+- [x] Verified implementation is committed and pushed.
 
 ---
 
@@ -184,4 +219,3 @@ Internal score-time guard capability only; no cross-project boundary is created.
 | Existing prompt-injection tests break | Protocol accidentally made mandatory | Keep `--inv7-live-protocol-file` optional and only guard when supplied. |
 | Input hashes omit protocol file | `phase0_input_hashes()` signature not updated | Add explicit `inv7_live_protocol_file` parameter and assert in tests. |
 | CLI wrapper misses new flag | Top-level `qc_cli.py bench` not updated with script parity | Add parser and forwarding test. |
-

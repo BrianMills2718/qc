@@ -26,12 +26,18 @@ highest-value documented lane.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Plan #173 is active: add score-time INV-7 live protocol
-preflight enforcement to `make bench` / `qc_cli.py bench` for supplied
-`PROMPT_INJECTION=` packages. The slice is protocol/accounting infrastructure
-only; it does not run live models, populate a held-out adversarial benchmark, or
-claim prompt-injection robustness, model-obedience proof, methodological
-validity, or SOTA.
+**Active checkpoint:** Select and plan the next deterministic, high-value
+roadmap lane. No implementation plan is currently active.
+
+**Completed checkpoint:** `make bench` / `qc_cli.py bench` can now optionally
+enforce INV-7 live protocol/result preflight before scoring supplied
+`PROMPT_INJECTION=` packages. Failed preflight blocks scorecard, output, and
+artifact writes; passing preflight is recorded at
+`_meta.preflight_reports.inv7_live`, with the protocol file hash/path carried in
+scorecard and artifact provenance. Existing unguarded prompt-injection scoring
+remains compatible. This is protocol/accounting infrastructure only, not a
+broader held-out adversarial benchmark, prompt-injection robustness evidence,
+model-obedience proof, methodological-validity evidence, or SOTA evidence.
 
 **Completed checkpoint:** D7 comparison protocols can now include optional
 structured `metric_criteria` for exact-score metrics and local span-overlap
