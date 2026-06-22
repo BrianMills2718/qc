@@ -1,12 +1,39 @@
 # Plan #57: D3 Baseline Comparison Scorecard
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** None
 **Blocks:** Held-out D3 baseline comparison packages
 
 ---
+
+## Outcome
+
+D3 application-validity scorecards can now score externally supplied
+`application_baselines` against the same exact code/source-anchor gold as the
+system. The surface is available through
+`make bench D3_BASELINES=<baselines.json>`,
+`scripts/bench_phase0.py --d3-baselines-file <baselines.json>`, and Phase 0
+package manifests via `d3_baselines_file`. Results appear under
+`application_validity_d3.baselines` with baseline TP/FP/FN, recall, precision,
+F1, Wilson intervals, F1 bootstrap intervals, system-minus-baseline deltas, and
+paired exact-key bootstrap intervals when exact bootstrapping is enabled.
+External files are applied in memory only and are included in input hashes and
+artifact command provenance.
+
+## Verification
+
+- Focused tests: `python -m pytest tests/test_bench_phase0.py tests/test_bench_phase0_script.py tests/test_phase0_benchmark_package.py -q`
+  (`82 passed`)
+- Focused lint: `python -m ruff check qc_clean/core/bench.py scripts/bench_phase0.py scripts/run_phase0_benchmark_package.py tests/test_bench_phase0.py tests/test_bench_phase0_script.py tests/test_phase0_benchmark_package.py`
+  (`All checks passed!`)
+- Docs/link/plan checks:
+  - `python scripts/check_markdown_links.py`
+  - `python scripts/sync_plan_status.py --check`
+- Full gate: `make check` (`766 passed, 1 skipped, 8 deselected`; ruff and
+  docs-check passed)
+- Type check: not configured by the repo (`make check` reports this explicitly)
 
 ## Gap
 
@@ -64,11 +91,11 @@ Internal scorecard capability only; no cross-project boundary is created.
 
 ### Capability Validation
 
-- [ ] D3 baseline metadata is validated and duplicate names fail loudly.
-- [ ] Baseline predictions score against the same D3 gold key universe as the system.
-- [ ] Baseline deltas include paired exact-key bootstrap intervals when enabled.
-- [ ] External `--d3-baselines-file` input is applied in memory without mutating saved project state.
-- [ ] Phase 0 package manifests can forward `d3_baselines_file`.
+- [x] D3 baseline metadata is validated and duplicate names fail loudly.
+- [x] Baseline predictions score against the same D3 gold key universe as the system.
+- [x] Baseline deltas include paired exact-key bootstrap intervals when enabled.
+- [x] External `--d3-baselines-file` input is applied in memory without mutating saved project state.
+- [x] Phase 0 package manifests can forward `d3_baselines_file`.
 
 ---
 
@@ -131,23 +158,23 @@ Internal scorecard capability only; no cross-project boundary is created.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] `application_validity_d3.baselines` appears when D3 gold and D3 baseline
+- [x] `application_validity_d3.baselines` appears when D3 gold and D3 baseline
   predictions are supplied.
-- [ ] Baseline records use stable names and duplicate names fail loudly.
-- [ ] System-minus-baseline deltas are reported for recall, precision, and F1.
-- [ ] Delta CIs are omitted when `phase0_exact_bootstrap.enabled=false`.
-- [ ] `make bench D3_BASELINES=...`, `--d3-baselines-file`, and
+- [x] Baseline records use stable names and duplicate names fail loudly.
+- [x] System-minus-baseline deltas are reported for recall, precision, and F1.
+- [x] Delta CIs are omitted when `phase0_exact_bootstrap.enabled=false`.
+- [x] `make bench D3_BASELINES=...`, `--d3-baselines-file`, and
   `d3_baselines_file` package manifests are supported.
-- [ ] Input hashes and artifact command provenance include the D3 baselines file.
-- [ ] Docs preserve the caveat that this is a substrate, not populated held-out
+- [x] Input hashes and artifact command provenance include the D3 baselines file.
+- [x] Docs preserve the caveat that this is a substrate, not populated held-out
   benchmark evidence.
 
 > Process criteria:
-- [ ] Required tests pass
-- [ ] Full test suite passes
-- [ ] Type check status reported
-- [ ] Docs updated
-- [ ] Plan completed, committed, and pushed
+- [x] Required tests pass
+- [x] Full test suite passes
+- [x] Type check status reported
+- [x] Docs updated
+- [x] Plan completed, committed, and pushed
 
 ---
 
