@@ -3092,6 +3092,7 @@ def _percentile(sorted_values: list[float], percentile: float) -> float:
 
 def _score_d3_baselines(
     gold_keys: set[str],
+    gold: list[ApplicationGoldAnchor],
     baselines: list[ApplicationBaselinePrediction],
     system_score: Dict[str, Any],
     *,
@@ -3113,6 +3114,14 @@ def _score_d3_baselines(
             bootstrap_config=bootstrap_config,
         )
         baseline_score["description"] = baseline.description
+        baseline_spans, baseline_unscored_spans = _d3_spans_from_annotations(
+            baseline.code_applications
+        )
+        baseline_score["span_overlap"] = _d3_span_overlap_score_for_predictions(
+            gold,
+            baseline_spans,
+            baseline_unscored_spans,
+        )
         baseline_score["system_minus_baseline"] = {
             "recall": system_score["recall"] - baseline_score["recall"],
             "precision": system_score["precision"] - baseline_score["precision"],
@@ -3481,6 +3490,7 @@ def application_validity_d3_scorecard(state: ProjectState) -> Dict[str, Any]:
     if baselines:
         card["baselines"] = _score_d3_baselines(
             gold_keys,
+            gold,
             baselines,
             score,
             system_predicted_keys=predicted_keys,
@@ -3777,9 +3787,22 @@ def _d3_span_overlap_score(
     state: ProjectState,
 ) -> dict[str, Any]:
     """Compute same-code/same-document D3 char-span IoU diagnostics."""
+    predicted_spans, unscored_predicted_count = _predicted_application_spans(state)
+    return _d3_span_overlap_score_for_predictions(
+        gold,
+        predicted_spans,
+        unscored_predicted_count,
+    )
+
+
+def _d3_span_overlap_score_for_predictions(
+    gold: list[ApplicationGoldAnchor],
+    predicted_spans: list[_ComparableSpan],
+    unscored_predicted_count: int,
+) -> dict[str, Any]:
+    """Compute D3 char-span overlap diagnostics for one prediction set."""
     gold_spans = [_application_span_from_gold(anchor) for anchor in gold]
     scoreable_gold_spans = [span for span in gold_spans if span is not None]
-    predicted_spans, unscored_predicted_count = _predicted_application_spans(state)
     base: dict[str, Any] = {
         "metric": "char_span_iou_same_code_doc",
         "note": (
@@ -3801,7 +3824,7 @@ def _d3_span_overlap_score(
         return {
             **base,
             "status": "not_available",
-            "reason": "No system code applications with char-span offsets are available for IoU scoring.",
+            "reason": "No D3 predicted code applications with char-span offsets are available for IoU scoring.",
         }
 
     gold_rows = [
@@ -3849,6 +3872,21 @@ def _application_span_from_gold(anchor: ApplicationGoldAnchor) -> _ComparableSpa
         end_char=anchor.end_char,
         key=_key_for_application_gold(anchor),
     )
+
+
+def _d3_spans_from_annotations(
+    annotations: list[ApplicationGoldAnchor],
+) -> tuple[list[_ComparableSpan], int]:
+    """Return unique scoreable D3 spans and unscored count for one prediction set."""
+    spans_by_key: dict[str, _ComparableSpan] = {}
+    unscored_count = 0
+    for annotation in annotations:
+        span = _application_span_from_gold(annotation)
+        if span is None:
+            unscored_count += 1
+            continue
+        spans_by_key.setdefault(span.key, span)
+    return [spans_by_key[key] for key in sorted(spans_by_key)], unscored_count
 
 
 def _predicted_application_spans(state: ProjectState) -> tuple[list[_ComparableSpan], int]:

@@ -695,6 +695,118 @@ def test_scorecard_scores_d3_baselines_against_same_gold():
     assert "local paired exact-key bootstrap intervals" in d3["baseline_note"]
 
 
+def test_scorecard_d3_baseline_span_overlap_scores_near_boundary_match():
+    content = "0123456789abcdefghij0123456789"
+    doc = Document(id="d1", name="d.txt", content=content)
+    state = ProjectState(
+        config=ProjectConfig(
+            methodology=Methodology.THEMATIC_ANALYSIS,
+            extra={
+                "application_gold": [
+                    {
+                        "code_id": "AI_USE",
+                        "doc_id": doc.id,
+                        "start_char": 10,
+                        "end_char": 20,
+                    }
+                ],
+                "application_baselines": [
+                    {
+                        "name": "near_boundary",
+                        "description": "Near-boundary D3 baseline.",
+                        "code_applications": [
+                            {
+                                "code_id": "AI_USE",
+                                "doc_id": doc.id,
+                                "start_char": 15,
+                                "end_char": 25,
+                            }
+                        ],
+                    }
+                ],
+            },
+        ),
+        corpus=Corpus(documents=[doc]),
+    )
+
+    baseline = phase0_scorecard(state)["application_validity_d3"]["baselines"][
+        "near_boundary"
+    ]
+
+    assert baseline["true_positives"] == 0
+    assert baseline["false_positives"] == 1
+    assert baseline["false_negatives"] == 1
+    overlap = baseline["span_overlap"]
+    assert overlap["status"] == "scored"
+    assert overlap["metric"] == "char_span_iou_same_code_doc"
+    assert overlap["mean_best_gold_iou"] == pytest.approx(5 / 15)
+    assert overlap["mean_best_predicted_iou"] == pytest.approx(5 / 15)
+    assert overlap["mean_best_gold_modified_hausdorff_distance"] == pytest.approx(1.5)
+    assert overlap["mean_best_predicted_modified_hausdorff_distance"] == pytest.approx(1.5)
+    assert overlap["gold_best_overlaps"] == [
+        {
+            "gold_key": "AI_USE|d1|10:20",
+            "best_predicted_key": "AI_USE|d1|15:25",
+            "best_iou": pytest.approx(5 / 15),
+            "best_modified_hausdorff_distance": pytest.approx(1.5),
+        }
+    ]
+
+
+def test_scorecard_d3_baseline_span_overlap_counts_unscored_records():
+    content = "AI helped here."
+    doc = Document(id="d1", name="d.txt", content=content)
+    state = ProjectState(
+        config=ProjectConfig(
+            methodology=Methodology.THEMATIC_ANALYSIS,
+            extra={
+                "application_gold": [
+                    {
+                        "code_id": "AI_USE",
+                        "doc_id": doc.id,
+                        "start_char": 0,
+                        "end_char": len(content),
+                    },
+                    {"code_id": "AI_USE", "doc_id": doc.id, "segment_id": "seg-1"},
+                ],
+                "application_baselines": [
+                    {
+                        "name": "mixed_anchor_baseline",
+                        "code_applications": [
+                            {
+                                "code_id": "AI_USE",
+                                "doc_id": doc.id,
+                                "start_char": 0,
+                                "end_char": len(content),
+                            },
+                            {
+                                "code_id": "AI_USE",
+                                "doc_id": doc.id,
+                                "segment_id": "seg-1",
+                            },
+                        ],
+                    }
+                ],
+            },
+        ),
+        corpus=Corpus(documents=[doc]),
+    )
+
+    overlap = (
+        phase0_scorecard(state)["application_validity_d3"]["baselines"][
+            "mixed_anchor_baseline"
+        ]["span_overlap"]
+    )
+
+    assert overlap["status"] == "scored"
+    assert overlap["gold_span_count"] == 1
+    assert overlap["predicted_span_count"] == 1
+    assert overlap["unscored_gold_count"] == 1
+    assert overlap["unscored_predicted_count"] == 1
+    assert overlap["mean_best_gold_iou"] == 1.0
+    assert overlap["mean_best_gold_modified_hausdorff_distance"] == 0.0
+
+
 def test_scorecard_d3_baseline_bootstrap_disable_suppresses_delta_ci():
     content = "AI helped here. AI failed later."
     doc = Document(id="d1", name="d.txt", content=content)

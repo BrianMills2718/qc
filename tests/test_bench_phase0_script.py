@@ -436,6 +436,9 @@ def test_bench_phase0_scores_d3_baselines_from_file_without_mutating_state(
     assert baseline["false_positives"] == 1
     assert baseline["false_negatives"] == 1
     assert baseline["system_minus_baseline"]["recall"] == 1.0
+    assert baseline["span_overlap"]["status"] == "scored"
+    assert baseline["span_overlap"]["mean_best_gold_iou"] == 0.0
+    assert baseline["span_overlap"]["mean_best_predicted_iou"] == 0.0
     assert output["_meta"]["input_hashes"]["d3_baselines_file_sha256"] == (
         _sha256_file(d3_baselines_file)
     )
