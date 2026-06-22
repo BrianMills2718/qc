@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 124 | D9 interpretive preference protocol result preflight | High | Planned | `D9_INTERPRETIVE_PREFERENCE_PROTOCOL_RESULT_PREFLIGHT.md` |
 
 ## Completed Plans
 

@@ -22,8 +22,8 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Select and create the next highest-value evaluation-harness or invariant
-   lane from `docs/PROJECT_THEORY_AND_GOALS.md` and `docs/EVALUATION_HARNESS.md`.
+1. Execute Plan #124 (`D9_INTERPRETIVE_PREFERENCE_PROTOCOL_RESULT_PREFLIGHT.md`):
+   add protocol/result preflight for D9 blind preference outcome files.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
