@@ -1,4 +1,4 @@
-.PHONY: help test test-quick test-e2e test-all bench bench-package validate-d3-gold validate-d7-gold validate-inv7-package validate-adjudication-responses run-d7-retrieval compare-d7-retrieval run-inv7-fixtures run-inv7-live-fixtures adjudication-sample check lint docs-check clean status cost errors
+.PHONY: help test test-quick test-e2e test-all bench bench-package validate-d3-gold validate-d7-gold validate-inv7-package validate-adjudication-responses lint-scope-phrasing run-d7-retrieval compare-d7-retrieval run-inv7-fixtures run-inv7-live-fixtures adjudication-sample check lint docs-check clean status cost errors
 
 DAYS ?= 7
 PROJECT ?= qualitative_coding
@@ -52,6 +52,15 @@ ifndef PACKAGE
 	$(error PACKAGE is required. Usage: make validate-adjudication-responses PACKAGE=sample.json)
 endif
 	python scripts/validate_adjudication_responses.py $(PACKAGE)
+
+lint-scope-phrasing:  ## Lint report text for unsafe scope phrasing (ID=<project_id> INPUT=report.md)
+ifndef ID
+	$(error ID is required. Usage: make lint-scope-phrasing ID=<project_id> INPUT=report.md)
+endif
+ifndef INPUT
+	$(error INPUT is required. Usage: make lint-scope-phrasing ID=<project_id> INPUT=report.md)
+endif
+	python scripts/lint_scope_phrasing.py $(ID) --input-file $(INPUT) $(if $(PROJECTS_DIR),--projects-dir $(PROJECTS_DIR),)
 
 MODE ?= lexical_bm25
 

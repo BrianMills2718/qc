@@ -48,6 +48,7 @@ make bench ID=<project_id> OBS_DB=path TRACE_ID=trace  # Override D10 observabil
 make bench ID=<project_id> ARTIFACT_DIR=benchmark_results  # Write versioned Phase 0 scorecard package
 make adjudication-sample ID=<project_id> OUTPUT=sample.json  # Export unlabeled human/expert review sample packet
 make validate-adjudication-responses PACKAGE=sample.json  # Validate completed adjudication response package shape/completeness
+make lint-scope-phrasing ID=<project_id> INPUT=report.md  # Lint arbitrary text for unsafe population-generalizing scope phrasing
 make validate-d7-gold GOLD=gold_set.json  # Validate versioned held-out D7 gold-set package
 make run-inv7-fixtures OUTPUT=inv7.json  # Write structural INV-7 fixture package for PROMPT_INJECTION=
 make run-inv7-live-fixtures OUTPUT=inv7_live.json MODEL=<model>  # Write opt-in live canary package for PROMPT_INJECTION=
