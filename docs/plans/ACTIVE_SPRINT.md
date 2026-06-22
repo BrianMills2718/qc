@@ -22,8 +22,8 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Select the next unambiguous evaluation-harness protocol/preflight/guard lane
-   from `docs/plans/CLAUDE.md` and the roadmap.
+1. Execute Plan #121 (`D8_GT_FIDELITY_PROTOCOL_RESULT_PREFLIGHT.md`): add a
+   deterministic D8 protocol/result preflight before score-time guard wiring.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 

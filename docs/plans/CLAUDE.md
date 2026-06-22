@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 121 | D8 GT fidelity protocol result preflight | High | Planned | `D8_GT_FIDELITY_PROTOCOL_RESULT_PREFLIGHT.md` |
 
 ## Completed Plans
 
