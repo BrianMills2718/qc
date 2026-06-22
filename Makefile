@@ -1,4 +1,4 @@
-.PHONY: help test test-quick test-e2e test-all bench bench-package validate-d3-gold validate-d7-gold validate-inv7-package validate-adjudication-responses lint-scope-phrasing export-audit-manifest verify-export-audit-manifest run-d7-retrieval compare-d7-retrieval run-inv7-fixtures run-inv7-live-fixtures adjudication-sample check lint docs-check clean status cost errors
+.PHONY: help test test-quick test-e2e test-all bench bench-package validate-d3-gold validate-d7-gold validate-inv7-package validate-adjudication-responses lint-scope-phrasing export-audit-manifest verify-export-audit-manifest export-publish-preflight run-d7-retrieval compare-d7-retrieval run-inv7-fixtures run-inv7-live-fixtures adjudication-sample check lint docs-check clean status cost errors
 
 DAYS ?= 7
 PROJECT ?= qualitative_coding
@@ -82,6 +82,12 @@ ifndef MANIFEST
 	$(error MANIFEST is required. Usage: make verify-export-audit-manifest MANIFEST=manifest.json)
 endif
 	python scripts/verify_export_audit_manifest.py $(MANIFEST) $(if $(BASE_DIR),--base-dir $(BASE_DIR),) $(if $(ID),--project-id $(ID),) $(if $(PROJECTS_DIR),--projects-dir $(PROJECTS_DIR),)
+
+export-publish-preflight:  ## Strict publish preflight requiring a valid export manifest (MANIFEST=manifest.json [BASE_DIR=exports] [ID=<project_id>])
+ifndef MANIFEST
+	$(error MANIFEST is required. Usage: make export-publish-preflight MANIFEST=manifest.json)
+endif
+	python scripts/export_publish_preflight.py --manifest $(MANIFEST) $(if $(BASE_DIR),--base-dir $(BASE_DIR),) $(if $(ID),--project-id $(ID),) $(if $(PROJECTS_DIR),--projects-dir $(PROJECTS_DIR),)
 
 MODE ?= lexical_bm25
 
