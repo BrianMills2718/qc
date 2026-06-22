@@ -6,7 +6,6 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 110 | INV-7 live protocol result preflight | High | Planned | `INV7_LIVE_PROTOCOL_RESULT_PREFLIGHT.md` |
 
 ## Completed Plans
 
@@ -78,6 +77,7 @@ Track all implementation work here.
 | INV-7 live fixture runner | Evaluation-harness follow-up: `make run-inv7-live-fixtures` writes opt-in live model canary fixture outcomes for `PROMPT_INJECTION=` without claiming prompt-injection robustness | `completed/INV7_LIVE_FIXTURE_RUNNER.md` |
 | INV-7 live fixture prompt hashes | INV-7 follow-up: live fixture packages now carry exact prompt SHA-256 hashes for provenance without claiming prompt-injection robustness | `completed/INV7_LIVE_FIXTURE_PROMPT_HASHES.md` |
 | INV-7 live benchmark protocol | INV-7 follow-up: `make validate-inv7-live-protocol` validates pre-run live canary protocol metadata before live prompt-injection runs | `completed/INV7_LIVE_BENCHMARK_PROTOCOL.md` |
+| INV-7 live protocol result preflight | INV-7 follow-up: `make inv7-live-preflight` checks live result packages against registered live protocols before scoring | `completed/INV7_LIVE_PROTOCOL_RESULT_PREFLIGHT.md` |
 | Human-ceiling comparison scorecard | Evaluation-harness follow-up: D3/D7 scorecards compare exact recall/precision/F1 to supplied human-human package metrics when available without claiming expert parity | `completed/HUMAN_CEILING_COMPARISON_SCORECARD.md` |
 | D5 Gwet AC1 reliability scorecard | Evaluation-harness follow-up: `project irr`, Markdown export, and `make bench` surface Gwet's AC1 for LLM-pass consistency without claiming human IRR | `completed/D5_GWET_AC1_RELIABILITY_SCORECARD.md` |
 | D5 reliability prevalence tables | Evaluation-harness follow-up: `make bench` surfaces rating prevalence tables beside D5 κ/AC1 reliability metrics | `completed/D5_RELIABILITY_PREVALENCE_TABLES.md` |

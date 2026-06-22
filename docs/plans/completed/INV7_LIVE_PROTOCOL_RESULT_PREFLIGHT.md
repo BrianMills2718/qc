@@ -1,12 +1,25 @@
 # Plan #110: INV-7 Live Protocol Result Preflight
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** INV-7 live benchmark protocol; INV-7 prompt-injection package
 **Blocks:** safer live INV-7 benchmark package scoring
 
 ---
+
+## Outcome
+
+Implemented `make inv7-live-preflight PROTOCOL=... PACKAGE=...`, backed by
+`qc_clean/core/inv7_live_preflight.py` and
+`scripts/preflight_inv7_live_package.py`. The gate validates both package
+schemas, requires live-result mode, checks split/fixture/model/trace/freeze/
+contamination metadata, rejects result budget overrun, and requires exact
+fixture prompt-hash parity before scoring. Verification: focused INV-7 tests
+passed (`18 passed`), focused Ruff passed, `make docs-check` passed, the Make
+target dry-run resolved to the expected script call, and full `make check`
+passed (`928 passed, 1 skipped, 8 deselected`; Ruff/docs clean; type check not
+configured).
 
 ## Gap
 
@@ -67,11 +80,11 @@ Internal preflight capability only; no cross-project boundary is created.
 
 ### Capability Validation
 
-- [ ] Matching protocol/result packages pass.
-- [ ] Result validation failures block preflight.
-- [ ] Metadata mismatches fail loud.
-- [ ] Prompt hash mismatches fail loud.
-- [ ] CLI/Make target emit machine-readable pass/fail output.
+- [x] Matching protocol/result packages pass.
+- [x] Result validation failures block preflight.
+- [x] Metadata mismatches fail loud.
+- [x] Prompt hash mismatches fail loud.
+- [x] CLI/Make target emit machine-readable pass/fail output.
 
 ---
 
@@ -130,29 +143,29 @@ Internal preflight capability only; no cross-project boundary is created.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] Matching protocol/live result package passes preflight.
-- [ ] Protocol/result schema failures block preflight.
-- [ ] Split, fixture set, model, trace ID, freeze, contamination, and budget
+- [x] Matching protocol/live result package passes preflight.
+- [x] Protocol/result schema failures block preflight.
+- [x] Split, fixture set, model, trace ID, freeze, contamination, and budget
   mismatches fail loud.
-- [ ] Prompt hash mismatch fails loud.
-- [ ] `make inv7-live-preflight PROTOCOL=... PACKAGE=...` is discoverable and
+- [x] Prompt hash mismatch fails loud.
+- [x] `make inv7-live-preflight PROTOCOL=... PACKAGE=...` is discoverable and
   dry-runs correctly.
-- [ ] Docs state this is process/provenance metadata only, not prompt-injection
+- [x] Docs state this is process/provenance metadata only, not prompt-injection
   robustness evidence.
 
 > Process criteria:
-- [ ] Required focused tests pass.
-- [ ] Focused Ruff check passes.
-- [ ] `make docs-check` passes.
-- [ ] Full `make check` passes or any failure is documented with evidence.
-- [ ] Type-check status is reported.
-- [ ] Verified work is committed and pushed.
+- [x] Required focused tests pass.
+- [x] Focused Ruff check passes.
+- [x] `make docs-check` passes.
+- [x] Full `make check` passes or any failure is documented with evidence.
+- [x] Type-check status is reported.
+- [x] Verified work is committed and pushed.
 
 ---
 
 ## Open Questions
 
-- [ ] Should preflight evaluate success criteria automatically? — Status:
+- [x] Should preflight evaluate success criteria automatically? — Status:
   DEFERRED | Why it matters: criteria are human-readable today. A follow-up can
   add structured criteria if the live benchmark protocol needs automatic pass/
   fail decisions beyond package matching.

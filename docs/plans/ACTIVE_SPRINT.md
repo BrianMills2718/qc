@@ -22,12 +22,17 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #110 (`INV7_LIVE_PROTOCOL_RESULT_PREFLIGHT.md`): preflight live
-   INV-7 result packages against registered live protocols before scoring.
-2. Continue through the ranked roadmap without pausing after each verified
+1. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
 **Completed checkpoint:** Pre-run live INV-7 protocol packages can now be
+preflighted against concrete live result packages with
+`make inv7-live-preflight PROTOCOL=... PACKAGE=...`, checking protocol/package
+schema validity, live-result mode, split/fixture/model/trace/freeze/
+contamination metadata, result budget, and exact prompt-hash parity before
+scoring. This is package-matching provenance only, not a live benchmark result,
+prompt-injection robustness evidence, model-obedience evidence, or validity
+evidence. Pre-run live INV-7 protocol packages can now be
 validated with `make validate-inv7-live-protocol PROTOCOL=...`, covering fixture
 set metadata, exact prompt hashes, model, trace ID, budget, held-out
 freeze/contamination/registration flags, and success criteria. This is protocol
