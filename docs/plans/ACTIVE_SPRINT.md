@@ -22,7 +22,10 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Continue through the ranked roadmap without pausing after each verified
+1. Execute Plan #111 (`D7_RETRIEVAL_COMPARISON_PROTOCOL_PREFLIGHT.md`):
+   preflight D7 retrieval comparison gold/prediction packages against a
+   registered protocol before scoring.
+2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
 **Completed checkpoint:** Pre-run live INV-7 protocol packages can now be

@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 111 | D7 retrieval comparison protocol preflight | High | Planned | `D7_RETRIEVAL_COMPARISON_PROTOCOL_PREFLIGHT.md` |
 
 ## Completed Plans
 
