@@ -259,6 +259,79 @@ def test_phase0_benchmark_package_forwards_relative_inputs(
         }),
         encoding="utf-8",
     )
+    preference = package_dir / "interpretive_preference.json"
+    preference.write_text(
+        json.dumps({
+            "interpretive_preference_evaluations": [
+                {
+                    "case_id": "case-1",
+                    "evaluator": "expert-1",
+                    "evaluator_type": "human_expert",
+                    "preferred": "system",
+                    "criterion": "interpretive_depth",
+                    "surface": "codebook",
+                },
+                {
+                    "case_id": "case-2",
+                    "evaluator": "expert-2",
+                    "evaluator_type": "human_expert",
+                    "preferred": "human",
+                    "criterion": "latent_meaning",
+                    "surface": "themes",
+                },
+            ]
+        }),
+        encoding="utf-8",
+    )
+    d9_protocol = package_dir / "d9_protocol.json"
+    d9_protocol.write_text(
+        json.dumps({
+            "schema_version": 1,
+            "package_type": "qualitative_coding.d9_interpretive_preference_protocol",
+            "protocol_id": "d9-package-protocol-v1",
+            "project_id": state.id,
+            "dataset_name": "D9 package protocol v1",
+            "split": "held_out",
+            "corpus_sha256": "a" * 64,
+            "project_state_sha256": "b" * 64,
+            "comparison_artifact_sha256": "c" * 64,
+            "prompt_frozen": True,
+            "contamination_checked": True,
+            "registered_before_evaluation": True,
+            "blinded": True,
+            "evaluator_plan": {
+                "evaluator_types": ["human_expert"],
+                "planned_evaluator_count": 2,
+                "qualification": "Package fixture expert panel.",
+            },
+            "target_criteria": ["interpretive_depth", "latent_meaning"],
+            "target_surfaces": ["codebook", "themes"],
+            "planned_case_count": 2,
+            "non_inferiority_margin": 0.1,
+            "outcome_metrics": [
+                "system_minus_human_preference_rate",
+                "system_preference_rate",
+                "tie_rate",
+            ],
+            "outcome_file": "interpretive_preference.json",
+            "outcome_file_sha256": bench_phase0.sha256_file(preference),
+            "success_criteria": [
+                {
+                    "metric": "system_minus_human_preference_rate",
+                    "pass_condition": "Lower CI bound must be above the margin.",
+                },
+                {
+                    "metric": "system_preference_rate",
+                    "pass_condition": "Report preference rate before any claim.",
+                },
+                {
+                    "metric": "tie_rate",
+                    "pass_condition": "Report tie rate before any claim.",
+                },
+            ],
+        }),
+        encoding="utf-8",
+    )
     package_file = package_dir / "phase0_package.json"
     package_file.write_text(
         json.dumps({
@@ -272,6 +345,8 @@ def test_phase0_benchmark_package_forwards_relative_inputs(
             "codebook_quality_file": "quality.json",
             "d8_gt_fidelity_protocol_file": "d8_protocol.json",
             "gt_fidelity_file": "gt_fidelity.json",
+            "d9_interpretive_preference_protocol_file": "d9_protocol.json",
+            "interpretive_preference_file": "interpretive_preference.json",
         }),
         encoding="utf-8",
     )
@@ -290,9 +365,14 @@ def test_phase0_benchmark_package_forwards_relative_inputs(
     assert output["bias_stratified_d6"]["status"] == "scored"
     assert output["bias_stratified_d6"]["incorrect_cases"] == 1
     assert output["gt_fidelity_d8"]["status"] == "scored"
+    assert output["interpretive_preference_d9"]["status"] == "scored"
     assert output["_meta"]["preflight_reports"]["d6_bias"]["status"] == "pass"
     assert output["_meta"]["preflight_reports"]["d4_codebook_quality"]["status"] == "pass"
     assert output["_meta"]["preflight_reports"]["d8_gt_fidelity"]["status"] == "pass"
+    assert (
+        output["_meta"]["preflight_reports"]["d9_interpretive_preference"]["status"]
+        == "pass"
+    )
     hashes = output["_meta"]["input_hashes"]
     assert hashes["d3_gold_file_sha256"] == bench_phase0.sha256_file(d3_gold)
     assert hashes["d3_baselines_file_sha256"] == bench_phase0.sha256_file(d3_baselines)
@@ -306,12 +386,19 @@ def test_phase0_benchmark_package_forwards_relative_inputs(
         bench_phase0.sha256_file(d8_protocol)
     )
     assert hashes["gt_fidelity_file_sha256"] == bench_phase0.sha256_file(gt_fidelity)
+    assert hashes["d9_interpretive_preference_protocol_file_sha256"] == (
+        bench_phase0.sha256_file(d9_protocol)
+    )
+    assert hashes["interpretive_preference_file_sha256"] == (
+        bench_phase0.sha256_file(preference)
+    )
     reloaded = store.load(state.id)
     assert "application_gold" not in reloaded.config.extra
     assert "application_baselines" not in reloaded.config.extra
     assert "bias_stratified_evaluations" not in reloaded.config.extra
     assert "codebook_quality_evaluations" not in reloaded.config.extra
     assert "gt_fidelity_evaluations" not in reloaded.config.extra
+    assert "interpretive_preference_evaluations" not in reloaded.config.extra
 
 
 def test_phase0_benchmark_package_rejects_unknown_keys(tmp_path, capsys):
@@ -383,6 +470,8 @@ def test_phase0_package_to_bench_argv_resolves_relative_paths(tmp_path):
         d3_baselines_file="baselines/d3.json",
         d8_gt_fidelity_protocol_file="protocols/d8.json",
         gt_fidelity_file="rubrics/d8.json",
+        d9_interpretive_preference_protocol_file="protocols/d9.json",
+        interpretive_preference_file="rubrics/d9.json",
         trace_id="trace-123",
     )
 
@@ -398,6 +487,10 @@ def test_phase0_package_to_bench_argv_resolves_relative_paths(tmp_path):
         str(tmp_path / "protocols" / "d8.json"),
         "--gt-fidelity-file",
         str(tmp_path / "rubrics" / "d8.json"),
+        "--d9-interpretive-preference-protocol-file",
+        str(tmp_path / "protocols" / "d9.json"),
+        "--interpretive-preference-file",
+        str(tmp_path / "rubrics" / "d9.json"),
         "--trace-id",
         "trace-123",
     ]

@@ -65,6 +65,7 @@ def test_bench_phase0_includes_input_hashes_without_external_files(
     assert hashes["d6_bias_protocol_file_sha256"] is None
     assert hashes["d4_codebook_quality_protocol_file_sha256"] is None
     assert hashes["d8_gt_fidelity_protocol_file_sha256"] is None
+    assert hashes["d9_interpretive_preference_protocol_file_sha256"] is None
     assert hashes["bias_counterfactual_file_sha256"] is None
     assert hashes["bias_stratified_file_sha256"] is None
     assert hashes["codebook_quality_file_sha256"] is None
@@ -266,6 +267,7 @@ def test_bench_phase0_hashes_external_input_files(
     assert hashes["prompt_injection_file_sha256"] == _sha256_file(injection_file)
     assert hashes["d6_bias_protocol_file_sha256"] is None
     assert hashes["d8_gt_fidelity_protocol_file_sha256"] is None
+    assert hashes["d9_interpretive_preference_protocol_file_sha256"] is None
     assert hashes["bias_counterfactual_file_sha256"] == _sha256_file(bias_file)
     assert hashes["codebook_quality_file_sha256"] == _sha256_file(quality_file)
     assert hashes["gt_fidelity_file_sha256"] == _sha256_file(gt_fidelity_file)
@@ -1883,6 +1885,77 @@ def _d8_gt_fidelity_payload() -> dict:
     }
 
 
+def _d9_protocol_payload(*, preference_hash: str) -> dict:
+    return {
+        "schema_version": 1,
+        "package_type": "qualitative_coding.d9_interpretive_preference_protocol",
+        "protocol_id": "d9-preference-heldout-v1",
+        "project_id": "project-alpha",
+        "dataset_name": "D9 held-out interpretive preference v1",
+        "split": "held_out",
+        "corpus_sha256": "a" * 64,
+        "project_state_sha256": "b" * 64,
+        "comparison_artifact_sha256": "c" * 64,
+        "prompt_frozen": True,
+        "contamination_checked": True,
+        "registered_before_evaluation": True,
+        "blinded": True,
+        "evaluator_plan": {
+            "evaluator_types": ["human_expert"],
+            "planned_evaluator_count": 2,
+            "qualification": "Blind qualitative-methods expert panel.",
+        },
+        "target_criteria": ["interpretive_depth", "latent_meaning"],
+        "target_surfaces": ["codebook", "themes"],
+        "planned_case_count": 2,
+        "non_inferiority_margin": 0.1,
+        "outcome_metrics": [
+            "system_minus_human_preference_rate",
+            "system_preference_rate",
+            "tie_rate",
+        ],
+        "outcome_file": "interpretive_preference.json",
+        "outcome_file_sha256": preference_hash,
+        "success_criteria": [
+            {
+                "metric": "system_minus_human_preference_rate",
+                "pass_condition": "Lower CI bound must be above the margin.",
+            },
+            {
+                "metric": "system_preference_rate",
+                "pass_condition": "Report non-tie system preference rate and interval.",
+            },
+            {
+                "metric": "tie_rate",
+                "pass_condition": "Report tie rate and interval.",
+            },
+        ],
+    }
+
+
+def _d9_preference_payload() -> dict:
+    return {
+        "interpretive_preference_evaluations": [
+            {
+                "case_id": "case-1",
+                "evaluator": "expert-1",
+                "evaluator_type": "human_expert",
+                "preferred": "system",
+                "criterion": "interpretive_depth",
+                "surface": "codebook",
+            },
+            {
+                "case_id": "case-2",
+                "evaluator": "expert-2",
+                "evaluator_type": "human_expert",
+                "preferred": "human",
+                "criterion": "latent_meaning",
+                "surface": "themes",
+            },
+        ]
+    }
+
+
 def _d6_stratified_payload() -> dict:
     return {
         "bias_stratified_evaluations": [
@@ -2123,6 +2196,104 @@ def test_bench_phase0_scores_interpretive_preference_from_file_without_mutating_
     assert d9["non_inferiority_assessment"]["protocol"]["protocol_id"] == "d9-margin-v1"
     reloaded = store.load(state.id)
     assert "interpretive_preference_evaluations" not in reloaded.config.extra
+
+
+def test_bench_phase0_d9_protocol_guard_allows_matching_inputs(
+    tmp_path,
+    monkeypatch,
+    capsys,
+):
+    state = ProjectState(
+        id="project_d9_guard_pass",
+        name="D9 guard pass project",
+        config=ProjectConfig(extra={}),
+    )
+    store = ProjectStore(projects_dir=tmp_path / "projects")
+    store.save(state)
+    preference_file = tmp_path / "interpretive_preference.json"
+    preference_file.write_text(json.dumps(_d9_preference_payload()), encoding="utf-8")
+    protocol_file = tmp_path / "d9_protocol.json"
+    protocol_file.write_text(
+        json.dumps(_d9_protocol_payload(preference_hash=_sha256_file(preference_file))),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(bench_phase0, "ProjectStore", lambda: store)
+
+    exit_code = bench_phase0.main([
+        state.id,
+        "--interpretive-preference-file",
+        str(preference_file),
+        "--d9-interpretive-preference-protocol-file",
+        str(protocol_file),
+    ])
+
+    assert exit_code == 0
+    output = json.loads(capsys.readouterr().out)
+    d9 = output["interpretive_preference_d9"]
+    assert d9["status"] == "scored"
+    assessment = d9["non_inferiority_assessment"]
+    assert assessment["status"] == "scored"
+    assert assessment["protocol"]["protocol_id"] == "d9-preference-heldout-v1"
+    assert assessment["protocol"]["non_inferiority_margin"] == 0.1
+    preflight = output["_meta"]["preflight_reports"]["d9_interpretive_preference"]
+    assert preflight["status"] == "pass"
+    assert preflight["result_row_count"] == 2
+    assert preflight["case_count"] == 2
+    hashes = output["_meta"]["input_hashes"]
+    assert hashes["d9_interpretive_preference_protocol_file_sha256"] == (
+        _sha256_file(protocol_file)
+    )
+    assert hashes["interpretive_preference_file_sha256"] == _sha256_file(
+        preference_file
+    )
+    reloaded = store.load(state.id)
+    assert "interpretive_preference_evaluations" not in reloaded.config.extra
+
+
+def test_bench_phase0_d9_protocol_guard_blocks_mismatched_inputs_without_output(
+    tmp_path,
+    monkeypatch,
+    capsys,
+):
+    state = ProjectState(
+        id="project_d9_guard_fail",
+        name="D9 guard fail project",
+        config=ProjectConfig(extra={}),
+    )
+    store = ProjectStore(projects_dir=tmp_path / "projects")
+    store.save(state)
+    preference_file = tmp_path / "interpretive_preference.json"
+    preference_file.write_text(json.dumps(_d9_preference_payload()), encoding="utf-8")
+    protocol_file = tmp_path / "d9_protocol.json"
+    protocol_file.write_text(
+        json.dumps(_d9_protocol_payload(preference_hash="0" * 64)),
+        encoding="utf-8",
+    )
+    output_path = tmp_path / "scorecard.json"
+    artifact_dir = tmp_path / "artifacts"
+    monkeypatch.setattr(bench_phase0, "ProjectStore", lambda: store)
+
+    exit_code = bench_phase0.main([
+        state.id,
+        "--interpretive-preference-file",
+        str(preference_file),
+        "--d9-interpretive-preference-protocol-file",
+        str(protocol_file),
+        "--output",
+        str(output_path),
+        "--artifact-dir",
+        str(artifact_dir),
+    ])
+
+    assert exit_code == 1
+    output = json.loads(capsys.readouterr().out)
+    assert "D9 interpretive-preference preflight failed" in output["error"]
+    assert output["preflight_report"]["status"] == "fail"
+    assert output["preflight_report"]["errors"][0]["field"] == (
+        "preference_file_sha256"
+    )
+    assert not output_path.exists()
+    assert not artifact_dir.exists()
 
 
 def test_bench_phase0_invalid_interpretive_preference_file_fails_loud(

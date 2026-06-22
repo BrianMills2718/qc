@@ -12,6 +12,7 @@ Usage:
         [--codebook-quality-file quality.json]
         [--d8-gt-fidelity-protocol-file protocol.json]
         [--gt-fidelity-file gt_fidelity.json]
+        [--d9-interpretive-preference-protocol-file protocol.json]
         [--interpretive-preference-file preference.json]
         [--confidence-calibration-file calibration.json]
         [--output scorecard.json]
@@ -48,6 +49,9 @@ from qc_clean.core.d4_codebook_quality_preflight import (
 )
 from qc_clean.core.d6_bias_preflight import preflight_d6_bias_payloads
 from qc_clean.core.d8_gt_fidelity_preflight import preflight_d8_gt_fidelity_payloads
+from qc_clean.core.d9_interpretive_preference_preflight import (
+    preflight_d9_interpretive_preference_payloads,
+)
 from qc_clean.core.d3_gold import application_gold_payload_for_scorecard
 from qc_clean.core.d7_gold import d7_gold_payload_for_scorecard
 from qc_clean.core.inv7_package import prompt_injection_payload_for_scorecard
@@ -117,6 +121,13 @@ def main(argv: Sequence[str] | None = None) -> int:
         help="Optional D9 blind forced-choice preference outcome JSON file; applied in memory only",
     )
     parser.add_argument(
+        "--d9-interpretive-preference-protocol-file",
+        help=(
+            "Optional D9 interpretive-preference protocol JSON file; preflights "
+            "supplied D9 rows before scoring"
+        ),
+    )
+    parser.add_argument(
         "--confidence-calibration-file",
         help="Optional confidence/correctness calibration JSON file; applied in memory only",
     )
@@ -152,6 +163,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     bias_stratified_results: Any | None = None
     codebook_quality_results: Any | None = None
     gt_fidelity_results: Any | None = None
+    interpretive_preference_results: Any | None = None
 
     if args.d3_gold_file:
         try:
@@ -342,8 +354,51 @@ def main(argv: Sequence[str] | None = None) -> int:
         except ValueError as exc:
             print(json.dumps({"error": str(exc)}))
             return 1
+
+    d9_interpretive_preference_preflight_report = None
+    d9_interpretive_preference_protocol = None
+    if args.d9_interpretive_preference_protocol_file:
+        try:
+            d9_interpretive_preference_protocol = (
+                load_d9_interpretive_preference_protocol_file(
+                    Path(args.d9_interpretive_preference_protocol_file)
+                )
+            )
+        except ValueError as exc:
+            print(json.dumps({"error": str(exc)}))
+            return 1
+        d9_interpretive_preference_preflight_report = (
+            preflight_d9_interpretive_preference_payloads(
+                d9_interpretive_preference_protocol,
+                interpretive_preference_results,
+                preference_file_sha256=(
+                    sha256_file(Path(args.interpretive_preference_file))
+                    if args.interpretive_preference_file
+                    else None
+                ),
+            )
+        )
+        if d9_interpretive_preference_preflight_report.status != "pass":
+            print(json.dumps({
+                "error": "D9 interpretive-preference preflight failed",
+                "preflight_report": (
+                    d9_interpretive_preference_preflight_report.model_dump(
+                        mode="json"
+                    )
+                ),
+            }))
+            return 1
+
+    if interpretive_preference_results is not None:
         state = state.model_copy(deep=True)
         state.config.extra = dict(state.config.extra)
+        if d9_interpretive_preference_protocol is not None:
+            interpretive_preference_results = (
+                interpretive_preference_payload_with_protocol(
+                    interpretive_preference_results,
+                    d9_interpretive_preference_protocol,
+                )
+            )
         state.config.extra["interpretive_preference_evaluations"] = (
             interpretive_preference_results
         )
@@ -379,6 +434,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         card.setdefault("_meta", {}).setdefault("preflight_reports", {})[
             "d8_gt_fidelity"
         ] = d8_gt_fidelity_preflight_report.model_dump(mode="json")
+    if d9_interpretive_preference_preflight_report is not None:
+        card.setdefault("_meta", {}).setdefault("preflight_reports", {})[
+            "d9_interpretive_preference"
+        ] = d9_interpretive_preference_preflight_report.model_dump(mode="json")
     card.setdefault("_meta", {})["input_hashes"] = phase0_input_hashes(
         loaded_state,
         d3_gold_file=Path(args.d3_gold_file) if args.d3_gold_file else None,
@@ -399,6 +458,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         d8_gt_fidelity_protocol_file=(
             Path(args.d8_gt_fidelity_protocol_file)
             if args.d8_gt_fidelity_protocol_file
+            else None
+        ),
+        d9_interpretive_preference_protocol_file=(
+            Path(args.d9_interpretive_preference_protocol_file)
+            if args.d9_interpretive_preference_protocol_file
             else None
         ),
         bias_counterfactual_file=(
@@ -618,6 +682,11 @@ def phase0_command_provenance(args: argparse.Namespace) -> dict[str, Any]:
             if args.d8_gt_fidelity_protocol_file
             else None
         ),
+        "d9_interpretive_preference_protocol_file": (
+            str(Path(args.d9_interpretive_preference_protocol_file))
+            if args.d9_interpretive_preference_protocol_file
+            else None
+        ),
         "bias_counterfactual_file": (
             str(Path(args.bias_counterfactual_file))
             if args.bias_counterfactual_file
@@ -686,6 +755,7 @@ def phase0_input_hashes(
     d6_bias_protocol_file: Path | None,
     d4_codebook_quality_protocol_file: Path | None,
     d8_gt_fidelity_protocol_file: Path | None,
+    d9_interpretive_preference_protocol_file: Path | None,
     bias_counterfactual_file: Path | None,
     bias_stratified_file: Path | None,
     codebook_quality_file: Path | None,
@@ -724,6 +794,11 @@ def phase0_input_hashes(
         "d8_gt_fidelity_protocol_file_sha256": (
             sha256_file(d8_gt_fidelity_protocol_file)
             if d8_gt_fidelity_protocol_file
+            else None
+        ),
+        "d9_interpretive_preference_protocol_file_sha256": (
+            sha256_file(d9_interpretive_preference_protocol_file)
+            if d9_interpretive_preference_protocol_file
             else None
         ),
         "bias_counterfactual_file_sha256": (
@@ -960,6 +1035,43 @@ def load_d8_gt_fidelity_protocol_file(path: Path) -> Any:
     if not isinstance(raw, dict):
         raise ValueError("D8 GT-fidelity protocol file must be a JSON object")
     return raw
+
+
+def load_d9_interpretive_preference_protocol_file(path: Path) -> Any:
+    """Load a D9 interpretive-preference protocol file for score-time preflight."""
+    try:
+        raw = json.loads(path.read_text(encoding="utf-8"))
+    except OSError as exc:
+        raise ValueError(
+            f"D9 interpretive-preference protocol file '{path}' could not be read: {exc}"
+        ) from exc
+    except json.JSONDecodeError as exc:
+        raise ValueError(
+            f"D9 interpretive-preference protocol file '{path}' is not valid JSON: {exc}"
+        ) from exc
+    if not isinstance(raw, dict):
+        raise ValueError("D9 interpretive-preference protocol file must be a JSON object")
+    return raw
+
+
+def interpretive_preference_payload_with_protocol(
+    preference_results: Any,
+    protocol_payload: dict[str, Any],
+) -> dict[str, Any]:
+    """Attach D9 protocol metadata to an in-memory preference payload."""
+    if isinstance(preference_results, dict):
+        payload = dict(preference_results)
+    else:
+        payload = {"interpretive_preference_evaluations": preference_results}
+    payload["interpretive_preference_protocol"] = {
+        "protocol_id": protocol_payload["protocol_id"],
+        "non_inferiority_margin": protocol_payload["non_inferiority_margin"],
+        "registered_before_evaluation": protocol_payload[
+            "registered_before_evaluation"
+        ],
+        "notes": "Loaded from D9 interpretive-preference protocol file.",
+    }
+    return payload
 
 
 def load_bias_stratified_file(path: Path) -> Any:

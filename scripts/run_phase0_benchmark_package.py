@@ -31,6 +31,9 @@ _PATH_FLAGS = {
     "bias_stratified_file": "--bias-stratified-file",
     "codebook_quality_file": "--codebook-quality-file",
     "gt_fidelity_file": "--gt-fidelity-file",
+    "d9_interpretive_preference_protocol_file": (
+        "--d9-interpretive-preference-protocol-file"
+    ),
     "interpretive_preference_file": "--interpretive-preference-file",
     "confidence_calibration_file": "--confidence-calibration-file",
     "observability_db": "--observability-db",
@@ -71,6 +74,10 @@ class Phase0BenchmarkPackage(BaseModel):
     d8_gt_fidelity_protocol_file: str | None = Field(
         default=None,
         description="Optional D8 GT-fidelity protocol JSON path",
+    )
+    d9_interpretive_preference_protocol_file: str | None = Field(
+        default=None,
+        description="Optional D9 interpretive-preference protocol JSON path",
     )
     bias_counterfactual_file: str | None = Field(
         default=None,

@@ -16,7 +16,7 @@ Canonical governance sources:
 
 ## Purpose
 
-*Last Updated: 2026-06-21*
+*Last Updated: 2026-06-22*
 
 > **Canonical status/theory docs (read before describing the system).** This
 > file is the **operational** reference (architecture, commands, config). The
@@ -48,6 +48,7 @@ make bench ID=<project_id> D4_PROTOCOL=protocol.json CODEBOOK_QUALITY=quality.js
 make validate-d6-bias-protocol PROTOCOL=protocol.json  # Validate pre-run D6 bias-audit protocol metadata
 make d6-bias-preflight PROTOCOL=protocol.json STRATIFIED=bias_stratified.json COUNTERFACTUAL=bias_counterfactual.json  # Preflight D6 result files against protocol
 make bench ID=<project_id> D6_PROTOCOL=protocol.json BIAS_STRATIFIED=bias_stratified.json BIAS_COUNTERFACTUAL=bias_counterfactual.json  # Guard D6 scoring with protocol preflight
+make bench ID=<project_id> D9_PROTOCOL=protocol.json PREFERENCE=preference.json  # Guard D9 scoring with protocol preflight
 make bench ID=<project_id> GOLD=gold.json BASELINES=baselines.json  # Add external D7 gold/baselines without mutating project state
 make bench ID=<project_id> BIAS_STRATIFIED=bias_stratified.json  # Add external D6 stratified correctness rows without mutating state
 make bench ID=<project_id> PROMPT_INJECTION=inv7.json  # Add external INV-7 fixture results without mutating state
