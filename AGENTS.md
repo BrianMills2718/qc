@@ -49,6 +49,7 @@ make bench ID=<project_id> ARTIFACT_DIR=benchmark_results  # Write versioned Pha
 make adjudication-sample ID=<project_id> OUTPUT=sample.json  # Export unlabeled human/expert review sample packet
 make validate-adjudication-responses PACKAGE=sample.json  # Validate completed adjudication response package shape/completeness
 make import-adjudication-responses PACKAGE=sample.json GOLD_SET_ID=study-v1 DATASET_NAME="Study dev labels" CODER_COUNT=1 ADJUDICATOR=coder-1 PROTOCOL="Single adjudicator review" D3_OUTPUT=d3_gold.json D7_OUTPUT=d7_gold.json  # Convert valid responses to D3/D7 gold package inputs
+make write-phase0-adjudication-package ID=<project_id> OUTPUT=phase0_package.json D3_GOLD=d3_gold.json GOLD=d7_gold.json  # Write strict Phase 0 package manifest for imported D3/D7 gold
 make lint-scope-phrasing ID=<project_id> INPUT=report.md  # Lint arbitrary text for unsafe population-generalizing scope phrasing
 make export-audit-manifest ID=<project_id> FORMAT=markdown ARTIFACTS="report.md" OUTPUT=manifest.json  # Write export artifact hash manifest
 make verify-export-audit-manifest MANIFEST=manifest.json BASE_DIR=. ID=<project_id>  # Verify manifest self-hash, artifact hashes, and optional project-state hash

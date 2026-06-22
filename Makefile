@@ -1,4 +1,4 @@
-.PHONY: help test test-quick test-e2e test-all bench bench-package validate-d3-gold validate-d7-gold validate-inv7-package validate-adjudication-responses import-adjudication-responses lint-scope-phrasing export-audit-manifest verify-export-audit-manifest export-publish-preflight verify-export-audit-log run-d7-retrieval compare-d7-retrieval run-inv7-fixtures run-inv7-live-fixtures adjudication-sample check lint docs-check clean status cost errors
+.PHONY: help test test-quick test-e2e test-all bench bench-package write-phase0-adjudication-package validate-d3-gold validate-d7-gold validate-inv7-package validate-adjudication-responses import-adjudication-responses lint-scope-phrasing export-audit-manifest verify-export-audit-manifest export-publish-preflight verify-export-audit-log run-d7-retrieval compare-d7-retrieval run-inv7-fixtures run-inv7-live-fixtures adjudication-sample check lint docs-check clean status cost errors
 
 DAYS ?= 7
 PROJECT ?= qualitative_coding
@@ -28,6 +28,18 @@ ifndef PACKAGE
 	$(error PACKAGE is required. Usage: make bench-package PACKAGE=phase0_package.json)
 endif
 	python scripts/run_phase0_benchmark_package.py $(PACKAGE)
+
+write-phase0-adjudication-package:  ## Write Phase 0 package manifest from D3/D7 adjudication gold (ID=<project_id> OUTPUT=phase0_package.json [D3_GOLD=d3.json] [GOLD=d7.json])
+ifndef ID
+	$(error ID is required. Usage: make write-phase0-adjudication-package ID=<project_id> OUTPUT=phase0_package.json D3_GOLD=d3.json)
+endif
+ifndef OUTPUT
+	$(error OUTPUT is required. Usage: make write-phase0-adjudication-package ID=<project_id> OUTPUT=phase0_package.json D3_GOLD=d3.json)
+endif
+ifeq ($(strip $(D3_GOLD)$(GOLD)),)
+	$(error D3_GOLD or GOLD is required)
+endif
+	python scripts/write_phase0_adjudication_package.py $(ID) --output $(OUTPUT) $(if $(D3_GOLD),--d3-gold-file $(D3_GOLD),) $(if $(GOLD),--d7-gold-file $(GOLD),) $(if $(SCORECARD_OUTPUT),--scorecard-output $(SCORECARD_OUTPUT),) $(if $(ARTIFACT_DIR),--artifact-dir $(ARTIFACT_DIR),) $(if $(OBS_DB),--observability-db $(OBS_DB),) $(if $(TRACE_ID),--trace-id $(TRACE_ID),)
 
 validate-d3-gold:  ## Validate a versioned D3 application gold-set package (GOLD=gold_set.json)
 ifndef GOLD
