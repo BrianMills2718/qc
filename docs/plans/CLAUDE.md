@@ -6,7 +6,6 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 61 | D6 counterfactual change-rate Wilson intervals | High | Planned | `D6_COUNTERFACTUAL_CHANGE_RATE_WILSON_INTERVALS.md` |
 
 ## Completed Plans
 
@@ -72,6 +71,7 @@ Track all implementation work here.
 | Exact-key Krippendorff alpha scorecard | Evaluation-harness follow-up: D3/D7 exact-key system-gold agreement now reports Krippendorff's α metadata without claiming full semantic/multi-label α | `completed/EXACT_KEY_KRIPPENDORFF_ALPHA_SCORECARD.md` |
 | D9 non-inferiority margin scorecard | Evaluation-harness follow-up: D9 preference packages can report a pre-registered non-inferiority margin assessment without claiming blind expert parity | `completed/D9_NON_INFERIORITY_MARGIN_SCORECARD.md` |
 | Confidence calibration Wilson intervals | Evaluation-harness follow-up: confidence-calibration scorecards report Wilson accuracy intervals overall, by bin, and by surface without claiming calibration proof | `completed/CONFIDENCE_CALIBRATION_WILSON_INTERVALS.md` |
+| D6 counterfactual change-rate Wilson intervals | Evaluation-harness follow-up: D6 counterfactual-bias scorecards report Wilson intervals for code-change rates overall and by attribute without claiming a populated bias audit | `completed/D6_COUNTERFACTUAL_CHANGE_RATE_WILSON_INTERVALS.md` |
 
 ## Status Key
 

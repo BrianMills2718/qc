@@ -1,12 +1,28 @@
 # Plan #61: D6 Counterfactual Change-Rate Wilson Intervals
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** None
 **Blocks:** D6 benchmark uncertainty metadata
 
 ---
+
+## Outcome
+
+D6 counterfactual-bias scorecards now report Wilson `code_change_rate_ci`
+metadata for invariant-case code-change rates overall and by varied attribute.
+The interval uses the same changed and invariant-case counts already reported by
+the D6 scorecard. This remains local uncertainty metadata for externally
+supplied counterfactual outcomes, not proof of bias or bias absence.
+
+## Verification
+
+- `python -m pytest tests/test_bench_phase0.py tests/test_bench_phase0_script.py -q` - 80 passed
+- `python -m ruff check qc_clean/core/bench.py tests/test_bench_phase0.py tests/test_bench_phase0_script.py` - clean
+- `python scripts/check_markdown_links.py` - clean
+- `python scripts/sync_plan_status.py --check` - clean
+- `make check` - 771 passed, 1 skipped, 8 deselected; lint and docs checks clean; type check not configured
 
 ## Gap
 
@@ -57,11 +73,11 @@ Internal scorecard capability only; no cross-project boundary is created.
 
 ### Capability Validation
 
-- [ ] Overall D6 summary includes `code_change_rate_ci`.
-- [ ] Each per-attribute D6 summary includes `code_change_rate_ci`.
-- [ ] Interval counts match changed and invariant-case denominators.
-- [ ] Existing D6 code-change and Jaccard metrics are unchanged.
-- [ ] Docs preserve the caveat that this is local uncertainty metadata, not bias proof.
+- [x] Overall D6 summary includes `code_change_rate_ci`.
+- [x] Each per-attribute D6 summary includes `code_change_rate_ci`.
+- [x] Interval counts match changed and invariant-case denominators.
+- [x] Existing D6 code-change and Jaccard metrics are unchanged.
+- [x] Docs preserve the caveat that this is local uncertainty metadata, not bias proof.
 
 ---
 
@@ -112,17 +128,17 @@ Internal scorecard capability only; no cross-project boundary is created.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] Overall D6 score includes Wilson `code_change_rate_ci`.
-- [ ] Per-attribute D6 summaries include Wilson `code_change_rate_ci`.
-- [ ] Existing D6 metrics are unchanged.
-- [ ] Docs preserve the caveat that this is local metadata only.
+- [x] Overall D6 score includes Wilson `code_change_rate_ci`.
+- [x] Per-attribute D6 summaries include Wilson `code_change_rate_ci`.
+- [x] Existing D6 metrics are unchanged.
+- [x] Docs preserve the caveat that this is local metadata only.
 
 > Process criteria:
-- [ ] Required tests pass
-- [ ] Full test suite passes
-- [ ] Type check status reported
-- [ ] Docs updated
-- [ ] Plan completed, committed, and pushed
+- [x] Required tests pass
+- [x] Full test suite passes
+- [x] Type check status reported
+- [x] Docs updated
+- [x] Plan completed, committed, and pushed
 
 ---
 
