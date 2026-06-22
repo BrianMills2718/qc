@@ -263,6 +263,20 @@ class TestGroundedTheoryModels:
 # ---------------------------------------------------------------------------
 
 
+class TestProjectConfig:
+    def test_project_config_auto_refresh_higher_order_on_recode_defaults_false(self):
+        config = ProjectConfig()
+
+        assert config.auto_refresh_higher_order_on_recode is False
+
+    def test_project_config_auto_refresh_higher_order_on_recode_round_trips(self):
+        config = ProjectConfig(auto_refresh_higher_order_on_recode=True)
+
+        loaded = ProjectConfig.model_validate_json(config.model_dump_json())
+
+        assert loaded.auto_refresh_higher_order_on_recode is True
+
+
 class TestProjectState:
     def test_defaults(self):
         state = ProjectState()

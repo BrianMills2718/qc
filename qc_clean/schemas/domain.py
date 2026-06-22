@@ -621,6 +621,13 @@ class ProjectConfig(BaseModel):
     """Configuration snapshot for the project."""
     methodology: Methodology = Methodology.DEFAULT
     model_name: str = "gpt-5-mini"
+    auto_refresh_higher_order_on_recode: bool = Field(
+        default=False,
+        description=(
+            "When true, incremental recode defaults to refreshing "
+            "methodology-specific higher-order outputs after coding new documents."
+        ),
+    )
     created_at: str = Field(default_factory=lambda: datetime.now().isoformat())
     extra: Dict[str, Any] = Field(default_factory=dict)
 

@@ -235,6 +235,49 @@ class TestProjectAddDocs:
             "documents": 1,
         }
 
+    def test_add_docs_with_recode_forwards_no_refresh_override(
+        self,
+        tmp_path,
+        tmp_store,
+        monkeypatch,
+    ):
+        """add-docs --recode forwards the force-off refresh override."""
+        state = ProjectState(
+            id="add-recode-no-refresh",
+            name="Add Recode No Refresh",
+            codebook=Codebook(codes=[Code(id="C1", name="Existing")]),
+        )
+        tmp_store.save(state)
+        doc_path = tmp_path / "new_interview.txt"
+        doc_path.write_text("Participant: More material.", encoding="utf-8")
+        seen = {}
+
+        def fake_recode(store, args):
+            seen["refresh_higher_order"] = args.refresh_higher_order
+            seen["no_refresh_higher_order"] = args.no_refresh_higher_order
+            return 0
+
+        monkeypatch.setattr(project_commands, "_recode_project", fake_recode)
+
+        result = project_commands._add_docs(
+            tmp_store,
+            SimpleNamespace(
+                project_id=state.id,
+                files=[str(doc_path)],
+                directory=None,
+                recode=True,
+                model="gpt-test",
+                refresh_higher_order=False,
+                no_refresh_higher_order=True,
+            ),
+        )
+
+        assert result == 0
+        assert seen == {
+            "refresh_higher_order": False,
+            "no_refresh_higher_order": True,
+        }
+
     def test_add_docs_with_recode_does_not_recode_when_no_documents_added(
         self,
         tmp_path,
@@ -277,6 +320,25 @@ class TestProjectAddDocs:
 # ---------------------------------------------------------------------------
 
 class TestProjectRecode:
+    def test_create_project_can_enable_recode_refresh_policy(
+        self,
+        tmp_store,
+        capsys,
+    ):
+        result = project_commands._create_project(
+            tmp_store,
+            SimpleNamespace(
+                name="Policy Project",
+                methodology=Methodology.THEMATIC_ANALYSIS.value,
+                auto_refresh_higher_order_on_recode=True,
+            ),
+        )
+
+        assert result == 0
+        project_id = capsys.readouterr().out.split("Created project: ", 1)[1].splitlines()[0]
+        saved = tmp_store.load(project_id)
+        assert saved.config.auto_refresh_higher_order_on_recode is True
+
     def test_recode_forwards_refresh_higher_order_to_pipeline_factory(
         self,
         tmp_store,
@@ -326,6 +388,149 @@ class TestProjectRecode:
             "methodology": Methodology.THEMATIC_ANALYSIS.value,
             "refresh_higher_order": True,
         }
+
+    def test_recode_uses_configured_refresh_policy_by_default(
+        self,
+        tmp_store,
+        monkeypatch,
+    ):
+        state = ProjectState(
+            id="recode-config-refresh",
+            name="Recode Config Refresh",
+            config=ProjectConfig(
+                methodology=Methodology.THEMATIC_ANALYSIS,
+                auto_refresh_higher_order_on_recode=True,
+            ),
+            corpus=Corpus(documents=[
+                Document(id="coded", name="coded.txt", content="coded"),
+                Document(id="new", name="new.txt", content="new"),
+            ]),
+            codebook=Codebook(codes=[Code(id="C1", name="Existing")]),
+            code_applications=[
+                CodeApplication(code_id="C1", doc_id="coded", quote_text="coded"),
+            ],
+        )
+        tmp_store.save(state)
+        seen = {}
+
+        def fake_create_incremental_pipeline(
+            methodology,
+            on_stage_complete,
+            refresh_higher_order=False,
+        ):
+            seen["methodology"] = methodology
+            seen["refresh_higher_order"] = refresh_higher_order
+            return AnalysisPipeline(stages=[], on_stage_complete=on_stage_complete)
+
+        monkeypatch.setattr(
+            "qc_clean.core.pipeline.pipeline_factory.create_incremental_pipeline",
+            fake_create_incremental_pipeline,
+        )
+
+        result = project_commands._recode_project(
+            tmp_store,
+            SimpleNamespace(
+                project_id=state.id,
+                model="gpt-test",
+                refresh_higher_order=False,
+                no_refresh_higher_order=False,
+            ),
+        )
+
+        assert result == 0
+        assert seen == {
+            "methodology": Methodology.THEMATIC_ANALYSIS.value,
+            "refresh_higher_order": True,
+        }
+
+    def test_recode_no_refresh_override_wins_over_config(
+        self,
+        tmp_store,
+        monkeypatch,
+    ):
+        state = ProjectState(
+            id="recode-config-no-refresh",
+            name="Recode Config No Refresh",
+            config=ProjectConfig(
+                methodology=Methodology.THEMATIC_ANALYSIS,
+                auto_refresh_higher_order_on_recode=True,
+            ),
+            corpus=Corpus(documents=[
+                Document(id="coded", name="coded.txt", content="coded"),
+                Document(id="new", name="new.txt", content="new"),
+            ]),
+            codebook=Codebook(codes=[Code(id="C1", name="Existing")]),
+            code_applications=[
+                CodeApplication(code_id="C1", doc_id="coded", quote_text="coded"),
+            ],
+        )
+        tmp_store.save(state)
+        seen = {}
+
+        def fake_create_incremental_pipeline(
+            methodology,
+            on_stage_complete,
+            refresh_higher_order=False,
+        ):
+            seen["methodology"] = methodology
+            seen["refresh_higher_order"] = refresh_higher_order
+            return AnalysisPipeline(stages=[], on_stage_complete=on_stage_complete)
+
+        monkeypatch.setattr(
+            "qc_clean.core.pipeline.pipeline_factory.create_incremental_pipeline",
+            fake_create_incremental_pipeline,
+        )
+
+        result = project_commands._recode_project(
+            tmp_store,
+            SimpleNamespace(
+                project_id=state.id,
+                model="gpt-test",
+                refresh_higher_order=False,
+                no_refresh_higher_order=True,
+            ),
+        )
+
+        assert result == 0
+        assert seen == {
+            "methodology": Methodology.THEMATIC_ANALYSIS.value,
+            "refresh_higher_order": False,
+        }
+
+    def test_recode_policy_command_updates_config(
+        self,
+        tmp_store,
+        capsys,
+    ):
+        state = ProjectState(id="policy-update", name="Policy Update")
+        tmp_store.save(state)
+
+        result = project_commands._recode_policy(
+            tmp_store,
+            SimpleNamespace(
+                project_id=state.id,
+                enable_auto_refresh_higher_order=True,
+                disable_auto_refresh_higher_order=False,
+            ),
+        )
+
+        assert result == 0
+        saved = tmp_store.load(state.id)
+        assert saved.config.auto_refresh_higher_order_on_recode is True
+        assert "auto_refresh_higher_order_on_recode: enabled" in capsys.readouterr().out
+
+        result = project_commands._recode_policy(
+            tmp_store,
+            SimpleNamespace(
+                project_id=state.id,
+                enable_auto_refresh_higher_order=False,
+                disable_auto_refresh_higher_order=True,
+            ),
+        )
+
+        assert result == 0
+        saved = tmp_store.load(state.id)
+        assert saved.config.auto_refresh_higher_order_on_recode is False
 
     def test_recode_refresh_higher_order_allows_grounded_theory(
         self,
@@ -1090,6 +1295,27 @@ class TestCLIParsing:
         assert args.recode is True
         assert args.refresh_higher_order is True
         assert args.model == "gpt-test"
+        assert args.no_refresh_higher_order is False
+
+    def test_add_docs_subparser_accepts_no_refresh_override(self):
+        from qc_cli import create_parser
+        parser = create_parser()
+
+        args = parser.parse_args([
+            "project",
+            "add-docs",
+            "pid",
+            "--files",
+            "interview.txt",
+            "--recode",
+            "--no-refresh-higher-order",
+        ])
+
+        assert args.command == "project"
+        assert args.project_action == "add-docs"
+        assert args.recode is True
+        assert args.refresh_higher_order is False
+        assert args.no_refresh_higher_order is True
 
     def test_recode_subparser_accepts_refresh_higher_order(self):
         from qc_cli import create_parser
@@ -1109,6 +1335,57 @@ class TestCLIParsing:
         assert args.project_id == "pid"
         assert args.model == "gpt-test"
         assert args.refresh_higher_order is True
+        assert args.no_refresh_higher_order is False
+
+    def test_recode_subparser_accepts_no_refresh_override(self):
+        from qc_cli import create_parser
+        parser = create_parser()
+
+        args = parser.parse_args([
+            "project",
+            "recode",
+            "pid",
+            "--no-refresh-higher-order",
+        ])
+
+        assert args.command == "project"
+        assert args.project_action == "recode"
+        assert args.project_id == "pid"
+        assert args.refresh_higher_order is False
+        assert args.no_refresh_higher_order is True
+
+    def test_create_subparser_accepts_recode_refresh_policy(self):
+        from qc_cli import create_parser
+        parser = create_parser()
+
+        args = parser.parse_args([
+            "project",
+            "create",
+            "--name",
+            "Policy Project",
+            "--auto-refresh-higher-order-on-recode",
+        ])
+
+        assert args.command == "project"
+        assert args.project_action == "create"
+        assert args.auto_refresh_higher_order_on_recode is True
+
+    def test_recode_policy_subparser_accepts_update_flags(self):
+        from qc_cli import create_parser
+        parser = create_parser()
+
+        args = parser.parse_args([
+            "project",
+            "recode-policy",
+            "pid",
+            "--enable-auto-refresh-higher-order",
+        ])
+
+        assert args.command == "project"
+        assert args.project_action == "recode-policy"
+        assert args.project_id == "pid"
+        assert args.enable_auto_refresh_higher_order is True
+        assert args.disable_auto_refresh_higher_order is False
 
     def test_export_subparser(self):
         from qc_cli import create_parser

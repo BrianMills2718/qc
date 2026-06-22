@@ -954,6 +954,11 @@ Examples:
         help='Exclusion criterion; repeat for multiple criteria',
     )
     proj_create.add_argument('--notes', help='Additional scope caveats or notes')
+    proj_create.add_argument(
+        '--auto-refresh-higher-order-on-recode',
+        action='store_true',
+        help='Default this project to higher-order refresh during incremental recode',
+    )
 
     proj_list = project_subparsers.add_parser('list', help='List all projects')
 
@@ -983,6 +988,25 @@ Examples:
     )
     proj_scope.add_argument('--notes', help='Additional scope caveats or notes')
 
+    proj_recode_policy = project_subparsers.add_parser(
+        'recode-policy',
+        help='Show or update project recode refresh policy',
+    )
+    proj_recode_policy.add_argument('project_id', help='Project ID')
+    recode_policy_group = proj_recode_policy.add_mutually_exclusive_group()
+    recode_policy_group.add_argument(
+        '--enable-auto-refresh-higher-order',
+        action='store_true',
+        default=False,
+        help='Enable project-level higher-order refresh by default during recode',
+    )
+    recode_policy_group.add_argument(
+        '--disable-auto-refresh-higher-order',
+        action='store_true',
+        default=False,
+        help='Disable project-level higher-order refresh by default during recode',
+    )
+
     proj_add = project_subparsers.add_parser('add-docs', help='Add documents to project')
     proj_add.add_argument('project_id', help='Project ID')
     proj_add.add_argument('--files', nargs='+', help='Files to add')
@@ -997,13 +1021,21 @@ Examples:
         default=None,
         help='LLM model to use when --recode is supplied (default: project config)',
     )
-    proj_add.add_argument(
+    proj_add_refresh_group = proj_add.add_mutually_exclusive_group()
+    proj_add_refresh_group.add_argument(
         '--refresh-higher-order',
         action='store_true',
+        default=False,
         help=(
             'With --recode, refresh methodology-specific higher-order outputs '
             'after incremental coding'
         ),
+    )
+    proj_add_refresh_group.add_argument(
+        '--no-refresh-higher-order',
+        action='store_true',
+        default=False,
+        help='With --recode, force hard-invalidation mode for this run',
     )
 
     proj_run = project_subparsers.add_parser('run', help='Run analysis pipeline on project')
@@ -1067,13 +1099,21 @@ Examples:
     proj_recode = project_subparsers.add_parser('recode', help='Incrementally code new documents')
     proj_recode.add_argument('project_id', help='Project ID')
     proj_recode.add_argument('--model', default=None, help='LLM model to use (default: gpt-5-mini)')
-    proj_recode.add_argument(
+    proj_recode_refresh_group = proj_recode.add_mutually_exclusive_group()
+    proj_recode_refresh_group.add_argument(
         '--refresh-higher-order',
         action='store_true',
+        default=False,
         help=(
             'Refresh methodology-specific higher-order outputs after '
             'incremental coding'
         ),
+    )
+    proj_recode_refresh_group.add_argument(
+        '--no-refresh-higher-order',
+        action='store_true',
+        default=False,
+        help='Force hard-invalidation mode for this recode run',
     )
 
     # Review command

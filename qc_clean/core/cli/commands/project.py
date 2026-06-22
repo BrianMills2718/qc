@@ -37,6 +37,8 @@ def handle_project_command(args) -> int:
         return _show_claims(store, args)
     elif args.project_action == "scope":
         return _show_or_update_scope(store, args)
+    elif args.project_action == "recode-policy":
+        return _recode_policy(store, args)
     elif args.project_action == "add-docs":
         return _add_docs(store, args)
     elif args.project_action == "run":
@@ -67,13 +69,20 @@ def _create_project(store: ProjectStore, args) -> int:
 
     state = ProjectState(
         name=name,
-        config=ProjectConfig(methodology=meth),
+        config=ProjectConfig(
+            methodology=meth,
+            auto_refresh_higher_order_on_recode=bool(
+                getattr(args, "auto_refresh_higher_order_on_recode", False)
+            ),
+        ),
     )
     state.corpus_scope = _scope_from_create_args(args)
     path = store.save(state)
     print(f"Created project: {state.id}")
     print(f"  Name: {state.name}")
     print(f"  Methodology: {meth.value}")
+    if state.config.auto_refresh_higher_order_on_recode:
+        print("  Auto refresh higher-order on recode: enabled")
     if state.corpus_scope is not None:
         print("  Corpus scope: set")
     print(f"  Saved to: {path}")
@@ -162,9 +171,32 @@ def _add_docs(store: ProjectStore, args) -> int:
             project_id=project_id,
             model=getattr(args, "model", None),
             refresh_higher_order=getattr(args, "refresh_higher_order", False),
+            no_refresh_higher_order=getattr(args, "no_refresh_higher_order", False),
         )
         return _recode_project(store, recode_args)
 
+    return 0
+
+
+def _recode_policy(store: ProjectStore, args) -> int:
+    """Show or update the project-level higher-order recode refresh policy."""
+    project_id = args.project_id
+    try:
+        state = store.load(project_id)
+    except FileNotFoundError:
+        print(f"Project not found: {project_id}", file=sys.stderr)
+        return 1
+
+    if getattr(args, "enable_auto_refresh_higher_order", False):
+        state.config.auto_refresh_higher_order_on_recode = True
+        store.save(state)
+    elif getattr(args, "disable_auto_refresh_higher_order", False):
+        state.config.auto_refresh_higher_order_on_recode = False
+        store.save(state)
+
+    status = "enabled" if state.config.auto_refresh_higher_order_on_recode else "disabled"
+    print(f"Recode policy for project: {state.name}")
+    print(f"  auto_refresh_higher_order_on_recode: {status}")
     return 0
 
 
@@ -808,7 +840,7 @@ def _recode_project(store: ProjectStore, args) -> int:
         print("All documents are already coded. Add new documents first with 'project add-docs'.", file=sys.stderr)
         return 1
 
-    refresh_higher_order = bool(getattr(args, "refresh_higher_order", False))
+    refresh_higher_order, refresh_source = _resolve_recode_refresh_policy(state, args)
 
     from qc_clean.core.pipeline.pipeline_factory import create_incremental_pipeline
 
@@ -839,7 +871,7 @@ def _recode_project(store: ProjectStore, args) -> int:
             scope = "GT axial/selective/theory"
         else:
             scope = "thematic perspective/relationship/synthesis"
-        print(f"  Refresh higher-order: enabled ({scope})")
+        print(f"  Refresh higher-order: enabled ({scope}; {refresh_source})")
     print()
 
     # Reset pipeline status for the incremental run
@@ -860,3 +892,14 @@ def _recode_project(store: ProjectStore, args) -> int:
     print(f"  Iteration: {state.iteration}")
 
     return 0
+
+
+def _resolve_recode_refresh_policy(state: ProjectState, args) -> tuple[bool, str]:
+    """Resolve one-run recode overrides against the project-level refresh policy."""
+    if getattr(args, "refresh_higher_order", False):
+        return True, "command override"
+    if getattr(args, "no_refresh_higher_order", False):
+        return False, "command override"
+    if state.config.auto_refresh_higher_order_on_recode:
+        return True, "project policy"
+    return False, "default policy"
