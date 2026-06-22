@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 66 | D1/D2 structural rate Wilson intervals | High | Planned | `D1_D2_STRUCTURAL_RATE_WILSON_INTERVALS.md` |
 
 ## Completed Plans
 
