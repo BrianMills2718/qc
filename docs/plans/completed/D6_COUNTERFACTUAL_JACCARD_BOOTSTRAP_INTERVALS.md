@@ -1,6 +1,14 @@
 # Plan #68: D6 Counterfactual Jaccard Bootstrap Intervals
 
-**Status:** In Progress
+**Outcome:** Complete. D6 counterfactual-bias scorecards now report
+configurable deterministic local bootstrap intervals for mean Jaccard distance
+overall and by attribute through `phase0_counterfactual_bootstrap`, while
+preserving code-change Wilson intervals and the no-populated-bias-audit caveat.
+Verified with focused D6 tests, docs checks, and full `make check` on
+2026-06-21 (`776 passed, 1 skipped, 8 deselected`; Ruff/docs checks passed;
+type check remains not configured).
+
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** None
@@ -139,7 +147,7 @@ pattern.
 - [x] Plan sync passes.
 - [x] Markdown link check passes.
 - [x] Full `make check` passes, or any non-codebase failure is recorded.
-- [ ] Verified implementation is committed and pushed.
+- [x] Verified implementation is committed and pushed.
 
 ---
 
