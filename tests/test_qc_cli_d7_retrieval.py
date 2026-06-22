@@ -3,7 +3,13 @@
 import sys
 
 import qc_cli
-from scripts import compare_d7_retrieval, run_d7_retrieval, validate_d7_baseline_package
+from scripts import (
+    compare_d7_retrieval,
+    run_d7_retrieval,
+    validate_d3_gold_set,
+    validate_d7_baseline_package,
+    validate_d7_gold_set,
+)
 
 
 def test_qc_cli_run_d7_retrieval_forwards_flags(monkeypatch):
@@ -158,3 +164,47 @@ def test_qc_cli_validate_d7_baseline_package_forwards_path(monkeypatch):
 
     assert qc_cli.main() == 7
     assert captured["argv"] == ["baseline.json"]
+
+
+def test_qc_cli_validate_d3_gold_forwards_path(monkeypatch):
+    captured = {}
+
+    def fake_main(argv):
+        captured["argv"] = argv
+        return 3
+
+    monkeypatch.setattr(validate_d3_gold_set, "main", fake_main)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "qc_cli.py",
+            "validate-d3-gold",
+            "d3_gold.json",
+        ],
+    )
+
+    assert qc_cli.main() == 3
+    assert captured["argv"] == ["d3_gold.json"]
+
+
+def test_qc_cli_validate_d7_gold_forwards_path(monkeypatch):
+    captured = {}
+
+    def fake_main(argv):
+        captured["argv"] = argv
+        return 4
+
+    monkeypatch.setattr(validate_d7_gold_set, "main", fake_main)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "qc_cli.py",
+            "validate-d7-gold",
+            "d7_gold.json",
+        ],
+    )
+
+    assert qc_cli.main() == 4
+    assert captured["argv"] == ["d7_gold.json"]

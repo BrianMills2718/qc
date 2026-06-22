@@ -167,6 +167,8 @@ make adjudication-protocol-preflight PROTOCOL=protocol.json SAMPLE=sample.json
 make validate-adjudication-responses PACKAGE=sample.json
 make adjudication-response-preflight PROTOCOL=protocol.json SAMPLE=sample.json RESPONSES=responses.json
 make import-adjudication-responses PACKAGE=sample.json GOLD_SET_ID=study-v1 DATASET_NAME="Study dev labels" CODER_COUNT=1 ADJUDICATOR=coder-1 PROTOCOL="Single adjudicator review" PREFLIGHT_PROTOCOL=protocol.json PREFLIGHT_SAMPLE=sample.json D3_OUTPUT=d3_gold.json D7_OUTPUT=d7_gold.json
+python qc_cli.py validate-d3-gold d3_gold.json
+python qc_cli.py validate-d7-gold d7_gold.json
 make write-phase0-adjudication-package ID=<project_id> OUTPUT=phase0_package.json D3_GOLD=d3_gold.json GOLD=d7_gold.json
 make lint-scope-phrasing ID=<project_id> INPUT=report.md
 make validate-d8-gt-fidelity-protocol PROTOCOL=protocol.json
@@ -491,6 +493,8 @@ python qc_cli.py run-inv7-live-fixtures --output inv7_live.json --model <model> 
 make validate-inv7-live-protocol PROTOCOL=inv7_live_protocol.json  # Validate pre-run live protocol metadata
 make inv7-live-preflight PROTOCOL=inv7_live_protocol.json PACKAGE=inv7_live.json  # Preflight live result against protocol before scoring
 make validate-inv7-package PACKAGE=inv7.json  # Validate schema_version=1 INV-7 package metadata
+python qc_cli.py validate-d3-gold d3_gold.json  # Canonical CLI wrapper for D3 gold package validation
+python qc_cli.py validate-d7-gold d7_gold.json  # Canonical CLI wrapper for D7 gold package validation
 make lint-prompt-overrides  # Check prompt override source uses against registry declarations
 make cost               # Show LLM spend (DAYS=7)
 make errors             # Show recent error breakdown
