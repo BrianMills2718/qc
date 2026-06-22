@@ -1,12 +1,31 @@
 # Plan #63: D8 GT-Fidelity Bootstrap Intervals
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** #62
 **Blocks:** D8 benchmark uncertainty metadata
 
 ---
+
+## Outcome
+
+D8 GT-fidelity scorecards now include deterministic local rubric-mean bootstrap
+intervals when `phase0_rubric_bootstrap` is enabled. The scorecard reports
+`overall_mean_ci`, per-metric `mean_ci`, per-evaluator-type overall/metric
+intervals, and per-scope overall/metric intervals. The shared
+`phase0_rubric_bootstrap.enabled=false` setting suppresses the interval fields.
+This remains local uncertainty metadata for supplied rubric rows, not
+expert-rubric acceptance, methodological saturation proof, or full grounded
+theory evidence.
+
+## Verification
+
+- `python -m pytest tests/test_bench_phase0.py -q` - 54 passed
+- `python -m ruff check qc_clean/core/bench.py tests/test_bench_phase0.py` - clean
+- `python scripts/check_markdown_links.py` - clean
+- `python scripts/sync_plan_status.py --check` - clean
+- `make check` - 773 passed, 1 skipped, 8 deselected; lint and docs checks clean; type check not configured
 
 ## Gap
 
@@ -55,12 +74,12 @@ Internal scorecard capability only; no cross-project boundary is created.
 
 ### Capability Validation
 
-- [ ] D8 overall summary includes `overall_mean_ci` when bootstrap is enabled.
-- [ ] D8 metric summaries include `mean_ci` when bootstrap is enabled.
-- [ ] D8 per-evaluator-type summaries include overall and metric mean intervals.
-- [ ] D8 per-scope summaries include overall and metric mean intervals.
-- [ ] Existing `phase0_rubric_bootstrap.enabled=false` suppresses D8 interval fields.
-- [ ] Docs preserve the caveat that intervals are local uncertainty metadata, not GT-fidelity proof.
+- [x] D8 overall summary includes `overall_mean_ci` when bootstrap is enabled.
+- [x] D8 metric summaries include `mean_ci` when bootstrap is enabled.
+- [x] D8 per-evaluator-type summaries include overall and metric mean intervals.
+- [x] D8 per-scope summaries include overall and metric mean intervals.
+- [x] Existing `phase0_rubric_bootstrap.enabled=false` suppresses D8 interval fields.
+- [x] Docs preserve the caveat that intervals are local uncertainty metadata, not GT-fidelity proof.
 
 ---
 
@@ -109,20 +128,20 @@ Internal scorecard capability only; no cross-project boundary is created.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] D8 overall mean has deterministic bootstrap CI metadata.
-- [ ] D8 per-metric means have deterministic bootstrap CI metadata.
-- [ ] D8 per-evaluator-type summaries have deterministic bootstrap CI metadata.
-- [ ] D8 per-scope summaries have deterministic bootstrap CI metadata.
-- [ ] Explicit bootstrap disable suppresses D8 interval fields.
-- [ ] Existing D8 point metrics are unchanged.
-- [ ] Docs preserve the caveat that this is local metadata only.
+- [x] D8 overall mean has deterministic bootstrap CI metadata.
+- [x] D8 per-metric means have deterministic bootstrap CI metadata.
+- [x] D8 per-evaluator-type summaries have deterministic bootstrap CI metadata.
+- [x] D8 per-scope summaries have deterministic bootstrap CI metadata.
+- [x] Explicit bootstrap disable suppresses D8 interval fields.
+- [x] Existing D8 point metrics are unchanged.
+- [x] Docs preserve the caveat that this is local metadata only.
 
 > Process criteria:
-- [ ] Required tests pass
-- [ ] Full test suite passes
-- [ ] Type check status reported
-- [ ] Docs updated
-- [ ] Plan completed, committed, and pushed
+- [x] Required tests pass
+- [x] Full test suite passes
+- [x] Type check status reported
+- [x] Docs updated
+- [x] Plan completed, committed, and pushed
 
 ---
 
