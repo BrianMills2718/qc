@@ -1,10 +1,50 @@
 # Plan #192: INV-11 Recode Refresh Policy Config
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** #167
 **Blocks:** fuller default corpus-mutation auto-refresh policy
+
+---
+
+## Outcome
+
+Implemented in commit `0c481875`.
+
+`ProjectConfig.auto_refresh_higher_order_on_recode` now records a durable
+project-level default for higher-order refresh during incremental recode.
+Existing projects default to hard-invalidation mode. Operators can opt new
+projects in with `project create --auto-refresh-higher-order-on-recode`, inspect
+or update existing projects with `project recode-policy`, force refresh for a
+single run with `--refresh-higher-order`, or force hard-invalidation mode for a
+single run with `--no-refresh-higher-order`. `project add-docs --recode`
+forwards both one-run overrides into the same recode path.
+
+Verification evidence:
+
+- TDD red state observed before implementation:
+  `python -m pytest tests/test_domain_model.py tests/test_project_commands.py -q`
+  failed with 12 expected failures for the missing config field, parser flags,
+  policy command, add-docs forwarding, and effective recode policy resolution.
+- Focused config/CLI tests:
+  `python -m pytest tests/test_domain_model.py tests/test_project_commands.py -q`
+  passed with `91 passed`.
+- INV-11 regressions:
+  `python -m pytest tests/test_incremental.py tests/test_incremental_staleness_inv11.py -q`
+  passed with `27 passed`.
+- Focused Ruff:
+  `python -m ruff check qc_clean/schemas/domain.py qc_clean/core/cli/commands/project.py qc_cli.py tests/test_domain_model.py tests/test_project_commands.py`
+  passed.
+- `make docs-check` passed.
+- `git diff --check` passed.
+- `make check` passed with `1233 passed, 1 skipped, 8 deselected`; type check
+  remains not configured.
+
+Claim discipline: this is a configurable project policy, not a global
+auto-refresh default and not full INV-11 completion. It is not methodological
+validity evidence, saturation evidence, parity/superiority evidence, or SOTA
+evidence.
 
 ---
 
@@ -160,29 +200,29 @@ callable capability.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] `ProjectConfig.auto_refresh_higher_order_on_recode` exists, defaults to
+- [x] `ProjectConfig.auto_refresh_higher_order_on_recode` exists, defaults to
   false, and persists through JSON.
-- [ ] New projects can opt into the policy through CLI creation.
-- [ ] Existing projects can inspect and update the policy through an
+- [x] New projects can opt into the policy through CLI creation.
+- [x] Existing projects can inspect and update the policy through an
   agent-drivable CLI command.
-- [ ] `project recode` and `project add-docs --recode` use the configured
+- [x] `project recode` and `project add-docs --recode` use the configured
   policy when neither per-run override is supplied.
-- [ ] `--refresh-higher-order` forces refresh for one run.
-- [ ] `--no-refresh-higher-order` forces hard-invalidation mode for one run.
-- [ ] Existing default behavior remains unchanged for projects without the
+- [x] `--refresh-higher-order` forces refresh for one run.
+- [x] `--no-refresh-higher-order` forces hard-invalidation mode for one run.
+- [x] Existing default behavior remains unchanged for projects without the
   config flag.
-- [ ] Docs state this is an opt-in project policy, not global auto-refresh and
+- [x] Docs state this is an opt-in project policy, not global auto-refresh and
   not full INV-11 completion.
 
 > Process criteria:
-- [ ] TDD red state observed before implementation.
-- [ ] Focused tests pass.
-- [ ] Focused Ruff check passes.
-- [ ] `make docs-check` passes.
-- [ ] `git diff --check` passes.
-- [ ] `make check` passes.
-- [ ] Plan is moved to completed with verification evidence.
-- [ ] Verified implementation is committed and pushed.
+- [x] TDD red state observed before implementation.
+- [x] Focused tests pass.
+- [x] Focused Ruff check passes.
+- [x] `make docs-check` passes.
+- [x] `git diff --check` passes.
+- [x] `make check` passes.
+- [x] Plan is moved to completed with verification evidence.
+- [x] Verified implementation is committed and pushed.
 
 ---
 

@@ -6,12 +6,12 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 192 | INV-11 recode refresh policy config | High | Planned | `INV11_RECODE_REFRESH_POLICY_CONFIG.md` |
 
 ## Completed Plans
 
 | Name | Outcome | Record |
 |------|---------|--------|
+| INV-11 recode refresh policy config | `ProjectConfig.auto_refresh_higher_order_on_recode` now gives projects a durable recode refresh default, with CLI create/policy surfaces plus one-run force-on/force-off overrides while preserving hard-invalidation defaults for existing projects | `completed/INV11_RECODE_REFRESH_POLICY_CONFIG.md` |
 | QC CLI evaluation protocol surfaces | `qc_cli.py` now wraps D4/D6/D8/D9/confidence protocol validation and result-preflight scripts through top-level commands that delegate exact argv to canonical scripts without duplicating protocol/preflight logic or claiming populated labels/evidence | `completed/QC_CLI_EVALUATION_PROTOCOL_SURFACES.md` |
 | QC CLI theoretical sampling surfaces | `qc_cli.py` now wraps theoretical-sampling protocol validation, candidate/result preflight, candidate export, and result export scripts through top-level commands that preserve repeated arguments and boolean flags without duplicating package logic or claiming saturation/evidence | `completed/QC_CLI_THEORETICAL_SAMPLING_SURFACES.md` |
 | QC CLI adjudication import surface | `qc_cli.py import-adjudication-responses` now delegates to the canonical response import script, forwarding required metadata, optional D3/D7 outputs, optional protocol/sample preflight guards, boolean provenance flags, and notes without duplicating import logic or claiming labels/evidence | `completed/QC_CLI_ADJUDICATION_IMPORT_SURFACE.md` |

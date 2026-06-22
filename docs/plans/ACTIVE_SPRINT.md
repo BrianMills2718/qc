@@ -26,13 +26,20 @@ highest-value documented lane.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Plan #192 is active: add a project-level
-`auto_refresh_higher_order_on_recode` policy so configured projects can refresh
-methodology-specific higher-order outputs by default during `project recode` or
-`project add-docs --recode`, while existing projects keep hard-invalidation
-defaults unless configured. The slice must preserve one-run CLI overrides,
-avoid silent global LLM-spend changes, and not claim full INV-11 completion,
-methodological-validity evidence, or SOTA.
+**Active checkpoint:** No implementation plan is currently active. Select the
+next deterministic, high-value roadmap lane, write its plan with acceptance
+criteria, then proceed without pausing unless a canonical stop condition is
+reached.
+
+**Completed checkpoint:** `ProjectConfig.auto_refresh_higher_order_on_recode`
+now records a durable project-level recode refresh default. New projects can opt
+in with `project create --auto-refresh-higher-order-on-recode`, existing
+projects can inspect/update it through `project recode-policy`, and one-run
+`--refresh-higher-order` / `--no-refresh-higher-order` overrides control
+`project recode` and `project add-docs --recode`. Existing projects keep
+hard-invalidation defaults unless configured. This is an INV-11 policy surface,
+not global auto-refresh, full INV-11 completion, methodological-validity
+evidence, saturation evidence, parity/superiority evidence, or SOTA.
 
 **Completed checkpoint:** `qc_cli.py` now wraps the D4/D6/D8/D9/confidence
 protocol validation and result-preflight scripts through top-level commands:
