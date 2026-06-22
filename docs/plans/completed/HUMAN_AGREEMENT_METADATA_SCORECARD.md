@@ -1,12 +1,30 @@
 # Plan #49: Human Agreement Metadata Scorecard
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** None
 **Blocks:** D3/D7 human-ceiling agreement transparency
 
 ---
+
+## Outcome
+
+D3/D7 `human_ceiling_comparison` sections now include
+`chance_corrected_agreement` when versioned gold-package
+`adjudication.human_human_agreement` metadata supplies numeric Cohen's κ,
+Fleiss κ, Krippendorff's α, or Gwet's AC1 values. Exact system-vs-human
+comparison remains limited to recall/precision/F1; packages with only
+chance-corrected human metrics return `metadata_only`, not a scored exact parity
+comparison. Non-numeric chance metrics remain explicit under
+`non_numeric_metrics`. Docs preserve that no populated κ/α/AC1 human-ceiling
+benchmark or system agreement-vs-gold evidence exists yet.
+
+**Verification:**
+- `python -m pytest tests/test_bench_phase0.py -q` - 35 passed.
+- `python -m ruff check qc_clean/core/bench.py tests/test_bench_phase0.py` - passed.
+- `python scripts/check_markdown_links.py` - passed.
+- `make check` - 737 passed, 1 skipped, 8 deselected; Ruff and docs checks passed; type check not yet configured.
 
 ## Gap
 
@@ -60,10 +78,10 @@ Internal scorecard capability only; no cross-project boundary is created.
 
 ### Capability Validation
 
-- [ ] Numeric κ/α/AC1-style metrics are surfaced under `chance_corrected_agreement`.
-- [ ] Exact system-vs-human comparison remains limited to recall/precision/F1.
-- [ ] A package with only chance-corrected metrics reports `metadata_only`, not exact-score parity.
-- [ ] Non-numeric or unknown human metrics remain explicit and do not silently disappear.
+- [x] Numeric κ/α/AC1-style metrics are surfaced under `chance_corrected_agreement`.
+- [x] Exact system-vs-human comparison remains limited to recall/precision/F1.
+- [x] A package with only chance-corrected metrics reports `metadata_only`, not exact-score parity.
+- [x] Non-numeric or unknown human metrics remain explicit and do not silently disappear.
 
 ---
 
@@ -115,20 +133,20 @@ Internal scorecard capability only; no cross-project boundary is created.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] D3/D7 human-ceiling sections surface numeric Cohen's κ, Krippendorff's α,
+- [x] D3/D7 human-ceiling sections surface numeric Cohen's κ, Krippendorff's α,
   Fleiss κ, and Gwet's AC1 metadata when supplied.
-- [ ] Exact comparison status remains `scored` only when recall/precision/F1 are
+- [x] Exact comparison status remains `scored` only when recall/precision/F1 are
   comparable to system exact scores.
-- [ ] Metadata-only packages do not claim system parity or validity.
-- [ ] Docs preserve the caveat that no populated κ/α/AC1 human-ceiling benchmark
+- [x] Metadata-only packages do not claim system parity or validity.
+- [x] Docs preserve the caveat that no populated κ/α/AC1 human-ceiling benchmark
   has been run.
 
 > Process criteria:
-- [ ] Required tests pass
-- [ ] Full test suite passes
-- [ ] Type check status reported
-- [ ] Docs updated
-- [ ] Plan completed, committed, and pushed
+- [x] Required tests pass
+- [x] Full test suite passes
+- [x] Type check status reported
+- [x] Docs updated
+- [x] Plan completed, committed, and pushed
 
 ---
 
