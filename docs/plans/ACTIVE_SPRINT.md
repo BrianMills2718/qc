@@ -26,15 +26,23 @@ highest-value documented lane.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Plan #184 is active: add a Phase 0 benchmark artifact
-verifier for local `scorecard.json` / `timing_d10.json` / `manifest.json`
-packages. This slice should accept a run directory or manifest path, verify
-scorecard and timing hashes, check manifest metadata copied from scorecard
-`_meta`, check timing D10 sections against the scorecard, require
-prompt-eval-not-run and non-evidentiary caveats, and expose Make/`qc_cli.py`
-surfaces. It must not run benchmarks, create held-out data, call
-`prompt_eval`, sign artifacts, provide append-only storage, or claim
-methodological-validity, superiority, parity, timing, or SOTA evidence.
+**Active checkpoint:** Select and plan the next deterministic, high-value
+roadmap lane from `docs/PROJECT_THEORY_AND_GOALS.md` and
+`docs/EVALUATION_HARNESS.md`; no implementation slice is currently active
+after Plan #184 closeout.
+
+**Completed checkpoint:** Phase 0 scorecard/timing/manifest artifact packages
+can now be verified through `scripts/verify_phase0_benchmark_artifact.py`,
+`make verify-phase0-benchmark-artifact ARTIFACT=...`, and
+`qc_cli.py verify-phase0-benchmark-artifact ...`. The verifier accepts a run
+directory or manifest path, checks local scorecard and timing hashes, compares
+manifest metadata copied from scorecard `_meta`, confirms timing D10 sections
+match the scorecard, requires prompt-eval-not-run metadata and
+non-evidentiary caveats, emits structured failures, and exits `0` only when
+verified. This is local integrity/provenance checking only; it does not run
+benchmarks, create held-out data, call `prompt_eval`, verify semantic validity,
+sign artifacts, provide append-only storage, or claim methodological-validity,
+superiority, parity, timing, or SOTA evidence.
 
 **Completed checkpoint:** D7 retrieval/live-baseline comparison manifests can
 now be written through `scripts/write_d7_comparison_package.py`, `make

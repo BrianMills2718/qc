@@ -1,6 +1,6 @@
 # Plan #184: Phase 0 Benchmark Artifact Verifier
 
-**Status:** Planned
+**Status:** Completed
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Phase 0 benchmark artifacts
@@ -78,13 +78,13 @@ created.
 
 ### Capability Validation
 
-- [ ] Matching artifact package verifies with `status="verified"`.
-- [ ] Manifest path input and run-directory input both work.
-- [ ] Scorecard hash mismatch is detected.
-- [ ] Timing hash mismatch is detected.
-- [ ] Manifest/scorecard metadata mismatch is detected.
-- [ ] Missing scorecard or timing files are detected.
-- [ ] Prompt-eval and claim-discipline caveat violations are detected.
+- [x] Matching artifact package verifies with `status="verified"`.
+- [x] Manifest path input and run-directory input both work.
+- [x] Scorecard hash mismatch is detected.
+- [x] Timing hash mismatch is detected.
+- [x] Manifest/scorecard metadata mismatch is detected.
+- [x] Missing scorecard or timing files are detected.
+- [x] Prompt-eval and claim-discipline caveat violations are detected.
 
 ---
 
@@ -152,31 +152,31 @@ created.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] Matching Phase 0 artifact packages verify with `status="verified"` and
+- [x] Matching Phase 0 artifact packages verify with `status="verified"` and
   exit `0`.
-- [ ] Invalid artifact packages return structured failures and exit non-zero.
-- [ ] Run-directory and manifest-path inputs both work.
-- [ ] Scorecard and timing file SHA-256 mismatches are detected.
-- [ ] Missing scorecard/timing files are detected.
-- [ ] Manifest `input_hashes`, `run_configuration_hashes`, and
+- [x] Invalid artifact packages return structured failures and exit non-zero.
+- [x] Run-directory and manifest-path inputs both work.
+- [x] Scorecard and timing file SHA-256 mismatches are detected.
+- [x] Missing scorecard/timing files are detected.
+- [x] Manifest `input_hashes`, `run_configuration_hashes`, and
   `claim_discipline` must match scorecard `_meta`.
-- [ ] Timing artifact must identify `scorecard.json` as source and copy D10
+- [x] Timing artifact must identify `scorecard.json` as source and copy D10
   sections from the scorecard.
-- [ ] Manifest `prompt_eval.status` must be `not_run`.
-- [ ] Claim caveat must state this is not methodological-validity/SOTA evidence.
-- [ ] Make and `qc_cli.py` surfaces delegate to the canonical verifier.
-- [ ] Docs state this verifier is local integrity/provenance checking only.
+- [x] Manifest `prompt_eval.status` must be `not_run`.
+- [x] Claim caveat must state this is not methodological-validity/SOTA evidence.
+- [x] Make and `qc_cli.py` surfaces delegate to the canonical verifier.
+- [x] Docs state this verifier is local integrity/provenance checking only.
 
 > Process criteria:
-- [ ] TDD red state observed before implementation.
-- [ ] Focused tests pass.
-- [ ] Focused Ruff check passes.
-- [ ] Make dry-run passes.
-- [ ] `make docs-check` passes.
-- [ ] `git diff --check` passes.
-- [ ] `make check` passes.
-- [ ] Plan is moved to completed with verification evidence.
-- [ ] Verified implementation is committed and pushed.
+- [x] TDD red state observed before implementation.
+- [x] Focused tests pass.
+- [x] Focused Ruff check passes.
+- [x] Make dry-run passes.
+- [x] `make docs-check` passes.
+- [x] `git diff --check` passes.
+- [x] `make check` passes.
+- [x] Plan is moved to completed with verification evidence.
+- [x] Verified implementation is committed and pushed.
 
 ---
 
@@ -189,3 +189,37 @@ created.
 | Manifest metadata drifts | Copied `_meta` fields not checked | Compare `input_hashes`, `run_configuration_hashes`, and `claim_discipline` to scorecard `_meta`. |
 | Timing file unrelated to scorecard | D10 sections not checked | Verify source file and copied D10 sections. |
 | Caveats omitted | Claims look stronger than evidence | Require prompt_eval-not-run and non-evidentiary caveat text. |
+
+---
+
+## Outcome
+
+Implemented in commit `abb251ae` and pushed to `main`.
+
+The verifier is exposed through `scripts/verify_phase0_benchmark_artifact.py`,
+`make verify-phase0-benchmark-artifact ARTIFACT=...`, and
+`qc_cli.py verify-phase0-benchmark-artifact ...`. It accepts either a Phase 0
+artifact run directory or `manifest.json`, verifies scorecard/timing file
+hashes, checks copied scorecard metadata, confirms timing sections match the
+scorecard, enforces prompt-eval-not-run metadata, and emits structured JSON
+failure reports.
+
+Verification evidence:
+
+- TDD red state: focused tests initially failed with
+  `ImportError: cannot import name 'verify_phase0_benchmark_artifact' from 'scripts'`.
+- `python -m pytest tests/test_phase0_benchmark_artifact_verifier.py tests/test_qc_cli_bench.py -q`:
+  12 passed.
+- `python -m ruff check scripts/verify_phase0_benchmark_artifact.py tests/test_phase0_benchmark_artifact_verifier.py tests/test_qc_cli_bench.py qc_cli.py`:
+  passed.
+- `make -n verify-phase0-benchmark-artifact ARTIFACT=benchmark_results/run-dir`:
+  forwards to `python scripts/verify_phase0_benchmark_artifact.py benchmark_results/run-dir`.
+- `make docs-check`: passed.
+- `git diff --check`: passed.
+- `make check`: 1199 passed, 1 skipped, 8 deselected; Ruff and docs-check
+  passed; type check remains not configured.
+
+Claim discipline: this is local integrity/provenance checking only. It does
+not run benchmarks, create held-out data, call `prompt_eval`, verify semantic
+validity, sign artifacts, provide append-only storage, or license
+methodological-validity, superiority, parity, timing, or SOTA claims.
