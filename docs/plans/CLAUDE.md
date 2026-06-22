@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| #75 | D10 Tool-Call Costs | High | Planned | `D10_TOOL_CALL_COSTS.md` |
 
 ## Completed Plans
 
