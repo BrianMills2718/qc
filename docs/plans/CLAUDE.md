@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| #74 | Phase 0 Run Configuration Hashes | High | Planned | `PHASE0_RUN_CONFIGURATION_HASHES.md` |
 
 ## Completed Plans
 
