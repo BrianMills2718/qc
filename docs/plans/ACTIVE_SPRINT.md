@@ -22,10 +22,17 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #116 (`D6_BIAS_SCORECARD_PREFLIGHT_GUARD.md`): add optional
-   `D6_PROTOCOL=...` score-time preflight enforcement for D6 benchmark inputs.
-2. Continue through the ranked roadmap without pausing after each verified
+1. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
+
+**Completed checkpoint:** `make bench` now accepts `D6_PROTOCOL=...` and
+`scripts/bench_phase0.py --d6-bias-protocol-file ...` to enforce D6
+protocol/result preflight at score time. Failed preflight returns JSON with the
+preflight report and blocks scorecard/output/artifact writes; passing guarded
+scorecards include `_meta.preflight_reports.d6_bias`, and input hashes/command
+provenance/package manifests include the protocol file. This is score-time
+provenance only, not a populated bias audit, causal proof, held-out correctness
+evidence, methodological-validity evidence, or a bias-free claim.
 
 **Completed checkpoint:** D6 bias result files can now be preflighted against a
 registered D6 protocol with `make d6-bias-preflight PROTOCOL=... STRATIFIED=...

@@ -1,10 +1,39 @@
 # Plan #116: D6 Bias Scorecard Preflight Guard
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Plan #115 D6 bias protocol result preflight
 **Blocks:** Guarded D6 benchmark scoring and populated INV-5 bias-audit workflow
+
+---
+
+## Outcome
+
+Implemented in commit `5e6fcfd` and pushed to `main`. Phase 0 bench now accepts
+`--d6-bias-protocol-file`, `make bench` forwards `D6_PROTOCOL=...`, and Phase 0
+benchmark package manifests accept `d6_bias_protocol_file`. When a protocol is
+supplied, bench runs D6 protocol/result preflight before scorecard generation
+and before output/artifact writes. Failed preflight returns a JSON error with
+the preflight report and writes no scorecard/artifact files. Passing guarded
+scorecards include `_meta.preflight_reports.d6_bias`, and input hashes/command
+provenance include the protocol file.
+
+Verification evidence:
+- TDD red slice: targeted bench/package tests initially failed because
+  `--d6-bias-protocol-file` and `d6_bias_protocol_file` were not supported.
+- Focused tests: `python -m pytest tests/test_bench_phase0_script.py
+  tests/test_phase0_benchmark_package.py -q` -> `36 passed`.
+- Focused Ruff: `python -m ruff check scripts/bench_phase0.py
+  scripts/run_phase0_benchmark_package.py tests/test_bench_phase0_script.py
+  tests/test_phase0_benchmark_package.py` -> passed.
+- Make dry run: `make -n bench ID=project D6_PROTOCOL=protocol.json
+  BIAS_STRATIFIED=bias_stratified.json
+  BIAS_COUNTERFACTUAL=bias_counterfactual.json` forwards
+  `--d6-bias-protocol-file`.
+- Docs gate: `make docs-check` passed.
+- Full gate: `make check` -> `960 passed, 1 skipped, 8 deselected`; Ruff and
+  docs checks passed; type check is still not configured.
 
 ---
 
@@ -69,13 +98,13 @@ Internal guarded-scoring capability only; no cross-project boundary is created.
 
 ### Capability Validation
 
-- [ ] Passing protocol/result preflight lets `bench_phase0` score D6 rows.
-- [ ] Passing guarded scorecards include `_meta.preflight_reports.d6_bias`.
-- [ ] Failing protocol/result preflight returns non-zero JSON error and writes
+- [x] Passing protocol/result preflight lets `bench_phase0` score D6 rows.
+- [x] Passing guarded scorecards include `_meta.preflight_reports.d6_bias`.
+- [x] Failing protocol/result preflight returns non-zero JSON error and writes
   no scorecard/output/artifact files.
-- [ ] Input hashes, command provenance, and package manifests include the D6
+- [x] Input hashes, command provenance, and package manifests include the D6
   protocol file.
-- [ ] `make bench D6_PROTOCOL=...` forwards the guard flag.
+- [x] `make bench D6_PROTOCOL=...` forwards the guard flag.
 
 ---
 
@@ -137,27 +166,27 @@ Internal guarded-scoring capability only; no cross-project boundary is created.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] `bench_phase0` accepts `--d6-bias-protocol-file`.
-- [ ] `make bench` accepts `D6_PROTOCOL=...`.
-- [ ] Phase 0 package manifests accept `d6_bias_protocol_file`.
-- [ ] Passing guarded D6 scorecards include `_meta.preflight_reports.d6_bias`.
-- [ ] Failed D6 preflight blocks scoring and output/artifact writes.
-- [ ] Protocol file hash and command provenance are recorded.
-- [ ] Docs state this is a provenance guard only, not bias evidence.
+- [x] `bench_phase0` accepts `--d6-bias-protocol-file`.
+- [x] `make bench` accepts `D6_PROTOCOL=...`.
+- [x] Phase 0 package manifests accept `d6_bias_protocol_file`.
+- [x] Passing guarded D6 scorecards include `_meta.preflight_reports.d6_bias`.
+- [x] Failed D6 preflight blocks scoring and output/artifact writes.
+- [x] Protocol file hash and command provenance are recorded.
+- [x] Docs state this is a provenance guard only, not bias evidence.
 
 > Process criteria:
-- [ ] Required focused tests pass.
-- [ ] Focused Ruff check passes.
-- [ ] `make docs-check` passes.
-- [ ] Full `make check` passes or any failure is documented with evidence.
-- [ ] Type-check status is reported.
-- [ ] Verified work is committed and pushed.
+- [x] Required focused tests pass.
+- [x] Focused Ruff check passes.
+- [x] `make docs-check` passes.
+- [x] Full `make check` passes or any failure is documented with evidence.
+- [x] Type-check status is reported.
+- [x] Verified work is committed and pushed.
 
 ---
 
 ## Open Questions
 
-- [ ] Should `D6_PROTOCOL` become required whenever D6 external files are
+- [x] Should `D6_PROTOCOL` become required whenever D6 external files are
   supplied? — Status: DEFERRED | This slice makes the guard opt-in so existing
   Phase 0 local accounting remains compatible. A later policy plan can decide
   whether populated benchmark packages must require it.
