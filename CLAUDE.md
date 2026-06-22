@@ -476,6 +476,8 @@ python qc_cli.py run-d7-retrieval <project_id> --output predictions.json  # Cano
 python qc_cli.py compare-d7-retrieval <project_id> --gold-file d7_gold.json --predictions-file lexical.json --predictions-file embedding.json --protocol-package d7_protocol.json  # Canonical CLI wrapper for D7 retrieval comparison
 make run-inv7-fixtures OUTPUT=inv7.json  # Write structural INV-7 fixture package for PROMPT_INJECTION=
 make run-inv7-live-fixtures OUTPUT=inv7_live.json MODEL=<model>  # Write opt-in live canary package for PROMPT_INJECTION=
+python qc_cli.py run-inv7-fixtures --output inv7.json  # Canonical CLI wrapper for structural INV-7 fixtures
+python qc_cli.py run-inv7-live-fixtures --output inv7_live.json --model <model>  # Canonical CLI wrapper for opt-in live INV-7 fixtures
 make validate-inv7-live-protocol PROTOCOL=inv7_live_protocol.json  # Validate pre-run live protocol metadata
 make inv7-live-preflight PROTOCOL=inv7_live_protocol.json PACKAGE=inv7_live.json  # Preflight live result against protocol before scoring
 make validate-inv7-package PACKAGE=inv7.json  # Validate schema_version=1 INV-7 package metadata

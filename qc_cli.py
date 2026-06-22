@@ -45,6 +45,8 @@ Examples:
   qc_cli bench-package phase0_package.json
   qc_cli run-d7-retrieval <project_id> --output predictions.json
   qc_cli compare-d7-retrieval <project_id> --gold-file d7_gold.json --predictions-file predictions.json
+  qc_cli run-inv7-fixtures --output inv7.json
+  qc_cli run-inv7-live-fixtures --output inv7_live.json --model gpt-5-mini
   qc_cli project export <project_id> --format markdown --output-file report.md
   qc_cli status --server
         """
@@ -262,6 +264,36 @@ Examples:
         help='Optional D7 comparison protocol package used to preflight before scoring',
     )
 
+    # INV-7 prompt-injection fixture commands
+    inv7_fixture_parser = subparsers.add_parser(
+        'run-inv7-fixtures',
+        help='Run structural INV-7 fixtures',
+        description='Run deterministic INV-7 structural fixtures and write scorecard input JSON',
+    )
+    inv7_fixture_parser.add_argument(
+        '--output',
+        required=True,
+        help='Path to write INV-7 fixture results JSON',
+    )
+
+    inv7_live_fixture_parser = subparsers.add_parser(
+        'run-inv7-live-fixtures',
+        help='Run live INV-7 fixtures',
+        description='Run live INV-7 prompt-injection fixtures and write scorecard input JSON',
+    )
+    inv7_live_fixture_parser.add_argument(
+        '--output',
+        required=True,
+        help='Path to write INV-7 live fixture results JSON',
+    )
+    inv7_live_fixture_parser.add_argument('--model', help='Live model name')
+    inv7_live_fixture_parser.add_argument('--trace-id', help='llm_client trace ID prefix')
+    inv7_live_fixture_parser.add_argument(
+        '--max-budget',
+        type=float,
+        help='llm_client maximum budget for the live fixture run',
+    )
+
     # Server command
     server_parser = subparsers.add_parser(
         'server',
@@ -467,6 +499,10 @@ def main() -> int:
             return handle_run_d7_retrieval_command(args)
         elif args.command == 'compare-d7-retrieval':
             return handle_compare_d7_retrieval_command(args)
+        elif args.command == 'run-inv7-fixtures':
+            return handle_run_inv7_fixtures_command(args)
+        elif args.command == 'run-inv7-live-fixtures':
+            return handle_run_inv7_live_fixtures_command(args)
         elif args.command == 'server':
             return handle_server_command(args)
         elif args.command == 'project':
@@ -599,6 +635,29 @@ def handle_compare_d7_retrieval_command(args) -> int:
     if args.protocol_package is not None:
         argv.extend(["--protocol-package", args.protocol_package])
     return compare_d7_retrieval.main(argv)
+
+
+def handle_run_inv7_fixtures_command(args) -> int:
+    """Run structural INV-7 fixtures through the canonical CLI."""
+    from scripts import run_inv7_fixtures
+
+    return run_inv7_fixtures.main(["--output", args.output])
+
+
+def handle_run_inv7_live_fixtures_command(args) -> int:
+    """Run live INV-7 fixtures through the canonical CLI."""
+    from scripts import run_inv7_live_fixtures
+
+    argv = ["--output", args.output]
+    for attr, flag in [
+        ("model", "--model"),
+        ("trace_id", "--trace-id"),
+        ("max_budget", "--max-budget"),
+    ]:
+        value = getattr(args, attr)
+        if value is not None:
+            argv.extend([flag, str(value)])
+    return run_inv7_live_fixtures.main(argv)
 
 
 if __name__ == "__main__":
