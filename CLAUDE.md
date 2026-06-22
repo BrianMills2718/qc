@@ -350,9 +350,6 @@ Superseded by the canonical theory doc: the proven/measured/planned **state ledg
 
 The ranked roadmap (invariants before features) lives in `docs/PROJECT_THEORY_AND_GOALS.md` §18 — evaluation harness (keystone), span anchoring (done), segment universe + exhaustive coding (INV-8, done), claim ledger object layer (INV-9, mostly done), retrieval-first/adversarial/BM25-style query-expanded disconfirmation/adjudication first slices plus D7 recall/precision Wilson intervals and optional baseline point comparisons (INV-2/INV-6/INV-10 partial), raw + derived instruction/data separation first slices plus externally fed INV-7 prompt-injection scorecard substrate (INV-7 partial), category-saturation diagnostics (INV-4 partial), corpus-scope/report-boundary contract first slices including missing-scope warnings, claim-row boundary context, and scope phrasing lint, relationship-review and negative-case-review API/MCP/browser first slices, adjudication sample export and response-validation substrate, semantic retrieval + held-out D7 evaluation/live baselines, live prompt-injection evaluation, theoretical sampling protocol, sampling-frame adequacy evaluation, etc. Don't duplicate it here.
 
-### Maintenance Follow-Ups (2026-06-19)
-- **Line endings**: Normalize mixed CRLF/LF files in one mechanical commit with no behavior changes, then run `make check`.
-
 ## prompt_eval Integration (Prompt Optimization)
 
 ### Infrastructure
