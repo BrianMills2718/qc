@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 56 | Phase 0 benchmark package runner | High | Planned | `PHASE0_BENCHMARK_PACKAGE_RUNNER.md` |
 
 ## Completed Plans
 
