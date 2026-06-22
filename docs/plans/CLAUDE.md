@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 125 | D9 interpretive preference scorecard preflight guard | High | Planned | `D9_INTERPRETIVE_PREFERENCE_SCORECARD_PREFLIGHT_GUARD.md` |
 
 ## Completed Plans
 
