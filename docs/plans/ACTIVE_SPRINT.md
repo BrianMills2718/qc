@@ -22,9 +22,9 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #104 (`ADJUDICATION_PROTOCOL_SAMPLE_PREFLIGHT.md`): check a
-   registered adjudication protocol against the concrete sample package hash,
-   target types, and planned sample counts before labels are collected.
+1. Create and execute the next validity-infrastructure slice:
+   response-to-protocol preflight, checking completed adjudication responses
+   against the registered protocol and sample package before import.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
@@ -50,6 +50,12 @@ contamination, registration, coder-count, dimension/target compatibility, and
 success-criteria checks. This is protocol/provenance metadata only; it does not
 create labels, correctness estimates, methodological validity evidence, or SOTA
 evidence.
+Registered adjudication protocols can now be preflighted against concrete sample
+packages with `make adjudication-protocol-preflight`, checking project/corpus
+hashes, optional project-state and sample-file hashes, required target-type
+coverage, and planned sample size before labeling. This is handoff/process
+metadata only, not labels, correctness estimates, validity evidence, or
+benchmark evidence.
 Claim-bearing exports now also warn on empty scope records and
 population-without-sampling-frame metadata, and CSV/Markdown claim rows now carry
 per-row claim scope and corpus-boundary context without rewriting claim text;

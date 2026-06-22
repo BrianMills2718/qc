@@ -1,10 +1,52 @@
 # Plan #104: Adjudication Protocol Sample Preflight
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Adjudication protocol package; INV-3 adjudication sample export
 **Blocks:** safer human/expert labeling handoff; held-out adjudication run discipline
+
+---
+
+## Outcome
+
+Implemented protocol-to-sample preflight:
+
+- `qc_clean/core/adjudication_preflight.py` validates protocol and sample
+  package payloads before cross-checking.
+- The preflight report fails on project, corpus, optional project-state hash,
+  optional sample-file hash, required target-type coverage, and planned
+  sample-size mismatches.
+- `scripts/preflight_adjudication_protocol_sample.py` emits a machine-readable
+  pass/fail report and exits nonzero on failed preflight.
+- `make adjudication-protocol-preflight PROTOCOL=... SAMPLE=...` exposes the
+  gate as an agent-drivable target.
+- Docs state preflight is process/provenance metadata only, not labels,
+  correctness estimates, validity evidence, or benchmark results.
+
+Implementation commit: `1be1078`
+
+## Verification
+
+- TDD red: initial `python -m pytest tests/test_adjudication_preflight.py -q`
+  failed with `ImportError: cannot import name 'adjudication_preflight'`.
+- Focused behavior: `python -m pytest tests/test_adjudication_preflight.py
+  tests/test_adjudication_protocol.py tests/test_adjudication_sample.py -q` ->
+  17 passed.
+- Focused lint: `python -m ruff check
+  qc_clean/core/adjudication_preflight.py
+  scripts/preflight_adjudication_protocol_sample.py
+  tests/test_adjudication_preflight.py qc_clean/core/adjudication_protocol.py
+  scripts/validate_adjudication_protocol.py` -> all checks passed.
+- Command discoverability: `make help` lists
+  `adjudication-protocol-preflight`; `make -n
+  adjudication-protocol-preflight PROTOCOL=protocol.json SAMPLE=sample.json`
+  expands to `python scripts/preflight_adjudication_protocol_sample.py
+  protocol.json sample.json`.
+- Documentation governance: `make docs-check` passed.
+- Full gate: `make check` -> 901 passed, 1 skipped, 8 deselected; Ruff and
+  docs-check passed; type check remains not configured.
+- Commit `1be1078` was pushed to `main`.
 
 ---
 
@@ -71,10 +113,10 @@ Internal preflight capability only; no cross-project boundary is created.
 
 ### Capability Validation
 
-- [ ] Protocol and sample payloads validate before cross-checks.
-- [ ] Hash/project mismatches fail loudly.
-- [ ] Required target-type coverage and planned sample size are tested.
-- [ ] CLI emits machine-readable JSON.
+- [x] Protocol and sample payloads validate before cross-checks.
+- [x] Hash/project mismatches fail loudly.
+- [x] Required target-type coverage and planned sample size are tested.
+- [x] CLI emits machine-readable JSON.
 
 ---
 
@@ -134,29 +176,29 @@ Internal preflight capability only; no cross-project boundary is created.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] Matching protocol/sample package pair passes preflight.
-- [ ] Project, corpus, project-state, and optional sample-file hash mismatches
+- [x] Matching protocol/sample package pair passes preflight.
+- [x] Project, corpus, project-state, and optional sample-file hash mismatches
   fail loudly.
-- [ ] Missing required target types fail loudly.
-- [ ] Sample count below planned sample size fails loudly.
-- [ ] `make adjudication-protocol-preflight PROTOCOL=... SAMPLE=...` is
+- [x] Missing required target types fail loudly.
+- [x] Sample count below planned sample size fails loudly.
+- [x] `make adjudication-protocol-preflight PROTOCOL=... SAMPLE=...` is
   discoverable.
-- [ ] Docs state preflight is process/provenance metadata only, not labels or
+- [x] Docs state preflight is process/provenance metadata only, not labels or
   evidence.
 
 > Process criteria:
-- [ ] Required focused tests pass.
-- [ ] Focused Ruff check passes.
-- [ ] `make docs-check` passes.
-- [ ] Full `make check` passes or any failure is documented with evidence.
-- [ ] Type-check status is reported.
-- [ ] Verified work is committed and pushed.
+- [x] Required focused tests pass.
+- [x] Focused Ruff check passes.
+- [x] `make docs-check` passes.
+- [x] Full `make check` passes or any failure is documented with evidence.
+- [x] Type-check status is reported.
+- [x] Verified work is committed and pushed.
 
 ---
 
 ## Open Questions
 
-- [ ] Should preflight require exact target-type counts by type, not just total
+- [x] Should preflight require exact target-type counts by type, not just total
   planned sample size? — Status: DEFERRED | Why it matters: the current protocol
   package records one total sample size; per-type quotas need an explicit schema
   extension.
