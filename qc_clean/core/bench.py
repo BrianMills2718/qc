@@ -1639,6 +1639,7 @@ def bias_counterfactual_scorecard(state: ProjectState) -> Dict[str, Any]:
         "changed_invariant_cases": len(changed),
         "unchanged_invariant_cases": len(invariant) - len(changed),
         "code_change_rate": _safe_div_or_none(len(changed), len(invariant)),
+        "code_change_rate_ci": _wilson_interval(len(changed), len(invariant)),
         "mean_jaccard_distance": _mean_or_none(jaccard_distances),
         "changed_case_ids": sorted(metric["case_id"] for metric in changed),
         "by_attribute": _bias_counterfactual_by_attribute(invariant),
@@ -1715,6 +1716,7 @@ def _bias_counterfactual_by_attribute(
                 "changed_invariant_cases": 0,
                 "unchanged_invariant_cases": 0,
                 "code_change_rate": None,
+                "code_change_rate_ci": None,
                 "mean_jaccard_distance": None,
                 "changed_case_ids": [],
             },
@@ -1731,6 +1733,10 @@ def _bias_counterfactual_by_attribute(
     for attribute, bucket in summary.items():
         bucket["changed_case_ids"] = sorted(bucket["changed_case_ids"])
         bucket["code_change_rate"] = _safe_div_or_none(
+            bucket["changed_invariant_cases"],
+            bucket["invariant_cases"],
+        )
+        bucket["code_change_rate_ci"] = _wilson_interval(
             bucket["changed_invariant_cases"],
             bucket["invariant_cases"],
         )

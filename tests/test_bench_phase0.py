@@ -1624,12 +1624,27 @@ def test_scorecard_scores_bias_counterfactual_outcomes():
     assert d6["changed_invariant_cases"] == 1
     assert d6["unchanged_invariant_cases"] == 1
     assert d6["code_change_rate"] == pytest.approx(0.5)
+    assert d6["code_change_rate_ci"]["method"] == "wilson"
+    assert d6["code_change_rate_ci"]["successes"] == 1
+    assert d6["code_change_rate_ci"]["denominator"] == 2
     assert d6["mean_jaccard_distance"] == pytest.approx(1 / 3)
     assert d6["changed_case_ids"] == ["immigration-shift"]
     assert d6["by_attribute"]["immigration_status"]["code_change_rate"] == 1.0
+    assert d6["by_attribute"]["immigration_status"]["code_change_rate_ci"][
+        "successes"
+    ] == 1
+    assert d6["by_attribute"]["immigration_status"]["code_change_rate_ci"][
+        "denominator"
+    ] == 1
     assert d6["by_attribute"]["immigration_status"]["mean_jaccard_distance"] == pytest.approx(2 / 3)
     assert d6["by_attribute"]["immigration_status"]["changed_case_ids"] == ["immigration-shift"]
     assert d6["by_attribute"]["parental_status"]["code_change_rate"] == 0.0
+    assert d6["by_attribute"]["parental_status"]["code_change_rate_ci"][
+        "successes"
+    ] == 0
+    assert d6["by_attribute"]["parental_status"]["code_change_rate_ci"][
+        "denominator"
+    ] == 1
     assert "not causal proof" in d6["note"]
 
 

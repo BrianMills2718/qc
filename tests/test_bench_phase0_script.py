@@ -1191,6 +1191,14 @@ def test_bench_phase0_scores_bias_counterfactual_from_file_without_mutating_stat
     assert d6["status"] == "scored"
     assert d6["changed_invariant_cases"] == 1
     assert d6["code_change_rate"] == pytest.approx(0.5)
+    assert d6["code_change_rate_ci"]["successes"] == 1
+    assert d6["code_change_rate_ci"]["denominator"] == 2
+    assert d6["by_attribute"]["immigration_status"]["code_change_rate_ci"][
+        "successes"
+    ] == 1
+    assert d6["by_attribute"]["parental_status"]["code_change_rate_ci"][
+        "successes"
+    ] == 0
     assert d6["changed_case_ids"] == ["identity-shift"]
     reloaded = store.load(state.id)
     assert "bias_counterfactual_evaluations" not in reloaded.config.extra
