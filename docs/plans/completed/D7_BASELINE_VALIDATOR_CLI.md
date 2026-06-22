@@ -1,6 +1,14 @@
 # Plan #144: D7 Baseline Validator CLI
 
-**Status:** Planned
+Completed 2026-06-22. `qc_cli.py validate-d7-baseline-package
+<package_file>` now delegates to `scripts.validate_d7_baseline_package.main`
+with script-owned JSON output and exit-code behavior. Verification:
+`python -m pytest tests/test_qc_cli_d7_retrieval.py
+tests/test_qc_cli_d7_live_baseline.py tests/test_d7_baseline_package.py -q`
+(10 passed), targeted Ruff, `make docs-check`, and `make check` (1069 passed,
+1 skipped, 8 deselected; type check not configured).
+
+**Status:** Complete
 **Type:** implementation
 **Priority:** Medium
 **Blocked By:** None
@@ -102,17 +110,17 @@ script-owned validator.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] `qc_cli.py validate-d7-baseline-package <package_file>` exists.
-- [ ] The command delegates to `scripts.validate_d7_baseline_package.main` with
+- [x] `qc_cli.py validate-d7-baseline-package <package_file>` exists.
+- [x] The command delegates to `scripts.validate_d7_baseline_package.main` with
       the same package path and returns the script exit code.
-- [ ] Docs list the CLI alias and keep the package/provenance-only caveat.
+- [x] Docs list the CLI alias and keep the package/provenance-only caveat.
 
 > Process criteria:
-- [ ] Required CLI wrapper test passes.
-- [ ] Related D7 validator tests pass.
-- [ ] `make docs-check` passes.
-- [ ] `make check` passes.
-- [ ] Plan is completed, committed, and pushed.
+- [x] Required CLI wrapper test passes.
+- [x] Related D7 validator tests pass.
+- [x] `make docs-check` passes.
+- [x] `make check` passes.
+- [x] Plan is completed, committed, and pushed.
 
 ---
 

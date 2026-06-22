@@ -22,11 +22,16 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #144, `D7_BASELINE_VALIDATOR_CLI.md`, to add top-level
-   `qc_cli.py validate-d7-baseline-package` parity for the D7 baseline package
-   validator.
+1. Select the next highest-value documented roadmap lane from
+   `docs/PROJECT_THEORY_AND_GOALS.md` and `docs/EVALUATION_HARNESS.md`.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
+
+**Completed checkpoint:** The top-level CLI now exposes
+`qc_cli.py validate-d7-baseline-package <package_file>`, delegating to the
+canonical D7 baseline package validator script with script-owned JSON output and
+exit-code behavior. This is CLI parity/provenance ergonomics only, not held-out
+D7 evidence, live-baseline evidence, or superiority evidence.
 
 **Completed checkpoint:** Versioned D7 retrieval and live-baseline prediction
 packages now validate through `qc_clean/core/d7_baseline_package.py` and
