@@ -1,4 +1,4 @@
-.PHONY: help test test-quick test-e2e test-all bench validate-d3-gold validate-d7-gold run-d7-retrieval compare-d7-retrieval run-inv7-fixtures run-inv7-live-fixtures check lint docs-check clean status cost errors
+.PHONY: help test test-quick test-e2e test-all bench bench-package validate-d3-gold validate-d7-gold run-d7-retrieval compare-d7-retrieval run-inv7-fixtures run-inv7-live-fixtures check lint docs-check clean status cost errors
 
 DAYS ?= 7
 PROJECT ?= qualitative_coding
@@ -21,6 +21,12 @@ test-all:  ## Run deterministic tests and live LLM E2E tests
 
 bench:  ## Evaluation-harness Phase 0 scorecard (ID=<project_id> [D3_GOLD=d3_gold.json] [GOLD=gold.json] [BASELINES=baselines.json] [PROMPT_INJECTION=inv7.json] [BIAS_COUNTERFACTUAL=bias.json] [CODEBOOK_QUALITY=quality.json] [GT_FIDELITY=gt_fidelity.json] [PREFERENCE=preference.json] [CALIBRATION=calibration.json] [OBS_DB=path] [TRACE_ID=id] [ARTIFACT_DIR=benchmark_results])
 	python scripts/bench_phase0.py $(ID) $(if $(D3_GOLD),--d3-gold-file $(D3_GOLD),) $(if $(GOLD),--gold-file $(GOLD),) $(if $(BASELINES),--d7-baselines-file $(BASELINES),) $(if $(PROMPT_INJECTION),--prompt-injection-file $(PROMPT_INJECTION),) $(if $(BIAS_COUNTERFACTUAL),--bias-counterfactual-file $(BIAS_COUNTERFACTUAL),) $(if $(CODEBOOK_QUALITY),--codebook-quality-file $(CODEBOOK_QUALITY),) $(if $(GT_FIDELITY),--gt-fidelity-file $(GT_FIDELITY),) $(if $(PREFERENCE),--interpretive-preference-file $(PREFERENCE),) $(if $(CALIBRATION),--confidence-calibration-file $(CALIBRATION),) $(if $(OBS_DB),--observability-db $(OBS_DB),) $(if $(TRACE_ID),--trace-id $(TRACE_ID),) $(if $(ARTIFACT_DIR),--artifact-dir $(ARTIFACT_DIR),)
+
+bench-package:  ## Run Phase 0 from a versioned package manifest (PACKAGE=phase0_package.json)
+ifndef PACKAGE
+	$(error PACKAGE is required. Usage: make bench-package PACKAGE=phase0_package.json)
+endif
+	python scripts/run_phase0_benchmark_package.py $(PACKAGE)
 
 validate-d3-gold:  ## Validate a versioned D3 application gold-set package (GOLD=gold_set.json)
 ifndef GOLD

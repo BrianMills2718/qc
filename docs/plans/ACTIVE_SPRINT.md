@@ -57,7 +57,10 @@ now scores externally supplied D8 GT-fidelity rubric outcomes through
 now scores externally supplied D9 forced-choice interpretive-preference outcomes
 through `PREFERENCE=` / `--interpretive-preference-file`. Phase 0 now scores
 externally supplied confidence/correctness calibration records through
-`CALIBRATION=` / `--confidence-calibration-file`. This remains a
+`CALIBRATION=` / `--confidence-calibration-file`. Phase 0 can also run from a
+strict versioned benchmark package manifest with relative input paths through
+`make bench-package PACKAGE=...`; that runner invokes the same canonical
+scorecard path and adds orchestration/provenance only. This remains a
 gold-dependent exact-score/provenance/uncertainty, human-ceiling-comparison, and
 canary-fixture/counterfactual/GT-fidelity/preference/calibration-accounting substrate, not a populated held-out
 benchmark, full D3/D7 validity, populated D4 LLM-judge/blind-expert evaluation,
