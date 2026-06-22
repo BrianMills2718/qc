@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 156 | Line ending normalization | Medium | Planned | `LINE_ENDING_NORMALIZATION.md` |
 
 ## Completed Plans
 

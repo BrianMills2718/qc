@@ -22,11 +22,17 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Select the next highest-value documented roadmap lane from
-   `docs/PROJECT_THEORY_AND_GOALS.md`, `docs/EVALUATION_HARNESS.md`, and the
-   remaining `CLAUDE.md` maintenance follow-ups.
+1. Execute Plan #156: normalize tracked text line endings to LF in one
+   mechanical commit and add a narrow `.gitattributes` LF text policy.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
+
+**Active checkpoint:** Plan #156
+(`docs/plans/LINE_ENDING_NORMALIZATION.md`) targets the final explicit
+maintenance follow-up. Inspection found 80 tracked files with CRLF or mixed
+CRLF/LF line terminators and no `.gitattributes` policy. This lane must stay
+mechanical: LF normalization, policy file, verification scans, docs/gate
+checks, and no semantic source edits.
 
 **Completed checkpoint:** Cost observability targets are verified in the
 current environment. `make cost` returns real `llm_client` LLM-call and
