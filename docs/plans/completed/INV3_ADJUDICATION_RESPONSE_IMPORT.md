@@ -1,10 +1,47 @@
 # Plan #101: INV-3 Adjudication Response Import
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** INV-3 adjudication sample export; INV-3 adjudication response validator; D3/D7 gold-set package validators
 **Blocks:** populated D3/D7 scorecard runs from adjudicated labels; future expert-validity evidence protocols
+
+---
+
+## Outcome
+
+Implemented an explicit response-to-gold import bridge:
+
+- `qc_clean/core/adjudication_import.py` validates completed adjudication
+  response packages and converts valid code-application / negative-case
+  responses into D3/D7 gold package inputs.
+- `scripts/import_adjudication_responses.py` and
+  `make import-adjudication-responses` write requested D3/D7 package files.
+- Invalid and unclear responses are excluded and counted, not treated as gold.
+- Generated packages validate through the existing D3/D7 package validators.
+- `CLAUDE.md`, generated `AGENTS.md`, `docs/PROJECT_THEORY_AND_GOALS.md`, and
+  `docs/EVALUATION_HARNESS.md` state that generated packages are protocol
+  artifacts, not methodological validity evidence by themselves.
+
+Implementation commit: `9c6afea`
+
+## Verification
+
+- TDD red: initial `python -m pytest tests/test_adjudication_import.py -q`
+  failed with `ModuleNotFoundError: No module named
+  'qc_clean.core.adjudication_import'`.
+- Focused behavior: `python -m pytest tests/test_adjudication_import.py
+  tests/test_adjudication_sample.py tests/test_d3_gold_set.py
+  tests/test_d7_gold_set.py -q` -> 19 passed.
+- Focused lint: `python -m ruff check
+  qc_clean/core/adjudication_import.py
+  scripts/import_adjudication_responses.py tests/test_adjudication_import.py`
+  -> all checks passed.
+- Command discoverability: `make help` lists `import-adjudication-responses`.
+- Documentation governance: `make docs-check` passed.
+- Full gate: `make check` -> 886 passed, 1 skipped, 8 deselected; Ruff and
+  docs-check passed; type check remains not configured.
+- Commit `9c6afea` was pushed to `main`.
 
 ---
 
@@ -147,33 +184,33 @@ future lane.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] Completed response packages are validated before conversion.
-- [ ] D3 output is a schema_version=1 package accepted by the existing D3
+- [x] Completed response packages are validated before conversion.
+- [x] D3 output is a schema_version=1 package accepted by the existing D3
   validator.
-- [ ] D7 output is a schema_version=1 package accepted by the existing D7
+- [x] D7 output is a schema_version=1 package accepted by the existing D7
   validator.
-- [ ] Invalid/unclear responses are excluded and counted, not treated as gold.
-- [ ] Requested empty outputs fail loudly.
-- [ ] Script and Make target are agent-drivable.
-- [ ] Docs state imported gold packages are labels/protocol artifacts, not
+- [x] Invalid/unclear responses are excluded and counted, not treated as gold.
+- [x] Requested empty outputs fail loudly.
+- [x] Script and Make target are agent-drivable.
+- [x] Docs state imported gold packages are labels/protocol artifacts, not
   methodological validity evidence unless populated under a documented expert
   protocol and scored.
 
 > Process criteria:
-- [ ] Required focused tests pass.
-- [ ] Full `make check` passes or any failure is documented with evidence.
-- [ ] Type-check status is reported.
-- [ ] Verified work is committed and pushed.
+- [x] Required focused tests pass.
+- [x] Full `make check` passes or any failure is documented with evidence.
+- [x] Type-check status is reported.
+- [x] Verified work is committed and pushed.
 
 ---
 
 ## Open Questions
 
-- [ ] Should invalid responses generate explicit negative labels for future
+- [x] Should invalid responses generate explicit negative labels for future
   false-positive analysis? - Status: DEFERRED | Why it matters: current D3/D7
   exact-key scorecards consume positive gold anchors, so negative-label
   semantics need a separate metric design.
-- [ ] Should this importer support D4/D8/D9 package creation too? - Status:
+- [x] Should this importer support D4/D8/D9 package creation too? - Status:
   DEFERRED | Why it matters: this slice only bridges existing sample item types
   to existing D3/D7 gold contracts.
 

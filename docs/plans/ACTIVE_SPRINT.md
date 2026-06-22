@@ -22,10 +22,10 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #101 (`INV3_ADJUDICATION_RESPONSE_IMPORT.md`): convert
-   shape-validated adjudication response packages into reusable D3/D7 gold
-   inputs without claiming expert evidence unless labels are actually supplied
-   under a documented protocol.
+1. Create and execute the next validity-infrastructure slice: build a strict
+   Phase 0 benchmark-package assembly path for imported D3/D7 adjudication gold
+   outputs, preserving existing claim discipline that imported packages are
+   protocol artifacts until populated by real adjudication.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
@@ -33,6 +33,13 @@ highest-value documented lane.
 JSON `export_warnings` metadata, and CSV `export_warnings.csv` for claim-bearing
 exports without recorded scope, and CLI/MCP project creation can now persist
 corpus scope when supplied while leaving no-scope creation compatible.
+Completed adjudication response packages can now be imported through
+`make import-adjudication-responses` into D3/D7 gold package inputs using only
+valid completed code-application and negative-case responses while excluding
+invalid/unclear labels. These generated gold-package files are still protocol
+artifacts unless they were populated under a documented human/expert
+adjudication protocol; they are not, by themselves, expert evidence,
+methodological validity evidence, or SOTA evidence.
 Claim-bearing exports now also warn on empty scope records and
 population-without-sampling-frame metadata, and CSV/Markdown claim rows now carry
 per-row claim scope and corpus-boundary context without rewriting claim text;
