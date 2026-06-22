@@ -1,4 +1,4 @@
-.PHONY: help test test-quick test-e2e test-all bench bench-package write-phase0-adjudication-package validate-d3-gold validate-d7-gold validate-inv7-package validate-inv7-live-protocol inv7-live-preflight validate-d6-bias-protocol d6-bias-preflight validate-d4-codebook-quality-protocol d4-codebook-quality-preflight validate-d8-gt-fidelity-protocol d8-gt-fidelity-preflight validate-d9-interpretive-preference-protocol d9-interpretive-preference-preflight validate-confidence-calibration-protocol confidence-calibration-preflight validate-theoretical-sampling-protocol theoretical-sampling-preflight export-theoretical-sampling-candidates export-theoretical-sampling-results validate-d7-comparison-protocol d7-comparison-preflight validate-adjudication-responses validate-adjudication-protocol adjudication-protocol-preflight adjudication-response-preflight import-adjudication-responses lint-scope-phrasing export-audit-manifest verify-export-audit-manifest export-publish-preflight verify-export-audit-log run-d7-retrieval run-d7-live-baseline compare-d7-retrieval run-inv7-fixtures run-inv7-live-fixtures adjudication-sample check lint docs-check clean status cost errors
+.PHONY: help test test-quick test-e2e test-all bench bench-package write-phase0-adjudication-package validate-d3-gold validate-d7-gold validate-inv7-package validate-inv7-live-protocol inv7-live-preflight validate-d6-bias-protocol d6-bias-preflight validate-d4-codebook-quality-protocol d4-codebook-quality-preflight validate-d8-gt-fidelity-protocol d8-gt-fidelity-preflight validate-d9-interpretive-preference-protocol d9-interpretive-preference-preflight validate-confidence-calibration-protocol confidence-calibration-preflight validate-theoretical-sampling-protocol theoretical-sampling-preflight export-theoretical-sampling-candidates export-theoretical-sampling-results validate-d7-comparison-protocol d7-comparison-preflight validate-adjudication-responses validate-adjudication-protocol adjudication-protocol-preflight adjudication-response-preflight import-adjudication-responses lint-scope-phrasing lint-prompt-overrides export-audit-manifest verify-export-audit-manifest export-publish-preflight verify-export-audit-log run-d7-retrieval run-d7-live-baseline compare-d7-retrieval run-inv7-fixtures run-inv7-live-fixtures adjudication-sample check lint docs-check clean status cost errors
 
 DAYS ?= 7
 PROJECT ?= qualitative_coding
@@ -256,6 +256,9 @@ ifndef INPUT
 	$(error INPUT is required. Usage: make lint-scope-phrasing ID=<project_id> INPUT=report.md)
 endif
 	python scripts/lint_scope_phrasing.py $(ID) --input-file $(INPUT) $(if $(PROJECTS_DIR),--projects-dir $(PROJECTS_DIR),)
+
+lint-prompt-overrides:  ## Check prompt override source uses against registry declarations
+	python scripts/check_prompt_override_registry.py
 
 export-audit-manifest:  ## Write export hash manifest (ID=<project_id> FORMAT=json|csv|markdown|qdpx ARTIFACTS="file..." OUTPUT=manifest.json [AUDIT_LOG=events.jsonl])
 ifndef ID

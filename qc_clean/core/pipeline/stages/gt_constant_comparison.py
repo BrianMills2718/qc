@@ -24,6 +24,7 @@ from qc_clean.core.claims import (
     replace_claims_for_stage,
 )
 from qc_clean.core.prompting import format_untrusted_data_block, render_prompt_override
+from qc_clean.core.prompt_override_registry import get_prompt_override_surface
 from qc_clean.core.pipeline.saturation import calculate_codebook_change
 from qc_clean.schemas.domain import (
     AnalysisMemo,
@@ -241,10 +242,11 @@ class GTConstantComparisonStage(PipelineStage):
                     _format_codebook_context(codebook),
                 )
                 if ctx.prompt_overrides.get("gt_constant_comparison"):
+                    surface = get_prompt_override_surface("gt_constant_comparison")
                     prompt = render_prompt_override(
-                        stage_name="gt_constant_comparison",
+                        stage_name=surface.stage_name,
                         template=ctx.prompt_overrides["gt_constant_comparison"],
-                        required_placeholders={"segment_text"},
+                        required_placeholders=surface.required_data_placeholders,
                         values={
                             "codebook_context": protected_codebook_context,
                             "segment_text": protected_segment_text,
@@ -252,8 +254,8 @@ class GTConstantComparisonStage(PipelineStage):
                             "total_segments": len(segments),
                             "doc_name": segment["doc_name"],
                         },
-                        optional_data_placeholders={"codebook_context"},
-                        metadata_placeholders={"seg_idx", "total_segments", "doc_name"},
+                        optional_data_placeholders=surface.optional_data_placeholders,
+                        metadata_placeholders=surface.metadata_placeholders,
                     )
                 else:
                     prompt = _build_comparison_prompt(codebook, segment, seg_idx, len(segments))

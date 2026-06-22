@@ -18,6 +18,7 @@ from qc_clean.core.prompting import (
     format_untrusted_documents,
     render_prompt_override,
 )
+from qc_clean.core.prompt_override_registry import get_prompt_override_surface
 from qc_clean.schemas.analysis_schemas import CodeHierarchy
 from qc_clean.schemas.adapters import code_hierarchy_to_codebook
 from qc_clean.schemas.domain import AnalysisMemo, CodeApplication, ProjectState, Provenance
@@ -55,16 +56,18 @@ class ThematicCodingStage(PipelineStage):
         num_interviews = state.corpus.num_documents
 
         if ctx.prompt_overrides.get("thematic_coding"):
+            surface = get_prompt_override_surface("thematic_coding")
             # Use the override prompt, substituting {combined_text} and {num_interviews}
             prompt = render_prompt_override(
-                stage_name="thematic_coding",
+                stage_name=surface.stage_name,
                 template=ctx.prompt_overrides["thematic_coding"],
-                required_placeholders={"combined_text"},
+                required_placeholders=surface.required_data_placeholders,
                 values={
                     "combined_text": combined_text,
                     "num_interviews": num_interviews,
                 },
-                metadata_placeholders={"num_interviews"},
+                optional_data_placeholders=surface.optional_data_placeholders,
+                metadata_placeholders=surface.metadata_placeholders,
             )
             logger.info("Using prompt override for thematic_coding (%d chars)", len(prompt))
         else:

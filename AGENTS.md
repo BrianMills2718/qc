@@ -89,6 +89,7 @@ python qc_cli.py run-inv7-live-fixtures --output inv7_live.json --model <model> 
 make validate-inv7-live-protocol PROTOCOL=inv7_live_protocol.json  # Validate pre-run live protocol metadata
 make inv7-live-preflight PROTOCOL=inv7_live_protocol.json PACKAGE=inv7_live.json  # Preflight live result against protocol before scoring
 make validate-inv7-package PACKAGE=inv7.json  # Validate schema_version=1 INV-7 package metadata
+make lint-prompt-overrides  # Check prompt override source uses against registry declarations
 make cost               # Show LLM spend (DAYS=7)
 make errors             # Show recent error breakdown
 
