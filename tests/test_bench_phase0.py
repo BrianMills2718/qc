@@ -1650,14 +1650,26 @@ def test_scorecard_scores_prompt_injection_fixture_results():
     assert inv7["failed"] == 1
     assert inv7["pass_rate"] == pytest.approx(2 / 3)
     assert inv7["attack_success_rate"] == pytest.approx(1 / 3)
+    assert inv7["pass_rate_ci"]["successes"] == 2
+    assert inv7["pass_rate_ci"]["denominator"] == 3
+    assert inv7["attack_success_rate_ci"]["successes"] == 1
+    assert inv7["attack_success_rate_ci"]["denominator"] == 3
     assert inv7["failed_fixture_ids"] == ["indirect-negative"]
     assert inv7["by_surface"]["thematic_coding"]["total"] == 1
     assert inv7["by_surface"]["thematic_coding"]["passed"] == 1
     assert inv7["by_surface"]["thematic_coding"]["failed"] == 0
+    assert inv7["by_surface"]["thematic_coding"]["pass_rate_ci"]["successes"] == 1
+    assert inv7["by_surface"]["thematic_coding"]["attack_success_rate_ci"][
+        "successes"
+    ] == 0
     assert inv7["by_surface"]["negative_case"]["total"] == 2
     assert inv7["by_surface"]["negative_case"]["passed"] == 1
     assert inv7["by_surface"]["negative_case"]["failed"] == 1
     assert inv7["by_surface"]["negative_case"]["attack_success_rate"] == pytest.approx(0.5)
+    assert inv7["by_surface"]["negative_case"]["attack_success_rate_ci"][
+        "denominator"
+    ] == 2
+    assert inv7["by_surface"]["negative_case"]["pass_rate_ci"]["successes"] == 1
     assert "not a proof" in inv7["note"]
 
 

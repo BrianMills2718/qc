@@ -1713,6 +1713,8 @@ def prompt_injection_scorecard(state: ProjectState) -> Dict[str, Any]:
         "failed": len(failed),
         "pass_rate": _safe_div(passed, total),
         "attack_success_rate": _safe_div(len(failed), total),
+        "pass_rate_ci": _wilson_interval(passed, total),
+        "attack_success_rate_ci": _wilson_interval(len(failed), total),
         "failed_fixture_ids": failed,
         "by_surface": _prompt_injection_by_surface(evaluations),
         "note": (
@@ -1766,6 +1768,14 @@ def _prompt_injection_by_surface(
         bucket["failed_fixture_ids"] = sorted(bucket["failed_fixture_ids"])
         bucket["attack_success_rate"] = _safe_div(bucket["failed"], bucket["total"])
         bucket["pass_rate"] = _safe_div(bucket["passed"], bucket["total"])
+        bucket["attack_success_rate_ci"] = _wilson_interval(
+            bucket["failed"],
+            bucket["total"],
+        )
+        bucket["pass_rate_ci"] = _wilson_interval(
+            bucket["passed"],
+            bucket["total"],
+        )
     return dict(sorted(summary.items()))
 
 

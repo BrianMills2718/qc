@@ -40,7 +40,8 @@ packages are validated by
 `make validate-d7-gold GOLD=gold_set.json`. INV-7 now has both deterministic
 structural fixture export (`make run-inv7-fixtures`) and opt-in live model
 canary fixture export (`make run-inv7-live-fixtures`) for the `PROMPT_INJECTION=`
-scorecard path. D3 and D7 scorecards now report exact-key binary system-vs-gold
+scorecard path; supplied INV-7 fixture scores report Wilson intervals for pass
+and attack-success rates overall and by surface. D3 and D7 scorecards now report exact-key binary system-vs-gold
 percent agreement, Cohen's κ, Gwet's AC1, Krippendorff's α, and prevalence metadata. D3/D7
 scorecards also compare exact recall/precision/F1 against supplied
 versioned-package human-human metrics when present and surface supplied
