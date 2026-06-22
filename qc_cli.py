@@ -49,6 +49,10 @@ Examples:
   qc_cli validate-adjudication-responses responses.json
   qc_cli adjudication-response-preflight adjudication_protocol.json sample.json responses.json
   qc_cli import-adjudication-responses responses.json --gold-set-id gold-001 --dataset-name "Study" --coder-count 2 --adjudicator expert --protocol "Expert consensus" --output-d3 d3_gold.json
+  qc_cli validate-theoretical-sampling-protocol theoretical_sampling_protocol.json
+  qc_cli theoretical-sampling-preflight theoretical_sampling_protocol.json --candidates-file candidates.json --results-file results.json
+  qc_cli export-theoretical-sampling-candidates <project_id> --protocol theoretical_sampling_protocol.json --output candidates.json
+  qc_cli export-theoretical-sampling-results theoretical_sampling_protocol.json --candidates-file candidates.json --selected-candidate-id candidate-1 --success-criterion-met "gap covered" --output results.json
   qc_cli verify-phase0-benchmark-artifact benchmark_results/run/manifest.json
   qc_cli validate-d3-gold d3_gold.json
   qc_cli validate-d7-gold d7_gold.json
@@ -408,6 +412,103 @@ Examples:
     adjudication_import_parser.add_argument(
         '--notes',
         help='Optional adjudication notes',
+    )
+
+    theoretical_sampling_protocol_validator_parser = subparsers.add_parser(
+        'validate-theoretical-sampling-protocol',
+        help='Validate a theoretical-sampling protocol package',
+        description='Validate a schema_version=1 theoretical-sampling protocol package',
+    )
+    theoretical_sampling_protocol_validator_parser.add_argument(
+        'protocol',
+        help='Path to a schema_version=1 theoretical-sampling protocol JSON package',
+    )
+
+    theoretical_sampling_preflight_parser = subparsers.add_parser(
+        'theoretical-sampling-preflight',
+        help='Preflight theoretical-sampling packages',
+        description='Preflight theoretical-sampling candidates/results against a protocol',
+    )
+    theoretical_sampling_preflight_parser.add_argument(
+        'protocol',
+        help='Path to a schema_version=1 theoretical-sampling protocol JSON package',
+    )
+    theoretical_sampling_preflight_parser.add_argument(
+        '--candidates-file',
+        required=True,
+        help='Theoretical-sampling candidate package JSON file',
+    )
+    theoretical_sampling_preflight_parser.add_argument(
+        '--results-file',
+        help='Optional theoretical-sampling result package JSON file',
+    )
+
+    theoretical_sampling_candidates_parser = subparsers.add_parser(
+        'export-theoretical-sampling-candidates',
+        help='Export theoretical-sampling candidates',
+        description='Export loaded-document theoretical-sampling candidate packages',
+    )
+    theoretical_sampling_candidates_parser.add_argument(
+        'project_id',
+        help='Project ID to export candidates for',
+    )
+    theoretical_sampling_candidates_parser.add_argument(
+        '--protocol',
+        required=True,
+        help='Path to a schema_version=1 theoretical-sampling protocol JSON package',
+    )
+    theoretical_sampling_candidates_parser.add_argument(
+        '--output',
+        help='Optional JSON output path',
+    )
+    theoretical_sampling_candidates_parser.add_argument(
+        '--candidate-name',
+        action='append',
+        dest='candidate_names',
+        help='Optional loaded document name to consider; may be repeated',
+    )
+    theoretical_sampling_candidates_parser.add_argument(
+        '--max-suggestions',
+        type=int,
+        help='Optional suggestion limit',
+    )
+
+    theoretical_sampling_results_parser = subparsers.add_parser(
+        'export-theoretical-sampling-results',
+        help='Export theoretical-sampling results',
+        description='Export selected theoretical-sampling candidates as a result package',
+    )
+    theoretical_sampling_results_parser.add_argument(
+        'protocol',
+        help='Path to a schema_version=1 theoretical-sampling protocol JSON package',
+    )
+    theoretical_sampling_results_parser.add_argument(
+        '--candidates-file',
+        required=True,
+        help='Theoretical-sampling candidate package JSON file',
+    )
+    theoretical_sampling_results_parser.add_argument(
+        '--selected-candidate-id',
+        action='append',
+        required=True,
+        dest='selected_candidate_ids',
+        help='Selected candidate ID; may be repeated',
+    )
+    theoretical_sampling_results_parser.add_argument(
+        '--success-criterion-met',
+        action='append',
+        required=True,
+        dest='success_criteria_met',
+        help='Pre-registered success criterion marked as met; may be repeated',
+    )
+    theoretical_sampling_results_parser.add_argument(
+        '--stopped-by-rule',
+        action='store_true',
+        help='Mark the result package as stopped by the protocol stopping rule',
+    )
+    theoretical_sampling_results_parser.add_argument(
+        '--output',
+        help='Optional JSON output path',
     )
 
     phase0_artifact_verifier_parser = subparsers.add_parser(
@@ -901,6 +1002,14 @@ def main() -> int:
             return handle_adjudication_response_preflight_command(args)
         elif args.command == 'import-adjudication-responses':
             return handle_import_adjudication_responses_command(args)
+        elif args.command == 'validate-theoretical-sampling-protocol':
+            return handle_validate_theoretical_sampling_protocol_command(args)
+        elif args.command == 'theoretical-sampling-preflight':
+            return handle_theoretical_sampling_preflight_command(args)
+        elif args.command == 'export-theoretical-sampling-candidates':
+            return handle_export_theoretical_sampling_candidates_command(args)
+        elif args.command == 'export-theoretical-sampling-results':
+            return handle_export_theoretical_sampling_results_command(args)
         elif args.command == 'verify-phase0-benchmark-artifact':
             return handle_verify_phase0_benchmark_artifact_command(args)
         elif args.command == 'run-d7-retrieval':
@@ -1124,6 +1233,53 @@ def handle_import_adjudication_responses_command(args) -> int:
     if args.notes is not None:
         argv.extend(["--notes", args.notes])
     return import_adjudication_responses.main(argv)
+
+
+def handle_validate_theoretical_sampling_protocol_command(args) -> int:
+    """Validate a theoretical-sampling protocol through the canonical CLI."""
+    from scripts import validate_theoretical_sampling_protocol
+
+    return validate_theoretical_sampling_protocol.main([args.protocol])
+
+
+def handle_theoretical_sampling_preflight_command(args) -> int:
+    """Preflight theoretical-sampling packages through the canonical CLI."""
+    from scripts import preflight_theoretical_sampling_protocol
+
+    argv = [args.protocol, "--candidates-file", args.candidates_file]
+    if args.results_file is not None:
+        argv.extend(["--results-file", args.results_file])
+    return preflight_theoretical_sampling_protocol.main(argv)
+
+
+def handle_export_theoretical_sampling_candidates_command(args) -> int:
+    """Export theoretical-sampling candidates through the canonical CLI."""
+    from scripts import export_theoretical_sampling_candidates
+
+    argv = [args.project_id, "--protocol", args.protocol]
+    if args.output is not None:
+        argv.extend(["--output", args.output])
+    for candidate_name in args.candidate_names or []:
+        argv.extend(["--candidate-name", candidate_name])
+    if args.max_suggestions is not None:
+        argv.extend(["--max-suggestions", str(args.max_suggestions)])
+    return export_theoretical_sampling_candidates.main(argv)
+
+
+def handle_export_theoretical_sampling_results_command(args) -> int:
+    """Export theoretical-sampling results through the canonical CLI."""
+    from scripts import export_theoretical_sampling_results
+
+    argv = [args.protocol, "--candidates-file", args.candidates_file]
+    for selected_candidate_id in args.selected_candidate_ids:
+        argv.extend(["--selected-candidate-id", selected_candidate_id])
+    for success_criterion_met in args.success_criteria_met:
+        argv.extend(["--success-criterion-met", success_criterion_met])
+    if args.stopped_by_rule:
+        argv.append("--stopped-by-rule")
+    if args.output is not None:
+        argv.extend(["--output", args.output])
+    return export_theoretical_sampling_results.main(argv)
 
 
 def handle_verify_phase0_benchmark_artifact_command(args) -> int:

@@ -89,9 +89,13 @@ make validate-d7-gold GOLD=gold_set.json  # Validate versioned held-out D7 gold-
 make validate-d7-baseline-package PACKAGE=d7_baseline.json  # Validate versioned D7 retrieval/live baseline package
 python qc_cli.py validate-d7-baseline-package d7_baseline.json  # Canonical CLI wrapper for D7 baseline package validation
 make validate-theoretical-sampling-protocol PROTOCOL=theoretical_sampling_protocol.json  # Validate pre-run theoretical-sampling protocol metadata
+python qc_cli.py validate-theoretical-sampling-protocol theoretical_sampling_protocol.json  # Canonical CLI wrapper for theoretical-sampling protocol validation
 make export-theoretical-sampling-candidates ID=<project_id> PROTOCOL=theoretical_sampling_protocol.json OUTPUT=candidates.json  # Export loaded-document theoretical-sampling candidates
+python qc_cli.py export-theoretical-sampling-candidates <project_id> --protocol theoretical_sampling_protocol.json --output candidates.json  # Canonical CLI wrapper for candidate export
 make export-theoretical-sampling-results PROTOCOL=theoretical_sampling_protocol.json CANDIDATES=candidates.json SELECTED=loaded-doc-1 SUCCESS_CRITERION="..." OUTPUT=results.json  # Export selected theoretical-sampling candidates as a result package
+python qc_cli.py export-theoretical-sampling-results theoretical_sampling_protocol.json --candidates-file candidates.json --selected-candidate-id loaded-doc-1 --success-criterion-met "..." --output results.json  # Canonical CLI wrapper for result export
 make theoretical-sampling-preflight PROTOCOL=theoretical_sampling_protocol.json CANDIDATES=candidates.json RESULTS=results.json  # Preflight theoretical-sampling candidates/results against a protocol
+python qc_cli.py theoretical-sampling-preflight theoretical_sampling_protocol.json --candidates-file candidates.json --results-file results.json  # Canonical CLI wrapper for theoretical-sampling preflight
 make validate-d7-comparison-protocol PROTOCOL=d7_protocol.json  # Validate pre-run D7 retrieval comparison protocol, including optional metric criteria
 make d7-comparison-preflight PROTOCOL=d7_protocol.json GOLD=d7_gold.json PREDICTIONS="lexical.json embedding.json"  # Preflight D7 comparison inputs before scoring
 make compare-d7-retrieval ID=<project_id> GOLD=d7_gold.json PREDICTIONS="lexical.json embedding.json" PROTOCOL=d7_protocol.json ARTIFACT_DIR=benchmark_results  # Score D7 retrieval predictions with preflight guard, metric-criteria report when configured, input-hash provenance, and optional artifact package
