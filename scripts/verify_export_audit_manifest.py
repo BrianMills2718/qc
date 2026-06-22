@@ -1,0 +1,66 @@
+#!/usr/bin/env python3
+"""Verify a hash manifest for project export artifacts."""
+
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+from pathlib import Path
+from typing import Sequence
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from qc_clean.core.export.audit_manifest import (
+    load_export_audit_manifest,
+    verify_export_audit_manifest_payload,
+)
+from qc_clean.core.persistence.project_store import ProjectStore
+
+
+def main(argv: Sequence[str] | None = None) -> int:
+    """Verify an export audit manifest and print a JSON report."""
+    parser = argparse.ArgumentParser(description="Verify an export audit hash manifest")
+    parser.add_argument("manifest", type=Path, help="Export audit manifest JSON path")
+    parser.add_argument(
+        "--base-dir",
+        type=Path,
+        help="Optional base directory for resolving relative artifact paths",
+    )
+    parser.add_argument("--project-id", help="Optional project ID for project-state hash checking")
+    parser.add_argument(
+        "--projects-dir",
+        type=Path,
+        help="Optional project store directory; defaults to ~/.qc_projects",
+    )
+    args = parser.parse_args(argv)
+
+    try:
+        manifest = load_export_audit_manifest(args.manifest)
+    except ValueError as exc:
+        print(json.dumps({"status": "error", "error": str(exc)}, indent=2))
+        return 1
+
+    state = None
+    if args.project_id:
+        store = ProjectStore(projects_dir=args.projects_dir)
+        try:
+            state = store.load(args.project_id)
+        except FileNotFoundError as exc:
+            print(json.dumps({"status": "error", "error": str(exc)}, indent=2))
+            return 1
+
+    base_dir = args.base_dir if args.base_dir is not None else args.manifest.parent
+    report = verify_export_audit_manifest_payload(
+        manifest,
+        base_dir=base_dir,
+        state=state,
+    )
+    print(json.dumps(report.model_dump(mode="json"), indent=2))
+    return 0 if report.status == "verified" else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

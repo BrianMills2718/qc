@@ -8,6 +8,7 @@ import pytest
 
 from qc_clean.core.export.audit_manifest import (
     build_export_audit_manifest,
+    verify_export_audit_manifest_payload,
     write_export_audit_manifest,
 )
 from qc_clean.core.persistence.project_store import ProjectStore
@@ -130,6 +131,132 @@ def test_write_export_audit_manifest_script(tmp_path, capsys):
     assert bad_exit == 1
     assert error_payload["status"] == "error"
     assert "does not exist" in error_payload["error"]
+
+
+def test_verify_export_audit_manifest_accepts_matching_files(tmp_path):
+    state = ProjectState(id="manifest-project", name="Manifest Project")
+    report_path = tmp_path / "report.md"
+    report_path.write_text("# Report\n", encoding="utf-8")
+    manifest = build_export_audit_manifest(
+        state,
+        export_format="markdown",
+        artifact_paths=[report_path],
+        base_dir=tmp_path,
+    )
+
+    report = verify_export_audit_manifest_payload(
+        manifest.model_dump(mode="json"),
+        base_dir=tmp_path,
+        state=state,
+    ).model_dump(mode="json")
+
+    assert report["status"] == "verified"
+    assert report["manifest_self_hash_status"] == "verified"
+    assert report["project_state_hash_status"] == "verified"
+    assert report["artifact_count"] == 1
+    assert report["checked_artifact_count"] == 1
+    assert report["failure_count"] == 0
+    assert report["failures"] == []
+    assert "not a signed or append-only audit log" in report["caveat"]
+
+
+def test_verify_export_audit_manifest_detects_artifact_hash_mismatch(tmp_path):
+    state = ProjectState(id="manifest-project", name="Manifest Project")
+    report_path = tmp_path / "report.md"
+    report_path.write_text("abc", encoding="utf-8")
+    manifest = build_export_audit_manifest(
+        state,
+        export_format="markdown",
+        artifact_paths=[report_path],
+        base_dir=tmp_path,
+    )
+    report_path.write_text("xyz", encoding="utf-8")
+
+    report = verify_export_audit_manifest_payload(
+        manifest.model_dump(mode="json"),
+        base_dir=tmp_path,
+    ).model_dump(mode="json")
+
+    assert report["status"] == "invalid"
+    assert report["project_state_hash_status"] == "not_checked"
+    assert any(failure["code"] == "artifact_sha256_mismatch" for failure in report["failures"])
+
+
+def test_verify_export_audit_manifest_detects_manifest_hash_mismatch(tmp_path):
+    state = ProjectState(id="manifest-project", name="Manifest Project")
+    report_path = tmp_path / "report.md"
+    report_path.write_text("# Report\n", encoding="utf-8")
+    payload = build_export_audit_manifest(
+        state,
+        export_format="markdown",
+        artifact_paths=[report_path],
+        base_dir=tmp_path,
+    ).model_dump(mode="json")
+    payload["project_name"] = "Tampered Project"
+
+    report = verify_export_audit_manifest_payload(payload, base_dir=tmp_path).model_dump(
+        mode="json"
+    )
+
+    assert report["status"] == "invalid"
+    assert report["manifest_self_hash_status"] == "invalid"
+    assert any(failure["code"] == "manifest_sha256_mismatch" for failure in report["failures"])
+
+
+def test_verify_export_audit_manifest_detects_project_state_mismatch(tmp_path):
+    state = ProjectState(id="manifest-project", name="Manifest Project")
+    changed_state = ProjectState(id="manifest-project", name="Changed Project")
+    report_path = tmp_path / "report.md"
+    report_path.write_text("# Report\n", encoding="utf-8")
+    manifest = build_export_audit_manifest(
+        state,
+        export_format="markdown",
+        artifact_paths=[report_path],
+        base_dir=tmp_path,
+    )
+
+    report = verify_export_audit_manifest_payload(
+        manifest.model_dump(mode="json"),
+        base_dir=tmp_path,
+        state=changed_state,
+    ).model_dump(mode="json")
+
+    assert report["status"] == "invalid"
+    assert report["project_state_hash_status"] == "invalid"
+    assert any(
+        failure["code"] == "project_state_sha256_mismatch" for failure in report["failures"]
+    )
+
+
+def test_verify_export_audit_manifest_script(tmp_path, capsys):
+    from scripts import verify_export_audit_manifest as script
+
+    state = ProjectState(id="manifest-project", name="Manifest Project")
+    report_path = tmp_path / "report.md"
+    report_path.write_text("# Report\n", encoding="utf-8")
+    manifest = build_export_audit_manifest(
+        state,
+        export_format="markdown",
+        artifact_paths=[report_path],
+        base_dir=tmp_path,
+    )
+    manifest_path = tmp_path / "manifest.json"
+    write_export_audit_manifest(manifest, manifest_path)
+
+    ok_exit = script.main([str(manifest_path), "--base-dir", str(tmp_path)])
+    ok_report = json.loads(capsys.readouterr().out)
+
+    assert ok_exit == 0
+    assert ok_report["status"] == "verified"
+
+    report_path.write_text("Changed\n", encoding="utf-8")
+
+    bad_exit = script.main([str(manifest_path), "--base-dir", str(tmp_path)])
+    bad_report = json.loads(capsys.readouterr().out)
+
+    assert bad_exit == 1
+    assert bad_report["status"] == "invalid"
+    assert any(failure["code"] == "artifact_sha256_mismatch" for failure in bad_report["failures"])
 
 
 def _sha256_bytes(value: bytes) -> str:

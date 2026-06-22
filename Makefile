@@ -1,4 +1,4 @@
-.PHONY: help test test-quick test-e2e test-all bench bench-package validate-d3-gold validate-d7-gold validate-inv7-package validate-adjudication-responses lint-scope-phrasing export-audit-manifest run-d7-retrieval compare-d7-retrieval run-inv7-fixtures run-inv7-live-fixtures adjudication-sample check lint docs-check clean status cost errors
+.PHONY: help test test-quick test-e2e test-all bench bench-package validate-d3-gold validate-d7-gold validate-inv7-package validate-adjudication-responses lint-scope-phrasing export-audit-manifest verify-export-audit-manifest run-d7-retrieval compare-d7-retrieval run-inv7-fixtures run-inv7-live-fixtures adjudication-sample check lint docs-check clean status cost errors
 
 DAYS ?= 7
 PROJECT ?= qualitative_coding
@@ -76,6 +76,12 @@ ifndef OUTPUT
 	$(error OUTPUT is required. Usage: make export-audit-manifest ID=<project_id> FORMAT=markdown ARTIFACTS="report.md" OUTPUT=manifest.json)
 endif
 	python scripts/write_export_audit_manifest.py $(ID) --format $(FORMAT) $(foreach file,$(ARTIFACTS),--artifact $(file)) --output $(OUTPUT) $(if $(BASE_DIR),--base-dir $(BASE_DIR),) $(if $(PROJECTS_DIR),--projects-dir $(PROJECTS_DIR),)
+
+verify-export-audit-manifest:  ## Verify export hash manifest (MANIFEST=manifest.json [BASE_DIR=exports] [ID=<project_id>])
+ifndef MANIFEST
+	$(error MANIFEST is required. Usage: make verify-export-audit-manifest MANIFEST=manifest.json)
+endif
+	python scripts/verify_export_audit_manifest.py $(MANIFEST) $(if $(BASE_DIR),--base-dir $(BASE_DIR),) $(if $(ID),--project-id $(ID),) $(if $(PROJECTS_DIR),--projects-dir $(PROJECTS_DIR),)
 
 MODE ?= lexical_bm25
 
