@@ -85,6 +85,11 @@ def render_prompt_override(
         metadata_placeholders=metadata,
         value_keys=set(values),
     )
+    _validate_data_placeholder_values(
+        stage_name=stage_name,
+        values=values,
+        data_placeholders=required | optional_data,
+    )
     field_uses = _format_field_uses(stage_name, template)
     _validate_field_uses(
         stage_name=stage_name,
@@ -191,6 +196,37 @@ def _validate_placeholder_declarations(
             f"Prompt override for {stage_name} exposes undeclared value(s): "
             f"{', '.join(undeclared_values)}"
         )
+
+
+def _validate_data_placeholder_values(
+    *,
+    stage_name: str,
+    values: dict[str, Any],
+    data_placeholders: set[str],
+) -> None:
+    """Fail loudly when data placeholders are supplied without data boundaries."""
+    invalid = sorted(
+        placeholder
+        for placeholder in data_placeholders & set(values)
+        if not _is_untrusted_data_block_value(values[placeholder])
+    )
+    if invalid:
+        raise ValueError(
+            f"Prompt override for {stage_name} data placeholder(s) "
+            f"{', '.join(invalid)} must be rendered as untrusted data block(s)"
+        )
+
+
+def _is_untrusted_data_block_value(value: Any) -> bool:
+    """Return whether a renderer value carries untrusted-data block structure."""
+    if not isinstance(value, str):
+        return False
+    stripped = value.strip()
+    return (
+        stripped.startswith("BEGIN UNTRUSTED DATA BLOCK")
+        and "END UNTRUSTED DATA BLOCK" in stripped
+        and f"\n{DATA_LINE_PREFIX}" in stripped
+    )
 
 
 def _has_unsupported_syntax(field_use: _PromptFieldUse) -> bool:
