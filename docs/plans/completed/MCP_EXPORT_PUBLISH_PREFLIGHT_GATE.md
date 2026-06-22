@@ -1,6 +1,6 @@
 # Plan #198: MCP Export Publish Preflight Gate
 
-**Status:** In Progress
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** MCP export-audit integration and export publish preflight scope lint
@@ -36,6 +36,45 @@ without remembering to call a separate script outside MCP.
 add CSV/QDPX MCP export tools, make preflight mandatory, validate
 sampling-frame adequacy, sign artifacts, make event logs append-only, create
 external tamper evidence, or produce methodological-validity/SOTA evidence.
+
+---
+
+## Outcome
+
+Plan commit: `97c4115e`
+Implementation commit: `32c9ea68`
+
+MCP JSON and Markdown export tools now support explicit opt-in publish/handoff
+preflight:
+
+- `publish_preflight=True`
+- `scope_lint=True`
+
+`publish_preflight=True` requires `audit_manifest=True` and runs
+`run_export_publish_preflight` after the confined MCP manifest sidecar is
+written. The returned payload includes `publish_preflight` with the structured
+preflight report. `scope_lint=True` requires `publish_preflight=True` and
+enables the same deterministic Markdown/text scope-phrasing gate as script,
+Make, `qc_cli.py`, and `project export`.
+
+When MCP audit event logging is enabled, the export event log records a
+`publish_preflight` event and the optional SQLite mirror is refreshed after that
+event. Default MCP export payloads are unchanged when the new flags are absent.
+
+Verification:
+
+- TDD red state observed: five expected failures before implementation because
+  MCP `qc_export_markdown` / `qc_export_json` rejected the new
+  `publish_preflight` and `scope_lint` keyword arguments.
+- Focused tests:
+  `python -m pytest tests/test_mcp_server.py tests/test_mcp_export_confinement.py tests/test_export_publish_preflight.py -q`
+  -> `96 passed`.
+- Focused Ruff:
+  `python -m ruff check qc_mcp_server.py tests/test_mcp_server.py` -> passed.
+- `make docs-check` -> passed.
+- `git diff --check` -> passed.
+- `make check` -> `1261 passed, 1 skipped, 8 deselected`; Ruff and docs gates
+  passed; type check is still not configured.
 
 ---
 
@@ -80,18 +119,18 @@ Internal MCP tool integration only; no new cross-project boundary is created.
 
 ### Capability Validation
 
-- [ ] Default MCP export payloads are unchanged when new flags are absent.
-- [ ] `publish_preflight=True` requires `audit_manifest=True`.
-- [ ] `scope_lint=True` requires `publish_preflight=True`.
-- [ ] Passing MCP publish preflight returns a structured report with status
+- [x] Default MCP export payloads are unchanged when new flags are absent.
+- [x] `publish_preflight=True` requires `audit_manifest=True`.
+- [x] `scope_lint=True` requires `publish_preflight=True`.
+- [x] Passing MCP publish preflight returns a structured report with status
   `pass`.
-- [ ] Failing MCP publish preflight returns an error payload with the structured
+- [x] Failing MCP publish preflight returns an error payload with the structured
   report and stable failure codes.
-- [ ] MCP audit event logs include `publish_preflight` when requested, and
+- [x] MCP audit event logs include `publish_preflight` when requested, and
   SQLite mirrors are refreshed after that event.
-- [ ] MCP export path confinement remains intact for artifacts, manifests,
+- [x] MCP export path confinement remains intact for artifacts, manifests,
   event logs, and DB mirrors.
-- [ ] Docs preserve caveats: local integrity/report-discipline only, not
+- [x] Docs preserve caveats: local integrity/report-discipline only, not
   sampling adequacy, methodological validity, signing, append-only storage,
   external tamper evidence, or SOTA.
 
@@ -114,17 +153,17 @@ Internal MCP tool integration only; no new cross-project boundary is created.
 
 ### Steps
 
-1. [ ] Add failing MCP tests for dependency validation, passing preflight,
+1. [x] Add failing MCP tests for dependency validation, passing preflight,
    scope-lint blocking behavior, audit-event/DB inclusion, and preserved
    confinement/default payloads.
-2. [ ] Extend `_with_optional_export_audit` with opt-in publish preflight and
+2. [x] Extend `_with_optional_export_audit` with opt-in publish preflight and
    scope lint, using `run_export_publish_preflight`.
-3. [ ] Add `publish_preflight` / `scope_lint` parameters and docstrings to
+3. [x] Add `publish_preflight` / `scope_lint` parameters and docstrings to
    `qc_export_markdown` and `qc_export_json`.
-4. [ ] Update docs/CLAUDE/theory/plan caveats and regenerate `AGENTS.md`.
-5. [ ] Run focused tests, focused Ruff, docs checks, whitespace checks, and full
+4. [x] Update docs/CLAUDE/theory/plan caveats and regenerate `AGENTS.md`.
+5. [x] Run focused tests, focused Ruff, docs checks, whitespace checks, and full
    `make check`.
-6. [ ] Commit/push implementation, then close this plan.
+6. [x] Commit/push implementation, then close this plan.
 
 ---
 
@@ -155,33 +194,33 @@ Internal MCP tool integration only; no new cross-project boundary is created.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] `qc_export_markdown` and `qc_export_json` accept `publish_preflight` and
+- [x] `qc_export_markdown` and `qc_export_json` accept `publish_preflight` and
   `scope_lint` booleans.
-- [ ] `publish_preflight=True` fails loud in the returned JSON payload unless
+- [x] `publish_preflight=True` fails loud in the returned JSON payload unless
   `audit_manifest=True`.
-- [ ] `scope_lint=True` fails loud in the returned JSON payload unless
+- [x] `scope_lint=True` fails loud in the returned JSON payload unless
   `publish_preflight=True`.
-- [ ] Passing MCP publish preflight returns `publish_preflight.status == "pass"`.
-- [ ] Failing MCP publish preflight returns an error payload and preserves the
+- [x] Passing MCP publish preflight returns `publish_preflight.status == "pass"`.
+- [x] Failing MCP publish preflight returns an error payload and preserves the
   structured failure report.
-- [ ] Optional scope lint blocks risky Markdown/text handoff artifacts under
+- [x] Optional scope lint blocks risky Markdown/text handoff artifacts under
   missing/under-specified scope.
-- [ ] Audit JSONL/SQLite workflows include the MCP `publish_preflight` event
+- [x] Audit JSONL/SQLite workflows include the MCP `publish_preflight` event
   when audit logging is enabled.
-- [ ] Existing MCP export behavior without new flags is unchanged.
-- [ ] Documentation preserves caveats: this is opt-in local integrity and
+- [x] Existing MCP export behavior without new flags is unchanged.
+- [x] Documentation preserves caveats: this is opt-in local integrity and
   report-boundary discipline only.
 
 > Process criteria:
-- [ ] Plan committed before implementation.
-- [ ] Red tests observed before implementation.
-- [ ] Focused tests pass.
-- [ ] Focused Ruff passes.
-- [ ] `make docs-check` passes.
-- [ ] `git diff --check` passes.
-- [ ] `make check` passes, or any failure is documented as unrelated with
+- [x] Plan committed before implementation.
+- [x] Red tests observed before implementation.
+- [x] Focused tests pass.
+- [x] Focused Ruff passes.
+- [x] `make docs-check` passes.
+- [x] `git diff --check` passes.
+- [x] `make check` passes, or any failure is documented as unrelated with
   evidence.
-- [ ] Implementation and closeout commits are pushed.
+- [x] Implementation and closeout commits are pushed.
 
 ---
 
@@ -199,4 +238,4 @@ Internal MCP tool integration only; no new cross-project boundary is created.
 
 ## Closeout
 
-Pending implementation.
+Plan closed after implementation verification.

@@ -26,13 +26,16 @@ highest-value documented lane.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Plan #198
-`completed/MCP_EXPORT_PUBLISH_PREFLIGHT_GATE.md` is active. This slice adds
-explicit opt-in `publish_preflight` / `scope_lint` parameters to confined MCP
-JSON/Markdown export tools so agents can request the local publish/handoff gate
-inside one MCP export call. It does not change default MCP export payloads, make
-preflight mandatory, validate sampling adequacy, sign artifacts, make logs
-append-only, create external tamper evidence, or produce SOTA claims.
+**Active checkpoint:** No implementation plan is active. Select and plan the
+next deterministic roadmap lane before editing code.
+
+**Completed checkpoint:** Plan #198
+`completed/MCP_EXPORT_PUBLISH_PREFLIGHT_GATE.md` added explicit opt-in
+`publish_preflight` / `scope_lint` parameters to confined MCP JSON/Markdown
+export tools so agents can request the local publish/handoff gate inside one MCP
+export call. It does not change default MCP export payloads, make preflight
+mandatory, validate sampling adequacy, sign artifacts, make logs append-only,
+create external tamper evidence, or produce SOTA claims.
 
 **Completed checkpoint:** Plan #197
 `completed/PROJECT_EXPORT_PUBLISH_PREFLIGHT_GATE.md` added explicit opt-in
