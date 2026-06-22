@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 61 | D6 counterfactual change-rate Wilson intervals | High | Planned | `D6_COUNTERFACTUAL_CHANGE_RATE_WILSON_INTERVALS.md` |
 
 ## Completed Plans
 

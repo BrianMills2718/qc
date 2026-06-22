@@ -22,9 +22,9 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Next evaluation-harness slice after D3 exact application scoring: choose the
-   next highest-value unmet harness lane that can be advanced without pretending
-   held-out expert data exists.
+1. Plan #61, D6 counterfactual change-rate Wilson intervals: add local
+   uncertainty metadata for invariant-case code-change rates overall and by
+   attribute without claiming a populated bias audit.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
