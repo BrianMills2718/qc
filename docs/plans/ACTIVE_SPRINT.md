@@ -22,7 +22,9 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Continue through the ranked roadmap without pausing after each verified
+1. Execute Plan #113 (`D6_STRATIFIED_BIAS_SCORECARD.md`): add externally
+   supplied stratified-bias accounting to Phase 0.
+2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
 **Completed checkpoint:** `make compare-d7-retrieval ... PROTOCOL=...` can now

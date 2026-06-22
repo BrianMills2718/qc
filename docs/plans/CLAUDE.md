@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 113 | D6 stratified bias scorecard | High | Planned | `D6_STRATIFIED_BIAS_SCORECARD.md` |
 
 ## Completed Plans
 
