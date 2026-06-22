@@ -1,6 +1,6 @@
 # Plan #186: Phase 0 Package Projects Dir Support
 
-**Status:** Planned
+**Status:** Completed
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Phase 0 benchmark package runner
@@ -65,13 +65,13 @@ created.
 
 ### Capability Validation
 
-- [ ] Package manifests accept `projects_dir`.
-- [ ] Relative `projects_dir` paths resolve from the manifest directory.
-- [ ] Package-to-bench argv includes `--projects-dir`.
-- [ ] A package-local project store can be scored without monkeypatching
+- [x] Package manifests accept `projects_dir`.
+- [x] Relative `projects_dir` paths resolve from the manifest directory.
+- [x] Package-to-bench argv includes `--projects-dir`.
+- [x] A package-local project store can be scored without monkeypatching
   `ProjectStore`.
-- [ ] Existing unknown-key rejection remains in place for unsupported fields.
-- [ ] Documentation states this is package portability/provenance support only.
+- [x] Existing unknown-key rejection remains in place for unsupported fields.
+- [x] Documentation states this is package portability/provenance support only.
 
 ---
 
@@ -129,26 +129,26 @@ created.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] `Phase0BenchmarkPackage` accepts optional `projects_dir`.
-- [ ] `phase0_package_to_bench_argv()` resolves `projects_dir` relative to the
+- [x] `Phase0BenchmarkPackage` accepts optional `projects_dir`.
+- [x] `phase0_package_to_bench_argv()` resolves `projects_dir` relative to the
   package manifest directory.
-- [ ] `phase0_package_to_bench_argv()` forwards the canonical `--projects-dir`
+- [x] `phase0_package_to_bench_argv()` forwards the canonical `--projects-dir`
   flag.
-- [ ] A package manifest can run against a package-local project store without
+- [x] A package manifest can run against a package-local project store without
   monkeypatching or relying on default user state.
-- [ ] Existing strict unknown-key behavior remains unchanged.
-- [ ] Docs/CLAUDE describe package-local project-store support without implying
+- [x] Existing strict unknown-key behavior remains unchanged.
+- [x] Docs/CLAUDE describe package-local project-store support without implying
   benchmark evidence.
 
 > Process criteria:
-- [ ] TDD red state observed before implementation.
-- [ ] Focused tests pass.
-- [ ] Focused Ruff check passes.
-- [ ] `make docs-check` passes.
-- [ ] `git diff --check` passes.
-- [ ] `make check` passes.
-- [ ] Plan is moved to completed with verification evidence.
-- [ ] Verified implementation is committed and pushed.
+- [x] TDD red state observed before implementation.
+- [x] Focused tests pass.
+- [x] Focused Ruff check passes.
+- [x] `make docs-check` passes.
+- [x] `git diff --check` passes.
+- [x] `make check` passes.
+- [x] Plan is moved to completed with verification evidence.
+- [x] Verified implementation is committed and pushed.
 
 ---
 
@@ -161,3 +161,33 @@ created.
 | Relative project store resolves from cwd | Path conversion bypasses `_resolve_manifest_path` | Route through existing package path handling. |
 | Tests depend on ambient project state | No package-local integration test | Add a temp `ProjectStore` package run without monkeypatching. |
 | Docs overclaim | Package portability sounds like benchmark evidence | Keep caveats: portability/provenance only, not validity evidence. |
+
+---
+
+## Outcome
+
+Implemented in commit `e61f4e31` and pushed to `main`.
+
+`Phase0BenchmarkPackage` now accepts optional `projects_dir`, and
+`phase0_package_to_bench_argv()` resolves that path relative to the package
+manifest directory before forwarding the canonical `--projects-dir` flag to
+`bench_phase0`. A package manifest can now score a package-local `ProjectStore`
+without monkeypatching or relying on default user state.
+
+Verification evidence:
+
+- TDD red state: `python -m pytest tests/test_phase0_benchmark_package.py -q`
+  initially failed because `projects_dir` was rejected with `extra_forbidden`.
+- `python -m pytest tests/test_phase0_benchmark_package.py tests/test_qc_cli_bench.py -q`:
+  14 passed.
+- `python -m ruff check scripts/run_phase0_benchmark_package.py tests/test_phase0_benchmark_package.py`:
+  passed.
+- `make docs-check`: passed.
+- `git diff --check`: passed.
+- `make check`: 1202 passed, 1 skipped, 8 deselected; Ruff and docs-check
+  passed; type check remains not configured.
+
+Claim discipline: this is package portability/provenance support only. It does
+not change project persistence, copy project data into packages, run live LLM
+calls, or license benchmark validity, methodological-validity, superiority,
+parity, timing, or SOTA claims.

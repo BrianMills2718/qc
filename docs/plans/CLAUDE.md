@@ -6,12 +6,12 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 186 | Phase 0 package projects dir support | High | Planned | `PHASE0_PACKAGE_PROJECTS_DIR_SUPPORT.md` |
 
 ## Completed Plans
 
 | Name | Outcome | Record |
 |------|---------|--------|
+| Phase 0 package projects dir support | Strict Phase 0 package manifests can now carry `projects_dir`, resolving it relative to the manifest and forwarding `--projects-dir` so package-driven runs can score package-local or non-default project stores without claiming benchmark evidence | `completed/PHASE0_PACKAGE_PROJECTS_DIR_SUPPORT.md` |
 | Phase 0 package INV-7 protocol support | Strict Phase 0 package manifests can now carry `inv7_live_protocol_file`, resolving it relative to the manifest and forwarding `--inv7-live-protocol-file` so package-driven runs preserve the existing INV-7 live preflight guard without claiming robustness evidence | `completed/PHASE0_PACKAGE_INV7_PROTOCOL_SUPPORT.md` |
 | Phase 0 benchmark artifact verifier | Phase 0 scorecard/timing/manifest artifact packages can now be verified through script, Make, and `qc_cli.py` for local hashes, copied metadata, prompt-eval status, and caveat consistency without claiming benchmark evidence | `completed/PHASE0_BENCHMARK_ARTIFACT_VERIFIER.md` |
 | D7 comparison package writer | D7 retrieval/live-baseline comparison manifests can now be written through script, Make, and `qc_cli.py` after validating versioned gold and prediction packages plus optional protocol preflight, preserving prediction order and package-relative paths without claiming benchmark evidence | `completed/D7_COMPARISON_PACKAGE_WRITER.md` |

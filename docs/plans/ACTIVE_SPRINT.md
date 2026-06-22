@@ -26,13 +26,20 @@ highest-value documented lane.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Plan #186 is active: add `projects_dir` support to
-strict Phase 0 package manifests so package-driven runs can score projects from
-non-default or package-local project stores. This slice should accept the
-manifest field, resolve it relative to the package file, forward
-`--projects-dir` to `bench_phase0`, prove a package-local project store runs
-without monkeypatching, keep unknown-key rejection for unsupported fields, and
-avoid any claim that package portability creates benchmark validity evidence.
+**Active checkpoint:** Select and plan the next deterministic, high-value
+roadmap lane from `docs/PROJECT_THEORY_AND_GOALS.md` and
+`docs/EVALUATION_HARNESS.md`; no implementation slice is currently active
+after Plan #186 closeout.
+
+**Completed checkpoint:** Strict Phase 0 package manifests can now carry
+`projects_dir`. The package runner resolves the path relative to the manifest
+directory and forwards `--projects-dir` to `bench_phase0`, so package-driven
+runs can score package-local or other non-default project stores without
+monkeypatching or ambient default user state. This is package
+portability/provenance support only; it does not change project persistence,
+copy project data into packages, run live LLM calls, or claim benchmark
+validity, methodological validity, superiority, parity, timing, or SOTA
+evidence.
 
 **Completed checkpoint:** Strict Phase 0 package manifests can now carry
 `inv7_live_protocol_file`. The package runner resolves the path relative to
