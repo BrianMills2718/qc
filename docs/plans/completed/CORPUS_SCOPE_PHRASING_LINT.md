@@ -1,10 +1,42 @@
 # Plan #93: Corpus Scope Phrasing Lint
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Corpus scope warnings; scope-bound claim export rows
 **Blocks:** safer agent/human report drafting; broader scope-aware phrasing checks
+
+---
+
+## Outcome
+
+Implemented deterministic corpus-scope phrasing lint for arbitrary text. The
+lint classifies project scope as `missing`, `empty`, `missing_sampling_frame`,
+or `complete`; scans caller-supplied text for a narrow set of risky
+population-generalizing patterns; emits a typed JSON report with line-level
+warnings; and preserves a caveat that linting is report discipline, not sampling
+adequacy or validity evidence. Added:
+
+- `qc_clean/core/scope_lint.py`
+- `scripts/lint_scope_phrasing.py <project_id> --input-file report.md`
+- `make lint-scope-phrasing ID=<project_id> INPUT=report.md`
+
+Implementation commit: `15e7157`
+
+## Verification
+
+- TDD red check: `python -m pytest tests/test_scope_phrasing_lint.py -q`
+  initially failed with `ModuleNotFoundError: No module named
+  'qc_clean.core.scope_lint'`.
+- Focused pass: `python -m pytest tests/test_scope_phrasing_lint.py -q` →
+  `6 passed`.
+- Focused lint: `python -m ruff check qc_clean/core/scope_lint.py scripts/lint_scope_phrasing.py tests/test_scope_phrasing_lint.py` →
+  `All checks passed!`
+- Make target discovery: `make help` lists `lint-scope-phrasing`.
+- Docs gate: `make docs-check` passed.
+- Full gate: `make check` → `850 passed, 1 skipped, 8 deselected`; Ruff and
+  docs checks passed.
+- Type-check status: `make check` reports `Type check not yet configured`.
 
 ---
 
@@ -146,31 +178,31 @@ documents without a stated and defensible sampling frame.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] Core lint returns a typed JSON-serializable report with status, scope
+- [x] Core lint returns a typed JSON-serializable report with status, scope
   status, warning count, line-level warnings, and caveat.
-- [ ] Missing scope, empty scope, and population-without-sampling-frame status
+- [x] Missing scope, empty scope, and population-without-sampling-frame status
   can trigger warnings on risky population/generalization phrases.
-- [ ] Loaded-document-only phrasing does not warn.
-- [ ] Complete scope suppresses missing/under-specified-scope warnings while
+- [x] Loaded-document-only phrasing does not warn.
+- [x] Complete scope suppresses missing/under-specified-scope warnings while
   preserving a non-evidence caveat.
-- [ ] Script and Make target are agent-drivable and exit nonzero on warnings.
-- [ ] Docs state this is phrasing/report discipline, not sampling adequacy or
+- [x] Script and Make target are agent-drivable and exit nonzero on warnings.
+- [x] Docs state this is phrasing/report discipline, not sampling adequacy or
   validity evidence.
 
 > Process criteria:
-- [ ] Required focused tests pass.
-- [ ] Full `make check` passes or any failure is documented with evidence.
-- [ ] Type-check status is reported.
-- [ ] Verified work is committed and pushed.
+- [x] Required focused tests pass.
+- [x] Full `make check` passes or any failure is documented with evidence.
+- [x] Type-check status is reported.
+- [x] Verified work is committed and pushed.
 
 ---
 
 ## Open Questions
 
-- [ ] Should this lint eventually run automatically on Markdown exports? -
+- [x] Should this lint eventually run automatically on Markdown exports? -
   Status: DEFERRED | Why it matters: exports already have deterministic scope
   warnings and per-row context; auto-lint can be a future strict/preflight mode.
-- [ ] Should phrase patterns become configurable? - Status: DEFERRED | Why it
+- [x] Should phrase patterns become configurable? - Status: DEFERRED | Why it
   matters: configuration is useful, but this first slice should keep the warning
   surface deterministic and testable.
 

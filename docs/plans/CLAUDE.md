@@ -6,7 +6,6 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 93 | Corpus scope phrasing lint | High | Planned | `CORPUS_SCOPE_PHRASING_LINT.md` |
 
 ## Completed Plans
 
@@ -104,6 +103,7 @@ Track all implementation work here.
 | Confidence calibration bootstrap intervals | Evaluation-harness follow-up: confidence-calibration scorecards report deterministic local bootstrap intervals for Brier score and ECE without claiming calibrated confidence | `completed/CONFIDENCE_CALIBRATION_BOOTSTRAP_INTERVALS.md` |
 | INV-3 adjudication sample export | INV-3 first slice: `make adjudication-sample` exports unlabeled schema_version=1 sample packets for human/expert review inputs without claiming labels or validity evidence | `completed/INV3_ADJUDICATION_SAMPLE_EXPORT.md` |
 | INV-3 adjudication response validator | INV-3 follow-up: `make validate-adjudication-responses` validates completed sample response shape/completeness without importing labels or claiming validity evidence | `completed/INV3_ADJUDICATION_RESPONSE_VALIDATOR.md` |
+| Corpus scope phrasing lint | Scope/report follow-up: `make lint-scope-phrasing` scans arbitrary text for risky population-generalizing phrasing under missing or under-specified corpus scope | `completed/CORPUS_SCOPE_PHRASING_LINT.md` |
 
 ## Status Key
 

@@ -22,9 +22,9 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #93 (`CORPUS_SCOPE_PHRASING_LINT.md`): add deterministic
-   scope-aware phrasing lint for agent/human-authored summaries without
-   claiming sampling-frame adequacy or methodological validity.
+1. Create and execute the next high-value lane: deterministic export-audit hash
+   manifest for JSON/CSV/Markdown/QDPX outputs as a first slice toward the
+   tamper-evident audit substrate, without claiming a full append-only audit log.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
@@ -55,7 +55,10 @@ not labels, gold data, correctness estimates, or validity evidence. Completed
 adjudication response packages can now be shape/completeness-validated through
 `make validate-adjudication-responses PACKAGE=sample.json`; this is a protocol
 gate only and still does not import labels, create gold, score correctness, or
-provide expert evidence.
+provide expert evidence. `make lint-scope-phrasing` now scans arbitrary
+agent/human-authored text for risky population-generalizing phrasing under
+missing or under-specified corpus scope; this is report discipline only, not
+sampling-frame adequacy or validity evidence.
 MCP now exposes `qc_review_decisions` for agent-driven review decisions,
 including claim targets with rationale preservation, while keeping the old
 `qc_review_codes` tool compatible. MCP also exposes `qc_review_claims` as a
