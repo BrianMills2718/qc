@@ -22,9 +22,9 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #97 (`MCP_EXPORT_AUDIT_INTEGRATION.md`): add optional
-   audit-manifest sidecars to existing MCP JSON/Markdown export tools without
-   changing default return contracts or weakening export confinement.
+1. Create and execute the next high-value lane: strict export publish preflight
+   that requires a valid export-audit manifest when explicitly requested,
+   without making sidecars default or claiming signed append-only audit.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
@@ -68,6 +68,9 @@ hash; verification is still local integrity checking, not a signed or
 append-only audit log. `qc_cli.py project export --audit-manifest ...
 --verify-audit-manifest` can now write and immediately verify optional sidecars
 for JSON/CSV/Markdown/QDPX exports without changing default export behavior.
+MCP JSON/Markdown export tools can now do the same with confined sidecars under
+`EXPORTS_DIR`; default MCP export return payloads are unchanged when audit flags
+are absent.
 MCP now exposes `qc_review_decisions` for agent-driven review decisions,
 including claim targets with rationale preservation, while keeping the old
 `qc_review_codes` tool compatible. MCP also exposes `qc_review_claims` as a

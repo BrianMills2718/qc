@@ -1,10 +1,36 @@
 # Plan #97: MCP Export Audit Integration
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Plan #94 export audit hash manifest; Plan #95 manifest verification; Plan #96 CLI integration
 **Blocks:** agent-facing export integrity handoffs
+
+---
+
+## Outcome
+
+Added optional export-audit sidecars to existing MCP JSON and Markdown export
+tools without changing their default return payloads. When `audit_manifest=True`
+is supplied, MCP writes a confined `<export_stem>.manifest.json` sidecar in
+`EXPORTS_DIR`. When `verify_audit_manifest=True` is also supplied, MCP verifies
+the sidecar immediately and returns the verification report.
+
+Implementation commit: `3437732`
+
+## Verification
+
+- TDD red check: `python -m pytest tests/test_mcp_server.py tests/test_mcp_export_confinement.py -q`
+  initially failed on missing MCP optional parameters and missing
+  `_manifest_path_for_export` (`4 failed, 70 passed`).
+- Focused pass: `python -m pytest tests/test_mcp_server.py tests/test_mcp_export_confinement.py -q` →
+  `74 passed`.
+- Focused lint: `python -m ruff check qc_mcp_server.py tests/test_mcp_server.py tests/test_mcp_export_confinement.py` →
+  `All checks passed!`
+- Docs gate: `make docs-check` passed.
+- Full gate: `make check` → `868 passed, 1 skipped, 8 deselected`; Ruff and
+  docs checks passed.
+- Type-check status: `make check` reports `Type check not yet configured`.
 
 ---
 
@@ -122,25 +148,25 @@ does not create a new boundary.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] Default MCP export responses remain unchanged when audit flags are absent.
-- [ ] Markdown and JSON MCP exports can write confined manifest sidecars.
-- [ ] Immediate verification reports success/failure when requested.
-- [ ] Verify without manifest returns an error payload.
-- [ ] Manifest paths cannot escape `EXPORTS_DIR`.
-- [ ] Docs state MCP integration is optional integrity/provenance metadata, not
+- [x] Default MCP export responses remain unchanged when audit flags are absent.
+- [x] Markdown and JSON MCP exports can write confined manifest sidecars.
+- [x] Immediate verification reports success/failure when requested.
+- [x] Verify without manifest returns an error payload.
+- [x] Manifest paths cannot escape `EXPORTS_DIR`.
+- [x] Docs state MCP integration is optional integrity/provenance metadata, not
   a full tamper-evident audit log.
 
 > Process criteria:
-- [ ] Required focused tests pass.
-- [ ] Full `make check` passes or any failure is documented with evidence.
-- [ ] Type-check status is reported.
-- [ ] Verified work is committed and pushed.
+- [x] Required focused tests pass.
+- [x] Full `make check` passes or any failure is documented with evidence.
+- [x] Type-check status is reported.
+- [x] Verified work is committed and pushed.
 
 ---
 
 ## Open Questions
 
-- [ ] Should MCP grow CSV/QDPX export tools? - Status: DEFERRED | Why it
+- [x] Should MCP grow CSV/QDPX export tools? - Status: DEFERRED | Why it
   matters: this plan only hardens existing MCP export surfaces.
 
 ---
