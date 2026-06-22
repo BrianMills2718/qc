@@ -1,4 +1,4 @@
-.PHONY: help test test-quick test-e2e test-all bench bench-package write-phase0-adjudication-package validate-d3-gold validate-d7-gold validate-inv7-package validate-inv7-live-protocol inv7-live-preflight validate-d6-bias-protocol d6-bias-preflight validate-d4-codebook-quality-protocol d4-codebook-quality-preflight validate-d8-gt-fidelity-protocol d8-gt-fidelity-preflight validate-d9-interpretive-preference-protocol d9-interpretive-preference-preflight validate-d7-comparison-protocol d7-comparison-preflight validate-adjudication-responses validate-adjudication-protocol adjudication-protocol-preflight adjudication-response-preflight import-adjudication-responses lint-scope-phrasing export-audit-manifest verify-export-audit-manifest export-publish-preflight verify-export-audit-log run-d7-retrieval compare-d7-retrieval run-inv7-fixtures run-inv7-live-fixtures adjudication-sample check lint docs-check clean status cost errors
+.PHONY: help test test-quick test-e2e test-all bench bench-package write-phase0-adjudication-package validate-d3-gold validate-d7-gold validate-inv7-package validate-inv7-live-protocol inv7-live-preflight validate-d6-bias-protocol d6-bias-preflight validate-d4-codebook-quality-protocol d4-codebook-quality-preflight validate-d8-gt-fidelity-protocol d8-gt-fidelity-preflight validate-d9-interpretive-preference-protocol d9-interpretive-preference-preflight validate-confidence-calibration-protocol confidence-calibration-preflight validate-d7-comparison-protocol d7-comparison-preflight validate-adjudication-responses validate-adjudication-protocol adjudication-protocol-preflight adjudication-response-preflight import-adjudication-responses lint-scope-phrasing export-audit-manifest verify-export-audit-manifest export-publish-preflight verify-export-audit-log run-d7-retrieval compare-d7-retrieval run-inv7-fixtures run-inv7-live-fixtures adjudication-sample check lint docs-check clean status cost errors
 
 DAYS ?= 7
 PROJECT ?= qualitative_coding
@@ -136,6 +136,15 @@ ifndef PROTOCOL
 	$(error PROTOCOL is required. Usage: make validate-confidence-calibration-protocol PROTOCOL=protocol.json)
 endif
 	python scripts/validate_confidence_calibration_protocol.py $(PROTOCOL)
+
+confidence-calibration-preflight:  ## Preflight confidence-calibration results against a protocol (PROTOCOL=protocol.json CALIBRATION=calibration.json)
+ifndef PROTOCOL
+	$(error PROTOCOL is required. Usage: make confidence-calibration-preflight PROTOCOL=protocol.json CALIBRATION=calibration.json)
+endif
+ifndef CALIBRATION
+	$(error CALIBRATION is required. Usage: make confidence-calibration-preflight PROTOCOL=protocol.json CALIBRATION=calibration.json)
+endif
+	python scripts/preflight_confidence_calibration_protocol.py $(PROTOCOL) --calibration-file $(CALIBRATION)
 
 validate-adjudication-responses:  ## Validate completed adjudication sample responses (PACKAGE=sample.json)
 ifndef PACKAGE
