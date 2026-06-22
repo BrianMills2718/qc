@@ -22,10 +22,22 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #124 (`D9_INTERPRETIVE_PREFERENCE_PROTOCOL_RESULT_PREFLIGHT.md`):
-   add protocol/result preflight for D9 blind preference outcome files.
+1. Select and create the next highest-value evaluation-harness or invariant
+   lane from `docs/PROJECT_THEORY_AND_GOALS.md` and `docs/EVALUATION_HARNESS.md`.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
+
+**Completed checkpoint:** D9 interpretive-preference result files can now be
+preflighted against registered D9 protocols with
+`make d9-interpretive-preference-preflight PROTOCOL=... PREFERENCE=...` /
+`scripts/preflight_d9_interpretive_preference_protocol.py`. The preflight
+validates the protocol and concrete result rows, checks optional result-file
+SHA-256 locks, evaluator type/count, target criteria, target surfaces, planned
+case count, and emits a schema_version=1 pass/fail report. D9 preference rows
+can carry `evaluator_type` and `surface` metadata while preserving existing
+scorecard compatibility through defaults. This is process/provenance metadata
+only, not blind expert-parity evidence, interpretive-depth evidence,
+methodological-validity evidence, or SOTA evidence.
 
 **Completed checkpoint:** D9 interpretive-preference protocols can now be
 validated with `make validate-d9-interpretive-preference-protocol PROTOCOL=...`

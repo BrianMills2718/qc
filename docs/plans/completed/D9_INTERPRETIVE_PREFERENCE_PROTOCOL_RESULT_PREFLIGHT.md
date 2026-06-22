@@ -1,6 +1,6 @@
 # Plan #124: D9 Interpretive Preference Protocol Result Preflight
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Plan #123 D9 interpretive-preference protocol package
@@ -74,16 +74,16 @@ Internal preflight validation only; no cross-project boundary is created.
 
 ### Capability Validation
 
-- [ ] Valid protocol/result pairs pass.
-- [ ] Missing preference result files fail loud.
-- [ ] Optional result-file SHA-256 locks are enforced.
-- [ ] Evaluator type set, evaluator count, target criteria set, target surface
+- [x] Valid protocol/result pairs pass.
+- [x] Missing preference result files fail loud.
+- [x] Optional result-file SHA-256 locks are enforced.
+- [x] Evaluator type set, evaluator count, target criteria set, target surface
   set, and planned case count are cross-checked.
-- [ ] Preflight report includes schema version, protocol ID, project ID, split,
+- [x] Preflight report includes schema version, protocol ID, project ID, split,
   target criteria/surfaces, non-inferiority margin, result row count, case
   count, evaluator count/types, status, errors, and caution.
-- [ ] CLI emits machine-readable JSON and meaningful exit codes.
-- [ ] Make target routes to the CLI.
+- [x] CLI emits machine-readable JSON and meaningful exit codes.
+- [x] Make target routes to the CLI.
 
 ---
 
@@ -151,21 +151,21 @@ Internal preflight validation only; no cross-project boundary is created.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] D9 protocol/result pairs can be preflighted before scoring.
-- [ ] Passing reports include the expected D9 protocol/result metadata.
-- [ ] Missing/mismatched preference results fail loud with machine-readable
+- [x] D9 protocol/result pairs can be preflighted before scoring.
+- [x] Passing reports include the expected D9 protocol/result metadata.
+- [x] Missing/mismatched preference results fail loud with machine-readable
   errors.
-- [ ] D9 result rows can carry evaluator type and surface without breaking
+- [x] D9 result rows can carry evaluator type and surface without breaking
   existing scorecard callers.
-- [ ] Docs state the preflight is process/provenance only.
+- [x] Docs state the preflight is process/provenance only.
 
 > Process criteria:
-- [ ] Required focused tests pass.
-- [ ] Focused Ruff check passes.
-- [ ] `make docs-check` passes.
-- [ ] Full `make check` passes or any failure is documented with evidence.
-- [ ] Type-check status is reported.
-- [ ] Verified work is committed and pushed.
+- [x] Required focused tests pass.
+- [x] Focused Ruff check passes.
+- [x] `make docs-check` passes.
+- [x] Full `make check` passes or any failure is documented with evidence.
+- [x] Type-check status is reported.
+- [x] Verified work is committed and pushed.
 
 ---
 
@@ -179,6 +179,34 @@ Internal preflight validation only; no cross-project boundary is created.
   — Status: DEFERRED | Decide in the score-time guard lane.
 
 ---
+
+## Outcome
+
+Implemented in `0e0b2e9`
+(`[Plan: D9_INTERPRETIVE_PREFERENCE_PROTOCOL_RESULT_PREFLIGHT] Add D9 result preflight`).
+The repo now has `qc_clean/core/d9_interpretive_preference_preflight.py`,
+`scripts/preflight_d9_interpretive_preference_protocol.py`, and
+`make d9-interpretive-preference-preflight PROTOCOL=... PREFERENCE=...`.
+D9 preference rows can carry `evaluator_type` and `surface` metadata while
+preserving existing scorecard compatibility through defaults. The preflight
+validates protocol/result shape, optional result-file SHA-256 locks, evaluator
+type/count, target criteria, target surfaces, and planned case count, then emits
+a schema_version=1 pass/fail report.
+
+Verification evidence:
+
+- TDD red before implementation: `python -m pytest tests/test_d9_interpretive_preference_preflight.py -q`
+  failed at collection with
+  `ModuleNotFoundError: No module named 'qc_clean.core.d9_interpretive_preference_preflight'`.
+- `python -m pytest tests/test_d9_interpretive_preference_protocol.py tests/test_d9_interpretive_preference_preflight.py tests/test_bench_phase0.py::test_scorecard_scores_interpretive_preference_outcomes tests/test_bench_phase0_script.py::test_bench_phase0_scores_interpretive_preference_from_file_without_mutating_state -q`
+  - 14 passed.
+- `python -m ruff check qc_clean/core/bench.py qc_clean/core/d9_interpretive_preference_preflight.py scripts/preflight_d9_interpretive_preference_protocol.py tests/test_d9_interpretive_preference_preflight.py`
+  - all checks passed.
+- `make -n d9-interpretive-preference-preflight PROTOCOL=protocol.json PREFERENCE=preference.json`
+  - routed to `python scripts/preflight_d9_interpretive_preference_protocol.py protocol.json --preference-file preference.json`.
+- `make docs-check` - passed.
+- `make check` - 999 passed, 1 skipped, 8 deselected; Ruff and docs checks
+  passed; type check is not yet configured.
 
 ## Notes
 
