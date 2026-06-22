@@ -1,10 +1,45 @@
 # Plan #170: D7 Span-Overlap Diagnostics
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** D7 exact-anchor scorecard substrate
 **Blocks:** richer D7 near-boundary retrieval/error analysis
+
+---
+
+## Outcome
+
+D7 scorecards now include a diagnostic-only `disconfirmation_d7.span_overlap`
+section whenever D7 gold is scored. The diagnostic compares character-offset
+contrary-evidence anchors only when they share the same `target_claim_id` and
+`doc_id`, reporting best IoU and Modified Hausdorff distance in both
+gold-to-system and system-to-gold directions. Segment-only or missing-offset
+anchors are counted as unscored for this diagnostic and are not converted into
+guessed character spans.
+
+Exact D7 TP/FP/FN, recall, precision, F1, Wilson/bootstrap intervals,
+system-gold agreement metadata, and baseline scoring remain unchanged except
+for the additive diagnostic section. This is local error-analysis metadata
+only; it is not semantic disconfirmation validity, held-out benchmark evidence,
+expert parity, or SOTA evidence.
+
+Implementation commit: `7935ca4` (`Add D7 span-overlap diagnostics`).
+
+Verification:
+
+- Initial focused TDD run failed as expected because `disconfirmation_d7` did
+  not yet expose `span_overlap`.
+- `python -m pytest tests/test_bench_phase0.py -k "d7_span_overlap or d3_span_overlap" -q`
+  -> 5 passed, 67 deselected.
+- `python -m pytest tests/test_bench_phase0.py tests/test_bench_phase0_script.py -k "d7 or span_overlap or disconfirmation" -q`
+  -> 18 passed, 95 deselected.
+- `python -m ruff check qc_clean/core/bench.py tests/test_bench_phase0.py`
+  -> passed.
+- `make docs-check` -> passed.
+- `git diff --check` -> passed.
+- `make check` -> 1138 passed, 1 skipped, 8 deselected; Ruff and docs gates
+  passed. Type check remains unconfigured by the repo.
 
 ---
 
@@ -78,12 +113,12 @@ Internal scorecard capability only; no cross-project boundary is created.
 
 ### Capability Validation
 
-- [ ] D7 exact metrics remain unchanged by overlap diagnostics.
-- [ ] D7 overlap rows only compare anchors with the same target claim and
+- [x] D7 exact metrics remain unchanged by overlap diagnostics.
+- [x] D7 overlap rows only compare anchors with the same target claim and
   document.
-- [ ] Segment-only or otherwise unscoreable anchors are counted separately
+- [x] Segment-only or otherwise unscoreable anchors are counted separately
   rather than guessed.
-- [ ] Notes state that the section is local diagnostic metadata, not semantic
+- [x] Notes state that the section is local diagnostic metadata, not semantic
   disconfirmation validity or held-out benchmark evidence.
 
 ---
@@ -142,22 +177,22 @@ Internal scorecard capability only; no cross-project boundary is created.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] `disconfirmation_d7.span_overlap` appears when D7 gold is scored.
-- [ ] Same-target/document near-boundary D7 spans report best IoU and Modified
+- [x] `disconfirmation_d7.span_overlap` appears when D7 gold is scored.
+- [x] Same-target/document near-boundary D7 spans report best IoU and Modified
   Hausdorff distance in gold-to-system and system-to-gold directions.
-- [ ] Exact D7 counts, keys, intervals, agreement metadata, and baseline scoring
+- [x] Exact D7 counts, keys, intervals, agreement metadata, and baseline scoring
   remain unchanged except for the additive diagnostic section.
-- [ ] Segment-only or missing-offset anchors are counted as unscored for the
+- [x] Segment-only or missing-offset anchors are counted as unscored for the
   diagnostic and are not converted into fabricated character spans.
-- [ ] Docs preserve the caveat that D7 overlap diagnostics are local error
+- [x] Docs preserve the caveat that D7 overlap diagnostics are local error
   analysis only, not semantic disconfirmation validity, held-out evidence,
   expert parity, or SOTA evidence.
 
 > Process criteria:
-- [ ] Required tests pass
-- [ ] Full test suite passes
-- [ ] Docs updated
-- [ ] Plan completed, committed, and pushed
+- [x] Required tests pass
+- [x] Full test suite passes
+- [x] Docs updated
+- [x] Plan completed, committed, and pushed
 
 ---
 
