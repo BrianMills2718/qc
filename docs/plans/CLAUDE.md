@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 103 | Adjudication protocol package | High | Planned | `ADJUDICATION_PROTOCOL_PACKAGE.md` |
 
 ## Completed Plans
 

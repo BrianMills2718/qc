@@ -22,10 +22,10 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Create and execute the next validity-infrastructure slice: add a
-   pre-registered adjudication protocol manifest/validator so future expert
-   labels have documented split, freeze, contamination, coder, and success
-   criteria metadata before import/scoring.
+1. Execute Plan #103 (`ADJUDICATION_PROTOCOL_PACKAGE.md`): add a pre-registered
+   adjudication protocol manifest/validator so future expert labels have
+   documented split, freeze, contamination, coder, and success criteria metadata
+   before import/scoring.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
