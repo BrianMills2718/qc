@@ -6,7 +6,6 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 112 | D7 comparison preflight guard | High | Planned | `D7_COMPARISON_PREFLIGHT_GUARD.md` |
 
 ## Completed Plans
 
@@ -69,6 +68,7 @@ Track all implementation work here.
 | D7 retrieval-mode export | Evaluation-harness follow-up: `make run-d7-retrieval` exports retrieval candidates as D7 baseline-compatible predictions for `make bench BASELINES=...` | `completed/D7_RETRIEVAL_MODE_EXPORT.md` |
 | D7 retrieval comparison report | Evaluation-harness follow-up: `make compare-d7-retrieval` scores multiple retrieval prediction packages against one D7 gold file with the existing exact-span scorer | `completed/D7_RETRIEVAL_COMPARISON_REPORT.md` |
 | D7 retrieval comparison protocol preflight | Evaluation-harness follow-up: `make validate-d7-comparison-protocol` and `make d7-comparison-preflight` bind D7 retrieval comparison gold/prediction packages to registered protocol metadata before scoring | `completed/D7_RETRIEVAL_COMPARISON_PROTOCOL_PREFLIGHT.md` |
+| D7 comparison preflight guard | Evaluation-harness follow-up: `make compare-d7-retrieval ... PROTOCOL=...` runs D7 comparison preflight before scoring and blocks mismatched inputs | `completed/D7_COMPARISON_PREFLIGHT_GUARD.md` |
 | D3 application validity scorecard | Evaluation-harness follow-up: `make bench D3_GOLD=...` reports exact code/source-anchor application-validity scores when adjudicated D3 gold is supplied | `completed/D3_APPLICATION_VALIDITY_SCORECARD.md` |
 | D3 held-out gold-set scaffold | Evaluation-harness follow-up: versioned D3 gold-set packages can be validated and used as `--d3-gold-file` inputs without claiming held-out results | `completed/D3_HELD_OUT_GOLD_SET_SCAFFOLD.md` |
 | Gold-set provenance in scorecards | Evaluation-harness follow-up: versioned D3/D7 package metadata is surfaced as compact `gold_provenance` in Phase 0 scorecard sections | `completed/GOLD_SET_PROVENANCE_SCORECARD.md` |

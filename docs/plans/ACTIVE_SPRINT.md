@@ -22,12 +22,16 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #112 (`D7_COMPARISON_PREFLIGHT_GUARD.md`): add an optional
-   protocol preflight guard to `compare-d7-retrieval` before scoring.
-2. Continue through the ranked roadmap without pausing after each verified
+1. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Completed checkpoint:** D7 retrieval prediction packages now carry
+**Completed checkpoint:** `make compare-d7-retrieval ... PROTOCOL=...` can now
+run the registered D7 comparison preflight at the scoring boundary. Failed
+preflight blocks scoring and output report writes; passing guarded comparisons
+include `preflight_report` in stdout/output JSON. This is score-time provenance
+enforcement only, not held-out D7 evidence, live-baseline evidence,
+methodological-validity evidence, or superiority evidence. D7 retrieval
+prediction packages now carry
 project/corpus/state/trace/budget provenance, and D7 retrieval comparisons can
 be protocol-gated before scoring with `make validate-d7-comparison-protocol
 PROTOCOL=...` and `make d7-comparison-preflight PROTOCOL=... GOLD=...

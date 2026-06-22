@@ -1,12 +1,24 @@
 # Plan #112: D7 Comparison Preflight Guard
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** D7 retrieval comparison protocol preflight
 **Blocks:** safer held-out D7 retrieval comparison scoring
 
 ---
+
+## Outcome
+
+Implemented optional score-time protocol guarding for D7 retrieval comparisons.
+`scripts/compare_d7_retrieval.py --protocol-package ...` now runs the D7
+comparison preflight before scoring; failed preflight blocks scoring and output
+file writes, while passing guarded comparisons include `preflight_report` in
+stdout and output JSON. `make compare-d7-retrieval ... PROTOCOL=...` forwards
+the guard path. Verification: focused guard/D7 tests passed (`16 passed`),
+focused Ruff passed, `make docs-check` passed, guarded Make dry-run forwarded
+`--protocol-package`, and full `make check` passed (`942 passed, 1 skipped, 8
+deselected`; Ruff/docs clean; type check not configured).
 
 ## Gap
 
@@ -65,11 +77,11 @@ Internal CLI guard only; no new cross-project boundary is created.
 
 ### Capability Validation
 
-- [ ] Unguarded comparison behavior remains compatible.
-- [ ] Guarded comparison runs preflight before scoring.
-- [ ] Failed preflight blocks scoring and writes no output report.
-- [ ] Passing guarded comparison includes `preflight_report`.
-- [ ] Make target forwards `PROTOCOL=` to the script.
+- [x] Unguarded comparison behavior remains compatible.
+- [x] Guarded comparison runs preflight before scoring.
+- [x] Failed preflight blocks scoring and writes no output report.
+- [x] Passing guarded comparison includes `preflight_report`.
+- [x] Make target forwards `PROTOCOL=` to the script.
 
 ---
 
@@ -128,28 +140,28 @@ Internal CLI guard only; no new cross-project boundary is created.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] `scripts/compare_d7_retrieval.py --protocol-package ...` runs D7 preflight
+- [x] `scripts/compare_d7_retrieval.py --protocol-package ...` runs D7 preflight
   before scoring.
-- [ ] Failed preflight blocks scoring and output file writes.
-- [ ] Passing guarded comparison includes `preflight_report`.
-- [ ] Unguarded comparison remains backward-compatible.
-- [ ] `make compare-d7-retrieval ... PROTOCOL=...` forwards the guard path.
-- [ ] Docs state this is provenance/process enforcement only, not held-out D7
+- [x] Failed preflight blocks scoring and output file writes.
+- [x] Passing guarded comparison includes `preflight_report`.
+- [x] Unguarded comparison remains backward-compatible.
+- [x] `make compare-d7-retrieval ... PROTOCOL=...` forwards the guard path.
+- [x] Docs state this is provenance/process enforcement only, not held-out D7
   evidence, live-baseline evidence, or superiority evidence.
 
 > Process criteria:
-- [ ] Required focused tests pass.
-- [ ] Focused Ruff check passes.
-- [ ] `make docs-check` passes.
-- [ ] Full `make check` passes or any failure is documented with evidence.
-- [ ] Type-check status is reported.
-- [ ] Verified work is committed and pushed.
+- [x] Required focused tests pass.
+- [x] Focused Ruff check passes.
+- [x] `make docs-check` passes.
+- [x] Full `make check` passes or any failure is documented with evidence.
+- [x] Type-check status is reported.
+- [x] Verified work is committed and pushed.
 
 ---
 
 ## Open Questions
 
-- [ ] Should guarded comparison become mandatory for held-out splits? — Status:
+- [x] Should guarded comparison become mandatory for held-out splits? — Status:
   DEFERRED | Why it matters: this plan preserves compatibility while adding the
   guard. A future policy slice can require protocols for held-out scoring once
   operators have migrated.
