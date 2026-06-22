@@ -22,9 +22,10 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Create and execute the next high-value lane: strict export publish preflight
-   that requires a valid export-audit manifest when explicitly requested,
-   without making sidecars default or claiming signed append-only audit.
+1. Execute Plan #98 (`EXPORT_PUBLISH_PREFLIGHT.md`): add an explicit strict
+   export publish/handoff preflight that requires a valid export-audit manifest
+   when requested, without making sidecars default or claiming signed
+   append-only audit.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 

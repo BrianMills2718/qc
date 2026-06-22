@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 98 | Export publish preflight | High | Planned | `EXPORT_PUBLISH_PREFLIGHT.md` |
 
 ## Completed Plans
 
