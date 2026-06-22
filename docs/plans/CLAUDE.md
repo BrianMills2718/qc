@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 171 | D7 baseline span-overlap diagnostics | High | Planned | `D7_BASELINE_SPAN_OVERLAP_DIAGNOSTICS.md` |
 
 ## Completed Plans
 
