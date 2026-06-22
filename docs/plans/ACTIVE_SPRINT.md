@@ -22,10 +22,9 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Create and execute the next audit-substrate slice:
-   `EXPORT_AUDIT_CLI_MCP_EVENT_INTEGRATION.md`, adding opt-in event-log writing
-   to CLI/MCP export-audit workflows while preserving default behavior and MCP
-   export sandboxing.
+1. Execute Plan #100 (`EXPORT_AUDIT_CLI_MCP_EVENT_INTEGRATION.md`): add opt-in
+   event-log writing to CLI/MCP export-audit workflows while preserving default
+   behavior and MCP export sandboxing.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 

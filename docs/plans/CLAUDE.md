@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 100 | Export audit CLI/MCP event integration | High | Planned | `EXPORT_AUDIT_CLI_MCP_EVENT_INTEGRATION.md` |
 
 ## Completed Plans
 
