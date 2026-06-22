@@ -1412,6 +1412,15 @@ def test_scorecard_computes_d7_perfect_match_against_gold():
     assert d7["matched_gold_keys"] == [f"claim-ai|{doc.id}|{start}:{end}"]
     assert d7["missed_gold_keys"] == []
     assert d7["extra_predicted_keys"] == []
+    agreement = d7["system_gold_agreement"]
+    assert agreement["status"] == "scored"
+    assert agreement["unit"] == "exact target-claim/source-anchor key"
+    assert agreement["row_count"] == 1
+    assert agreement["percent_agreement"] == 1.0
+    assert agreement["cohens_kappa"] == 1.0
+    assert agreement["gwet_ac1"] == 1.0
+    assert agreement["prevalence"]["row_patterns"]["all_present"] == 1
+    assert "not semantic disconfirmation validity" in agreement["note"]
 
 
 def test_scorecard_d7_compares_exact_metrics_to_human_ceiling_package():
@@ -1513,6 +1522,20 @@ def test_scorecard_computes_d7_false_positive_and_false_negative():
     assert d7["matched_gold_keys"] == [f"claim-ai|{doc.id}|{first_start}:{first_end}"]
     assert d7["missed_gold_keys"] == [f"claim-ai|{doc.id}|{second_start}:{second_end}"]
     assert d7["extra_predicted_keys"] == [f"claim-ai|{doc.id}|{extra_start}:{extra_end}"]
+    agreement = d7["system_gold_agreement"]
+    assert agreement["status"] == "scored"
+    assert agreement["row_count"] == 3
+    assert agreement["gold_positive_count"] == 2
+    assert agreement["system_positive_count"] == 2
+    assert agreement["percent_agreement"] == pytest.approx(1 / 3)
+    assert agreement["cohens_kappa"] == pytest.approx(-0.5)
+    assert agreement["gwet_ac1"] == pytest.approx(-0.2)
+    assert agreement["prevalence"]["categories"]["present"]["count"] == 4
+    assert agreement["prevalence"]["row_patterns"] == {
+        "all_absent": 0,
+        "all_present": 1,
+        "mixed": 2,
+    }
 
 
 def test_scorecard_reports_d7_wilson_intervals_for_perfect_match():

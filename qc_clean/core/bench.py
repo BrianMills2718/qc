@@ -1635,6 +1635,13 @@ def disconfirmation_d7_scorecard(state: ProjectState) -> Dict[str, Any]:
     gold_provenance = _d7_gold_provenance(state)
     if gold_provenance is not None:
         card["gold_provenance"] = gold_provenance
+    card["system_gold_agreement"] = _exact_key_system_gold_agreement(
+        gold_keys,
+        predicted_keys,
+        dimension="D7",
+        unit="exact target-claim/source-anchor key",
+        caveat="semantic disconfirmation validity or held-out benchmark evidence",
+    )
     card["human_ceiling_comparison"] = _human_ceiling_comparison(
         system_score,
         gold_provenance,
@@ -2058,9 +2065,15 @@ def application_validity_d3_scorecard(state: ProjectState) -> Dict[str, Any]:
     gold_provenance = _d3_gold_provenance(state)
     if gold_provenance is not None:
         card["gold_provenance"] = gold_provenance
-    card["system_gold_agreement"] = _d3_system_gold_agreement(
+    card["system_gold_agreement"] = _exact_key_system_gold_agreement(
         gold_keys,
         predicted_keys,
+        dimension="D3",
+        unit="exact code/source-anchor key",
+        caveat=(
+            "semantic equivalence, Krippendorff's alpha, full D3 validity, "
+            "or expert-parity evidence"
+        ),
     )
     card["human_ceiling_comparison"] = _human_ceiling_comparison(
         score,
@@ -2262,19 +2275,23 @@ def _d3_gold_provenance(state: ProjectState) -> dict[str, Any] | None:
     )
 
 
-def _d3_system_gold_agreement(
+def _exact_key_system_gold_agreement(
     gold_keys: set[str],
     predicted_keys: set[str],
+    *,
+    dimension: str,
+    unit: str,
+    caveat: str,
 ) -> dict[str, Any]:
-    """Compute exact-key binary agreement between D3 gold and system predictions."""
+    """Compute exact-key binary agreement between gold and system predictions."""
     key_universe = sorted(gold_keys | predicted_keys)
     if not key_universe:
         return {
             "status": "not_available",
-            "reason": "No D3 exact-key gold/predicted universe is available.",
+            "reason": f"No {dimension} exact-key gold/predicted universe is available.",
             "note": (
-                "D3 system-gold agreement is exact-key binary metadata, not "
-                "full D3 validity or expert-parity evidence."
+                f"{dimension} system-gold agreement is exact-key binary metadata, "
+                f"not {caveat}."
             ),
         }
 
@@ -2287,7 +2304,7 @@ def _d3_system_gold_agreement(
     }
     return {
         "status": "scored",
-        "unit": "exact code/source-anchor key",
+        "unit": unit,
         "raters": ["gold", "system"],
         "row_count": len(key_universe),
         "gold_positive_count": len(gold_keys),
@@ -2297,9 +2314,8 @@ def _d3_system_gold_agreement(
         "gwet_ac1": compute_gwet_ac1(matrix),
         "prevalence": _binary_matrix_prevalence(matrix),
         "note": (
-            "Binary agreement over the exact D3 key universe only. This is "
-            "prevalence-aware agreement metadata, not semantic equivalence, "
-            "Krippendorff's alpha, full D3 validity, or expert-parity evidence."
+            f"Binary agreement over the exact {dimension} key universe only. "
+            f"This is prevalence-aware agreement metadata, not {caveat}."
         ),
     }
 
