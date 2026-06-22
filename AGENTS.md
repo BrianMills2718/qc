@@ -56,6 +56,7 @@ make bench ID=<project_id> CONFIDENCE_PROTOCOL=protocol.json CALIBRATION=calibra
 make bench ID=<project_id> GOLD=gold.json BASELINES=baselines.json  # Add external D7 gold/baselines without mutating project state
 make bench ID=<project_id> BIAS_STRATIFIED=bias_stratified.json  # Add external D6 stratified correctness rows without mutating state
 make bench ID=<project_id> PROMPT_INJECTION=inv7.json  # Add external INV-7 fixture results without mutating state
+make bench ID=<project_id> PROMPT_INJECTION=inv7.json INV7_PROTOCOL=inv7_live_protocol.json  # Score INV-7 with live protocol preflight guard
 make bench ID=<project_id> OBS_DB=path TRACE_ID=trace  # Override D10 observability DB / exact trace
 make bench ID=<project_id> ARTIFACT_DIR=benchmark_results  # Write versioned Phase 0 scorecard package
 make adjudication-sample ID=<project_id> OUTPUT=sample.json  # Export unlabeled human/expert review sample packet

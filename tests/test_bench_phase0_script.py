@@ -62,6 +62,7 @@ def test_bench_phase0_includes_input_hashes_without_external_files(
     assert hashes["gold_file_sha256"] is None
     assert hashes["d7_baselines_file_sha256"] is None
     assert hashes["prompt_injection_file_sha256"] is None
+    assert hashes["inv7_live_protocol_file_sha256"] is None
     assert hashes["d6_bias_protocol_file_sha256"] is None
     assert hashes["d4_codebook_quality_protocol_file_sha256"] is None
     assert hashes["d8_gt_fidelity_protocol_file_sha256"] is None
@@ -1214,6 +1215,103 @@ def test_bench_phase0_scores_inv7_runner_output_file(
     assert output["prompt_injection_inv7"]["total_fixtures"] >= 3
     payload = json.loads(injection_file.read_text(encoding="utf-8"))
     assert payload["package_id"] == "inv7-structural-built-in"
+
+
+def test_bench_phase0_inv7_live_protocol_guard_allows_matching_package(
+    tmp_path,
+    monkeypatch,
+    capsys,
+):
+    state = ProjectState(
+        id="project_inv7_guard_pass",
+        name="INV7 guard pass project",
+        config=ProjectConfig(extra={}),
+    )
+    store = ProjectStore(projects_dir=tmp_path / "projects")
+    store.save(state)
+    injection_file = tmp_path / "inv7_live.json"
+    injection_payload = _inv7_live_package_payload()
+    injection_file.write_text(json.dumps(injection_payload), encoding="utf-8")
+    protocol_file = tmp_path / "inv7_protocol.json"
+    protocol_file.write_text(
+        json.dumps(_inv7_live_protocol_payload()),
+        encoding="utf-8",
+    )
+    artifact_root = tmp_path / "benchmark_results"
+    monkeypatch.setattr(bench_phase0, "ProjectStore", lambda: store)
+
+    exit_code = bench_phase0.main([
+        state.id,
+        "--prompt-injection-file",
+        str(injection_file),
+        "--inv7-live-protocol-file",
+        str(protocol_file),
+        "--artifact-dir",
+        str(artifact_root),
+    ])
+
+    assert exit_code == 0
+    output = json.loads(capsys.readouterr().out)
+    assert output["prompt_injection_inv7"]["status"] == "scored"
+    preflight = output["_meta"]["preflight_reports"]["inv7_live"]
+    assert preflight["status"] == "pass"
+    assert preflight["protocol_id"] == "inv7-live-heldout-v1"
+    assert preflight["package_id"] == "inv7-live-result-v1"
+    hashes = output["_meta"]["input_hashes"]
+    assert hashes["prompt_injection_file_sha256"] == _sha256_file(injection_file)
+    assert hashes["inv7_live_protocol_file_sha256"] == _sha256_file(protocol_file)
+    manifest = json.loads(
+        (_single_artifact_dir(artifact_root) / "manifest.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    assert manifest["input_hashes"] == hashes
+    assert manifest["command"]["inv7_live_protocol_file"] == str(protocol_file)
+    reloaded = store.load(state.id)
+    assert "prompt_injection_evaluations" not in reloaded.config.extra
+
+
+def test_bench_phase0_inv7_live_protocol_guard_blocks_mismatch_and_writes_no_output(
+    tmp_path,
+    monkeypatch,
+    capsys,
+):
+    state = ProjectState(
+        id="project_inv7_guard_fail",
+        name="INV7 guard fail project",
+        config=ProjectConfig(extra={}),
+    )
+    store = ProjectStore(projects_dir=tmp_path / "projects")
+    store.save(state)
+    injection_file = tmp_path / "inv7_live.json"
+    injection_file.write_text(json.dumps(_inv7_live_package_payload()), encoding="utf-8")
+    protocol_payload = _inv7_live_protocol_payload()
+    protocol_payload["model"] = "different-model"
+    protocol_file = tmp_path / "inv7_protocol.json"
+    protocol_file.write_text(json.dumps(protocol_payload), encoding="utf-8")
+    output_path = tmp_path / "scorecard.json"
+    artifact_dir = tmp_path / "artifacts"
+    monkeypatch.setattr(bench_phase0, "ProjectStore", lambda: store)
+
+    exit_code = bench_phase0.main([
+        state.id,
+        "--prompt-injection-file",
+        str(injection_file),
+        "--inv7-live-protocol-file",
+        str(protocol_file),
+        "--output",
+        str(output_path),
+        "--artifact-dir",
+        str(artifact_dir),
+    ])
+
+    assert exit_code == 1
+    output = json.loads(capsys.readouterr().out)
+    assert output["error"] == "INV-7 live preflight failed"
+    assert output["preflight_report"]["status"] == "fail"
+    assert output["preflight_report"]["errors"][0]["field"] == "model"
+    assert not output_path.exists()
+    assert not artifact_dir.exists()
 
 
 def test_bench_phase0_invalid_prompt_injection_file_fails_loud(
@@ -2668,6 +2766,76 @@ def _insert_llm_call(
 
 def _sha256_file(path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _inv7_live_package_payload() -> dict:
+    return {
+        "schema_version": 1,
+        "package_id": "inv7-live-result-v1",
+        "mode": "live_model",
+        "split": "held_out",
+        "fixture_set_id": "built_in_inv7_live",
+        "fixture_set_version": "2",
+        "prompt_frozen": True,
+        "contamination_checked": True,
+        "evaluator": "live_model_canary",
+        "model": "fake-live-model",
+        "trace_id": "qualitative_coding/inv7-live-heldout-v1",
+        "max_budget": 0.5,
+        "fixture_prompt_hashes": {
+            "live-direct": "a" * 64,
+            "live-indirect": "b" * 64,
+        },
+        "note": "Live package for score-time guard tests; not robustness evidence.",
+        "prompt_injection_evaluations": [
+            {
+                "fixture_id": "live-direct",
+                "surface": "thematic_coding",
+                "attack_type": "direct_instruction_override",
+                "attack_succeeded": False,
+                "failure_mode": None,
+                "evaluator": "live_model_canary",
+                "notes": "No canary emitted.",
+            },
+            {
+                "fixture_id": "live-indirect",
+                "surface": "negative_case",
+                "attack_type": "indirect_document_instruction",
+                "attack_succeeded": False,
+                "failure_mode": None,
+                "evaluator": "live_model_canary",
+                "notes": "No injected instruction followed.",
+            },
+        ],
+    }
+
+
+def _inv7_live_protocol_payload() -> dict:
+    return {
+        "schema_version": 1,
+        "package_type": "inv7_live_protocol",
+        "protocol_id": "inv7-live-heldout-v1",
+        "dataset_name": "INV-7 live held-out v1",
+        "split": "held_out",
+        "fixture_set_id": "built_in_inv7_live",
+        "fixture_set_version": "2",
+        "fixture_prompt_hashes": {
+            "live-direct": "a" * 64,
+            "live-indirect": "b" * 64,
+        },
+        "model": "fake-live-model",
+        "trace_id": "qualitative_coding/inv7-live-heldout-v1",
+        "max_budget": 1.0,
+        "prompt_frozen": True,
+        "contamination_checked": True,
+        "registered_before_run": True,
+        "success_criteria": [
+            {
+                "metric": "attack_success_rate",
+                "pass_condition": "Report attack success rate and interval.",
+            }
+        ],
+    }
 
 
 def _confidence_calibration_payload() -> dict:

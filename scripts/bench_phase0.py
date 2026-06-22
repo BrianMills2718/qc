@@ -16,6 +16,7 @@ Usage:
         [--interpretive-preference-file preference.json]
         [--confidence-calibration-protocol-file protocol.json]
         [--confidence-calibration-file calibration.json]
+        [--inv7-live-protocol-file protocol.json]
         [--output scorecard.json]
 
 Agent-drivable: emits JSON to stdout (and optionally a file). See
@@ -60,6 +61,7 @@ from qc_clean.core.d3_baseline_package import d3_baselines_payload_for_scorecard
 from qc_clean.core.d3_gold import application_gold_payload_for_scorecard
 from qc_clean.core.d7_baseline_package import d7_baselines_payload_for_scorecard
 from qc_clean.core.d7_gold import d7_gold_payload_for_scorecard
+from qc_clean.core.inv7_live_preflight import preflight_inv7_live_payloads
 from qc_clean.core.inv7_package import prompt_injection_payload_for_scorecard
 from qc_clean.core.persistence.project_store import ProjectStore
 
@@ -87,6 +89,13 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument(
         "--prompt-injection-file",
         help="Optional INV-7 prompt-injection fixture results JSON file; applied in memory only",
+    )
+    parser.add_argument(
+        "--inv7-live-protocol-file",
+        help=(
+            "Optional INV-7 live protocol JSON file; preflights supplied "
+            "prompt-injection package before scoring"
+        ),
     )
     parser.add_argument(
         "--d6-bias-protocol-file",
@@ -184,6 +193,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     gt_fidelity_results: Any | None = None
     interpretive_preference_results: Any | None = None
     confidence_calibration_results: Any | None = None
+    prompt_injection_package_payload: Any | None = None
 
     if args.d3_gold_file:
         try:
@@ -227,13 +237,40 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if args.prompt_injection_file:
         try:
-            prompt_injection_results = load_prompt_injection_file(Path(args.prompt_injection_file))
+            prompt_injection_package_payload = load_prompt_injection_payload_file(
+                Path(args.prompt_injection_file)
+            )
+            prompt_injection_results = prompt_injection_payload_for_scorecard(
+                prompt_injection_package_payload
+            )
         except ValueError as exc:
             print(json.dumps({"error": str(exc)}))
             return 1
         state = state.model_copy(deep=True)
         state.config.extra = dict(state.config.extra)
         state.config.extra["prompt_injection_evaluations"] = prompt_injection_results
+
+    inv7_live_preflight_report = None
+    if args.inv7_live_protocol_file:
+        try:
+            inv7_live_protocol = load_inv7_live_protocol_file(
+                Path(args.inv7_live_protocol_file)
+            )
+        except ValueError as exc:
+            print(json.dumps({"error": str(exc)}))
+            return 1
+        inv7_live_preflight_report = preflight_inv7_live_payloads(
+            inv7_live_protocol,
+            prompt_injection_package_payload,
+        )
+        if inv7_live_preflight_report.status != "pass":
+            print(json.dumps({
+                "error": "INV-7 live preflight failed",
+                "preflight_report": inv7_live_preflight_report.model_dump(
+                    mode="json"
+                ),
+            }))
+            return 1
 
     if args.bias_counterfactual_file:
         try:
@@ -495,6 +532,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         card.setdefault("_meta", {}).setdefault("preflight_reports", {})[
             "confidence_calibration"
         ] = confidence_calibration_preflight_report.model_dump(mode="json")
+    if inv7_live_preflight_report is not None:
+        card.setdefault("_meta", {}).setdefault("preflight_reports", {})[
+            "inv7_live"
+        ] = inv7_live_preflight_report.model_dump(mode="json")
     card.setdefault("_meta", {})["input_hashes"] = phase0_input_hashes(
         loaded_state,
         d3_gold_file=Path(args.d3_gold_file) if args.d3_gold_file else None,
@@ -504,6 +545,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         gold_file=Path(args.gold_file) if args.gold_file else None,
         d7_baselines_file=Path(args.d7_baselines_file) if args.d7_baselines_file else None,
         prompt_injection_file=Path(args.prompt_injection_file) if args.prompt_injection_file else None,
+        inv7_live_protocol_file=(
+            Path(args.inv7_live_protocol_file)
+            if args.inv7_live_protocol_file
+            else None
+        ),
         d6_bias_protocol_file=(
             Path(args.d6_bias_protocol_file) if args.d6_bias_protocol_file else None
         ),
@@ -729,6 +775,11 @@ def phase0_command_provenance(args: argparse.Namespace) -> dict[str, Any]:
         "prompt_injection_file": (
             str(Path(args.prompt_injection_file)) if args.prompt_injection_file else None
         ),
+        "inv7_live_protocol_file": (
+            str(Path(args.inv7_live_protocol_file))
+            if args.inv7_live_protocol_file
+            else None
+        ),
         "d6_bias_protocol_file": (
             str(Path(args.d6_bias_protocol_file))
             if args.d6_bias_protocol_file
@@ -820,6 +871,7 @@ def phase0_input_hashes(
     gold_file: Path | None,
     d7_baselines_file: Path | None,
     prompt_injection_file: Path | None,
+    inv7_live_protocol_file: Path | None,
     d6_bias_protocol_file: Path | None,
     d4_codebook_quality_protocol_file: Path | None,
     d8_gt_fidelity_protocol_file: Path | None,
@@ -851,6 +903,9 @@ def phase0_input_hashes(
         ),
         "prompt_injection_file_sha256": (
             sha256_file(prompt_injection_file) if prompt_injection_file else None
+        ),
+        "inv7_live_protocol_file_sha256": (
+            sha256_file(inv7_live_protocol_file) if inv7_live_protocol_file else None
         ),
         "d6_bias_protocol_file_sha256": (
             sha256_file(d6_bias_protocol_file) if d6_bias_protocol_file else None
@@ -1023,6 +1078,11 @@ def load_d7_baselines_file(path: Path) -> Any:
 
 def load_prompt_injection_file(path: Path) -> Any:
     """Load and shape-check an external INV-7 prompt-injection result file."""
+    return prompt_injection_payload_for_scorecard(load_prompt_injection_payload_file(path))
+
+
+def load_prompt_injection_payload_file(path: Path) -> Any:
+    """Load raw external INV-7 prompt-injection JSON for scoring or preflight."""
     try:
         raw = json.loads(path.read_text(encoding="utf-8"))
     except OSError as exc:
@@ -1030,7 +1090,19 @@ def load_prompt_injection_file(path: Path) -> Any:
     except json.JSONDecodeError as exc:
         raise ValueError(f"Prompt injection file '{path}' is not valid JSON: {exc}") from exc
 
-    return prompt_injection_payload_for_scorecard(raw)
+    return raw
+
+
+def load_inv7_live_protocol_file(path: Path) -> Any:
+    """Load an INV-7 live protocol file for score-time preflight."""
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except OSError as exc:
+        raise ValueError(f"INV-7 live protocol file '{path}' could not be read: {exc}") from exc
+    except json.JSONDecodeError as exc:
+        raise ValueError(
+            f"INV-7 live protocol file '{path}' is not valid JSON: {exc}"
+        ) from exc
 
 
 def load_bias_counterfactual_file(path: Path) -> Any:

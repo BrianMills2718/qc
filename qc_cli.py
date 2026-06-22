@@ -160,6 +160,10 @@ Examples:
         help='Optional INV-7 prompt-injection fixture results JSON file; applied in memory only'
     )
     bench_parser.add_argument(
+        '--inv7-live-protocol-file',
+        help='Optional INV-7 live protocol JSON file; preflights supplied package before scoring'
+    )
+    bench_parser.add_argument(
         '--d6-bias-protocol-file',
         help='Optional D6 bias protocol JSON file; preflights supplied D6 rows before scoring'
     )
@@ -699,6 +703,8 @@ def handle_bench_command(args) -> int:
         argv.extend(["--d7-baselines-file", args.d7_baselines_file])
     if args.prompt_injection_file:
         argv.extend(["--prompt-injection-file", args.prompt_injection_file])
+    if args.inv7_live_protocol_file:
+        argv.extend(["--inv7-live-protocol-file", args.inv7_live_protocol_file])
     if args.d6_bias_protocol_file:
         argv.extend(["--d6-bias-protocol-file", args.d6_bias_protocol_file])
     if args.bias_counterfactual_file:
