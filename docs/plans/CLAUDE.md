@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 173 | INV-7 score-time preflight guard | High | Planned | `INV7_SCORE_TIME_PREFLIGHT_GUARD.md` |
 
 ## Completed Plans
 

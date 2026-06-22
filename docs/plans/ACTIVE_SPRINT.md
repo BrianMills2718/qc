@@ -26,13 +26,12 @@ highest-value documented lane.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Select the next deterministic roadmap lane from the
-remaining documented gaps. Candidate lanes include semantic/embedding D7
-evaluation-policy scaffolding that does not fabricate gold labels, broader
-held-out live INV-7 protocol/accounting that can be populated later, populated
-theoretical-sampling protocol/result evidence if concrete inputs exist, or
-another protocol/accounting lane that can be verified without external
-evidence.
+**Active checkpoint:** Plan #173 is active: add score-time INV-7 live protocol
+preflight enforcement to `make bench` / `qc_cli.py bench` for supplied
+`PROMPT_INJECTION=` packages. The slice is protocol/accounting infrastructure
+only; it does not run live models, populate a held-out adversarial benchmark, or
+claim prompt-injection robustness, model-obedience proof, methodological
+validity, or SOTA.
 
 **Completed checkpoint:** D7 comparison protocols can now include optional
 structured `metric_criteria` for exact-score metrics and local span-overlap
