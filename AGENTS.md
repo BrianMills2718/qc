@@ -93,12 +93,14 @@ python qc_cli.py lint-scope-phrasing <project_id> --input-file report.md  # Cano
 make export-audit-manifest ID=<project_id> FORMAT=markdown ARTIFACTS="report.md" OUTPUT=manifest.json AUDIT_LOG=events.jsonl AUDIT_DB=events.sqlite  # Write export artifact hash manifest and optional audit event mirror
 make verify-export-audit-manifest MANIFEST=manifest.json BASE_DIR=. ID=<project_id> AUDIT_LOG=events.jsonl AUDIT_DB=events.sqlite  # Verify manifest and optionally mirror the verification event
 make export-publish-preflight MANIFEST=manifest.json BASE_DIR=. ID=<project_id> AUDIT_LOG=events.jsonl AUDIT_DB=events.sqlite  # Strict local publish/handoff preflight with optional mirrored event
+make export-publish-preflight MANIFEST=manifest.json BASE_DIR=. ID=<project_id> SCOPE_LINT=1  # Also block risky Markdown/text scope phrasing before handoff
 make verify-export-audit-log LOG=export_audit_events.jsonl  # Verify opt-in local hash-linked export audit event log
 make mirror-export-audit-db LOG=export_audit_events.jsonl DB=export_audit_events.sqlite  # Mirror verified event log into local SQLite
 make verify-export-audit-db DB=export_audit_events.sqlite  # Verify local SQLite export audit event mirror
 python qc_cli.py export-audit-manifest <project_id> --format markdown --artifact report.md --output manifest.json --audit-log events.jsonl --audit-db events.sqlite  # Canonical CLI wrapper for export audit manifest writing
 python qc_cli.py verify-export-audit-manifest manifest.json --base-dir . --project-id <project_id> --audit-log events.jsonl --audit-db events.sqlite  # Canonical CLI wrapper for export audit manifest verification
 python qc_cli.py export-publish-preflight --manifest manifest.json --base-dir . --project-id <project_id> --audit-log events.jsonl --audit-db events.sqlite  # Canonical CLI wrapper for export publish preflight
+python qc_cli.py export-publish-preflight --manifest manifest.json --base-dir . --project-id <project_id> --scope-lint  # Canonical CLI wrapper with optional scope phrasing preflight
 python qc_cli.py verify-export-audit-log export_audit_events.jsonl  # Canonical CLI wrapper for export audit event-log verification
 python qc_cli.py mirror-export-audit-db export_audit_events.jsonl --db export_audit_events.sqlite  # Canonical CLI wrapper for export audit SQLite mirroring
 python qc_cli.py verify-export-audit-db export_audit_events.sqlite  # Canonical CLI wrapper for export audit SQLite verification

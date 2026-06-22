@@ -46,6 +46,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         type=Path,
         help="Optional SQLite mirror for the audit event log; requires --audit-log",
     )
+    parser.add_argument(
+        "--scope-lint",
+        action="store_true",
+        help="Also lint textual export artifacts for unsafe corpus-scope phrasing",
+    )
     args = parser.parse_args(argv)
     if args.audit_db and not args.audit_log:
         print(json.dumps({"status": "error", "error": "--audit-db requires --audit-log"}, indent=2))
@@ -64,6 +69,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         args.manifest,
         base_dir=args.base_dir,
         state=state,
+        scope_lint=args.scope_lint,
     )
     if args.audit_log:
         try:

@@ -299,11 +299,11 @@ ifndef MANIFEST
 endif
 	python scripts/verify_export_audit_manifest.py $(MANIFEST) $(if $(BASE_DIR),--base-dir $(BASE_DIR),) $(if $(ID),--project-id $(ID),) $(if $(PROJECTS_DIR),--projects-dir $(PROJECTS_DIR),) $(if $(AUDIT_LOG),--audit-log $(AUDIT_LOG),) $(if $(AUDIT_DB),--audit-db $(AUDIT_DB),)
 
-export-publish-preflight:  ## Strict publish preflight requiring a valid export manifest (MANIFEST=manifest.json [BASE_DIR=exports] [ID=<project_id>] [AUDIT_LOG=events.jsonl] [AUDIT_DB=events.sqlite])
+export-publish-preflight:  ## Strict publish preflight requiring a valid export manifest (MANIFEST=manifest.json [BASE_DIR=exports] [ID=<project_id>] [AUDIT_LOG=events.jsonl] [AUDIT_DB=events.sqlite] [SCOPE_LINT=1])
 ifndef MANIFEST
 	$(error MANIFEST is required. Usage: make export-publish-preflight MANIFEST=manifest.json)
 endif
-	python scripts/export_publish_preflight.py --manifest $(MANIFEST) $(if $(BASE_DIR),--base-dir $(BASE_DIR),) $(if $(ID),--project-id $(ID),) $(if $(PROJECTS_DIR),--projects-dir $(PROJECTS_DIR),) $(if $(AUDIT_LOG),--audit-log $(AUDIT_LOG),) $(if $(AUDIT_DB),--audit-db $(AUDIT_DB),)
+	python scripts/export_publish_preflight.py --manifest $(MANIFEST) $(if $(BASE_DIR),--base-dir $(BASE_DIR),) $(if $(ID),--project-id $(ID),) $(if $(PROJECTS_DIR),--projects-dir $(PROJECTS_DIR),) $(if $(AUDIT_LOG),--audit-log $(AUDIT_LOG),) $(if $(AUDIT_DB),--audit-db $(AUDIT_DB),) $(if $(SCOPE_LINT),--scope-lint,)
 
 verify-export-audit-log:  ## Verify local export audit event log (LOG=events.jsonl)
 ifndef LOG

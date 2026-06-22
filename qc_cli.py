@@ -770,6 +770,11 @@ Examples:
         '--audit-db',
         help='Optional SQLite mirror for the audit event log; requires --audit-log',
     )
+    export_publish_preflight_parser.add_argument(
+        '--scope-lint',
+        action='store_true',
+        help='Also lint textual export artifacts for unsafe corpus-scope phrasing',
+    )
 
     export_audit_log_verifier_parser = subparsers.add_parser(
         'verify-export-audit-log',
@@ -1889,6 +1894,8 @@ def handle_export_publish_preflight_command(args) -> int:
         value = getattr(args, attr)
         if value is not None:
             argv.extend([flag, value])
+    if args.scope_lint:
+        argv.append("--scope-lint")
     return export_publish_preflight.main(argv)
 
 

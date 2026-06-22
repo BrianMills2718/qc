@@ -106,6 +106,7 @@ from scripts import (
                 "events.jsonl",
                 "--audit-db",
                 "events.sqlite",
+                "--scope-lint",
             ],
             [
                 "--manifest",
@@ -120,6 +121,7 @@ from scripts import (
                 "events.jsonl",
                 "--audit-db",
                 "events.sqlite",
+                "--scope-lint",
             ],
         ),
         (
