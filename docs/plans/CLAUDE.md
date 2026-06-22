@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 64 | D9 tie-rate Wilson intervals | High | Planned | `D9_TIE_RATE_WILSON_INTERVALS.md` |
 
 ## Completed Plans
 
