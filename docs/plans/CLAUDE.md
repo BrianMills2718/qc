@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 120 | D8 GT fidelity protocol package | High | Planned | `D8_GT_FIDELITY_PROTOCOL_PACKAGE.md` |
 
 ## Completed Plans
 

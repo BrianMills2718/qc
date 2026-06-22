@@ -22,7 +22,10 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Continue through the ranked roadmap without pausing after each verified
+1. Execute Plan #120 (`D8_GT_FIDELITY_PROTOCOL_PACKAGE.md`): add a
+   pre-registered D8 GT-fidelity protocol validator before populated D8 rubric
+   rows are treated as benchmark evidence.
+2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
 **Completed checkpoint:** `make bench` now accepts `D4_PROTOCOL=...` and
