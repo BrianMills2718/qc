@@ -26,8 +26,14 @@ highest-value documented lane.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** No implementation plan is active. Select and plan the
-next deterministic roadmap lane before editing code.
+**Active checkpoint:** Plan #196
+`completed/EXPORT_PUBLISH_PREFLIGHT_SCOPE_LINT.md` is active. This slice adds an
+explicit opt-in `--scope-lint` / `SCOPE_LINT=1` publish-preflight gate that
+blocks risky population-generalizing Markdown/text handoff artifacts when the
+loaded project state has missing or under-specified corpus scope. The gate is
+report-boundary discipline only; it does not validate sampling-frame adequacy,
+claim correctness, methodological validity, audit signing, external tamper
+evidence, or SOTA claims.
 
 **Completed checkpoint:** `qc_cli.py` now wraps the scope-phrasing and
 prompt-override governance lint scripts through top-level commands:
