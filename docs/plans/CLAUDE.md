@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 179 | D7 comparison report provenance | High | Planned | `D7_COMPARISON_REPORT_PROVENANCE.md` |
 
 ## Completed Plans
 
