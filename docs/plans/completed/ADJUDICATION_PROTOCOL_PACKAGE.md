@@ -1,10 +1,54 @@
 # Plan #103: Adjudication Protocol Package
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** INV-3 adjudication sample export; INV-3 adjudication response import
 **Blocks:** held-out expert adjudication runs; D3/D7 evidence claim discipline
+
+---
+
+## Outcome
+
+Implemented a pre-label adjudication protocol package validator:
+
+- `qc_clean/core/adjudication_protocol.py` defines a schema_version=1
+  `adjudication_protocol` package with protocol/project/dataset IDs, split,
+  corpus/project hashes, prompt-freeze/contamination/registration flags, coder
+  metadata, target dimensions, sampling plan, success criteria, and a caution.
+- Held-out protocols fail loudly unless `prompt_frozen=true`,
+  `contamination_checked=true`, `registered_before_labeling=true`, and
+  `coder_count>=2`.
+- D3/D7 protocol dimensions require compatible sample item target types
+  (`code_application` and `negative_case` respectively).
+- `scripts/validate_adjudication_protocol.py` and
+  `make validate-adjudication-protocol` provide machine-readable validation.
+- Docs state protocol packages are process/provenance metadata only, not expert
+  labels, correctness estimates, validity evidence, or benchmark results.
+
+Implementation commit: `9f00782`
+
+## Verification
+
+- TDD red: initial `python -m pytest tests/test_adjudication_protocol.py -q`
+  failed with `ModuleNotFoundError: No module named
+  'qc_clean.core.adjudication_protocol'`.
+- Focused behavior: `python -m pytest tests/test_adjudication_protocol.py
+  tests/test_adjudication_sample.py tests/test_adjudication_import.py
+  tests/test_d3_gold_set.py tests/test_d7_gold_set.py -q` -> 24 passed.
+- Focused lint: `python -m ruff check
+  qc_clean/core/adjudication_protocol.py
+  scripts/validate_adjudication_protocol.py tests/test_adjudication_protocol.py
+  qc_clean/core/adjudication_sample.py qc_clean/core/adjudication_import.py`
+  -> all checks passed.
+- Command discoverability: `make help` lists
+  `validate-adjudication-protocol`; `make -n
+  validate-adjudication-protocol PROTOCOL=protocol.json` expands to
+  `python scripts/validate_adjudication_protocol.py protocol.json`.
+- Documentation governance: `make docs-check` passed.
+- Full gate: `make check` -> 895 passed, 1 skipped, 8 deselected; Ruff and
+  docs-check passed; type check remains not configured.
+- Commit `9f00782` was pushed to `main`.
 
 ---
 
@@ -75,10 +119,10 @@ Internal validation capability only; no cross-project boundary is created.
 
 ### Capability Validation
 
-- [ ] Pydantic schema has `Field(description=...)` on public fields.
-- [ ] Held-out-specific invariants fail loudly.
-- [ ] Dimension/sample-target compatibility is covered by tests.
-- [ ] Validator script emits machine-readable JSON.
+- [x] Pydantic schema has `Field(description=...)` on public fields.
+- [x] Held-out-specific invariants fail loudly.
+- [x] Dimension/sample-target compatibility is covered by tests.
+- [x] Validator script emits machine-readable JSON.
 
 ---
 
@@ -140,29 +184,29 @@ Internal validation capability only; no cross-project boundary is created.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] `schema_version=1` adjudication protocol packages can be validated.
-- [ ] Held-out protocols require prompt freeze, contamination check,
+- [x] `schema_version=1` adjudication protocol packages can be validated.
+- [x] Held-out protocols require prompt freeze, contamination check,
   pre-label registration, and at least two coders.
-- [ ] D3/D7 dimensions require compatible sample target types.
-- [ ] Duplicate dimensions and blank protocol metadata fail loudly.
-- [ ] `make validate-adjudication-protocol PROTOCOL=...` is available and
+- [x] D3/D7 dimensions require compatible sample target types.
+- [x] Duplicate dimensions and blank protocol metadata fail loudly.
+- [x] `make validate-adjudication-protocol PROTOCOL=...` is available and
   discoverable.
-- [ ] Docs say protocol packages are pre-registration metadata only, not expert
+- [x] Docs say protocol packages are pre-registration metadata only, not expert
   labels, correctness estimates, or validity evidence.
 
 > Process criteria:
-- [ ] Required focused tests pass.
-- [ ] Focused Ruff check passes.
-- [ ] `make docs-check` passes.
-- [ ] Full `make check` passes or any failure is documented with evidence.
-- [ ] Type-check status is reported.
-- [ ] Verified work is committed and pushed.
+- [x] Required focused tests pass.
+- [x] Focused Ruff check passes.
+- [x] `make docs-check` passes.
+- [x] Full `make check` passes or any failure is documented with evidence.
+- [x] Type-check status is reported.
+- [x] Verified work is committed and pushed.
 
 ---
 
 ## Open Questions
 
-- [ ] Should protocol validation compare a protocol file against a concrete
+- [x] Should protocol validation compare a protocol file against a concrete
   sample package hash in this slice? — Status: DEFERRED | Why it matters: the
   protocol schema records optional sample-package hash/path metadata, but strict
   sample-package cross-checking belongs in a later protocol-to-sample preflight

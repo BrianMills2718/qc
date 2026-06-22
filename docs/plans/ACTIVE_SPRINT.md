@@ -22,10 +22,10 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #103 (`ADJUDICATION_PROTOCOL_PACKAGE.md`): add a pre-registered
-   adjudication protocol manifest/validator so future expert labels have
-   documented split, freeze, contamination, coder, and success criteria metadata
-   before import/scoring.
+1. Create and execute the next validity-infrastructure slice:
+   protocol-to-sample preflight, checking a registered adjudication protocol
+   against the concrete sample package hash, target types, and planned sample
+   counts before labels are collected.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
@@ -45,6 +45,12 @@ package manifest with `make write-phase0-adjudication-package`, which validates
 versioned package inputs together before `make bench-package` scoring. This is
 repeatability/provenance infrastructure only; it does not prove that labels
 were expert-produced, held out, or methodologically adequate.
+Pre-label adjudication protocol metadata can now be validated with
+`make validate-adjudication-protocol`, including held-out freeze,
+contamination, registration, coder-count, dimension/target compatibility, and
+success-criteria checks. This is protocol/provenance metadata only; it does not
+create labels, correctness estimates, methodological validity evidence, or SOTA
+evidence.
 Claim-bearing exports now also warn on empty scope records and
 population-without-sampling-frame metadata, and CSV/Markdown claim rows now carry
 per-row claim scope and corpus-boundary context without rewriting claim text;
