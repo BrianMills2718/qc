@@ -22,14 +22,10 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #87 (`RELATIONSHIP_REVIEW_API_DECISIONS.md`): add
-   ReviewManager/API relationship review targets and explicit
-   `code_relationship` / `entity_relationship` decision semantics without
-   claiming browser, MCP, or expert review coverage.
-2. Choose the next highest-value unmet evaluation-harness, review, grounding, or
+1. Choose the next highest-value unmet evaluation-harness, review, grounding, or
    scope-discipline lane that can be advanced without pretending held-out expert
    data exists.
-3. Continue through the ranked roadmap without pausing after each verified
+2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
 **Completed checkpoint:** Corpus-scope warning propagation now covers Markdown,
@@ -43,8 +39,10 @@ this remains report discipline, not sampling adequacy evidence. Claim-review now
 `/projects/{id}/review/claims` plus review-decision regression coverage, but no
 expert adjudication protocol is claimed. The browser review page now has a
 Claims mode that lists claim cards and submits claim approve/reject/modify
-decisions through the shared review decision endpoint; relationship and
-negative-case review UX remain future work.
+decisions through the shared review decision endpoint; ReviewManager and the API
+now expose code/entity relationship review rows and `code_relationship` /
+`entity_relationship` approve/reject/modify decisions; browser/MCP relationship
+review and negative-case-specific review UX remain future work.
 MCP now exposes `qc_review_decisions` for agent-driven review decisions,
 including claim targets with rationale preservation, while keeping the old
 `qc_review_codes` tool compatible. MCP also exposes `qc_review_claims` as a

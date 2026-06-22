@@ -8,6 +8,29 @@
 
 ---
 
+## Outcome
+
+Completed 2026-06-21. `ReviewSummary` now includes `relationships_count`, and
+`ReviewManager.get_pending_relationships()` returns normalized code/entity
+relationship review rows with explicit `target_type` values. The shared review
+decision path now supports `code_relationship` and `entity_relationship`
+approve/reject/modify decisions, with fail-loud behavior for missing IDs,
+unsupported actions, and unsupported modify fields. The API exposes
+`/projects/{project_id}/review/relationships`, and `/review/decisions` returns
+the remaining relationship count.
+
+This closes the API/manager first slice for relationship adjudication. It does
+not add browser relationship review, MCP relationship review, negative-case-
+specific review UX, or expert adjudication evidence.
+
+Verification: initial TDD run failed as expected (`5 failed, 43 passed`) because
+relationship review methods, target types, and API route were missing. After
+implementation, focused review tests passed (`48 passed`), Ruff passed on
+touched files, docs/plan/AGENTS checks passed, and final `make check` passed
+(`824 passed, 1 skipped, 8 deselected`; type check not yet configured).
+
+---
+
 ## Gap
 
 **Current:** `ReviewManager` and the review API can list/adjudicate codes, code
@@ -134,22 +157,39 @@ create a cross-project callable boundary.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] Review summaries include total persisted relationships.
-- [ ] Relationship review rows distinguish `code_relationship` from
+- [x] Review summaries include total persisted relationships.
+- [x] Relationship review rows distinguish `code_relationship` from
   `entity_relationship`.
-- [ ] API clients can list relationship review targets through
+- [x] API clients can list relationship review targets through
   `/projects/{project_id}/review/relationships`.
-- [ ] API/manager decisions can approve, reject, and modify code relationships.
-- [ ] API/manager decisions can approve, reject, and modify entity relationships.
-- [ ] Missing relationship IDs and unsupported relationship actions fail loudly.
-- [ ] Docs state this narrows INV-10 but does not add browser/MCP/expert review
+- [x] API/manager decisions can approve, reject, and modify code relationships.
+- [x] API/manager decisions can approve, reject, and modify entity relationships.
+- [x] Missing relationship IDs and unsupported relationship actions fail loudly.
+- [x] Docs state this narrows INV-10 but does not add browser/MCP/expert review
   coverage.
 
 > Process criteria:
-- [ ] Required focused tests pass.
-- [ ] Full `make check` passes or any failure is documented with evidence.
-- [ ] Type-check status is reported.
-- [ ] Verified work is committed and pushed.
+- [x] Required focused tests pass.
+- [x] Full `make check` passes or any failure is documented with evidence.
+- [x] Type-check status is reported.
+- [x] Verified work is committed and pushed.
+
+---
+
+## Verification
+
+- Initial TDD run: `python -m pytest tests/test_review.py tests/test_review_api.py -q`
+  - failed as expected because `get_pending_relationships`,
+  `code_relationship` / `entity_relationship` target handling, and
+  `/review/relationships` did not exist (`5 failed, 43 passed`).
+- `python -m pytest tests/test_review.py tests/test_review_api.py -q` - passed
+  (`48 passed`).
+- `python -m ruff check qc_clean/schemas/domain.py qc_clean/core/pipeline/review.py qc_clean/plugins/api/api_server.py tests/test_review.py tests/test_review_api.py`
+  - passed.
+- `python scripts/check_markdown_links.py && python scripts/sync_plan_status.py --check && python scripts/meta/check_agents_sync.py --check`
+  - passed.
+- `make check` - passed (`824 passed, 1 skipped, 8 deselected`); Ruff and docs
+  gates passed; type check is not yet configured.
 
 ---
 

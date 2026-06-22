@@ -6,7 +6,6 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 87 | Relationship review API decisions | High | Planned | `RELATIONSHIP_REVIEW_API_DECISIONS.md` |
 
 ## Completed Plans
 
@@ -41,6 +40,7 @@ Track all implementation work here.
 | Scope-bound claim export rows | Scope/report follow-up: CSV/Markdown claim rows carry per-row claim scope and corpus boundary context without rewriting claim text | `completed/SCOPE_BOUND_CLAIM_EXPORT_ROWS.md` |
 | Claim review API listing | INV-10 follow-up: `/projects/{id}/review/claims` exposes bounded claim review targets and claim decisions are covered through the review API | `completed/CLAIM_REVIEW_API_LISTING.md` |
 | Claim review browser UI | INV-10 follow-up: browser review page now has a Claims mode that lists claim cards and submits claim approve/reject/modify decisions | `completed/CLAIM_REVIEW_BROWSER_UI.md` |
+| Relationship review API decisions | INV-10 follow-up: `/projects/{id}/review/relationships` and ReviewManager support code/entity relationship review decisions | `completed/RELATIONSHIP_REVIEW_API_DECISIONS.md` |
 | MCP claim review decisions | INV-10 follow-up: `qc_review_decisions` applies generic review decisions including claim targets with preserved rationale | `completed/MCP_CLAIM_REVIEW_DECISIONS.md` |
 | MCP claim review listing | INV-10 follow-up: `qc_review_claims` exposes bounded claim review targets for agent-driven review workflows | `completed/MCP_CLAIM_REVIEW_LISTING.md` |
 | INV-7 prompt injection scorecard | Evaluation-harness follow-up: `make bench` can score externally supplied prompt-injection fixture outcomes without mutating project state | `completed/INV7_PROMPT_INJECTION_SCORECARD.md` |
