@@ -28,6 +28,10 @@ highest-value documented lane.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
+**Active slice:** Plan #84, INV-7 prompt-injection package. This slice adds a
+versioned protocol/validation container for structural and live INV-7 fixture
+outputs without claiming prompt-injection robustness.
+
 **Completed checkpoint:** Corpus-scope warning propagation now covers Markdown,
 JSON `export_warnings` metadata, and CSV `export_warnings.csv` for claim-bearing
 exports without recorded scope, and CLI/MCP project creation can now persist
