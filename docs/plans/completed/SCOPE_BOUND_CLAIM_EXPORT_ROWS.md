@@ -8,6 +8,27 @@
 
 ---
 
+## Outcome
+
+Completed 2026-06-21. CSV `claims.csv` rows now include `claim_scope` and
+`corpus_scope_boundary` columns. Markdown claim ledger tables now include
+`Scope` and `Corpus boundary` columns. Missing or empty corpus scope is phrased
+as loaded-document-corpus-only context, and population-without-sampling-frame
+rows are explicitly marked as unvalidated population boundaries. The underlying
+`AnalyticClaim.claim_text` is not rewritten.
+
+This narrows the scope-aware export-phrasing gap. It does not validate sampling
+adequacy, source support, disconfirmation survival, or human/expert
+adjudication.
+
+Verification: initial TDD run failed on the expected missing columns/Markdown
+header (`4 failed, 14 passed`). After implementation, focused export tests
+passed (`18 passed`), Ruff passed on touched code/tests, docs/plan/AGENTS checks
+passed, and final `make check` passed (`818 passed, 1 skipped, 8 deselected`;
+type check not yet configured).
+
+---
+
 ## Gap
 
 **Current:** Claim-bearing exports show a report-level `Corpus Scope` section or
@@ -127,24 +148,40 @@ cross-project callable capability or boundary.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] CSV claim rows include deterministic `claim_scope` and
+- [x] CSV claim rows include deterministic `claim_scope` and
   `corpus_scope_boundary` columns.
-- [ ] Markdown claim rows include deterministic `Scope` and `Corpus boundary`
+- [x] Markdown claim rows include deterministic `Scope` and `Corpus boundary`
   columns.
-- [ ] Missing/empty corpus scope row context binds claims to loaded documents
+- [x] Missing/empty corpus scope row context binds claims to loaded documents
   only.
-- [ ] Population without sampling frame remains explicitly unvalidated in row
+- [x] Population without sampling frame remains explicitly unvalidated in row
   context.
-- [ ] Original `claim_text` values are not rewritten or decorated.
-- [ ] Existing `export_warnings` behavior is preserved.
-- [ ] Docs state this is scope-aware export context, not sampling-frame
+- [x] Original `claim_text` values are not rewritten or decorated.
+- [x] Existing `export_warnings` behavior is preserved.
+- [x] Docs state this is scope-aware export context, not sampling-frame
   validation.
 
 > Process criteria:
-- [ ] Required focused tests pass.
-- [ ] Full `make check` passes or any failure is documented with evidence.
-- [ ] Type-check status is reported.
-- [ ] Verified work is committed and pushed.
+- [x] Required focused tests pass.
+- [x] Full `make check` passes or any failure is documented with evidence.
+- [x] Type-check status is reported.
+- [x] Verified work is committed and pushed.
+
+---
+
+## Verification
+
+- Initial TDD run: `python -m pytest tests/test_claim_ledger_exports.py -q` -
+  failed as expected with missing `claim_scope` / `corpus_scope_boundary` CSV
+  fields and missing Markdown table columns (`4 failed, 14 passed`).
+- `python -m pytest tests/test_claim_ledger_exports.py -q` - passed
+  (`18 passed`).
+- `python -m ruff check qc_clean/core/claims.py qc_clean/core/export/data_exporter.py tests/test_claim_ledger_exports.py`
+  - passed.
+- `python scripts/check_markdown_links.py && python scripts/sync_plan_status.py --check && python scripts/meta/check_agents_sync.py --check`
+  - passed.
+- `make check` - passed (`818 passed, 1 skipped, 8 deselected`); Ruff and docs
+  gates passed; type check is not yet configured.
 
 ---
 

@@ -22,13 +22,10 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #86 (`SCOPE_BOUND_CLAIM_EXPORT_ROWS.md`): add per-row claim
-   scope and corpus-boundary context to CSV/Markdown claim exports without
-   rewriting claim text or implying sampling-frame validity.
-2. Choose the next highest-value unmet evaluation-harness, review, grounding, or
+1. Choose the next highest-value unmet evaluation-harness, review, grounding, or
    scope-discipline lane that can be advanced without pretending held-out expert
    data exists.
-3. Continue through the ranked roadmap without pausing after each verified
+2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
 **Completed checkpoint:** Corpus-scope warning propagation now covers Markdown,
@@ -36,8 +33,9 @@ JSON `export_warnings` metadata, and CSV `export_warnings.csv` for claim-bearing
 exports without recorded scope, and CLI/MCP project creation can now persist
 corpus scope when supplied while leaving no-scope creation compatible.
 Claim-bearing exports now also warn on empty scope records and
-population-without-sampling-frame metadata; this remains report discipline, not
-sampling adequacy evidence. Claim-review now has a bounded API listing at
+population-without-sampling-frame metadata, and CSV/Markdown claim rows now carry
+per-row claim scope and corpus-boundary context without rewriting claim text;
+this remains report discipline, not sampling adequacy evidence. Claim-review now has a bounded API listing at
 `/projects/{id}/review/claims` plus review-decision regression coverage, but no
 expert adjudication protocol is claimed. The browser review page now has a
 Claims mode that lists claim cards and submits claim approve/reject/modify
