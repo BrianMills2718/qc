@@ -44,6 +44,7 @@ Examples:
   qc_cli bench <project_id>
   qc_cli bench-package phase0_package.json
   qc_cli run-d7-retrieval <project_id> --output predictions.json
+  qc_cli run-d7-live-baseline <project_id> --output live_baseline.json --model gpt-5-mini
   qc_cli compare-d7-retrieval <project_id> --gold-file d7_gold.json --predictions-file predictions.json
   qc_cli run-inv7-fixtures --output inv7.json
   qc_cli run-inv7-live-fixtures --output inv7_live.json --model gpt-5-mini
@@ -243,6 +244,31 @@ Examples:
     d7_retrieval_parser.add_argument('--min-semantic-similarity', type=float)
     d7_retrieval_parser.add_argument('--trace-id')
     d7_retrieval_parser.add_argument('--max-budget', type=float)
+
+    # D7 live baseline export command
+    d7_live_baseline_parser = subparsers.add_parser(
+        'run-d7-live-baseline',
+        help='Export live D7 baseline predictions',
+        description='Export live candidate-selection predictions as a D7 baseline package',
+    )
+    d7_live_baseline_parser.add_argument('project_id', help='Project ID to export')
+    d7_live_baseline_parser.add_argument('--output', help='Optional JSON output path')
+    d7_live_baseline_parser.add_argument('--name', help='Optional baseline name')
+    d7_live_baseline_parser.add_argument('--description', help='Optional baseline description')
+    d7_live_baseline_parser.add_argument('--model', help='Live model name')
+    d7_live_baseline_parser.add_argument('--max-targets', type=int)
+    d7_live_baseline_parser.add_argument('--candidates-per-claim', type=int)
+    d7_live_baseline_parser.add_argument('--retrieval-mode')
+    d7_live_baseline_parser.add_argument('--bm25-k1', type=float)
+    d7_live_baseline_parser.add_argument('--bm25-b', type=float)
+    d7_live_baseline_parser.add_argument('--contrary-cue-weight', type=float)
+    d7_live_baseline_parser.add_argument('--expanded-term-weight', type=float)
+    d7_live_baseline_parser.add_argument('--embedding-model')
+    d7_live_baseline_parser.add_argument('--embedding-dimensions', type=int)
+    d7_live_baseline_parser.add_argument('--semantic-weight', type=float)
+    d7_live_baseline_parser.add_argument('--min-semantic-similarity', type=float)
+    d7_live_baseline_parser.add_argument('--trace-id')
+    d7_live_baseline_parser.add_argument('--max-budget', type=float)
 
     # D7 retrieval comparison command
     d7_comparison_parser = subparsers.add_parser(
@@ -497,6 +523,8 @@ def main() -> int:
             return handle_bench_package_command(args)
         elif args.command == 'run-d7-retrieval':
             return handle_run_d7_retrieval_command(args)
+        elif args.command == 'run-d7-live-baseline':
+            return handle_run_d7_live_baseline_command(args)
         elif args.command == 'compare-d7-retrieval':
             return handle_compare_d7_retrieval_command(args)
         elif args.command == 'run-inv7-fixtures':
@@ -621,6 +649,36 @@ def handle_run_d7_retrieval_command(args) -> int:
         if value is not None:
             argv.extend([flag, str(value)])
     return run_d7_retrieval.main(argv)
+
+
+def handle_run_d7_live_baseline_command(args) -> int:
+    """Export live D7 baseline predictions through the canonical CLI."""
+    from scripts import run_d7_live_baseline
+
+    argv = [args.project_id]
+    for attr, flag in [
+        ("output", "--output"),
+        ("name", "--name"),
+        ("description", "--description"),
+        ("model", "--model"),
+        ("max_targets", "--max-targets"),
+        ("candidates_per_claim", "--candidates-per-claim"),
+        ("retrieval_mode", "--retrieval-mode"),
+        ("bm25_k1", "--bm25-k1"),
+        ("bm25_b", "--bm25-b"),
+        ("contrary_cue_weight", "--contrary-cue-weight"),
+        ("expanded_term_weight", "--expanded-term-weight"),
+        ("embedding_model", "--embedding-model"),
+        ("embedding_dimensions", "--embedding-dimensions"),
+        ("semantic_weight", "--semantic-weight"),
+        ("min_semantic_similarity", "--min-semantic-similarity"),
+        ("trace_id", "--trace-id"),
+        ("max_budget", "--max-budget"),
+    ]:
+        value = getattr(args, attr)
+        if value is not None:
+            argv.extend([flag, str(value)])
+    return run_d7_live_baseline.main(argv)
 
 
 def handle_compare_d7_retrieval_command(args) -> int:

@@ -1,4 +1,4 @@
-.PHONY: help test test-quick test-e2e test-all bench bench-package write-phase0-adjudication-package validate-d3-gold validate-d7-gold validate-inv7-package validate-inv7-live-protocol inv7-live-preflight validate-d6-bias-protocol d6-bias-preflight validate-d4-codebook-quality-protocol d4-codebook-quality-preflight validate-d8-gt-fidelity-protocol d8-gt-fidelity-preflight validate-d9-interpretive-preference-protocol d9-interpretive-preference-preflight validate-confidence-calibration-protocol confidence-calibration-preflight validate-d7-comparison-protocol d7-comparison-preflight validate-adjudication-responses validate-adjudication-protocol adjudication-protocol-preflight adjudication-response-preflight import-adjudication-responses lint-scope-phrasing export-audit-manifest verify-export-audit-manifest export-publish-preflight verify-export-audit-log run-d7-retrieval compare-d7-retrieval run-inv7-fixtures run-inv7-live-fixtures adjudication-sample check lint docs-check clean status cost errors
+.PHONY: help test test-quick test-e2e test-all bench bench-package write-phase0-adjudication-package validate-d3-gold validate-d7-gold validate-inv7-package validate-inv7-live-protocol inv7-live-preflight validate-d6-bias-protocol d6-bias-preflight validate-d4-codebook-quality-protocol d4-codebook-quality-preflight validate-d8-gt-fidelity-protocol d8-gt-fidelity-preflight validate-d9-interpretive-preference-protocol d9-interpretive-preference-preflight validate-confidence-calibration-protocol confidence-calibration-preflight validate-d7-comparison-protocol d7-comparison-preflight validate-adjudication-responses validate-adjudication-protocol adjudication-protocol-preflight adjudication-response-preflight import-adjudication-responses lint-scope-phrasing export-audit-manifest verify-export-audit-manifest export-publish-preflight verify-export-audit-log run-d7-retrieval run-d7-live-baseline compare-d7-retrieval run-inv7-fixtures run-inv7-live-fixtures adjudication-sample check lint docs-check clean status cost errors
 
 DAYS ?= 7
 PROJECT ?= qualitative_coding
@@ -255,6 +255,15 @@ ifndef OUTPUT
 	$(error OUTPUT is required. Usage: make run-d7-retrieval ID=<project_id> OUTPUT=predictions.json)
 endif
 	python scripts/run_d7_retrieval.py $(ID) --output $(OUTPUT) --retrieval-mode $(MODE) $(if $(MODEL),--embedding-model $(MODEL),) $(if $(CANDIDATES),--candidates-per-claim $(CANDIDATES),)
+
+run-d7-live-baseline:  ## Export opt-in live D7 baseline predictions (ID=<project_id> OUTPUT=live_baseline.json [MODEL=gpt-5-mini] [MODE=lexical_bm25] [CANDIDATES=5])
+ifndef ID
+	$(error ID is required. Usage: make run-d7-live-baseline ID=<project_id> OUTPUT=live_baseline.json MODEL=<model>)
+endif
+ifndef OUTPUT
+	$(error OUTPUT is required. Usage: make run-d7-live-baseline ID=<project_id> OUTPUT=live_baseline.json MODEL=<model>)
+endif
+	python scripts/run_d7_live_baseline.py $(ID) --output $(OUTPUT) $(if $(MODEL),--model $(MODEL),) --retrieval-mode $(MODE) $(if $(CANDIDATES),--candidates-per-claim $(CANDIDATES),) $(if $(TRACE_ID),--trace-id $(TRACE_ID),) $(if $(MAX_BUDGET),--max-budget $(MAX_BUDGET),)
 
 compare-d7-retrieval:  ## Compare D7 retrieval predictions (ID=<project_id> GOLD=gold.json PREDICTIONS="a.json b.json" [PROTOCOL=protocol.json] [OUTPUT=report.json])
 ifndef ID
