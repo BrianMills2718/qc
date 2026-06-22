@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| #73 | D2 Coded Segment Rate | High | Planned | `D2_CODED_SEGMENT_RATE.md` |
 
 ## Completed Plans
 
