@@ -26,8 +26,11 @@ highest-value documented lane.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Select and plan the next deterministic, high-value
-roadmap lane. No implementation plan is currently active.
+**Active checkpoint:** Plan #175 is active: add a schema_version=1 D3 baseline
+comparison protocol validator plus Make/script surface. This slice is
+protocol/provenance only; it must not add D3 comparison preflight, score-time
+guards, package comparison execution, held-out D3 evidence, expert parity,
+superiority evidence, methodological-validity evidence, or SOTA claims.
 
 **Completed checkpoint:** D3 baseline rows now include diagnostic-only
 `span_overlap` metadata under `application_validity_d3.baselines.<name>`. The
