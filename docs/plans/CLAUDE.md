@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 167 | INV-11 GT recode higher-order refresh | High | Planned | `INV11_GT_RECODE_HIGHER_ORDER_REFRESH.md` |
 
 ## Completed Plans
 
