@@ -26,13 +26,16 @@ highest-value documented lane.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Plan #202
-`CLAIM_LEDGER_API_LIMIT_METADATA.md` is active. Make API
+**Active checkpoint:** No implementation plan is active. Select and plan the
+next deterministic roadmap lane before editing code.
+
+**Completed checkpoint:** Plan #202
+`completed/CLAIM_LEDGER_API_LIMIT_METADATA.md` made API
 `/projects/{project_id}/claims` expose its first-window row cap through an
 explicit `limit` query parameter and `returned` / `total_claims` / `limit`
-metadata while preserving the existing 100-row default/hard maximum. This is
-read-surface accounting only, not claim-validity evidence, human/expert
-adjudication, held-out D7 evidence, semantic disconfirmation validity, or SOTA.
+metadata while preserving existing claim row fields. This is read-surface
+accounting only, not claim-validity evidence, human/expert adjudication,
+held-out D7 evidence, semantic disconfirmation validity, or SOTA.
 
 **Completed checkpoint:** Plan #201
 `completed/CLAIM_LEDGER_SCOPE_READ_SURFACES.md` extended `ClaimScope`

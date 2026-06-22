@@ -6,12 +6,12 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 202 | Claim ledger API limit metadata | High | In Progress | `CLAIM_LEDGER_API_LIMIT_METADATA.md` |
 
 ## Completed Plans
 
 | Name | Outcome | Record |
 |------|---------|--------|
+| Claim ledger API limit metadata | API `/projects/{project_id}/claims` now accepts bounded `limit` queries and reports `returned`, `total_claims`, and applied `limit` metadata while preserving existing claim row fields | `completed/CLAIM_LEDGER_API_LIMIT_METADATA.md` |
 | Claim ledger scope read surfaces | API/MCP claim-ledger read rows now include serialized ClaimScope, and CLI `project claims --show-scope` prints compact scope summaries while preserving compact default output | `completed/CLAIM_LEDGER_SCOPE_READ_SURFACES.md` |
 | Claim ledger anchor detail read surfaces | API/MCP claim-ledger read rows now include bounded supporting/contrary anchor detail payloads, and CLI `project claims --show-anchors` prints bounded anchor details while preserving compact default output | `completed/CLAIM_LEDGER_ANCHOR_DETAIL_READ_SURFACES.md` |
 | Negative case review anchor details | API/MCP/browser claim-review rows now expose bounded supporting/contrary anchor details so negative-case review can inspect anchored contrary evidence without changing claim-decision semantics or claiming expert adjudication/D7 validity | `completed/NEGATIVE_CASE_REVIEW_ANCHOR_DETAILS.md` |

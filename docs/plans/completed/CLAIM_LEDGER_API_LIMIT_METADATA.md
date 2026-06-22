@@ -1,12 +1,36 @@
 # Plan #202: Claim Ledger API Limit Metadata
 
-**Status:** In Progress
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Claim Ledger Scope Read Surfaces
 **Blocks:** INV-9 agent-drivable claim interpretation
 
 ---
+
+## Outcome
+
+Completed 2026-06-22. API `/projects/{project_id}/claims` now accepts a
+`limit` query parameter, clamps it to the configured first-window policy
+(`claim_ledger_api_max_rows`, default `100`) and zero for negative inputs, and
+returns `returned`, `total_claims`, and applied `limit` metadata. Existing
+claim row fields, including serialized scope and bounded anchor details, remain
+unchanged. This is read-surface accounting only; it is not claim truth, expert
+adjudication, D7 evidence, disconfirmation validity, or SOTA evidence.
+
+## Verification
+
+- TDD red: `python -m pytest tests/test_review_api.py -q` initially failed on
+  missing `returned` metadata for the new tests.
+- Focused tests: `python -m pytest tests/test_review_api.py -q` (`40 passed`).
+- Focused Ruff:
+  `python -m ruff check qc_clean/plugins/api/api_server.py tests/test_review_api.py`.
+- Docs gate: `make docs-check`.
+- Whitespace gate: `git diff --check`.
+- Full gate: `make check` (`1270 passed, 1 skipped, 8 deselected`; Ruff/docs
+  passed; type check not configured).
+- Implementation commit pushed:
+  `7d1b2a36 [Plan: CLAIM_API_LIMIT] Expose claim API limit metadata`.
 
 ## Gap
 
@@ -115,23 +139,23 @@ create a cross-project boundary, registry entry, or new evaluation capability.
 
 Feature-level criteria:
 
-- [ ] API `/projects/{project_id}/claims` accepts `limit`.
-- [ ] Default API behavior returns at most 100 claim rows and reports
+- [x] API `/projects/{project_id}/claims` accepts `limit`.
+- [x] Default API behavior returns at most 100 claim rows and reports
   `limit: 100`.
-- [ ] Explicit positive limits return at most that many claim rows and report
+- [x] Explicit positive limits return at most that many claim rows and report
   the applied limit.
-- [ ] Negative limits return zero claim rows and report `limit: 0`.
-- [ ] API response reports `returned` and `total_claims`.
-- [ ] Existing claim row fields, including scope and anchor details, remain
+- [x] Negative limits return zero claim rows and report `limit: 0`.
+- [x] API response reports `returned` and `total_claims`.
+- [x] Existing claim row fields, including scope and anchor details, remain
   unchanged.
 
 Process criteria:
 
-- [ ] Required focused tests pass.
-- [ ] Focused Ruff passes.
-- [ ] `make docs-check` passes.
-- [ ] `make check` passes or any failure is documented with evidence.
-- [ ] Verified work is committed and pushed.
+- [x] Required focused tests pass.
+- [x] Focused Ruff passes.
+- [x] `make docs-check` passes.
+- [x] `make check` passes or any failure is documented with evidence.
+- [x] Verified work is committed and pushed.
 
 ---
 
