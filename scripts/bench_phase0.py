@@ -6,6 +6,7 @@ Usage:
         [--d3-baselines-file baselines.json] [--gold-file gold.json]
         [--d7-baselines-file baselines.json] [--prompt-injection-file inv7.json]
         [--bias-counterfactual-file bias.json]
+        [--bias-stratified-file bias_stratified.json]
         [--codebook-quality-file quality.json]
         [--gt-fidelity-file gt_fidelity.json]
         [--interpretive-preference-file preference.json]
@@ -72,6 +73,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument(
         "--bias-counterfactual-file",
         help="Optional D6 counterfactual identity-swap outcome JSON file; applied in memory only",
+    )
+    parser.add_argument(
+        "--bias-stratified-file",
+        help="Optional D6 stratified correctness/error JSON file; applied in memory only",
     )
     parser.add_argument(
         "--codebook-quality-file",
@@ -180,6 +185,18 @@ def main(argv: Sequence[str] | None = None) -> int:
         state.config.extra = dict(state.config.extra)
         state.config.extra["bias_counterfactual_evaluations"] = bias_counterfactual_results
 
+    if args.bias_stratified_file:
+        try:
+            bias_stratified_results = load_bias_stratified_file(
+                Path(args.bias_stratified_file)
+            )
+        except ValueError as exc:
+            print(json.dumps({"error": str(exc)}))
+            return 1
+        state = state.model_copy(deep=True)
+        state.config.extra = dict(state.config.extra)
+        state.config.extra["bias_stratified_evaluations"] = bias_stratified_results
+
     if args.codebook_quality_file:
         try:
             codebook_quality_results = load_codebook_quality_file(
@@ -246,6 +263,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         prompt_injection_file=Path(args.prompt_injection_file) if args.prompt_injection_file else None,
         bias_counterfactual_file=(
             Path(args.bias_counterfactual_file) if args.bias_counterfactual_file else None
+        ),
+        bias_stratified_file=(
+            Path(args.bias_stratified_file) if args.bias_stratified_file else None
         ),
         codebook_quality_file=(
             Path(args.codebook_quality_file) if args.codebook_quality_file else None
@@ -448,6 +468,9 @@ def phase0_command_provenance(args: argparse.Namespace) -> dict[str, Any]:
             if args.bias_counterfactual_file
             else None
         ),
+        "bias_stratified_file": (
+            str(Path(args.bias_stratified_file)) if args.bias_stratified_file else None
+        ),
         "codebook_quality_file": (
             str(Path(args.codebook_quality_file)) if args.codebook_quality_file else None
         ),
@@ -506,6 +529,7 @@ def phase0_input_hashes(
     d7_baselines_file: Path | None,
     prompt_injection_file: Path | None,
     bias_counterfactual_file: Path | None,
+    bias_stratified_file: Path | None,
     codebook_quality_file: Path | None,
     gt_fidelity_file: Path | None,
     interpretive_preference_file: Path | None,
@@ -533,6 +557,9 @@ def phase0_input_hashes(
         ),
         "bias_counterfactual_file_sha256": (
             sha256_file(bias_counterfactual_file) if bias_counterfactual_file else None
+        ),
+        "bias_stratified_file_sha256": (
+            sha256_file(bias_stratified_file) if bias_stratified_file else None
         ),
         "codebook_quality_file_sha256": (
             sha256_file(codebook_quality_file) if codebook_quality_file else None
@@ -712,6 +739,27 @@ def load_bias_counterfactual_file(path: Path) -> Any:
     raise ValueError(
         "Bias counterfactual file must be a JSON list of counterfactual outcomes "
         "or an object with a 'bias_counterfactual_evaluations' list"
+    )
+
+
+def load_bias_stratified_file(path: Path) -> Any:
+    """Load and shape-check an external D6 stratified result file."""
+    try:
+        raw = json.loads(path.read_text(encoding="utf-8"))
+    except OSError as exc:
+        raise ValueError(f"Bias stratified file '{path}' could not be read: {exc}") from exc
+    except json.JSONDecodeError as exc:
+        raise ValueError(
+            f"Bias stratified file '{path}' is not valid JSON: {exc}"
+        ) from exc
+
+    if isinstance(raw, list):
+        return raw
+    if isinstance(raw, dict) and isinstance(raw.get("bias_stratified_evaluations"), list):
+        return raw["bias_stratified_evaluations"]
+    raise ValueError(
+        "Bias stratified file must be a JSON list of stratified correctness rows "
+        "or an object with a 'bias_stratified_evaluations' list"
     )
 
 

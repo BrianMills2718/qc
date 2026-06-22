@@ -25,6 +25,7 @@ _PATH_FLAGS = {
     "d7_baselines_file": "--d7-baselines-file",
     "prompt_injection_file": "--prompt-injection-file",
     "bias_counterfactual_file": "--bias-counterfactual-file",
+    "bias_stratified_file": "--bias-stratified-file",
     "codebook_quality_file": "--codebook-quality-file",
     "gt_fidelity_file": "--gt-fidelity-file",
     "interpretive_preference_file": "--interpretive-preference-file",
@@ -59,6 +60,10 @@ class Phase0BenchmarkPackage(BaseModel):
     bias_counterfactual_file: str | None = Field(
         default=None,
         description="Optional D6 counterfactual JSON path",
+    )
+    bias_stratified_file: str | None = Field(
+        default=None,
+        description="Optional D6 stratified correctness JSON path",
     )
     codebook_quality_file: str | None = Field(
         default=None,

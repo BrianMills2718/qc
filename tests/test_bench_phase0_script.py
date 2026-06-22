@@ -1278,6 +1278,68 @@ def test_bench_phase0_scores_bias_counterfactual_from_file_without_mutating_stat
     assert "bias_counterfactual_evaluations" not in reloaded.config.extra
 
 
+def test_bench_phase0_scores_bias_stratified_from_file_without_mutating_state(
+    tmp_path,
+    monkeypatch,
+    capsys,
+):
+    state = ProjectState(
+        id="project_d6_stratified",
+        name="D6 stratified project",
+        config=ProjectConfig(extra={}),
+    )
+    store = ProjectStore(projects_dir=tmp_path / "projects")
+    store.save(state)
+    bias_file = tmp_path / "bias_stratified.json"
+    bias_file.write_text(
+        json.dumps({
+            "bias_stratified_evaluations": [
+                {
+                    "case_id": "gender-woman-correct",
+                    "attribute": "gender",
+                    "group": "woman",
+                    "surface": "application_validity",
+                    "correct": True,
+                },
+                {
+                    "case_id": "gender-woman-error",
+                    "attribute": "gender",
+                    "group": "woman",
+                    "surface": "application_validity",
+                    "correct": False,
+                },
+                {
+                    "case_id": "gender-man-correct",
+                    "attribute": "gender",
+                    "group": "man",
+                    "surface": "application_validity",
+                    "correct": True,
+                },
+            ],
+        }),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(bench_phase0, "ProjectStore", lambda: store)
+
+    exit_code = bench_phase0.main([
+        state.id,
+        "--bias-stratified-file",
+        str(bias_file),
+    ])
+
+    assert exit_code == 0
+    output = json.loads(capsys.readouterr().out)
+    d6 = output["bias_stratified_d6"]
+    assert d6["status"] == "scored"
+    assert d6["incorrect_cases"] == 1
+    assert d6["by_attribute"]["gender"]["max_error_rate_gap"] == pytest.approx(0.5)
+    assert output["_meta"]["input_hashes"]["bias_stratified_file_sha256"] == (
+        _sha256_file(bias_file)
+    )
+    reloaded = store.load(state.id)
+    assert "bias_stratified_evaluations" not in reloaded.config.extra
+
+
 def test_bench_phase0_invalid_bias_counterfactual_file_fails_loud(
     tmp_path,
     monkeypatch,
@@ -1300,6 +1362,30 @@ def test_bench_phase0_invalid_bias_counterfactual_file_fails_loud(
     output = json.loads(capsys.readouterr().out)
     assert "error" in output
     assert "Bias counterfactual file" in output["error"]
+
+
+def test_bench_phase0_invalid_bias_stratified_file_fails_loud(
+    tmp_path,
+    monkeypatch,
+    capsys,
+):
+    state = ProjectState(id="project_bad_d6_stratified", name="Bad D6 stratified")
+    store = ProjectStore(projects_dir=tmp_path / "projects")
+    store.save(state)
+    bias_file = tmp_path / "bias_stratified.json"
+    bias_file.write_text(json.dumps({"unexpected": []}), encoding="utf-8")
+    monkeypatch.setattr(bench_phase0, "ProjectStore", lambda: store)
+
+    exit_code = bench_phase0.main([
+        state.id,
+        "--bias-stratified-file",
+        str(bias_file),
+    ])
+
+    assert exit_code == 1
+    output = json.loads(capsys.readouterr().out)
+    assert "error" in output
+    assert "Bias stratified file" in output["error"]
 
 
 def test_bench_phase0_scores_codebook_quality_from_file_without_mutating_state(

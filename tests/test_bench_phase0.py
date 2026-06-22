@@ -1534,6 +1534,20 @@ def test_scorecard_reports_bias_counterfactual_unavailable_without_eval_data():
     assert "not evidence" in d6["note"]
 
 
+def test_scorecard_reports_bias_stratified_unavailable_without_eval_data():
+    state = ProjectState(
+        name="no-bias-stratified-eval",
+        config=ProjectConfig(methodology=Methodology.THEMATIC_ANALYSIS),
+        corpus=Corpus(documents=[Document(name="d.txt", content="Participant text.")]),
+    )
+
+    d6 = phase0_scorecard(state)["bias_stratified_d6"]
+
+    assert d6["status"] == "not_available"
+    assert "bias_stratified_evaluations" in d6["reason"]
+    assert "not evidence" in d6["note"]
+
+
 def test_d10_cost_latency_unavailable_when_db_missing(tmp_path):
     state = ProjectState(id="project-cost", name="Cost")
 
@@ -2048,6 +2062,82 @@ def test_scorecard_invalid_bias_counterfactual_bootstrap_config_fails_loud():
     )
 
     with pytest.raises(ValueError, match="phase0_counterfactual_bootstrap"):
+        phase0_scorecard(state)
+
+
+def test_scorecard_scores_bias_stratified_outcomes():
+    state = ProjectState(
+        name="bias-stratified-eval",
+        config=ProjectConfig(
+            methodology=Methodology.THEMATIC_ANALYSIS,
+            extra={
+                "bias_stratified_evaluations": [
+                    {
+                        "case_id": "gender-woman-correct",
+                        "attribute": "gender",
+                        "group": "woman",
+                        "surface": "application_validity",
+                        "correct": True,
+                    },
+                    {
+                        "case_id": "gender-woman-error",
+                        "attribute": "gender",
+                        "group": "woman",
+                        "surface": "application_validity",
+                        "correct": False,
+                        "error_type": "missed_code",
+                    },
+                    {
+                        "case_id": "gender-man-correct",
+                        "attribute": "gender",
+                        "group": "man",
+                        "surface": "application_validity",
+                        "correct": True,
+                    },
+                    {
+                        "case_id": "role-manager-error",
+                        "attribute": "role",
+                        "group": "manager",
+                        "surface": "claim_validity",
+                        "correct": False,
+                    },
+                ],
+            },
+        ),
+    )
+
+    d6 = phase0_scorecard(state)["bias_stratified_d6"]
+
+    assert d6["status"] == "scored"
+    assert d6["total_cases"] == 4
+    assert d6["correct_cases"] == 2
+    assert d6["incorrect_cases"] == 2
+    assert d6["accuracy"] == pytest.approx(0.5)
+    assert d6["error_rate"] == pytest.approx(0.5)
+    assert d6["accuracy_ci"]["successes"] == 2
+    assert d6["error_rate_ci"]["successes"] == 2
+    assert d6["error_case_ids"] == ["gender-woman-error", "role-manager-error"]
+    gender = d6["by_attribute"]["gender"]
+    assert gender["total_cases"] == 3
+    assert gender["max_error_rate_gap"] == pytest.approx(0.5)
+    assert gender["groups"]["woman"]["total_cases"] == 2
+    assert gender["groups"]["woman"]["incorrect_cases"] == 1
+    assert gender["groups"]["woman"]["error_rate"] == pytest.approx(0.5)
+    assert gender["groups"]["woman"]["error_rate_ci"]["denominator"] == 2
+    assert gender["groups"]["man"]["error_rate"] == pytest.approx(0.0)
+    assert gender["groups"]["man"]["error_rate_ci"]["successes"] == 0
+    assert d6["by_attribute"]["role"]["max_error_rate_gap"] is None
+    assert d6["by_surface"]["application_validity"]["error_rate"] == pytest.approx(1 / 3)
+    assert d6["by_surface"]["claim_validity"]["error_rate"] == pytest.approx(1.0)
+    assert "not causal proof" in d6["note"]
+
+
+def test_scorecard_invalid_bias_stratified_metadata_fails_loud():
+    state = ProjectState(
+        config=ProjectConfig(extra={"bias_stratified_evaluations": {"unexpected": []}}),
+    )
+
+    with pytest.raises(ValueError, match="bias_stratified_evaluations"):
         phase0_scorecard(state)
 
 

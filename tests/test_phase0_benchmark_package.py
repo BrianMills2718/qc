@@ -75,6 +75,28 @@ def test_phase0_benchmark_package_forwards_relative_inputs(
         }),
         encoding="utf-8",
     )
+    bias_stratified = package_dir / "bias_stratified.json"
+    bias_stratified.write_text(
+        json.dumps({
+            "bias_stratified_evaluations": [
+                {
+                    "case_id": "gender-woman-correct",
+                    "attribute": "gender",
+                    "group": "woman",
+                    "surface": "application_validity",
+                    "correct": True,
+                },
+                {
+                    "case_id": "gender-man-error",
+                    "attribute": "gender",
+                    "group": "man",
+                    "surface": "application_validity",
+                    "correct": False,
+                },
+            ]
+        }),
+        encoding="utf-8",
+    )
     package_file = package_dir / "phase0_package.json"
     package_file.write_text(
         json.dumps({
@@ -82,6 +104,7 @@ def test_phase0_benchmark_package_forwards_relative_inputs(
             "project_id": state.id,
             "d3_gold_file": "d3_gold.json",
             "d3_baselines_file": "d3_baselines.json",
+            "bias_stratified_file": "bias_stratified.json",
             "codebook_quality_file": "quality.json",
         }),
         encoding="utf-8",
@@ -98,13 +121,17 @@ def test_phase0_benchmark_package_forwards_relative_inputs(
     assert baseline["false_negatives"] == 1
     assert baseline["system_minus_baseline"]["recall"] == 1.0
     assert output["codebook_quality_d4"]["status"] == "scored"
+    assert output["bias_stratified_d6"]["status"] == "scored"
+    assert output["bias_stratified_d6"]["incorrect_cases"] == 1
     hashes = output["_meta"]["input_hashes"]
     assert hashes["d3_gold_file_sha256"] == bench_phase0.sha256_file(d3_gold)
     assert hashes["d3_baselines_file_sha256"] == bench_phase0.sha256_file(d3_baselines)
+    assert hashes["bias_stratified_file_sha256"] == bench_phase0.sha256_file(bias_stratified)
     assert hashes["codebook_quality_file_sha256"] == bench_phase0.sha256_file(quality)
     reloaded = store.load(state.id)
     assert "application_gold" not in reloaded.config.extra
     assert "application_baselines" not in reloaded.config.extra
+    assert "bias_stratified_evaluations" not in reloaded.config.extra
     assert "codebook_quality_evaluations" not in reloaded.config.extra
 
 

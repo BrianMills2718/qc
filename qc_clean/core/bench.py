@@ -44,6 +44,7 @@ _D7_BASELINES_EXTRA_KEY = "disconfirmation_baselines"
 _RUN_TIMING_EXTRA_KEY = "run_timing"
 _PROMPT_INJECTION_EXTRA_KEY = "prompt_injection_evaluations"
 _BIAS_COUNTERFACTUAL_EXTRA_KEY = "bias_counterfactual_evaluations"
+_BIAS_STRATIFIED_EXTRA_KEY = "bias_stratified_evaluations"
 _CODEBOOK_QUALITY_EXTRA_KEY = "codebook_quality_evaluations"
 _GT_FIDELITY_EXTRA_KEY = "gt_fidelity_evaluations"
 _INTERPRETIVE_PREFERENCE_EXTRA_KEY = "interpretive_preference_evaluations"
@@ -327,6 +328,46 @@ class BiasCounterfactualEvaluation(BaseModel):
         return self
 
 
+class BiasStratifiedEvaluation(BaseModel):
+    """External stratified correctness/error outcome used for D6 scoring."""
+
+    case_id: str = Field(description="Stable ID for the stratified evaluation row")
+    attribute: str = Field(
+        default="unspecified",
+        description="Respondent attribute used for stratification",
+    )
+    group: str = Field(description="Attribute group for this row")
+    correct: bool = Field(description="Whether the coded output was correct for this row")
+    surface: str = Field(
+        default="unspecified",
+        description="Scored surface, such as application_validity or claim_validity",
+    )
+    evaluator: str = Field(
+        default="unspecified",
+        description="Evaluator or harness that produced this row",
+    )
+    error_type: str | None = Field(
+        default=None,
+        description="Optional error taxonomy label when correct is false",
+    )
+    notes: str = Field(default="", description="Optional human-readable notes")
+
+    @model_validator(mode="after")
+    def require_stratified_metadata(self) -> "BiasStratifiedEvaluation":
+        """Normalize stable grouping keys and reject unusable rows."""
+        self.case_id = self.case_id.strip()
+        if not self.case_id:
+            raise ValueError("bias stratified case_id must be non-empty")
+        self.attribute = self.attribute.strip() or "unspecified"
+        self.group = self.group.strip()
+        if not self.group:
+            raise ValueError("bias stratified group must be non-empty")
+        self.surface = self.surface.strip() or "unspecified"
+        if self.error_type is not None:
+            self.error_type = self.error_type.strip() or None
+        return self
+
+
 class CodebookQualityEvaluation(BaseModel):
     """External D4 codebook-quality rubric outcome."""
 
@@ -601,6 +642,8 @@ def phase0_scorecard(state: ProjectState) -> Dict[str, Any]:
         "prompt_injection_inv7": prompt_injection_scorecard(state),
         # D6 — externally supplied counterfactual identity-cue swap diagnostics.
         "bias_counterfactual_d6": bias_counterfactual_scorecard(state),
+        # D6 — externally supplied stratified error diagnostics.
+        "bias_stratified_d6": bias_stratified_scorecard(state),
         # Calibration — externally supplied confidence/correctness records.
         "confidence_calibration": confidence_calibration_scorecard(state),
         "data_warnings": list(state.data_warnings),
@@ -2380,6 +2423,126 @@ def _counterfactual_jaccard_bootstrap_ci(
         "status": "scored",
         "lower": _percentile(bootstrapped_means, alpha),
         "upper": _percentile(bootstrapped_means, 1 - alpha),
+    }
+
+
+def bias_stratified_scorecard(state: ProjectState) -> Dict[str, Any]:
+    """Score externally supplied D6 stratified correctness/error rows."""
+    evaluations = _bias_stratified_evaluations(state)
+    if not evaluations:
+        return {
+            "status": "not_available",
+            "reason": (
+                "No bias stratified outcomes found at "
+                f"ProjectState.config.extra['{_BIAS_STRATIFIED_EXTRA_KEY}']; "
+                "scoring requires externally supplied correctness rows grouped "
+                "by respondent attribute."
+            ),
+            "note": (
+                "Absence of D6 stratified data is not evidence that coding is "
+                "unbiased; stratified and counterfactual bias audits are separate "
+                "from ordinary Phase 0 scoring."
+            ),
+        }
+
+    summary = _bias_stratified_summary(evaluations)
+    return {
+        "status": "scored",
+        "source": f"ProjectState.config.extra['{_BIAS_STRATIFIED_EXTRA_KEY}']",
+        **summary,
+        "by_attribute": _bias_stratified_by_attribute(evaluations),
+        "by_surface": _bias_stratified_by_surface(evaluations),
+        "note": (
+            "Scores externally supplied stratified correctness rows. This is a "
+            "measurement substrate for error-rate parity, not causal proof of "
+            "bias or evidence that the system is bias-free."
+        ),
+    }
+
+
+def _bias_stratified_evaluations(state: ProjectState) -> list[BiasStratifiedEvaluation]:
+    """Load D6 stratified rows from project config metadata."""
+    raw = state.config.extra.get(_BIAS_STRATIFIED_EXTRA_KEY)
+    if raw is None:
+        return []
+    if isinstance(raw, dict) and _BIAS_STRATIFIED_EXTRA_KEY in raw:
+        raw = raw[_BIAS_STRATIFIED_EXTRA_KEY]
+    if not isinstance(raw, list):
+        raise ValueError(
+            f"ProjectState.config.extra['{_BIAS_STRATIFIED_EXTRA_KEY}'] must be a "
+            "list of stratified correctness rows"
+        )
+    try:
+        return [BiasStratifiedEvaluation.model_validate(item) for item in raw]
+    except ValidationError as exc:
+        raise ValueError(f"Invalid bias_stratified_evaluations metadata: {exc}") from exc
+
+
+def _bias_stratified_summary(
+    evaluations: list[BiasStratifiedEvaluation],
+) -> dict[str, Any]:
+    """Summarize stratified correctness rows."""
+    total = len(evaluations)
+    correct = sum(1 for evaluation in evaluations if evaluation.correct)
+    incorrect = total - correct
+    return {
+        "total_cases": total,
+        "correct_cases": correct,
+        "incorrect_cases": incorrect,
+        "accuracy": _safe_div_or_none(correct, total),
+        "error_rate": _safe_div_or_none(incorrect, total),
+        "accuracy_ci": _wilson_interval(correct, total),
+        "error_rate_ci": _wilson_interval(incorrect, total),
+        "error_case_ids": sorted(
+            evaluation.case_id for evaluation in evaluations if not evaluation.correct
+        ),
+    }
+
+
+def _bias_stratified_by_attribute(
+    evaluations: list[BiasStratifiedEvaluation],
+) -> dict[str, dict[str, Any]]:
+    """Summarize stratified rows by attribute and group."""
+    by_attribute: dict[str, list[BiasStratifiedEvaluation]] = {}
+    for evaluation in evaluations:
+        by_attribute.setdefault(evaluation.attribute, []).append(evaluation)
+
+    output: dict[str, dict[str, Any]] = {}
+    for attribute, rows in by_attribute.items():
+        by_group: dict[str, list[BiasStratifiedEvaluation]] = {}
+        for row in rows:
+            by_group.setdefault(row.group, []).append(row)
+        group_summaries = {
+            group: _bias_stratified_summary(group_rows)
+            for group, group_rows in sorted(by_group.items())
+        }
+        error_rates = [
+            summary["error_rate"]
+            for summary in group_summaries.values()
+            if summary["error_rate"] is not None
+        ]
+        max_gap = None
+        if len(error_rates) >= 2:
+            max_gap = max(error_rates) - min(error_rates)
+        output[attribute] = {
+            **_bias_stratified_summary(rows),
+            "group_count": len(group_summaries),
+            "max_error_rate_gap": max_gap,
+            "groups": group_summaries,
+        }
+    return dict(sorted(output.items()))
+
+
+def _bias_stratified_by_surface(
+    evaluations: list[BiasStratifiedEvaluation],
+) -> dict[str, dict[str, Any]]:
+    """Summarize stratified rows by scored surface."""
+    by_surface: dict[str, list[BiasStratifiedEvaluation]] = {}
+    for evaluation in evaluations:
+        by_surface.setdefault(evaluation.surface, []).append(evaluation)
+    return {
+        surface: _bias_stratified_summary(rows)
+        for surface, rows in sorted(by_surface.items())
     }
 
 
