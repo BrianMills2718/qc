@@ -164,16 +164,18 @@ def claims_for_relationships(
     claims: list[AnalyticClaim] = []
 
     for rel in state.entity_relationships:
+        scope = ClaimScope(
+            entity_ids=[rel.entity_1_id, rel.entity_2_id],
+            relationship_ids=[rel.id],
+        )
         claims.append(_relationship_claim(
             rel,
             source_stage,
             entity_names.get(rel.entity_1_id, rel.entity_1_id),
             entity_names.get(rel.entity_2_id, rel.entity_2_id),
-            ClaimScope(
-                entity_ids=[rel.entity_1_id, rel.entity_2_id],
-                relationship_ids=[rel.id],
-            ),
+            scope,
             "domain_entity_relationship",
+            supporting_anchors=_anchors_for_evidence(state, rel.supporting_evidence),
         ))
 
     for rel in state.code_relationships:
@@ -181,6 +183,8 @@ def claims_for_relationships(
             code_ids=[rel.source_code_id, rel.target_code_id],
             relationship_ids=[rel.id],
         )
+        scoped_anchors = _anchors_for_scope(state, scope)
+        evidence_anchors = _anchors_for_evidence(state, rel.evidence)
         claims.append(_relationship_claim(
             rel,
             source_stage,
@@ -188,7 +192,10 @@ def claims_for_relationships(
             code_names.get(rel.target_code_id, rel.target_code_id),
             scope,
             "code_relationship",
-            supporting_anchors=_anchors_for_scope(state, scope),
+            supporting_anchors=_merge_scoped_and_evidence_anchors(
+                scoped_anchors,
+                evidence_anchors,
+            ),
         ))
 
     return claims
@@ -593,6 +600,46 @@ def _anchors_for_scope(state: ProjectState, scope: ClaimScope) -> list[ClaimAnch
     return anchors
 
 
+def _anchors_for_evidence(
+    state: ProjectState,
+    evidence_items: Iterable[str],
+) -> list[ClaimAnchor]:
+    """Resolve unique evidence strings into exact source anchors."""
+    anchors: list[ClaimAnchor] = []
+    seen: set[tuple[str, int | None, int | None]] = set()
+    for evidence in evidence_items:
+        anchor = _anchor_from_quote(state, evidence)
+        if anchor is None:
+            continue
+        key = _anchor_span_key(anchor)
+        if key in seen:
+            continue
+        seen.add(key)
+        anchors.append(anchor)
+    return anchors
+
+
+def _merge_scoped_and_evidence_anchors(
+    scoped_anchors: Iterable[ClaimAnchor],
+    evidence_anchors: Iterable[ClaimAnchor],
+) -> list[ClaimAnchor]:
+    """Append evidence anchors unless they duplicate an existing scoped span."""
+    anchors = list(scoped_anchors)
+    seen_evidence_spans = {_anchor_span_key(anchor) for anchor in anchors}
+    for anchor in evidence_anchors:
+        key = _anchor_span_key(anchor)
+        if key in seen_evidence_spans:
+            continue
+        seen_evidence_spans.add(key)
+        anchors.append(anchor)
+    return anchors
+
+
+def _anchor_span_key(anchor: ClaimAnchor) -> tuple[str, int | None, int | None]:
+    """Return the source-span identity for duplicate relationship evidence."""
+    return (anchor.doc_id, anchor.start_char, anchor.end_char)
+
+
 def _support_status(anchors: list[ClaimAnchor]) -> ClaimSupportStatus:
     """Return supported when at least one source anchor exists."""
     return ClaimSupportStatus.SUPPORTED if anchors else ClaimSupportStatus.NEEDS_ANCHOR
@@ -748,7 +795,7 @@ def _anchor_for_negative_case(
 
 
 def _anchor_from_quote(state: ProjectState, quote: str) -> ClaimAnchor | None:
-    """Resolve a quote across project documents into a claim contrary anchor."""
+    """Resolve a quote across project documents into an exact claim anchor."""
     match = resolve_against_docs(quote, state.corpus.documents)
     if match.status is not MatchStatus.UNIQUE or match.doc_id is None:
         return None

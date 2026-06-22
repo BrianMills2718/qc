@@ -1,5 +1,7 @@
 """Tests for the first-class analytic claim ledger (INV-9)."""
 
+import hashlib
+
 from qc_clean.core.claims import (
     claims_for_code_applications,
     claims_for_codes,
@@ -416,6 +418,106 @@ def test_code_scoped_higher_order_claims_inherit_code_application_anchors():
     assert all(claim.support_status == ClaimSupportStatus.SUPPORTED for claim in anchored)
     for claim in anchored:
         assert [anchor.code_application_id for anchor in claim.supporting_anchors] == ["a1"]
+
+
+def test_relationship_evidence_strings_resolve_to_claim_anchors():
+    """Relationship-specific evidence strings become exact source anchors."""
+    doc = Document(
+        id="d1",
+        name="d.txt",
+        content="Alex said AI changed workflow. Bob said training reduced risk.",
+    )
+    quote = "AI changed workflow"
+    app = CodeApplication(
+        id="a1",
+        code_id="C1",
+        doc_id=doc.id,
+        quote_text=quote,
+        start_char=10,
+        end_char=29,
+        quote_hash=hashlib.sha256(quote.encode("utf-8")).hexdigest(),
+    )
+    state = ProjectState(
+        corpus=Corpus(documents=[doc]),
+        codebook=Codebook(codes=[
+            Code(id="C1", name="AI Use"),
+            Code(id="C2", name="Workflow"),
+        ]),
+        code_applications=[app],
+        entities=[
+            Entity(id="e1", name="Training"),
+            Entity(id="e2", name="Risk"),
+        ],
+        entity_relationships=[
+            DomainEntityRelationship(
+                id="er1",
+                entity_1_id="e1",
+                entity_2_id="e2",
+                relationship_type="reduces",
+                supporting_evidence=["training reduced risk"],
+            )
+        ],
+        code_relationships=[
+            CodeRelationship(
+                id="cr1",
+                source_code_id="C1",
+                target_code_id="C2",
+                relationship_type="changes",
+                evidence=[quote],
+            )
+        ],
+    )
+
+    claims = {claim.origin_object_id: claim for claim in claims_for_relationships(state)}
+
+    code_claim = claims["cr1"]
+    assert code_claim.support_status == ClaimSupportStatus.SUPPORTED
+    assert [anchor.code_application_id for anchor in code_claim.supporting_anchors] == ["a1"]
+    assert [anchor.quote_text for anchor in code_claim.supporting_anchors] == [quote]
+
+    entity_claim = claims["er1"]
+    assert entity_claim.support_status == ClaimSupportStatus.SUPPORTED
+    assert len(entity_claim.supporting_anchors) == 1
+    assert entity_claim.supporting_anchors[0].doc_id == "d1"
+    assert entity_claim.supporting_anchors[0].quote_text == "training reduced risk"
+    assert entity_claim.supporting_anchors[0].code_application_id is None
+
+
+def test_relationship_evidence_anchors_are_not_guessed_when_ambiguous_or_missing():
+    """Ambiguous or missing relationship evidence stays visibly unanchored."""
+    state = ProjectState(
+        corpus=Corpus(documents=[
+            Document(id="d1", name="d1.txt", content="AI changed workflow."),
+            Document(id="d2", name="d2.txt", content="AI changed workflow."),
+        ]),
+        entities=[
+            Entity(id="e1", name="AI"),
+            Entity(id="e2", name="Workflow"),
+            Entity(id="e3", name="Training"),
+        ],
+        entity_relationships=[
+            DomainEntityRelationship(
+                id="ambiguous",
+                entity_1_id="e1",
+                entity_2_id="e2",
+                relationship_type="changes",
+                supporting_evidence=["AI changed workflow"],
+            ),
+            DomainEntityRelationship(
+                id="missing",
+                entity_1_id="e1",
+                entity_2_id="e3",
+                relationship_type="requires",
+                supporting_evidence=["training created adoption"],
+            ),
+        ],
+    )
+
+    claims = {claim.origin_object_id: claim for claim in claims_for_relationships(state)}
+
+    for claim in claims.values():
+        assert claim.support_status == ClaimSupportStatus.NEEDS_ANCHOR
+        assert claim.supporting_anchors == []
 
 
 def test_cross_case_builder_uses_code_application_support():
