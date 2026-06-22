@@ -94,6 +94,22 @@ def test_qc_cli_bench_forwards_files_and_output(tmp_path, monkeypatch, capsys):
         }),
         encoding="utf-8",
     )
+    gt_fidelity_file = tmp_path / "gt_fidelity.json"
+    gt_fidelity_file.write_text(
+        json.dumps({
+            "gt_fidelity_evaluations": [
+                {
+                    "evaluator": "judge-a",
+                    "evaluator_type": "llm_judge",
+                    "constant_comparison": 0.8,
+                    "category_development": 0.7,
+                    "memo_quality": 0.9,
+                    "saturation_justification": 0.6,
+                }
+            ]
+        }),
+        encoding="utf-8",
+    )
     preference_file = tmp_path / "interpretive_preference.json"
     preference_file.write_text(
         json.dumps({
@@ -124,6 +140,8 @@ def test_qc_cli_bench_forwards_files_and_output(tmp_path, monkeypatch, capsys):
             str(bias_file),
             "--codebook-quality-file",
             str(quality_file),
+            "--gt-fidelity-file",
+            str(gt_fidelity_file),
             "--interpretive-preference-file",
             str(preference_file),
             "--output",
@@ -141,16 +159,21 @@ def test_qc_cli_bench_forwards_files_and_output(tmp_path, monkeypatch, capsys):
     assert stdout_scorecard["disconfirmation_d7"]["status"] == "scored"
     assert stdout_scorecard["bias_counterfactual_d6"]["status"] == "scored"
     assert stdout_scorecard["codebook_quality_d4"]["status"] == "scored"
+    assert stdout_scorecard["gt_fidelity_d8"]["status"] == "scored"
     assert stdout_scorecard["interpretive_preference_d9"]["status"] == "scored"
     expected_d3_hash = hashlib.sha256(d3_gold_file.read_bytes()).hexdigest()
     expected_hash = hashlib.sha256(gold_file.read_bytes()).hexdigest()
     expected_bias_hash = hashlib.sha256(bias_file.read_bytes()).hexdigest()
     expected_quality_hash = hashlib.sha256(quality_file.read_bytes()).hexdigest()
+    expected_gt_fidelity_hash = hashlib.sha256(gt_fidelity_file.read_bytes()).hexdigest()
     expected_preference_hash = hashlib.sha256(preference_file.read_bytes()).hexdigest()
     assert stdout_scorecard["_meta"]["input_hashes"]["d3_gold_file_sha256"] == expected_d3_hash
     assert stdout_scorecard["_meta"]["input_hashes"]["gold_file_sha256"] == expected_hash
     assert stdout_scorecard["_meta"]["input_hashes"]["bias_counterfactual_file_sha256"] == expected_bias_hash
     assert stdout_scorecard["_meta"]["input_hashes"]["codebook_quality_file_sha256"] == expected_quality_hash
+    assert stdout_scorecard["_meta"]["input_hashes"][
+        "gt_fidelity_file_sha256"
+    ] == expected_gt_fidelity_hash
     assert stdout_scorecard["_meta"]["input_hashes"][
         "interpretive_preference_file_sha256"
     ] == expected_preference_hash

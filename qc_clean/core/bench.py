@@ -42,6 +42,7 @@ _RUN_TIMING_EXTRA_KEY = "run_timing"
 _PROMPT_INJECTION_EXTRA_KEY = "prompt_injection_evaluations"
 _BIAS_COUNTERFACTUAL_EXTRA_KEY = "bias_counterfactual_evaluations"
 _CODEBOOK_QUALITY_EXTRA_KEY = "codebook_quality_evaluations"
+_GT_FIDELITY_EXTRA_KEY = "gt_fidelity_evaluations"
 _INTERPRETIVE_PREFERENCE_EXTRA_KEY = "interpretive_preference_evaluations"
 _EXACT_BOOTSTRAP_EXTRA_KEY = "phase0_exact_bootstrap"
 _RELIABILITY_BOOTSTRAP_EXTRA_KEY = "phase0_reliability_bootstrap"
@@ -49,6 +50,12 @@ DEFAULT_OBSERVABILITY_DB_PATH = Path.home() / "projects" / "data" / "llm_observa
 _WILSON_Z_95 = 1.959963984540054
 _HUMAN_CEILING_EXACT_METRICS = ("recall", "precision", "f1")
 _CODEBOOK_QUALITY_METRICS = ("clarity", "specificity", "usefulness", "grounding")
+_GT_FIDELITY_METRICS = (
+    "constant_comparison",
+    "category_development",
+    "memo_quality",
+    "saturation_justification",
+)
 _HUMAN_CEILING_AGREEMENT_METRIC_ALIASES = {
     "cohen_kappa": "cohens_kappa",
     "cohens_kappa": "cohens_kappa",
@@ -257,6 +264,51 @@ class CodebookQualityEvaluation(BaseModel):
         return self
 
 
+class GTFidelityEvaluation(BaseModel):
+    """External D8 grounded-theory fidelity rubric outcome."""
+
+    evaluator: str = Field(description="Evaluator identifier or redacted label")
+    evaluator_type: str = Field(
+        default="unspecified",
+        description="Evaluator type, such as llm_judge or human_expert",
+    )
+    constant_comparison: float = Field(description="0-1 score for constant comparison fidelity")
+    category_development: float = Field(
+        description="0-1 score for category property and dimension development"
+    )
+    memo_quality: float = Field(description="0-1 score for analytic memo quality")
+    saturation_justification: float = Field(
+        description="0-1 score for saturation justification quality"
+    )
+    scope: str = Field(
+        default="grounded_theory_pipeline",
+        description="Rubric scope, such as grounded_theory_pipeline or category",
+    )
+    artifact_id: str | None = Field(
+        default=None,
+        description="Optional artifact ID when the rubric targets a category, memo, or model",
+    )
+    notes: str = Field(default="", description="Optional human-readable notes")
+
+    @model_validator(mode="after")
+    def require_valid_gt_fidelity_outcome(self) -> "GTFidelityEvaluation":
+        """Normalize grouping keys and reject out-of-range D8 rubric scores."""
+        self.evaluator = self.evaluator.strip()
+        if not self.evaluator:
+            raise ValueError("GT fidelity evaluator must be non-empty")
+        self.evaluator_type = self.evaluator_type.strip() or "unspecified"
+        self.scope = self.scope.strip() or "grounded_theory_pipeline"
+        if self.artifact_id is not None:
+            self.artifact_id = self.artifact_id.strip()
+            if not self.artifact_id:
+                raise ValueError("GT fidelity artifact_id must be non-empty when supplied")
+        for metric_name in _GT_FIDELITY_METRICS:
+            metric_value = getattr(self, metric_name)
+            if not 0 <= metric_value <= 1:
+                raise ValueError(f"GT fidelity {metric_name} must be between 0 and 1")
+        return self
+
+
 class InterpretivePreferenceEvaluation(BaseModel):
     """External D9 blind forced-choice preference outcome."""
 
@@ -353,6 +405,8 @@ def phase0_scorecard(state: ProjectState) -> Dict[str, Any]:
         "codebook_quality_d4": codebook_quality_scorecard(state),
         # D7 — disconfirmation quality when human/adjudicated gold is present.
         "disconfirmation_d7": disconfirmation_d7_scorecard(state),
+        # D8 — externally supplied GT-fidelity rubric outcomes.
+        "gt_fidelity_d8": gt_fidelity_scorecard(state),
         # D9 — externally supplied blind forced-choice interpretive preference outcomes.
         "interpretive_preference_d9": interpretive_preference_scorecard(state),
         # INV-4 — category adequacy diagnostic, not proof of GT saturation.
@@ -935,6 +989,118 @@ def _numeric_summary(values: list[float]) -> dict[str, float | None]:
         "min": min(values),
         "max": max(values),
     }
+
+
+def gt_fidelity_scorecard(state: ProjectState) -> Dict[str, Any]:
+    """Score externally supplied D8 grounded-theory fidelity rubric outcomes."""
+    evaluations = _gt_fidelity_evaluations(state)
+    if not evaluations:
+        return {
+            "status": "not_available",
+            "reason": (
+                "No GT-fidelity rubric outcomes found at "
+                f"ProjectState.config.extra['{_GT_FIDELITY_EXTRA_KEY}']; "
+                "scoring requires externally supplied expert or judge rubric outcomes."
+            ),
+            "note": (
+                "Absence of D8 rubric data is not evidence of grounded-theory "
+                "fidelity, methodological saturation, or full grounded theory."
+            ),
+        }
+
+    return {
+        "status": "scored",
+        "source": f"ProjectState.config.extra['{_GT_FIDELITY_EXTRA_KEY}']",
+        "total_evaluations": len(evaluations),
+        "evaluator_types": dict(sorted(Counter(ev.evaluator_type for ev in evaluations).items())),
+        "scopes": dict(sorted(Counter(ev.scope for ev in evaluations).items())),
+        "metric_summary": _gt_fidelity_metric_summary(evaluations),
+        "overall_mean": _mean_or_none([
+            _gt_fidelity_overall_score(ev) for ev in evaluations
+        ]),
+        "by_evaluator_type": _gt_fidelity_by_evaluator_type(evaluations),
+        "by_scope": _gt_fidelity_by_scope(evaluations),
+        "note": (
+            "Scores externally supplied GT-fidelity rubric outcomes. This is a "
+            "measurement substrate, not expert-rubric acceptance, proof of "
+            "methodological saturation, full grounded theory, or a SOTA claim."
+        ),
+    }
+
+
+def _gt_fidelity_evaluations(state: ProjectState) -> list[GTFidelityEvaluation]:
+    """Load D8 GT-fidelity rubric outcomes from project config metadata."""
+    raw = state.config.extra.get(_GT_FIDELITY_EXTRA_KEY)
+    if raw is None:
+        return []
+    if isinstance(raw, dict) and _GT_FIDELITY_EXTRA_KEY in raw:
+        raw = raw[_GT_FIDELITY_EXTRA_KEY]
+    if not isinstance(raw, list):
+        raise ValueError(
+            f"ProjectState.config.extra['{_GT_FIDELITY_EXTRA_KEY}'] must be a "
+            "list of GT-fidelity rubric outcomes"
+        )
+    try:
+        return [GTFidelityEvaluation.model_validate(item) for item in raw]
+    except ValidationError as exc:
+        raise ValueError(f"Invalid gt_fidelity_evaluations metadata: {exc}") from exc
+
+
+def _gt_fidelity_metric_summary(
+    evaluations: list[GTFidelityEvaluation],
+) -> dict[str, dict[str, float | None]]:
+    """Summarize each D8 rubric metric over all evaluations."""
+    return {
+        metric_name: _numeric_summary([
+            getattr(evaluation, metric_name) for evaluation in evaluations
+        ])
+        for metric_name in _GT_FIDELITY_METRICS
+    }
+
+
+def _gt_fidelity_by_evaluator_type(
+    evaluations: list[GTFidelityEvaluation],
+) -> dict[str, dict[str, Any]]:
+    """Summarize D8 rubric outcomes by evaluator type."""
+    grouped: dict[str, list[GTFidelityEvaluation]] = {}
+    for evaluation in evaluations:
+        grouped.setdefault(evaluation.evaluator_type, []).append(evaluation)
+    return {
+        evaluator_type: {
+            "count": len(group),
+            "metric_summary": _gt_fidelity_metric_summary(group),
+            "overall_mean": _mean_or_none([
+                _gt_fidelity_overall_score(evaluation) for evaluation in group
+            ]),
+        }
+        for evaluator_type, group in sorted(grouped.items())
+    }
+
+
+def _gt_fidelity_by_scope(
+    evaluations: list[GTFidelityEvaluation],
+) -> dict[str, dict[str, Any]]:
+    """Summarize D8 rubric outcomes by reviewed artifact scope."""
+    grouped: dict[str, list[GTFidelityEvaluation]] = {}
+    for evaluation in evaluations:
+        grouped.setdefault(evaluation.scope, []).append(evaluation)
+    return {
+        scope: {
+            "count": len(group),
+            "metric_summary": _gt_fidelity_metric_summary(group),
+            "overall_mean": _mean_or_none([
+                _gt_fidelity_overall_score(evaluation) for evaluation in group
+            ]),
+        }
+        for scope, group in sorted(grouped.items())
+    }
+
+
+def _gt_fidelity_overall_score(evaluation: GTFidelityEvaluation) -> float:
+    """Return the average rubric score for one D8 outcome."""
+    return sum(getattr(evaluation, metric) for metric in _GT_FIDELITY_METRICS) / len(
+        _GT_FIDELITY_METRICS
+    )
 
 
 def interpretive_preference_scorecard(state: ProjectState) -> Dict[str, Any]:

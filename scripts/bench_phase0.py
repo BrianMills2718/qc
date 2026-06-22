@@ -6,6 +6,7 @@ Usage:
         [--d7-baselines-file baselines.json] [--prompt-injection-file inv7.json]
         [--bias-counterfactual-file bias.json]
         [--codebook-quality-file quality.json]
+        [--gt-fidelity-file gt_fidelity.json]
         [--interpretive-preference-file preference.json]
         [--output scorecard.json]
 
@@ -66,6 +67,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument(
         "--codebook-quality-file",
         help="Optional D4 codebook-quality rubric outcome JSON file; applied in memory only",
+    )
+    parser.add_argument(
+        "--gt-fidelity-file",
+        help="Optional D8 GT-fidelity rubric outcome JSON file; applied in memory only",
     )
     parser.add_argument(
         "--interpretive-preference-file",
@@ -164,6 +169,16 @@ def main(argv: Sequence[str] | None = None) -> int:
         state.config.extra = dict(state.config.extra)
         state.config.extra["codebook_quality_evaluations"] = codebook_quality_results
 
+    if args.gt_fidelity_file:
+        try:
+            gt_fidelity_results = load_gt_fidelity_file(Path(args.gt_fidelity_file))
+        except ValueError as exc:
+            print(json.dumps({"error": str(exc)}))
+            return 1
+        state = state.model_copy(deep=True)
+        state.config.extra = dict(state.config.extra)
+        state.config.extra["gt_fidelity_evaluations"] = gt_fidelity_results
+
     if args.interpretive_preference_file:
         try:
             interpretive_preference_results = load_interpretive_preference_file(
@@ -195,6 +210,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         codebook_quality_file=(
             Path(args.codebook_quality_file) if args.codebook_quality_file else None
         ),
+        gt_fidelity_file=Path(args.gt_fidelity_file) if args.gt_fidelity_file else None,
         interpretive_preference_file=(
             Path(args.interpretive_preference_file)
             if args.interpretive_preference_file
@@ -322,6 +338,9 @@ def phase0_command_provenance(args: argparse.Namespace) -> dict[str, Any]:
         "codebook_quality_file": (
             str(Path(args.codebook_quality_file)) if args.codebook_quality_file else None
         ),
+        "gt_fidelity_file": (
+            str(Path(args.gt_fidelity_file)) if args.gt_fidelity_file else None
+        ),
         "interpretive_preference_file": (
             str(Path(args.interpretive_preference_file))
             if args.interpretive_preference_file
@@ -369,6 +388,7 @@ def phase0_input_hashes(
     prompt_injection_file: Path | None,
     bias_counterfactual_file: Path | None,
     codebook_quality_file: Path | None,
+    gt_fidelity_file: Path | None,
     interpretive_preference_file: Path | None,
     observability_db: Path | None,
 ) -> dict[str, Any]:
@@ -393,6 +413,9 @@ def phase0_input_hashes(
         ),
         "codebook_quality_file_sha256": (
             sha256_file(codebook_quality_file) if codebook_quality_file else None
+        ),
+        "gt_fidelity_file_sha256": (
+            sha256_file(gt_fidelity_file) if gt_fidelity_file else None
         ),
         "interpretive_preference_file_sha256": (
             sha256_file(interpretive_preference_file)
@@ -539,6 +562,25 @@ def load_codebook_quality_file(path: Path) -> Any:
     raise ValueError(
         "Codebook quality file must be a JSON list of rubric outcomes or an "
         "object with a 'codebook_quality_evaluations' list"
+    )
+
+
+def load_gt_fidelity_file(path: Path) -> Any:
+    """Load and shape-check an external D8 GT-fidelity result file."""
+    try:
+        raw = json.loads(path.read_text(encoding="utf-8"))
+    except OSError as exc:
+        raise ValueError(f"GT fidelity file '{path}' could not be read: {exc}") from exc
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"GT fidelity file '{path}' is not valid JSON: {exc}") from exc
+
+    if isinstance(raw, list):
+        return raw
+    if isinstance(raw, dict) and isinstance(raw.get("gt_fidelity_evaluations"), list):
+        return raw["gt_fidelity_evaluations"]
+    raise ValueError(
+        "GT fidelity file must be a JSON list of rubric outcomes or an "
+        "object with a 'gt_fidelity_evaluations' list"
     )
 
 

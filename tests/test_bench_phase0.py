@@ -547,6 +547,90 @@ def test_scorecard_invalid_codebook_quality_metadata_fails_loud():
         phase0_scorecard(state)
 
 
+def test_scorecard_reports_gt_fidelity_unavailable_without_eval_data():
+    state = ProjectState(
+        name="no-gt-fidelity-eval",
+        config=ProjectConfig(methodology=Methodology.GROUNDED_THEORY),
+        corpus=Corpus(documents=[Document(name="d.txt", content="Participant text.")]),
+    )
+
+    d8 = phase0_scorecard(state)["gt_fidelity_d8"]
+
+    assert d8["status"] == "not_available"
+    assert "gt_fidelity_evaluations" in d8["reason"]
+    assert "not evidence" in d8["note"]
+
+
+def test_scorecard_scores_gt_fidelity_rubric_outcomes():
+    state = ProjectState(
+        name="gt-fidelity-eval",
+        config=ProjectConfig(
+            methodology=Methodology.GROUNDED_THEORY,
+            extra={
+                "gt_fidelity_evaluations": [
+                    {
+                        "evaluator": "judge-a",
+                        "evaluator_type": "llm_judge",
+                        "constant_comparison": 0.8,
+                        "category_development": 0.7,
+                        "memo_quality": 0.9,
+                        "saturation_justification": 0.6,
+                    },
+                    {
+                        "evaluator": "expert-1",
+                        "evaluator_type": "human_expert",
+                        "scope": "category",
+                        "artifact_id": "C1",
+                        "constant_comparison": 0.6,
+                        "category_development": 0.8,
+                        "memo_quality": 0.7,
+                        "saturation_justification": 0.5,
+                    },
+                ],
+            },
+        ),
+    )
+
+    d8 = phase0_scorecard(state)["gt_fidelity_d8"]
+
+    assert d8["status"] == "scored"
+    assert d8["total_evaluations"] == 2
+    assert d8["evaluator_types"] == {"human_expert": 1, "llm_judge": 1}
+    assert d8["scopes"] == {"category": 1, "grounded_theory_pipeline": 1}
+    assert d8["overall_mean"] == pytest.approx(0.7)
+    assert d8["metric_summary"]["constant_comparison"] == {
+        "mean": pytest.approx(0.7),
+        "min": 0.6,
+        "max": 0.8,
+    }
+    assert d8["metric_summary"]["category_development"]["mean"] == pytest.approx(0.75)
+    assert d8["by_evaluator_type"]["llm_judge"]["overall_mean"] == pytest.approx(0.75)
+    assert d8["by_evaluator_type"]["human_expert"]["overall_mean"] == pytest.approx(0.65)
+    assert d8["by_scope"]["category"]["overall_mean"] == pytest.approx(0.65)
+    assert "not expert-rubric acceptance" in d8["note"]
+
+
+def test_scorecard_invalid_gt_fidelity_metadata_fails_loud():
+    state = ProjectState(
+        config=ProjectConfig(
+            extra={
+                "gt_fidelity_evaluations": [
+                    {
+                        "evaluator": "judge-a",
+                        "constant_comparison": 1.2,
+                        "category_development": 0.7,
+                        "memo_quality": 0.9,
+                        "saturation_justification": 0.6,
+                    }
+                ]
+            }
+        ),
+    )
+
+    with pytest.raises(ValueError, match="gt_fidelity_evaluations"):
+        phase0_scorecard(state)
+
+
 def test_scorecard_reports_interpretive_preference_unavailable_without_eval_data():
     state = ProjectState(
         name="no-preference-eval",

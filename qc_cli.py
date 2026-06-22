@@ -151,6 +151,10 @@ Examples:
         help='Optional D4 codebook-quality rubric outcome JSON file; applied in memory only'
     )
     bench_parser.add_argument(
+        '--gt-fidelity-file',
+        help='Optional D8 GT-fidelity rubric outcome JSON file; applied in memory only'
+    )
+    bench_parser.add_argument(
         '--interpretive-preference-file',
         help='Optional D9 blind forced-choice preference outcome JSON file; applied in memory only'
     )
@@ -365,6 +369,8 @@ def handle_bench_command(args) -> int:
         argv.extend(["--bias-counterfactual-file", args.bias_counterfactual_file])
     if args.codebook_quality_file:
         argv.extend(["--codebook-quality-file", args.codebook_quality_file])
+    if args.gt_fidelity_file:
+        argv.extend(["--gt-fidelity-file", args.gt_fidelity_file])
     if args.interpretive_preference_file:
         argv.extend(["--interpretive-preference-file", args.interpretive_preference_file])
     if args.observability_db:

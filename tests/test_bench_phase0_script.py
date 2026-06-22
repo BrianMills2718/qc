@@ -57,6 +57,7 @@ def test_bench_phase0_includes_input_hashes_without_external_files(
     assert hashes["prompt_injection_file_sha256"] is None
     assert hashes["bias_counterfactual_file_sha256"] is None
     assert hashes["codebook_quality_file_sha256"] is None
+    assert hashes["gt_fidelity_file_sha256"] is None
     assert hashes["interpretive_preference_file_sha256"] is None
     assert hashes["observability_db_sha256"] is None
 
@@ -151,6 +152,22 @@ def test_bench_phase0_hashes_external_input_files(
         }),
         encoding="utf-8",
     )
+    gt_fidelity_file = tmp_path / "gt_fidelity.json"
+    gt_fidelity_file.write_text(
+        json.dumps({
+            "gt_fidelity_evaluations": [
+                {
+                    "evaluator": "judge-a",
+                    "evaluator_type": "llm_judge",
+                    "constant_comparison": 0.8,
+                    "category_development": 0.7,
+                    "memo_quality": 0.9,
+                    "saturation_justification": 0.6,
+                }
+            ]
+        }),
+        encoding="utf-8",
+    )
     preference_file = tmp_path / "interpretive_preference.json"
     preference_file.write_text(
         json.dumps({
@@ -182,6 +199,8 @@ def test_bench_phase0_hashes_external_input_files(
         str(bias_file),
         "--codebook-quality-file",
         str(quality_file),
+        "--gt-fidelity-file",
+        str(gt_fidelity_file),
         "--interpretive-preference-file",
         str(preference_file),
         "--observability-db",
@@ -197,6 +216,7 @@ def test_bench_phase0_hashes_external_input_files(
     assert hashes["prompt_injection_file_sha256"] == _sha256_file(injection_file)
     assert hashes["bias_counterfactual_file_sha256"] == _sha256_file(bias_file)
     assert hashes["codebook_quality_file_sha256"] == _sha256_file(quality_file)
+    assert hashes["gt_fidelity_file_sha256"] == _sha256_file(gt_fidelity_file)
     assert hashes["interpretive_preference_file_sha256"] == _sha256_file(preference_file)
     assert hashes["observability_db_sha256"] == _sha256_file(db_path)
     reloaded = store.load(state.id)
@@ -206,6 +226,7 @@ def test_bench_phase0_hashes_external_input_files(
     assert "prompt_injection_evaluations" not in reloaded.config.extra
     assert "bias_counterfactual_evaluations" not in reloaded.config.extra
     assert "codebook_quality_evaluations" not in reloaded.config.extra
+    assert "gt_fidelity_evaluations" not in reloaded.config.extra
     assert "interpretive_preference_evaluations" not in reloaded.config.extra
 
 
@@ -453,6 +474,22 @@ def test_bench_phase0_artifact_manifest_records_external_inputs(
         }),
         encoding="utf-8",
     )
+    gt_fidelity_file = tmp_path / "gt_fidelity.json"
+    gt_fidelity_file.write_text(
+        json.dumps({
+            "gt_fidelity_evaluations": [
+                {
+                    "evaluator": "judge-a",
+                    "evaluator_type": "llm_judge",
+                    "constant_comparison": 0.8,
+                    "category_development": 0.7,
+                    "memo_quality": 0.9,
+                    "saturation_justification": 0.6,
+                }
+            ]
+        }),
+        encoding="utf-8",
+    )
     preference_file = tmp_path / "interpretive_preference.json"
     preference_file.write_text(
         json.dumps({
@@ -483,6 +520,8 @@ def test_bench_phase0_artifact_manifest_records_external_inputs(
         str(bias_file),
         "--codebook-quality-file",
         str(quality_file),
+        "--gt-fidelity-file",
+        str(gt_fidelity_file),
         "--interpretive-preference-file",
         str(preference_file),
         "--observability-db",
@@ -502,6 +541,9 @@ def test_bench_phase0_artifact_manifest_records_external_inputs(
     assert manifest["input_hashes"]["prompt_injection_file_sha256"] == _sha256_file(injection_file)
     assert manifest["input_hashes"]["bias_counterfactual_file_sha256"] == _sha256_file(bias_file)
     assert manifest["input_hashes"]["codebook_quality_file_sha256"] == _sha256_file(quality_file)
+    assert manifest["input_hashes"]["gt_fidelity_file_sha256"] == (
+        _sha256_file(gt_fidelity_file)
+    )
     assert manifest["input_hashes"]["interpretive_preference_file_sha256"] == (
         _sha256_file(preference_file)
     )
@@ -511,6 +553,7 @@ def test_bench_phase0_artifact_manifest_records_external_inputs(
     assert manifest["command"]["prompt_injection_file"] == str(injection_file)
     assert manifest["command"]["bias_counterfactual_file"] == str(bias_file)
     assert manifest["command"]["codebook_quality_file"] == str(quality_file)
+    assert manifest["command"]["gt_fidelity_file"] == str(gt_fidelity_file)
     assert manifest["command"]["interpretive_preference_file"] == str(preference_file)
     assert manifest["command"]["observability_db"] == str(db_path)
     assert manifest["command"]["trace_id"] == "trace-123"
@@ -1071,6 +1114,76 @@ def test_bench_phase0_invalid_codebook_quality_file_fails_loud(
     output = json.loads(capsys.readouterr().out)
     assert "error" in output
     assert "Codebook quality file" in output["error"]
+
+
+def test_bench_phase0_scores_gt_fidelity_from_file_without_mutating_state(
+    tmp_path,
+    monkeypatch,
+    capsys,
+):
+    state = ProjectState(
+        id="project_d8",
+        name="D8 project",
+        config=ProjectConfig(extra={}),
+    )
+    store = ProjectStore(projects_dir=tmp_path / "projects")
+    store.save(state)
+    gt_fidelity_file = tmp_path / "gt_fidelity.json"
+    gt_fidelity_file.write_text(
+        json.dumps({
+            "gt_fidelity_evaluations": [
+                {
+                    "evaluator": "judge-a",
+                    "evaluator_type": "llm_judge",
+                    "constant_comparison": 0.8,
+                    "category_development": 0.7,
+                    "memo_quality": 0.9,
+                    "saturation_justification": 0.6,
+                }
+            ],
+        }),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(bench_phase0, "ProjectStore", lambda: store)
+
+    exit_code = bench_phase0.main([
+        state.id,
+        "--gt-fidelity-file",
+        str(gt_fidelity_file),
+    ])
+
+    assert exit_code == 0
+    output = json.loads(capsys.readouterr().out)
+    d8 = output["gt_fidelity_d8"]
+    assert d8["status"] == "scored"
+    assert d8["total_evaluations"] == 1
+    assert d8["overall_mean"] == pytest.approx(0.75)
+    reloaded = store.load(state.id)
+    assert "gt_fidelity_evaluations" not in reloaded.config.extra
+
+
+def test_bench_phase0_invalid_gt_fidelity_file_fails_loud(
+    tmp_path,
+    monkeypatch,
+    capsys,
+):
+    state = ProjectState(id="project_bad_d8", name="Bad D8")
+    store = ProjectStore(projects_dir=tmp_path / "projects")
+    store.save(state)
+    gt_fidelity_file = tmp_path / "gt_fidelity.json"
+    gt_fidelity_file.write_text(json.dumps({"unexpected": []}), encoding="utf-8")
+    monkeypatch.setattr(bench_phase0, "ProjectStore", lambda: store)
+
+    exit_code = bench_phase0.main([
+        state.id,
+        "--gt-fidelity-file",
+        str(gt_fidelity_file),
+    ])
+
+    assert exit_code == 1
+    output = json.loads(capsys.readouterr().out)
+    assert "error" in output
+    assert "GT fidelity file" in output["error"]
 
 
 def test_bench_phase0_scores_interpretive_preference_from_file_without_mutating_state(
