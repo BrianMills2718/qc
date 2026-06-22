@@ -1,12 +1,29 @@
 # Plan #67: Confidence Calibration Bootstrap Intervals
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** #60
 **Blocks:** Confidence-calibration uncertainty metadata
 
 ---
+
+## Outcome
+
+Confidence-calibration scorecards now include deterministic local bootstrap
+intervals for Brier score and fixed-bin ECE when
+`phase0_calibration_bootstrap` is enabled. The same metadata appears in overall
+and per-surface summaries. `phase0_calibration_bootstrap.enabled=false`
+suppresses the interval fields. This remains local uncertainty metadata for
+supplied confidence/correctness rows, not proof of calibrated confidence.
+
+## Verification
+
+- `python -m pytest tests/test_bench_phase0.py -q` - 55 passed
+- `python -m ruff check qc_clean/core/bench.py tests/test_bench_phase0.py` - clean
+- `python scripts/check_markdown_links.py` - clean
+- `python scripts/sync_plan_status.py --check` - clean
+- `make check` - 774 passed, 1 skipped, 8 deselected; lint and docs checks clean; type check not configured
 
 ## Gap
 
@@ -56,12 +73,12 @@ Internal scorecard capability only; no cross-project boundary is created.
 
 ### Capability Validation
 
-- [ ] Overall calibration summary includes `brier_score_ci` when bootstrap is enabled.
-- [ ] Overall calibration summary includes `expected_calibration_error_ci` when bootstrap is enabled.
-- [ ] Per-surface calibration summaries include Brier/ECE interval metadata.
-- [ ] Bootstrap metadata reports method, confidence level, samples, seed, unit, and population size.
-- [ ] Bootstrap can be disabled through project metadata.
-- [ ] Docs preserve the caveat that intervals are local uncertainty metadata, not calibration proof.
+- [x] Overall calibration summary includes `brier_score_ci` when bootstrap is enabled.
+- [x] Overall calibration summary includes `expected_calibration_error_ci` when bootstrap is enabled.
+- [x] Per-surface calibration summaries include Brier/ECE interval metadata.
+- [x] Bootstrap metadata reports method, confidence level, samples, seed, unit, and population size.
+- [x] Bootstrap can be disabled through project metadata.
+- [x] Docs preserve the caveat that intervals are local uncertainty metadata, not calibration proof.
 
 ---
 
@@ -111,19 +128,19 @@ Internal scorecard capability only; no cross-project boundary is created.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] Overall Brier score has deterministic bootstrap CI metadata.
-- [ ] Overall ECE has deterministic bootstrap CI metadata.
-- [ ] Per-surface Brier/ECE summaries have deterministic bootstrap CI metadata.
-- [ ] Explicit bootstrap disable suppresses calibration bootstrap interval fields.
-- [ ] Existing calibration point metrics are unchanged.
-- [ ] Docs preserve the caveat that this is local metadata only.
+- [x] Overall Brier score has deterministic bootstrap CI metadata.
+- [x] Overall ECE has deterministic bootstrap CI metadata.
+- [x] Per-surface Brier/ECE summaries have deterministic bootstrap CI metadata.
+- [x] Explicit bootstrap disable suppresses calibration bootstrap interval fields.
+- [x] Existing calibration point metrics are unchanged.
+- [x] Docs preserve the caveat that this is local metadata only.
 
 > Process criteria:
-- [ ] Required tests pass
-- [ ] Full test suite passes
-- [ ] Type check status reported
-- [ ] Docs updated
-- [ ] Plan completed, committed, and pushed
+- [x] Required tests pass
+- [x] Full test suite passes
+- [x] Type check status reported
+- [x] Docs updated
+- [x] Plan completed, committed, and pushed
 
 ---
 
