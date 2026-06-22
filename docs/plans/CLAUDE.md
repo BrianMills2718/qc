@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 186 | Phase 0 package projects dir support | High | Planned | `PHASE0_PACKAGE_PROJECTS_DIR_SUPPORT.md` |
 
 ## Completed Plans
 
