@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 112 | D7 comparison preflight guard | High | Planned | `D7_COMPARISON_PREFLIGHT_GUARD.md` |
 
 ## Completed Plans
 

@@ -22,7 +22,9 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Continue through the ranked roadmap without pausing after each verified
+1. Execute Plan #112 (`D7_COMPARISON_PREFLIGHT_GUARD.md`): add an optional
+   protocol preflight guard to `compare-d7-retrieval` before scoring.
+2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
 **Completed checkpoint:** D7 retrieval prediction packages now carry
