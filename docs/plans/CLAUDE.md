@@ -6,7 +6,6 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 125 | D9 interpretive preference scorecard preflight guard | High | Planned | `D9_INTERPRETIVE_PREFERENCE_SCORECARD_PREFLIGHT_GUARD.md` |
 
 ## Completed Plans
 
@@ -98,6 +97,7 @@ Track all implementation work here.
 | D9 interpretive preference scorecard | Evaluation-harness follow-up: `make bench PREFERENCE=...` scores externally supplied forced-choice preference outcomes without claiming blind expert-parity evidence | `completed/D9_INTERPRETIVE_PREFERENCE_SCORECARD.md` |
 | D9 interpretive preference protocol package | Evaluation-harness follow-up: `make validate-d9-interpretive-preference-protocol` validates pre-evaluation D9 blind preference protocol metadata without claiming blind expert-parity evidence | `completed/D9_INTERPRETIVE_PREFERENCE_PROTOCOL_PACKAGE.md` |
 | D9 interpretive preference protocol result preflight | Evaluation-harness follow-up: `make d9-interpretive-preference-preflight` checks D9 result files against registered protocols without claiming blind expert-parity evidence | `completed/D9_INTERPRETIVE_PREFERENCE_PROTOCOL_RESULT_PREFLIGHT.md` |
+| D9 interpretive preference scorecard preflight guard | Evaluation-harness follow-up: `make bench D9_PROTOCOL=...` enforces D9 protocol/result preflight before scorecard/output/artifact writes | `completed/D9_INTERPRETIVE_PREFERENCE_SCORECARD_PREFLIGHT_GUARD.md` |
 | D8 GT fidelity scorecard | Evaluation-harness follow-up: `make bench GT_FIDELITY=...` scores externally supplied GT-fidelity rubric outcomes without claiming full GT or methodological saturation | `completed/D8_GT_FIDELITY_SCORECARD.md` |
 | D8 GT fidelity protocol package | Evaluation-harness follow-up: `make validate-d8-gt-fidelity-protocol` validates pre-evaluation D8 protocol metadata without claiming expert-rubric evidence | `completed/D8_GT_FIDELITY_PROTOCOL_PACKAGE.md` |
 | D8 GT fidelity protocol result preflight | Evaluation-harness follow-up: `make d8-gt-fidelity-preflight` checks D8 result files against registered protocols without claiming expert-rubric evidence | `completed/D8_GT_FIDELITY_PROTOCOL_RESULT_PREFLIGHT.md` |

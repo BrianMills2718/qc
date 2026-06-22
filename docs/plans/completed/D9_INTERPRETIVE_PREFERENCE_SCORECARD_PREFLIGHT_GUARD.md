@@ -1,6 +1,6 @@
 # Plan #125: D9 Interpretive Preference Scorecard Preflight Guard
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Plan #124 D9 interpretive-preference protocol/result preflight
@@ -81,17 +81,17 @@ Internal score-boundary guard only; no cross-project boundary is created.
 
 ### Capability Validation
 
-- [ ] `make bench D9_PROTOCOL=... PREFERENCE=...` runs D9 preflight before
+- [x] `make bench D9_PROTOCOL=... PREFERENCE=...` runs D9 preflight before
   scorecard generation.
-- [ ] Passing guarded scorecards include
+- [x] Passing guarded scorecards include
   `_meta.preflight_reports.d9_interpretive_preference`.
-- [ ] Passing guarded scorecards use the supplied protocol metadata for D9
+- [x] Passing guarded scorecards use the supplied protocol metadata for D9
   non-inferiority assessment.
-- [ ] Protocol file SHA-256 is included in `_meta.input_hashes`.
-- [ ] Command metadata and artifact manifests include the protocol path.
-- [ ] Mismatched D9 protocol/result inputs return JSON failure and do not write
+- [x] Protocol file SHA-256 is included in `_meta.input_hashes`.
+- [x] Command metadata and artifact manifests include the protocol path.
+- [x] Mismatched D9 protocol/result inputs return JSON failure and do not write
   `--output` or `--artifact-dir` artifacts.
-- [ ] Package manifests can pass
+- [x] Package manifests can pass
   `d9_interpretive_preference_protocol_file` through to the canonical bench
   path.
 
@@ -155,22 +155,22 @@ Internal score-boundary guard only; no cross-project boundary is created.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] D9 protocol/result preflight can be enforced at `make bench` score time.
-- [ ] Passing guarded scorecards include a D9 preflight report in `_meta`.
-- [ ] Passing guarded scorecards use the supplied protocol margin metadata for
+- [x] D9 protocol/result preflight can be enforced at `make bench` score time.
+- [x] Passing guarded scorecards include a D9 preflight report in `_meta`.
+- [x] Passing guarded scorecards use the supplied protocol margin metadata for
   D9 non-inferiority assessment without mutating saved project state.
-- [ ] Failing guarded runs block scorecard/output/artifact writes.
-- [ ] D9 protocol file hashes/paths are carried through scorecards, manifests,
+- [x] Failing guarded runs block scorecard/output/artifact writes.
+- [x] D9 protocol file hashes/paths are carried through scorecards, manifests,
   and package runner command mapping.
-- [ ] Docs state the guard is process/provenance only.
+- [x] Docs state the guard is process/provenance only.
 
 > Process criteria:
-- [ ] Required focused tests pass.
-- [ ] Focused Ruff check passes.
-- [ ] `make docs-check` passes.
-- [ ] Full `make check` passes or any failure is documented with evidence.
-- [ ] Type-check status is reported.
-- [ ] Verified work is committed and pushed.
+- [x] Required focused tests pass.
+- [x] Focused Ruff check passes.
+- [x] `make docs-check` passes.
+- [x] Full `make check` passes or any failure is documented with evidence.
+- [x] Type-check status is reported.
+- [x] Verified work is committed and pushed.
 
 ---
 
@@ -182,6 +182,39 @@ Internal score-boundary guard only; no cross-project boundary is created.
   validated protocol file as the authoritative in-memory source for
   `protocol_id`, `non_inferiority_margin`, and
   `registered_before_evaluation`.
+
+---
+
+## Outcome
+
+Implemented in `b4539e3`
+(`[Plan: D9_INTERPRETIVE_PREFERENCE_SCORECARD_PREFLIGHT_GUARD] Add D9 score-time guard`).
+`scripts/bench_phase0.py` now accepts
+`--d9-interpretive-preference-protocol-file`; `make bench` exposes it as
+`D9_PROTOCOL=...`; and strict Phase 0 package manifests can carry
+`d9_interpretive_preference_protocol_file`. Passing guarded runs include
+`_meta.preflight_reports.d9_interpretive_preference`, protocol/result input
+hashes, command provenance, and D9 non-inferiority assessment metadata sourced
+from the supplied protocol without mutating saved project state. Failing
+preflights emit machine-readable JSON and return before scorecard, output file,
+or artifact writes.
+
+Verification evidence:
+
+- TDD red before implementation: focused tests failed on missing
+  `d9_interpretive_preference_protocol_file_sha256`, missing
+  `--d9-interpretive-preference-protocol-file`, and strict package-manifest
+  rejection of `d9_interpretive_preference_protocol_file` (6 failed, 42
+  passed).
+- `python -m pytest tests/test_bench_phase0_script.py tests/test_phase0_benchmark_package.py tests/test_d9_interpretive_preference_preflight.py -q`
+  - 48 passed.
+- `python -m ruff check scripts/bench_phase0.py scripts/run_phase0_benchmark_package.py tests/test_bench_phase0_script.py tests/test_phase0_benchmark_package.py`
+  - all checks passed.
+- `make -n bench ID=project D9_PROTOCOL=protocol.json PREFERENCE=preference.json`
+  - routed to `scripts/bench_phase0.py --d9-interpretive-preference-protocol-file protocol.json --interpretive-preference-file preference.json`.
+- `make docs-check` - passed.
+- `make check` - 1001 passed, 1 skipped, 8 deselected; Ruff and docs checks
+  passed; type check is not yet configured.
 
 ---
 

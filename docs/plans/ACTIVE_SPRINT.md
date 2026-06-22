@@ -22,10 +22,22 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #125 (`D9_INTERPRETIVE_PREFERENCE_SCORECARD_PREFLIGHT_GUARD.md`):
-   enforce D9 protocol/result preflight at the Phase 0 scorecard boundary.
+1. Select and plan the next highest-value evaluation-harness lane from the
+   ranked roadmap.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
+
+**Completed checkpoint:** `make bench` now accepts `D9_PROTOCOL=...` and
+`scripts/bench_phase0.py --d9-interpretive-preference-protocol-file ...` to
+enforce D9 protocol/result preflight at score time. Failed preflight returns
+JSON with the preflight report and blocks scorecard/output/artifact writes;
+passing guarded scorecards include
+`_meta.preflight_reports.d9_interpretive_preference`, input hashes, command
+provenance, and package manifests include the protocol file, and the D9
+scorecard uses supplied protocol metadata for non-inferiority assessment
+without mutating saved state. This is score-time provenance only, not blind
+expert-parity evidence, interpretive-depth evidence, methodological-validity
+evidence, or SOTA evidence.
 
 **Completed checkpoint:** D9 interpretive-preference result files can now be
 preflighted against registered D9 protocols with
