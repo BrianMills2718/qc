@@ -25,6 +25,7 @@ _PATH_FLAGS = {
     "gold_file": "--gold-file",
     "d7_baselines_file": "--d7-baselines-file",
     "prompt_injection_file": "--prompt-injection-file",
+    "inv7_live_protocol_file": "--inv7-live-protocol-file",
     "d6_bias_protocol_file": "--d6-bias-protocol-file",
     "d4_codebook_quality_protocol_file": "--d4-codebook-quality-protocol-file",
     "d8_gt_fidelity_protocol_file": "--d8-gt-fidelity-protocol-file",
@@ -68,6 +69,10 @@ class Phase0BenchmarkPackage(BaseModel):
     prompt_injection_file: str | None = Field(
         default=None,
         description="Optional INV-7 prompt-injection fixture JSON path",
+    )
+    inv7_live_protocol_file: str | None = Field(
+        default=None,
+        description="Optional INV-7 live protocol JSON path",
     )
     d6_bias_protocol_file: str | None = Field(
         default=None,
