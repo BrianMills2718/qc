@@ -25,6 +25,7 @@ from qc_clean.schemas.domain import (
     ClaimSupportStatus,
     Code,
     CodeApplication,
+    CodeRelationship,
     Codebook,
     Corpus,
     CoreCategoryResult,
@@ -352,6 +353,69 @@ def test_higher_order_builders_mark_unanchored_claims_as_needing_anchors():
     assert any(claim.scope.participant_names == ["Alex"] for claim in claims)
     assert any(claim.scope.entity_ids == ["e1", "e2"] for claim in claims)
     assert any(claim.scope.code_ids == ["C1"] for claim in claims)
+
+
+def test_code_scoped_higher_order_claims_inherit_code_application_anchors():
+    """Higher-order claims with code scope cite existing exact code evidence."""
+    doc = Document(id="d1", name="d.txt", content="Alex: AI saved time.")
+    app = CodeApplication(
+        id="a1",
+        code_id="C1",
+        doc_id=doc.id,
+        quote_text="AI saved time",
+        start_char=6,
+        end_char=19,
+        quote_hash="hash1",
+    )
+    state = ProjectState(
+        corpus=Corpus(documents=[doc]),
+        codebook=Codebook(codes=[Code(id="C1", name="Efficiency")]),
+        code_applications=[app],
+        perspective_analysis=PerspectiveAnalysis(
+            participants=[
+                ParticipantPerspective(
+                    name="Alex",
+                    perspective_summary="Alex sees AI as a time saver.",
+                    codes_emphasized=["C1"],
+                )
+            ],
+        ),
+        code_relationships=[
+            CodeRelationship(
+                id="cr1",
+                source_code_id="C1",
+                target_code_id="C1",
+                relationship_type="reinforces",
+            )
+        ],
+        synthesis=Synthesis(
+            recommendations=[Recommendation(title="Train staff", supporting_themes=["C1"])],
+        ),
+        core_categories=[
+            CoreCategoryResult(
+                category_name="Managed adoption",
+                definition="AI adoption is staged and managed.",
+                related_categories=["C1"],
+            )
+        ],
+    )
+
+    claims = (
+        claims_for_perspectives(state)
+        + claims_for_relationships(state)
+        + claims_for_synthesis(state)
+        + claims_for_gt_categories(state)
+    )
+    anchored = [
+        claim
+        for claim in claims
+        if claim.origin_object_id in {"Alex", "cr1", "recommendation:0", "Managed adoption"}
+    ]
+
+    assert len(anchored) == 4
+    assert all(claim.support_status == ClaimSupportStatus.SUPPORTED for claim in anchored)
+    for claim in anchored:
+        assert [anchor.code_application_id for anchor in claim.supporting_anchors] == ["a1"]
 
 
 def test_cross_case_builder_uses_code_application_support():
