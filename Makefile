@@ -1,4 +1,4 @@
-.PHONY: help test test-quick test-e2e test-all bench bench-package write-phase0-adjudication-package validate-d3-gold validate-d7-gold validate-inv7-package validate-inv7-live-protocol inv7-live-preflight validate-d6-bias-protocol d6-bias-preflight validate-d4-codebook-quality-protocol d4-codebook-quality-preflight validate-d8-gt-fidelity-protocol d8-gt-fidelity-preflight validate-d9-interpretive-preference-protocol d9-interpretive-preference-preflight validate-confidence-calibration-protocol confidence-calibration-preflight validate-theoretical-sampling-protocol validate-d7-comparison-protocol d7-comparison-preflight validate-adjudication-responses validate-adjudication-protocol adjudication-protocol-preflight adjudication-response-preflight import-adjudication-responses lint-scope-phrasing export-audit-manifest verify-export-audit-manifest export-publish-preflight verify-export-audit-log run-d7-retrieval run-d7-live-baseline compare-d7-retrieval run-inv7-fixtures run-inv7-live-fixtures adjudication-sample check lint docs-check clean status cost errors
+.PHONY: help test test-quick test-e2e test-all bench bench-package write-phase0-adjudication-package validate-d3-gold validate-d7-gold validate-inv7-package validate-inv7-live-protocol inv7-live-preflight validate-d6-bias-protocol d6-bias-preflight validate-d4-codebook-quality-protocol d4-codebook-quality-preflight validate-d8-gt-fidelity-protocol d8-gt-fidelity-preflight validate-d9-interpretive-preference-protocol d9-interpretive-preference-preflight validate-confidence-calibration-protocol confidence-calibration-preflight validate-theoretical-sampling-protocol theoretical-sampling-preflight validate-d7-comparison-protocol d7-comparison-preflight validate-adjudication-responses validate-adjudication-protocol adjudication-protocol-preflight adjudication-response-preflight import-adjudication-responses lint-scope-phrasing export-audit-manifest verify-export-audit-manifest export-publish-preflight verify-export-audit-log run-d7-retrieval run-d7-live-baseline compare-d7-retrieval run-inv7-fixtures run-inv7-live-fixtures adjudication-sample check lint docs-check clean status cost errors
 
 DAYS ?= 7
 PROJECT ?= qualitative_coding
@@ -151,6 +151,15 @@ ifndef PROTOCOL
 	$(error PROTOCOL is required. Usage: make validate-theoretical-sampling-protocol PROTOCOL=protocol.json)
 endif
 	python scripts/validate_theoretical_sampling_protocol.py $(PROTOCOL)
+
+theoretical-sampling-preflight:  ## Preflight theoretical-sampling candidates/results against a protocol (PROTOCOL=protocol.json CANDIDATES=candidates.json [RESULTS=results.json])
+ifndef PROTOCOL
+	$(error PROTOCOL is required. Usage: make theoretical-sampling-preflight PROTOCOL=protocol.json CANDIDATES=candidates.json [RESULTS=results.json])
+endif
+ifndef CANDIDATES
+	$(error CANDIDATES is required. Usage: make theoretical-sampling-preflight PROTOCOL=protocol.json CANDIDATES=candidates.json [RESULTS=results.json])
+endif
+	python scripts/preflight_theoretical_sampling_protocol.py $(PROTOCOL) --candidates-file $(CANDIDATES) $(if $(RESULTS),--results-file $(RESULTS),)
 
 validate-adjudication-responses:  ## Validate completed adjudication sample responses (PACKAGE=sample.json)
 ifndef PACKAGE
