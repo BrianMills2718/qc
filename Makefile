@@ -131,6 +131,12 @@ ifndef PREFERENCE
 endif
 	python scripts/preflight_d9_interpretive_preference_protocol.py $(PROTOCOL) --preference-file $(PREFERENCE)
 
+validate-confidence-calibration-protocol:  ## Validate a pre-evaluation confidence-calibration protocol (PROTOCOL=protocol.json)
+ifndef PROTOCOL
+	$(error PROTOCOL is required. Usage: make validate-confidence-calibration-protocol PROTOCOL=protocol.json)
+endif
+	python scripts/validate_confidence_calibration_protocol.py $(PROTOCOL)
+
 validate-adjudication-responses:  ## Validate completed adjudication sample responses (PACKAGE=sample.json)
 ifndef PACKAGE
 	$(error PACKAGE is required. Usage: make validate-adjudication-responses PACKAGE=sample.json)
