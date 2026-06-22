@@ -84,9 +84,11 @@ Do not claim:
 - D7 disconfirmation scoring exists as a substrate, but no public gold-anchor
   benchmark result is counted.
 - Prompt-injection checks currently include deterministic structural fixtures
-  and one committed built-in live canary artifact
-  (`docs/benchmarks/inv7_live_canary_2026_06_22/`); broader held-out live
-  adversarial evaluation is still future work.
+  and committed built-in live canary artifacts: the original 3-fixture canary
+  (`docs/benchmarks/inv7_live_canary_2026_06_22/`) and the current 5-fixture v2
+  canary (`docs/benchmarks/inv7_live_canary_v2_2026_06_22/`) covering custom
+  prompt override surfaces. Broader held-out live adversarial evaluation is
+  still future work.
 - GT remains grounded-theory-inspired unless a theoretical sampling and
   category-saturation protocol is completed and evaluated.
 
