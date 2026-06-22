@@ -1,12 +1,28 @@
 # Plan #60: Confidence Calibration Wilson Intervals
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** None
 **Blocks:** Calibration benchmark uncertainty metadata
 
 ---
+
+## Outcome
+
+Confidence-calibration scorecards now report Wilson `accuracy_ci` metadata at
+the overall summary level, for each calibration bin, and for each per-surface
+summary. Empty bins keep explicit undefined interval bounds. This is local
+uncertainty metadata for supplied confidence/correctness records only, not proof
+that confidence is calibrated.
+
+## Verification
+
+- `python -m pytest tests/test_bench_phase0.py tests/test_bench_phase0_script.py -q` - 80 passed
+- `python -m ruff check qc_clean/core/bench.py tests/test_bench_phase0.py tests/test_bench_phase0_script.py` - clean
+- `python scripts/check_markdown_links.py` - clean
+- `python scripts/sync_plan_status.py --check` - clean
+- `make check` - 771 passed, 1 skipped, 8 deselected; lint and docs checks clean; type check not configured
 
 ## Gap
 
@@ -56,11 +72,11 @@ Internal scorecard capability only; no cross-project boundary is created.
 
 ### Capability Validation
 
-- [ ] Overall confidence-calibration summary includes `accuracy_ci`.
-- [ ] Non-empty calibration bins include Wilson `accuracy_ci` with successes and denominator.
-- [ ] Empty calibration bins include Wilson `accuracy_ci` with `None` bounds.
-- [ ] Per-surface summaries inherit the same accuracy interval behavior.
-- [ ] Docs preserve the caveat that intervals are local uncertainty metadata, not calibration proof.
+- [x] Overall confidence-calibration summary includes `accuracy_ci`.
+- [x] Non-empty calibration bins include Wilson `accuracy_ci` with successes and denominator.
+- [x] Empty calibration bins include Wilson `accuracy_ci` with `None` bounds.
+- [x] Per-surface summaries inherit the same accuracy interval behavior.
+- [x] Docs preserve the caveat that intervals are local uncertainty metadata, not calibration proof.
 
 ---
 
@@ -111,18 +127,18 @@ Internal scorecard capability only; no cross-project boundary is created.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] Overall calibration score includes Wilson `accuracy_ci`.
-- [ ] Calibration bins include Wilson `accuracy_ci`.
-- [ ] Surface summaries include Wilson `accuracy_ci`.
-- [ ] Existing calibration metrics are unchanged.
-- [ ] Docs preserve the caveat that this is local metadata only.
+- [x] Overall calibration score includes Wilson `accuracy_ci`.
+- [x] Calibration bins include Wilson `accuracy_ci`.
+- [x] Surface summaries include Wilson `accuracy_ci`.
+- [x] Existing calibration metrics are unchanged.
+- [x] Docs preserve the caveat that this is local metadata only.
 
 > Process criteria:
-- [ ] Required tests pass
-- [ ] Full test suite passes
-- [ ] Type check status reported
-- [ ] Docs updated
-- [ ] Plan completed, committed, and pushed
+- [x] Required tests pass
+- [x] Full test suite passes
+- [x] Type check status reported
+- [x] Docs updated
+- [x] Plan completed, committed, and pushed
 
 ---
 
