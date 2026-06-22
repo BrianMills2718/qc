@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 58 | Exact-key Krippendorff alpha scorecard | High | Planned | `EXACT_KEY_KRIPPENDORFF_ALPHA_SCORECARD.md` |
 
 ## Completed Plans
 
