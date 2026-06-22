@@ -1,10 +1,47 @@
 # Plan #98: Export Publish Preflight
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Export audit manifest generation and verification
 **Blocks:** explicit publish/handoff policy gate; future signed/append-only audit log
+
+---
+
+## Outcome
+
+Implemented a strict local export publish/handoff preflight:
+
+- `qc_clean/core/export/publish_preflight.py` exposes
+  `run_export_publish_preflight`.
+- `scripts/export_publish_preflight.py` emits JSON and exits nonzero on missing
+  manifests, invalid manifests, or failed manifest/artifact/project-state
+  verification.
+- `make export-publish-preflight MANIFEST=... [BASE_DIR=...] [ID=...]` provides
+  the agent-drivable gate.
+- `CLAUDE.md`, generated `AGENTS.md`, and
+  `docs/PROJECT_THEORY_AND_GOALS.md` document the command as local
+  integrity/provenance metadata, not signing, append-only logging,
+  methodological validity evidence, or a full tamper-evident audit substrate.
+
+Implementation commit: `d135d35`
+
+## Verification
+
+- TDD red: initial `python -m pytest tests/test_export_publish_preflight.py -q`
+  failed with `ModuleNotFoundError: No module named
+  'qc_clean.core.export.publish_preflight'`.
+- Focused behavior: `python -m pytest tests/test_export_publish_preflight.py -q`
+  -> 5 passed.
+- Focused lint: `python -m ruff check
+  qc_clean/core/export/publish_preflight.py
+  scripts/export_publish_preflight.py tests/test_export_publish_preflight.py`
+  -> all checks passed.
+- Command discoverability: `make help` lists `export-publish-preflight`.
+- Documentation governance: `make docs-check` passed.
+- Full gate: `make check` -> 873 passed, 1 skipped, 8 deselected; Ruff and
+  docs-check passed; type check remains not configured.
+- Commit `d135d35` was pushed to `main`.
 
 ---
 
@@ -126,26 +163,26 @@ around existing local hash verification.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] Preflight requires an existing manifest and fails if missing.
-- [ ] Preflight passes only when export-audit manifest verification is
+- [x] Preflight requires an existing manifest and fails if missing.
+- [x] Preflight passes only when export-audit manifest verification is
   `verified`.
-- [ ] Preflight propagates structured verifier failures.
-- [ ] Optional project-state hash checking is supported.
-- [ ] Script and Make target are agent-drivable and emit JSON.
-- [ ] Docs state this is an explicit local publish/handoff integrity gate, not a
+- [x] Preflight propagates structured verifier failures.
+- [x] Optional project-state hash checking is supported.
+- [x] Script and Make target are agent-drivable and emit JSON.
+- [x] Docs state this is an explicit local publish/handoff integrity gate, not a
   default export behavior and not a full tamper-evident audit substrate.
 
 > Process criteria:
-- [ ] Required focused tests pass.
-- [ ] Full `make check` passes or any failure is documented with evidence.
-- [ ] Type-check status is reported.
-- [ ] Verified work is committed and pushed.
+- [x] Required focused tests pass.
+- [x] Full `make check` passes or any failure is documented with evidence.
+- [x] Type-check status is reported.
+- [x] Verified work is committed and pushed.
 
 ---
 
 ## Open Questions
 
-- [ ] Should preflight become mandatory for public release packaging? - Status:
+- [x] Should preflight become mandatory for public release packaging? - Status:
   DEFERRED | Why it matters: this slice provides the gate; release policy should
   be a separate decision.
 

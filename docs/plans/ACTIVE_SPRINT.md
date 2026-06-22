@@ -22,10 +22,10 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #98 (`EXPORT_PUBLISH_PREFLIGHT.md`): add an explicit strict
-   export publish/handoff preflight that requires a valid export-audit manifest
-   when requested, without making sidecars default or claiming signed
-   append-only audit.
+1. Create and execute the next audit-substrate slice:
+   `EXPORT_AUDIT_EVENT_LOG.md`, a local export-audit event log for manifest
+   write/verify/preflight events with hash-linked event records, without
+   claiming signing, immutable storage, or full tamper-evidence.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
@@ -71,7 +71,12 @@ append-only audit log. `qc_cli.py project export --audit-manifest ...
 for JSON/CSV/Markdown/QDPX exports without changing default export behavior.
 MCP JSON/Markdown export tools can now do the same with confined sidecars under
 `EXPORTS_DIR`; default MCP export return payloads are unchanged when audit flags
-are absent.
+are absent. `make export-publish-preflight` now provides a strict local
+publish/handoff gate that requires an existing verified export-audit manifest
+and can include current project-state hash checking when `ID=<project_id>` is
+supplied; this is still local integrity/provenance metadata, not signing,
+append-only logging, methodological validity evidence, or a full
+tamper-evident audit substrate.
 MCP now exposes `qc_review_decisions` for agent-driven review decisions,
 including claim targets with rationale preservation, while keeping the old
 `qc_review_codes` tool compatible. MCP also exposes `qc_review_claims` as a
