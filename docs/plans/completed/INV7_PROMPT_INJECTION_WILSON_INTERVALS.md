@@ -1,12 +1,28 @@
 # Plan #65: INV-7 Prompt-Injection Wilson Intervals
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** None
 **Blocks:** INV-7 fixture scorecard uncertainty metadata
 
 ---
+
+## Outcome
+
+INV-7 prompt-injection fixture scorecards now report Wilson interval metadata
+for pass rates and attack-success rates overall and by prompt surface. The
+intervals reuse the existing passed/failed and total fixture counts. This
+remains local uncertainty metadata for supplied fixture outcomes, not proof of
+prompt-injection robustness.
+
+## Verification
+
+- `python -m pytest tests/test_bench_phase0.py -q` - 54 passed
+- `python -m ruff check qc_clean/core/bench.py tests/test_bench_phase0.py` - clean
+- `python scripts/check_markdown_links.py` - clean
+- `python scripts/sync_plan_status.py --check` - clean
+- `make check` - 773 passed, 1 skipped, 8 deselected; lint and docs checks clean; type check not configured
 
 ## Gap
 
@@ -54,12 +70,12 @@ Internal scorecard capability only; no cross-project boundary is created.
 
 ### Capability Validation
 
-- [ ] Overall INV-7 scorecard includes `pass_rate_ci`.
-- [ ] Overall INV-7 scorecard includes `attack_success_rate_ci`.
-- [ ] Per-surface INV-7 summaries include `pass_rate_ci`.
-- [ ] Per-surface INV-7 summaries include `attack_success_rate_ci`.
-- [ ] Interval counts match existing passed/failed and total fixture counts.
-- [ ] Docs preserve the caveat that intervals are local uncertainty metadata, not prompt-injection robustness proof.
+- [x] Overall INV-7 scorecard includes `pass_rate_ci`.
+- [x] Overall INV-7 scorecard includes `attack_success_rate_ci`.
+- [x] Per-surface INV-7 summaries include `pass_rate_ci`.
+- [x] Per-surface INV-7 summaries include `attack_success_rate_ci`.
+- [x] Interval counts match existing passed/failed and total fixture counts.
+- [x] Docs preserve the caveat that intervals are local uncertainty metadata, not prompt-injection robustness proof.
 
 ---
 
@@ -105,17 +121,17 @@ Internal scorecard capability only; no cross-project boundary is created.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] Overall pass/attack rates have Wilson interval metadata.
-- [ ] Per-surface pass/attack rates have Wilson interval metadata.
-- [ ] Existing INV-7 point metrics are unchanged.
-- [ ] Docs preserve the caveat that this is local metadata only.
+- [x] Overall pass/attack rates have Wilson interval metadata.
+- [x] Per-surface pass/attack rates have Wilson interval metadata.
+- [x] Existing INV-7 point metrics are unchanged.
+- [x] Docs preserve the caveat that this is local metadata only.
 
 > Process criteria:
-- [ ] Required tests pass
-- [ ] Full test suite passes
-- [ ] Type check status reported
-- [ ] Docs updated
-- [ ] Plan completed, committed, and pushed
+- [x] Required tests pass
+- [x] Full test suite passes
+- [x] Type check status reported
+- [x] Docs updated
+- [x] Plan completed, committed, and pushed
 
 ---
 

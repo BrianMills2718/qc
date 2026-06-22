@@ -6,7 +6,6 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 65 | INV-7 prompt-injection Wilson intervals | High | Planned | `INV7_PROMPT_INJECTION_WILSON_INTERVALS.md` |
 
 ## Completed Plans
 
@@ -76,6 +75,7 @@ Track all implementation work here.
 | D4 codebook-quality bootstrap intervals | Evaluation-harness follow-up: D4 codebook-quality scorecards report deterministic local bootstrap intervals for rubric means without claiming blind expert-panel evidence | `completed/D4_CODEBOOK_QUALITY_BOOTSTRAP_INTERVALS.md` |
 | D8 GT-fidelity bootstrap intervals | Evaluation-harness follow-up: D8 GT-fidelity scorecards report deterministic local bootstrap intervals for rubric means without claiming expert-rubric acceptance or full GT evidence | `completed/D8_GT_FIDELITY_BOOTSTRAP_INTERVALS.md` |
 | D9 tie-rate Wilson intervals | Evaluation-harness follow-up: D9 interpretive-preference scorecards report Wilson intervals for tie rates without claiming blind expert parity | `completed/D9_TIE_RATE_WILSON_INTERVALS.md` |
+| INV-7 prompt-injection Wilson intervals | Evaluation-harness follow-up: INV-7 prompt-injection fixture scorecards report Wilson intervals for pass and attack-success rates without claiming prompt-injection robustness | `completed/INV7_PROMPT_INJECTION_WILSON_INTERVALS.md` |
 
 ## Status Key
 
