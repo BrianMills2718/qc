@@ -6,7 +6,6 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 135 | D7 live baseline preflight support | High | In Progress | `D7_LIVE_BASELINE_PREFLIGHT_SUPPORT.md` |
 
 ## Completed Plans
 
@@ -75,6 +74,7 @@ Track all implementation work here.
 | D7 retrieval CLI surfaces | Evaluation-harness follow-up: `qc_cli.py run-d7-retrieval` and `qc_cli.py compare-d7-retrieval` expose existing D7 retrieval export/comparison scripts through the canonical CLI | `completed/D7_RETRIEVAL_CLI_SURFACES.md` |
 | D7 retrieval export script tests | Testing follow-up: direct script-boundary tests cover `scripts/run_d7_retrieval.py` stdout/output, JSON error, and option forwarding behavior | `completed/D7_RETRIEVAL_EXPORT_SCRIPT_TESTS.md` |
 | D7 live candidate baseline export | Evaluation-harness follow-up: `make run-d7-live-baseline` and `qc_cli.py run-d7-live-baseline` export opt-in live candidate-selection D7 baseline packages for `BASELINES=` without claiming held-out evidence | `completed/D7_LIVE_CANDIDATE_BASELINE_EXPORT.md` |
+| D7 live baseline preflight support | Evaluation-harness follow-up: D7 comparison protocols and preflights can now guard opt-in live candidate-selection baseline packages via `baseline_mode="live_candidate_selector"` without claiming held-out evidence | `completed/D7_LIVE_BASELINE_PREFLIGHT_SUPPORT.md` |
 | INV-7 fixture CLI surfaces | Evaluation-harness follow-up: `qc_cli.py run-inv7-fixtures` and `qc_cli.py run-inv7-live-fixtures` expose existing INV-7 fixture runner scripts through the canonical CLI | `completed/INV7_FIXTURE_CLI_SURFACES.md` |
 | D3 application validity scorecard | Evaluation-harness follow-up: `make bench D3_GOLD=...` reports exact code/source-anchor application-validity scores when adjudicated D3 gold is supplied | `completed/D3_APPLICATION_VALIDITY_SCORECARD.md` |
 | D3 held-out gold-set scaffold | Evaluation-harness follow-up: versioned D3 gold-set packages can be validated and used as `--d3-gold-file` inputs without claiming held-out results | `completed/D3_HELD_OUT_GOLD_SET_SCAFFOLD.md` |

@@ -22,10 +22,20 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #135 (`D7_LIVE_BASELINE_PREFLIGHT_SUPPORT.md`): allow guarded
-   D7 comparison preflight to validate opt-in live baseline packages.
+1. Select and execute the next highest-value documented roadmap lane with a
+   fresh plan and explicit acceptance criteria.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
+
+**Completed checkpoint:** D7 comparison protocol/preflight can now guard
+opt-in live candidate-selection baseline packages as well as retrieval
+prediction packages. Protocol expectations remain backward-compatible for
+retrieval packages and can now declare
+`baseline_mode="live_candidate_selector"` plus expected model/config metadata;
+preflight accepts matching live packages and rejects model drift before guarded
+comparison output is written. This is guard/provenance infrastructure only, not
+a committed held-out D7 result, live-baseline evidence, methodological-validity
+evidence, or superiority evidence.
 
 **Completed checkpoint:** Opt-in live D7 candidate-selection baseline packages
 can now be generated through `make run-d7-live-baseline` and

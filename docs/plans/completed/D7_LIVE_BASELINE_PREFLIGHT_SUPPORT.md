@@ -1,6 +1,6 @@
 # Plan #135: D7 Live Baseline Preflight Support
 
-**Status:** In Progress
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Plan #134 live D7 baseline package shape
@@ -61,13 +61,13 @@ The new live fields are opt-in for expected live baseline packages.
 
 ### Capability Validation
 
-- [ ] Existing retrieval protocol packages remain valid with no schema changes
+- [x] Existing retrieval protocol packages remain valid with no schema changes
   required.
-- [ ] Protocol expectations can declare `baseline_mode="live_candidate_selector"`
+- [x] Protocol expectations can declare `baseline_mode="live_candidate_selector"`
   and `model=<model>`.
-- [ ] Preflight accepts a matching live candidate-selection package.
-- [ ] Preflight rejects live package model/metadata mismatches.
-- [ ] Guarded comparison script can include a live package and a passing
+- [x] Preflight accepts a matching live candidate-selection package.
+- [x] Preflight rejects live package model/metadata mismatches.
+- [x] Guarded comparison script can include a live package and a passing
   preflight report.
 
 ---
@@ -127,24 +127,55 @@ The new live fields are opt-in for expected live baseline packages.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] Retrieval comparison protocols without `baseline_mode` still validate and
+- [x] Retrieval comparison protocols without `baseline_mode` still validate and
   behave as retrieval expectations.
-- [ ] Live baseline expectations can specify `baseline_mode`,
+- [x] Live baseline expectations can specify `baseline_mode`,
   `retrieval_mode`, `candidates_per_claim`, `max_targets`, `model`,
   `trace_id`, `max_budget`, and optional file hash.
-- [ ] Preflight accepts matching live baseline packages and rejects mismatched
+- [x] Preflight accepts matching live baseline packages and rejects mismatched
   live model metadata.
-- [ ] Guarded comparison script can include a live baseline prediction package.
-- [ ] Docs preserve that this is guard/provenance infrastructure, not a
+- [x] Guarded comparison script can include a live baseline prediction package.
+- [x] Docs preserve that this is guard/provenance infrastructure, not a
   committed held-out D7 result or superiority claim.
 
 > Process criteria:
-- [ ] Required focused tests pass.
-- [ ] Focused Ruff check passes.
-- [ ] `make docs-check` passes.
-- [ ] Full `make check` passes or any failure is documented with evidence.
-- [ ] Type-check status is reported.
-- [ ] Verified work is committed and pushed.
+- [x] Required focused tests pass.
+- [x] Focused Ruff check passes.
+- [x] `make docs-check` passes.
+- [x] Full `make check` passes or any failure is documented with evidence.
+- [x] Type-check status is reported.
+- [x] Verified work is committed and pushed.
+
+---
+
+## Outcome
+
+Implemented and pushed as `1ab03b5`
+(`[Plan: D7_LIVE_BASELINE_PREFLIGHT_SUPPORT] Guard live D7 baselines`).
+
+Verification evidence:
+
+- TDD red:
+  `python -m pytest tests/test_d7_comparison_preflight.py tests/test_d7_comparison_guard.py -q`
+  initially failed because live baseline packages were rejected as invalid D7
+  retrieval prediction packages and the guarded script blocked before writing
+  output (`3 failed, 8 passed`).
+- Focused preflight/guard tests:
+  `python -m pytest tests/test_d7_comparison_preflight.py tests/test_d7_comparison_guard.py -q`
+  passed (`11 passed`).
+- Live baseline producer tests:
+  `python -m pytest tests/test_d7_live_baseline.py tests/test_run_d7_live_baseline_script.py tests/test_qc_cli_d7_live_baseline.py -q`
+  passed (`6 passed`).
+- Combined focused tests:
+  `python -m pytest tests/test_d7_comparison_preflight.py tests/test_d7_comparison_guard.py tests/test_d7_live_baseline.py tests/test_run_d7_live_baseline_script.py tests/test_qc_cli_d7_live_baseline.py -q`
+  passed (`17 passed`).
+- Focused Ruff:
+  `python -m ruff check qc_clean/core/d7_comparison_protocol.py qc_clean/core/d7_comparison_preflight.py tests/test_d7_comparison_preflight.py tests/test_d7_comparison_guard.py`
+  passed.
+- Docs gate: `make docs-check` passed.
+- Full gate: `make check` passed (`1032 passed, 1 skipped, 8 deselected`);
+  Ruff and docs checks passed inside the gate.
+- Type check remains not configured in this repo, as reported by `make check`.
 
 ---
 
