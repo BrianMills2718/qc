@@ -12,6 +12,7 @@ from qc_clean.schemas.domain import (
     ClaimKind,
     ClaimScope,
     ClaimSupportStatus,
+    CorpusScope,
     Code,
     CodeApplication,
     Codebook,
@@ -387,6 +388,77 @@ def test_scorecard_reports_claim_anchor_coverage_breakdowns():
     assert coverage["by_support_status"]["needs_anchor"]["claims_needing_anchor"] == 1
     assert coverage["by_support_status"]["supported"]["anchored_claims"] == 2
     assert "methodological validity" in coverage["note"]
+
+
+@pytest.mark.parametrize(
+    ("scope", "expected_status", "expected_filled_count", "expected_warning_codes"),
+    [
+        (None, "missing", 0, ["missing_corpus_scope"]),
+        (CorpusScope(), "empty", 0, ["empty_corpus_scope"]),
+        (
+            CorpusScope(population="Clinic staff"),
+            "missing_sampling_frame",
+            1,
+            ["missing_sampling_frame"],
+        ),
+        (
+            CorpusScope(
+                phenomenon="AI workflow adoption",
+                population="Clinic staff",
+                sampling_frame="Pilot clinic interviewees",
+                inclusion_criteria=["Worked in the pilot"],
+                exclusion_criteria=["Vendors"],
+                notes="Bounded to pilot settings.",
+            ),
+            "complete",
+            6,
+            [],
+        ),
+    ],
+)
+def test_scorecard_reports_corpus_scope_adequacy_states(
+    scope,
+    expected_status,
+    expected_filled_count,
+    expected_warning_codes,
+):
+    state = ProjectState(
+        name="scope",
+        config=ProjectConfig(methodology=Methodology.THEMATIC_ANALYSIS),
+        corpus=Corpus(documents=[Document(name="d.txt", content="x")]),
+        corpus_scope=scope,
+        claims=[_scope_scorecard_claim()],
+    )
+
+    adequacy = phase0_scorecard(state)["corpus_scope_adequacy"]
+
+    assert adequacy["scope_status"] == expected_status
+    assert adequacy["has_scope_record"] is (scope is not None)
+    assert adequacy["document_count"] == 1
+    assert adequacy["claim_count"] == 1
+    assert adequacy["claims_require_scope_boundary"] is True
+    assert adequacy["filled_field_count"] == expected_filled_count
+    assert adequacy["field_count"] == 6
+    assert adequacy["field_completion_rate"] == pytest.approx(expected_filled_count / 6)
+    assert adequacy["minimum_boundary_recorded"] is (expected_status == "complete")
+    assert adequacy["population_without_sampling_frame"] is (
+        expected_status == "missing_sampling_frame"
+    )
+    assert [warning["code"] for warning in adequacy["warnings"]] == expected_warning_codes
+    assert set(adequacy["field_completeness"]) == {
+        "phenomenon",
+        "population",
+        "sampling_frame",
+        "inclusion_criteria",
+        "exclusion_criteria",
+        "notes",
+    }
+    if expected_status == "complete":
+        assert all(adequacy["field_completeness"].values())
+    if expected_status == "missing_sampling_frame":
+        assert adequacy["field_completeness"]["population"] is True
+        assert adequacy["field_completeness"]["sampling_frame"] is False
+    assert "does not validate sampling-frame adequacy" in adequacy["note"]
 
 
 def test_scorecard_grounding_rate_one_when_no_applications():
@@ -2712,6 +2784,18 @@ def _negative_case_claim(target_claim_id: str, anchor: ClaimAnchor) -> AnalyticC
         origin_object_type="negative_case",
         origin_object_id=f"negative:{target_claim_id}:{anchor.start_char}",
         contrary_anchors=[anchor],
+    )
+
+
+def _scope_scorecard_claim() -> AnalyticClaim:
+    return AnalyticClaim(
+        claim_kind=ClaimKind.SYNTHESIS_FINDING,
+        source_stage="synthesis",
+        claim_text="AI changed workflow priorities.",
+        scope=ClaimScope(corpus_level=True),
+        origin_object_type="synthesis_key_finding",
+        origin_object_id="finding:scope",
+        support_status=ClaimSupportStatus.NEEDS_ANCHOR,
     )
 
 

@@ -34,6 +34,7 @@ from qc_clean.core.pipeline.irr import (
 )
 from qc_clean.core.pipeline.saturation import assess_category_saturation
 from qc_clean.core.segmentation import compute_coverage
+from qc_clean.core.scope_lint import scope_status_for_lint
 from qc_clean.schemas.domain import ClaimAnchor, ClaimKind, ProjectState
 
 
@@ -56,6 +57,36 @@ _CALIBRATION_BOOTSTRAP_EXTRA_KEY = "phase0_calibration_bootstrap"
 _COUNTERFACTUAL_BOOTSTRAP_EXTRA_KEY = "phase0_counterfactual_bootstrap"
 DEFAULT_OBSERVABILITY_DB_PATH = Path.home() / "projects" / "data" / "llm_observability.db"
 _WILSON_Z_95 = 1.959963984540054
+_CORPUS_SCOPE_FIELDS = (
+    "phenomenon",
+    "population",
+    "sampling_frame",
+    "inclusion_criteria",
+    "exclusion_criteria",
+    "notes",
+)
+_CORPUS_SCOPE_WARNING_BY_STATUS = {
+    "missing": {
+        "code": "missing_corpus_scope",
+        "message": (
+            "No corpus scope is recorded. Claim-bearing outputs must be bounded "
+            "to the loaded documents only."
+        ),
+    },
+    "empty": {
+        "code": "empty_corpus_scope",
+        "message": (
+            "A corpus scope record exists, but no boundary details are specified."
+        ),
+    },
+    "missing_sampling_frame": {
+        "code": "missing_sampling_frame",
+        "message": (
+            "A corpus population is recorded without a sampling frame; the "
+            "population field is not a defensible generalization boundary."
+        ),
+    },
+}
 _HUMAN_CEILING_EXACT_METRICS = ("recall", "precision", "f1")
 _CODEBOOK_QUALITY_METRICS = ("clarity", "specificity", "usefulness", "grounding")
 _GT_FIDELITY_METRICS = (
@@ -636,6 +667,8 @@ def phase0_scorecard(state: ProjectState) -> Dict[str, Any]:
         "grounding": grounding_scorecard(state),
         # D2 — coverage over the segment universe (INV-8 denominator).
         "coverage": coverage_scorecard(state),
+        # Corpus boundary — scope-record completeness, not sampling validity.
+        "corpus_scope_adequacy": corpus_scope_adequacy_scorecard(state),
         # INV-9 — structural claim-ledger source-anchor coverage.
         "claim_anchor_coverage": claim_anchor_coverage_scorecard(state),
         # D3 — application validity when human/adjudicated gold is present.
@@ -784,6 +817,55 @@ def coverage_scorecard(state: ProjectState) -> dict[str, Any]:
         examined_segments,
     )
     return report
+
+
+def corpus_scope_adequacy_scorecard(state: ProjectState) -> dict[str, Any]:
+    """Serialize deterministic corpus-scope record completeness accounting."""
+    scope_status = scope_status_for_lint(state)
+    field_completeness = _corpus_scope_field_completeness(state)
+    filled_field_count = sum(1 for value in field_completeness.values() if value)
+    warnings = []
+    if scope_status != "complete":
+        warnings.append({
+            **_CORPUS_SCOPE_WARNING_BY_STATUS[scope_status],
+            "applies_to": "corpus_scope",
+        })
+
+    return {
+        "scope_status": scope_status,
+        "has_scope_record": state.corpus_scope is not None,
+        "document_count": state.corpus.num_documents,
+        "claim_count": len(state.claims),
+        "claims_require_scope_boundary": bool(state.claims),
+        "field_completeness": field_completeness,
+        "filled_field_count": filled_field_count,
+        "field_count": len(_CORPUS_SCOPE_FIELDS),
+        "field_completion_rate": filled_field_count / len(_CORPUS_SCOPE_FIELDS),
+        "minimum_boundary_recorded": scope_status == "complete",
+        "population_without_sampling_frame": scope_status == "missing_sampling_frame",
+        "warnings": warnings,
+        "note": (
+            "Deterministic corpus-scope record accounting only; this does not "
+            "validate sampling-frame adequacy, population generalization, "
+            "methodological validity, or SOTA evidence."
+        ),
+    }
+
+
+def _corpus_scope_field_completeness(state: ProjectState) -> dict[str, bool]:
+    """Return deterministic booleans for every CorpusScope field."""
+    if state.corpus_scope is None:
+        return {field: False for field in _CORPUS_SCOPE_FIELDS}
+
+    scope = state.corpus_scope
+    return {
+        "phenomenon": bool(scope.phenomenon),
+        "population": bool(scope.population),
+        "sampling_frame": bool(scope.sampling_frame),
+        "inclusion_criteria": bool(scope.inclusion_criteria),
+        "exclusion_criteria": bool(scope.exclusion_criteria),
+        "notes": bool(scope.notes),
+    }
 
 
 def claim_anchor_coverage_scorecard(state: ProjectState) -> dict[str, Any]:
