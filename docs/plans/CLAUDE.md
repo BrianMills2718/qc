@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 135 | D7 live baseline preflight support | High | In Progress | `D7_LIVE_BASELINE_PREFLIGHT_SUPPORT.md` |
 
 ## Completed Plans
 
