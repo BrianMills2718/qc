@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 123 | D9 interpretive preference protocol package | High | Planned | `D9_INTERPRETIVE_PREFERENCE_PROTOCOL_PACKAGE.md` |
 
 ## Completed Plans
 
