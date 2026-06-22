@@ -1,6 +1,6 @@
 # Plan #82: INV-11 Narrow Surface Warnings
 
-**Status:** Implemented
+**Status:** Completed
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Plan #22 INV-11 hard invalidation
@@ -120,6 +120,13 @@ new shared capability.
 
 - `python -m pytest tests/test_mcp_server.py::TestInspection::test_get_codebook tests/test_mcp_server.py::TestInspection::test_get_codebook_surfaces_data_warnings tests/test_graph_ui.py::TestCodeGraphEndpoint::test_code_graph_surfaces_data_warnings tests/test_graph_ui.py::TestEntityGraphEndpoint::test_entity_graph_surfaces_data_warnings tests/test_graph_ui.py -q` — 17 passed.
 - `make check` — 804 passed, 1 skipped, 8 deselected; lint/docs passed; type check not yet configured.
+
+## Outcome
+
+MCP `qc_get_codebook` and graph code/entity data responses now include
+`data_warnings` when state warnings exist. Warning-free responses remain
+unchanged. INV-11 remains partial because stale higher-order outputs are
+invalidated rather than auto-recomputed.
 
 ---
 

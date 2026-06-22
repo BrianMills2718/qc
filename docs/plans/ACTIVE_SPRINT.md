@@ -22,12 +22,10 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #82, INV-11 narrow surface warnings, without claiming
-   auto-recompute or full stale-output handling.
-2. Choose the next highest-value unmet evaluation-harness, review, grounding, or
+1. Choose the next highest-value unmet evaluation-harness, review, grounding, or
    scope-discipline lane that can be advanced without pretending held-out expert
    data exists.
-3. Continue through the ranked roadmap without pausing after each verified
+2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
 **Completed checkpoint:** Corpus-scope warning propagation now covers Markdown,
@@ -45,7 +43,9 @@ including claim targets with rationale preservation, while keeping the old
 bounded claim-review target listing for agent workflows.
 Example-quote anchoring now derives `speaker` from containing same-document
 segments when available; speaker attribution remains best-effort and is not part
-of hash verification.
+of hash verification. INV-11 `data_warnings` now also surface on MCP
+`qc_get_codebook` and graph code/entity data responses; stale-output handling
+still remains invalidation, not auto-recompute.
 Phase 0 scorecards and artifact manifests now include
 run-configuration hashes for persisted methodology/model/config metadata while
 marking prompt hashes as not-run. D10 cost/latency now preserves LLM-only fields
