@@ -92,6 +92,7 @@ class ThematicCodingStage(PipelineStage):
                     quote, state.corpus.documents,
                     code_id=tc.id, codebook_version=codebook.version,
                     confidence=tc.discovery_confidence,
+                    segments=state.segments,
                 )
                 if app is not None:
                     all_applications.append(app)

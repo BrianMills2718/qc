@@ -156,13 +156,42 @@ def resolve_against_docs(quote: str, documents: Sequence) -> DocSpanMatch:
     )
 
 
-def resolve_and_anchor(quote, documents, *, code_id, codebook_version, confidence):
+def _speaker_for_containing_segment(
+    doc_id: str,
+    start_char: int,
+    end_char: int,
+    segments: Optional[Sequence] = None,
+) -> Optional[str]:
+    """Return the speaker for the same-document segment containing a span."""
+    if not segments:
+        return None
+    for segment in segments:
+        if (
+            segment.doc_id == doc_id
+            and segment.start_char <= start_char
+            and end_char <= segment.end_char
+            and segment.speaker
+        ):
+            return segment.speaker
+    return None
+
+
+def resolve_and_anchor(
+    quote,
+    documents,
+    *,
+    code_id,
+    codebook_version,
+    confidence,
+    segments: Optional[Sequence] = None,
+):
     """Resolve ``quote`` across ``documents`` and build an anchored application.
 
     Returns ``(CodeApplication | None, MatchStatus)``. UNIQUE → a fully anchored
     application (doc_id + offsets + hash); AMBIGUOUS / NONE → ``(None, status)`` so
     the caller can drop it and count the reason. Shared by the thematic and both
-    incremental coding paths (was duplicated three times).
+    incremental coding paths (was duplicated three times). When ``segments`` are
+    supplied, speaker is copied from the containing same-document segment.
     """
     from qc_clean.schemas.domain import CodeApplication, Provenance
     m = resolve_against_docs(quote, documents)
@@ -172,6 +201,12 @@ def resolve_and_anchor(quote, documents, *, code_id, codebook_version, confidenc
         code_id=code_id,
         doc_id=m.doc_id,
         quote_text=quote,
+        speaker=_speaker_for_containing_segment(
+            m.doc_id,
+            m.start_char,
+            m.end_char,
+            segments,
+        ),
         start_char=m.start_char,
         end_char=m.end_char,
         quote_hash=m.quote_hash,

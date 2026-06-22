@@ -6,7 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| #81 | Segment-Derived Speaker For Anchored Quotes | High | Planned | `SEGMENT_DERIVED_SPEAKER_FOR_ANCHORED_QUOTES.md` |
+| #81 | Segment-Derived Speaker For Anchored Quotes | High | Implemented | `SEGMENT_DERIVED_SPEAKER_FOR_ANCHORED_QUOTES.md` |
 
 ## Completed Plans
 

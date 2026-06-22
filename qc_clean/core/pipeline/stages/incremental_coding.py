@@ -342,6 +342,7 @@ def _process_thematic_response(
                 quote, new_docs, code_id=code_id,
                 codebook_version=state.codebook.version,
                 confidence=tc.discovery_confidence,
+                segments=state.segments,
             )
             if app is not None:
                 new_applications.append(app)
@@ -400,6 +401,7 @@ def _process_gt_response(
                 quote, new_docs, code_id=code_id,
                 codebook_version=state.codebook.version,
                 confidence=oc.confidence,
+                segments=state.segments,
             )
             if app is not None:
                 new_applications.append(app)

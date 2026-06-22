@@ -167,3 +167,67 @@ def test_resolve_and_anchor_builds_app_or_returns_status():
     app3, status3 = resolve_and_anchor("not present", docs, code_id="C1",
                                        codebook_version=1, confidence=0.5)
     assert app3 is None and status3 is MatchStatus.NONE
+
+
+def test_resolve_and_anchor_derives_speaker_from_containing_segment():
+    from qc_clean.core.grounding import MatchStatus, resolve_and_anchor
+    from qc_clean.schemas.domain import Segment
+
+    content = "Alex: values autonomy.\nSam: felt rushed."
+    docs = [_Doc("d1", content)]
+    start = content.index("values autonomy")
+    end = start + len("values autonomy")
+    segments = [
+        Segment(
+            doc_id="d1",
+            index=0,
+            start_char=content.index("values autonomy"),
+            end_char=end,
+            speaker="Alex",
+            text="values autonomy",
+        )
+    ]
+
+    app, status = resolve_and_anchor(
+        "values autonomy",
+        docs,
+        code_id="C1",
+        codebook_version=1,
+        confidence=0.8,
+        segments=segments,
+    )
+
+    assert status is MatchStatus.UNIQUE
+    assert app is not None
+    assert app.speaker == "Alex"
+
+
+def test_resolve_and_anchor_leaves_speaker_empty_without_containing_segment():
+    from qc_clean.core.grounding import MatchStatus, resolve_and_anchor
+    from qc_clean.schemas.domain import Segment
+
+    content = "Alex: values autonomy."
+    docs = [_Doc("d1", content)]
+    segments = [
+        Segment(
+            doc_id="d1",
+            index=0,
+            start_char=0,
+            end_char=5,
+            speaker="Alex",
+            text="Alex:",
+        )
+    ]
+
+    app, status = resolve_and_anchor(
+        "values autonomy",
+        docs,
+        code_id="C1",
+        codebook_version=1,
+        confidence=0.8,
+        segments=segments,
+    )
+
+    assert status is MatchStatus.UNIQUE
+    assert app is not None
+    assert app.speaker is None

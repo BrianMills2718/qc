@@ -1,6 +1,6 @@
 # Plan #81: Segment-Derived Speaker For Anchored Quotes
 
-**Status:** Planned
+**Status:** Implemented
 **Type:** implementation
 **Priority:** High
 **Blocked By:** INV-1 span anchoring; INV-8 segment universe
@@ -109,20 +109,26 @@ shared capability.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] `resolve_and_anchor(..., segments=...)` sets `speaker` only when a
+- [x] `resolve_and_anchor(..., segments=...)` sets `speaker` only when a
   containing same-document segment has a speaker.
-- [ ] No segment match leaves `speaker` unset.
-- [ ] Existing callers without `segments` remain compatible.
-- [ ] Thematic and incremental example-quote paths pass the current segment
+- [x] No segment match leaves `speaker` unset.
+- [x] Existing callers without `segments` remain compatible.
+- [x] Thematic and incremental example-quote paths pass the current segment
   universe.
-- [ ] Docs state speaker attribution is improved but still best-effort when
+- [x] Docs state speaker attribution is improved but still best-effort when
   speakers are undetected or no segment contains the span.
 
 > Process criteria:
-- [ ] Required tests pass
-- [ ] Full test suite passes
-- [ ] Type check status is reported
-- [ ] Docs updated
+- [x] Required tests pass
+- [x] Full test suite passes
+- [x] Type check status is reported
+- [x] Docs updated
+
+## Verification
+
+- `python -m pytest tests/test_grounding.py -q` — 15 passed.
+- `python -m pytest tests/test_grounding.py tests/test_incremental.py tests/test_incremental_staleness_inv11.py -q` — 37 passed.
+- `make check` — 801 passed, 1 skipped, 8 deselected; lint/docs passed; type check not yet configured.
 
 ---
 
