@@ -717,15 +717,52 @@ def test_scorecard_scores_codebook_quality_rubric_outcomes():
     assert d4["total_evaluations"] == 2
     assert d4["evaluator_types"] == {"human_expert": 1, "llm_judge": 1}
     assert d4["overall_mean"] == pytest.approx(0.8)
-    assert d4["metric_summary"]["clarity"] == {
-        "mean": pytest.approx(0.7),
-        "min": 0.6,
-        "max": 0.8,
-    }
+    assert d4["overall_mean_ci"]["method"] == "rubric_mean_bootstrap"
+    assert d4["overall_mean_ci"]["population_size"] == 2
+    assert d4["overall_mean_ci"]["samples"] == 1000
+    assert d4["metric_summary"]["clarity"]["mean"] == pytest.approx(0.7)
+    assert d4["metric_summary"]["clarity"]["min"] == 0.6
+    assert d4["metric_summary"]["clarity"]["max"] == 0.8
+    assert d4["metric_summary"]["clarity"]["mean_ci"]["population_size"] == 2
     assert d4["metric_summary"]["specificity"]["mean"] == pytest.approx(0.8)
     assert d4["by_evaluator_type"]["llm_judge"]["overall_mean"] == pytest.approx(0.85)
+    assert d4["by_evaluator_type"]["llm_judge"]["overall_mean_ci"][
+        "population_size"
+    ] == 1
+    assert d4["by_evaluator_type"]["llm_judge"]["metric_summary"]["clarity"][
+        "mean_ci"
+    ]["population_size"] == 1
     assert d4["by_evaluator_type"]["human_expert"]["overall_mean"] == pytest.approx(0.75)
     assert "not blind expert-panel evidence" in d4["note"]
+
+
+def test_scorecard_codebook_quality_bootstrap_can_be_disabled():
+    state = ProjectState(
+        name="quality-eval",
+        config=ProjectConfig(
+            methodology=Methodology.THEMATIC_ANALYSIS,
+            extra={
+                "phase0_rubric_bootstrap": {"enabled": False},
+                "codebook_quality_evaluations": [
+                    {
+                        "evaluator": "judge-a",
+                        "evaluator_type": "llm_judge",
+                        "clarity": 0.8,
+                        "specificity": 0.7,
+                        "usefulness": 0.9,
+                        "grounding": 1.0,
+                    },
+                ],
+            },
+        ),
+    )
+
+    d4 = phase0_scorecard(state)["codebook_quality_d4"]
+
+    assert d4["status"] == "scored"
+    assert "overall_mean_ci" not in d4
+    assert "mean_ci" not in d4["metric_summary"]["clarity"]
+    assert "overall_mean_ci" not in d4["by_evaluator_type"]["llm_judge"]
 
 
 def test_scorecard_invalid_codebook_quality_metadata_fails_loud():

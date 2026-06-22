@@ -50,6 +50,7 @@ _INTERPRETIVE_PREFERENCE_EXTRA_KEY = "interpretive_preference_evaluations"
 _CONFIDENCE_CALIBRATION_EXTRA_KEY = "confidence_calibration_evaluations"
 _EXACT_BOOTSTRAP_EXTRA_KEY = "phase0_exact_bootstrap"
 _RELIABILITY_BOOTSTRAP_EXTRA_KEY = "phase0_reliability_bootstrap"
+_RUBRIC_BOOTSTRAP_EXTRA_KEY = "phase0_rubric_bootstrap"
 DEFAULT_OBSERVABILITY_DB_PATH = Path.home() / "projects" / "data" / "llm_observability.db"
 _WILSON_Z_95 = 1.959963984540054
 _HUMAN_CEILING_EXACT_METRICS = ("recall", "precision", "f1")
@@ -139,6 +140,38 @@ class ReliabilityBootstrapConfig(BaseModel):
         if not 0 < self.confidence_level < 1:
             raise ValueError(
                 "phase0_reliability_bootstrap.confidence_level must be between 0 and 1"
+            )
+        return self
+
+
+class RubricBootstrapConfig(BaseModel):
+    """Config for deterministic rubric-score bootstrap intervals."""
+
+    enabled: bool = Field(
+        default=True,
+        description="Whether rubric scorecards should include mean bootstrap intervals",
+    )
+    samples: int = Field(
+        default=1000,
+        description="Number of bootstrap resamples to draw over rubric outcome rows",
+    )
+    confidence_level: float = Field(
+        default=0.95,
+        description="Two-sided confidence level for the bootstrap interval",
+    )
+    seed: int = Field(
+        default=0,
+        description="Deterministic random seed for rubric bootstrap resampling",
+    )
+
+    @model_validator(mode="after")
+    def require_valid_settings(self) -> "RubricBootstrapConfig":
+        """Reject malformed rubric bootstrap settings."""
+        if self.samples < 1:
+            raise ValueError("phase0_rubric_bootstrap.samples must be at least 1")
+        if not 0 < self.confidence_level < 1:
+            raise ValueError(
+                "phase0_rubric_bootstrap.confidence_level must be between 0 and 1"
             )
         return self
 
@@ -995,22 +1028,35 @@ def codebook_quality_scorecard(state: ProjectState) -> Dict[str, Any]:
             ),
         }
 
-    return {
+    bootstrap_config = _rubric_bootstrap_config(state)
+    overall_scores = [_codebook_quality_overall_score(ev) for ev in evaluations]
+    scorecard = {
         "status": "scored",
         "source": f"ProjectState.config.extra['{_CODEBOOK_QUALITY_EXTRA_KEY}']",
         "total_evaluations": len(evaluations),
         "evaluator_types": dict(sorted(Counter(ev.evaluator_type for ev in evaluations).items())),
-        "metric_summary": _codebook_quality_metric_summary(evaluations),
-        "overall_mean": _mean_or_none([
-            _codebook_quality_overall_score(ev) for ev in evaluations
-        ]),
-        "by_evaluator_type": _codebook_quality_by_evaluator_type(evaluations),
+        "metric_summary": _codebook_quality_metric_summary(
+            evaluations,
+            bootstrap_config,
+        ),
+        "overall_mean": _mean_or_none(overall_scores),
+        "by_evaluator_type": _codebook_quality_by_evaluator_type(
+            evaluations,
+            bootstrap_config,
+        ),
         "note": (
             "Scores externally supplied codebook-quality rubric outcomes. This is "
             "a measurement substrate, not blind expert-panel evidence or proof "
             "of codebook validity."
         ),
     }
+    if bootstrap_config.enabled:
+        scorecard["overall_mean_ci"] = _rubric_mean_bootstrap_ci(
+            overall_scores,
+            bootstrap_config,
+            unit="codebook-quality rubric outcome",
+        )
+    return scorecard
 
 
 def _codebook_quality_evaluations(state: ProjectState) -> list[CodebookQualityEvaluation]:
@@ -1031,35 +1077,115 @@ def _codebook_quality_evaluations(state: ProjectState) -> list[CodebookQualityEv
         raise ValueError(f"Invalid codebook_quality_evaluations metadata: {exc}") from exc
 
 
+def _rubric_bootstrap_config(state: ProjectState) -> RubricBootstrapConfig:
+    """Load Phase 0 rubric bootstrap config from project metadata."""
+    raw = state.config.extra.get(_RUBRIC_BOOTSTRAP_EXTRA_KEY)
+    if raw is None:
+        return RubricBootstrapConfig()
+    if not isinstance(raw, dict):
+        raise ValueError(
+            f"ProjectState.config.extra['{_RUBRIC_BOOTSTRAP_EXTRA_KEY}'] must be an object"
+        )
+    try:
+        return RubricBootstrapConfig.model_validate(raw)
+    except ValidationError as exc:
+        raise ValueError(f"Invalid phase0_rubric_bootstrap config: {exc}") from exc
+
+
+def _rubric_mean_bootstrap_ci(
+    values: list[float],
+    bootstrap_config: RubricBootstrapConfig,
+    *,
+    unit: str,
+) -> dict[str, Any]:
+    """Return deterministic local bootstrap intervals for rubric means."""
+    base: dict[str, Any] = {
+        "method": "rubric_mean_bootstrap",
+        "metric": "mean",
+        "confidence_level": bootstrap_config.confidence_level,
+        "samples": bootstrap_config.samples,
+        "seed": bootstrap_config.seed,
+        "unit": unit,
+        "population_size": len(values),
+        "note": (
+            "Deterministic local bootstrap over supplied rubric rows. This is "
+            "uncertainty metadata, not blind expert-panel evidence."
+        ),
+    }
+    if not values:
+        return {
+            **base,
+            "status": "not_available",
+            "lower": None,
+            "upper": None,
+            "reason": "No rubric score rows available for bootstrap.",
+        }
+
+    rng = Random(bootstrap_config.seed)
+    sample_size = len(values)
+    bootstrapped_means = []
+    for _ in range(bootstrap_config.samples):
+        sample = [values[rng.randrange(sample_size)] for _ in range(sample_size)]
+        bootstrapped_means.append(sum(sample) / sample_size)
+
+    bootstrapped_means.sort()
+    alpha = (1 - bootstrap_config.confidence_level) / 2
+    return {
+        **base,
+        "status": "scored",
+        "lower": _percentile(bootstrapped_means, alpha),
+        "upper": _percentile(bootstrapped_means, 1 - alpha),
+    }
+
+
 def _codebook_quality_metric_summary(
     evaluations: list[CodebookQualityEvaluation],
-) -> dict[str, dict[str, float | None]]:
+    bootstrap_config: RubricBootstrapConfig,
+) -> dict[str, dict[str, Any]]:
     """Summarize each D4 rubric metric over all evaluations."""
-    return {
-        metric_name: _numeric_summary([
-            getattr(evaluation, metric_name) for evaluation in evaluations
-        ])
-        for metric_name in _CODEBOOK_QUALITY_METRICS
-    }
+    summaries: dict[str, dict[str, Any]] = {}
+    for metric_name in _CODEBOOK_QUALITY_METRICS:
+        values = [getattr(evaluation, metric_name) for evaluation in evaluations]
+        summary = _numeric_summary(values)
+        if bootstrap_config.enabled:
+            summary["mean_ci"] = _rubric_mean_bootstrap_ci(
+                values,
+                bootstrap_config,
+                unit=f"codebook-quality {metric_name} score",
+            )
+        summaries[metric_name] = summary
+    return summaries
 
 
 def _codebook_quality_by_evaluator_type(
     evaluations: list[CodebookQualityEvaluation],
+    bootstrap_config: RubricBootstrapConfig,
 ) -> dict[str, dict[str, Any]]:
     """Summarize D4 rubric outcomes by evaluator type."""
     grouped: dict[str, list[CodebookQualityEvaluation]] = {}
     for evaluation in evaluations:
         grouped.setdefault(evaluation.evaluator_type, []).append(evaluation)
-    return {
-        evaluator_type: {
+    summaries = {}
+    for evaluator_type, group in sorted(grouped.items()):
+        overall_scores = [
+            _codebook_quality_overall_score(evaluation) for evaluation in group
+        ]
+        summary = {
             "count": len(group),
-            "metric_summary": _codebook_quality_metric_summary(group),
-            "overall_mean": _mean_or_none([
-                _codebook_quality_overall_score(evaluation) for evaluation in group
-            ]),
+            "metric_summary": _codebook_quality_metric_summary(
+                group,
+                bootstrap_config,
+            ),
+            "overall_mean": _mean_or_none(overall_scores),
         }
-        for evaluator_type, group in sorted(grouped.items())
-    }
+        if bootstrap_config.enabled:
+            summary["overall_mean_ci"] = _rubric_mean_bootstrap_ci(
+                overall_scores,
+                bootstrap_config,
+                unit=f"codebook-quality rubric outcome ({evaluator_type})",
+            )
+        summaries[evaluator_type] = summary
+    return summaries
 
 
 def _codebook_quality_overall_score(evaluation: CodebookQualityEvaluation) -> float:
@@ -1069,7 +1195,7 @@ def _codebook_quality_overall_score(evaluation: CodebookQualityEvaluation) -> fl
     )
 
 
-def _numeric_summary(values: list[float]) -> dict[str, float | None]:
+def _numeric_summary(values: list[float]) -> dict[str, Any]:
     """Return deterministic mean/min/max for numeric scorecard values."""
     if not values:
         return {"mean": None, "min": None, "max": None}

@@ -56,7 +56,8 @@ tables and deterministic local row-bootstrap intervals in the Phase 0 scorecard.
 Phase 0 also now scores externally supplied D6 counterfactual identity-swap
 outcomes through `BIAS_COUNTERFACTUAL=` / `--bias-counterfactual-file`, with
 Wilson intervals for invariant-case code-change rates overall and by
-attribute. Phase 0
+attribute. Phase 0 also reports local rubric-mean bootstrap intervals for
+externally supplied D4 codebook-quality outcomes. Phase 0
 now scores externally supplied D8 GT-fidelity rubric outcomes through
 `GT_FIDELITY=` / `--gt-fidelity-file`. Phase 0
 now scores externally supplied D9 forced-choice interpretive-preference outcomes
