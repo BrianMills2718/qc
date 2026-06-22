@@ -48,6 +48,7 @@ make bench ID=<project_id> OBS_DB=path TRACE_ID=trace  # Override D10 observabil
 make bench ID=<project_id> ARTIFACT_DIR=benchmark_results  # Write versioned Phase 0 scorecard package
 make adjudication-sample ID=<project_id> OUTPUT=sample.json  # Export unlabeled human/expert review sample packet
 make validate-adjudication-protocol PROTOCOL=protocol.json  # Validate pre-registered adjudication protocol metadata
+make adjudication-protocol-preflight PROTOCOL=protocol.json SAMPLE=sample.json  # Preflight protocol/sample package match before labeling
 make validate-adjudication-responses PACKAGE=sample.json  # Validate completed adjudication response package shape/completeness
 make import-adjudication-responses PACKAGE=sample.json GOLD_SET_ID=study-v1 DATASET_NAME="Study dev labels" CODER_COUNT=1 ADJUDICATOR=coder-1 PROTOCOL="Single adjudicator review" D3_OUTPUT=d3_gold.json D7_OUTPUT=d7_gold.json  # Convert valid responses to D3/D7 gold package inputs
 make write-phase0-adjudication-package ID=<project_id> OUTPUT=phase0_package.json D3_GOLD=d3_gold.json GOLD=d7_gold.json  # Write strict Phase 0 package manifest for imported D3/D7 gold

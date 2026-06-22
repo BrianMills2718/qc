@@ -1,4 +1,4 @@
-.PHONY: help test test-quick test-e2e test-all bench bench-package write-phase0-adjudication-package validate-d3-gold validate-d7-gold validate-inv7-package validate-adjudication-responses validate-adjudication-protocol import-adjudication-responses lint-scope-phrasing export-audit-manifest verify-export-audit-manifest export-publish-preflight verify-export-audit-log run-d7-retrieval compare-d7-retrieval run-inv7-fixtures run-inv7-live-fixtures adjudication-sample check lint docs-check clean status cost errors
+.PHONY: help test test-quick test-e2e test-all bench bench-package write-phase0-adjudication-package validate-d3-gold validate-d7-gold validate-inv7-package validate-adjudication-responses validate-adjudication-protocol adjudication-protocol-preflight import-adjudication-responses lint-scope-phrasing export-audit-manifest verify-export-audit-manifest export-publish-preflight verify-export-audit-log run-d7-retrieval compare-d7-retrieval run-inv7-fixtures run-inv7-live-fixtures adjudication-sample check lint docs-check clean status cost errors
 
 DAYS ?= 7
 PROJECT ?= qualitative_coding
@@ -70,6 +70,15 @@ ifndef PROTOCOL
 	$(error PROTOCOL is required. Usage: make validate-adjudication-protocol PROTOCOL=protocol.json)
 endif
 	python scripts/validate_adjudication_protocol.py $(PROTOCOL)
+
+adjudication-protocol-preflight:  ## Preflight protocol against sample package (PROTOCOL=protocol.json SAMPLE=sample.json)
+ifndef PROTOCOL
+	$(error PROTOCOL is required. Usage: make adjudication-protocol-preflight PROTOCOL=protocol.json SAMPLE=sample.json)
+endif
+ifndef SAMPLE
+	$(error SAMPLE is required. Usage: make adjudication-protocol-preflight PROTOCOL=protocol.json SAMPLE=sample.json)
+endif
+	python scripts/preflight_adjudication_protocol_sample.py $(PROTOCOL) $(SAMPLE)
 
 import-adjudication-responses:  ## Import completed adjudication responses to D3/D7 gold packages (PACKAGE=responses.json GOLD_SET_ID=id DATASET_NAME=name CODER_COUNT=1 ADJUDICATOR=id PROTOCOL=summary [D3_OUTPUT=d3.json] [D7_OUTPUT=d7.json])
 ifndef PACKAGE
