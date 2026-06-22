@@ -8,6 +8,27 @@
 
 ---
 
+## Outcome
+
+Completed 2026-06-21. `render_prompt_override()` now rejects any prompt
+override placeholder that is not a bare declared field before formatting. The
+current override-capable stages still accept valid `{combined_text}` and
+`{segment_text}` templates, but now fail loudly before any LLM call for
+indexed, attribute-accessed, conversion-formatted, format-specified, automatic,
+or undeclared placeholders. Undeclared metadata-like placeholders such as
+`{document_metadata}` are not exposed through current stage override values.
+
+This narrows INV-7 custom-prompt governance but does not prove model obedience,
+govern arbitrary operator-authored surrounding instructions, define future
+metadata-exposure policy, or replace committed live adversarial prompt-injection
+benchmarking. INV-7 remains PARTIAL.
+
+Verification: focused INV-7 tests passed (`17 passed`), Ruff passed on touched
+files, docs/plan/AGENTS sync checks passed, and final `make check` passed
+(`807 passed, 1 skipped, 8 deselected`; type check not yet configured).
+
+---
+
 ## Gap
 
 **Current:** Current prompt override guards require protected root placeholder
@@ -120,7 +141,7 @@ cross-project callable capability.
 - [x] Required focused tests pass.
 - [x] Full `make check` passes or any failure is documented with evidence.
 - [x] Type-check status is reported.
-- [ ] Verified work is committed and pushed.
+- [x] Verified work is committed and pushed.
 
 ---
 
