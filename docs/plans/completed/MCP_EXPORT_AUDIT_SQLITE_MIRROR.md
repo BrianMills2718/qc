@@ -1,6 +1,6 @@
 # Plan #163: MCP Export Audit SQLite Mirror
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Export audit SQLite workflow integration
@@ -8,14 +8,43 @@
 
 ---
 
+## Outcome
+
+MCP JSON and Markdown export tools can now write confined SQLite mirrors for
+audit event logs when explicitly enabled with `audit_event_db=True`.
+`audit_event_db=True` requires `audit_event_log=True`, which still requires
+`audit_manifest=True`; default MCP export payloads are unchanged when the audit
+DB flag is absent. The SQLite path is derived from the confined export artifact
+stem under `EXPORTS_DIR` (for example `export.audit_events.sqlite`), and the DB
+is verified through the existing export-audit event DB verifier.
+
+Implementation commit: `731cc49` (`Add MCP SQLite audit event mirror`).
+
+Verification:
+
+- Initial TDD failures: new MCP tests failed with unexpected `audit_event_db`
+  keyword arguments before implementation.
+- `python -m pytest tests/test_mcp_server.py -q` -> 74 passed.
+- `python -m ruff check qc_mcp_server.py tests/test_mcp_server.py` -> passed.
+- `make docs-check` -> passed.
+- `git diff --check` -> passed.
+- `make check` -> 1120 passed, 1 skipped, 8 deselected; Ruff and docs gates
+  passed.
+
+This remains local provenance/queryability infrastructure only. It is not
+signing, immutable storage, external timestamping, append-only infrastructure,
+methodological-validity evidence, or a full tamper-evident audit log.
+
+---
+
 ## Gap
 
-**Current:** Local scripts, Make targets, and `project export` can mirror JSONL
+**Previous:** Local scripts, Make targets, and `project export` can mirror JSONL
 audit events into SQLite with explicit `--audit-db` / `AUDIT_DB`. MCP JSON and
 Markdown export tools can write confined manifests and JSONL event logs, but
 cannot write a confined SQLite event mirror.
 
-**Target:** Add optional MCP SQLite event mirrors:
+**Delivered:** Optional MCP SQLite event mirrors:
 
 - `qc_export_json(..., audit_event_db=True)`
 - `qc_export_markdown(..., audit_event_db=True)`
@@ -106,20 +135,20 @@ create a cross-project callable capability.
 
 Feature-level criteria:
 
-- [ ] MCP JSON export can write a confined SQLite audit event mirror.
-- [ ] MCP Markdown export uses the same confined naming helper.
-- [ ] `audit_event_db=True` fails loud unless `audit_event_log=True`.
-- [ ] Default MCP export payloads remain unchanged when audit DB flags are
+- [x] MCP JSON export can write a confined SQLite audit event mirror.
+- [x] MCP Markdown export uses the same confined naming helper.
+- [x] `audit_event_db=True` fails loud unless `audit_event_log=True`.
+- [x] Default MCP export payloads remain unchanged when audit DB flags are
   absent.
-- [ ] Docs preserve the local mirror caveat and do not call this append-only or
+- [x] Docs preserve the local mirror caveat and do not call this append-only or
   tamper-evident storage.
 
 Process criteria:
 
-- [ ] Required focused tests pass.
-- [ ] `make docs-check` passes.
-- [ ] `make check` passes.
-- [ ] Verified increment is committed and pushed.
+- [x] Required focused tests pass.
+- [x] `make docs-check` passes.
+- [x] `make check` passes.
+- [x] Verified increment is committed and pushed.
 
 ---
 

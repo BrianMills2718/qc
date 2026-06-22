@@ -22,25 +22,29 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #163: add a confined optional SQLite audit event mirror to MCP
-   JSON and Markdown export tools.
+1. Select and plan the next deterministic lane from the ranked roadmap.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Plan #163
-(`docs/plans/MCP_EXPORT_AUDIT_SQLITE_MIRROR.md`) extends the SQLite audit mirror
-to MCP exports while preserving MCP path confinement. `audit_event_db=True`
-requires `audit_event_log=True`, and the DB is a confined mirror of the JSONL
-event log, not a standalone source of truth, not append-only storage, and not
-full tamper-evidence.
+**Active checkpoint:** Plan #163 has been implemented and is being closed out;
+the next active lane should be selected from the ranked roadmap with a fresh
+plan and acceptance criteria before implementation.
+
+**Completed checkpoint:** MCP JSON/Markdown export tools can now write confined
+SQLite mirrors for audit event logs when explicitly enabled with
+`audit_event_db=True`. The flag requires `audit_event_log=True`, default MCP
+export payloads remain unchanged, and the mirror is derived from the confined
+export artifact path under `EXPORTS_DIR`. This is local provenance/queryability
+infrastructure only, not signing, immutable storage, external timestamping,
+append-only infrastructure, methodological validity evidence, or a full
+tamper-evident audit log.
 
 **Completed checkpoint:** Local export-audit scripts, Make targets, and
 `project export` can now update the optional SQLite event mirror whenever JSONL
 audit logging is explicitly enabled. `--audit-db` / `AUDIT_DB` requires
 `--audit-log` / `AUDIT_LOG`, so SQLite remains a mirror rather than a standalone
-source of truth. MCP SQLite mirror integration remains future work because it
-needs a separate confined output naming policy. This is local provenance/
-queryability infrastructure only, not signing, immutable storage, external
+source of truth. This is local provenance/queryability infrastructure only, not
+signing, immutable storage, external
 timestamping, append-only infrastructure, methodological validity evidence, or
 a full tamper-evident audit log.
 

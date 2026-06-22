@@ -6,12 +6,12 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 163 | MCP export audit SQLite mirror | High | Planned | `MCP_EXPORT_AUDIT_SQLITE_MIRROR.md` |
 
 ## Completed Plans
 
 | Name | Outcome | Record |
 |------|---------|--------|
+| MCP export audit SQLite mirror | MCP JSON/Markdown exports can now write confined SQLite mirrors for audit event logs when explicitly enabled with `audit_event_db=True` | `completed/MCP_EXPORT_AUDIT_SQLITE_MIRROR.md` |
 | Export audit SQLite workflow integration | Local export-audit scripts, Make targets, and `project export` can now update the optional SQLite event mirror whenever JSONL audit logging is explicitly enabled | `completed/EXPORT_AUDIT_SQLITE_WORKFLOW_INTEGRATION.md` |
 | Export audit SQLite event mirror | Verified export audit JSONL event logs can now be mirrored into local SQLite and verified there for event shape, hashes, previous links, duplicate hashes, and row ordering | `completed/EXPORT_AUDIT_SQLITE_EVENT_MIRROR.md` |
 | INV-9 relationship evidence anchors | Relationship claims now resolve direct evidence strings into exact supporting anchors when uniquely grounded, while ambiguous/unresolvable evidence remains visibly unanchored | `completed/INV9_RELATIONSHIP_EVIDENCE_ANCHORS.md` |
