@@ -22,7 +22,8 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Select the next unambiguous D8 score-time guard lane from the roadmap.
+1. Execute Plan #122 (`D8_GT_FIDELITY_SCORECARD_PREFLIGHT_GUARD.md`): enforce
+   D8 protocol/result preflight at the Phase 0 scorecard boundary.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 

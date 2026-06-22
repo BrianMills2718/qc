@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 122 | D8 GT fidelity scorecard preflight guard | High | Planned | `D8_GT_FIDELITY_SCORECARD_PREFLIGHT_GUARD.md` |
 
 ## Completed Plans
 
