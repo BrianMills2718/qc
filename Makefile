@@ -1,4 +1,4 @@
-.PHONY: help test test-quick test-e2e test-all bench bench-package write-phase0-adjudication-package validate-d3-gold validate-d7-gold validate-d3-baseline-package validate-d7-baseline-package validate-inv7-package validate-inv7-live-protocol inv7-live-preflight validate-d6-bias-protocol d6-bias-preflight validate-d4-codebook-quality-protocol d4-codebook-quality-preflight validate-d8-gt-fidelity-protocol d8-gt-fidelity-preflight validate-d9-interpretive-preference-protocol d9-interpretive-preference-preflight validate-confidence-calibration-protocol confidence-calibration-preflight validate-theoretical-sampling-protocol theoretical-sampling-preflight export-theoretical-sampling-candidates export-theoretical-sampling-results validate-d3-comparison-protocol d3-comparison-preflight validate-d7-comparison-protocol d7-comparison-preflight validate-adjudication-responses validate-adjudication-protocol adjudication-protocol-preflight adjudication-response-preflight import-adjudication-responses lint-scope-phrasing lint-prompt-overrides export-audit-manifest verify-export-audit-manifest export-publish-preflight verify-export-audit-log mirror-export-audit-db verify-export-audit-db run-d7-retrieval run-d7-live-baseline compare-d7-retrieval compare-d7-package verify-d7-comparison-artifact run-inv7-fixtures run-inv7-live-fixtures adjudication-sample check lint docs-check clean status cost errors
+.PHONY: help test test-quick test-e2e test-all bench bench-package write-phase0-adjudication-package validate-d3-gold validate-d7-gold validate-d3-baseline-package validate-d7-baseline-package validate-inv7-package validate-inv7-live-protocol inv7-live-preflight validate-d6-bias-protocol d6-bias-preflight validate-d4-codebook-quality-protocol d4-codebook-quality-preflight validate-d8-gt-fidelity-protocol d8-gt-fidelity-preflight validate-d9-interpretive-preference-protocol d9-interpretive-preference-preflight validate-confidence-calibration-protocol confidence-calibration-preflight validate-theoretical-sampling-protocol theoretical-sampling-preflight export-theoretical-sampling-candidates export-theoretical-sampling-results validate-d3-comparison-protocol d3-comparison-preflight validate-d7-comparison-protocol d7-comparison-preflight validate-adjudication-responses validate-adjudication-protocol adjudication-protocol-preflight adjudication-response-preflight import-adjudication-responses lint-scope-phrasing lint-prompt-overrides export-audit-manifest verify-export-audit-manifest export-publish-preflight verify-export-audit-log mirror-export-audit-db verify-export-audit-db run-d7-retrieval run-d7-live-baseline compare-d7-retrieval write-d7-comparison-package compare-d7-package verify-d7-comparison-artifact run-inv7-fixtures run-inv7-live-fixtures adjudication-sample check lint docs-check clean status cost errors
 
 DAYS ?= 7
 PROJECT ?= qualitative_coding
@@ -351,6 +351,21 @@ ifndef PREDICTIONS
 	$(error PREDICTIONS is required. Usage: make compare-d7-retrieval ID=<project_id> GOLD=gold.json PREDICTIONS="a.json b.json")
 endif
 	python scripts/compare_d7_retrieval.py $(ID) --gold-file $(GOLD) $(foreach file,$(PREDICTIONS),--predictions-file $(file)) $(if $(PROTOCOL),--protocol-package $(PROTOCOL),) $(if $(OUTPUT),--output $(OUTPUT),) $(if $(ARTIFACT_DIR),--artifact-dir $(ARTIFACT_DIR),)
+
+write-d7-comparison-package:  ## Write D7 comparison package manifest (ID=<project_id> GOLD=gold.json PREDICTIONS="a.json b.json" OUTPUT=d7_package.json)
+ifndef ID
+	$(error ID is required. Usage: make write-d7-comparison-package ID=<project_id> GOLD=gold.json PREDICTIONS="a.json b.json" OUTPUT=d7_package.json)
+endif
+ifndef GOLD
+	$(error GOLD is required. Usage: make write-d7-comparison-package ID=<project_id> GOLD=gold.json PREDICTIONS="a.json b.json" OUTPUT=d7_package.json)
+endif
+ifndef PREDICTIONS
+	$(error PREDICTIONS is required. Usage: make write-d7-comparison-package ID=<project_id> GOLD=gold.json PREDICTIONS="a.json b.json" OUTPUT=d7_package.json)
+endif
+ifndef OUTPUT
+	$(error OUTPUT is required. Usage: make write-d7-comparison-package ID=<project_id> GOLD=gold.json PREDICTIONS="a.json b.json" OUTPUT=d7_package.json)
+endif
+	python scripts/write_d7_comparison_package.py $(ID) --output $(OUTPUT) --gold-file $(GOLD) $(foreach file,$(PREDICTIONS),--predictions-file $(file)) $(if $(PROTOCOL),--protocol-package $(PROTOCOL),) $(if $(COMPARISON_OUTPUT),--comparison-output $(COMPARISON_OUTPUT),) $(if $(ARTIFACT_DIR),--artifact-dir $(ARTIFACT_DIR),) $(if $(VERIFY_ARTIFACT),--verify-artifact,)
 
 verify-d7-comparison-artifact:  ## Verify a D7 comparison artifact package (ARTIFACT=run-dir-or-manifest.json)
 ifndef ARTIFACT

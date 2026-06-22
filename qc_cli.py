@@ -50,6 +50,7 @@ Examples:
   qc_cli run-d7-live-baseline <project_id> --output live_baseline.json --model gpt-5-mini
   qc_cli validate-d7-baseline-package baseline.json
   qc_cli compare-d7-retrieval <project_id> --gold-file d7_gold.json --predictions-file predictions.json --artifact-dir benchmark_results
+  qc_cli write-d7-comparison-package <project_id> --output d7_package.json --gold-file d7_gold.json --predictions-file predictions.json
   qc_cli compare-d7-package d7_comparison_package.json
   qc_cli verify-d7-comparison-artifact benchmark_results/run/manifest.json
   qc_cli run-inv7-fixtures --output inv7.json
@@ -329,6 +330,46 @@ Examples:
     d7_comparison_package_parser.add_argument(
         'package_file',
         help='Path to the D7 comparison package JSON manifest',
+    )
+
+    d7_comparison_package_writer_parser = subparsers.add_parser(
+        'write-d7-comparison-package',
+        help='Write a D7 comparison package manifest',
+        description='Write a strict D7 comparison package manifest from validated inputs',
+    )
+    d7_comparison_package_writer_parser.add_argument('project_id', help='Project ID to compare')
+    d7_comparison_package_writer_parser.add_argument(
+        '--output',
+        required=True,
+        help='Output D7 comparison package manifest path',
+    )
+    d7_comparison_package_writer_parser.add_argument(
+        '--gold-file',
+        required=True,
+        help='Versioned D7 gold package path',
+    )
+    d7_comparison_package_writer_parser.add_argument(
+        '--predictions-file',
+        required=True,
+        action='append',
+        help='Versioned D7 retrieval/live-baseline prediction package path; repeat for multiple packages',
+    )
+    d7_comparison_package_writer_parser.add_argument(
+        '--protocol-package',
+        help='Optional D7 comparison protocol package to preflight before writing',
+    )
+    d7_comparison_package_writer_parser.add_argument(
+        '--comparison-output',
+        help='Optional D7 comparison report output path recorded in the package',
+    )
+    d7_comparison_package_writer_parser.add_argument(
+        '--artifact-dir',
+        help='Optional artifact root directory recorded in the package',
+    )
+    d7_comparison_package_writer_parser.add_argument(
+        '--verify-artifact',
+        action='store_true',
+        help='Ask the package runner to verify the artifact created by the comparison run',
     )
 
     # D3/D7 gold-set validation commands
@@ -677,6 +718,8 @@ def main() -> int:
             return handle_verify_d7_comparison_artifact_command(args)
         elif args.command == 'compare-d7-package':
             return handle_compare_d7_package_command(args)
+        elif args.command == 'write-d7-comparison-package':
+            return handle_write_d7_comparison_package_command(args)
         elif args.command == 'validate-d3-gold':
             return handle_validate_d3_gold_command(args)
         elif args.command == 'validate-d7-gold':
@@ -880,6 +923,24 @@ def handle_compare_d7_package_command(args) -> int:
     from scripts import run_d7_comparison_package
 
     return run_d7_comparison_package.main([args.package_file])
+
+
+def handle_write_d7_comparison_package_command(args) -> int:
+    """Write a D7 comparison package through the canonical CLI."""
+    from scripts import write_d7_comparison_package
+
+    argv = [args.project_id, "--output", args.output, "--gold-file", args.gold_file]
+    for prediction_file in args.predictions_file:
+        argv.extend(["--predictions-file", prediction_file])
+    if args.protocol_package is not None:
+        argv.extend(["--protocol-package", args.protocol_package])
+    if args.comparison_output is not None:
+        argv.extend(["--comparison-output", args.comparison_output])
+    if args.artifact_dir is not None:
+        argv.extend(["--artifact-dir", args.artifact_dir])
+    if args.verify_artifact:
+        argv.append("--verify-artifact")
+    return write_d7_comparison_package.main(argv)
 
 
 def handle_validate_d3_gold_command(args) -> int:

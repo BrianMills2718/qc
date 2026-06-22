@@ -12,6 +12,7 @@ from scripts import (
     validate_d7_baseline_package,
     validate_d7_gold_set,
     verify_d7_comparison_artifact,
+    write_d7_comparison_package,
 )
 
 
@@ -193,6 +194,60 @@ def test_qc_cli_compare_d7_package_forwards_manifest_path(monkeypatch):
 
     assert qc_cli.main() == 0
     assert captured["argv"] == ["d7_comparison_package.json"]
+
+
+def test_qc_cli_write_d7_comparison_package_forwards_args(monkeypatch):
+    captured = {}
+
+    def fake_main(argv):
+        captured["argv"] = argv
+        return 0
+
+    monkeypatch.setattr(write_d7_comparison_package, "main", fake_main)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "qc_cli.py",
+            "write-d7-comparison-package",
+            "project-d7",
+            "--output",
+            "d7_comparison_package.json",
+            "--gold-file",
+            "gold.json",
+            "--predictions-file",
+            "lexical.json",
+            "--predictions-file",
+            "live.json",
+            "--protocol-package",
+            "protocol.json",
+            "--comparison-output",
+            "comparison.json",
+            "--artifact-dir",
+            "benchmark_results",
+            "--verify-artifact",
+        ],
+    )
+
+    assert qc_cli.main() == 0
+    assert captured["argv"] == [
+        "project-d7",
+        "--output",
+        "d7_comparison_package.json",
+        "--gold-file",
+        "gold.json",
+        "--predictions-file",
+        "lexical.json",
+        "--predictions-file",
+        "live.json",
+        "--protocol-package",
+        "protocol.json",
+        "--comparison-output",
+        "comparison.json",
+        "--artifact-dir",
+        "benchmark_results",
+        "--verify-artifact",
+    ]
 
 
 def test_qc_cli_validate_d7_baseline_package_forwards_path(monkeypatch):
