@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 162 | Export audit SQLite workflow integration | High | Planned | `EXPORT_AUDIT_SQLITE_WORKFLOW_INTEGRATION.md` |
 
 ## Completed Plans
 

@@ -22,13 +22,17 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Select the next highest-value roadmap lane with deterministic acceptance
-   criteria and no live/external evidence dependency.
+1. Execute Plan #162: wire the optional SQLite audit mirror into local CLI and
+   script export-audit workflows behind explicit audit-log dependency guards.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Selecting next deterministic roadmap lane after Plan
-#161 closeout.
+**Active checkpoint:** Plan #162
+(`docs/plans/EXPORT_AUDIT_SQLITE_WORKFLOW_INTEGRATION.md`) integrates the
+SQLite audit mirror into local CLI/script export-audit workflows without making
+DB logging default. `--audit-db` remains an explicit mirror of `--audit-log`,
+not a standalone source of truth, not append-only storage, and not full
+tamper-evidence.
 
 **Completed checkpoint:** Verified export audit JSONL event logs can now be
 mirrored into local SQLite and verified there. The mirror imports full event
