@@ -1,6 +1,16 @@
 # Plan #142: INV-7 Prompt Override Surface Registry
 
-**Status:** Planned
+Completed 2026-06-22. Supported custom prompt override surfaces are now
+declared in `qc_clean/core/prompt_override_registry.py`, the existing
+`thematic_coding` and `gt_constant_comparison` call sites consume that registry,
+and `make lint-prompt-overrides` emits a schema_version=1 JSON report that fails
+when source uses an unregistered override key or a registered surface disappears
+from source. Verification: `python -m pytest tests/test_prompt_override_registry.py
+tests/test_prompt_boundaries_inv7.py -q` (24 passed),
+`make lint-prompt-overrides`, targeted Ruff, `make docs-check`, and `make check`
+(1062 passed, 1 skipped, 8 deselected; type check not configured).
+
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** None
@@ -119,21 +129,21 @@ create a cross-project callable capability or contract.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] Current supported surfaces are centrally declared with required protected
+- [x] Current supported surfaces are centrally declared with required protected
       data, optional protected data, and metadata placeholders.
-- [ ] Current override call sites consume the registry and preserve existing
+- [x] Current override call sites consume the registry and preserve existing
       fail-loud placeholder enforcement.
-- [ ] `make lint-prompt-overrides` exits non-zero and reports JSON when source
+- [x] `make lint-prompt-overrides` exits non-zero and reports JSON when source
       uses a prompt override key absent from the registry.
-- [ ] Docs state this is custom-prompt governance only, not proof of
+- [x] Docs state this is custom-prompt governance only, not proof of
       prompt-injection robustness or model obedience.
 
 > Process criteria:
-- [ ] Required new tests pass.
-- [ ] `tests/test_prompt_boundaries_inv7.py` passes.
-- [ ] `make docs-check` passes.
-- [ ] `make check` passes.
-- [ ] Plan is completed, committed, and pushed.
+- [x] Required new tests pass.
+- [x] `tests/test_prompt_boundaries_inv7.py` passes.
+- [x] `make docs-check` passes.
+- [x] `make check` passes.
+- [x] Plan is completed, committed, and pushed.
 
 ---
 

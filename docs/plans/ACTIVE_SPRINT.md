@@ -22,11 +22,19 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #142, `INV7_PROMPT_OVERRIDE_SURFACE_REGISTRY.md`, to turn the
-   remaining INV-7 custom-prompt governance gap into a deterministic registry
-   and source check.
+1. Select the next highest-value documented roadmap lane from
+   `docs/PROJECT_THEORY_AND_GOALS.md` and `docs/EVALUATION_HARNESS.md`.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
+
+**Completed checkpoint:** Supported custom prompt override surfaces are now
+declared in `qc_clean/core/prompt_override_registry.py`, and
+`make lint-prompt-overrides` emits a schema_version=1 JSON report that fails if
+source uses an unregistered `prompt_overrides` key or if a registered surface is
+not used in source. The current `thematic_coding` and
+`gt_constant_comparison` call sites consume the registry. This is deterministic
+custom-prompt governance only, not prompt-injection robustness evidence,
+model-obedience evidence, or a committed live adversarial benchmark.
 
 **Completed checkpoint:** Anchored quote speaker attribution now falls back to
 explicit same-line `Speaker:` source prefixes when no containing segment speaker
