@@ -69,6 +69,8 @@ def test_scorecard_includes_reliability_and_stability_when_present():
     assert card["reliability_llm_pass_agreement"]["application_level"] is False
     assert card["reliability_llm_pass_agreement"]["prevalence"]["row_count"] == 0
     assert card["reliability_llm_pass_agreement"]["prevalence"]["rating_count"] == 0
+    assert card["reliability_llm_pass_agreement"]["bootstrap_ci"]["status"] == "not_available"
+    assert card["reliability_llm_pass_agreement"]["bootstrap_ci"]["population_size"] == 0
     assert "consistency not validity" in card["reliability_llm_pass_agreement"]["note"]
     assert card["stability"]["overall_stability"] == 0.8
     assert card["stability"]["unstable"] == 1
@@ -120,6 +122,11 @@ def test_scorecard_surfaces_application_level_reliability_metrics():
     assert reliability["application_level"] is True
     assert reliability["prevalence"]["categories"]["present"]["count"] == 3
     assert reliability["prevalence"]["categories"]["present"]["rate"] == 0.75
+    assert reliability["bootstrap_ci"]["status"] == "scored"
+    assert reliability["bootstrap_ci"]["method"] == "row_bootstrap"
+    assert reliability["bootstrap_ci"]["samples"] == 1000
+    assert reliability["bootstrap_ci"]["population_size"] == 2
+    assert set(reliability["bootstrap_ci"]["metrics"]) == {"percent_agreement", "gwet_ac1"}
     assert reliability["prevalence"]["row_patterns"] == {
         "all_absent": 0,
         "all_present": 1,
@@ -138,6 +145,11 @@ def test_scorecard_surfaces_application_level_reliability_metrics():
     assert positive["prevalence"]["ratings_per_row"] == 2
     assert positive["prevalence"]["categories"]["present"]["count"] == 4
     assert positive["prevalence"]["categories"]["absent"]["rate"] == pytest.approx(1 / 3)
+    assert positive["bootstrap_ci"]["status"] == "scored"
+    assert positive["bootstrap_ci"]["population_size"] == 3
+    assert positive["bootstrap_ci"]["metrics"]["percent_agreement"]["lower"] <= (
+        positive["bootstrap_ci"]["metrics"]["percent_agreement"]["upper"]
+    )
 
     segment = reliability["segment_decision"]
     assert segment["units"] == 4
@@ -151,6 +163,41 @@ def test_scorecard_surfaces_application_level_reliability_metrics():
     assert segment["prevalence"]["categories"]["coded"] == {"count": 4, "rate": 0.5}
     assert segment["prevalence"]["categories"]["no_code"] == {"count": 3, "rate": 0.375}
     assert segment["prevalence"]["categories"]["not_examined"] == {"count": 1, "rate": 0.125}
+    assert segment["bootstrap_ci"]["status"] == "scored"
+    assert segment["bootstrap_ci"]["unit"] == "categorical reliability matrix row"
+    assert set(segment["bootstrap_ci"]["metrics"]) == {"percent_agreement", "gwet_ac1"}
+
+
+def test_scorecard_reliability_bootstrap_can_be_disabled():
+    state = ProjectState(
+        name="s",
+        config=ProjectConfig(
+            methodology=Methodology.THEMATIC_ANALYSIS,
+            extra={"phase0_reliability_bootstrap": {"enabled": False}},
+        ),
+        corpus=Corpus(documents=[Document(name="d.txt", content="x")]),
+        irr_result=IRRResult(
+            num_passes=2,
+            percent_agreement=1.0,
+            gwet_ac1=1.0,
+            coding_matrix={"code-a": [1, 1]},
+            application_level=True,
+            application_units=1,
+            application_percent_agreement=1.0,
+            application_gwet_ac1=1.0,
+            application_matrix={"d#0::a": [1, 1]},
+            segment_decision_units=1,
+            segment_decision_percent_agreement=1.0,
+            segment_decision_gwet_ac1=1.0,
+            segment_decision_matrix={"d#0": ["coded", "coded"]},
+        ),
+    )
+
+    reliability = phase0_scorecard(state)["reliability_llm_pass_agreement"]
+
+    assert "bootstrap_ci" not in reliability
+    assert "bootstrap_ci" not in reliability["application_positive_segment_code"]
+    assert "bootstrap_ci" not in reliability["segment_decision"]
 
 
 def test_coverage_note_is_conditional_on_exhaustive_mode():

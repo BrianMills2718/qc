@@ -24,6 +24,12 @@ from pydantic import BaseModel, Field, ValidationError, model_validator
 from qc_clean.core.d3_gold import ApplicationGoldAnchor, validate_d3_gold_set_payload
 from qc_clean.core.d7_gold import DisconfirmationGoldAnchor, validate_d7_gold_set_payload
 from qc_clean.core.grounding import verify_grounding
+from qc_clean.core.pipeline.irr import (
+    compute_categorical_gwet_ac1,
+    compute_categorical_percent_agreement,
+    compute_gwet_ac1,
+    compute_percent_agreement,
+)
 from qc_clean.core.pipeline.saturation import assess_category_saturation
 from qc_clean.core.segmentation import compute_coverage
 from qc_clean.schemas.domain import ClaimAnchor, ClaimKind, ProjectState
@@ -35,6 +41,7 @@ _D7_BASELINES_EXTRA_KEY = "disconfirmation_baselines"
 _RUN_TIMING_EXTRA_KEY = "run_timing"
 _PROMPT_INJECTION_EXTRA_KEY = "prompt_injection_evaluations"
 _EXACT_BOOTSTRAP_EXTRA_KEY = "phase0_exact_bootstrap"
+_RELIABILITY_BOOTSTRAP_EXTRA_KEY = "phase0_reliability_bootstrap"
 DEFAULT_OBSERVABILITY_DB_PATH = Path.home() / "projects" / "data" / "llm_observability.db"
 _WILSON_Z_95 = 1.959963984540054
 _HUMAN_CEILING_EXACT_METRICS = ("recall", "precision", "f1")
@@ -76,6 +83,38 @@ class ExactScoreBootstrapConfig(BaseModel):
             raise ValueError("phase0_exact_bootstrap.samples must be at least 1")
         if not 0 < self.confidence_level < 1:
             raise ValueError("phase0_exact_bootstrap.confidence_level must be between 0 and 1")
+        return self
+
+
+class ReliabilityBootstrapConfig(BaseModel):
+    """Config for deterministic reliability-matrix bootstrap intervals."""
+
+    enabled: bool = Field(
+        default=True,
+        description="Whether D5 reliability scorecards should include bootstrap intervals",
+    )
+    samples: int = Field(
+        default=1000,
+        description="Number of bootstrap resamples to draw over reliability matrix rows",
+    )
+    confidence_level: float = Field(
+        default=0.95,
+        description="Two-sided confidence level for the bootstrap interval",
+    )
+    seed: int = Field(
+        default=0,
+        description="Deterministic random seed for reliability bootstrap resampling",
+    )
+
+    @model_validator(mode="after")
+    def require_valid_settings(self) -> "ReliabilityBootstrapConfig":
+        """Reject malformed reliability bootstrap settings."""
+        if self.samples < 1:
+            raise ValueError("phase0_reliability_bootstrap.samples must be at least 1")
+        if not 0 < self.confidence_level < 1:
+            raise ValueError(
+                "phase0_reliability_bootstrap.confidence_level must be between 0 and 1"
+            )
         return self
 
 
@@ -187,6 +226,7 @@ def phase0_scorecard(state: ProjectState) -> Dict[str, Any]:
     # D5 — consistency (reported, NOT validity; see theory doc §11/§15).
     if state.irr_result is not None:
         irr = state.irr_result
+        reliability_bootstrap = _reliability_bootstrap_config(state)
         card["reliability_llm_pass_agreement"] = {
             "percent_agreement": irr.percent_agreement,
             "cohens_kappa": irr.cohens_kappa,
@@ -200,6 +240,13 @@ def phase0_scorecard(state: ProjectState) -> Dict[str, Any]:
                 "consistency not validity."
             ),
         }
+        if reliability_bootstrap.enabled:
+            card["reliability_llm_pass_agreement"]["bootstrap_ci"] = (
+                _binary_reliability_bootstrap_ci(
+                    irr.coding_matrix,
+                    reliability_bootstrap,
+                )
+            )
         if irr.application_level:
             card["reliability_llm_pass_agreement"]["application_positive_segment_code"] = {
                 "units": irr.application_units,
@@ -211,6 +258,13 @@ def phase0_scorecard(state: ProjectState) -> Dict[str, Any]:
                 "prevalence": _binary_matrix_prevalence(irr.application_matrix),
                 "note": "Positive segment x code cells where at least one pass applied the code.",
             }
+            if reliability_bootstrap.enabled:
+                card["reliability_llm_pass_agreement"]["application_positive_segment_code"][
+                    "bootstrap_ci"
+                ] = _binary_reliability_bootstrap_ci(
+                    irr.application_matrix,
+                    reliability_bootstrap,
+                )
             card["reliability_llm_pass_agreement"]["segment_decision"] = {
                 "units": irr.segment_decision_units,
                 "percent_agreement": irr.segment_decision_percent_agreement,
@@ -221,6 +275,13 @@ def phase0_scorecard(state: ProjectState) -> Dict[str, Any]:
                 "prevalence": _categorical_matrix_prevalence(irr.segment_decision_matrix),
                 "note": "coded/no_code/not_examined decisions over the segment universe.",
             }
+            if reliability_bootstrap.enabled:
+                card["reliability_llm_pass_agreement"]["segment_decision"][
+                    "bootstrap_ci"
+                ] = _categorical_reliability_bootstrap_ci(
+                    irr.segment_decision_matrix,
+                    reliability_bootstrap,
+                )
     if state.stability_result is not None:
         card["stability"] = {
             "overall_stability": state.stability_result.overall_stability,
@@ -316,6 +377,107 @@ def _category_rates(counts: Mapping[str, int], rating_count: int) -> dict[str, d
         }
         for category, count in counts.items()
     }
+
+
+def _reliability_bootstrap_config(state: ProjectState) -> ReliabilityBootstrapConfig:
+    """Load Phase 0 reliability bootstrap config from project metadata."""
+    raw = state.config.extra.get(_RELIABILITY_BOOTSTRAP_EXTRA_KEY)
+    if raw is None:
+        return ReliabilityBootstrapConfig()
+    if not isinstance(raw, dict):
+        raise ValueError(
+            f"ProjectState.config.extra['{_RELIABILITY_BOOTSTRAP_EXTRA_KEY}'] must be an object"
+        )
+    try:
+        return ReliabilityBootstrapConfig.model_validate(raw)
+    except ValidationError as exc:
+        raise ValueError(f"Invalid phase0_reliability_bootstrap config: {exc}") from exc
+
+
+def _binary_reliability_bootstrap_ci(
+    matrix: Mapping[str, list[int]],
+    bootstrap_config: ReliabilityBootstrapConfig,
+) -> dict[str, Any]:
+    """Bootstrap D5 metrics over binary reliability matrix rows."""
+    return _reliability_bootstrap_ci(
+        matrix,
+        bootstrap_config,
+        metric_functions={
+            "percent_agreement": compute_percent_agreement,
+            "gwet_ac1": compute_gwet_ac1,
+        },
+        unit="binary reliability matrix row",
+    )
+
+
+def _categorical_reliability_bootstrap_ci(
+    matrix: Mapping[str, list[str]],
+    bootstrap_config: ReliabilityBootstrapConfig,
+) -> dict[str, Any]:
+    """Bootstrap D5 metrics over categorical reliability matrix rows."""
+    return _reliability_bootstrap_ci(
+        matrix,
+        bootstrap_config,
+        metric_functions={
+            "percent_agreement": compute_categorical_percent_agreement,
+            "gwet_ac1": compute_categorical_gwet_ac1,
+        },
+        unit="categorical reliability matrix row",
+    )
+
+
+def _reliability_bootstrap_ci(
+    matrix: Mapping[str, list[Any]],
+    bootstrap_config: ReliabilityBootstrapConfig,
+    *,
+    metric_functions: Mapping[str, Any],
+    unit: str,
+) -> dict[str, Any]:
+    """Return deterministic row-bootstrap intervals for reliability metrics."""
+    rows = list(matrix.values())
+    base: dict[str, Any] = {
+        "method": "row_bootstrap",
+        "confidence_level": bootstrap_config.confidence_level,
+        "samples": bootstrap_config.samples,
+        "seed": bootstrap_config.seed,
+        "unit": unit,
+        "population_size": len(rows),
+        "note": (
+            "Deterministic local bootstrap over LLM-pass reliability rows. "
+            "This is consistency uncertainty metadata, not human IRR evidence."
+        ),
+    }
+    if not rows:
+        return {
+            **base,
+            "status": "not_available",
+            "reason": "No reliability matrix rows available for bootstrap.",
+            "metrics": {
+                metric: {"lower": None, "upper": None}
+                for metric in metric_functions
+            },
+        }
+
+    rng = Random(bootstrap_config.seed)
+    sample_size = len(rows)
+    values: dict[str, list[float]] = {metric: [] for metric in metric_functions}
+    for _ in range(bootstrap_config.samples):
+        sample = {
+            str(index): rows[rng.randrange(sample_size)]
+            for index in range(sample_size)
+        }
+        for metric, metric_fn in metric_functions.items():
+            values[metric].append(metric_fn(sample))
+
+    alpha = (1 - bootstrap_config.confidence_level) / 2
+    intervals = {}
+    for metric, metric_values in values.items():
+        metric_values.sort()
+        intervals[metric] = {
+            "lower": _percentile(metric_values, alpha),
+            "upper": _percentile(metric_values, 1 - alpha),
+        }
+    return {**base, "status": "scored", "metrics": intervals}
 
 
 def d10_cost_latency_scorecard(
