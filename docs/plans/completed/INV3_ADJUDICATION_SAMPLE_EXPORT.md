@@ -1,10 +1,43 @@
 # Plan #91: INV-3 Adjudication Sample Export
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Claim ledger object layer; review API/MCP/browser first slices
 **Blocks:** INV-3 expert adjudication protocol; populated D3/D7/D4/D8/D9 evaluation workflows
+
+---
+
+## Outcome
+
+Implemented a deterministic schema_version=1 adjudication sample export. The
+core builder emits bounded unlabeled samples over code applications, generic
+claims, negative-case claims, code relationships, and entity relationships with
+project/corpus hashes, source context where available, item counts, and empty
+response templates. The workflow is available through
+`qc_cli.py project adjudication-sample` and `make adjudication-sample`.
+
+This is an input packet for human/expert review only. It does not collect
+labels, validate labels as D3/D7 gold, estimate correctness, or license any
+methodological-validity/SOTA claim.
+
+## Verification
+
+- Initial focused TDD run failed as expected because
+  `qc_clean.core.adjudication_sample` did not exist.
+- Focused verification passed:
+  `python -m pytest tests/test_adjudication_sample.py tests/test_project_commands.py -q`
+  (`33 passed`).
+- Focused Ruff passed:
+  `python -m ruff check qc_clean/core/adjudication_sample.py qc_clean/core/cli/commands/project.py qc_cli.py tests/test_adjudication_sample.py tests/test_project_commands.py`.
+- `make help` shows the `adjudication-sample` target.
+- Docs gate passed: `make docs-check`.
+- Full gate passed: `make check` (`840 passed, 1 skipped, 8 deselected`;
+  Ruff and docs checks passed).
+- Type check remains not configured; `make check` still reports
+  `Type check not yet configured`.
+- Implementation commit pushed:
+  `34765a8 [Plan: INV3_ADJUDICATION_SAMPLE_EXPORT] Add adjudication sample export`.
 
 ---
 
@@ -150,20 +183,20 @@ slice that prepares adjudication inputs without asserting results.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] Core builder emits schema_version=1 packages with project/corpus hashes.
-- [ ] Package contains deterministic bounded samples of applications, claims,
+- [x] Core builder emits schema_version=1 packages with project/corpus hashes.
+- [x] Package contains deterministic bounded samples of applications, claims,
   negative cases, code relationships, and entity relationships when present.
-- [ ] Items include enough provenance/context for human adjudication and an
+- [x] Items include enough provenance/context for human adjudication and an
   explicit empty response template.
-- [ ] CLI writes the JSON package and fails clearly for missing projects.
-- [ ] Make target exposes the workflow for agents.
-- [ ] Docs state this is an adjudication input substrate, not expert evidence.
+- [x] CLI writes the JSON package and fails clearly for missing projects.
+- [x] Make target exposes the workflow for agents.
+- [x] Docs state this is an adjudication input substrate, not expert evidence.
 
 > Process criteria:
-- [ ] Required focused tests pass.
-- [ ] Full `make check` passes or any failure is documented with evidence.
-- [ ] Type-check status is reported.
-- [ ] Verified work is committed and pushed.
+- [x] Required focused tests pass.
+- [x] Full `make check` passes or any failure is documented with evidence.
+- [x] Type-check status is reported.
+- [x] Verified work is committed and pushed.
 
 ---
 

@@ -6,7 +6,6 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 91 | INV-3 adjudication sample export | High | Planned | `INV3_ADJUDICATION_SAMPLE_EXPORT.md` |
 
 ## Completed Plans
 
@@ -102,6 +101,7 @@ Track all implementation work here.
 | D1/D2 structural rate Wilson intervals | Evaluation-harness follow-up: Phase 0 grounding, coverage, and examined rates report Wilson intervals without claiming validity evidence | `completed/D1_D2_STRUCTURAL_RATE_WILSON_INTERVALS.md` |
 | D2 coded segment rate | Evaluation-harness follow-up: Phase 0 D2 coverage reports coded-segment rate and Wilson intervals over examined decisions only | `completed/D2_CODED_SEGMENT_RATE.md` |
 | Confidence calibration bootstrap intervals | Evaluation-harness follow-up: confidence-calibration scorecards report deterministic local bootstrap intervals for Brier score and ECE without claiming calibrated confidence | `completed/CONFIDENCE_CALIBRATION_BOOTSTRAP_INTERVALS.md` |
+| INV-3 adjudication sample export | INV-3 first slice: `make adjudication-sample` exports unlabeled schema_version=1 sample packets for human/expert review inputs without claiming labels or validity evidence | `completed/INV3_ADJUDICATION_SAMPLE_EXPORT.md` |
 
 ## Status Key
 

@@ -22,9 +22,9 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #91 (`INV3_ADJUDICATION_SAMPLE_EXPORT.md`): create a
-   deterministic unlabeled adjudication sample package export for human/expert
-   review inputs without claiming that expert labels or validity evidence exist.
+1. Choose the next highest-value unmet evaluation-harness, review, grounding,
+   scope-discipline, or validity-protocol lane that can be advanced without
+   pretending held-out expert data exists.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
@@ -47,7 +47,11 @@ listing; the browser review page now has a Relationships mode for relationship
 decisions; API/MCP/browser surfaces now also expose negative-case-specific
 review listing over existing `ClaimKind.NEGATIVE_CASE` claim rows while keeping
 review decisions on `target_type="claim"`. This is review accessibility, not
-expert adjudication or D7 validity evidence.
+expert adjudication or D7 validity evidence. `make adjudication-sample` and
+`qc_cli.py project adjudication-sample` now export unlabeled schema_version=1
+sample packets over applications, claims, negative cases, and relationships for
+human/expert review inputs with hashes and source context; these packets are
+not labels, gold data, correctness estimates, or validity evidence.
 MCP now exposes `qc_review_decisions` for agent-driven review decisions,
 including claim targets with rationale preservation, while keeping the old
 `qc_review_codes` tool compatible. MCP also exposes `qc_review_claims` as a
