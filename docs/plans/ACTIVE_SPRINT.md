@@ -22,10 +22,18 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #113 (`D6_STRATIFIED_BIAS_SCORECARD.md`): add externally
-   supplied stratified-bias accounting to Phase 0.
-2. Continue through the ranked roadmap without pausing after each verified
+1. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
+
+**Completed checkpoint:** Phase 0 now scores externally supplied D6 stratified
+correctness/error rows through `make bench BIAS_STRATIFIED=...`,
+`scripts/bench_phase0.py --bias-stratified-file`, package manifests, and
+`ProjectState.config.extra["bias_stratified_evaluations"]`. The scorecard
+reports overall accuracy/error rates with Wilson intervals, per-attribute/
+per-group summaries, per-surface summaries, and max group error-rate gaps while
+recording input hashes and command provenance. This is local accounting only,
+not a populated bias audit, causal proof, held-out correctness evidence, or a
+bias-free claim.
 
 **Completed checkpoint:** `make compare-d7-retrieval ... PROTOCOL=...` can now
 run the registered D7 comparison preflight at the scoring boundary. Failed

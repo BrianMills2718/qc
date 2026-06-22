@@ -1,10 +1,39 @@
 # Plan #113: D6 Stratified Bias Scorecard
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Phase 0 evaluation harness
 **Blocks:** INV-5 bias-surfacing evidence workflow
+
+---
+
+## Outcome
+
+Implemented in commit `e143261` and pushed to `main`. Phase 0 now exposes
+`bias_stratified_d6`, fed by `ProjectState.config.extra["bias_stratified_evaluations"]`,
+`scripts/bench_phase0.py --bias-stratified-file`, `make bench
+BIAS_STRATIFIED=...`, and Phase 0 benchmark package manifests. The scorecard
+reports overall accuracy/error rates with Wilson intervals, error case IDs,
+per-attribute/per-group summaries, per-surface summaries, and max group
+error-rate gaps while explicitly preserving the claim that this is local
+accounting only, not a populated bias audit or causal proof.
+
+Verification evidence:
+- TDD red slice: targeted tests initially failed on the missing
+  `bias_stratified_d6` section and missing CLI flag.
+- Focused tests: `python -m pytest tests/test_bench_phase0.py
+  tests/test_bench_phase0_script.py tests/test_phase0_benchmark_package.py -q`
+  -> `97 passed`.
+- Focused Ruff: `python -m ruff check qc_clean/core/bench.py
+  scripts/bench_phase0.py scripts/run_phase0_benchmark_package.py
+  tests/test_bench_phase0.py tests/test_bench_phase0_script.py
+  tests/test_phase0_benchmark_package.py` -> passed.
+- Make dry run: `make -n bench ID=project BIAS_STRATIFIED=bias.json` forwards
+  `--bias-stratified-file bias.json`.
+- Docs gate: `make docs-check` passed.
+- Full gate: `make check` -> `947 passed, 1 skipped, 8 deselected`; Ruff and
+  docs checks passed; type check is still not configured.
 
 ---
 
@@ -75,12 +104,12 @@ Internal scorecard capability only; no cross-project boundary is created.
 
 ### Capability Validation
 
-- [ ] Missing stratified rows report `not_available` with no bias-free claim.
-- [ ] Valid rows produce overall accuracy/error rates and Wilson intervals.
-- [ ] Per-attribute/per-group summaries report group rates and max error-rate gaps.
-- [ ] Per-surface summaries report rates.
-- [ ] Invalid metadata fails loud.
-- [ ] CLI/Make/package inputs load without mutating saved project state.
+- [x] Missing stratified rows report `not_available` with no bias-free claim.
+- [x] Valid rows produce overall accuracy/error rates and Wilson intervals.
+- [x] Per-attribute/per-group summaries report group rates and max error-rate gaps.
+- [x] Per-surface summaries report rates.
+- [x] Invalid metadata fails loud.
+- [x] CLI/Make/package inputs load without mutating saved project state.
 
 ---
 
@@ -145,31 +174,31 @@ Internal scorecard capability only; no cross-project boundary is created.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] `phase0_scorecard` includes `bias_stratified_d6`.
-- [ ] Missing data returns `not_available` and explicitly refuses bias-free
+- [x] `phase0_scorecard` includes `bias_stratified_d6`.
+- [x] Missing data returns `not_available` and explicitly refuses bias-free
   inference.
-- [ ] Valid rows produce overall, group, attribute-gap, and surface summaries.
-- [ ] Wilson intervals are included for accuracy/error rates.
-- [ ] `make bench ... BIAS_STRATIFIED=...` and `--bias-stratified-file` load
+- [x] Valid rows produce overall, group, attribute-gap, and surface summaries.
+- [x] Wilson intervals are included for accuracy/error rates.
+- [x] `make bench ... BIAS_STRATIFIED=...` and `--bias-stratified-file` load
   external rows without mutating project state.
-- [ ] Phase 0 input hashes, command provenance, and package manifest support
+- [x] Phase 0 input hashes, command provenance, and package manifest support
   include the new file.
-- [ ] Docs state this is local accounting only, not causal proof, bias-free
+- [x] Docs state this is local accounting only, not causal proof, bias-free
   evidence, or a populated bias audit.
 
 > Process criteria:
-- [ ] Required focused tests pass.
-- [ ] Focused Ruff check passes.
-- [ ] `make docs-check` passes.
-- [ ] Full `make check` passes or any failure is documented with evidence.
-- [ ] Type-check status is reported.
-- [ ] Verified work is committed and pushed.
+- [x] Required focused tests pass.
+- [x] Focused Ruff check passes.
+- [x] `make docs-check` passes.
+- [x] Full `make check` passes or any failure is documented with evidence.
+- [x] Type-check status is reported.
+- [x] Verified work is committed and pushed.
 
 ---
 
 ## Open Questions
 
-- [ ] Should this scorecard enforce a minimum group size threshold? — Status:
+- [x] Should this scorecard enforce a minimum group size threshold? — Status:
   DEFERRED | Why it matters: small groups can make disparity estimates unstable.
   This slice reports Wilson intervals and raw counts; policy thresholds should
   be pre-registered in a populated benchmark protocol.
