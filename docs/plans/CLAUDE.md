@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 131 | D7 retrieval CLI surfaces | High | In Progress | `D7_RETRIEVAL_CLI_SURFACES.md` |
 
 ## Completed Plans
 
