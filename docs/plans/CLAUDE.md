@@ -6,7 +6,6 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 108 | INV-7 live fixture prompt hashes | High | Planned | `INV7_LIVE_FIXTURE_PROMPT_HASHES.md` |
 
 ## Completed Plans
 
@@ -76,6 +75,7 @@ Track all implementation work here.
 | D3 span-overlap IoU scorecard | Evaluation-harness follow-up: D3 scorecards now report local same-code/doc char-span IoU overlap diagnostics beside exact-anchor scores | `completed/D3_SPAN_OVERLAP_IOU_SCORECARD.md` |
 | D3 Modified Hausdorff scorecard | Evaluation-harness follow-up: D3 span-overlap diagnostics now report local discrete Modified Hausdorff distances beside IoU | `completed/D3_MODIFIED_HAUSDORFF_SCORECARD.md` |
 | INV-7 live fixture runner | Evaluation-harness follow-up: `make run-inv7-live-fixtures` writes opt-in live model canary fixture outcomes for `PROMPT_INJECTION=` without claiming prompt-injection robustness | `completed/INV7_LIVE_FIXTURE_RUNNER.md` |
+| INV-7 live fixture prompt hashes | INV-7 follow-up: live fixture packages now carry exact prompt SHA-256 hashes for provenance without claiming prompt-injection robustness | `completed/INV7_LIVE_FIXTURE_PROMPT_HASHES.md` |
 | Human-ceiling comparison scorecard | Evaluation-harness follow-up: D3/D7 scorecards compare exact recall/precision/F1 to supplied human-human package metrics when available without claiming expert parity | `completed/HUMAN_CEILING_COMPARISON_SCORECARD.md` |
 | D5 Gwet AC1 reliability scorecard | Evaluation-harness follow-up: `project irr`, Markdown export, and `make bench` surface Gwet's AC1 for LLM-pass consistency without claiming human IRR | `completed/D5_GWET_AC1_RELIABILITY_SCORECARD.md` |
 | D5 reliability prevalence tables | Evaluation-harness follow-up: `make bench` surfaces rating prevalence tables beside D5 κ/AC1 reliability metrics | `completed/D5_RELIABILITY_PREVALENCE_TABLES.md` |

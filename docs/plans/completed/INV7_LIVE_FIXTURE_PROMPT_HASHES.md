@@ -1,10 +1,42 @@
 # Plan #108: INV-7 Live Fixture Prompt Hashes
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** INV-7 live fixture runner; INV-7 prompt-injection package
 **Blocks:** auditable committed live adversarial injection benchmark results
+
+---
+
+## Outcome
+
+Implemented and pushed in commit `196103f`:
+
+- `run_inv7_live_fixtures_async(...)` now emits `fixture_prompt_hashes` keyed by
+  fixture ID.
+- Hashes are SHA-256 over the exact prompt string passed to the live model
+  caller.
+- `Inv7PromptInjectionPackage` accepts optional `fixture_prompt_hashes`.
+- Package validation rejects hash key mismatches and malformed hash values when
+  the map is present.
+- Legacy packages without `fixture_prompt_hashes` remain valid.
+- Docs now describe live prompt hashes as provenance only, not prompt-injection
+  robustness evidence.
+
+Verification:
+
+- `python -m pytest tests/test_inv7_fixture_runner.py
+  tests/test_inv7_prompt_injection_package.py -q` failed before implementation
+  on the new prompt-hash expectations, as expected.
+- `python -m pytest tests/test_inv7_fixture_runner.py
+  tests/test_inv7_prompt_injection_package.py tests/test_bench_phase0.py
+  tests/test_bench_phase0_script.py -q` -> 102 passed.
+- `python -m ruff check qc_clean/core/inv7_fixtures.py
+  qc_clean/core/inv7_package.py tests/test_inv7_fixture_runner.py
+  tests/test_inv7_prompt_injection_package.py` -> passed.
+- `make docs-check` -> passed.
+- `make check` -> 918 passed, 1 skipped, 8 deselected; Ruff/docs green; type
+  check not yet configured.
 
 ---
 
@@ -64,11 +96,11 @@ Internal benchmark provenance only; no cross-project boundary is created.
 
 ### Capability Validation
 
-- [ ] Live runner output includes a hash for every live fixture prompt.
-- [ ] Package validator accepts matching prompt hashes.
-- [ ] Package validator rejects extra/missing prompt hash keys.
-- [ ] Package validator rejects malformed prompt hashes.
-- [ ] Backward-compatible packages without prompt hashes still validate.
+- [x] Live runner output includes a hash for every live fixture prompt.
+- [x] Package validator accepts matching prompt hashes.
+- [x] Package validator rejects extra/missing prompt hash keys.
+- [x] Package validator rejects malformed prompt hashes.
+- [x] Backward-compatible packages without prompt hashes still validate.
 
 ---
 
@@ -128,21 +160,21 @@ Internal benchmark provenance only; no cross-project boundary is created.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] Live runner emits `fixture_prompt_hashes` for every fixture.
-- [ ] Prompt hashes are SHA-256 over the exact prompt string sent to the model.
-- [ ] Versioned package validation accepts matching prompt hash maps.
-- [ ] Versioned package validation rejects hash key mismatches.
-- [ ] Versioned package validation rejects malformed hash values.
-- [ ] Existing INV-7 package inputs without prompt hashes remain valid.
-- [ ] Docs describe prompt hashes as provenance only, not robustness evidence.
+- [x] Live runner emits `fixture_prompt_hashes` for every fixture.
+- [x] Prompt hashes are SHA-256 over the exact prompt string sent to the model.
+- [x] Versioned package validation accepts matching prompt hash maps.
+- [x] Versioned package validation rejects hash key mismatches.
+- [x] Versioned package validation rejects malformed hash values.
+- [x] Existing INV-7 package inputs without prompt hashes remain valid.
+- [x] Docs describe prompt hashes as provenance only, not robustness evidence.
 
 > Process criteria:
-- [ ] Required focused tests pass.
-- [ ] Focused Ruff check passes.
-- [ ] `make docs-check` passes.
-- [ ] Full `make check` passes or any failure is documented with evidence.
-- [ ] Type-check status is reported.
-- [ ] Verified work is committed and pushed.
+- [x] Required focused tests pass.
+- [x] Focused Ruff check passes.
+- [x] `make docs-check` passes.
+- [x] Full `make check` passes or any failure is documented with evidence.
+- [x] Type-check status is reported.
+- [x] Verified work is committed and pushed.
 
 ---
 
