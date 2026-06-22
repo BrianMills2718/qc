@@ -22,11 +22,19 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #118 (`D4_CODEBOOK_QUALITY_PROTOCOL_RESULT_PREFLIGHT.md`): add
-   D4 protocol/result preflight before populated D4 rubric rows are treated as
-   benchmark inputs.
-2. Continue through the ranked roadmap without pausing after each verified
+1. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
+
+**Completed checkpoint:** D4 codebook-quality result files can now be
+preflighted against registered D4 protocols with
+`make d4-codebook-quality-preflight PROTOCOL=... QUALITY=...` /
+`scripts/preflight_d4_codebook_quality_protocol.py`. The preflight validates
+the protocol and concrete result rows, checks optional result-file SHA-256
+locks, evaluator type/count, target scopes, and individual-code `code_id`
+coverage, and emits a schema_version=1 pass/fail report. This is
+process/provenance metadata only, not blind expert-panel evidence, LLM-judge
+evidence, codebook-quality evidence, methodological-validity evidence, or SOTA
+evidence.
 
 **Completed checkpoint:** D4 codebook-quality protocols can now be validated
 with `make validate-d4-codebook-quality-protocol PROTOCOL=...` /

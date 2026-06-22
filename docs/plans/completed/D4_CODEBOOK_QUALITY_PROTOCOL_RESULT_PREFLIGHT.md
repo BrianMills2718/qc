@@ -1,11 +1,41 @@
 # Plan #118: D4 Codebook Quality Protocol Result Preflight
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** D4 codebook quality protocol package
 **Blocks:** D4 score-time preflight guard; populated D4 blind expert /
 LLM-judge evaluation workflow
+
+---
+
+## Outcome
+
+Implemented and verified the schema_version=1 D4 codebook-quality
+protocol/result preflight. The preflight validates concrete D4 result rows with
+the same scorecard row schema, checks optional protocol hash locks, evaluator
+type/count, target scopes, and individual-code `code_id` coverage, and emits a
+machine-readable pass/fail report through both importable code and
+`make d4-codebook-quality-preflight`.
+
+Verification evidence:
+
+- TDD red: `python -m pytest tests/test_d4_codebook_quality_preflight.py -q`
+  initially failed with missing `qc_clean.core.d4_codebook_quality_preflight`.
+- Focused tests: `python -m pytest tests/test_d4_codebook_quality_preflight.py -q`
+  passed (`5 passed`).
+- Focused Ruff:
+  `python -m ruff check qc_clean/core/d4_codebook_quality_preflight.py scripts/preflight_d4_codebook_quality_protocol.py tests/test_d4_codebook_quality_preflight.py`
+  passed.
+- Make dry-run:
+  `make -n d4-codebook-quality-preflight PROTOCOL=protocol.json QUALITY=quality.json`
+  emitted
+  `python scripts/preflight_d4_codebook_quality_protocol.py protocol.json --quality-file quality.json`.
+- Docs gate: `make docs-check` passed.
+- Full gate: `make check` passed (`971 passed, 1 skipped, 8 deselected`;
+  Ruff and docs checks clean; type check not configured).
+- Implementation commit pushed: `dcf1eae`
+  `[Plan: D4_CODEBOOK_QUALITY_PROTOCOL_RESULT_PREFLIGHT] Add D4 result preflight`.
 
 ---
 
@@ -70,15 +100,15 @@ Internal preflight capability only; no cross-project boundary is created.
 
 ### Capability Validation
 
-- [ ] Matching D4 protocol and quality-result payloads produce a pass report.
-- [ ] Missing, malformed, or empty quality-result payloads fail loud.
-- [ ] Protocol `outcome_file_sha256` locks are checked against the actual file
+- [x] Matching D4 protocol and quality-result payloads produce a pass report.
+- [x] Missing, malformed, or empty quality-result payloads fail loud.
+- [x] Protocol `outcome_file_sha256` locks are checked against the actual file
   hash when present.
-- [ ] Result evaluator types must match the protocol evaluator plan.
-- [ ] Unique result evaluators must satisfy `planned_evaluator_count`.
-- [ ] Result scopes must match protocol `target_scopes`.
-- [ ] Rows with `scope="individual_code"` must include a `code_id`.
-- [ ] CLI emits machine-readable JSON and returns non-zero on failed preflight.
+- [x] Result evaluator types must match the protocol evaluator plan.
+- [x] Unique result evaluators must satisfy `planned_evaluator_count`.
+- [x] Result scopes must match protocol `target_scopes`.
+- [x] Rows with `scope="individual_code"` must include a `code_id`.
+- [x] CLI emits machine-readable JSON and returns non-zero on failed preflight.
 
 ---
 
@@ -163,28 +193,28 @@ Deferred by design:
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] A schema_version=1 D4 preflight report can be produced by importable code.
-- [ ] `make d4-codebook-quality-preflight PROTOCOL=protocol.json QUALITY=quality.json`
+- [x] A schema_version=1 D4 preflight report can be produced by importable code.
+- [x] `make d4-codebook-quality-preflight PROTOCOL=protocol.json QUALITY=quality.json`
   emits JSON and returns non-zero on failed preflight.
-- [ ] Result payloads are validated with the same D4 scorecard row schema.
-- [ ] Protocol output hash locks are enforced when present.
-- [ ] Evaluator type, evaluator count, target scope, and individual-code
+- [x] Result payloads are validated with the same D4 scorecard row schema.
+- [x] Protocol output hash locks are enforced when present.
+- [x] Evaluator type, evaluator count, target scope, and individual-code
   `code_id` checks are enforced.
-- [ ] Docs state D4 preflight is process/provenance only.
+- [x] Docs state D4 preflight is process/provenance only.
 
 > Process criteria:
-- [ ] Required focused tests pass.
-- [ ] Focused Ruff check passes.
-- [ ] `make docs-check` passes.
-- [ ] Full `make check` passes or any failure is documented with evidence.
-- [ ] Type-check status is reported.
-- [ ] Verified work is committed and pushed.
+- [x] Required focused tests pass.
+- [x] Focused Ruff check passes.
+- [x] `make docs-check` passes.
+- [x] Full `make check` passes or any failure is documented with evidence.
+- [x] Type-check status is reported.
+- [x] Verified work is committed and pushed.
 
 ---
 
 ## Open Questions
 
-- [ ] Should the score-time guard be included in this same slice? — Status:
+- [x] Should the score-time guard be included in this same slice? — Status:
   DEFERRED | This plan creates the standalone protocol/result preflight first;
   `make bench D4_PROTOCOL=...` can follow as a separate guard slice once the
   report contract is stable.

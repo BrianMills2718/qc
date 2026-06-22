@@ -6,7 +6,6 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 118 | D4 codebook quality protocol result preflight | High | Planned | `D4_CODEBOOK_QUALITY_PROTOCOL_RESULT_PREFLIGHT.md` |
 
 ## Completed Plans
 
@@ -91,6 +90,7 @@ Track all implementation work here.
 | D6 bias protocol result preflight | Evaluation-harness follow-up: `make d6-bias-preflight` checks D6 result files against a registered protocol before scoring without claiming bias evidence | `completed/D6_BIAS_PROTOCOL_RESULT_PREFLIGHT.md` |
 | D6 bias scorecard preflight guard | Evaluation-harness follow-up: `make bench D6_PROTOCOL=...` enforces D6 protocol/result preflight before scorecard/output/artifact writes | `completed/D6_BIAS_SCORECARD_PREFLIGHT_GUARD.md` |
 | D4 codebook quality protocol package | Evaluation-harness follow-up: `make validate-d4-codebook-quality-protocol` validates pre-evaluation D4 protocol metadata without claiming blind expert evidence | `completed/D4_CODEBOOK_QUALITY_PROTOCOL_PACKAGE.md` |
+| D4 codebook quality protocol result preflight | Evaluation-harness follow-up: `make d4-codebook-quality-preflight` checks D4 result files against a registered protocol without claiming blind expert evidence | `completed/D4_CODEBOOK_QUALITY_PROTOCOL_RESULT_PREFLIGHT.md` |
 | Human agreement metadata scorecard | Evaluation-harness follow-up: D3/D7 human-ceiling sections now surface supplied human-human κ/α/AC1 metadata without claiming system agreement-vs-gold | `completed/HUMAN_AGREEMENT_METADATA_SCORECARD.md` |
 | D4 codebook quality scorecard | Evaluation-harness follow-up: `make bench CODEBOOK_QUALITY=...` scores externally supplied rubric outcomes without claiming blind expert-panel evidence | `completed/D4_CODEBOOK_QUALITY_SCORECARD.md` |
 | D9 interpretive preference scorecard | Evaluation-harness follow-up: `make bench PREFERENCE=...` scores externally supplied forced-choice preference outcomes without claiming blind expert-parity evidence | `completed/D9_INTERPRETIVE_PREFERENCE_SCORECARD.md` |
