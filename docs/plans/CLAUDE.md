@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 145 | INV-11 add-docs recode hook | High | In progress | `INV11_ADD_DOCS_RECODE_HOOK.md` |
 
 ## Completed Plans
 
