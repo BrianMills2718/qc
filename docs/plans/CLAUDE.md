@@ -6,12 +6,12 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 159 | INV-9 code-scoped higher-order claim anchors | High | Planned | `INV9_CODE_SCOPED_HIGHER_ORDER_CLAIM_ANCHORS.md` |
 
 ## Completed Plans
 
 | Name | Outcome | Record |
 |------|---------|--------|
+| INV-9 code-scoped higher-order claim anchors | Higher-order claims with explicit code scope now inherit existing exact code-application anchors while corpus-level/no-code-scope claims remain visibly unanchored | `completed/INV9_CODE_SCOPED_HIGHER_ORDER_CLAIM_ANCHORS.md` |
 | INV-7 prompt override metadata boundary | Prompt override rendering now rejects structured or multi-line metadata placeholder values before custom prompt rendering | `completed/INV7_PROMPT_OVERRIDE_METADATA_BOUNDARY.md` |
 | INV-7 prompt override data value boundary | Prompt override rendering now rejects raw/unwrapped values supplied for declared data placeholders before any LLM call | `completed/INV7_PROMPT_OVERRIDE_DATA_VALUE_BOUNDARY.md` |
 | Line ending normalization | Tracked text files are LF-normalized and `.gitattributes` now records an LF text policy; CRLF scans return no tracked text matches | `completed/LINE_ENDING_NORMALIZATION.md` |

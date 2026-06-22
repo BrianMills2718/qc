@@ -1,10 +1,36 @@
 # Plan #159: INV-9 Code-Scoped Higher-Order Claim Anchors
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** None
 **Blocks:** None
+
+---
+
+## Outcome
+
+Code-scoped higher-order claims now inherit exact existing `CodeApplication`
+anchors when their `ClaimScope` names matching code IDs or application IDs.
+This covers participant perspectives, code relationships, synthesis
+recommendations, and GT categories. Duplicate anchors are removed, and
+corpus-level/no-code-scope claims remain visibly `needs_anchor`.
+
+This is structural traceability only: anchors show the source spans backing the
+referenced code scope, not semantic proof or methodological validation of the
+higher-order prose.
+
+Implementation commit: `8dd2aae`
+
+## Verification
+
+- `python -m pytest tests/test_claims.py -q` -> 13 passed.
+- `python -m pytest tests/test_bench_phase0.py -k claim_anchor_coverage -q` ->
+  2 passed, 67 deselected.
+- `make docs-check` passed.
+- `make check` -> 1109 passed, 1 skipped, 8 deselected; Ruff and docs-check
+  passed; type check remains not configured.
+- Commit `8dd2aae` was pushed to `main`.
 
 ---
 
@@ -104,21 +130,21 @@ cross-project capability.
 
 Feature-level criteria:
 
-- [ ] Code-scoped higher-order claims inherit unique supporting anchors from
+- [x] Code-scoped higher-order claims inherit unique supporting anchors from
   matching code applications.
-- [ ] Corpus-level higher-order claims with no code scope remain unanchored and
+- [x] Corpus-level higher-order claims with no code scope remain unanchored and
   `needs_anchor`.
-- [ ] Claim anchor propagation does not mark unsupported/no-anchor code scopes
+- [x] Claim anchor propagation does not mark unsupported/no-anchor code scopes
   as supported.
-- [ ] Docs frame this as structural support/traceability, not claim truth or
+- [x] Docs frame this as structural support/traceability, not claim truth or
   methodological validation.
 
 Process criteria:
 
-- [ ] Required focused tests pass.
-- [ ] `make docs-check` passes.
-- [ ] `make check` passes.
-- [ ] Verified increment is committed and pushed.
+- [x] Required focused tests pass.
+- [x] `make docs-check` passes.
+- [x] `make check` passes.
+- [x] Verified increment is committed and pushed.
 
 ---
 
