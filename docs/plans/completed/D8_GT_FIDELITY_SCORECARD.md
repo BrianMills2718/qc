@@ -1,10 +1,31 @@
 # Plan #52: D8 GT Fidelity Scorecard
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** None
 **Blocks:** D8 grounded-theory fidelity measurement substrate
+
+---
+
+## Outcome
+
+Implemented the deterministic Phase 0 `gt_fidelity_d8` scorecard for externally
+supplied GT-fidelity rubric outcomes. The bench surface now accepts
+`GT_FIDELITY=gt_fidelity.json` / `--gt-fidelity-file`, hashes the D8 file in
+`_meta.input_hashes`, records it in artifact command provenance, and keeps the
+file input in memory without mutating saved project state. The scorecard
+reports total evaluations, metric summaries, overall mean, evaluator-type
+summaries, and scope summaries. Docs state that this is not full GT,
+methodological saturation, expert-rubric acceptance, or SOTA evidence.
+
+## Verification
+
+- `python -m pytest tests/test_bench_phase0.py tests/test_bench_phase0_script.py tests/test_qc_cli_bench.py -q` - 71 passed.
+- `python -m ruff check qc_clean/core/bench.py scripts/bench_phase0.py qc_cli.py tests/test_bench_phase0.py tests/test_bench_phase0_script.py tests/test_qc_cli_bench.py` - passed.
+- `python scripts/check_markdown_links.py` - passed.
+- `python scripts/sync_plan_status.py --check` - passed.
+- `make check` - 752 passed, 1 skipped, 8 deselected; Ruff and docs checks passed; type check not yet configured.
 
 ---
 
@@ -67,10 +88,10 @@ Internal scorecard capability only; no cross-project boundary is created.
 
 ### Capability Validation
 
-- [ ] GT-fidelity outcomes are Pydantic-validated and fail loudly when malformed.
-- [ ] Rubric metrics are constrained to 0-1.
-- [ ] Overall mean and metric summaries are computed deterministically.
-- [ ] External files are hashed in `_meta.input_hashes` and recorded in artifact command provenance.
+- [x] GT-fidelity outcomes are Pydantic-validated and fail loudly when malformed.
+- [x] Rubric metrics are constrained to 0-1.
+- [x] Overall mean and metric summaries are computed deterministically.
+- [x] External files are hashed in `_meta.input_hashes` and recorded in artifact command provenance.
 
 ---
 
@@ -136,23 +157,23 @@ Internal scorecard capability only; no cross-project boundary is created.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] Scorecard has `gt_fidelity_d8` with explicit unavailable state when no
+- [x] Scorecard has `gt_fidelity_d8` with explicit unavailable state when no
   rubric outcomes exist.
-- [ ] Scored output reports total evaluations, metric summaries, overall mean,
+- [x] Scored output reports total evaluations, metric summaries, overall mean,
   evaluator-type summaries, and scope summaries.
-- [ ] External D8 JSON file can be supplied through Make, script, and `qc_cli`
+- [x] External D8 JSON file can be supplied through Make, script, and `qc_cli`
   without mutating saved project state.
-- [ ] Phase 0 input hashes and artifact command provenance include the D8
+- [x] Phase 0 input hashes and artifact command provenance include the D8
   external file.
-- [ ] Docs preserve the caveat that this is not full GT, methodological
+- [x] Docs preserve the caveat that this is not full GT, methodological
   saturation, expert-rubric acceptance, or SOTA evidence.
 
 > Process criteria:
-- [ ] Required tests pass
-- [ ] Full test suite passes
-- [ ] Type check status reported
-- [ ] Docs updated
-- [ ] Plan completed, committed, and pushed
+- [x] Required tests pass
+- [x] Full test suite passes
+- [x] Type check status reported
+- [x] Docs updated
+- [x] Plan completed, committed, and pushed
 
 ---
 

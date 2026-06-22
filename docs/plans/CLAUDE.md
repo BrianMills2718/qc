@@ -6,7 +6,6 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 52 | D8 GT fidelity scorecard | High | Planned | `D8_GT_FIDELITY_SCORECARD.md` |
 
 ## Completed Plans
 
@@ -63,6 +62,7 @@ Track all implementation work here.
 | Human agreement metadata scorecard | Evaluation-harness follow-up: D3/D7 human-ceiling sections now surface supplied human-human κ/α/AC1 metadata without claiming system agreement-vs-gold | `completed/HUMAN_AGREEMENT_METADATA_SCORECARD.md` |
 | D4 codebook quality scorecard | Evaluation-harness follow-up: `make bench CODEBOOK_QUALITY=...` scores externally supplied rubric outcomes without claiming blind expert-panel evidence | `completed/D4_CODEBOOK_QUALITY_SCORECARD.md` |
 | D9 interpretive preference scorecard | Evaluation-harness follow-up: `make bench PREFERENCE=...` scores externally supplied forced-choice preference outcomes without claiming blind expert-parity evidence | `completed/D9_INTERPRETIVE_PREFERENCE_SCORECARD.md` |
+| D8 GT fidelity scorecard | Evaluation-harness follow-up: `make bench GT_FIDELITY=...` scores externally supplied GT-fidelity rubric outcomes without claiming full GT or methodological saturation | `completed/D8_GT_FIDELITY_SCORECARD.md` |
 
 ## Status Key
 
