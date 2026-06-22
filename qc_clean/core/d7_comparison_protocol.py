@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 import json
+import math
 import re
 from pathlib import Path
-from typing import Any, Literal
+from typing import Any, Literal, Mapping
 
 from pydantic import BaseModel, Field, ValidationError, model_validator
 
@@ -17,6 +18,32 @@ D7_COMPARISON_PROTOCOL_CAUTION = (
     "held-out D7 evidence, live-baseline evidence, methodological-validity "
     "evidence, or superiority evidence."
 )
+
+D7ComparisonMetric = Literal[
+    "recall",
+    "precision",
+    "f1",
+    "mean_best_gold_iou",
+    "mean_best_predicted_iou",
+    "mean_best_gold_modified_hausdorff_distance",
+    "mean_best_predicted_modified_hausdorff_distance",
+]
+D7ComparisonOperator = Literal[">=", ">", "<=", "<", "=="]
+D7MetricCriteriaStatus = Literal["pass", "fail", "missing"]
+
+_PROPORTION_METRICS: set[D7ComparisonMetric] = {
+    "recall",
+    "precision",
+    "f1",
+    "mean_best_gold_iou",
+    "mean_best_predicted_iou",
+}
+_SPAN_OVERLAP_METRICS: set[D7ComparisonMetric] = {
+    "mean_best_gold_iou",
+    "mean_best_predicted_iou",
+    "mean_best_gold_modified_hausdorff_distance",
+    "mean_best_predicted_modified_hausdorff_distance",
+}
 
 
 class D7ExpectedRetrievalPrediction(BaseModel):
@@ -79,6 +106,76 @@ class D7ExpectedRetrievalPrediction(BaseModel):
         return self
 
 
+class D7ComparisonMetricCriterion(BaseModel):
+    """One pre-registered D7 comparison metric criterion."""
+
+    criterion_id: str = Field(description="Stable unique criterion ID")
+    baseline_name: str = Field(description="Expected baseline this criterion evaluates")
+    metric: D7ComparisonMetric = Field(description="D7 comparison metric governed")
+    operator: D7ComparisonOperator = Field(description="Threshold comparison operator")
+    threshold: float = Field(description="Pre-registered numeric threshold")
+    rationale: str = Field(description="Human-readable pre-registration rationale")
+
+    @model_validator(mode="after")
+    def require_metric_criterion_invariants(self) -> "D7ComparisonMetricCriterion":
+        """Enforce interpretable threshold criteria."""
+        self.criterion_id = self.criterion_id.strip()
+        self.baseline_name = self.baseline_name.strip()
+        self.rationale = self.rationale.strip()
+        if not self.criterion_id:
+            raise ValueError("D7 metric criterion_id must be non-empty")
+        if not self.baseline_name:
+            raise ValueError("D7 metric criterion baseline_name must be non-empty")
+        if not self.rationale:
+            raise ValueError("D7 metric criterion rationale must be non-empty")
+        if not math.isfinite(self.threshold):
+            raise ValueError("D7 metric criterion threshold must be finite")
+        if self.metric in _PROPORTION_METRICS and not 0 <= self.threshold <= 1:
+            raise ValueError(
+                "D7 metric criterion threshold for exact/span-IoU metrics must be between 0 and 1"
+            )
+        if self.metric not in _PROPORTION_METRICS and self.threshold < 0:
+            raise ValueError(
+                "D7 metric criterion threshold for Modified Hausdorff metrics must be non-negative"
+            )
+        return self
+
+
+class D7MetricCriterionResult(BaseModel):
+    """Evaluation result for one D7 comparison metric criterion."""
+
+    criterion_id: str = Field(description="Stable unique criterion ID")
+    baseline_name: str = Field(description="Baseline evaluated")
+    metric: D7ComparisonMetric = Field(description="Metric evaluated")
+    operator: D7ComparisonOperator = Field(description="Threshold comparison operator")
+    threshold: float = Field(description="Pre-registered threshold")
+    observed_value: float | None = Field(
+        description="Observed metric value, or null when unavailable"
+    )
+    status: D7MetricCriteriaStatus = Field(description="Criterion evaluation status")
+    rationale: str = Field(description="Pre-registered rationale")
+    message: str = Field(description="Human-readable criterion result explanation")
+
+
+class D7MetricCriteriaReport(BaseModel):
+    """Machine-readable D7 metric-criteria evaluation report."""
+
+    schema_version: Literal[1] = Field(description="Metric criteria report schema version")
+    package_type: Literal["d7_retrieval_comparison_metric_criteria"] = Field(
+        description="Report package kind"
+    )
+    status: Literal["pass", "fail"] = Field(description="Overall criteria status")
+    protocol_id: str = Field(description="Protocol ID evaluated")
+    criterion_count: int = Field(description="Number of criteria evaluated")
+    passed_count: int = Field(description="Number of passing criteria")
+    failed_count: int = Field(description="Number of failed criteria")
+    missing_count: int = Field(description="Number of criteria with missing metric values")
+    results: list[D7MetricCriterionResult] = Field(
+        description="Per-criterion evaluation rows"
+    )
+    caution: str = Field(description="Claim-discipline caveat for criteria consumers")
+
+
 class D7ComparisonProtocolPackage(BaseModel):
     """Pre-registered protocol for a D7 retrieval comparison run."""
 
@@ -105,6 +202,10 @@ class D7ComparisonProtocolPackage(BaseModel):
         description="Prediction baselines expected in the comparison"
     )
     success_criteria: list[str] = Field(description="Human-readable pre-registered success criteria")
+    metric_criteria: list[D7ComparisonMetricCriterion] = Field(
+        default_factory=list,
+        description="Optional machine-checkable pre-registered metric criteria",
+    )
     caution: str = Field(description="Claim-discipline caveat for protocol consumers")
 
     @model_validator(mode="after")
@@ -133,6 +234,27 @@ class D7ComparisonProtocolPackage(BaseModel):
         duplicates = sorted(name for name in set(names) if names.count(name) > 1)
         if duplicates:
             raise ValueError("Duplicate D7 expected baseline name(s): " + ", ".join(duplicates))
+        criterion_ids = [criterion.criterion_id for criterion in self.metric_criteria]
+        duplicate_criteria = sorted(
+            criterion_id
+            for criterion_id in set(criterion_ids)
+            if criterion_ids.count(criterion_id) > 1
+        )
+        if duplicate_criteria:
+            raise ValueError(
+                "Duplicate D7 metric criterion ID(s): " + ", ".join(duplicate_criteria)
+            )
+        expected_names = set(names)
+        unknown_baselines = sorted(
+            criterion.baseline_name
+            for criterion in self.metric_criteria
+            if criterion.baseline_name not in expected_names
+        )
+        if unknown_baselines:
+            raise ValueError(
+                "D7 metric criteria reference unknown baseline(s): "
+                + ", ".join(unknown_baselines)
+            )
 
         if self.split == "held_out":
             if not self.prompt_frozen:
@@ -170,5 +292,129 @@ def validate_d7_comparison_protocol_payload(payload: Any) -> D7ComparisonProtoco
         raise ValueError(f"Invalid D7 comparison protocol package: {exc}") from exc
 
 
+def evaluate_d7_comparison_metric_criteria(
+    protocol_payload: Any,
+    comparison_report: Mapping[str, Any],
+) -> D7MetricCriteriaReport | None:
+    """Evaluate D7 protocol metric criteria against a comparison report."""
+    protocol = validate_d7_comparison_protocol_payload(protocol_payload)
+    if not protocol.metric_criteria:
+        return None
+
+    results = [
+        _evaluate_metric_criterion(criterion, comparison_report)
+        for criterion in protocol.metric_criteria
+    ]
+    passed_count = sum(1 for result in results if result.status == "pass")
+    failed_count = sum(1 for result in results if result.status == "fail")
+    missing_count = sum(1 for result in results if result.status == "missing")
+    return D7MetricCriteriaReport(
+        schema_version=1,
+        package_type="d7_retrieval_comparison_metric_criteria",
+        status="pass" if passed_count == len(results) else "fail",
+        protocol_id=protocol.protocol_id,
+        criterion_count=len(results),
+        passed_count=passed_count,
+        failed_count=failed_count,
+        missing_count=missing_count,
+        results=results,
+        caution=(
+            "D7 metric criteria evaluate pre-registered local comparison metrics only; "
+            "they are not held-out D7 evidence, live-baseline evidence, "
+            "methodological-validity evidence, superiority evidence, or SOTA evidence."
+        ),
+    )
+
+
 def _is_sha256(value: str) -> bool:
     return bool(_SHA256_RE.fullmatch(value))
+
+
+def _evaluate_metric_criterion(
+    criterion: D7ComparisonMetricCriterion,
+    comparison_report: Mapping[str, Any],
+) -> D7MetricCriterionResult:
+    """Evaluate one criterion against a comparison report."""
+    observed = _lookup_baseline_metric(
+        comparison_report,
+        baseline_name=criterion.baseline_name,
+        metric=criterion.metric,
+    )
+    if observed is None:
+        return D7MetricCriterionResult(
+            criterion_id=criterion.criterion_id,
+            baseline_name=criterion.baseline_name,
+            metric=criterion.metric,
+            operator=criterion.operator,
+            threshold=criterion.threshold,
+            observed_value=None,
+            status="missing",
+            rationale=criterion.rationale,
+            message=(
+                f"Metric {criterion.metric!r} was not available for baseline "
+                f"{criterion.baseline_name!r}"
+            ),
+        )
+    passed = _compare(observed, criterion.operator, criterion.threshold)
+    return D7MetricCriterionResult(
+        criterion_id=criterion.criterion_id,
+        baseline_name=criterion.baseline_name,
+        metric=criterion.metric,
+        operator=criterion.operator,
+        threshold=criterion.threshold,
+        observed_value=observed,
+        status="pass" if passed else "fail",
+        rationale=criterion.rationale,
+        message=(
+            f"Observed {criterion.metric}={observed} "
+            f"{'met' if passed else 'did not meet'} "
+            f"{criterion.operator} {criterion.threshold}"
+        ),
+    )
+
+
+def _lookup_baseline_metric(
+    comparison_report: Mapping[str, Any],
+    *,
+    baseline_name: str,
+    metric: D7ComparisonMetric,
+) -> float | None:
+    """Return a baseline metric value when present and numeric."""
+    d7_section = comparison_report.get("disconfirmation_d7")
+    if not isinstance(d7_section, Mapping):
+        return None
+    baselines = d7_section.get("baselines")
+    if not isinstance(baselines, Mapping):
+        return None
+    baseline = baselines.get(baseline_name)
+    if not isinstance(baseline, Mapping):
+        return None
+    if metric in _SPAN_OVERLAP_METRICS:
+        span_overlap = baseline.get("span_overlap")
+        if not isinstance(span_overlap, Mapping):
+            return None
+        return _numeric_or_none(span_overlap.get(metric))
+    return _numeric_or_none(baseline.get(metric))
+
+
+def _numeric_or_none(value: Any) -> float | None:
+    """Return finite numeric values as floats; treat everything else as missing."""
+    if type(value) not in {int, float}:
+        return None
+    numeric = float(value)
+    if not math.isfinite(numeric):
+        return None
+    return numeric
+
+
+def _compare(observed: float, operator: D7ComparisonOperator, threshold: float) -> bool:
+    """Compare an observed metric to a threshold."""
+    if operator == ">=":
+        return observed >= threshold
+    if operator == ">":
+        return observed > threshold
+    if operator == "<=":
+        return observed <= threshold
+    if operator == "<":
+        return observed < threshold
+    return observed == threshold

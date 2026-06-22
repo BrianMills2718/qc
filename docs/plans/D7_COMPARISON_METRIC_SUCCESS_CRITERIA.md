@@ -104,8 +104,8 @@ Each criterion:
 - `baseline_name`: expected baseline being evaluated
 - `metric`: one of exact-score `recall`, `precision`, `f1`, or diagnostic
   span-overlap metrics `mean_best_gold_iou`, `mean_best_predicted_iou`,
-  `mean_best_gold_modified_hausdorff`,
-  `mean_best_predicted_modified_hausdorff`
+  `mean_best_gold_modified_hausdorff_distance`,
+  `mean_best_predicted_modified_hausdorff_distance`
 - `operator`: one of `>=`, `>`, `<=`, `<`, `==`
 - `threshold`: float threshold
 - `rationale`: human-readable pre-registration rationale
@@ -212,4 +212,3 @@ Deferred by design:
 | Criteria change D7 exact scores | Integration touched scoring instead of post-score accounting | Keep evaluation helper read-only over the comparison report. |
 | Span-overlap criteria are misleading | Criteria target diagnostic metrics without caveat | Keep metric names explicit and docs label them diagnostic-only. |
 | Full gate fails outside touched files | Inspect failing output; fix only related regressions, otherwise record as pre-existing if proven unrelated. |
-

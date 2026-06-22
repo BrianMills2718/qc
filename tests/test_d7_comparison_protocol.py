@@ -26,6 +26,128 @@ def test_validate_d7_comparison_protocol_accepts_held_out_package(tmp_path, caps
     assert output["expected_prediction_count"] == 1
 
 
+def test_validate_d7_comparison_protocol_accepts_metric_criteria(tmp_path, capsys):
+    payload = _valid_protocol()
+    payload["metric_criteria"] = [
+        {
+            "criterion_id": "lexical-recall-floor",
+            "baseline_name": "retrieval_lexical_bm25_top1",
+            "metric": "recall",
+            "operator": ">=",
+            "threshold": 0.8,
+            "rationale": "Lexical retrieval should recover most adjudicated contrary anchors.",
+        },
+        {
+            "criterion_id": "lexical-span-iou-floor",
+            "baseline_name": "retrieval_lexical_bm25_top1",
+            "metric": "mean_best_gold_iou",
+            "operator": ">=",
+            "threshold": 0.5,
+            "rationale": "Diagnostic span overlap should be good enough for review.",
+        },
+    ]
+    path = tmp_path / "protocol.json"
+    path.write_text(json.dumps(payload), encoding="utf-8")
+
+    package = validate_d7_comparison_protocol_payload(payload)
+    exit_code = validate_d7_comparison_protocol.main([str(path)])
+
+    output = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert len(package.metric_criteria) == 2
+    assert package.metric_criteria[0].criterion_id == "lexical-recall-floor"
+    assert output["metric_criteria_count"] == 2
+
+
+def test_validate_d7_comparison_protocol_rejects_unknown_metric_criterion_baseline():
+    payload = _valid_protocol()
+    payload["metric_criteria"] = [
+        {
+            "criterion_id": "unknown-baseline",
+            "baseline_name": "missing_baseline",
+            "metric": "recall",
+            "operator": ">=",
+            "threshold": 0.8,
+            "rationale": "This should fail because the baseline is not expected.",
+        }
+    ]
+
+    with pytest.raises(ValueError, match="unknown baseline"):
+        validate_d7_comparison_protocol_payload(payload)
+
+
+def test_validate_d7_comparison_protocol_rejects_duplicate_metric_criteria():
+    payload = _valid_protocol()
+    payload["metric_criteria"] = [
+        {
+            "criterion_id": "duplicate-id",
+            "baseline_name": "retrieval_lexical_bm25_top1",
+            "metric": "recall",
+            "operator": ">=",
+            "threshold": 0.8,
+            "rationale": "First criterion.",
+        },
+        {
+            "criterion_id": "duplicate-id",
+            "baseline_name": "retrieval_lexical_bm25_top1",
+            "metric": "precision",
+            "operator": ">=",
+            "threshold": 0.8,
+            "rationale": "Second criterion.",
+        },
+    ]
+
+    with pytest.raises(ValueError, match="Duplicate D7 metric criterion"):
+        validate_d7_comparison_protocol_payload(payload)
+
+
+def test_validate_d7_comparison_protocol_rejects_invalid_metric_threshold():
+    payload = _valid_protocol()
+    payload["metric_criteria"] = [
+        {
+            "criterion_id": "bad-iou-threshold",
+            "baseline_name": "retrieval_lexical_bm25_top1",
+            "metric": "mean_best_gold_iou",
+            "operator": ">=",
+            "threshold": 1.5,
+            "rationale": "IoU thresholds must stay in the proportion range.",
+        }
+    ]
+
+    with pytest.raises(ValueError, match="threshold"):
+        validate_d7_comparison_protocol_payload(payload)
+
+    payload = _valid_protocol()
+    payload["metric_criteria"] = [
+        {
+            "criterion_id": "bad-operator",
+            "baseline_name": "retrieval_lexical_bm25_top1",
+            "metric": "recall",
+            "operator": "approximately",
+            "threshold": 0.8,
+            "rationale": "Operators must be from the supported deterministic set.",
+        }
+    ]
+
+    with pytest.raises(ValueError, match="operator"):
+        validate_d7_comparison_protocol_payload(payload)
+
+    payload = _valid_protocol()
+    payload["metric_criteria"] = [
+        {
+            "criterion_id": "empty-rationale",
+            "baseline_name": "retrieval_lexical_bm25_top1",
+            "metric": "recall",
+            "operator": ">=",
+            "threshold": 0.8,
+            "rationale": " ",
+        }
+    ]
+
+    with pytest.raises(ValueError, match="rationale"):
+        validate_d7_comparison_protocol_payload(payload)
+
+
 def test_validate_d7_comparison_protocol_rejects_invalid_held_out_flags():
     payload = _valid_protocol()
     payload["prompt_frozen"] = False

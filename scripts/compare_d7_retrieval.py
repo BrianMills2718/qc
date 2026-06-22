@@ -18,6 +18,10 @@ from qc_clean.core.d7_comparison_preflight import (
     D7ComparisonPreflightReport,
     preflight_d7_comparison_payloads,
 )
+from qc_clean.core.d7_comparison_protocol import (
+    D7MetricCriteriaReport,
+    evaluate_d7_comparison_metric_criteria,
+)
 from qc_clean.core.d7_retrieval import compare_d7_retrieval_predictions
 from qc_clean.core.persistence.project_store import ProjectStore
 from scripts.bench_phase0 import load_d7_gold_file
@@ -50,7 +54,13 @@ def main(argv: Sequence[str] | None = None) -> int:
         state = store.load(args.project_id)
         gold_payload = load_d7_gold_file(args.gold_file)
         packages = [load_prediction_package(path) for path in args.predictions_file]
-        preflight_report = _run_preflight_if_requested(args, gold_payload, packages)
+        protocol_payload = _load_protocol_if_requested(args)
+        preflight_report = _run_preflight_if_requested(
+            args,
+            gold_payload,
+            packages,
+            protocol_payload,
+        )
         if preflight_report is not None and preflight_report.status != "pass":
             print(
                 json.dumps(
@@ -68,14 +78,19 @@ def main(argv: Sequence[str] | None = None) -> int:
             gold_payload=gold_payload,
             prediction_packages=packages,
         )
+        metric_criteria_report = _evaluate_metric_criteria_if_requested(
+            protocol_payload,
+            report,
+        )
     except (FileNotFoundError, OSError, ValueError, json.JSONDecodeError) as exc:
         print(json.dumps({"error": str(exc)}))
         return 1
 
-    text = json.dumps(report, indent=2)
     if preflight_report is not None:
         report["preflight_report"] = preflight_report.model_dump(mode="json")
-        text = json.dumps(report, indent=2)
+    if metric_criteria_report is not None:
+        report["metric_criteria_report"] = metric_criteria_report.model_dump(mode="json")
+    text = json.dumps(report, indent=2)
     if args.output:
         args.output.write_text(text, encoding="utf-8")
     print(text)
@@ -99,12 +114,11 @@ def _run_preflight_if_requested(
     args: argparse.Namespace,
     gold_payload: Any,
     prediction_packages: list[dict[str, Any]],
+    protocol_payload: Any | None,
 ) -> D7ComparisonPreflightReport | None:
     """Run D7 comparison preflight when a protocol package is supplied."""
-    protocol_path = args.protocol_package
-    if protocol_path is None:
+    if protocol_payload is None:
         return None
-    protocol_payload = _load_json(protocol_path, label="protocol package")
     prediction_hashes: dict[str, str] = {}
     for path, package in zip(args.predictions_file, prediction_packages, strict=True):
         prediction_hash = _sha256_file(path)
@@ -116,6 +130,23 @@ def _run_preflight_if_requested(
         prediction_packages,
         prediction_file_sha256_by_baseline=prediction_hashes,
     )
+
+
+def _load_protocol_if_requested(args: argparse.Namespace) -> Any | None:
+    """Load the optional D7 comparison protocol payload."""
+    if args.protocol_package is None:
+        return None
+    return _load_json(args.protocol_package, label="protocol package")
+
+
+def _evaluate_metric_criteria_if_requested(
+    protocol_payload: Any | None,
+    report: dict[str, Any],
+) -> D7MetricCriteriaReport | None:
+    """Evaluate optional protocol metric criteria after a passing comparison."""
+    if protocol_payload is None:
+        return None
+    return evaluate_d7_comparison_metric_criteria(protocol_payload, report)
 
 
 def _load_json(path: Path, *, label: str) -> Any:

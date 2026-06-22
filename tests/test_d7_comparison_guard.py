@@ -61,6 +61,116 @@ def test_compare_d7_retrieval_guard_includes_preflight_report(tmp_path, monkeypa
     assert written["preflight_report"]["status"] == "pass"
 
 
+def test_compare_d7_retrieval_guard_includes_metric_criteria_results(
+    tmp_path,
+    monkeypatch,
+    capsys,
+):
+    state, store = _saved_state(tmp_path)
+    package = _prediction_package(state)
+    prediction_path = _write_json(tmp_path / "predictions.json", package)
+    gold = _gold_package(package)
+    gold_path = _write_json(tmp_path / "gold.json", gold)
+    protocol = _protocol_for(
+        package,
+        gold,
+        prediction_file_sha256=_sha256_file(prediction_path),
+    )
+    baseline_name = package["disconfirmation_baselines"][0]["name"]
+    protocol["metric_criteria"] = [
+        {
+            "criterion_id": "retrieval-recall-floor",
+            "baseline_name": baseline_name,
+            "metric": "recall",
+            "operator": ">=",
+            "threshold": 1.0,
+            "rationale": "The synthetic fixture should recover the one gold anchor.",
+        },
+        {
+            "criterion_id": "retrieval-span-iou-floor",
+            "baseline_name": baseline_name,
+            "metric": "mean_best_gold_iou",
+            "operator": ">=",
+            "threshold": 1.0,
+            "rationale": "The synthetic fixture should match the one gold span exactly.",
+        },
+    ]
+    protocol_path = _write_json(tmp_path / "protocol.json", protocol)
+    monkeypatch.setattr(compare_d7_retrieval, "ProjectStore", lambda: store)
+
+    exit_code = compare_d7_retrieval.main([
+        state.id,
+        "--gold-file",
+        str(gold_path),
+        "--predictions-file",
+        str(prediction_path),
+        "--protocol-package",
+        str(protocol_path),
+    ])
+
+    output = json.loads(capsys.readouterr().out)
+    criteria = output["metric_criteria_report"]
+    assert exit_code == 0
+    assert criteria["status"] == "pass"
+    assert criteria["criterion_count"] == 2
+    assert {row["status"] for row in criteria["results"]} == {"pass"}
+    assert criteria["results"][0]["observed_value"] == 1.0
+
+
+def test_compare_d7_retrieval_guard_reports_missing_metric_criteria(
+    tmp_path,
+    monkeypatch,
+    capsys,
+):
+    state, store = _saved_state(tmp_path)
+    package = _prediction_package(state)
+    prediction_path = _write_json(tmp_path / "predictions.json", package)
+    gold = _gold_package(package)
+    gold_path = _write_json(tmp_path / "gold.json", gold)
+    protocol = _protocol_for(
+        package,
+        gold,
+        prediction_file_sha256=_sha256_file(prediction_path),
+    )
+    baseline_name = package["disconfirmation_baselines"][0]["name"]
+    protocol["metric_criteria"] = [
+        {
+            "criterion_id": "missing-diagnostic",
+            "baseline_name": baseline_name,
+            "metric": "mean_best_predicted_modified_hausdorff_distance",
+            "operator": "<=",
+            "threshold": 0.0,
+            "rationale": "This fixture has no predicted span-offset diagnostic value.",
+        }
+    ]
+    package["disconfirmation_baselines"][0]["contrary_evidence"][0].pop("start_char")
+    package["disconfirmation_baselines"][0]["contrary_evidence"][0].pop("end_char")
+    prediction_path = _write_json(tmp_path / "predictions_missing_span.json", package)
+    protocol["expected_predictions"][0]["prediction_file_sha256"] = _sha256_file(
+        prediction_path
+    )
+    protocol_path = _write_json(tmp_path / "protocol.json", protocol)
+    monkeypatch.setattr(compare_d7_retrieval, "ProjectStore", lambda: store)
+
+    exit_code = compare_d7_retrieval.main([
+        state.id,
+        "--gold-file",
+        str(gold_path),
+        "--predictions-file",
+        str(prediction_path),
+        "--protocol-package",
+        str(protocol_path),
+    ])
+
+    output = json.loads(capsys.readouterr().out)
+    criteria = output["metric_criteria_report"]
+    assert exit_code == 0
+    assert criteria["status"] == "fail"
+    assert criteria["missing_count"] == 1
+    assert criteria["results"][0]["status"] == "missing"
+    assert criteria["results"][0]["observed_value"] is None
+
+
 def test_compare_d7_retrieval_guard_blocks_failed_preflight_and_writes_no_output(
     tmp_path,
     monkeypatch,

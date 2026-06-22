@@ -39,6 +39,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 "gold_set_id": package.gold_set_id,
                 "split": package.split,
                 "expected_prediction_count": len(package.expected_predictions),
+                "metric_criteria_count": len(package.metric_criteria),
                 "caution": package.caution,
             },
             indent=2,
