@@ -1,12 +1,29 @@
 # Plan #62: D4 Codebook-Quality Bootstrap Intervals
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** None
 **Blocks:** D4 benchmark uncertainty metadata
 
 ---
+
+## Outcome
+
+D4 codebook-quality scorecards now include deterministic local rubric-mean
+bootstrap intervals when `phase0_rubric_bootstrap` is enabled. The scorecard
+reports `overall_mean_ci`, per-metric `mean_ci`, and per-evaluator-type
+overall/metric intervals. `phase0_rubric_bootstrap.enabled=false` suppresses
+the interval fields. This remains local uncertainty metadata for supplied rubric
+rows, not blind expert-panel evidence or proof of codebook validity.
+
+## Verification
+
+- `python -m pytest tests/test_bench_phase0.py -q` - 53 passed
+- `python -m ruff check qc_clean/core/bench.py tests/test_bench_phase0.py` - clean
+- `python scripts/check_markdown_links.py` - clean
+- `python scripts/sync_plan_status.py --check` - clean
+- `make check` - 772 passed, 1 skipped, 8 deselected; lint and docs checks clean; type check not configured
 
 ## Gap
 
@@ -56,12 +73,12 @@ Internal scorecard capability only; no cross-project boundary is created.
 
 ### Capability Validation
 
-- [ ] D4 overall summary includes `overall_mean_ci` when bootstrap is enabled.
-- [ ] D4 metric summaries include `mean_ci` when bootstrap is enabled.
-- [ ] D4 per-evaluator-type summaries include overall and metric mean intervals.
-- [ ] Bootstrap metadata reports method, confidence level, samples, seed, unit, and population size.
-- [ ] Bootstrap can be disabled through project metadata.
-- [ ] Docs preserve the caveat that intervals are local uncertainty metadata, not expert-panel evidence.
+- [x] D4 overall summary includes `overall_mean_ci` when bootstrap is enabled.
+- [x] D4 metric summaries include `mean_ci` when bootstrap is enabled.
+- [x] D4 per-evaluator-type summaries include overall and metric mean intervals.
+- [x] Bootstrap metadata reports method, confidence level, samples, seed, unit, and population size.
+- [x] Bootstrap can be disabled through project metadata.
+- [x] Docs preserve the caveat that intervals are local uncertainty metadata, not expert-panel evidence.
 
 ---
 
@@ -112,19 +129,19 @@ Internal scorecard capability only; no cross-project boundary is created.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] D4 overall mean has deterministic bootstrap CI metadata.
-- [ ] D4 per-metric means have deterministic bootstrap CI metadata.
-- [ ] D4 per-evaluator-type summaries have deterministic bootstrap CI metadata.
-- [ ] Explicit bootstrap disable suppresses D4 interval fields.
-- [ ] Existing D4 point metrics are unchanged.
-- [ ] Docs preserve the caveat that this is local metadata only.
+- [x] D4 overall mean has deterministic bootstrap CI metadata.
+- [x] D4 per-metric means have deterministic bootstrap CI metadata.
+- [x] D4 per-evaluator-type summaries have deterministic bootstrap CI metadata.
+- [x] Explicit bootstrap disable suppresses D4 interval fields.
+- [x] Existing D4 point metrics are unchanged.
+- [x] Docs preserve the caveat that this is local metadata only.
 
 > Process criteria:
-- [ ] Required tests pass
-- [ ] Full test suite passes
-- [ ] Type check status reported
-- [ ] Docs updated
-- [ ] Plan completed, committed, and pushed
+- [x] Required tests pass
+- [x] Full test suite passes
+- [x] Type check status reported
+- [x] Docs updated
+- [x] Plan completed, committed, and pushed
 
 ---
 
