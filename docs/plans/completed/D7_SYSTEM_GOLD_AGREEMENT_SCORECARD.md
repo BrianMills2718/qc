@@ -1,10 +1,29 @@
 # Plan #55: D7 System-Gold Agreement Scorecard
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** Medium
 **Blocked By:** None
 **Blocks:** D7 richer agreement-vs-gold metadata
+
+---
+
+## Outcome
+
+Implemented `disconfirmation_d7.system_gold_agreement`, a deterministic
+exact-key binary agreement diagnostic over the union of D7 gold and predicted
+target-claim/source-anchor keys. The implementation shares the exact-key
+agreement helper used by D3 and reports row count, percent agreement, Cohen's κ,
+Gwet's AC1, and prevalence metadata, with notes that prevent interpreting this
+as semantic disconfirmation validity or held-out benchmark evidence.
+
+## Verification
+
+- `python -m pytest tests/test_bench_phase0.py -q` - 47 passed.
+- `python -m ruff check qc_clean/core/bench.py tests/test_bench_phase0.py` - passed.
+- `python scripts/check_markdown_links.py` - passed.
+- `python scripts/sync_plan_status.py --check` - passed.
+- `make check` - 757 passed, 1 skipped, 8 deselected; Ruff and docs checks passed; type check not yet configured.
 
 ---
 
@@ -66,10 +85,10 @@ Internal scorecard capability only; no cross-project boundary is created.
 
 ### Capability Validation
 
-- [ ] Agreement rows are built from the exact union of gold and predicted D7 keys.
-- [ ] Metrics include percent agreement, Cohen's κ, and Gwet's AC1.
-- [ ] Prevalence is reported for interpreting sparse exact-key labels.
-- [ ] Notes prevent semantic-validity/held-out-benchmark interpretation.
+- [x] Agreement rows are built from the exact union of gold and predicted D7 keys.
+- [x] Metrics include percent agreement, Cohen's κ, and Gwet's AC1.
+- [x] Prevalence is reported for interpreting sparse exact-key labels.
+- [x] Notes prevent semantic-validity/held-out-benchmark interpretation.
 
 ---
 
@@ -118,19 +137,19 @@ Internal scorecard capability only; no cross-project boundary is created.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] `disconfirmation_d7.system_gold_agreement` exists when D7 gold is scored.
-- [ ] Mixed TP/FP/FN exact-key rows produce deterministic agreement metrics and
+- [x] `disconfirmation_d7.system_gold_agreement` exists when D7 gold is scored.
+- [x] Mixed TP/FP/FN exact-key rows produce deterministic agreement metrics and
   prevalence metadata.
-- [ ] Perfect exact matches produce 1.0 agreement metrics.
-- [ ] Docs preserve the caveat that this is exact-key binary agreement metadata,
+- [x] Perfect exact matches produce 1.0 agreement metrics.
+- [x] Docs preserve the caveat that this is exact-key binary agreement metadata,
   not semantic disconfirmation validity or held-out benchmark evidence.
 
 > Process criteria:
-- [ ] Required tests pass
-- [ ] Full test suite passes
-- [ ] Type check status reported
-- [ ] Docs updated
-- [ ] Plan completed, committed, and pushed
+- [x] Required tests pass
+- [x] Full test suite passes
+- [x] Type check status reported
+- [x] Docs updated
+- [x] Plan completed, committed, and pushed
 
 ---
 

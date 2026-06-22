@@ -6,7 +6,6 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 55 | D7 system-gold agreement scorecard | Medium | Planned | `D7_SYSTEM_GOLD_AGREEMENT_SCORECARD.md` |
 
 ## Completed Plans
 
@@ -66,6 +65,7 @@ Track all implementation work here.
 | D8 GT fidelity scorecard | Evaluation-harness follow-up: `make bench GT_FIDELITY=...` scores externally supplied GT-fidelity rubric outcomes without claiming full GT or methodological saturation | `completed/D8_GT_FIDELITY_SCORECARD.md` |
 | Confidence calibration scorecard | Evaluation-harness follow-up: `make bench CALIBRATION=...` scores externally supplied confidence/correctness records without claiming calibrated confidence | `completed/CONFIDENCE_CALIBRATION_SCORECARD.md` |
 | D3 system-gold agreement scorecard | Evaluation-harness follow-up: D3 scorecards report exact-key binary system-vs-gold agreement metrics without claiming full D3 validity or expert parity | `completed/D3_SYSTEM_GOLD_AGREEMENT_SCORECARD.md` |
+| D7 system-gold agreement scorecard | Evaluation-harness follow-up: D7 scorecards report exact-key binary system-vs-gold agreement metrics without claiming semantic disconfirmation validity or held-out evidence | `completed/D7_SYSTEM_GOLD_AGREEMENT_SCORECARD.md` |
 
 ## Status Key
 
