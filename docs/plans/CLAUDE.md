@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 146 | D3/D7 gold validator CLI surfaces | Medium | In progress | `D3_D7_GOLD_VALIDATOR_CLI.md` |
 
 ## Completed Plans
 
