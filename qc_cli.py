@@ -64,6 +64,12 @@ Examples:
   qc_cli validate-confidence-calibration-protocol confidence_protocol.json
   qc_cli confidence-calibration-preflight confidence_protocol.json --calibration-file calibration.json
   qc_cli verify-phase0-benchmark-artifact benchmark_results/run/manifest.json
+  qc_cli export-audit-manifest <project_id> --format markdown --artifact report.md --output manifest.json
+  qc_cli verify-export-audit-manifest manifest.json
+  qc_cli export-publish-preflight --manifest manifest.json
+  qc_cli verify-export-audit-log events.jsonl
+  qc_cli mirror-export-audit-db events.jsonl --db events.sqlite
+  qc_cli verify-export-audit-db events.sqlite
   qc_cli validate-d3-gold d3_gold.json
   qc_cli validate-d7-gold d7_gold.json
   qc_cli validate-d3-baseline-package d3_baseline.json
@@ -657,6 +663,145 @@ Examples:
     phase0_artifact_verifier_parser.add_argument(
         'artifact',
         help='Phase 0 benchmark artifact directory or manifest.json path',
+    )
+
+    export_audit_manifest_parser = subparsers.add_parser(
+        'export-audit-manifest',
+        help='Write an export audit manifest',
+        description='Write a local hash manifest for existing project export artifacts',
+    )
+    export_audit_manifest_parser.add_argument(
+        'project_id',
+        help='Project ID used to build the export',
+    )
+    export_audit_manifest_parser.add_argument(
+        '--format',
+        required=True,
+        choices=['json', 'csv', 'markdown', 'qdpx'],
+        help='Export format represented by the artifacts',
+    )
+    export_audit_manifest_parser.add_argument(
+        '--artifact',
+        action='append',
+        required=True,
+        help='Export artifact path; repeat for multi-file exports',
+    )
+    export_audit_manifest_parser.add_argument(
+        '--output',
+        required=True,
+        help='Manifest JSON output path',
+    )
+    export_audit_manifest_parser.add_argument(
+        '--base-dir',
+        help='Optional base directory for relative artifact paths in the manifest',
+    )
+    export_audit_manifest_parser.add_argument(
+        '--projects-dir',
+        help='Optional project store directory',
+    )
+    export_audit_manifest_parser.add_argument(
+        '--audit-log',
+        help='Optional export audit event JSONL log to append a manifest_written event',
+    )
+    export_audit_manifest_parser.add_argument(
+        '--audit-db',
+        help='Optional SQLite mirror for the audit event log; requires --audit-log',
+    )
+
+    export_audit_manifest_verifier_parser = subparsers.add_parser(
+        'verify-export-audit-manifest',
+        help='Verify an export audit manifest',
+        description='Verify a local hash manifest for project export artifacts',
+    )
+    export_audit_manifest_verifier_parser.add_argument(
+        'manifest',
+        help='Export audit manifest JSON path',
+    )
+    export_audit_manifest_verifier_parser.add_argument(
+        '--base-dir',
+        help='Optional base directory for resolving relative artifact paths',
+    )
+    export_audit_manifest_verifier_parser.add_argument(
+        '--project-id',
+        help='Optional project ID for project-state hash checking',
+    )
+    export_audit_manifest_verifier_parser.add_argument(
+        '--projects-dir',
+        help='Optional project store directory',
+    )
+    export_audit_manifest_verifier_parser.add_argument(
+        '--audit-log',
+        help='Optional export audit event JSONL log to append a manifest_verified event',
+    )
+    export_audit_manifest_verifier_parser.add_argument(
+        '--audit-db',
+        help='Optional SQLite mirror for the audit event log; requires --audit-log',
+    )
+
+    export_publish_preflight_parser = subparsers.add_parser(
+        'export-publish-preflight',
+        help='Run export publish preflight',
+        description='Run strict local preflight for export publish or handoff',
+    )
+    export_publish_preflight_parser.add_argument(
+        '--manifest',
+        required=True,
+        help='Export audit manifest path',
+    )
+    export_publish_preflight_parser.add_argument(
+        '--base-dir',
+        help='Optional base directory for resolving manifest artifact paths',
+    )
+    export_publish_preflight_parser.add_argument(
+        '--project-id',
+        help='Optional project ID for project-state hash checking',
+    )
+    export_publish_preflight_parser.add_argument(
+        '--projects-dir',
+        help='Optional project store directory',
+    )
+    export_publish_preflight_parser.add_argument(
+        '--audit-log',
+        help='Optional export audit event JSONL log to append a publish_preflight event',
+    )
+    export_publish_preflight_parser.add_argument(
+        '--audit-db',
+        help='Optional SQLite mirror for the audit event log; requires --audit-log',
+    )
+
+    export_audit_log_verifier_parser = subparsers.add_parser(
+        'verify-export-audit-log',
+        help='Verify an export audit event log',
+        description='Verify a local export audit event JSONL log',
+    )
+    export_audit_log_verifier_parser.add_argument(
+        'log',
+        help='Export audit event JSONL path',
+    )
+
+    export_audit_db_mirror_parser = subparsers.add_parser(
+        'mirror-export-audit-db',
+        help='Mirror export audit events into SQLite',
+        description='Mirror a verified export audit event JSONL log into SQLite',
+    )
+    export_audit_db_mirror_parser.add_argument(
+        'log',
+        help='Export audit event JSONL path',
+    )
+    export_audit_db_mirror_parser.add_argument(
+        '--db',
+        required=True,
+        help='SQLite audit event database path',
+    )
+
+    export_audit_db_verifier_parser = subparsers.add_parser(
+        'verify-export-audit-db',
+        help='Verify an export audit SQLite mirror',
+        description='Verify a local SQLite export audit event mirror',
+    )
+    export_audit_db_verifier_parser.add_argument(
+        'db',
+        help='SQLite audit event database path',
     )
 
     # D7 retrieval export command
@@ -1268,6 +1413,18 @@ def main() -> int:
             return handle_confidence_calibration_preflight_command(args)
         elif args.command == 'verify-phase0-benchmark-artifact':
             return handle_verify_phase0_benchmark_artifact_command(args)
+        elif args.command == 'export-audit-manifest':
+            return handle_export_audit_manifest_command(args)
+        elif args.command == 'verify-export-audit-manifest':
+            return handle_verify_export_audit_manifest_command(args)
+        elif args.command == 'export-publish-preflight':
+            return handle_export_publish_preflight_command(args)
+        elif args.command == 'verify-export-audit-log':
+            return handle_verify_export_audit_log_command(args)
+        elif args.command == 'mirror-export-audit-db':
+            return handle_mirror_export_audit_db_command(args)
+        elif args.command == 'verify-export-audit-db':
+            return handle_verify_export_audit_db_command(args)
         elif args.command == 'run-d7-retrieval':
             return handle_run_d7_retrieval_command(args)
         elif args.command == 'run-d7-live-baseline':
@@ -1638,6 +1795,83 @@ def handle_verify_phase0_benchmark_artifact_command(args) -> int:
     from scripts import verify_phase0_benchmark_artifact
 
     return verify_phase0_benchmark_artifact.main([args.artifact])
+
+
+def handle_export_audit_manifest_command(args) -> int:
+    """Write an export audit manifest through the canonical CLI."""
+    from scripts import write_export_audit_manifest
+
+    argv = [args.project_id, "--format", args.format]
+    for artifact_path in args.artifact:
+        argv.extend(["--artifact", artifact_path])
+    argv.extend(["--output", args.output])
+    for attr, flag in [
+        ("base_dir", "--base-dir"),
+        ("projects_dir", "--projects-dir"),
+        ("audit_log", "--audit-log"),
+        ("audit_db", "--audit-db"),
+    ]:
+        value = getattr(args, attr)
+        if value is not None:
+            argv.extend([flag, value])
+    return write_export_audit_manifest.main(argv)
+
+
+def handle_verify_export_audit_manifest_command(args) -> int:
+    """Verify an export audit manifest through the canonical CLI."""
+    from scripts import verify_export_audit_manifest
+
+    argv = [args.manifest]
+    for attr, flag in [
+        ("base_dir", "--base-dir"),
+        ("project_id", "--project-id"),
+        ("projects_dir", "--projects-dir"),
+        ("audit_log", "--audit-log"),
+        ("audit_db", "--audit-db"),
+    ]:
+        value = getattr(args, attr)
+        if value is not None:
+            argv.extend([flag, value])
+    return verify_export_audit_manifest.main(argv)
+
+
+def handle_export_publish_preflight_command(args) -> int:
+    """Run export publish preflight through the canonical CLI."""
+    from scripts import export_publish_preflight
+
+    argv = ["--manifest", args.manifest]
+    for attr, flag in [
+        ("base_dir", "--base-dir"),
+        ("project_id", "--project-id"),
+        ("projects_dir", "--projects-dir"),
+        ("audit_log", "--audit-log"),
+        ("audit_db", "--audit-db"),
+    ]:
+        value = getattr(args, attr)
+        if value is not None:
+            argv.extend([flag, value])
+    return export_publish_preflight.main(argv)
+
+
+def handle_verify_export_audit_log_command(args) -> int:
+    """Verify an export audit event log through the canonical CLI."""
+    from scripts import verify_export_audit_event_log
+
+    return verify_export_audit_event_log.main([args.log])
+
+
+def handle_mirror_export_audit_db_command(args) -> int:
+    """Mirror an export audit event log into SQLite through the canonical CLI."""
+    from scripts import mirror_export_audit_event_log_db
+
+    return mirror_export_audit_event_log_db.main([args.log, "--db", args.db])
+
+
+def handle_verify_export_audit_db_command(args) -> int:
+    """Verify an export audit SQLite mirror through the canonical CLI."""
+    from scripts import verify_export_audit_event_db
+
+    return verify_export_audit_event_db.main([args.db])
 
 
 def handle_run_d7_retrieval_command(args) -> int:
