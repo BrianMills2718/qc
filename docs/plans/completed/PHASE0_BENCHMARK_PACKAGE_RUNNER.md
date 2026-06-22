@@ -1,12 +1,35 @@
 # Plan #56: Phase 0 Benchmark Package Runner
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** None
 **Blocks:** Repeatable benchmark-package execution
 
 ---
+
+## Outcome
+
+Phase 0 can now run from a strict versioned benchmark-package manifest via
+`scripts/run_phase0_benchmark_package.py <package.json>` or
+`make bench-package PACKAGE=<package.json>`. The runner validates
+`schema_version=1`, rejects unknown manifest keys, resolves input/output paths
+relative to the manifest file, and invokes the existing canonical
+`scripts/bench_phase0.py` path. Docs record this as orchestration/provenance
+infrastructure, not populated held-out benchmark evidence.
+
+## Verification
+
+- Focused tests: `python -m pytest tests/test_phase0_benchmark_package.py -q`
+  (`4 passed`)
+- Focused lint: `python -m ruff check scripts/run_phase0_benchmark_package.py tests/test_phase0_benchmark_package.py`
+  (`All checks passed!`)
+- Docs/link/plan checks:
+  - `python scripts/check_markdown_links.py`
+  - `python scripts/sync_plan_status.py --check`
+- Full gate: `make check` (`761 passed, 1 skipped, 8 deselected`; ruff and
+  docs-check passed)
+- Type check: not configured by the repo (`make check` reports this explicitly)
 
 ## Gap
 
@@ -62,10 +85,10 @@ Internal runner capability only; no cross-project boundary is created.
 
 ### Capability Validation
 
-- [ ] Manifest schema is validated with unknown keys rejected.
-- [ ] Input paths resolve relative to the manifest file.
-- [ ] Runner invokes `bench_phase0.main` with canonical flags only.
-- [ ] Make target is agent-drivable.
+- [x] Manifest schema is validated with unknown keys rejected.
+- [x] Input paths resolve relative to the manifest file.
+- [x] Runner invokes `bench_phase0.main` with canonical flags only.
+- [x] Make target is agent-drivable.
 
 ---
 
@@ -120,20 +143,20 @@ Internal runner capability only; no cross-project boundary is created.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] `scripts/run_phase0_benchmark_package.py <package.json>` runs the
+- [x] `scripts/run_phase0_benchmark_package.py <package.json>` runs the
   canonical Phase 0 bench path.
-- [ ] Manifest paths resolve relative to the manifest file.
-- [ ] Unknown manifest fields fail loudly.
-- [ ] `make bench-package PACKAGE=package.json` is available.
-- [ ] Docs preserve the caveat that a package runner is not populated held-out
+- [x] Manifest paths resolve relative to the manifest file.
+- [x] Unknown manifest fields fail loudly.
+- [x] `make bench-package PACKAGE=package.json` is available.
+- [x] Docs preserve the caveat that a package runner is not populated held-out
   benchmark evidence.
 
 > Process criteria:
-- [ ] Required tests pass
-- [ ] Full test suite passes
-- [ ] Type check status reported
-- [ ] Docs updated
-- [ ] Plan completed, committed, and pushed
+- [x] Required tests pass
+- [x] Full test suite passes
+- [x] Type check status reported
+- [x] Docs updated
+- [x] Plan completed, committed, and pushed
 
 ---
 
