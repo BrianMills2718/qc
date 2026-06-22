@@ -636,6 +636,8 @@ def phase0_scorecard(state: ProjectState) -> Dict[str, Any]:
         "grounding": grounding_scorecard(state),
         # D2 — coverage over the segment universe (INV-8 denominator).
         "coverage": coverage_scorecard(state),
+        # INV-9 — structural claim-ledger source-anchor coverage.
+        "claim_anchor_coverage": claim_anchor_coverage_scorecard(state),
         # D3 — application validity when human/adjudicated gold is present.
         "application_validity_d3": application_validity_d3_scorecard(state),
         # D4 — externally supplied codebook-quality rubric outcomes.
@@ -782,6 +784,123 @@ def coverage_scorecard(state: ProjectState) -> dict[str, Any]:
         examined_segments,
     )
     return report
+
+
+def claim_anchor_coverage_scorecard(state: ProjectState) -> dict[str, Any]:
+    """Serialize INV-9 claim-ledger source-anchor coverage accounting."""
+    buckets_by_kind: dict[str, dict[str, int]] = {}
+    buckets_by_stage: dict[str, dict[str, int]] = {}
+    buckets_by_status: dict[str, dict[str, int]] = {}
+    totals = _empty_claim_anchor_bucket()
+
+    for claim in state.claims:
+        supporting_count = len(claim.supporting_anchors)
+        contrary_count = len(claim.contrary_anchors)
+        anchored = supporting_count + contrary_count > 0
+        needs_anchor = claim.support_status.value == "needs_anchor"
+
+        _add_claim_anchor_bucket(
+            totals,
+            supporting_count=supporting_count,
+            contrary_count=contrary_count,
+            anchored=anchored,
+            needs_anchor=needs_anchor,
+        )
+        _add_claim_anchor_bucket(
+            buckets_by_kind.setdefault(claim.claim_kind.value, _empty_claim_anchor_bucket()),
+            supporting_count=supporting_count,
+            contrary_count=contrary_count,
+            anchored=anchored,
+            needs_anchor=needs_anchor,
+        )
+        _add_claim_anchor_bucket(
+            buckets_by_stage.setdefault(claim.source_stage, _empty_claim_anchor_bucket()),
+            supporting_count=supporting_count,
+            contrary_count=contrary_count,
+            anchored=anchored,
+            needs_anchor=needs_anchor,
+        )
+        _add_claim_anchor_bucket(
+            buckets_by_status.setdefault(claim.support_status.value, _empty_claim_anchor_bucket()),
+            supporting_count=supporting_count,
+            contrary_count=contrary_count,
+            anchored=anchored,
+            needs_anchor=needs_anchor,
+        )
+
+    summary = _finalize_claim_anchor_bucket(totals)
+    summary["anchored_rate_ci"] = _wilson_interval(
+        summary["anchored_claims"],
+        summary["total_claims"],
+    )
+    summary["by_kind"] = _finalize_claim_anchor_buckets(buckets_by_kind)
+    summary["by_stage"] = _finalize_claim_anchor_buckets(buckets_by_stage)
+    summary["by_support_status"] = _finalize_claim_anchor_buckets(buckets_by_status)
+    summary["note"] = (
+        "Structural source-anchor accounting for INV-9 claim-ledger entries only; "
+        "anchor presence is not claim truth, human adjudication, full "
+        "disconfirmation coverage, methodological validity, or SOTA evidence."
+    )
+    return summary
+
+
+def _empty_claim_anchor_bucket() -> dict[str, int]:
+    """Return a mutable counter bucket for claim-anchor coverage."""
+    return {
+        "total_claims": 0,
+        "anchored_claims": 0,
+        "unanchored_claims": 0,
+        "claims_with_supporting_anchors": 0,
+        "claims_with_contrary_anchors": 0,
+        "claims_needing_anchor": 0,
+        "supporting_anchor_count": 0,
+        "contrary_anchor_count": 0,
+        "source_anchor_count": 0,
+    }
+
+
+def _add_claim_anchor_bucket(
+    bucket: dict[str, int],
+    *,
+    supporting_count: int,
+    contrary_count: int,
+    anchored: bool,
+    needs_anchor: bool,
+) -> None:
+    """Accumulate one claim into a claim-anchor coverage bucket."""
+    bucket["total_claims"] += 1
+    if anchored:
+        bucket["anchored_claims"] += 1
+    else:
+        bucket["unanchored_claims"] += 1
+    if supporting_count:
+        bucket["claims_with_supporting_anchors"] += 1
+    if contrary_count:
+        bucket["claims_with_contrary_anchors"] += 1
+    if needs_anchor:
+        bucket["claims_needing_anchor"] += 1
+    bucket["supporting_anchor_count"] += supporting_count
+    bucket["contrary_anchor_count"] += contrary_count
+    bucket["source_anchor_count"] += supporting_count + contrary_count
+
+
+def _finalize_claim_anchor_bucket(bucket: dict[str, int]) -> dict[str, Any]:
+    """Add rates to a claim-anchor coverage bucket."""
+    total = bucket["total_claims"]
+    return {
+        **bucket,
+        "anchored_rate": (bucket["anchored_claims"] / total) if total else None,
+    }
+
+
+def _finalize_claim_anchor_buckets(
+    buckets: Mapping[str, dict[str, int]],
+) -> dict[str, dict[str, Any]]:
+    """Return deterministically ordered claim-anchor coverage breakdowns."""
+    return {
+        key: _finalize_claim_anchor_bucket(buckets[key])
+        for key in sorted(buckets)
+    }
 
 
 def _binary_matrix_prevalence(matrix: Mapping[str, list[int]]) -> dict[str, Any]:

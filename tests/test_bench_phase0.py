@@ -11,6 +11,7 @@ from qc_clean.schemas.domain import (
     ClaimAnchor,
     ClaimKind,
     ClaimScope,
+    ClaimSupportStatus,
     Code,
     CodeApplication,
     Codebook,
@@ -270,6 +271,122 @@ def test_coverage_scorecard_reports_mixed_coded_segment_rate():
     assert coverage["coded_segment_rate_ci"]["denominator"] == 3
     assert coverage["coded_segment_rate_ci"]["lower"] <= coverage["coded_segment_rate"]
     assert coverage["coded_segment_rate_ci"]["upper"] >= coverage["coded_segment_rate"]
+
+
+def test_scorecard_reports_empty_claim_anchor_coverage():
+    state = ProjectState(
+        name="empty",
+        config=ProjectConfig(methodology=Methodology.THEMATIC_ANALYSIS),
+    )
+
+    coverage = phase0_scorecard(state)["claim_anchor_coverage"]
+
+    assert coverage["total_claims"] == 0
+    assert coverage["anchored_claims"] == 0
+    assert coverage["unanchored_claims"] == 0
+    assert coverage["claims_needing_anchor"] == 0
+    assert coverage["supporting_anchor_count"] == 0
+    assert coverage["contrary_anchor_count"] == 0
+    assert coverage["source_anchor_count"] == 0
+    assert coverage["anchored_rate"] is None
+    assert coverage["anchored_rate_ci"]["successes"] == 0
+    assert coverage["anchored_rate_ci"]["denominator"] == 0
+    assert coverage["by_kind"] == {}
+    assert coverage["by_stage"] == {}
+    assert coverage["by_support_status"] == {}
+    assert "not claim truth" in coverage["note"]
+
+
+def test_scorecard_reports_claim_anchor_coverage_breakdowns():
+    supporting_anchor = ClaimAnchor(
+        doc_id="doc-1",
+        start_char=0,
+        end_char=10,
+        quote_text="source one",
+        quote_hash="hash-one",
+        code_application_id="app-1",
+    )
+    contrary_anchor = ClaimAnchor(
+        doc_id="doc-2",
+        start_char=20,
+        end_char=35,
+        quote_text="source two",
+        quote_hash="hash-two",
+        segment_id="seg-2",
+    )
+    state = ProjectState(
+        name="claims",
+        config=ProjectConfig(methodology=Methodology.THEMATIC_ANALYSIS),
+        claims=[
+            AnalyticClaim(
+                claim_kind=ClaimKind.CODE_APPLICATION,
+                source_stage="thematic_coding",
+                claim_text="Passage is coded as autonomy.",
+                scope=ClaimScope(application_ids=["app-1"]),
+                origin_object_type="code_application",
+                origin_object_id="app-1",
+                supporting_anchors=[supporting_anchor],
+                support_status=ClaimSupportStatus.SUPPORTED,
+            ),
+            AnalyticClaim(
+                claim_kind=ClaimKind.SYNTHESIS_FINDING,
+                source_stage="synthesis",
+                claim_text="Autonomy is a central theme.",
+                scope=ClaimScope(corpus_level=True),
+                origin_object_type="synthesis_key_finding",
+                origin_object_id="finding-1",
+                support_status=ClaimSupportStatus.NEEDS_ANCHOR,
+            ),
+            AnalyticClaim(
+                claim_kind=ClaimKind.NEGATIVE_CASE,
+                source_stage="negative_case_analysis",
+                claim_text="Contrary evidence challenges a claim.",
+                scope=ClaimScope(claim_ids=["claim-target"]),
+                origin_object_type="negative_case",
+                origin_object_id="negative-1",
+                contrary_anchors=[contrary_anchor],
+                support_status=ClaimSupportStatus.SUPPORTED,
+            ),
+            AnalyticClaim(
+                claim_kind=ClaimKind.NO_CLAIMS_EVENT,
+                source_stage="relationship",
+                claim_text="No relationship claims were produced.",
+                scope=ClaimScope(),
+                origin_object_type="no_claims_event",
+                origin_object_id="relationship",
+                support_status=ClaimSupportStatus.SUPPORTED,
+            ),
+        ],
+    )
+
+    coverage = phase0_scorecard(state)["claim_anchor_coverage"]
+
+    assert coverage["total_claims"] == 4
+    assert coverage["anchored_claims"] == 2
+    assert coverage["unanchored_claims"] == 2
+    assert coverage["claims_with_supporting_anchors"] == 1
+    assert coverage["claims_with_contrary_anchors"] == 1
+    assert coverage["claims_needing_anchor"] == 1
+    assert coverage["supporting_anchor_count"] == 1
+    assert coverage["contrary_anchor_count"] == 1
+    assert coverage["source_anchor_count"] == 2
+    assert coverage["anchored_rate"] == pytest.approx(0.5)
+    assert coverage["anchored_rate_ci"]["successes"] == 2
+    assert coverage["anchored_rate_ci"]["denominator"] == 4
+    assert list(coverage["by_kind"]) == [
+        "code_application",
+        "negative_case",
+        "no_claims_event",
+        "synthesis_finding",
+    ]
+    assert coverage["by_kind"]["negative_case"]["contrary_anchor_count"] == 1
+    assert coverage["by_kind"]["synthesis_finding"]["claims_needing_anchor"] == 1
+    assert coverage["by_kind"]["no_claims_event"]["unanchored_claims"] == 1
+    assert coverage["by_stage"]["negative_case_analysis"]["anchored_claims"] == 1
+    assert coverage["by_stage"]["synthesis"]["anchored_rate"] == 0.0
+    assert coverage["by_support_status"]["needs_anchor"]["claims_needing_anchor"] == 1
+    assert coverage["by_support_status"]["supported"]["anchored_claims"] == 2
+    assert "methodological validity" in coverage["note"]
 
 
 def test_scorecard_grounding_rate_one_when_no_applications():
