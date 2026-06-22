@@ -19,6 +19,7 @@ from scripts import bench_phase0
 
 
 _PATH_FLAGS = {
+    "projects_dir": "--projects-dir",
     "d3_gold_file": "--d3-gold-file",
     "d3_baselines_file": "--d3-baselines-file",
     "d3_comparison_protocol_file": "--d3-comparison-protocol-file",
@@ -52,6 +53,10 @@ class Phase0BenchmarkPackage(BaseModel):
 
     schema_version: int = Field(description="Manifest schema version; currently 1")
     project_id: str = Field(description="Project ID to score")
+    projects_dir: str | None = Field(
+        default=None,
+        description="Optional project store directory path",
+    )
     d3_gold_file: str | None = Field(default=None, description="Optional D3 gold JSON path")
     d3_baselines_file: str | None = Field(
         default=None,

@@ -42,7 +42,7 @@ make check              # Run deterministic tests + lint + docs checks
 make status             # Show git status
 make bench ID=<project_id>              # Phase 0 scorecard (D1-D10 local accounting substrates)
 python qc_cli.py bench <project_id>     # Same Phase 0 scorecard through the canonical CLI; mirrors scripts/bench_phase0.py file/protocol flags
-python qc_cli.py bench-package phase0_package.json  # Run a strict Phase 0 package manifest through the canonical CLI, preserving supported protocol guards
+python qc_cli.py bench-package phase0_package.json  # Run a strict Phase 0 package manifest through the canonical CLI, including package-local projects_dir when supplied
 make validate-d4-codebook-quality-protocol PROTOCOL=protocol.json  # Validate pre-evaluation D4 rubric protocol metadata
 make d4-codebook-quality-preflight PROTOCOL=protocol.json QUALITY=quality.json  # Preflight D4 result file against protocol
 make bench ID=<project_id> D4_PROTOCOL=protocol.json CODEBOOK_QUALITY=quality.json  # Guard D4 scoring with protocol preflight

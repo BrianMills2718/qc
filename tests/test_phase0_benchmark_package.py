@@ -5,6 +5,7 @@ import json
 import pytest
 
 from scripts import bench_phase0, run_phase0_benchmark_package
+from qc_clean.core.grounding import resolve_span
 from qc_clean.core.persistence.project_store import ProjectStore
 from qc_clean.schemas.domain import CodeApplication, Corpus, Document, ProjectState
 
@@ -545,6 +546,79 @@ def test_phase0_benchmark_package_forwards_output_and_artifact_dir(
     assert manifest["command"]["artifact_dir"] == str(artifact_dir)
 
 
+def test_phase0_benchmark_package_forwards_projects_dir(
+    tmp_path,
+    monkeypatch,
+):
+    captured = {}
+
+    def fake_main(argv):
+        captured["argv"] = argv
+        return 0
+
+    package_dir = tmp_path / "package"
+    package_dir.mkdir()
+    projects_dir = package_dir / "projects"
+    package_file = package_dir / "phase0_package.json"
+    package_file.write_text(
+        json.dumps({
+            "schema_version": 1,
+            "project_id": "package_project",
+            "projects_dir": "projects",
+        }),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(bench_phase0, "main", fake_main)
+
+    exit_code = run_phase0_benchmark_package.main([str(package_file)])
+
+    assert exit_code == 0
+    assert captured["argv"] == [
+        "package_project",
+        "--projects-dir",
+        str(projects_dir),
+    ]
+
+
+def test_phase0_benchmark_package_uses_package_local_projects_dir(tmp_path, capsys):
+    package_dir = tmp_path / "package"
+    package_dir.mkdir()
+    projects_dir = package_dir / "projects"
+    content = "Package-local project content."
+    match = resolve_span(content, content)
+    state = ProjectState(
+        id="package_local_project",
+        name="Package local project",
+        corpus=Corpus(documents=[Document(id="d1", name="a.txt", content=content)]),
+        code_applications=[
+            CodeApplication(
+                code_id="LOCAL",
+                doc_id="d1",
+                quote_text=content,
+                start_char=match.start_char,
+                end_char=match.end_char,
+                quote_hash=match.quote_hash,
+            )
+        ],
+    )
+    ProjectStore(projects_dir=projects_dir).save(state)
+    package_file = package_dir / "phase0_package.json"
+    package_file.write_text(
+        json.dumps({
+            "schema_version": 1,
+            "project_id": state.id,
+            "projects_dir": "projects",
+        }),
+        encoding="utf-8",
+    )
+
+    exit_code = run_phase0_benchmark_package.main([str(package_file)])
+
+    assert exit_code == 0
+    output = json.loads(capsys.readouterr().out)
+    assert output["grounding"]["anchored_verified"] == 1
+
+
 def test_phase0_benchmark_package_forwards_d3_comparison_protocol(
     tmp_path,
     monkeypatch,
@@ -619,6 +693,7 @@ def test_phase0_package_to_bench_argv_resolves_relative_paths(tmp_path):
     package = run_phase0_benchmark_package.Phase0BenchmarkPackage(
         schema_version=1,
         project_id="project",
+        projects_dir="stores/projects",
         d3_gold_file="gold/d3.json",
         d3_baselines_file="baselines/d3.json",
         d3_comparison_protocol_file="protocols/d3.json",
@@ -636,6 +711,8 @@ def test_phase0_package_to_bench_argv_resolves_relative_paths(tmp_path):
 
     assert argv == [
         "project",
+        "--projects-dir",
+        str(tmp_path / "stores" / "projects"),
         "--d3-gold-file",
         str(tmp_path / "gold" / "d3.json"),
         "--d3-baselines-file",
