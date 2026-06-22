@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 160 | INV-9 relationship evidence anchors | High | Planned | `INV9_RELATIONSHIP_EVIDENCE_ANCHORS.md` |
 
 ## Completed Plans
 

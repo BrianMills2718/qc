@@ -22,13 +22,17 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Select the next highest-value roadmap lane with deterministic acceptance
-   criteria and no live/external evidence dependency.
+1. Execute Plan #160: resolve direct relationship evidence strings into exact
+   claim anchors when they uniquely match the loaded corpus.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Selecting next deterministic roadmap lane after Plan
-#159 closeout.
+**Active checkpoint:** Plan #160
+(`docs/plans/INV9_RELATIONSHIP_EVIDENCE_ANCHORS.md`) targets the next
+deterministic INV-9 anchoring gap. The scope is conservative: reuse existing
+exact quote grounding for `CodeRelationship.evidence` and
+`DomainEntityRelationship.supporting_evidence`; do not guess ambiguous or
+unresolvable evidence, and do not claim semantic proof of the relationship.
 
 **Completed checkpoint:** Code-scoped higher-order claims now inherit existing
 exact code-application anchors for their scoped code IDs, with duplicate anchors
