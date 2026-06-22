@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 141 | INV-1 source-prefix speaker fallback | High | In Progress | `INV1_SOURCE_PREFIX_SPEAKER_FALLBACK.md` |
 
 ## Completed Plans
 
