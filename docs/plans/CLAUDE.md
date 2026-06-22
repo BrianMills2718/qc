@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 152 | Explicit export overwrite policy | Medium | Planned | `EXPORT_OVERWRITE_POLICY.md` |
 
 ## Completed Plans
 

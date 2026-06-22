@@ -22,10 +22,16 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Select the next highest-value documented roadmap lane from
-   `docs/PROJECT_THEORY_AND_GOALS.md` and `docs/EVALUATION_HARNESS.md`.
+1. Execute Plan #152: make export overwrite behavior explicit and add an
+   opt-in no-clobber guard without changing the default.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
+
+**Active checkpoint:** Plan #152 (`docs/plans/EXPORT_OVERWRITE_POLICY.md`)
+targets the documented exporter overwrite policy debt. The default must remain
+backward-compatible, but agents need an explicit `--no-overwrite` guard for
+durable local artifacts. This is local clobber prevention only, not a full
+tamper-evident audit substrate.
 
 **Completed checkpoint:** Phase 0 now reports deterministic
 `corpus_scope_adequacy` for the corpus boundary record: missing/empty/
