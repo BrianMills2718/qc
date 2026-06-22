@@ -1,6 +1,6 @@
 # Plan #197: Project Export Publish Preflight Gate
 
-**Status:** In Progress
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Export audit manifest workflow and export publish preflight scope lint
@@ -35,6 +35,48 @@ without asking an agent to remember a second command.
 publish preflight mandatory, change export artifact content, validate
 sampling-frame adequacy, sign artifacts, make audit logs append-only, create
 external tamper evidence, or produce methodological-validity/SOTA evidence.
+
+---
+
+## Outcome
+
+Plan commit: `0d8879f2`
+Implementation commit: `7fb573a7`
+
+`qc_cli.py project export` now supports explicit inline publish/handoff gates:
+
+- `--publish-preflight`
+- `--scope-lint`
+
+`--publish-preflight` requires `--audit-manifest`, runs
+`run_export_publish_preflight` after the manifest is written, and makes the
+export command return nonzero if preflight fails. `--scope-lint` requires
+`--publish-preflight` and enables the same Markdown/text scope-phrasing gate
+used by the standalone publish-preflight command. Existing exports remain
+unchanged unless these flags are supplied.
+
+When audit logging is enabled, inline publish preflight appends a
+`publish_preflight` event and refreshes the optional SQLite mirror after all
+requested export-audit events are appended.
+
+Verification:
+
+- TDD red state observed: six expected failures before implementation
+  (dependency validation missing, parser flags rejected, inline preflight not
+  run, scope-lint failure not blocking, and audit log missing
+  `publish_preflight`).
+- Focused project tests:
+  `python -m pytest tests/test_project_commands.py -q` -> `70 passed`.
+- Focused integration tests:
+  `python -m pytest tests/test_project_commands.py tests/test_export_publish_preflight.py tests/test_export_audit_event_log.py -q`
+  -> `84 passed`.
+- Focused Ruff:
+  `python -m ruff check qc_clean/core/cli/commands/project.py qc_cli.py tests/test_project_commands.py`
+  -> passed.
+- `make docs-check` -> passed.
+- `git diff --check` -> passed.
+- `make check` -> `1256 passed, 1 skipped, 8 deselected`; Ruff and docs gates
+  passed; type check is still not configured.
 
 ---
 
@@ -77,17 +119,17 @@ Internal CLI integration only; no new cross-project boundary is created.
 
 ### Capability Validation
 
-- [ ] Existing `project export` behavior is unchanged without new flags.
-- [ ] `--publish-preflight` requires `--audit-manifest`.
-- [ ] `--scope-lint` requires `--publish-preflight`.
-- [ ] A passing inline publish preflight prints a clear success line and exits
+- [x] Existing `project export` behavior is unchanged without new flags.
+- [x] `--publish-preflight` requires `--audit-manifest`.
+- [x] `--scope-lint` requires `--publish-preflight`.
+- [x] A passing inline publish preflight prints a clear success line and exits
   zero.
-- [ ] A failing inline publish preflight makes `project export` return nonzero.
-- [ ] Optional `--scope-lint` blocks risky Markdown/text handoff artifacts under
+- [x] A failing inline publish preflight makes `project export` return nonzero.
+- [x] Optional `--scope-lint` blocks risky Markdown/text handoff artifacts under
   missing or under-specified corpus scope.
-- [ ] Audit event logs, when requested, include the inline publish-preflight
+- [x] Audit event logs, when requested, include the inline publish-preflight
   event and SQLite mirrors are refreshed after it.
-- [ ] Docs preserve caveats: local integrity/report-discipline only, not
+- [x] Docs preserve caveats: local integrity/report-discipline only, not
   sampling adequacy, methodological validity, signing, append-only storage,
   external tamper evidence, or SOTA.
 
@@ -111,20 +153,20 @@ Internal CLI integration only; no new cross-project boundary is created.
 
 ### Steps
 
-1. [ ] Add failing parser tests for `project export --publish-preflight` and
+1. [x] Add failing parser tests for `project export --publish-preflight` and
    `--scope-lint`.
-2. [ ] Add failing export command tests for dependency validation, passing
+2. [x] Add failing export command tests for dependency validation, passing
    inline preflight, failing scope-lint preflight, and optional audit event
    logging.
-3. [ ] Add parser flags in `qc_cli.py`.
-4. [ ] Wire `_export_project` and
+3. [x] Add parser flags in `qc_cli.py`.
+4. [x] Wire `_export_project` and
    `_write_and_optionally_verify_export_manifest` to run
    `run_export_publish_preflight` after manifest writes when explicitly
    requested.
-5. [ ] Update docs/CLAUDE/theory/plan caveats and regenerate `AGENTS.md`.
-6. [ ] Run focused tests, focused Ruff, docs checks, whitespace checks, and full
+5. [x] Update docs/CLAUDE/theory/plan caveats and regenerate `AGENTS.md`.
+6. [x] Run focused tests, focused Ruff, docs checks, whitespace checks, and full
    `make check`.
-7. [ ] Commit/push implementation, then close this plan.
+7. [x] Commit/push implementation, then close this plan.
 
 ---
 
@@ -156,32 +198,32 @@ Internal CLI integration only; no new cross-project boundary is created.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] `qc_cli.py project export` accepts `--publish-preflight` and
+- [x] `qc_cli.py project export` accepts `--publish-preflight` and
   `--scope-lint`.
-- [ ] `--publish-preflight` fails loud without `--audit-manifest`.
-- [ ] `--scope-lint` fails loud without `--publish-preflight`.
-- [ ] Passing inline publish preflight preserves successful export exit code and
+- [x] `--publish-preflight` fails loud without `--audit-manifest`.
+- [x] `--scope-lint` fails loud without `--publish-preflight`.
+- [x] Passing inline publish preflight preserves successful export exit code and
   prints a clear success line.
-- [ ] Failing inline publish preflight returns nonzero and includes the preflight
+- [x] Failing inline publish preflight returns nonzero and includes the preflight
   failure reason in stderr.
-- [ ] Optional inline `--scope-lint` blocks risky Markdown/text artifacts under
+- [x] Optional inline `--scope-lint` blocks risky Markdown/text artifacts under
   missing/under-specified scope using existing `scope_lint_*` failure codes.
-- [ ] Audit JSONL/SQLite workflows include the inline publish-preflight event
+- [x] Audit JSONL/SQLite workflows include the inline publish-preflight event
   when audit logging is enabled.
-- [ ] Existing export behavior without new flags is unchanged.
-- [ ] Documentation preserves caveats: this is opt-in local integrity and
+- [x] Existing export behavior without new flags is unchanged.
+- [x] Documentation preserves caveats: this is opt-in local integrity and
   report-boundary discipline only.
 
 > Process criteria:
-- [ ] Plan committed before implementation.
-- [ ] Red tests observed before implementation.
-- [ ] Focused tests pass.
-- [ ] Focused Ruff passes.
-- [ ] `make docs-check` passes.
-- [ ] `git diff --check` passes.
-- [ ] `make check` passes, or any failure is documented as unrelated with
+- [x] Plan committed before implementation.
+- [x] Red tests observed before implementation.
+- [x] Focused tests pass.
+- [x] Focused Ruff passes.
+- [x] `make docs-check` passes.
+- [x] `git diff --check` passes.
+- [x] `make check` passes, or any failure is documented as unrelated with
   evidence.
-- [ ] Implementation and closeout commits are pushed.
+- [x] Implementation and closeout commits are pushed.
 
 ---
 
@@ -199,4 +241,4 @@ Internal CLI integration only; no new cross-project boundary is created.
 
 ## Closeout
 
-Pending implementation.
+Plan closed after implementation verification.
