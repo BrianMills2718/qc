@@ -1,12 +1,41 @@
 # Plan #204: Claim Ledger CLI/MCP Offset Pagination
 
-**Status:** In Progress
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Claim Ledger API Offset Pagination
 **Blocks:** INV-9 agent-drivable claim interpretation
 
 ---
+
+## Outcome
+
+Completed 2026-06-22. MCP `qc_get_claims` now accepts `offset`, clamps
+negative `limit`/`offset` inputs to zero, slices rows by the applied page, and
+returns top-level `returned`, `total_claims`, `limit`, and `offset`. CLI
+`project claims` now accepts `--offset`, clamps negative offsets to zero, and
+prints page metadata when the output is offset or truncated while preserving
+compact default output for non-truncated first pages. This is read-surface
+pagination/accounting only; it is not claim truth, expert adjudication, D7
+evidence, disconfirmation validity, or SOTA evidence.
+
+## Verification
+
+- TDD red:
+  `python -m pytest tests/test_mcp_server.py tests/test_project_commands.py -q`
+  initially failed on missing MCP `offset`, missing CLI parser `--offset`, and
+  missing CLI offset page output.
+- Focused tests:
+  `python -m pytest tests/test_mcp_server.py tests/test_project_commands.py -q`
+  (`157 passed`).
+- Focused Ruff:
+  `python -m ruff check qc_mcp_server.py qc_clean/core/cli/commands/project.py qc_cli.py tests/test_mcp_server.py tests/test_project_commands.py`.
+- Docs gate: `make docs-check`.
+- Whitespace gate: `git diff --check`.
+- Full gate: `make check` (`1276 passed, 1 skipped, 8 deselected`; Ruff/docs
+  passed; type check not configured).
+- Implementation commit pushed:
+  `b8459b28 [Plan: CLAIM_CLI_MCP_OFFSET] Add CLI MCP claim offsets`.
 
 ## Gap
 
@@ -126,24 +155,24 @@ create a cross-project boundary, registry entry, or new evaluation capability.
 
 Feature-level criteria:
 
-- [ ] MCP `qc_get_claims` accepts `offset`.
-- [ ] MCP response reports top-level `returned`, `total_claims`, `limit`, and
+- [x] MCP `qc_get_claims` accepts `offset`.
+- [x] MCP response reports top-level `returned`, `total_claims`, `limit`, and
   `offset`.
-- [ ] MCP positive offsets page claim rows after the applied offset.
-- [ ] MCP negative offsets clamp to `offset: 0`.
-- [ ] CLI `project claims` accepts `--offset`.
-- [ ] CLI positive offsets display the requested claim page with visible page
+- [x] MCP positive offsets page claim rows after the applied offset.
+- [x] MCP negative offsets clamp to `offset: 0`.
+- [x] CLI `project claims` accepts `--offset`.
+- [x] CLI positive offsets display the requested claim page with visible page
   metadata.
-- [ ] CLI default output without offset/truncation remains compact.
-- [ ] Existing scope and anchor detail fields/output remain unchanged.
+- [x] CLI default output without offset/truncation remains compact.
+- [x] Existing scope and anchor detail fields/output remain unchanged.
 
 Process criteria:
 
-- [ ] Required focused tests pass.
-- [ ] Focused Ruff passes.
-- [ ] `make docs-check` passes.
-- [ ] `make check` passes or any failure is documented with evidence.
-- [ ] Verified work is committed and pushed.
+- [x] Required focused tests pass.
+- [x] Focused Ruff passes.
+- [x] `make docs-check` passes.
+- [x] `make check` passes or any failure is documented with evidence.
+- [x] Verified work is committed and pushed.
 
 ---
 

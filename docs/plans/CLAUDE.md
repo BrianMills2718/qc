@@ -6,12 +6,12 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 204 | Claim ledger CLI/MCP offset pagination | High | In Progress | `CLAIM_LEDGER_CLI_MCP_OFFSET_PAGINATION.md` |
 
 ## Completed Plans
 
 | Name | Outcome | Record |
 |------|---------|--------|
+| Claim ledger CLI/MCP offset pagination | MCP `qc_get_claims` and CLI `project claims --offset` now support bounded offset traversal with visible pagination metadata while preserving existing scope and anchor-detail fields/output | `completed/CLAIM_LEDGER_CLI_MCP_OFFSET_PAGINATION.md` |
 | Claim ledger API offset pagination | API `/projects/{project_id}/claims` now supports bounded `limit` plus non-negative `offset` traversal and reports applied pagination/count metadata without changing claim row fields | `completed/CLAIM_LEDGER_API_OFFSET_PAGINATION.md` |
 | Portfolio dossier spine | Standardized wiki-visible dossier, methodology, artifact, validation, concern, and ADR pages now exist for portfolio navigation without changing code or claiming new methodological evidence | `completed/PORTFOLIO_DOSSIER_SPINE.md` |
 | Claim ledger API limit metadata | API `/projects/{project_id}/claims` now accepts bounded `limit` queries and reports `returned`, `total_claims`, and applied `limit` metadata while preserving existing claim row fields | `completed/CLAIM_LEDGER_API_LIMIT_METADATA.md` |
