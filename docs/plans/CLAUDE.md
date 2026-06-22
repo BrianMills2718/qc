@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 153 | Boundary invalid project ID tests | Medium | Planned | `BOUNDARY_INVALID_PROJECT_ID_TESTS.md` |
 
 ## Completed Plans
 
