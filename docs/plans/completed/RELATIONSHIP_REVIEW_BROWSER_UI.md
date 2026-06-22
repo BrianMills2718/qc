@@ -8,6 +8,27 @@
 
 ---
 
+## Outcome
+
+Completed 2026-06-21. The browser review page now has a Relationships mode next
+to Codes and Claims. Relationship mode fetches
+`/projects/{project_id}/review/relationships`, renders bounded relationship
+cards with source/target names, target type, relationship type, strength, and
+evidence metadata, and submits approve/reject/modify decisions using each row's
+`target_type`.
+
+This closes the browser-native first slice for relationship review. It does not
+add negative-case-specific review UX, expert adjudication, or methodological
+validity evidence.
+
+Verification: initial TDD run failed as expected because
+`id="relationshipModeBtn"` was absent. After implementation, the new static UI
+test passed, full review API/UI tests passed (`30 passed`), Ruff passed on
+touched files, docs/plan/AGENTS checks passed, and final `make check` passed
+(`829 passed, 1 skipped, 8 deselected`; type check not yet configured).
+
+---
+
 ## Gap
 
 **Current:** `ReviewManager`, the API, and MCP can list/adjudicate code/entity
@@ -117,21 +138,38 @@ callable capability.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] Browser review page has a visible Relationships mode.
-- [ ] Relationship mode fetches `/projects/{project_id}/review/relationships`.
-- [ ] Relationship cards show source/target, relationship type, strength, and
+- [x] Browser review page has a visible Relationships mode.
+- [x] Relationship mode fetches `/projects/{project_id}/review/relationships`.
+- [x] Relationship cards show source/target, relationship type, strength, and
   evidence metadata.
-- [ ] Relationship approve/reject/modify decisions submit the row's
+- [x] Relationship approve/reject/modify decisions submit the row's
   `target_type`.
-- [ ] Existing Codes and Claims behavior is preserved.
-- [ ] Docs state this narrows INV-10 but does not add negative-case-specific or
+- [x] Existing Codes and Claims behavior is preserved.
+- [x] Docs state this narrows INV-10 but does not add negative-case-specific or
   expert review.
 
 > Process criteria:
-- [ ] Required focused tests pass.
-- [ ] Full `make check` passes or any failure is documented with evidence.
-- [ ] Type-check status is reported.
-- [ ] Verified work is committed and pushed.
+- [x] Required focused tests pass.
+- [x] Full `make check` passes or any failure is documented with evidence.
+- [x] Type-check status is reported.
+- [x] Verified work is committed and pushed.
+
+---
+
+## Verification
+
+- Initial TDD run:
+  `python -m pytest tests/test_review_api.py::TestReviewUIPage::test_review_page_exposes_relationship_review_ui -q`
+  - failed as expected because `id="relationshipModeBtn"` was absent.
+- `python -m pytest tests/test_review_api.py::TestReviewUIPage::test_review_page_exposes_relationship_review_ui -q`
+  - passed.
+- `python -m pytest tests/test_review_api.py -q` - passed (`30 passed`).
+- `python -m ruff check qc_clean/plugins/api/review_ui.py tests/test_review_api.py`
+  - passed.
+- `python scripts/check_markdown_links.py && python scripts/sync_plan_status.py --check && python scripts/meta/check_agents_sync.py --check`
+  - passed.
+- `make check` - passed (`829 passed, 1 skipped, 8 deselected`); Ruff and docs
+  gates passed; type check is not yet configured.
 
 ---
 
