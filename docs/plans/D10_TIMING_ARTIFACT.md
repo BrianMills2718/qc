@@ -1,6 +1,6 @@
 # Plan #70: D10 Timing Artifact
 
-**Status:** Planned
+**Status:** In Progress
 **Type:** implementation
 **Priority:** High
 **Blocked By:** D10 wall-clock runtime; Phase 0 benchmark artifacts
@@ -56,9 +56,9 @@ packaging extension around already computed D10 scorecard sections.
 
 ### Capability Validation
 
-- [ ] D10 timing artifact has a stable schema/version/caveat.
-- [ ] Manifest records the timing file and hash.
-- [ ] No new cross-project callable boundary is introduced.
+- [x] D10 timing artifact has a stable schema/version/caveat.
+- [x] Manifest records the timing file and hash.
+- [x] No new cross-project callable boundary is introduced.
 
 ---
 
@@ -111,19 +111,19 @@ packaging extension around already computed D10 scorecard sections.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] `--artifact-dir` packages include `timing_d10.json`.
-- [ ] `timing_d10.json` includes `cost_latency_d10`, `wall_clock_d10`,
+- [x] `--artifact-dir` packages include `timing_d10.json`.
+- [x] `timing_d10.json` includes `cost_latency_d10`, `wall_clock_d10`,
   `artifact_type`, `schema_version`, and a claim-discipline caveat.
-- [ ] `manifest.json` records `timing_file` and `timing_sha256`.
-- [ ] The direct artifact writer remains fail-loud on existing run directory.
-- [ ] Docs preserve the claim boundary: this is timing artifact packaging, not
+- [x] `manifest.json` records `timing_file` and `timing_sha256`.
+- [x] The direct artifact writer remains fail-loud on existing run directory.
+- [x] Docs preserve the claim boundary: this is timing artifact packaging, not
   public benchmark or baseline evidence.
 
 > Process criteria:
-- [ ] Focused tests pass.
-- [ ] Plan sync passes.
-- [ ] Markdown link check passes.
-- [ ] Full `make check` passes, or any non-codebase failure is recorded.
+- [x] Focused tests pass.
+- [x] Plan sync passes.
+- [x] Markdown link check passes.
+- [x] Full `make check` passes, or any non-codebase failure is recorded.
 - [ ] Verified implementation is committed and pushed.
 
 ---

@@ -499,12 +499,20 @@ def test_bench_phase0_writes_versioned_artifact_package(
     run_dir = _single_artifact_dir(artifact_root)
     assert run_dir.name.endswith("-project_artifacts-phase0")
     scorecard_path = run_dir / "scorecard.json"
+    timing_path = run_dir / "timing_d10.json"
     manifest_path = run_dir / "manifest.json"
     assert scorecard_path.exists()
+    assert timing_path.exists()
     assert manifest_path.exists()
     scorecard = json.loads(scorecard_path.read_text(encoding="utf-8"))
+    timing = json.loads(timing_path.read_text(encoding="utf-8"))
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     assert scorecard == stdout_scorecard
+    assert timing["schema_version"] == 1
+    assert timing["artifact_type"] == "qualitative_coding.phase0_d10_timing"
+    assert timing["cost_latency_d10"] == stdout_scorecard["cost_latency_d10"]
+    assert timing["wall_clock_d10"] == stdout_scorecard["wall_clock_d10"]
+    assert "not public benchmark timing evidence" in timing["note"]
     assert manifest["schema_version"] == 1
     assert manifest["artifact_type"] == "qualitative_coding.phase0_scorecard"
     assert manifest["project_id"] == state.id
@@ -512,6 +520,8 @@ def test_bench_phase0_writes_versioned_artifact_package(
     assert manifest["phase"] == 0
     assert manifest["scorecard_file"] == "scorecard.json"
     assert manifest["scorecard_sha256"] == hashlib.sha256(scorecard_path.read_bytes()).hexdigest()
+    assert manifest["timing_file"] == "timing_d10.json"
+    assert manifest["timing_sha256"] == hashlib.sha256(timing_path.read_bytes()).hexdigest()
     assert manifest["input_hashes"] == stdout_scorecard["_meta"]["input_hashes"]
     assert manifest["claim_discipline"] == stdout_scorecard["_meta"]["claims"]
     assert manifest["prompt_eval"]["status"] == "not_run"
@@ -735,6 +745,14 @@ def test_phase0_artifact_writer_fails_when_run_dir_exists(tmp_path):
         command={"project_id": state.id},
         generated_at=generated_at,
     )
+    run_dir = tmp_path / bench_phase0.phase0_artifact_dir_name(state.id, generated_at)
+    timing = json.loads((run_dir / "timing_d10.json").read_text(encoding="utf-8"))
+    manifest = json.loads((run_dir / "manifest.json").read_text(encoding="utf-8"))
+    assert timing["cost_latency_d10"]["status"] == "not_available"
+    assert timing["wall_clock_d10"]["status"] == "not_available"
+    assert manifest["timing_sha256"] == hashlib.sha256(
+        (run_dir / "timing_d10.json").read_bytes()
+    ).hexdigest()
 
     with pytest.raises(ValueError, match="already exists"):
         bench_phase0.write_phase0_benchmark_artifact(

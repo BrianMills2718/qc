@@ -308,12 +308,19 @@ def write_phase0_benchmark_artifact(
     scorecard_path = run_dir / "scorecard.json"
     scorecard_path.write_bytes(scorecard_bytes)
 
+    timing_payload = phase0_timing_artifact(card)
+    timing_text = json.dumps(timing_payload, indent=2, sort_keys=True)
+    timing_bytes = timing_text.encode("utf-8")
+    timing_path = run_dir / "timing_d10.json"
+    timing_path.write_bytes(timing_bytes)
+
     manifest = phase0_artifact_manifest(
         card,
         state=state,
         command=command,
         generated_at=generated_at,
         scorecard_sha256=hashlib.sha256(scorecard_bytes).hexdigest(),
+        timing_sha256=hashlib.sha256(timing_bytes).hexdigest(),
     )
     (run_dir / "manifest.json").write_text(
         json.dumps(manifest, indent=2, sort_keys=True),
@@ -329,6 +336,7 @@ def phase0_artifact_manifest(
     command: dict[str, Any],
     generated_at: datetime,
     scorecard_sha256: str,
+    timing_sha256: str,
 ) -> dict[str, Any]:
     """Build the manifest for a Phase 0 benchmark artifact package."""
     meta = card.get("_meta", {})
@@ -344,6 +352,8 @@ def phase0_artifact_manifest(
         "phase": meta.get("phase", 0),
         "scorecard_file": "scorecard.json",
         "scorecard_sha256": scorecard_sha256,
+        "timing_file": "timing_d10.json",
+        "timing_sha256": timing_sha256,
         "input_hashes": input_hashes,
         "claim_discipline": meta.get("claims"),
         "prompt_eval": {
@@ -356,6 +366,37 @@ def phase0_artifact_manifest(
             ),
         },
         "command": command,
+    }
+
+
+def phase0_timing_artifact(card: dict[str, Any]) -> dict[str, Any]:
+    """Extract D10 timing sections into a dedicated artifact payload."""
+    return {
+        "schema_version": 1,
+        "artifact_type": "qualitative_coding.phase0_d10_timing",
+        "source_file": "scorecard.json",
+        "cost_latency_d10": card.get(
+            "cost_latency_d10",
+            _missing_d10_artifact_section("cost_latency_d10"),
+        ),
+        "wall_clock_d10": card.get(
+            "wall_clock_d10",
+            _missing_d10_artifact_section("wall_clock_d10"),
+        ),
+        "note": (
+            "D10 timing artifact packages local Phase 0 timing metadata for "
+            "review. It is not public benchmark timing evidence, a baseline "
+            "comparison, or a SOTA claim."
+        ),
+    }
+
+
+def _missing_d10_artifact_section(section: str) -> dict[str, str]:
+    """Represent absent D10 scorecard sections without estimating timing."""
+    return {
+        "status": "not_available",
+        "reason": f"Scorecard did not contain {section}; artifact writer did not estimate it.",
+        "note": "D10 artifact sections must come from scored Phase 0 data.",
     }
 
 

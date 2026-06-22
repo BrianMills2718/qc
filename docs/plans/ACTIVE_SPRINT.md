@@ -74,7 +74,9 @@ overall, calibration-bin, and per-surface accuracy plus local bootstrap
 intervals for Brier score and ECE. Phase 0 can also run from a
 strict versioned benchmark package manifest with relative input paths through
 `make bench-package PACKAGE=...`; that runner invokes the same canonical
-scorecard path and adds orchestration/provenance only. This remains a
+scorecard path and adds orchestration/provenance only. Phase 0 artifact packages
+now include a hash-recorded `timing_d10.json` file for local D10 timing
+sections. This remains a
 gold-dependent exact-score/provenance/uncertainty, human-ceiling-comparison, and
 canary-fixture/counterfactual/GT-fidelity/preference/calibration-accounting substrate, not a populated held-out
 benchmark, full D3/D7 validity, populated D4 LLM-judge/blind-expert evaluation,
@@ -84,5 +86,6 @@ populated human-ceiling agreement,
 populated D9 blind expert preference benchmark,
 populated confidence-calibration benchmark,
 held-out live-baseline result,
-committed/scored live adversarial prompt-injection benchmark, or expert-parity/SOTA
+committed/scored live adversarial prompt-injection benchmark,
+public benchmark timing evidence, or expert-parity/SOTA
 evidence.
