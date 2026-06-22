@@ -22,10 +22,21 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #127 (`CONFIDENCE_CALIBRATION_PROTOCOL_RESULT_PREFLIGHT.md`):
-   add standalone confidence-calibration protocol/result preflight.
+1. Create and execute the next confidence-calibration scorecard preflight guard
+   plan: enforce protocol/result preflight at score time when a calibration
+   protocol is supplied.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
+
+**Completed checkpoint:** Confidence-calibration result files can now be
+preflighted against registered calibration protocols with
+`make confidence-calibration-preflight PROTOCOL=... CALIBRATION=...` /
+`scripts/preflight_confidence_calibration_protocol.py`. The preflight validates
+the protocol and concrete result rows, checks optional result-file SHA-256
+locks, label-source/evaluator consistency, target surfaces, planned item count,
+and emits a schema_version=1 pass/fail report. This is process/provenance
+metadata only, not calibration proof, held-out correctness evidence,
+methodological-validity evidence, or SOTA evidence.
 
 **Completed checkpoint:** Confidence-calibration protocols can now be
 validated with `make validate-confidence-calibration-protocol PROTOCOL=...` /

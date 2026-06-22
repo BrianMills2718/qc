@@ -1,6 +1,6 @@
 # Plan #127: Confidence Calibration Protocol Result Preflight
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Plan #126 Confidence calibration protocol package
@@ -76,15 +76,15 @@ Internal preflight capability only; no cross-project boundary is created.
 
 ### Capability Validation
 
-- [ ] Matching protocol/result payloads produce `status="pass"`.
-- [ ] Missing result file produces `status="fail"` with a machine-readable
+- [x] Matching protocol/result payloads produce `status="pass"`.
+- [x] Missing result file produces `status="fail"` with a machine-readable
   error.
-- [ ] Result-file SHA-256 mismatches fail when protocol locks the outcome hash.
-- [ ] Result rows must match protocol target surfaces and label-source/evaluator
+- [x] Result-file SHA-256 mismatches fail when protocol locks the outcome hash.
+- [x] Result rows must match protocol target surfaces and label-source/evaluator
   metadata.
-- [ ] Result rows must meet or exceed protocol planned item count.
-- [ ] CLI emits machine-readable JSON and returns non-zero on failed preflight.
-- [ ] Make target routes to the CLI.
+- [x] Result rows must meet or exceed protocol planned item count.
+- [x] CLI emits machine-readable JSON and returns non-zero on failed preflight.
+- [x] Make target routes to the CLI.
 
 ---
 
@@ -127,9 +127,9 @@ Internal preflight capability only; no cross-project boundary is created.
 | Test File | Test Function | What It Verifies |
 |-----------|---------------|------------------|
 | `tests/test_confidence_calibration_preflight.py` | `test_preflight_confidence_calibration_passes_matching_protocol_and_results` | Matching protocol/results pass and report counts/surfaces/metrics. |
-| `tests/test_confidence_calibration_preflight.py` | `test_preflight_confidence_calibration_fails_missing_result_file` | Protocol preflight requires calibration results. |
-| `tests/test_confidence_calibration_preflight.py` | `test_preflight_confidence_calibration_fails_hash_and_surface_mismatches` | Hash locks and target surfaces are enforced. |
-| `tests/test_confidence_calibration_preflight.py` | `test_preflight_confidence_calibration_fails_label_source_and_item_count_mismatches` | Label-source/evaluator metadata and planned item count are enforced. |
+| `tests/test_confidence_calibration_preflight.py` | `test_preflight_confidence_calibration_requires_result_payload` | Protocol preflight requires calibration results. |
+| `tests/test_confidence_calibration_preflight.py` | `test_preflight_confidence_calibration_reports_hash_and_surface_mismatches` | Hash locks and target surfaces are enforced. |
+| `tests/test_confidence_calibration_preflight.py` | `test_preflight_confidence_calibration_reports_label_source_and_item_count_mismatches` | Label-source/evaluator metadata and planned item count are enforced. |
 | `tests/test_confidence_calibration_preflight.py` | `test_preflight_confidence_calibration_script_outputs_json` | CLI emits valid/invalid JSON reports and exit codes. |
 
 ### Existing Tests (Must Pass)
@@ -147,22 +147,22 @@ Internal preflight capability only; no cross-project boundary is created.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] Importable preflight returns a schema_version=1 report with pass/fail
+- [x] Importable preflight returns a schema_version=1 report with pass/fail
   status, counts, protocol metadata, errors, and caution.
-- [ ] CLI/Make preflight returns exit code 0 only when status is `pass`.
-- [ ] Protocol outcome-file hash locks are enforced when provided.
-- [ ] Protocol target surfaces and label-source metadata are checked against
+- [x] CLI/Make preflight returns exit code 0 only when status is `pass`.
+- [x] Protocol outcome-file hash locks are enforced when provided.
+- [x] Protocol target surfaces and label-source metadata are checked against
   rows.
-- [ ] Planned item count undershoots fail.
-- [ ] Docs state this is process/provenance only.
+- [x] Planned item count undershoots fail.
+- [x] Docs state this is process/provenance only.
 
 > Process criteria:
-- [ ] Required focused tests pass.
-- [ ] Focused Ruff check passes.
-- [ ] `make docs-check` passes.
-- [ ] Full `make check` passes or any failure is documented with evidence.
-- [ ] Type-check status is reported.
-- [ ] Verified work is committed and pushed.
+- [x] Required focused tests pass.
+- [x] Focused Ruff check passes.
+- [x] `make docs-check` passes.
+- [x] Full `make check` passes or any failure is documented with evidence.
+- [x] Type-check status is reported.
+- [x] Verified work is committed and pushed.
 
 ---
 
@@ -176,6 +176,39 @@ Internal preflight capability only; no cross-project boundary is created.
 - [ ] Should score-time guard inject protocol metadata into calibration
   scorecards? — Status: DEFERRED | Decide in the score-time guard lane after
   standalone preflight exists.
+
+---
+
+## Outcome
+
+Implemented in `f147b2e`:
+
+- Added `qc_clean/core/confidence_calibration_preflight.py` with a
+  schema_version=1 pass/fail report, protocol metadata, row counts, evaluator
+  counts, machine-readable errors, and claim-discipline caution.
+- Added `scripts/preflight_confidence_calibration_protocol.py` and
+  `make confidence-calibration-preflight PROTOCOL=... CALIBRATION=...`.
+- Added regression coverage for pass, missing result payload, hash mismatch,
+  target-surface mismatch, label-source mismatch, planned-item-count
+  undershoot, and CLI JSON/exit-code behavior.
+- Updated `CLAUDE.md`, generated `AGENTS.md`, `docs/EVALUATION_HARNESS.md`,
+  and `docs/PROJECT_THEORY_AND_GOALS.md` to describe this as
+  process/provenance metadata only.
+
+Verification:
+
+- TDD red: missing `qc_clean.core.confidence_calibration_preflight` module.
+- `python -m pytest tests/test_confidence_calibration_preflight.py tests/test_confidence_calibration_protocol.py -q`
+  passed: 11 passed.
+- `python -m ruff check qc_clean/core/confidence_calibration_preflight.py scripts/preflight_confidence_calibration_protocol.py tests/test_confidence_calibration_preflight.py`
+  passed.
+- `make -n confidence-calibration-preflight PROTOCOL=protocol.json CALIBRATION=calibration.json`
+  routed to `scripts/preflight_confidence_calibration_protocol.py`.
+- `make docs-check` passed.
+- `make check` passed: 1012 passed, 1 skipped, 8 deselected; Ruff passed;
+  docs-check passed.
+- Type check is not configured in this repo.
+- Implementation commit `f147b2e` was pushed to `origin/main`.
 
 ---
 
