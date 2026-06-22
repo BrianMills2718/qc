@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 136 | Theoretical sampling protocol package | High | In Progress | `THEORETICAL_SAMPLING_PROTOCOL_PACKAGE.md` |
 
 ## Completed Plans
 

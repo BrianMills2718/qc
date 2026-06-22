@@ -22,8 +22,8 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Select and execute the next highest-value documented roadmap lane with a
-   fresh plan and explicit acceptance criteria.
+1. Execute Plan #136 (`THEORETICAL_SAMPLING_PROTOCOL_PACKAGE.md`): add the
+   first machine-readable theoretical-sampling protocol validator.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
