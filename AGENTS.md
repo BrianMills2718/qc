@@ -52,6 +52,7 @@ make lint-scope-phrasing ID=<project_id> INPUT=report.md  # Lint arbitrary text 
 make export-audit-manifest ID=<project_id> FORMAT=markdown ARTIFACTS="report.md" OUTPUT=manifest.json  # Write export artifact hash manifest
 make verify-export-audit-manifest MANIFEST=manifest.json BASE_DIR=. ID=<project_id>  # Verify manifest self-hash, artifact hashes, and optional project-state hash
 make export-publish-preflight MANIFEST=manifest.json BASE_DIR=. ID=<project_id>  # Strict local publish/handoff preflight requiring a verified export manifest
+make verify-export-audit-log LOG=export_audit_events.jsonl  # Verify opt-in local hash-linked export audit event log
 make validate-d7-gold GOLD=gold_set.json  # Validate versioned held-out D7 gold-set package
 make run-inv7-fixtures OUTPUT=inv7.json  # Write structural INV-7 fixture package for PROMPT_INJECTION=
 make run-inv7-live-fixtures OUTPUT=inv7_live.json MODEL=<model>  # Write opt-in live canary package for PROMPT_INJECTION=

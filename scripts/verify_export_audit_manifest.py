@@ -17,6 +17,7 @@ from qc_clean.core.export.audit_manifest import (
     load_export_audit_manifest,
     verify_export_audit_manifest_payload,
 )
+from qc_clean.core.export.audit_event_log import append_export_audit_event
 from qc_clean.core.persistence.project_store import ProjectStore
 
 
@@ -34,6 +35,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         "--projects-dir",
         type=Path,
         help="Optional project store directory; defaults to ~/.qc_projects",
+    )
+    parser.add_argument(
+        "--audit-log",
+        type=Path,
+        help="Optional export audit event JSONL log to append a manifest_verified event",
     )
     args = parser.parse_args(argv)
 
@@ -58,6 +64,18 @@ def main(argv: Sequence[str] | None = None) -> int:
         base_dir=base_dir,
         state=state,
     )
+    if args.audit_log:
+        try:
+            append_export_audit_event(
+                args.audit_log,
+                event_type="manifest_verified",
+                event_status=report.status,
+                manifest_path=args.manifest,
+                payload=report.model_dump(mode="json"),
+            )
+        except (OSError, ValueError) as exc:
+            print(json.dumps({"status": "error", "error": str(exc)}, indent=2))
+            return 1
     print(json.dumps(report.model_dump(mode="json"), indent=2))
     return 0 if report.status == "verified" else 1
 

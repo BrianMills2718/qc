@@ -17,6 +17,7 @@ from qc_clean.core.export.audit_manifest import (
     build_export_audit_manifest,
     write_export_audit_manifest,
 )
+from qc_clean.core.export.audit_event_log import append_export_audit_event
 from qc_clean.core.persistence.project_store import ProjectStore
 
 
@@ -47,6 +48,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         type=Path,
         help="Optional project store directory; defaults to ~/.qc_projects",
     )
+    parser.add_argument(
+        "--audit-log",
+        type=Path,
+        help="Optional export audit event JSONL log to append a manifest_written event",
+    )
     args = parser.parse_args(argv)
 
     store = ProjectStore(projects_dir=args.projects_dir)
@@ -59,7 +65,15 @@ def main(argv: Sequence[str] | None = None) -> int:
             base_dir=args.base_dir,
         )
         write_export_audit_manifest(manifest, args.output)
-    except (FileNotFoundError, ValueError) as exc:
+        if args.audit_log:
+            append_export_audit_event(
+                args.audit_log,
+                event_type="manifest_written",
+                event_status="success",
+                manifest_path=args.output,
+                payload=manifest.model_dump(mode="json"),
+            )
+    except (FileNotFoundError, OSError, ValueError) as exc:
         print(json.dumps({"status": "error", "error": str(exc)}, indent=2))
         return 1
 
