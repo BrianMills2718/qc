@@ -22,9 +22,9 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Create and execute the next high-value lane: MCP export-audit integration,
-   so agent-facing export tools can write optional manifest sidecars without
-   changing their default return contracts.
+1. Execute Plan #97 (`MCP_EXPORT_AUDIT_INTEGRATION.md`): add optional
+   audit-manifest sidecars to existing MCP JSON/Markdown export tools without
+   changing default return contracts or weakening export confinement.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 

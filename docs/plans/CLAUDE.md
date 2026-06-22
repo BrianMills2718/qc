@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 97 | MCP export audit integration | High | Planned | `MCP_EXPORT_AUDIT_INTEGRATION.md` |
 
 ## Completed Plans
 
