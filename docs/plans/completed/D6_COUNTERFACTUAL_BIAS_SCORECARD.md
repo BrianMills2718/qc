@@ -1,12 +1,31 @@
 # Plan #48: D6 Counterfactual Bias Scorecard
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** None
 **Blocks:** D6 bias measurement substrate; future prompt_eval-backed counterfactual suite
 
 ---
+
+## Outcome
+
+Phase 0 scorecards now include `bias_counterfactual_d6`, which scores
+externally supplied counterfactual identity-swap outcomes from
+`ProjectState.config.extra["bias_counterfactual_evaluations"]`,
+`make bench BIAS_COUNTERFACTUAL=bias.json`, `scripts/bench_phase0.py
+--bias-counterfactual-file`, or `qc_cli.py bench --bias-counterfactual-file`.
+The scorecard reports invariant-case code-change rate, mean code-set Jaccard
+distance, changed case IDs, and by-attribute summaries; external D6 files are
+hashed in `_meta.input_hashes` and recorded in Phase 0 artifact command
+provenance. The docs explicitly keep this as a local measurement substrate only,
+not a populated bias audit, causal proof, or bias-free claim.
+
+**Verification:**
+- `python -m pytest tests/test_bench_phase0.py tests/test_bench_phase0_script.py tests/test_qc_cli_bench.py -q` - 56 passed.
+- `python -m ruff check qc_clean/core/bench.py scripts/bench_phase0.py qc_cli.py tests/test_bench_phase0.py tests/test_bench_phase0_script.py tests/test_qc_cli_bench.py` - passed.
+- `python scripts/check_markdown_links.py` - passed.
+- `make check` - 737 passed, 1 skipped, 8 deselected; Ruff and docs checks passed; type check not yet configured.
 
 ## Gap
 
@@ -61,10 +80,10 @@ Internal scorecard capability only; no cross-project boundary is created.
 
 ### Capability Validation
 
-- [ ] Counterfactual outcomes are Pydantic-validated and fail loudly when malformed.
-- [ ] Invariant cases report code-change rate and mean Jaccard distance.
-- [ ] Attribute buckets report changed-case diagnostics without causal claims.
-- [ ] External files are hashed in `_meta.input_hashes` and recorded in artifact command provenance.
+- [x] Counterfactual outcomes are Pydantic-validated and fail loudly when malformed.
+- [x] Invariant cases report code-change rate and mean Jaccard distance.
+- [x] Attribute buckets report changed-case diagnostics without causal claims.
+- [x] External files are hashed in `_meta.input_hashes` and recorded in artifact command provenance.
 
 ---
 
@@ -129,18 +148,18 @@ Internal scorecard capability only; no cross-project boundary is created.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] Scorecard has `bias_counterfactual_d6` with explicit unavailable state when no data exists.
-- [ ] Scored output reports total cases, invariant cases, changed invariant cases, code-change rate, mean Jaccard distance, changed case IDs, and by-attribute summaries.
-- [ ] External D6 JSON file can be supplied through Make, script, and `qc_cli` without mutating saved project state.
-- [ ] Phase 0 input hashes and artifact command provenance include the D6 external file.
-- [ ] Docs preserve the caveat that this is not a populated bias audit or causal proof.
+- [x] Scorecard has `bias_counterfactual_d6` with explicit unavailable state when no data exists.
+- [x] Scored output reports total cases, invariant cases, changed invariant cases, code-change rate, mean Jaccard distance, changed case IDs, and by-attribute summaries.
+- [x] External D6 JSON file can be supplied through Make, script, and `qc_cli` without mutating saved project state.
+- [x] Phase 0 input hashes and artifact command provenance include the D6 external file.
+- [x] Docs preserve the caveat that this is not a populated bias audit or causal proof.
 
 > Process criteria:
-- [ ] Required tests pass
-- [ ] Full test suite passes
-- [ ] Type check status reported
-- [ ] Docs updated
-- [ ] Plan completed, committed, and pushed
+- [x] Required tests pass
+- [x] Full test suite passes
+- [x] Type check status reported
+- [x] Docs updated
+- [x] Plan completed, committed, and pushed
 
 ---
 

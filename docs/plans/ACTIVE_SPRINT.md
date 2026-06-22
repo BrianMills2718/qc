@@ -45,10 +45,13 @@ supplied versioned-package human-human metrics when present. D5 reliability now
 surfaces Gwet's AC1 for LLM-pass codebook-discovery, positive application-cell,
 and segment-decision consistency when IRR results exist, with rating prevalence
 tables and deterministic local row-bootstrap intervals in the Phase 0 scorecard.
-This remains a
+Phase 0 also now scores externally supplied D6 counterfactual identity-swap
+outcomes through `BIAS_COUNTERFACTUAL=` / `--bias-counterfactual-file`. This
+remains a
 gold-dependent exact-score/provenance/uncertainty, human-ceiling-comparison, and
-canary-fixture substrate, not a populated held-out benchmark, full D3/D7
-validity, κ/α/AC1 human agreement, populated human-ceiling agreement,
+canary-fixture/counterfactual-accounting substrate, not a populated held-out
+benchmark, full D3/D7 validity, populated D6 bias audit, κ/α/AC1 human
+agreement, populated human-ceiling agreement,
 held-out live-baseline result,
 committed/scored live adversarial prompt-injection benchmark, or expert-parity/SOTA
 evidence.
