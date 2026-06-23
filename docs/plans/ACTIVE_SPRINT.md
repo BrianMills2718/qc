@@ -28,13 +28,19 @@ highest-value documented lane.
    without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Plan #209
-`INV7_HELD_OUT_FIXTURE_MANIFEST_RUNNER.md` is active. The next slice extends
-the existing INV-7 live fixture runner so agents can run an external
-schema_version=1 fixture manifest through script, Make, and `qc_cli.py`
-surfaces. This is benchmark workflow infrastructure only; it does not create
-held-out results, prompt-injection robustness evidence, model-obedience proof,
+**Active checkpoint:** No implementation plan is active. Plan #209
+`completed/INV7_HELD_OUT_FIXTURE_MANIFEST_RUNNER.md` is complete. The INV-7
+live fixture runner can now execute external schema_version=1 fixture manifests
+through script, Make, and `qc_cli.py` surfaces, while enforcing held-out
+prompt-frozen/contamination/pre-run-registration invariants. This is benchmark
+workflow infrastructure only; it does not create held-out results,
+prompt-injection robustness evidence, model-obedience proof,
 methodological-validity evidence, or SOTA evidence.
+
+**Completed checkpoint:** Plan #209
+`completed/INV7_HELD_OUT_FIXTURE_MANIFEST_RUNNER.md` added external INV-7 live
+fixture manifest execution through script, Make, and `qc_cli.py`, preserving
+manifest split/provenance metadata and held-out invariants.
 
 **Completed checkpoint:** Plan #208
 `completed/GRAPH_REVIEW_UI_CLARITY_FIXES.md` clarified code-only bulk approval

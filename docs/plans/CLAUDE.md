@@ -6,12 +6,12 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 209 | INV-7 Held-Out Fixture Manifest Runner | High | Planned | `INV7_HELD_OUT_FIXTURE_MANIFEST_RUNNER.md` |
 
 ## Completed Plans
 
 | Name | Outcome | Record |
 |------|---------|--------|
+| INV-7 held-out fixture manifest runner | `run-inv7-live-fixtures` now accepts schema_version=1 external live fixture manifests through script, Make, and `qc_cli.py`, preserving manifest split/provenance metadata and enforcing held-out prompt-frozen/contamination/pre-run-registration invariants without claiming held-out evidence | `completed/INV7_HELD_OUT_FIXTURE_MANIFEST_RUNNER.md` |
 | Graph and review UI clarity fixes | Review UI now labels bulk approval as code-only, and Graph UI now survives tab switches, explains flat code hierarchies, and renders relationship/entity edges that were already present in graph API data | `completed/GRAPH_REVIEW_UI_CLARITY_FIXES.md` |
 | Review UI orientation aids | Browser review UI now includes a visible Start Here checklist, legend chips, tab-specific What to Inspect guidance, and tooltips/ARIA labels for ambiguous controls and metrics without changing review APIs or decision semantics | `completed/REVIEW_UI_ORIENTATION_AIDS.md` |
 | Reviewer demo run packet | `make reviewer-demo` now builds an isolated synthetic review packet with fixture transcripts, project state, exports, API/review/graph snapshots, Phase 0 scorecard artifacts, and explicit caveats; `QC_PROJECTS_DIR` lets CLI/API/browser surfaces inspect the packet without mutating the default store | `completed/REVIEWER_DEMO_RUN_PACKET.md` |

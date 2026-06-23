@@ -1,10 +1,48 @@
 # Plan #209: INV-7 Held-Out Fixture Manifest Runner
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** None
 **Blocks:** broader held-out/adversarial live INV-7 evaluation beyond built-in canaries
+
+---
+
+## Outcome
+
+The INV-7 live fixture runner now accepts external schema_version=1 fixture
+manifests through script, Make, and `qc_cli.py` surfaces:
+
+- `scripts/run_inv7_live_fixtures.py --fixtures manifest.json`
+- `make run-inv7-live-fixtures FIXTURES=manifest.json ...`
+- `qc_cli.py run-inv7-live-fixtures --fixtures manifest.json ...`
+
+The manifest contract carries result package ID, split, fixture-set ID/version,
+prompt-frozen status, contamination-check status, pre-run registration status,
+optional note, and live fixtures. Held-out manifests fail loudly unless
+`prompt_frozen`, `contamination_checked`, and `registered_before_run` are all
+true. Runner output preserves manifest metadata in the strict INV-7 result
+package and records exact SHA-256 hashes for every fixture prompt.
+
+Implementation commit: `7d066035`
+(`[Plan: INV7_HELDOUT] Add live fixture manifest runner`).
+
+Verification:
+
+- `python -m pytest tests/test_inv7_fixture_runner.py tests/test_qc_cli_inv7_fixtures.py -q`
+  -> 18 passed.
+- `python -m pytest tests/test_inv7_prompt_injection_package.py tests/test_inv7_live_protocol.py tests/test_inv7_live_preflight.py tests/test_bench_phase0_script.py -k "inv7 or prompt_injection" -q`
+  -> 23 passed, 42 deselected.
+- `python -m ruff check qc_clean/core/inv7_fixtures.py scripts/run_inv7_live_fixtures.py qc_cli.py tests/test_inv7_fixture_runner.py tests/test_qc_cli_inv7_fixtures.py`
+  -> passed.
+- `make docs-check` -> passed.
+- `git diff --check` -> passed.
+- `make check` -> 1293 passed, 1 skipped, 8 deselected; Ruff and docs gates
+  passed.
+
+This is execution/provenance infrastructure only. It does not create held-out
+results, prompt-injection robustness evidence, model-obedience proof,
+methodological-validity evidence, or SOTA evidence.
 
 ---
 
@@ -159,28 +197,28 @@ project-local fixture runner surface.
 
 Feature-level criteria:
 
-- [ ] A schema_version=1 external INV-7 live fixture manifest can be loaded.
-- [ ] Held-out manifests require frozen prompts, contamination checking, and
+- [x] A schema_version=1 external INV-7 live fixture manifest can be loaded.
+- [x] Held-out manifests require frozen prompts, contamination checking, and
   pre-run registration.
-- [ ] `run-inv7-live-fixtures --fixtures manifest.json` writes a strict
+- [x] `run-inv7-live-fixtures --fixtures manifest.json` writes a strict
   package whose split, fixture-set metadata, prompt-frozen flag,
   contamination flag, note, and exact prompt hashes come from the manifest.
-- [ ] Make and `qc_cli.py` expose the same optional fixture-manifest path.
-- [ ] Existing built-in canary behavior remains backward-compatible when no
+- [x] Make and `qc_cli.py` expose the same optional fixture-manifest path.
+- [x] Existing built-in canary behavior remains backward-compatible when no
   manifest is supplied.
-- [ ] Docs preserve claim discipline: this enables held-out runs but does not
+- [x] Docs preserve claim discipline: this enables held-out runs but does not
   create held-out evidence, prompt-injection robustness evidence, model
   obedience proof, methodological-validity evidence, or SOTA evidence.
 
 Process criteria:
 
-- [ ] Focused new tests pass.
-- [ ] Existing INV-7 package/protocol/preflight/scorecard tests pass.
-- [ ] Touched Python Ruff gate passes.
-- [ ] `make docs-check` passes.
-- [ ] `git diff --check` passes.
-- [ ] `make check` passes.
-- [ ] Verified increment is committed and pushed.
+- [x] Focused new tests pass.
+- [x] Existing INV-7 package/protocol/preflight/scorecard tests pass.
+- [x] Touched Python Ruff gate passes.
+- [x] `make docs-check` passes.
+- [x] `git diff --check` passes.
+- [x] `make check` passes.
+- [x] Verified increment is committed and pushed.
 
 ---
 
