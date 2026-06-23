@@ -28,14 +28,17 @@ highest-value documented lane.
    without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Plan #212
-`D7_COMPARISON_PROJECTS_DIR_PARITY.md` is active. The next slice adds explicit
-`PROJECTS_DIR` / `--projects-dir` support to D7 retrieval comparison through
-script, Make, and `qc_cli.py`, so future D7 comparison artifacts can load the
-same repo-local project stores used by retrieval export without hidden
-environment coupling. This is portability/provenance support only, not
-held-out D7 evidence, live-baseline evidence, superiority evidence,
-methodological-validity evidence, or SOTA evidence.
+**Active checkpoint:** None at this commit boundary. Select the next highest-
+value documented roadmap lane before editing code.
+
+**Completed checkpoint:** Plan #212
+`completed/D7_COMPARISON_PROJECTS_DIR_PARITY.md` added explicit `PROJECTS_DIR` /
+`--projects-dir` support to D7 retrieval comparison through script, Make, and
+`qc_cli.py`, so future D7 comparison artifacts can load the same repo-local
+project stores used by retrieval export without hidden environment coupling.
+This is portability/provenance support only, not held-out D7 evidence,
+live-baseline evidence, superiority evidence, methodological-validity evidence,
+or SOTA evidence.
 
 **Completed checkpoint:** Plan #211
 `completed/D7_RETRIEVAL_PROJECTS_DIR_PARITY.md` added explicit `PROJECTS_DIR` /
