@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 208 | Graph and review UI clarity fixes | High | Active | `GRAPH_REVIEW_UI_CLARITY_FIXES.md` |
 
 ## Completed Plans
 

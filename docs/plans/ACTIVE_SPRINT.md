@@ -22,19 +22,18 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Brian review gate: Plan #207 improved the live review UI with concise
-   instructions, per-tab guidance, and tooltips/labels, and the updated demo
-   server is running for review.
-2. After review or explicit continuation, continue through the ranked roadmap
+1. Execute Plan #208 `GRAPH_REVIEW_UI_CLARITY_FIXES.md`: clarify that
+   Approve All applies only to codes and repair graph tab rendering so
+   relationship/entity edges appear.
+2. Restart the demo server and verify the improved review and graph surfaces.
+3. After review or explicit continuation, continue through the ranked roadmap
    without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** No implementation plan is active. Plan #207
-`completed/REVIEW_UI_ORIENTATION_AIDS.md` is complete, and the live review UI
-now has a visible Start Here checklist, legend chips, tab-specific What to
-Inspect guidance, and tooltips/ARIA labels. This is UI usability only; it does
-not change API payloads, review decision semantics, claim meaning, pipeline
-execution, methodological-validity claims, or SOTA claims.
+**Active checkpoint:** Plan #208 `GRAPH_REVIEW_UI_CLARITY_FIXES.md` is active.
+This is UI clarification/rendering repair only. Do not change API payloads,
+project state, review decision semantics, graph endpoint contracts, claim
+meanings, methodological-validity claims, or SOTA claims.
 
 **Completed checkpoint:** Plan #207
 `completed/REVIEW_UI_ORIENTATION_AIDS.md` added concise reviewer guidance and
