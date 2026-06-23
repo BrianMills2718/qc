@@ -1,6 +1,6 @@
 # Plan #211: D7 Retrieval Projects Dir Parity
 
-**Status:** Planned
+**Status:** Completed
 **Type:** implementation
 **Priority:** High
 **Blocked By:** None
@@ -10,12 +10,12 @@
 
 ## Gap
 
-**Current:** `scripts/run_d7_retrieval.py` always loads projects from the
-default `ProjectStore()`. `make bench`, Phase 0 package runs, export-audit
-surfaces, and reviewer-demo flows already support explicit project stores via
-`PROJECTS_DIR` / `--projects-dir`. D7 retrieval export cannot yet run against a
-repo-local held-out project shell without monkeypatching or mutating the user
-default project store.
+**Current at plan start:** `scripts/run_d7_retrieval.py` always loaded projects
+from the default `ProjectStore()`. `make bench`, Phase 0 package runs,
+export-audit surfaces, and reviewer-demo flows already supported explicit
+project stores via `PROJECTS_DIR` / `--projects-dir`. D7 retrieval export could
+not yet run against a repo-local held-out project shell without monkeypatching
+or mutating the user default project store.
 
 **Target:** Add optional `--projects-dir` / `PROJECTS_DIR=` support to D7
 retrieval export through script, Make, and `qc_cli.py run-d7-retrieval`, while
@@ -133,22 +133,54 @@ project-local script and CLI surface.
 
 Feature-level criteria:
 
-- [ ] `scripts/run_d7_retrieval.py --projects-dir path` loads from that store.
-- [ ] `make run-d7-retrieval PROJECTS_DIR=path ...` forwards the path.
-- [ ] `qc_cli.py run-d7-retrieval --projects-dir path ...` forwards the path.
-- [ ] Default behavior without `--projects-dir` remains unchanged.
-- [ ] Docs preserve claim discipline: this is portability/provenance support,
+- [x] `scripts/run_d7_retrieval.py --projects-dir path` loads from that store.
+- [x] `make run-d7-retrieval PROJECTS_DIR=path ...` forwards the path.
+- [x] `qc_cli.py run-d7-retrieval --projects-dir path ...` forwards the path.
+- [x] Default behavior without `--projects-dir` remains unchanged.
+- [x] Docs preserve claim discipline: this is portability/provenance support,
   not held-out D7 evidence, live-baseline evidence, superiority evidence, or
   SOTA evidence.
 
 Process criteria:
 
-- [ ] Focused tests pass.
-- [ ] Touched Python Ruff gate passes.
-- [ ] `make docs-check` passes.
-- [ ] `git diff --check` passes.
-- [ ] `make check` passes.
-- [ ] Verified increment is committed and pushed.
+- [x] Focused tests pass.
+- [x] Touched Python Ruff gate passes.
+- [x] `make docs-check` passes.
+- [x] `git diff --check` passes.
+- [x] `make check` passes.
+- [x] Verified increment is committed and pushed.
+
+---
+
+## Outcome
+
+Completed in commit `b3900803`.
+
+Implemented optional explicit project-store loading for D7 retrieval export:
+
+- `scripts/run_d7_retrieval.py` accepts `--projects-dir path` and constructs
+  `ProjectStore(projects_dir=...)` only when supplied.
+- `make run-d7-retrieval PROJECTS_DIR=path ...` forwards the option.
+- `qc_cli.py run-d7-retrieval --projects-dir path ...` forwards the option to
+  the canonical script.
+- Tests cover direct script loading from a repo-local project store and
+  top-level CLI forwarding.
+- `CLAUDE.md`, generated `AGENTS.md`, and `docs/EVALUATION_HARNESS.md` document
+  the portability surface while preserving the non-evidentiary claim caveat.
+
+Verification:
+
+- `python -m pytest tests/test_run_d7_retrieval_script.py tests/test_qc_cli_d7_retrieval.py -q`
+  - 14 passed
+- `python -m ruff check scripts/run_d7_retrieval.py qc_cli.py tests/test_run_d7_retrieval_script.py tests/test_qc_cli_d7_retrieval.py`
+  - passed
+- `make docs-check`
+  - passed
+- `git diff --check`
+  - passed
+- `make check`
+  - 1295 passed, 1 skipped, 8 deselected; Ruff passed; docs-check passed;
+    type check is not yet configured
 
 ---
 

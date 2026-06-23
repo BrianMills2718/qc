@@ -28,13 +28,16 @@ highest-value documented lane.
    without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Plan #211
-`D7_RETRIEVAL_PROJECTS_DIR_PARITY.md` is active. The next slice adds explicit
-`PROJECTS_DIR` / `--projects-dir` support to D7 retrieval export through
-script, Make, and `qc_cli.py`, so future held-out D7 artifacts can use
-repo-local project stores without mutating the default user store. This is
-portability/provenance support only, not held-out D7 evidence, live-baseline
-evidence, superiority evidence, or SOTA evidence.
+**Active checkpoint:** None at this commit boundary. Select the next highest-
+value documented roadmap lane before editing code.
+
+**Completed checkpoint:** Plan #211
+`completed/D7_RETRIEVAL_PROJECTS_DIR_PARITY.md` added explicit `PROJECTS_DIR` /
+`--projects-dir` support to D7 retrieval export through script, Make, and
+`qc_cli.py`, so future held-out D7 artifacts can use repo-local project stores
+without mutating the default user store. This is portability/provenance support
+only, not held-out D7 evidence, live-baseline evidence, superiority evidence,
+or SOTA evidence.
 
 **Completed checkpoint:** Plan #210
 `completed/INV7_EXTERNAL_HELDOUT_SMOKE_ARTIFACT.md` committed a
