@@ -1,6 +1,6 @@
 # Plan #222: Theoretical Sampling Smoke Artifact
 
-**Status:** Active
+**Status:** Completed
 **Type:** artifact
 **Priority:** High
 **Blocked By:** None
@@ -160,40 +160,81 @@ artifact over existing project-local capabilities.
 
 Artifact criteria:
 
-- [ ] `docs/benchmarks/theoretical_sampling_smoke_2026_06_23/README.md`
+- [x] `docs/benchmarks/theoretical_sampling_smoke_2026_06_23/README.md`
   explains what the artifact is and is not.
-- [ ] Repo-local project store is committed under the artifact directory.
-- [ ] `protocol.json` validates and is accompanied by `validated_protocol.json`.
-- [ ] `candidates.json` was generated from explicit `PROJECTS_DIR`.
-- [ ] `results.json` records the selected candidate and registered success
+- [x] Repo-local project store is committed under the artifact directory.
+- [x] `protocol.json` validates and is accompanied by `validated_protocol.json`.
+- [x] `candidates.json` was generated from explicit `PROJECTS_DIR`.
+- [x] `results.json` records the selected candidate and registered success
   criterion.
-- [ ] `preflight.json` has `status == "pass"`, `candidate_count == 1`, and
+- [x] `preflight.json` has `status == "pass"`, `candidate_count == 1`, and
   `result_selected_count == 1`.
-- [ ] Caveats explicitly say this is workflow/provenance smoke evidence only,
+- [x] Caveats explicitly say this is workflow/provenance smoke evidence only,
   not theoretical sampling execution, sampling adequacy, saturation,
   GT-fidelity, methodological-validity, or SOTA evidence.
 
 Process criteria:
 
-- [ ] Focused theoretical-sampling tests pass.
-- [ ] `make docs-check` passes.
-- [ ] `git diff --check` passes.
-- [ ] `make check` passes.
-- [ ] Verified increment is committed and pushed.
+- [x] Focused theoretical-sampling tests pass.
+- [x] `make docs-check` passes.
+- [x] `git diff --check` passes.
+- [x] `make check` passes.
+- [x] Verified increment is committed and pushed.
 
 ---
 
 ## Outcome
 
-Pending.
+Completed in commit `1b1a6df4`.
+
+Committed `docs/benchmarks/theoretical_sampling_smoke_2026_06_23/` with:
+
+- a synthetic repo-local project store,
+- a hash-matched theoretical-sampling protocol,
+- normalized protocol validation output,
+- a loaded-document candidate package exported with explicit `PROJECTS_DIR`,
+- a selected-candidate result package,
+- a passing preflight report, and
+- a README with commands, summary, and caveats.
+
+Observed artifact summary:
+
+- `protocol_id`: `ts-smoke-2026-06-23`
+- selected candidate: `loaded-doc-2`
+- preflight `status`: `pass`
+- preflight `candidate_count`: 1
+- preflight `result_selected_count`: 1
+
+Verification:
+
+- `python qc_cli.py validate-theoretical-sampling-protocol docs/benchmarks/theoretical_sampling_smoke_2026_06_23/protocol.json > docs/benchmarks/theoretical_sampling_smoke_2026_06_23/validated_protocol.json`
+  - passed
+- `make export-theoretical-sampling-candidates ID=theoretical-sampling-smoke PROJECTS_DIR=docs/benchmarks/theoretical_sampling_smoke_2026_06_23/projects PROTOCOL=docs/benchmarks/theoretical_sampling_smoke_2026_06_23/protocol.json OUTPUT=docs/benchmarks/theoretical_sampling_smoke_2026_06_23/candidates.json MAX=1`
+  - passed
+- `python qc_cli.py export-theoretical-sampling-results docs/benchmarks/theoretical_sampling_smoke_2026_06_23/protocol.json --candidates-file docs/benchmarks/theoretical_sampling_smoke_2026_06_23/candidates.json --selected-candidate-id loaded-doc-2 --success-criterion-met "Every targeted gap has an explicit sampling decision." --output docs/benchmarks/theoretical_sampling_smoke_2026_06_23/results.json`
+  - passed
+- `make -s theoretical-sampling-preflight PROTOCOL=docs/benchmarks/theoretical_sampling_smoke_2026_06_23/protocol.json CANDIDATES=docs/benchmarks/theoretical_sampling_smoke_2026_06_23/candidates.json RESULTS=docs/benchmarks/theoretical_sampling_smoke_2026_06_23/results.json > docs/benchmarks/theoretical_sampling_smoke_2026_06_23/preflight.json`
+  - passed; `-s` prevents Make command echo from corrupting saved JSON
+- Artifact inspection command:
+  - passed
+- `python -m pytest tests/test_theoretical_sampling_candidate_export.py tests/test_theoretical_sampling_result_export.py tests/test_theoretical_sampling_preflight.py tests/test_export_theoretical_sampling_candidates_script.py tests/test_export_theoretical_sampling_results_script.py tests/test_qc_cli_theoretical_sampling_surfaces.py -q`
+  - 21 passed
+- `make docs-check`
+  - passed
+- `git diff --check`
+  - passed
+- `make check`
+  - 1308 passed, 1 skipped, 8 deselected; Ruff passed; docs-check passed;
+    type check is not yet configured
 
 ---
 
 ## Open Questions
 
-- [ ] Should this artifact use real project data?
-  Default: no. Use a synthetic fixture because real theoretical sampling would
-  require human data-selection judgment and would change the evidentiary claim.
+- [x] Should this artifact use real project data?
+  Status: RESOLVED. No. It uses a synthetic fixture because real theoretical
+  sampling would require human data-selection judgment and would change the
+  evidentiary claim.
 
 ---
 
