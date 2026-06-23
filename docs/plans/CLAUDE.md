@@ -6,12 +6,13 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 223 | INV-4 theory ledger refresh | High | Active | `INV4_THEORY_LEDGER_REFRESH.md` |
+| — | — | — | — | — |
 
 ## Completed Plans
 
 | Name | Outcome | Record |
 |------|---------|--------|
+| INV-4 theory ledger refresh | `docs/PROJECT_THEORY_AND_GOALS.md` and `CLAUDE.md` now record the committed synthetic INV-4 theoretical-sampling smoke artifact while preserving caveats that it is workflow/provenance smoke only, not theoretical sampling execution, sampling adequacy, category saturation, GT-fidelity, methodological validity, or SOTA evidence | `completed/INV4_THEORY_LEDGER_REFRESH.md` |
 | Theoretical sampling smoke artifact | A synthetic repo-local artifact under `docs/benchmarks/theoretical_sampling_smoke_2026_06_23/` demonstrates protocol validation, explicit-`PROJECTS_DIR` candidate export, selected-candidate result export, and passing preflight without claiming theoretical sampling execution, sampling adequacy, saturation, GT-fidelity, methodological validity, or SOTA evidence | `completed/THEORETICAL_SAMPLING_SMOKE_ARTIFACT.md` |
 | Theoretical sampling projects-dir parity | `export-theoretical-sampling-candidates` now accepts explicit repo-local project stores through script, Make, and `qc_cli.py`, enabling portable INV-4 package workflows without claiming theoretical sampling execution, sampling adequacy, saturation, GT-fidelity, methodological validity, or SOTA evidence | `completed/THEORETICAL_SAMPLING_PROJECTS_DIR_PARITY.md` |
 | INV-7 committed package comparison artifact | A committed comparison artifact under `docs/benchmarks/inv7_package_comparison_2026_06_23/` compares the current built-in v2 canary, external held-out smoke artifact, and held-out live v1 artifact through `qc_cli.py compare-inv7-packages`, with README caveats that it is output/provenance context only | `completed/INV7_COMMITTED_PACKAGE_COMPARISON_ARTIFACT.md` |

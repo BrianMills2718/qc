@@ -1,6 +1,6 @@
 # Plan #223: INV-4 Theory Ledger Refresh
 
-**Status:** Active
+**Status:** Completed
 **Type:** documentation
 **Priority:** High
 **Blocked By:** None
@@ -88,8 +88,8 @@ No new capability is added.
 
 | Test Pattern | Why |
 |--------------|-----|
-| `grep -RIn "theoretical_sampling_smoke_2026_06_23" docs/PROJECT_THEORY_AND_GOALS.md CLAUDE.md AGENTS.md` | Confirms the canonical ledgers mention the committed artifact. |
-| `grep -RIn "not theoretical sampling execution\\|not sampling adequacy\\|not category-saturation\\|not GT-fidelity\\|not methodological-validity\\|not SOTA" docs/PROJECT_THEORY_AND_GOALS.md CLAUDE.md AGENTS.md` | Confirms caveats are present. |
+| `grep -RIn "theoretical_sampling_smoke_2026_06_23" docs/PROJECT_THEORY_AND_GOALS.md CLAUDE.md` | Confirms the canonical source ledgers mention the committed artifact. |
+| `grep -RIn "not theoretical sampling execution\\|not sampling adequacy\\|not category-saturation\\|not GT-fidelity\\|not methodological-validity\\|not SOTA" docs/PROJECT_THEORY_AND_GOALS.md CLAUDE.md` | Confirms caveats are present in canonical source ledgers. |
 | `make docs-check` | Plan/docs governance and AGENTS sync. |
 | `git diff --check` | Whitespace gate. |
 | `make check` | Full deterministic gate before closeout. |
@@ -98,29 +98,53 @@ No new capability is added.
 
 ## Acceptance Criteria
 
-- [ ] `docs/PROJECT_THEORY_AND_GOALS.md` records the committed
+- [x] `docs/PROJECT_THEORY_AND_GOALS.md` records the committed
   `docs/benchmarks/theoretical_sampling_smoke_2026_06_23/` artifact.
-- [ ] `CLAUDE.md` records the artifact in the recent structural-work summary.
-- [ ] `AGENTS.md` is regenerated and in sync.
-- [ ] The docs preserve the artifact caveat: workflow/provenance smoke only,
+- [x] `CLAUDE.md` records the artifact in the recent structural-work summary.
+- [x] `AGENTS.md` is regenerated and in sync.
+- [x] The docs preserve the artifact caveat: workflow/provenance smoke only,
   not theoretical sampling execution, sampling adequacy, category saturation,
   GT-fidelity, methodological-validity, or SOTA evidence.
-- [ ] Targeted grep checks pass.
-- [ ] `make docs-check` passes.
-- [ ] `git diff --check` passes.
-- [ ] `make check` passes.
-- [ ] Verified increment is committed and pushed.
+- [x] Targeted grep checks pass.
+- [x] `make docs-check` passes.
+- [x] `git diff --check` passes.
+- [x] `make check` passes.
+- [x] Verified increment is committed and pushed.
 
 ---
 
 ## Outcome
 
-Pending.
+Completed in commit `ad230c90`.
+
+Updated:
+
+- `docs/PROJECT_THEORY_AND_GOALS.md` version 3.4, Since-v3.0 note, INV-4
+  invariant status, and roadmap item 7.
+- `CLAUDE.md` high-signal summary and direction paragraph.
+- `AGENTS.md` was regenerated; the generator's compressed projection did not
+  include the detailed direction paragraph, and `make docs-check` verified it
+  remains in sync.
+
+Verification:
+
+- `grep -RIn "theoretical_sampling_smoke_2026_06_23" docs/PROJECT_THEORY_AND_GOALS.md CLAUDE.md`
+  - passed
+- `grep -RInE "not theoretical sampling execution|not sampling adequacy|not category-saturation|not GT-fidelity|not methodological-validity|not SOTA" docs/PROJECT_THEORY_AND_GOALS.md CLAUDE.md`
+  - passed
+- `make docs-check`
+  - passed; `AGENTS.md` in sync
+- `git diff --check`
+  - passed
+- `make check`
+  - 1308 passed, 1 skipped, 8 deselected; Ruff passed; docs-check passed;
+    type check is not yet configured
 
 ---
 
 ## Open Questions
 
-- [ ] Should this mark INV-4 complete?
-  Default: no. The committed artifact proves package workflow/provenance only;
-  true theoretical sampling and saturation remain unmet.
+- [x] Should this mark INV-4 complete?
+  Status: RESOLVED. No. The committed artifact proves package
+  workflow/provenance only; true theoretical sampling and saturation remain
+  unmet.

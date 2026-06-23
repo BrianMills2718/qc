@@ -28,13 +28,15 @@ highest-value documented lane.
    without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Plan #223 `INV4_THEORY_LEDGER_REFRESH.md` will refresh
-`docs/PROJECT_THEORY_AND_GOALS.md`, `CLAUDE.md`, and generated `AGENTS.md` so
-the canonical ledgers record the committed synthetic INV-4 smoke artifact while
-preserving caveats that it is workflow/provenance smoke evidence only, not
-theoretical sampling execution, sampling adequacy evidence, saturation
-evidence, GT-fidelity evidence, methodological-validity evidence, or SOTA
-evidence.
+**Active checkpoint:** None. Select the next highest-value documented lane from
+the roadmap and create its plan before implementation.
+
+**Completed checkpoint:** Plan #223 `completed/INV4_THEORY_LEDGER_REFRESH.md`
+refreshed `docs/PROJECT_THEORY_AND_GOALS.md` and `CLAUDE.md` so the canonical
+ledgers record the committed synthetic INV-4 smoke artifact while preserving
+caveats that it is workflow/provenance smoke evidence only, not theoretical
+sampling execution, sampling adequacy evidence, saturation evidence,
+GT-fidelity evidence, methodological-validity evidence, or SOTA evidence.
 
 **Completed checkpoint:** Plan #222
 `completed/THEORETICAL_SAMPLING_SMOKE_ARTIFACT.md` committed a synthetic
