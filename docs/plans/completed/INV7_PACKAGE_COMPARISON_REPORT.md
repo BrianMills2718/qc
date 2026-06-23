@@ -1,6 +1,6 @@
 # Plan #218: INV-7 Package Comparison Report
 
-**Status:** Planned
+**Status:** Completed
 **Type:** implementation
 **Priority:** High
 **Blocked By:** None
@@ -126,24 +126,61 @@ not create a cross-project callable boundary or shared tool-registry capability.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] A core comparison function loads and validates at least two INV-7 packages.
-- [ ] The report includes per-package total/passed/failed/pass-rate/attack-rate,
+- [x] A core comparison function loads and validates at least two INV-7 packages.
+- [x] The report includes per-package total/passed/failed/pass-rate/attack-rate,
   failed fixture IDs, mode, split, fixture-set metadata, model, and trace ID.
-- [ ] The report includes pairwise fixture overlap, only-in-left, only-in-right,
+- [x] The report includes pairwise fixture overlap, only-in-left, only-in-right,
   and changed attack outcome fixture IDs.
-- [ ] The report includes by-surface and by-attack-type summaries per package.
-- [ ] Script, Make, and `qc_cli.py` surfaces are agent-drivable and fail loudly
+- [x] The report includes by-surface and by-attack-type summaries per package.
+- [x] Script, Make, and `qc_cli.py` surfaces are agent-drivable and fail loudly
   on fewer than two packages.
-- [ ] Report caveats explicitly say the comparison is not prompt-injection
+- [x] Report caveats explicitly say the comparison is not prompt-injection
   robustness proof, model-obedience proof, methodological-validity evidence, or
   SOTA evidence.
 
 > Process criteria:
-- [ ] Required focused tests pass.
-- [ ] `make docs-check` passes.
-- [ ] `git diff --check` passes.
-- [ ] `make check` passes.
-- [ ] Plan, implementation, and closeout are committed and pushed.
+- [x] Required focused tests pass.
+- [x] `make docs-check` passes.
+- [x] `git diff --check` passes.
+- [x] `make check` passes.
+- [x] Plan, implementation, and closeout are committed and pushed.
+
+---
+
+## Outcome
+
+Completed in implementation commit `f908848d`. The repo now has:
+
+- `qc_clean/core/inv7_package_comparison.py` for typed deterministic comparison
+  reports over validated schema_version=1 INV-7 prompt-injection packages.
+- `scripts/compare_inv7_packages.py` for command-line JSON report generation.
+- `make compare-inv7-packages PACKAGES="a.json b.json" [OUTPUT=report.json]`.
+- `qc_cli.py compare-inv7-packages a.json b.json [--output report.json]`.
+- Focused regression coverage in `tests/test_inv7_package_comparison.py`.
+
+The report compares observed package outcomes only. It does not run live models,
+rank providers beyond observed fixture outcomes, or license prompt-injection
+robustness, model-obedience, methodological-validity, or SOTA claims.
+
+---
+
+## Verification
+
+- `python -m pytest tests/test_inv7_package_comparison.py tests/test_inv7_prompt_injection_package.py tests/test_inv7_live_preflight.py tests/test_qc_cli_inv7_fixtures.py -q`
+  - 23 passed.
+- `python -m ruff check qc_clean/core/inv7_package_comparison.py scripts/compare_inv7_packages.py qc_cli.py tests/test_inv7_package_comparison.py`
+  - All checks passed.
+- `python qc_cli.py compare-inv7-packages docs/benchmarks/inv7_external_heldout_smoke_2026_06_23/result.json docs/benchmarks/inv7_heldout_live_v1_2026_06_23/result.json --output /tmp/inv7_compare_smoke.json`
+  - Wrote a valid comparison report for two committed INV-7 artifacts, with
+    `status="compared"`, `package_count=2`, and no shared fixture IDs between
+    the smoke and v1 held-out packages.
+- `make docs-check`
+  - Markdown links, doc coupling, plan sync, and AGENTS sync passed.
+- `git diff --check`
+  - Passed.
+- `make check`
+  - 1306 passed, 1 skipped, 8 deselected; Ruff passed; docs-check passed; type
+    check not yet configured.
 
 ---
 

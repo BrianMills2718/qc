@@ -28,14 +28,19 @@ highest-value documented lane.
    without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Plan #218
-`INV7_PACKAGE_COMPARISON_REPORT.md` is the current roadmap slice. It will add a
-deterministic comparison surface for two or more schema_version=1 INV-7
-prompt-injection result packages, including per-package metrics,
-pairwise fixture-overlap/missing diagnostics, by-surface/by-attack summaries,
-and script/Make/`qc_cli.py` entry points. This is comparison/provenance
-infrastructure only, not a new live run, prompt-injection robustness proof,
-model-obedience proof, methodological-validity evidence, or SOTA evidence.
+**Active checkpoint:** None. Select the next highest-value documented lane from
+the roadmap and create its plan before implementation.
+
+**Completed checkpoint:** Plan #218
+`completed/INV7_PACKAGE_COMPARISON_REPORT.md` added deterministic comparison
+reports for two or more schema_version=1 INV-7 prompt-injection result packages
+through core code, script, Make, and `qc_cli.py`. Reports include per-package
+metrics, grouped surface/attack summaries, pairwise fixture overlap/missing IDs,
+changed attack outcomes, and explicit caveats. This is package
+comparison/provenance infrastructure only, not a new live run,
+prompt-injection robustness proof, model-obedience proof,
+methodological-validity evidence, model/provider superiority evidence, or SOTA
+evidence.
 
 **Completed checkpoint:** Plan #217
 `completed/D7_LIVE_BASELINE_SMOKE_ARTIFACT.md` committed a synthetic D7
