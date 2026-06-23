@@ -28,14 +28,13 @@ highest-value documented lane.
    without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** No implementation plan is active. Plan #209
-`completed/INV7_HELD_OUT_FIXTURE_MANIFEST_RUNNER.md` is complete. The INV-7
-live fixture runner can now execute external schema_version=1 fixture manifests
-through script, Make, and `qc_cli.py` surfaces, while enforcing held-out
-prompt-frozen/contamination/pre-run-registration invariants. This is benchmark
-workflow infrastructure only; it does not create held-out results,
-prompt-injection robustness evidence, model-obedience proof,
-methodological-validity evidence, or SOTA evidence.
+**Active checkpoint:** Plan #210
+`INV7_EXTERNAL_HELDOUT_SMOKE_ARTIFACT.md` is active. The next slice uses the
+external manifest runner from Plan #209 to generate a small protocol-registered
+external held-out INV-7 smoke artifact. This may spend live-model budget up to
+`max_budget=0.75` and remains a smoke artifact only, not prompt-injection
+robustness evidence, model-obedience proof, methodological-validity evidence,
+or SOTA evidence.
 
 **Completed checkpoint:** Plan #209
 `completed/INV7_HELD_OUT_FIXTURE_MANIFEST_RUNNER.md` added external INV-7 live

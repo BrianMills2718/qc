@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 210 | INV-7 External Held-Out Smoke Artifact | High | Planned | `INV7_EXTERNAL_HELDOUT_SMOKE_ARTIFACT.md` |
 
 ## Completed Plans
 
