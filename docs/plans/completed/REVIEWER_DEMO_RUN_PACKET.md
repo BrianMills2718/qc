@@ -1,12 +1,30 @@
 # Plan #206: Reviewer Demo Run Packet
 
-**Status:** Active
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** None
 **Blocks:** Brian review handoff, portfolio reviewer walkthrough
 
 ---
+
+## Outcome
+
+Completed 2026-06-23. The repo now has a deterministic, synthetic reviewer
+demo packet generator at `scripts/build_reviewer_demo.py` and a canonical
+`make reviewer-demo` target. The generated packet writes fixture transcripts,
+an isolated project store, Markdown/JSON exports, API/review/graph snapshots,
+a Phase 0 structural scorecard, a versioned Phase 0 artifact package,
+README/walkthrough instructions, and a self-review caveat file.
+
+`ProjectStore()` now honors `QC_PROJECTS_DIR` when no explicit constructor
+path is supplied, so CLI/API/browser surfaces can inspect an isolated packet
+without mutating the default user-level project store. Explicit `projects_dir`
+still takes precedence.
+
+This is a software-surface demonstration and review handoff packet only. It is
+not a live LLM pipeline result, expert adjudication, held-out D3/D7 evidence,
+methodological-validity evidence, or SOTA evidence.
 
 ## Gap
 
@@ -147,7 +165,7 @@ Process criteria:
 - [x] `make docs-check` passes.
 - [x] `git diff --check` passes.
 - [x] `make check` passes or any failure is documented with evidence.
-- [ ] Verified work is committed and pushed.
+- [x] Verified work is committed and pushed.
 
 ## Implementation Notes
 

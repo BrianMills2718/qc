@@ -22,17 +22,29 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #206 `REVIEWER_DEMO_RUN_PACKET.md`: build an isolated
-   deterministic review packet, run it locally, inspect the generated outputs,
-   and only then declare it ready for Brian review.
-2. Continue through the ranked roadmap without pausing after each verified
+1. Brian review gate: Plan #206 produced a self-run reviewer demo packet. The
+   packet is ready for Brian to inspect before the next implementation lane.
+2. After review or explicit continuation, continue through the ranked roadmap
+   without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Plan #206 `REVIEWER_DEMO_RUN_PACKET.md` is active. This
-is the review-readiness lane: create a sanitized, reproducible packet that
-shows the CLI/API/export/scorecard surfaces on a local fixture. It is not live
+**Active checkpoint:** No implementation plan is active. Plan #206
+`completed/REVIEWER_DEMO_RUN_PACKET.md` is complete and ready for Brian review.
+The generated packet is a sanitized, reproducible demonstration of
+CLI/API/browser/export/scorecard surfaces on a local fixture. It is not live
 LLM validity evidence, expert adjudication, held-out D3/D7 evidence,
 methodological-validity evidence, or SOTA evidence.
+
+**Completed checkpoint:** Plan #206
+`completed/REVIEWER_DEMO_RUN_PACKET.md` added `make reviewer-demo` and
+`scripts/build_reviewer_demo.py` to build an isolated synthetic review packet
+with fixture transcripts, project JSON, Markdown/JSON exports, claim/review/
+graph API snapshots, Phase 0 scorecard artifacts, README instructions, and
+self-review caveats. `ProjectStore()` now honors `QC_PROJECTS_DIR` for isolated
+CLI/API/browser review stores when no explicit store path is supplied. This is
+software-surface demonstration only, not live LLM evidence, expert
+adjudication, held-out benchmark evidence, methodological-validity evidence, or
+SOTA evidence.
 
 **Completed checkpoint:** Plan #205
 `completed/REVIEW_SURFACE_OFFSET_PAGINATION.md` added offset traversal to

@@ -6,12 +6,12 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 206 | Reviewer demo run packet | High | Active | `REVIEWER_DEMO_RUN_PACKET.md` |
 
 ## Completed Plans
 
 | Name | Outcome | Record |
 |------|---------|--------|
+| Reviewer demo run packet | `make reviewer-demo` now builds an isolated synthetic review packet with fixture transcripts, project state, exports, API/review/graph snapshots, Phase 0 scorecard artifacts, and explicit caveats; `QC_PROJECTS_DIR` lets CLI/API/browser surfaces inspect the packet without mutating the default store | `completed/REVIEWER_DEMO_RUN_PACKET.md` |
 | Review surface offset pagination | API/MCP review list surfaces for claims, negative cases, and relationships now support bounded `limit`/`offset` traversal and report applied offset metadata without changing row payload fields | `completed/REVIEW_SURFACE_OFFSET_PAGINATION.md` |
 | Claim ledger CLI/MCP offset pagination | MCP `qc_get_claims` and CLI `project claims --offset` now support bounded offset traversal with visible pagination metadata while preserving existing scope and anchor-detail fields/output | `completed/CLAIM_LEDGER_CLI_MCP_OFFSET_PAGINATION.md` |
 | Claim ledger API offset pagination | API `/projects/{project_id}/claims` now supports bounded `limit` plus non-negative `offset` traversal and reports applied pagination/count metadata without changing claim row fields | `completed/CLAIM_LEDGER_API_OFFSET_PAGINATION.md` |
