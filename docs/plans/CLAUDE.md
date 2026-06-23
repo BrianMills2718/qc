@@ -6,7 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| _None_ | _No active plan at this checkpoint_ | _-_ | _-_ | _-_ |
+| 213 | D7 Portable Retrieval Smoke Artifact | High | Planned | `D7_PORTABLE_RETRIEVAL_SMOKE_ARTIFACT.md` |
 
 ## Completed Plans
 
