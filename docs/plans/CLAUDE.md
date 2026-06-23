@@ -6,7 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| _None_ | _No active plan at this checkpoint_ | _-_ | _-_ | _-_ |
+| 214 | D7 Live Baseline Projects Dir Parity | High | Planned | `D7_LIVE_BASELINE_PROJECTS_DIR_PARITY.md` |
 
 ## Completed Plans
 
