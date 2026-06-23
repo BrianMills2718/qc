@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "package_type": "inv7_live_preflight",
+  "status": "pass",
+  "protocol_id": "inv7-heldout-live-v1-2026-06-23",
+  "package_id": "inv7-heldout-live-v1-2026-06-23",
+  "split": "held_out",
+  "fixture_set_id": "external_inv7_heldout_live_v1",
+  "fixture_set_version": "2026-06-23",
+  "model": "gpt-5-mini",
+  "trace_id": "qualitative_coding/inv7-heldout-live-v1-2026-06-23",
+  "fixture_count": 10,
+  "errors": [],
+  "caution": "INV-7 live preflight is process metadata only; it is not a live benchmark result, not prompt-injection robustness evidence, not model-obedience evidence, and not validity evidence."
+}
