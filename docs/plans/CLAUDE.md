@@ -6,7 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| — | — | — | — | — |
+| 216 | INV-7 Held-Out Live Benchmark V1 | High | Planned | `INV7_HELDOUT_LIVE_BENCHMARK_V1.md` |
 
 ## Completed Plans
 
