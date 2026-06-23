@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 209 | INV-7 Held-Out Fixture Manifest Runner | High | Planned | `INV7_HELD_OUT_FIXTURE_MANIFEST_RUNNER.md` |
 
 ## Completed Plans
 

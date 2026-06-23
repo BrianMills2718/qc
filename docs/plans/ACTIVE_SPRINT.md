@@ -28,13 +28,13 @@ highest-value documented lane.
    without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** No implementation plan is active. Plan #208
-`completed/GRAPH_REVIEW_UI_CLARITY_FIXES.md` is complete. The live review UI
-now labels bulk approval as `Approve All Codes`, and the graph UI renders the
-demo Code Relationships and Entity Map edges while explaining flat hierarchy
-edge counts. This is UI clarification/rendering repair only, not a change to
-API payloads, project state, review decision semantics, graph endpoint
-contracts, claim meanings, methodological-validity claims, or SOTA claims.
+**Active checkpoint:** Plan #209
+`INV7_HELD_OUT_FIXTURE_MANIFEST_RUNNER.md` is active. The next slice extends
+the existing INV-7 live fixture runner so agents can run an external
+schema_version=1 fixture manifest through script, Make, and `qc_cli.py`
+surfaces. This is benchmark workflow infrastructure only; it does not create
+held-out results, prompt-injection robustness evidence, model-obedience proof,
+methodological-validity evidence, or SOTA evidence.
 
 **Completed checkpoint:** Plan #208
 `completed/GRAPH_REVIEW_UI_CLARITY_FIXES.md` clarified code-only bulk approval
