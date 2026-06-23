@@ -28,15 +28,19 @@ highest-value documented lane.
    without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Plan #220
-`INV7_COMMITTED_PACKAGE_COMPARISON_ARTIFACT.md` is the current roadmap slice. It
-will commit a durable comparison artifact under `docs/benchmarks/` using the
-new INV-7 package comparison surface over the current built-in v2 canary,
-external held-out smoke artifact, and held-out live v1 artifact. This is a
-review/output artifact over already committed packages, not a new live run,
-prompt-injection robustness proof, model-obedience proof,
-methodological-validity evidence, model/provider superiority evidence, or SOTA
-evidence.
+**Active checkpoint:** None. Select the next highest-value documented lane from
+the roadmap and create its plan before implementation.
+
+**Completed checkpoint:** Plan #220
+`completed/INV7_COMMITTED_PACKAGE_COMPARISON_ARTIFACT.md` committed
+`docs/benchmarks/inv7_package_comparison_2026_06_23/`, a durable INV-7 package
+comparison artifact generated with `qc_cli.py compare-inv7-packages` over the
+current built-in v2 canary, external held-out smoke artifact, and held-out live
+v1 artifact. It includes `comparison.json` plus a README with input rationale,
+result summary, and caveats. This is an output/provenance artifact over already
+committed packages, not a new live run, prompt-injection robustness proof,
+model-obedience proof, methodological-validity evidence, model/provider
+superiority evidence, or SOTA evidence.
 
 **Completed checkpoint:** Plan #219
 `completed/INV7_THEORY_LEDGER_REFRESH.md` refreshed the canonical strategic
