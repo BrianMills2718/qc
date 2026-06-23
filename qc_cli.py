@@ -852,6 +852,7 @@ Examples:
         description='Export disconfirmation retrieval candidates as D7 baseline predictions',
     )
     d7_retrieval_parser.add_argument('project_id', help='Project ID to export')
+    d7_retrieval_parser.add_argument('--projects-dir', help='Optional project store directory')
     d7_retrieval_parser.add_argument('--output', help='Optional JSON output path')
     d7_retrieval_parser.add_argument('--name', help='Optional baseline name')
     d7_retrieval_parser.add_argument('--description', help='Optional baseline description')
@@ -1976,6 +1977,7 @@ def handle_run_d7_retrieval_command(args) -> int:
 
     argv = [args.project_id]
     for attr, flag in [
+        ("projects_dir", "--projects-dir"),
         ("output", "--output"),
         ("name", "--name"),
         ("description", "--description"),

@@ -328,14 +328,14 @@ endif
 
 MODE ?= lexical_bm25
 
-run-d7-retrieval:  ## Export D7 retrieval baseline predictions (ID=<project_id> OUTPUT=predictions.json [MODE=lexical_bm25] [MODEL=embedding-model] [CANDIDATES=5])
+run-d7-retrieval:  ## Export D7 retrieval baseline predictions (ID=<project_id> OUTPUT=predictions.json [PROJECTS_DIR=path] [MODE=lexical_bm25] [MODEL=embedding-model] [CANDIDATES=5])
 ifndef ID
 	$(error ID is required. Usage: make run-d7-retrieval ID=<project_id> OUTPUT=predictions.json)
 endif
 ifndef OUTPUT
 	$(error OUTPUT is required. Usage: make run-d7-retrieval ID=<project_id> OUTPUT=predictions.json)
 endif
-	python scripts/run_d7_retrieval.py $(ID) --output $(OUTPUT) --retrieval-mode $(MODE) $(if $(MODEL),--embedding-model $(MODEL),) $(if $(CANDIDATES),--candidates-per-claim $(CANDIDATES),)
+	python scripts/run_d7_retrieval.py $(ID) $(if $(PROJECTS_DIR),--projects-dir $(PROJECTS_DIR),) --output $(OUTPUT) --retrieval-mode $(MODE) $(if $(MODEL),--embedding-model $(MODEL),) $(if $(CANDIDATES),--candidates-per-claim $(CANDIDATES),)
 
 run-d7-live-baseline:  ## Export opt-in live D7 baseline predictions (ID=<project_id> OUTPUT=live_baseline.json [MODEL=gpt-5-mini] [MODE=lexical_bm25] [CANDIDATES=5])
 ifndef ID

@@ -23,6 +23,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         description="Export disconfirmation retrieval candidates as D7 baseline predictions"
     )
     parser.add_argument("project_id", help="Project ID to export retrieval predictions for")
+    parser.add_argument("--projects-dir", type=Path, help="Optional project store directory")
     parser.add_argument("--output", type=Path, help="Optional JSON output path")
     parser.add_argument("--name", help="Optional baseline name")
     parser.add_argument("--description", default="", help="Optional baseline description")
@@ -46,7 +47,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
 
-    store = ProjectStore()
+    store = ProjectStore(projects_dir=args.projects_dir) if args.projects_dir else ProjectStore()
     try:
         state = store.load(args.project_id)
         package = export_d7_retrieval_baseline(

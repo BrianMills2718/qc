@@ -49,6 +49,32 @@ def test_run_d7_retrieval_writes_output_and_stdout(tmp_path, monkeypatch, capsys
     assert "disconfirmation_baselines" not in reloaded.config.extra
 
 
+def test_run_d7_retrieval_accepts_projects_dir(tmp_path, capsys):
+    state = _state_with_claim("AI failed badly after rollout.", "AI improves workflow.")
+    projects_dir = tmp_path / "portable_projects"
+    store = ProjectStore(projects_dir=projects_dir)
+    store.save(state)
+    output_file = tmp_path / "retrieval_predictions.json"
+
+    exit_code = run_d7_retrieval.main([
+        state.id,
+        "--projects-dir",
+        str(projects_dir),
+        "--output",
+        str(output_file),
+        "--max-targets",
+        "1",
+        "--candidates-per-claim",
+        "1",
+    ])
+
+    assert exit_code == 0
+    stdout_payload = json.loads(capsys.readouterr().out)
+    file_payload = json.loads(output_file.read_text(encoding="utf-8"))
+    assert stdout_payload == file_payload
+    assert stdout_payload["retrieval_run"]["project_id"] == state.id
+
+
 def test_run_d7_retrieval_missing_project_returns_json_error(tmp_path, monkeypatch, capsys):
     store = ProjectStore(projects_dir=tmp_path / "projects")
     monkeypatch.setattr(run_d7_retrieval, "ProjectStore", lambda: store)

@@ -104,6 +104,38 @@ def test_qc_cli_run_d7_retrieval_forwards_flags(monkeypatch):
     ]
 
 
+def test_qc_cli_run_d7_retrieval_forwards_projects_dir(monkeypatch):
+    captured = {}
+
+    def fake_main(argv):
+        captured["argv"] = argv
+        return 0
+
+    monkeypatch.setattr(run_d7_retrieval, "main", fake_main)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "qc_cli.py",
+            "run-d7-retrieval",
+            "project-123",
+            "--projects-dir",
+            "portable_projects",
+            "--output",
+            "predictions.json",
+        ],
+    )
+
+    assert qc_cli.main() == 0
+    assert captured["argv"] == [
+        "project-123",
+        "--projects-dir",
+        "portable_projects",
+        "--output",
+        "predictions.json",
+    ]
+
+
 def test_qc_cli_compare_d7_retrieval_forwards_flags(monkeypatch):
     captured = {}
 
