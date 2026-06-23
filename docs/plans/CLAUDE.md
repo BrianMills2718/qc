@@ -6,7 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| _None_ | _No active plan at this checkpoint_ | _-_ | _-_ | _-_ |
+| 212 | D7 Comparison Projects Dir Parity | High | Planned | `D7_COMPARISON_PROJECTS_DIR_PARITY.md` |
 
 ## Completed Plans
 
