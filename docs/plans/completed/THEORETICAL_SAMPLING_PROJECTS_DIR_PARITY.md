@@ -1,6 +1,6 @@
 # Plan #221: Theoretical Sampling Projects Dir Parity
 
-**Status:** Active
+**Status:** Completed
 **Type:** implementation
 **Priority:** High
 **Blocked By:** None
@@ -145,41 +145,70 @@ project-local script and CLI surface.
 
 Feature-level criteria:
 
-- [ ] `scripts/export_theoretical_sampling_candidates.py --projects-dir path`
+- [x] `scripts/export_theoretical_sampling_candidates.py --projects-dir path`
   loads from that store.
-- [ ] `make export-theoretical-sampling-candidates PROJECTS_DIR=path ...`
+- [x] `make export-theoretical-sampling-candidates PROJECTS_DIR=path ...`
   forwards the path.
-- [ ] `qc_cli.py export-theoretical-sampling-candidates --projects-dir path ...`
+- [x] `qc_cli.py export-theoretical-sampling-candidates --projects-dir path ...`
   forwards the path.
-- [ ] Default behavior without `--projects-dir` remains unchanged.
-- [ ] Docs preserve claim discipline: this is portability/provenance support,
+- [x] Default behavior without `--projects-dir` remains unchanged.
+- [x] Docs preserve claim discipline: this is portability/provenance support,
   not theoretical sampling execution, sampling adequacy evidence, saturation
   evidence, GT-fidelity evidence, methodological-validity evidence, or SOTA
   evidence.
 
 Process criteria:
 
-- [ ] Focused tests pass.
-- [ ] Touched Python Ruff gate passes.
-- [ ] `make docs-check` passes.
-- [ ] `git diff --check` passes.
-- [ ] `make check` passes.
-- [ ] Verified increment is committed and pushed.
+- [x] Focused tests pass.
+- [x] Touched Python Ruff gate passes.
+- [x] `make docs-check` passes.
+- [x] `git diff --check` passes.
+- [x] `make check` passes.
+- [x] Verified increment is committed and pushed.
 
 ---
 
 ## Outcome
 
-Pending.
+Completed in commit `51f3aecf`.
+
+Implemented optional explicit project-store loading for theoretical-sampling
+candidate export:
+
+- `scripts/export_theoretical_sampling_candidates.py` accepts `--projects-dir
+  path` and constructs `ProjectStore(projects_dir=...)` only when supplied.
+- `make export-theoretical-sampling-candidates PROJECTS_DIR=path ...` forwards
+  the option.
+- `qc_cli.py export-theoretical-sampling-candidates --projects-dir path ...`
+  forwards the option to the canonical script.
+- Tests cover direct script loading from a repo-local project store and
+  top-level CLI forwarding.
+- `CLAUDE.md`, generated `AGENTS.md`, and `docs/EVALUATION_HARNESS.md` document
+  the portability surface while preserving the non-evidentiary claim caveat.
+
+Verification:
+
+- `python -m pytest tests/test_export_theoretical_sampling_candidates_script.py tests/test_qc_cli_theoretical_sampling_surfaces.py -q`
+  - 8 passed
+- `python -m ruff check scripts/export_theoretical_sampling_candidates.py qc_cli.py tests/test_export_theoretical_sampling_candidates_script.py tests/test_qc_cli_theoretical_sampling_surfaces.py`
+  - passed
+- `make -n export-theoretical-sampling-candidates ID=project-alpha PROJECTS_DIR=projects PROTOCOL=protocol.json OUTPUT=candidates.json MAX=1`
+  - dry-run included `--projects-dir projects`
+- `make docs-check`
+  - passed
+- `git diff --check`
+  - passed
+- `make check`
+  - 1308 passed, 1 skipped, 8 deselected; Ruff passed; docs-check passed;
+    type check is not yet configured
 
 ---
 
 ## Open Questions
 
-- [ ] Should this plan also create the committed INV-4 smoke artifact?
-  Default: no. Keep this slice to explicit project-store parity, then use a
-  separate artifact plan so the artifact has its own acceptance criteria and
-  verification.
+- [x] Should this plan also create the committed INV-4 smoke artifact?
+  Status: RESOLVED. No. This slice only makes candidate export portable across
+  project stores. A later plan can use it to create/replay an INV-4 artifact.
 
 ---
 

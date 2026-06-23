@@ -6,12 +6,13 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 221 | Theoretical sampling projects-dir parity | High | Active | `THEORETICAL_SAMPLING_PROJECTS_DIR_PARITY.md` |
+| — | — | — | — | — |
 
 ## Completed Plans
 
 | Name | Outcome | Record |
 |------|---------|--------|
+| Theoretical sampling projects-dir parity | `export-theoretical-sampling-candidates` now accepts explicit repo-local project stores through script, Make, and `qc_cli.py`, enabling portable INV-4 package workflows without claiming theoretical sampling execution, sampling adequacy, saturation, GT-fidelity, methodological validity, or SOTA evidence | `completed/THEORETICAL_SAMPLING_PROJECTS_DIR_PARITY.md` |
 | INV-7 committed package comparison artifact | A committed comparison artifact under `docs/benchmarks/inv7_package_comparison_2026_06_23/` compares the current built-in v2 canary, external held-out smoke artifact, and held-out live v1 artifact through `qc_cli.py compare-inv7-packages`, with README caveats that it is output/provenance context only | `completed/INV7_COMMITTED_PACKAGE_COMPARISON_ARTIFACT.md` |
 | INV-7 theory ledger refresh | `docs/PROJECT_THEORY_AND_GOALS.md` now reflects the committed 10-fixture held-out live v1 artifact and INV-7 package-comparison surface while preserving caveats that these are bounded measurement/provenance outputs, not robustness, model-obedience, methodological-validity, superiority, or SOTA evidence | `completed/INV7_THEORY_LEDGER_REFRESH.md` |
 | INV-7 package comparison report | INV-7 result packages can now be compared through core code, script, Make, and `qc_cli.py`, reporting per-package metrics, grouped summaries, pairwise fixture overlap/missing IDs, and changed attack outcomes without claiming prompt-injection robustness or model/provider superiority | `completed/INV7_PACKAGE_COMPARISON_REPORT.md` |
