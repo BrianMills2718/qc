@@ -6,7 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| — | — | — | — | — |
+| 224 | Sampling-frame adequacy protocol preflight | High | Active | `SAMPLING_FRAME_ADEQUACY_PROTOCOL_PREFLIGHT.md` |
 
 ## Completed Plans
 

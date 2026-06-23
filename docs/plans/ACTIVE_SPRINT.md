@@ -28,8 +28,13 @@ highest-value documented lane.
    without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** None. Select the next highest-value documented lane from
-the roadmap and create its plan before implementation.
+**Active checkpoint:** Plan #224
+`SAMPLING_FRAME_ADEQUACY_PROTOCOL_PREFLIGHT.md` will add governed
+sampling-frame adequacy protocol/result preflight surfaces through core
+contracts, scripts, Make, and `qc_cli.py`. This is protocol/preflight
+infrastructure only, not populated reviewer evidence, sampling-frame adequacy
+evidence, population-generalization permission, methodological-validity
+evidence, or SOTA evidence.
 
 **Completed checkpoint:** Plan #223 `completed/INV4_THEORY_LEDGER_REFRESH.md`
 refreshed `docs/PROJECT_THEORY_AND_GOALS.md` and `CLAUDE.md` so the canonical
