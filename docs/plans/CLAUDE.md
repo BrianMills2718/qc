@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 207 | Review UI orientation aids | High | Active | `REVIEW_UI_ORIENTATION_AIDS.md` |
 
 ## Completed Plans
 

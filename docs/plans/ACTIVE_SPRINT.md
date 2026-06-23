@@ -22,18 +22,20 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Brian review gate: Plan #206 produced a self-run reviewer demo packet. The
-   packet is ready for Brian to inspect before the next implementation lane.
-2. After review or explicit continuation, continue through the ranked roadmap
+1. Execute Plan #207 `REVIEW_UI_ORIENTATION_AIDS.md`: add concise reviewer
+   instructions, per-tab guidance, and tooltips/labels to the live review UI
+   because the current page does not make clear what Brian is looking at.
+2. After verification, restart the demo server so Brian can review the improved
+   HTML surface.
+3. After review or explicit continuation, continue through the ranked roadmap
    without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** No implementation plan is active. Plan #206
-`completed/REVIEWER_DEMO_RUN_PACKET.md` is complete and ready for Brian review.
-The generated packet is a sanitized, reproducible demonstration of
-CLI/API/browser/export/scorecard surfaces on a local fixture. It is not live
-LLM validity evidence, expert adjudication, held-out D3/D7 evidence,
-methodological-validity evidence, or SOTA evidence.
+**Active checkpoint:** Plan #207 `REVIEW_UI_ORIENTATION_AIDS.md` is active.
+This is a UI usability slice over the existing review page only: add
+orientation text, tooltips, and labels without changing API payloads, review
+decision semantics, claim meaning, pipeline execution, methodological-validity
+claims, or SOTA claims.
 
 **Completed checkpoint:** Plan #206
 `completed/REVIEWER_DEMO_RUN_PACKET.md` added `make reviewer-demo` and
