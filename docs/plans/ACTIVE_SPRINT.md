@@ -28,8 +28,11 @@ highest-value documented lane.
    without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Plan #224
-`SAMPLING_FRAME_ADEQUACY_PROTOCOL_PREFLIGHT.md` will add governed
+**Active checkpoint:** None. Select the next highest-value documented lane from
+the roadmap and create its plan before implementation.
+
+**Completed checkpoint:** Plan #224
+`completed/SAMPLING_FRAME_ADEQUACY_PROTOCOL_PREFLIGHT.md` added governed
 sampling-frame adequacy protocol/result preflight surfaces through core
 contracts, scripts, Make, and `qc_cli.py`. This is protocol/preflight
 infrastructure only, not populated reviewer evidence, sampling-frame adequacy

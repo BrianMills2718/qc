@@ -1,6 +1,6 @@
 # Plan #224: Sampling-Frame Adequacy Protocol Preflight
 
-**Status:** Active
+**Status:** Completed
 **Type:** implementation
 **Priority:** High
 **Blocked By:** None
@@ -154,42 +154,80 @@ surface.
 
 Feature-level criteria:
 
-- [ ] `make validate-sampling-frame-adequacy-protocol PROTOCOL=protocol.json`
+- [x] `make validate-sampling-frame-adequacy-protocol PROTOCOL=protocol.json`
   validates schema_version=1 protocol metadata.
-- [ ] `python qc_cli.py validate-sampling-frame-adequacy-protocol protocol.json`
+- [x] `python qc_cli.py validate-sampling-frame-adequacy-protocol protocol.json`
   delegates to the same validator.
-- [ ] `make sampling-frame-adequacy-preflight PROTOCOL=protocol.json ADEQUACY=adequacy.json`
+- [x] `make sampling-frame-adequacy-preflight PROTOCOL=protocol.json ADEQUACY=adequacy.json`
   preflights result packages against the protocol.
-- [ ] `python qc_cli.py sampling-frame-adequacy-preflight protocol.json --adequacy-file adequacy.json`
+- [x] `python qc_cli.py sampling-frame-adequacy-preflight protocol.json --adequacy-file adequacy.json`
   delegates to the same preflight.
-- [ ] Invalid protocols/results fail loud with machine-readable errors.
-- [ ] Docs preserve claim discipline: this is protocol/preflight
+- [x] Invalid protocols/results fail loud with machine-readable errors.
+- [x] Docs preserve claim discipline: this is protocol/preflight
   infrastructure only, not populated reviewer evidence, sampling-frame adequacy
   evidence, population-generalization permission, methodological-validity
   evidence, or SOTA evidence.
 
 Process criteria:
 
-- [ ] Focused tests pass.
-- [ ] Touched Python Ruff gate passes.
-- [ ] `make docs-check` passes.
-- [ ] `git diff --check` passes.
-- [ ] `make check` passes.
-- [ ] Verified increment is committed and pushed.
+- [x] Focused tests pass.
+- [x] Touched Python Ruff gate passes.
+- [x] `make docs-check` passes.
+- [x] `git diff --check` passes.
+- [x] `make check` passes.
+- [x] Verified increment is committed and pushed.
 
 ---
 
 ## Outcome
 
-Pending.
+Completed in commit `b30eb970`.
+
+Implemented sampling-frame adequacy protocol/preflight infrastructure:
+
+- `qc_clean/core/sampling_frame_adequacy_protocol.py` defines
+  schema_version=1 protocol and result package contracts.
+- `qc_clean/core/sampling_frame_adequacy_preflight.py` cross-checks result
+  packages against protocol IDs, project/corpus/scope hashes, reviewer plans,
+  required dimensions, outcome-file hashes, and caveats.
+- `scripts/validate_sampling_frame_adequacy_protocol.py` emits
+  machine-readable validator JSON.
+- `scripts/preflight_sampling_frame_adequacy_protocol.py` emits
+  machine-readable preflight reports.
+- `make validate-sampling-frame-adequacy-protocol` and
+  `make sampling-frame-adequacy-preflight` expose the surfaces.
+- `qc_cli.py validate-sampling-frame-adequacy-protocol` and
+  `qc_cli.py sampling-frame-adequacy-preflight` delegate to the scripts.
+- `CLAUDE.md`, generated `AGENTS.md`, `docs/EVALUATION_HARNESS.md`, and
+  `docs/PROJECT_THEORY_AND_GOALS.md` document the new surfaces while preserving
+  non-evidentiary caveats.
+
+Verification:
+
+- `python -m pytest tests/test_sampling_frame_adequacy_protocol.py tests/test_sampling_frame_adequacy_preflight.py tests/test_qc_cli_sampling_frame_adequacy_surfaces.py -q`
+  - 13 passed
+- `python -m ruff check qc_clean/core/sampling_frame_adequacy_protocol.py qc_clean/core/sampling_frame_adequacy_preflight.py scripts/validate_sampling_frame_adequacy_protocol.py scripts/preflight_sampling_frame_adequacy_protocol.py qc_cli.py tests/test_sampling_frame_adequacy_protocol.py tests/test_sampling_frame_adequacy_preflight.py tests/test_qc_cli_sampling_frame_adequacy_surfaces.py`
+  - passed
+- CLI/Make smoke with temporary valid protocol/result packages:
+  - `qc_cli.py validate-sampling-frame-adequacy-protocol` passed
+  - `make -s sampling-frame-adequacy-preflight` produced `status="pass"`,
+    `result_row_count=5`, and `reviewer_count=2`
+- `make docs-check`
+  - passed
+- `git diff --check`
+  - passed
+- `make check`
+  - 1321 passed, 1 skipped, 8 deselected; Ruff passed; docs-check passed;
+    type check is not yet configured
 
 ---
 
 ## Open Questions
 
-- [ ] Should this feed `make bench` immediately?
-  Default: no. First add the governed protocol/preflight substrate; a later
-  score-time guard can feed Phase 0 once the result package shape is stable.
+- [x] Should this feed `make bench` immediately?
+  Status: RESOLVED. No. This slice adds the governed protocol/preflight
+  substrate; a later score-time guard can feed Phase 0 once the result package
+  shape is stable.
 
 ---
 

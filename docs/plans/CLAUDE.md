@@ -6,12 +6,13 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 224 | Sampling-frame adequacy protocol preflight | High | Active | `SAMPLING_FRAME_ADEQUACY_PROTOCOL_PREFLIGHT.md` |
+| — | — | — | — | — |
 
 ## Completed Plans
 
 | Name | Outcome | Record |
 |------|---------|--------|
+| Sampling-frame adequacy protocol preflight | Sampling-frame adequacy protocols and reviewer result packages can now be validated/preflighted through core contracts, scripts, Make, and `qc_cli.py`, while remaining protocol/preflight infrastructure only rather than sampling-frame adequacy evidence, population-generalization permission, methodological validity, or SOTA evidence | `completed/SAMPLING_FRAME_ADEQUACY_PROTOCOL_PREFLIGHT.md` |
 | INV-4 theory ledger refresh | `docs/PROJECT_THEORY_AND_GOALS.md` and `CLAUDE.md` now record the committed synthetic INV-4 theoretical-sampling smoke artifact while preserving caveats that it is workflow/provenance smoke only, not theoretical sampling execution, sampling adequacy, category saturation, GT-fidelity, methodological validity, or SOTA evidence | `completed/INV4_THEORY_LEDGER_REFRESH.md` |
 | Theoretical sampling smoke artifact | A synthetic repo-local artifact under `docs/benchmarks/theoretical_sampling_smoke_2026_06_23/` demonstrates protocol validation, explicit-`PROJECTS_DIR` candidate export, selected-candidate result export, and passing preflight without claiming theoretical sampling execution, sampling adequacy, saturation, GT-fidelity, methodological validity, or SOTA evidence | `completed/THEORETICAL_SAMPLING_SMOKE_ARTIFACT.md` |
 | Theoretical sampling projects-dir parity | `export-theoretical-sampling-candidates` now accepts explicit repo-local project stores through script, Make, and `qc_cli.py`, enabling portable INV-4 package workflows without claiming theoretical sampling execution, sampling adequacy, saturation, GT-fidelity, methodological validity, or SOTA evidence | `completed/THEORETICAL_SAMPLING_PROJECTS_DIR_PARITY.md` |
