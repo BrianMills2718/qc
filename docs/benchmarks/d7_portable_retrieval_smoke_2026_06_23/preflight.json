@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "package_type": "d7_retrieval_comparison_preflight",
+  "status": "pass",
+  "protocol_id": "d7-portable-retrieval-smoke-2026-06-23",
+  "project_id": "d7_portable_retrieval_smoke_project",
+  "gold_set_id": "d7-portable-retrieval-smoke-2026-06-23",
+  "split": "held_out",
+  "expected_prediction_count": 1,
+  "prediction_package_count": 1,
+  "baseline_count": 1,
+  "errors": [],
+  "caution": "D7 comparison preflight is process metadata only; it is not a held-out D7 benchmark result, not live-baseline evidence, not methodological-validity evidence, and not superiority evidence."
+}

@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "gold_set_id": "d7-portable-retrieval-smoke-2026-06-23",
+  "dataset_name": "Synthetic D7 portable retrieval smoke fixture",
+  "split": "held_out",
+  "corpus_sha256": "68aef519249e4d0536449a7498778133db276998df8d543219832303fde7772b",
+  "project_state_sha256": "f95ee1eff16100654f46f4f9b28526ab958a7862e89e7ff1552d7c565389819d",
+  "prompt_frozen": true,
+  "contamination_checked": true,
+  "adjudication": {
+    "coder_count": 2,
+    "adjudicator": "synthetic-fixture-generator",
+    "protocol": "Synthetic smoke fixture: exact contrary span is pre-specified for workflow verification only.",
+    "notes": "Synthetic smoke fixture aligned to the retrieval candidate span to verify portable D7 package plumbing; this is not expert adjudication or methodological-validity evidence."
+  },
+  "contrary_evidence": [
+    {
+      "target_claim_id": "claim-ai-workflow",
+      "doc_id": "d1",
+      "start_char": 0,
+      "end_char": 166,
+      "quote_text": "AI failed badly after rollout. Nurses said the tool slowed triage and caused rework.\nA later team reported modest improvements only after manual overrides were added.",
+      "segment_id": "0fa21b71-8a97-4bc5-81b2-6bbbe4e38579"
+    }
+  ]
+}

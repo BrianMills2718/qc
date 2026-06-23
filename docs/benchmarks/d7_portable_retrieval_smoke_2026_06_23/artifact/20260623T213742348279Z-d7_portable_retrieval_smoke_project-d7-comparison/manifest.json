@@ -1,0 +1,41 @@
+{
+  "artifact_type": "qualitative_coding.d7_retrieval_comparison",
+  "claim_discipline": {
+    "caveat": "This D7 comparison artifact is local provenance/accounting metadata only; it is not held-out D7 evidence, live-baseline evidence, superiority evidence, methodological-validity evidence, or SOTA evidence."
+  },
+  "command": {
+    "artifact_dir": "docs/benchmarks/d7_portable_retrieval_smoke_2026_06_23/artifact",
+    "gold_file": "docs/benchmarks/d7_portable_retrieval_smoke_2026_06_23/gold.json",
+    "output": "docs/benchmarks/d7_portable_retrieval_smoke_2026_06_23/report.json",
+    "prediction_files": [
+      "docs/benchmarks/d7_portable_retrieval_smoke_2026_06_23/predictions.json"
+    ],
+    "project_id": "d7_portable_retrieval_smoke_project",
+    "protocol_package": "docs/benchmarks/d7_portable_retrieval_smoke_2026_06_23/protocol.json"
+  },
+  "generated_at": "2026-06-23T21:37:42.348279Z",
+  "input_hashes": {
+    "corpus_sha256": "68aef519249e4d0536449a7498778133db276998df8d543219832303fde7772b",
+    "gold_file_sha256": "8eb3d98d9c7e128018aac2c9cd614e0f80733b97bf2cf2cabf4d3ee78cbb79b7",
+    "hash_algorithm": "sha256",
+    "prediction_files": [
+      {
+        "path": "docs/benchmarks/d7_portable_retrieval_smoke_2026_06_23/predictions.json",
+        "sha256": "2fa37a96d4583acaea52ba3fa2085b11abbcb56de8941480e75140c9a37054e2"
+      }
+    ],
+    "project_id": "d7_portable_retrieval_smoke_project",
+    "project_state_sha256": "f95ee1eff16100654f46f4f9b28526ab958a7862e89e7ff1552d7c565389819d",
+    "protocol_file_sha256": "6253f421c79e2a44fabc4c102f013a2b5329cc177ac6b2c91826a1ac9748a107"
+  },
+  "project_id": "d7_portable_retrieval_smoke_project",
+  "project_name": "D7 portable retrieval smoke project",
+  "prompt_eval": {
+    "note": "D7 comparison artifact packaging only; held-out datasets, live baseline runs, statistical comparisons, and experiment tracking belong to the future prompt_eval-backed suite.",
+    "owner": "prompt_eval",
+    "status": "not_run"
+  },
+  "report_file": "report.json",
+  "report_sha256": "5cba43bb1a74a5e1fd0231fefc0cd160e477cf5e28e645cad8795b772f7c26df",
+  "schema_version": 1
+}

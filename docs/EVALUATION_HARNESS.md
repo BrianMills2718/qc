@@ -120,6 +120,12 @@ Each dimension maps to a SOTA claim and (where relevant) an invariant. The bar i
 - D7 retrieval comparison may load from the same explicit project store via
   `PROJECTS_DIR=path` / `--projects-dir path`; this is portable comparison
   artifact plumbing only, not held-out D7 evidence by itself.
+- `docs/benchmarks/d7_portable_retrieval_smoke_2026_06_23/` contains a
+  committed synthetic D7 retrieval-comparison smoke artifact that exercises
+  repo-local project-store export, protocol preflight, comparison, artifact
+  manifest writing, and artifact verification. It is workflow/provenance smoke
+  evidence only, not semantic disconfirmation validity, expert adjudication, or
+  held-out D7 benchmark evidence.
 - `qc_cli.py write-phase0-adjudication-package ...` delegates to the same
   strict Phase 0 adjudication package writer as
   `make write-phase0-adjudication-package`; this is CLI parity for manifest

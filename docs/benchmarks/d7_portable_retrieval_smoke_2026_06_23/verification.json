@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "package_type": "qualitative_coding.d7_comparison_artifact_verification",
+  "status": "verified",
+  "artifact_type": "qualitative_coding.d7_retrieval_comparison",
+  "project_id": "d7_portable_retrieval_smoke_project",
+  "manifest_path": "docs/benchmarks/d7_portable_retrieval_smoke_2026_06_23/artifact/20260623T213742348279Z-d7_portable_retrieval_smoke_project-d7-comparison/manifest.json",
+  "report_path": "docs/benchmarks/d7_portable_retrieval_smoke_2026_06_23/artifact/20260623T213742348279Z-d7_portable_retrieval_smoke_project-d7-comparison/report.json",
+  "checked_report_count": 1,
+  "failure_count": 0,
+  "failures": [],
+  "caveat": "This verifies local D7 comparison artifact hashes and manifest/report consistency only; it is not held-out D7 evidence, live-baseline evidence, superiority evidence, methodological-validity evidence, or SOTA evidence."
+}

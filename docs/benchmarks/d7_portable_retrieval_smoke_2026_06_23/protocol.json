@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "package_type": "qualitative_coding.d7_retrieval_comparison_protocol",
+  "protocol_id": "d7-portable-retrieval-smoke-2026-06-23",
+  "project_id": "d7_portable_retrieval_smoke_project",
+  "dataset_name": "Synthetic D7 portable retrieval smoke fixture",
+  "split": "held_out",
+  "gold_set_id": "d7-portable-retrieval-smoke-2026-06-23",
+  "corpus_sha256": "68aef519249e4d0536449a7498778133db276998df8d543219832303fde7772b",
+  "project_state_sha256": "f95ee1eff16100654f46f4f9b28526ab958a7862e89e7ff1552d7c565389819d",
+  "prompt_frozen": true,
+  "contamination_checked": true,
+  "registered_before_run": true,
+  "expected_predictions": [
+    {
+      "baseline_name": "retrieval_lexical_bm25_top1",
+      "baseline_mode": "retrieval",
+      "retrieval_mode": "lexical_bm25",
+      "candidates_per_claim": 1,
+      "max_targets": 50,
+      "embedding_model": null,
+      "embedding_dimensions": null,
+      "trace_id": "qualitative_coding/d7-retrieval/d7_portable_retrieval_smoke_project",
+      "max_budget": 1.0,
+      "prediction_file_sha256": "2fa37a96d4583acaea52ba3fa2085b11abbcb56de8941480e75140c9a37054e2"
+    }
+  ],
+  "success_criteria": [
+    "The portable smoke comparison should run from repo-local projects_dir without default-store mutation.",
+    "The synthetic retrieval baseline should recover the one registered exact D7 anchor."
+  ],
+  "metric_criteria": [
+    {
+      "criterion_id": "synthetic-recall-is-one",
+      "baseline_name": "retrieval_lexical_bm25_top1",
+      "metric": "recall",
+      "operator": ">=",
+      "threshold": 1.0,
+      "rationale": "This synthetic smoke fixture aligns the gold span to the retrieved candidate span."
+    },
+    {
+      "criterion_id": "synthetic-f1-is-one",
+      "baseline_name": "retrieval_lexical_bm25_top1",
+      "metric": "f1",
+      "operator": ">=",
+      "threshold": 1.0,
+      "rationale": "This synthetic smoke fixture should have one exact true-positive and no false positives."
+    }
+  ],
+  "caution": "D7 comparison protocol validation is process metadata only; this synthetic smoke artifact is not held-out D7 validity evidence, live-baseline evidence, methodological-validity evidence, superiority evidence, or SOTA evidence."
+}
