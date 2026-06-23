@@ -6,7 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| — | — | — | — | — |
+| 218 | INV-7 package comparison report | High | Planned | `INV7_PACKAGE_COMPARISON_REPORT.md` |
 
 ## Completed Plans
 
