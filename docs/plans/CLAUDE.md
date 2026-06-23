@@ -6,12 +6,13 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 216 | INV-7 Held-Out Live Benchmark V1 | High | Planned | `INV7_HELDOUT_LIVE_BENCHMARK_V1.md` |
+| — | — | — | — | — |
 
 ## Completed Plans
 
 | Name | Outcome | Record |
 |------|---------|--------|
+| INV-7 held-out live benchmark v1 | A 10-fixture external held-out live INV-7 artifact is committed under `docs/benchmarks/`, with frozen manifest, matching protocol hashes, live result package, passing preflight, scorecard, and explicit caveats that it is bounded live-canary evidence rather than robustness or SOTA proof | `completed/INV7_HELDOUT_LIVE_BENCHMARK_V1.md` |
 | D7 comparison package projects-dir support | Strict D7 comparison package manifests can now carry package-local or non-default `projects_dir`, resolving it relative to the manifest and forwarding `--projects-dir` through package replay, writer, Make, and `qc_cli.py` without claiming held-out D7 or live-baseline evidence | `completed/D7_COMPARISON_PACKAGE_PROJECTS_DIR_SUPPORT.md` |
 | D7 live baseline projects-dir parity | `run-d7-live-baseline` now accepts explicit project stores through script, Make, and `qc_cli.py`, enabling portable live-baseline package production without mutating the default store or claiming live-baseline evidence | `completed/D7_LIVE_BASELINE_PROJECTS_DIR_PARITY.md` |
 | D7 portable retrieval smoke artifact | A synthetic D7 retrieval-comparison smoke artifact is committed under `docs/benchmarks/`, proving repo-local project-store retrieval export, protocol preflight, comparison, artifact manifest writing, and artifact verification without claiming D7 validity evidence | `completed/D7_PORTABLE_RETRIEVAL_SMOKE_ARTIFACT.md` |

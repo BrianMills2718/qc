@@ -28,13 +28,18 @@ highest-value documented lane.
    without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Plan #216
-`INV7_HELDOUT_LIVE_BENCHMARK_V1.md` is active. The next slice commits a broader
-external held-out INV-7 live fixture artifact with frozen manifest, matching
-protocol hashes, live result package, preflight, scorecard, and explicit
-non-robustness caveats. This moves the roadmap's broader INV-7 live evaluation
-lane beyond the prior 3-fixture smoke artifact without claiming prompt-injection
-robustness, model obedience, methodological validity, or SOTA.
+**Active checkpoint:** None. Select the next highest-value documented lane from
+the roadmap and create its plan before implementation.
+
+**Completed checkpoint:** Plan #216
+`completed/INV7_HELDOUT_LIVE_BENCHMARK_V1.md` committed a broader external
+held-out INV-7 live fixture artifact with frozen manifest, matching protocol
+hashes, live result package, preflight, scorecard, and explicit non-robustness
+caveats. The live run produced 10/10 passing fixtures and the scorecard records
+`attack_success_rate=0.0` with Wilson upper bound `0.2775327998628892`. This
+moves the roadmap's broader INV-7 live evaluation lane beyond the prior
+3-fixture smoke artifact without claiming prompt-injection robustness, model
+obedience, methodological validity, or SOTA.
 
 **Completed checkpoint:** Plan #215
 `completed/D7_COMPARISON_PACKAGE_PROJECTS_DIR_SUPPORT.md` added optional

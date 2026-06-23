@@ -1,6 +1,6 @@
 # Plan #216: INV-7 Held-Out Live Benchmark V1
 
-**Status:** Planned
+**Status:** Completed
 **Type:** benchmark artifact
 **Priority:** High
 **Blocked By:** None
@@ -71,7 +71,7 @@ INV-7 fixture and benchmark surfaces.
 
 ## Files Affected
 
-- `docs/plans/INV7_HELDOUT_LIVE_BENCHMARK_V1.md` - active plan.
+- `docs/plans/completed/INV7_HELDOUT_LIVE_BENCHMARK_V1.md` - completed plan.
 - `docs/plans/CLAUDE.md` - active plan index.
 - `docs/plans/ACTIVE_SPRINT.md` - sprint checkpoint.
 - New benchmark artifact directory:
@@ -137,28 +137,79 @@ INV-7 fixture and benchmark surfaces.
 
 Feature-level criteria:
 
-- [ ] Artifact directory contains manifest, protocol, result, preflight,
+- [x] Artifact directory contains manifest, protocol, result, preflight,
   scorecard, project shell, and README.
-- [ ] Manifest has `split="held_out"`, prompt-frozen, contamination-checked,
+- [x] Manifest has `split="held_out"`, prompt-frozen, contamination-checked,
   registered-before-run metadata, and at least 10 non-smoke fixture prompts.
-- [ ] Protocol prompt hashes match every fixture prompt exactly.
-- [ ] Live result package contains the same fixture-set metadata and one result
+- [x] Protocol prompt hashes match every fixture prompt exactly.
+- [x] Live result package contains the same fixture-set metadata and one result
   per fixture.
-- [ ] Preflight status is pass.
-- [ ] Scorecard records `prompt_injection_inv7` plus passing INV-7 preflight
+- [x] Preflight status is pass.
+- [x] Scorecard records `prompt_injection_inv7` plus passing INV-7 preflight
   metadata.
-- [ ] README and docs state the artifact is broader than the smoke artifact but
+- [x] README and docs state the artifact is broader than the smoke artifact but
   is not proof of prompt-injection robustness or SOTA.
 
 Process criteria:
 
-- [ ] Artifact commands pass or any live-run failure is recorded with concrete
+- [x] Artifact commands pass or any live-run failure is recorded with concrete
   error evidence and the next safe action.
-- [ ] Focused INV-7 regression tests pass.
-- [ ] `make docs-check` passes.
-- [ ] `git diff --check` passes.
-- [ ] `make check` passes.
-- [ ] Verified increment is committed and pushed.
+- [x] Focused INV-7 regression tests pass.
+- [x] `make docs-check` passes.
+- [x] `git diff --check` passes.
+- [x] `make check` passes.
+- [x] Verified increment is committed and pushed.
+
+---
+
+## Outcome
+
+Committed `docs/benchmarks/inv7_heldout_live_v1_2026_06_23/`, a broader
+external held-out INV-7 live v1 artifact with:
+
+- 10-fixture `manifest.json` covering direct override, roleplay, markdown
+  fence, JSON role spoof, XML tag spoof, HTML comment, YAML frontmatter, fake
+  tool output, delimiter breakout, and obfuscated-instruction attacks.
+- `protocol.json` with exact prompt hashes for every fixture.
+- Live `gpt-5-mini` `result.json`: 10 fixtures, 10 passed, 0 failed.
+- `preflight.json`: status `pass`.
+- `scorecard.json`: `prompt_injection_inv7.status="scored"`,
+  `total_fixtures=10`, `passed=10`, `failed=0`,
+  `attack_success_rate=0.0`, Wilson upper bound `0.2775327998628892`, and
+  `_meta.preflight_reports.inv7_live.status="pass"`.
+- Synthetic project shell and README with commands and caveats.
+
+Implementation commit:
+`7bbff360 [Plan: INV7_HELDOUT_LIVE_V1] Add held-out live INV-7 artifact`
+
+Verification:
+
+- `make validate-inv7-live-protocol PROTOCOL=docs/benchmarks/inv7_heldout_live_v1_2026_06_23/protocol.json`
+  - Result: valid; fixture_count=10.
+- `make run-inv7-live-fixtures OUTPUT=docs/benchmarks/inv7_heldout_live_v1_2026_06_23/result.json MODEL=gpt-5-mini TRACE_ID=qualitative_coding/inv7-heldout-live-v1-2026-06-23 MAX_BUDGET=2.0 FIXTURES=docs/benchmarks/inv7_heldout_live_v1_2026_06_23/manifest.json`
+  - Result: total_fixtures=10, passed=10, failed=0.
+- `make validate-inv7-package PACKAGE=docs/benchmarks/inv7_heldout_live_v1_2026_06_23/result.json`
+  - Result: ok, total_fixtures=10, failed=0, passed=10.
+- `make inv7-live-preflight PROTOCOL=docs/benchmarks/inv7_heldout_live_v1_2026_06_23/protocol.json PACKAGE=docs/benchmarks/inv7_heldout_live_v1_2026_06_23/result.json`
+  - Result: status=pass, fixture_count=10.
+- `python scripts/bench_phase0.py inv7_heldout_live_v1_project --projects-dir docs/benchmarks/inv7_heldout_live_v1_2026_06_23/projects --prompt-injection-file docs/benchmarks/inv7_heldout_live_v1_2026_06_23/result.json --inv7-live-protocol-file docs/benchmarks/inv7_heldout_live_v1_2026_06_23/protocol.json --trace-id qualitative_coding/inv7-heldout-live-v1-2026-06-23 --output docs/benchmarks/inv7_heldout_live_v1_2026_06_23/scorecard.json`
+  - Result: `prompt_injection_inv7` scored, total_fixtures=10, passed=10,
+    failed=0, preflight=pass.
+- `python -m pytest tests/test_inv7_fixture_runner.py tests/test_inv7_prompt_injection_package.py tests/test_inv7_live_protocol.py tests/test_inv7_live_preflight.py tests/test_bench_phase0_script.py -k "inv7 or prompt_injection" -q`
+  - Result: 35 passed, 42 deselected.
+- `make docs-check`
+  - Result: Markdown links OK; doc coupling config valid; plan records
+    consistent; `AGENTS.md` in sync.
+- `git diff --check`
+  - Result: clean.
+- `make check`
+  - Result: 1302 passed, 1 skipped, 8 deselected; Ruff all checks passed;
+    docs-check passed; type check not yet configured.
+
+Claim boundary: this is a broader held-out live canary artifact, not proof of
+prompt-injection robustness, model obedience, security hardening,
+methodological validity, or SOTA. Passing this artifact does not mean prompt
+injection is solved.
 
 ---
 
