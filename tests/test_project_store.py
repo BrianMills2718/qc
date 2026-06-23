@@ -35,6 +35,26 @@ def sample_state():
 
 
 class TestProjectStore:
+    def test_default_store_uses_qc_projects_dir_env(self, tmp_path, monkeypatch):
+        env_dir = tmp_path / "env-projects"
+        monkeypatch.setenv("QC_PROJECTS_DIR", str(env_dir))
+
+        store = ProjectStore()
+
+        assert store.projects_dir == env_dir
+        assert env_dir.exists()
+
+    def test_explicit_projects_dir_overrides_env(self, tmp_path, monkeypatch):
+        env_dir = tmp_path / "env-projects"
+        explicit_dir = tmp_path / "explicit-projects"
+        monkeypatch.setenv("QC_PROJECTS_DIR", str(env_dir))
+
+        store = ProjectStore(projects_dir=explicit_dir)
+
+        assert store.projects_dir == explicit_dir
+        assert explicit_dir.exists()
+        assert not env_dir.exists()
+
     def test_save_and_load(self, tmp_store, sample_state):
         path = tmp_store.save(sample_state)
         assert path.exists()

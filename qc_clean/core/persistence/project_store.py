@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 import re
 from pathlib import Path
 from typing import Dict, List, Optional
@@ -29,7 +30,13 @@ class ProjectStore:
     """Save / load / list ProjectState objects as JSON files."""
 
     def __init__(self, projects_dir: Optional[Path] = None):
-        self.projects_dir = projects_dir or DEFAULT_PROJECTS_DIR
+        env_projects_dir = os.environ.get("QC_PROJECTS_DIR")
+        if projects_dir is not None:
+            self.projects_dir = projects_dir
+        elif env_projects_dir:
+            self.projects_dir = Path(env_projects_dir)
+        else:
+            self.projects_dir = DEFAULT_PROJECTS_DIR
         self.projects_dir.mkdir(parents=True, exist_ok=True)
 
     # ------------------------------------------------------------------

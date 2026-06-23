@@ -104,6 +104,9 @@ python qc_cli.py project export <project_id> --format qdpx --output-file export.
 python qc_cli.py review <project_id>
 python qc_cli.py review <project_id> --approve-all
 python qc_cli.py review <project_id> --file decisions.json
+
+# Build a deterministic, synthetic reviewer packet
+make reviewer-demo
 ```
 
 Browser flows require the API server:
@@ -114,6 +117,11 @@ python start_server.py
 
 - Review UI: `http://localhost:8002/review/<project_id>`
 - Graph UI: `http://localhost:8002/graph/<project_id>`
+
+The reviewer demo packet is isolated from the default project store. After
+running `make reviewer-demo`, inspect `test_output/reviewer_demo/README.md` for
+the exact `QC_PROJECTS_DIR=...` CLI and browser commands. The packet is a
+software-surface demonstration, not methodological-validity or SOTA evidence.
 
 ## Supported Input Formats
 

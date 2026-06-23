@@ -124,30 +124,76 @@ This plan creates a project-local demo/walkthrough capability:
 
 Feature-level criteria:
 
-- [ ] A reviewer can run one command to generate the local demo packet.
-- [ ] The packet is written under an isolated output directory and does not
+- [x] A reviewer can run one command to generate the local demo packet.
+- [x] The packet is written under an isolated output directory and does not
   mutate the default project store unless the user explicitly points the
   environment there.
-- [ ] The packet includes fixture transcripts, project JSON, Markdown and JSON
+- [x] The packet includes fixture transcripts, project JSON, Markdown and JSON
   exports, claim-ledger snapshots, review/API snapshots, and a Phase 0
   structural scorecard artifact.
-- [ ] The packet README includes exact commands for CLI inspection and browser
+- [x] The packet README includes exact commands for CLI inspection and browser
   review using `QC_PROJECTS_DIR=<packet>/projects`.
-- [ ] The packet self-review explicitly states this is deterministic software
+- [x] The packet self-review explicitly states this is deterministic software
   demonstration output, not live LLM semantic validity, expert adjudication,
   held-out benchmark evidence, methodological validity, or SOTA evidence.
-- [ ] I have run the packet generator myself and inspected representative
+- [x] I have run the packet generator myself and inspected representative
   generated outputs before asking Brian to review.
 
 Process criteria:
 
-- [ ] Required focused tests pass.
-- [ ] Focused Ruff passes.
-- [ ] `make reviewer-demo OUTPUT=test_output/reviewer_demo` passes.
-- [ ] `make docs-check` passes.
-- [ ] `git diff --check` passes.
-- [ ] `make check` passes or any failure is documented with evidence.
+- [x] Required focused tests pass.
+- [x] Focused Ruff passes.
+- [x] `make reviewer-demo OUTPUT=test_output/reviewer_demo` passes.
+- [x] `make docs-check` passes.
+- [x] `git diff --check` passes.
+- [x] `make check` passes or any failure is documented with evidence.
 - [ ] Verified work is committed and pushed.
+
+## Implementation Notes
+
+- `ProjectStore()` now honors `QC_PROJECTS_DIR` when no explicit
+  `projects_dir` is supplied; explicit constructor paths still take precedence.
+- `scripts/build_reviewer_demo.py` builds a deterministic, synthetic,
+  LLM-free packet with fixture transcripts, an isolated project store, exports,
+  API/review/graph snapshots, a Phase 0 scorecard, a versioned scorecard
+  artifact, and README/self-review files.
+- `make reviewer-demo OUTPUT=test_output/reviewer_demo` is the canonical
+  local entrypoint. The generated packet includes exact `QC_PROJECTS_DIR=...`
+  CLI and browser commands.
+- Self-run inspection covered generated README, self-review, Markdown export,
+  CLI project show/claims, API snapshots, Phase 0 scorecard caveats, export
+  rerun, HTTP review/graph page loads, JSON claim/negative-case routes, and a
+  headless browser render of `/review/reviewer-demo`.
+
+## Verification
+
+- TDD red:
+  `python -m pytest tests/test_project_store.py tests/test_reviewer_demo.py -q`
+  initially failed because `scripts/build_reviewer_demo.py` did not exist and
+  `ProjectStore()` did not honor the planned env override.
+- Focused tests:
+  `python -m pytest tests/test_project_store.py tests/test_reviewer_demo.py -q`
+  (`16 passed`).
+- Focused Ruff:
+  `python -m ruff check qc_clean/core/persistence/project_store.py scripts/build_reviewer_demo.py tests/test_project_store.py tests/test_reviewer_demo.py`.
+- Demo run:
+  `make reviewer-demo OUTPUT=test_output/reviewer_demo`.
+- CLI self-check:
+  `QC_PROJECTS_DIR=test_output/reviewer_demo/projects python qc_cli.py project show reviewer-demo`
+  and
+  `QC_PROJECTS_DIR=test_output/reviewer_demo/projects python qc_cli.py project claims reviewer-demo --show-scope --show-anchors --limit 2`.
+- Export self-check:
+  `QC_PROJECTS_DIR=test_output/reviewer_demo/projects python qc_cli.py project export reviewer-demo --format markdown --output-file test_output/reviewer_demo/exports/rerun-report.md`.
+- Browser/API self-check:
+  `QC_PROJECTS_DIR=test_output/reviewer_demo/projects python start_server.py`;
+  `curl` returned `200` for `/review/reviewer-demo` and
+  `/graph/reviewer-demo`; JSON claim and negative-case routes returned expected
+  anchored payloads; headless browser render reported title `Code Review` and
+  heading `Reviewer Demo: Shift Coordination`.
+- Docs gate: `make docs-check`.
+- Whitespace gate: `git diff --check`.
+- Full gate: `make check` (`1286 passed, 1 skipped, 8 deselected`; Ruff/docs
+  passed; type check not configured).
 
 ## Open Questions
 

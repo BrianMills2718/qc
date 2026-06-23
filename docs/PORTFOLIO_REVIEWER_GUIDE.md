@@ -18,17 +18,22 @@ This project should be presented as computational social-science infrastructure 
 ## Reviewer Path
 
 1. Read `README.md` for the capability list and honest status.
-2. Read `docs/portfolio/QUALITATIVE_CODING_EVIDENCE_BUNDLE.md` for the compact
+2. Run `make reviewer-demo` and inspect `test_output/reviewer_demo/README.md`
+   for the isolated CLI/API/browser walkthrough.
+3. Read `docs/portfolio/QUALITATIVE_CODING_EVIDENCE_BUNDLE.md` for the compact
    evidence trail and reviewer caveats.
-3. Read `docs/PROJECT_THEORY_AND_GOALS.md` for the methodological claim discipline.
-4. Read `docs/EVALUATION_HARNESS.md` for the SOTA evaluation plan.
-5. Inspect the selected completed plan artifacts for span anchoring, segment
+4. Read `docs/PROJECT_THEORY_AND_GOALS.md` for the methodological claim discipline.
+5. Read `docs/EVALUATION_HARNESS.md` for the SOTA evaluation plan.
+6. Inspect the selected completed plan artifacts for span anchoring, segment
    coverage, claim ledger, instruction/data separation, application-level
    agreement, and Phase 0 benchmark packaging.
 
 ## Current Use In The Portfolio
 
-This is analyst-facing evidence of method translation: turning qualitative research practice into structured artifacts that an agent can assist with and a human can audit. It is not ready to stand alone as proof of methodological validity without a sanitized corpus and reviewer walkthrough.
+This is analyst-facing evidence of method translation: turning qualitative
+research practice into structured artifacts that an agent can assist with and a
+human can audit. The deterministic reviewer demo packet provides a sanitized
+software walkthrough, but it is not proof of methodological validity.
 
 ## Caveat
 
