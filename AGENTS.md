@@ -130,9 +130,9 @@ make write-d7-comparison-package ID=<project_id> GOLD=d7_gold.json PREDICTIONS="
 make compare-d7-package PACKAGE=d7_comparison_package.json  # Run D7 retrieval comparison from a strict package manifest
 make verify-d7-comparison-artifact ARTIFACT=benchmark_results/run-dir  # Verify D7 comparison artifact report/manifest hashes
 make run-d7-retrieval ID=<project_id> OUTPUT=predictions.json PROJECTS_DIR=projects  # Export D7 retrieval predictions from an explicit project store
-make run-d7-live-baseline ID=<project_id> OUTPUT=live_baseline.json MODEL=<model>  # Write opt-in live D7 candidate-selection baseline package for BASELINES=
+make run-d7-live-baseline ID=<project_id> OUTPUT=live_baseline.json PROJECTS_DIR=projects MODEL=<model>  # Write opt-in live D7 candidate-selection baseline package for BASELINES=
 python qc_cli.py run-d7-retrieval <project_id> --projects-dir projects --output predictions.json  # Canonical CLI wrapper for D7 retrieval export
-python qc_cli.py run-d7-live-baseline <project_id> --output live_baseline.json --model <model>  # Canonical CLI wrapper for opt-in live D7 baseline export
+python qc_cli.py run-d7-live-baseline <project_id> --projects-dir projects --output live_baseline.json --model <model>  # Canonical CLI wrapper for opt-in live D7 baseline export
 python qc_cli.py validate-d7-comparison-protocol d7_protocol.json  # Canonical CLI wrapper for D7 comparison protocol validation
 python qc_cli.py d7-comparison-preflight d7_protocol.json d7_gold.json lexical.json embedding.json  # Canonical CLI wrapper for D7 comparison preflight
 python qc_cli.py compare-d7-retrieval <project_id> --projects-dir projects --gold-file d7_gold.json --predictions-file lexical.json --predictions-file embedding.json --protocol-package d7_protocol.json --artifact-dir benchmark_results  # Canonical CLI wrapper for D7 retrieval comparison

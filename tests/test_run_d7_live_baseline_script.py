@@ -52,6 +52,35 @@ def test_run_d7_live_baseline_writes_output_and_stdout(tmp_path, monkeypatch, ca
     assert stdout_payload["live_baseline_run"]["model"] == "fake-live-model"
 
 
+def test_run_d7_live_baseline_accepts_projects_dir(tmp_path, monkeypatch, capsys):
+    state = _state_with_claim("AI failed badly after rollout.", "AI improves workflow.")
+    projects_dir = tmp_path / "portable_projects"
+    store = ProjectStore(projects_dir=projects_dir)
+    store.save(state)
+    output_file = tmp_path / "live_baseline.json"
+
+    async def fake_export(project_state, **kwargs):
+        return _package(project_state.id, kwargs)
+
+    monkeypatch.setattr(run_d7_live_baseline, "export_d7_live_candidate_baseline_async", fake_export)
+
+    exit_code = run_d7_live_baseline.main([
+        state.id,
+        "--projects-dir",
+        str(projects_dir),
+        "--output",
+        str(output_file),
+        "--model",
+        "fake-live-model",
+    ])
+
+    assert exit_code == 0
+    stdout_payload = json.loads(capsys.readouterr().out)
+    file_payload = json.loads(output_file.read_text(encoding="utf-8"))
+    assert stdout_payload == file_payload
+    assert stdout_payload["live_baseline_run"]["project_id"] == state.id
+
+
 def test_run_d7_live_baseline_forwards_options_to_exporter(tmp_path, monkeypatch, capsys):
     state = _state_with_claim("AI failed badly after rollout.", "AI improves workflow.")
     store = ProjectStore(projects_dir=tmp_path / "projects")

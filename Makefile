@@ -337,14 +337,14 @@ ifndef OUTPUT
 endif
 	python scripts/run_d7_retrieval.py $(ID) $(if $(PROJECTS_DIR),--projects-dir $(PROJECTS_DIR),) --output $(OUTPUT) --retrieval-mode $(MODE) $(if $(MODEL),--embedding-model $(MODEL),) $(if $(CANDIDATES),--candidates-per-claim $(CANDIDATES),)
 
-run-d7-live-baseline:  ## Export opt-in live D7 baseline predictions (ID=<project_id> OUTPUT=live_baseline.json [MODEL=gpt-5-mini] [MODE=lexical_bm25] [CANDIDATES=5])
+run-d7-live-baseline:  ## Export opt-in live D7 baseline predictions (ID=<project_id> OUTPUT=live_baseline.json [PROJECTS_DIR=path] [MODEL=gpt-5-mini] [MODE=lexical_bm25] [CANDIDATES=5])
 ifndef ID
 	$(error ID is required. Usage: make run-d7-live-baseline ID=<project_id> OUTPUT=live_baseline.json MODEL=<model>)
 endif
 ifndef OUTPUT
 	$(error OUTPUT is required. Usage: make run-d7-live-baseline ID=<project_id> OUTPUT=live_baseline.json MODEL=<model>)
 endif
-	python scripts/run_d7_live_baseline.py $(ID) --output $(OUTPUT) $(if $(MODEL),--model $(MODEL),) --retrieval-mode $(MODE) $(if $(CANDIDATES),--candidates-per-claim $(CANDIDATES),) $(if $(TRACE_ID),--trace-id $(TRACE_ID),) $(if $(MAX_BUDGET),--max-budget $(MAX_BUDGET),)
+	python scripts/run_d7_live_baseline.py $(ID) $(if $(PROJECTS_DIR),--projects-dir $(PROJECTS_DIR),) --output $(OUTPUT) $(if $(MODEL),--model $(MODEL),) --retrieval-mode $(MODE) $(if $(CANDIDATES),--candidates-per-claim $(CANDIDATES),) $(if $(TRACE_ID),--trace-id $(TRACE_ID),) $(if $(MAX_BUDGET),--max-budget $(MAX_BUDGET),)
 
 compare-d7-retrieval:  ## Compare D7 retrieval predictions (ID=<project_id> GOLD=gold.json PREDICTIONS="a.json b.json" [PROJECTS_DIR=path] [PROTOCOL=protocol.json] [OUTPUT=report.json] [ARTIFACT_DIR=benchmark_results])
 ifndef ID

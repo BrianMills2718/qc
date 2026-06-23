@@ -96,3 +96,39 @@ def test_qc_cli_run_d7_live_baseline_forwards_flags(monkeypatch):
         "--max-budget",
         "2.5",
     ]
+
+
+def test_qc_cli_run_d7_live_baseline_forwards_projects_dir(monkeypatch):
+    captured = {}
+
+    def fake_main(argv):
+        captured["argv"] = argv
+        return 0
+
+    monkeypatch.setattr(run_d7_live_baseline, "main", fake_main)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "qc_cli.py",
+            "run-d7-live-baseline",
+            "project-123",
+            "--projects-dir",
+            "portable_projects",
+            "--output",
+            "live_baseline.json",
+            "--model",
+            "fake-live-model",
+        ],
+    )
+
+    assert qc_cli.main() == 0
+    assert captured["argv"] == [
+        "project-123",
+        "--projects-dir",
+        "portable_projects",
+        "--output",
+        "live_baseline.json",
+        "--model",
+        "fake-live-model",
+    ]

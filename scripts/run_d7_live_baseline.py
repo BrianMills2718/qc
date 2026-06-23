@@ -24,6 +24,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         description="Export live candidate-selection predictions as a D7 baseline package"
     )
     parser.add_argument("project_id", help="Project ID to export live baseline predictions for")
+    parser.add_argument("--projects-dir", type=Path, help="Optional project store directory")
     parser.add_argument("--output", type=Path, help="Optional JSON output path")
     parser.add_argument("--name", help="Optional baseline name")
     parser.add_argument("--description", default="", help="Optional baseline description")
@@ -48,7 +49,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
 
-    store = ProjectStore()
+    store = ProjectStore(projects_dir=args.projects_dir) if args.projects_dir else ProjectStore()
     try:
         state = store.load(args.project_id)
         package = asyncio.run(export_d7_live_candidate_baseline_async(
