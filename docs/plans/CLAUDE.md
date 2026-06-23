@@ -6,7 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| — | — | — | — | — |
+| 217 | D7 Live Baseline Smoke Artifact | High | Planned | `D7_LIVE_BASELINE_SMOKE_ARTIFACT.md` |
 
 ## Completed Plans
 
