@@ -6,7 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| — | — | — | — | — |
+| 220 | INV-7 committed package comparison artifact | High | Planned | `INV7_COMMITTED_PACKAGE_COMPARISON_ARTIFACT.md` |
 
 ## Completed Plans
 
