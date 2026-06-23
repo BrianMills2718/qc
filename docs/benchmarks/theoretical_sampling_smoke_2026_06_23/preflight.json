@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "package_type": "theoretical_sampling_protocol_preflight",
+  "status": "pass",
+  "protocol_id": "ts-smoke-2026-06-23",
+  "project_id": "theoretical-sampling-smoke",
+  "target_gap_codes": [
+    "TRUST",
+    "ACCESS"
+  ],
+  "covered_gap_codes": [
+    "ACCESS",
+    "TRUST"
+  ],
+  "target_gap_types": [
+    "needs_properties",
+    "needs_dimensions"
+  ],
+  "covered_gap_types": [
+    "needs_dimensions",
+    "needs_properties"
+  ],
+  "candidate_source": "loaded_uncoded_documents",
+  "collection_mode": "select_existing_documents",
+  "candidate_count": 1,
+  "result_selected_count": 1,
+  "source_kinds": [
+    "loaded_document"
+  ],
+  "errors": [],
+  "caution": "Theoretical sampling preflight is process/provenance metadata only; it is not sampling adequacy evidence, not methodological saturation evidence, not full grounded-theory evidence, and not a SOTA claim."
+}

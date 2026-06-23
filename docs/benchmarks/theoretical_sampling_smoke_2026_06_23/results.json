@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "package_type": "qualitative_coding.theoretical_sampling_results",
+  "protocol_id": "ts-smoke-2026-06-23",
+  "project_id": "theoretical-sampling-smoke",
+  "corpus_sha256": "61892ec6c9db508c76a135acef8ed1be9245d71a6b8a1f78f0c95a28aeebe508",
+  "project_state_sha256": "4d20e5029384cc03f2ee809751328de88099eb2a0caf03d0998a2c1af7de7e5a",
+  "selected_candidate_ids": [
+    "loaded-doc-2"
+  ],
+  "addressed_gap_codes": [
+    "ACCESS",
+    "TRUST"
+  ],
+  "addressed_gap_types": [
+    "needs_dimensions",
+    "needs_properties"
+  ],
+  "stopped_by_rule": false,
+  "success_criteria_met": [
+    "Every targeted gap has an explicit sampling decision."
+  ],
+  "caution": "Theoretical sampling preflight is process/provenance metadata only; it is not sampling adequacy evidence, not methodological saturation evidence, not full grounded-theory evidence, and not a SOTA claim."
+}

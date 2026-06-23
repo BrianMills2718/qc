@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "package_type": "qualitative_coding.theoretical_sampling_protocol",
+  "protocol_id": "ts-smoke-2026-06-23",
+  "project_id": "theoretical-sampling-smoke",
+  "corpus_sha256": "61892ec6c9db508c76a135acef8ed1be9245d71a6b8a1f78f0c95a28aeebe508",
+  "project_state_sha256": "4d20e5029384cc03f2ee809751328de88099eb2a0caf03d0998a2c1af7de7e5a",
+  "registered_before_sampling": true,
+  "candidate_source": "loaded_uncoded_documents",
+  "collection_mode": "select_existing_documents",
+  "target_gap_codes": [
+    "TRUST",
+    "ACCESS"
+  ],
+  "target_gap_types": [
+    "needs_properties",
+    "needs_dimensions"
+  ],
+  "thresholds": {
+    "min_properties": 2,
+    "min_dimensions": 2,
+    "min_supporting_applications": 3,
+    "min_supporting_documents": 2
+  },
+  "max_suggestions": 1,
+  "collection_rules": [
+    "Select only loaded uncoded documents for this smoke artifact.",
+    "Prioritize documents that can elaborate targeted category gaps."
+  ],
+  "stopping_rule": "Stop after recording one selected loaded-document candidate for smoke verification.",
+  "success_criteria": [
+    "Every targeted gap has an explicit sampling decision."
+  ],
+  "caution": "Theoretical sampling protocol validation is process metadata only; it is not sampling adequacy evidence, not methodological saturation evidence, not full grounded-theory evidence, and not a SOTA claim.",
+  "notes": "Synthetic smoke protocol for verifying portable package workflow only."
+}

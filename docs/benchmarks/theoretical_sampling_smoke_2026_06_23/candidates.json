@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "package_type": "qualitative_coding.theoretical_sampling_candidates",
+  "protocol_id": "ts-smoke-2026-06-23",
+  "project_id": "theoretical-sampling-smoke",
+  "corpus_sha256": "61892ec6c9db508c76a135acef8ed1be9245d71a6b8a1f78f0c95a28aeebe508",
+  "project_state_sha256": "4d20e5029384cc03f2ee809751328de88099eb2a0caf03d0998a2c1af7de7e5a",
+  "candidate_source": "loaded_uncoded_documents",
+  "collection_mode": "select_existing_documents",
+  "candidates": [
+    {
+      "candidate_id": "loaded-doc-2",
+      "source_kind": "loaded_document",
+      "doc_id": "doc-2",
+      "doc_name": "interview_uncoded_candidate.txt",
+      "gap_codes": [
+        "ACCESS",
+        "TRUST"
+      ],
+      "gap_types": [
+        "needs_properties",
+        "needs_dimensions"
+      ],
+      "priority_score": 3.0,
+      "rationale": "Uncoded document with potential to address category-development gaps"
+    }
+  ],
+  "caution": "Theoretical sampling preflight is process/provenance metadata only; it is not sampling adequacy evidence, not methodological saturation evidence, not full grounded-theory evidence, and not a SOTA claim."
+}
