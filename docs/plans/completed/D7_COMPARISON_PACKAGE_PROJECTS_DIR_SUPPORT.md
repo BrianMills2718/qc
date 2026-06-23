@@ -1,6 +1,6 @@
 # Plan #215: D7 Comparison Package Projects Dir Support
 
-**Status:** Planned
+**Status:** Completed
 **Type:** implementation
 **Priority:** High
 **Blocked By:** None
@@ -79,7 +79,8 @@ package surfaces.
 
 ## Files Affected
 
-- `docs/plans/D7_COMPARISON_PACKAGE_PROJECTS_DIR_SUPPORT.md` - active plan.
+- `docs/plans/completed/D7_COMPARISON_PACKAGE_PROJECTS_DIR_SUPPORT.md` -
+  completed plan.
 - `docs/plans/CLAUDE.md` - active plan index.
 - `docs/plans/ACTIVE_SPRINT.md` - sprint checkpoint.
 - `scripts/run_d7_comparison_package.py` - optional `projects_dir` manifest
@@ -145,25 +146,58 @@ package surfaces.
 
 Feature-level criteria:
 
-- [ ] D7 comparison package manifests may include optional `projects_dir`.
-- [ ] Relative `projects_dir` resolves from the package manifest directory.
-- [ ] `compare-d7-package` forwards resolved `projects_dir` to
+- [x] D7 comparison package manifests may include optional `projects_dir`.
+- [x] Relative `projects_dir` resolves from the package manifest directory.
+- [x] `compare-d7-package` forwards resolved `projects_dir` to
   `compare_d7_retrieval.py`.
-- [ ] `write-d7-comparison-package PROJECTS_DIR=...` and
+- [x] `write-d7-comparison-package PROJECTS_DIR=...` and
   `qc_cli.py write-d7-comparison-package --projects-dir ...` write the field.
-- [ ] Existing manifests without `projects_dir` remain valid and compatible.
-- [ ] Docs preserve claim discipline: this is portability/provenance support,
+- [x] Existing manifests without `projects_dir` remain valid and compatible.
+- [x] Docs preserve claim discipline: this is portability/provenance support,
   not held-out D7 evidence, live-baseline evidence, superiority evidence,
   methodological-validity evidence, or SOTA evidence.
 
 Process criteria:
 
-- [ ] Focused tests pass.
-- [ ] Touched Python Ruff gate passes.
-- [ ] `make docs-check` passes.
-- [ ] `git diff --check` passes.
-- [ ] `make check` passes.
-- [ ] Verified increment is committed and pushed.
+- [x] Focused tests pass.
+- [x] Touched Python Ruff gate passes.
+- [x] `make docs-check` passes.
+- [x] `git diff --check` passes.
+- [x] `make check` passes.
+- [x] Verified increment is committed and pushed.
+
+---
+
+## Outcome
+
+Implemented optional `projects_dir` support for strict D7 comparison package
+manifests. The package runner resolves relative `projects_dir` paths from the
+manifest directory and forwards them to the canonical D7 comparison script. The
+package writer, Make target, and `qc_cli.py write-d7-comparison-package`
+surface can now record that field. Existing manifests without `projects_dir`
+remain valid.
+
+Implementation commit: `23f42efa [Plan: D7_PACKAGE_PROJECTS_DIR] Add D7 comparison package projects-dir support`
+
+Verification:
+
+- `python -m pytest tests/test_d7_comparison_package_runner.py tests/test_d7_comparison_package_writer.py tests/test_qc_cli_d7_retrieval.py -q`
+  - Result: 22 passed.
+- `python -m ruff check scripts/run_d7_comparison_package.py scripts/write_d7_comparison_package.py qc_cli.py tests/test_d7_comparison_package_runner.py tests/test_d7_comparison_package_writer.py tests/test_qc_cli_d7_retrieval.py`
+  - Result: all checks passed.
+- `make docs-check`
+  - Result: Markdown links OK; doc coupling config valid; plan records
+    consistent; `AGENTS.md` in sync.
+- `git diff --check`
+  - Result: clean.
+- `make check`
+  - Result: 1302 passed, 1 skipped, 8 deselected; Ruff all checks passed;
+    docs-check passed; type check not yet configured.
+
+Claim boundary: this remains repeatability/provenance plumbing only. It is not
+held-out D7 evidence, live-baseline evidence, semantic disconfirmation
+validity, superiority evidence, methodological-validity evidence, or SOTA
+evidence.
 
 ---
 
