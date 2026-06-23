@@ -1,6 +1,6 @@
 # Plan #217: D7 Live Baseline Smoke Artifact
 
-**Status:** Planned
+**Status:** Completed
 **Type:** benchmark artifact
 **Priority:** High
 **Blocked By:** None
@@ -74,7 +74,7 @@ D7 benchmark surfaces.
 
 ## Files Affected
 
-- `docs/plans/D7_LIVE_BASELINE_SMOKE_ARTIFACT.md` - active plan.
+- `docs/plans/completed/D7_LIVE_BASELINE_SMOKE_ARTIFACT.md` - completed plan.
 - `docs/plans/CLAUDE.md` - active plan index.
 - `docs/plans/ACTIVE_SPRINT.md` - sprint checkpoint.
 - New benchmark artifact directory:
@@ -148,29 +148,91 @@ D7 benchmark surfaces.
 
 Feature-level criteria:
 
-- [ ] Artifact directory contains project shell, gold, live baseline package,
+- [x] Artifact directory contains project shell, gold, live baseline package,
   protocol, preflight, comparison report, package manifest, package replay
   report, artifact manifest/report, verification output, and README.
-- [ ] Live baseline package validates and contains one selected candidate for
+- [x] Live baseline package validates and contains one selected candidate for
   the synthetic claim.
-- [ ] D7 comparison preflight passes against the live baseline package.
-- [ ] Direct comparison report includes the live baseline row and records
+- [x] D7 comparison preflight passes against the live baseline package.
+- [x] Direct comparison report includes the live baseline row and records
   input-hash/command provenance.
-- [ ] Artifact verifier reports `status="verified"`.
-- [ ] Strict comparison package replay succeeds from the package manifest with
+- [x] Artifact verifier reports `status="verified"`.
+- [x] Strict comparison package replay succeeds from the package manifest with
   package-local `projects_dir`.
-- [ ] README/docs state this is live-baseline workflow smoke evidence only, not
+- [x] README/docs state this is live-baseline workflow smoke evidence only, not
   held-out D7 validity, live-baseline quality, or SOTA evidence.
 
 Process criteria:
 
-- [ ] Artifact commands pass or any live-run failure is recorded with concrete
+- [x] Artifact commands pass or any live-run failure is recorded with concrete
   error evidence and the next safe action.
-- [ ] Focused D7 regression tests pass.
-- [ ] `make docs-check` passes.
-- [ ] `git diff --check` passes.
-- [ ] `make check` passes.
-- [ ] Verified increment is committed and pushed.
+- [x] Focused D7 regression tests pass.
+- [x] `make docs-check` passes.
+- [x] `git diff --check` passes.
+- [x] `make check` passes.
+- [x] Verified increment is committed and pushed.
+
+---
+
+## Outcome
+
+Committed `docs/benchmarks/d7_live_baseline_smoke_2026_06_23/`, a synthetic D7
+live-baseline smoke artifact that runs the opt-in live candidate selector
+through validation, D7 comparison preflight, direct comparison, artifact
+verification, strict package writing, and strict package replay from a
+package-local `projects_dir`.
+
+Result summary:
+
+- Live baseline package: one target claim, one retrieved candidate, one live
+  selected candidate.
+- Baseline row: `live_candidate_selector_gpt_5_mini_lexical_bm25_top1`.
+- Direct comparison and package replay both report baseline
+  recall/precision/F1 = 1.0 / 1.0 / 1.0 on the synthetic exact anchor.
+- Direct comparison preflight: pass.
+- Metric criteria: 2 passed, 0 failed.
+- Artifact verification: verified.
+
+Implementation commit:
+`b1f78dad [Plan: D7_LIVE_SMOKE] Add D7 live baseline smoke artifact`
+
+Verification:
+
+- `make run-d7-live-baseline ID=d7_live_baseline_smoke_project PROJECTS_DIR=docs/benchmarks/d7_live_baseline_smoke_2026_06_23/projects OUTPUT=docs/benchmarks/d7_live_baseline_smoke_2026_06_23/live_baseline.json MODEL=gpt-5-mini TRACE_ID=qualitative_coding/d7-live-baseline-smoke-2026-06-23 MAX_BUDGET=1.0 CANDIDATES=1`
+  - Result: selected_candidate_count=1.
+- `make validate-d7-baseline-package PACKAGE=docs/benchmarks/d7_live_baseline_smoke_2026_06_23/live_baseline.json`
+  - Result: status=pass, selected_candidate_count=1.
+- `make validate-d7-gold GOLD=docs/benchmarks/d7_live_baseline_smoke_2026_06_23/gold.json`
+  - Result: valid, contrary_evidence_count=1.
+- `make validate-d7-comparison-protocol PROTOCOL=docs/benchmarks/d7_live_baseline_smoke_2026_06_23/protocol.json`
+  - Result: status=valid, expected_prediction_count=1,
+    metric_criteria_count=2.
+- `python scripts/preflight_d7_comparison.py docs/benchmarks/d7_live_baseline_smoke_2026_06_23/protocol.json docs/benchmarks/d7_live_baseline_smoke_2026_06_23/gold.json docs/benchmarks/d7_live_baseline_smoke_2026_06_23/live_baseline.json`
+  - Result: status=pass.
+- `make compare-d7-retrieval ID=d7_live_baseline_smoke_project PROJECTS_DIR=docs/benchmarks/d7_live_baseline_smoke_2026_06_23/projects GOLD=docs/benchmarks/d7_live_baseline_smoke_2026_06_23/gold.json PREDICTIONS=docs/benchmarks/d7_live_baseline_smoke_2026_06_23/live_baseline.json PROTOCOL=docs/benchmarks/d7_live_baseline_smoke_2026_06_23/protocol.json OUTPUT=docs/benchmarks/d7_live_baseline_smoke_2026_06_23/report.json ARTIFACT_DIR=docs/benchmarks/d7_live_baseline_smoke_2026_06_23/artifact`
+  - Result: report written, preflight=pass, baseline recall/precision/F1=1.0.
+- `python scripts/verify_d7_comparison_artifact.py docs/benchmarks/d7_live_baseline_smoke_2026_06_23/artifact/20260623T220928828002Z-d7_live_baseline_smoke_project-d7-comparison/manifest.json`
+  - Result: status=verified.
+- `python scripts/write_d7_comparison_package.py d7_live_baseline_smoke_project --projects-dir docs/benchmarks/d7_live_baseline_smoke_2026_06_23/projects --output docs/benchmarks/d7_live_baseline_smoke_2026_06_23/package.json --gold-file docs/benchmarks/d7_live_baseline_smoke_2026_06_23/gold.json --predictions-file docs/benchmarks/d7_live_baseline_smoke_2026_06_23/live_baseline.json --protocol-package docs/benchmarks/d7_live_baseline_smoke_2026_06_23/protocol.json --comparison-output package_replay_report.json`
+  - Result: status=complete, package `projects_dir="projects"`.
+- `python scripts/run_d7_comparison_package.py docs/benchmarks/d7_live_baseline_smoke_2026_06_23/package.json`
+  - Result: package replay report written, preflight=pass, baseline
+    recall/precision/F1=1.0.
+- `python -m pytest tests/test_d7_live_baseline.py tests/test_run_d7_live_baseline_script.py tests/test_qc_cli_d7_live_baseline.py tests/test_d7_comparison_guard.py tests/test_d7_comparison_package_runner.py tests/test_d7_comparison_package_writer.py -q`
+  - Result: 28 passed.
+- `make docs-check`
+  - Result: Markdown links OK; doc coupling config valid; plan records
+    consistent; `AGENTS.md` in sync.
+- `git diff --check`
+  - Result: clean.
+- `make check`
+  - Result: 1302 passed, 1 skipped, 8 deselected; Ruff all checks passed;
+    docs-check passed; type check not yet configured.
+
+Claim boundary: this is workflow/provenance smoke evidence only. It is not
+held-out D7 evidence, live-baseline quality evidence, semantic disconfirmation
+validity, superiority evidence, methodological-validity evidence, or SOTA
+evidence.
 
 ---
 

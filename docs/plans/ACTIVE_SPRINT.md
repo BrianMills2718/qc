@@ -28,13 +28,18 @@ highest-value documented lane.
    without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Plan #217
-`D7_LIVE_BASELINE_SMOKE_ARTIFACT.md` is active. The next slice commits a small
-synthetic D7 live-baseline smoke artifact proving that opt-in live candidate
-selection can be exported, validated, preflighted, compared, artifact-verified,
-and replayed from a strict package manifest using a repo-local project store.
-This is live-baseline workflow/provenance smoke evidence only, not held-out D7
-validity, live-baseline quality, superiority, methodological validity, or SOTA.
+**Active checkpoint:** None. Select the next highest-value documented lane from
+the roadmap and create its plan before implementation.
+
+**Completed checkpoint:** Plan #217
+`completed/D7_LIVE_BASELINE_SMOKE_ARTIFACT.md` committed a synthetic D7
+live-baseline smoke artifact proving that opt-in live candidate selection can
+be exported, validated, preflighted, compared, artifact-verified, and replayed
+from a strict package manifest using a repo-local project store. The live
+baseline recovered the one synthetic exact anchor in direct comparison and
+package replay. This is live-baseline workflow/provenance smoke evidence only,
+not held-out D7 validity, live-baseline quality, superiority, methodological
+validity, or SOTA.
 
 **Completed checkpoint:** Plan #216
 `completed/INV7_HELDOUT_LIVE_BENCHMARK_V1.md` committed a broader external
