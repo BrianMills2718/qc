@@ -177,6 +177,43 @@ def test_compare_d7_retrieval_writes_artifact_package(
     assert "not held-out D7 evidence" in manifest["claim_discipline"]["caveat"]
 
 
+def test_compare_d7_retrieval_accepts_projects_dir(tmp_path, capsys):
+    state, _store = _saved_state(tmp_path)
+    package = _prediction_package(state)
+    prediction_path = _write_json(tmp_path / "predictions.json", package)
+    gold = _gold_package(package)
+    gold_path = _write_json(tmp_path / "gold.json", gold)
+    protocol = _protocol_for(
+        package,
+        gold,
+        prediction_file_sha256=_sha256_file(prediction_path),
+    )
+    protocol_path = _write_json(tmp_path / "protocol.json", protocol)
+    output_path = tmp_path / "report.json"
+    projects_dir = tmp_path / "projects"
+
+    exit_code = compare_d7_retrieval.main([
+        state.id,
+        "--projects-dir",
+        str(projects_dir),
+        "--gold-file",
+        str(gold_path),
+        "--predictions-file",
+        str(prediction_path),
+        "--protocol-package",
+        str(protocol_path),
+        "--output",
+        str(output_path),
+    ])
+
+    output = json.loads(capsys.readouterr().out)
+    written = json.loads(output_path.read_text(encoding="utf-8"))
+    assert exit_code == 0
+    assert output == written
+    assert output["project_id"] == state.id
+    assert output["preflight_report"]["status"] == "pass"
+
+
 def test_compare_d7_retrieval_guard_includes_metric_criteria_results(
     tmp_path,
     monkeypatch,

@@ -902,6 +902,7 @@ Examples:
         description='Score D7 retrieval prediction packages against one gold file',
     )
     d7_comparison_parser.add_argument('project_id', help='Project ID to score')
+    d7_comparison_parser.add_argument('--projects-dir', help='Optional project store directory')
     d7_comparison_parser.add_argument('--gold-file', required=True, help='D7 gold JSON file')
     d7_comparison_parser.add_argument(
         '--predictions-file',
@@ -2036,6 +2037,8 @@ def handle_compare_d7_retrieval_command(args) -> int:
     from scripts import compare_d7_retrieval
 
     argv = [args.project_id, "--gold-file", args.gold_file]
+    if args.projects_dir is not None:
+        argv[1:1] = ["--projects-dir", args.projects_dir]
     for prediction_file in args.predictions_file:
         argv.extend(["--predictions-file", prediction_file])
     if args.output is not None:

@@ -184,6 +184,42 @@ def test_qc_cli_compare_d7_retrieval_forwards_flags(monkeypatch):
     ]
 
 
+def test_qc_cli_compare_d7_retrieval_forwards_projects_dir(monkeypatch):
+    captured = {}
+
+    def fake_main(argv):
+        captured["argv"] = argv
+        return 0
+
+    monkeypatch.setattr(compare_d7_retrieval, "main", fake_main)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "qc_cli.py",
+            "compare-d7-retrieval",
+            "project-123",
+            "--projects-dir",
+            "portable_projects",
+            "--gold-file",
+            "d7_gold.json",
+            "--predictions-file",
+            "lexical.json",
+        ],
+    )
+
+    assert qc_cli.main() == 0
+    assert captured["argv"] == [
+        "project-123",
+        "--projects-dir",
+        "portable_projects",
+        "--gold-file",
+        "d7_gold.json",
+        "--predictions-file",
+        "lexical.json",
+    ]
+
+
 def test_qc_cli_verify_d7_comparison_artifact_forwards_path(monkeypatch):
     captured = {}
 

@@ -117,6 +117,9 @@ Each dimension maps to a SOTA claim and (where relevant) an invariant. The bar i
 - D7 retrieval export may also load from an explicit project store via
   `PROJECTS_DIR=path` / `--projects-dir path`; this mirrors the Phase 0
   portability pattern for producing portable retrieval prediction packages.
+- D7 retrieval comparison may load from the same explicit project store via
+  `PROJECTS_DIR=path` / `--projects-dir path`; this is portable comparison
+  artifact plumbing only, not held-out D7 evidence by itself.
 - `qc_cli.py write-phase0-adjudication-package ...` delegates to the same
   strict Phase 0 adjudication package writer as
   `make write-phase0-adjudication-package`; this is CLI parity for manifest
@@ -151,6 +154,11 @@ Each dimension maps to a SOTA claim and (where relevant) an invariant. The bar i
   --projects-dir path ...` delegates that project-store path to
   `scripts/run_d7_retrieval.py`. This is a canonical execution surface for
   portable package production, not held-out D7 evidence by itself.
+- D7 retrieval comparison CLI portability:
+  `qc_cli.py compare-d7-retrieval <project_id> --projects-dir path ...`
+  delegates that project-store path to `scripts/compare_d7_retrieval.py`.
+  This is a canonical execution surface for portable comparison artifacts, not
+  held-out D7 evidence by itself.
 - **D7 live baseline CLI aliases:** `qc_cli.py run-d7-live-baseline <project_id> --output live_baseline.json --model ...` delegates to `scripts/run_d7_live_baseline.py`, which writes an opt-in live candidate-selection baseline package for `BASELINES=`. D7 comparison protocol/preflight can now guard those live packages when the protocol declares `baseline_mode="live_candidate_selector"` and the expected model/config metadata. This is a package generator and preflight substrate over bounded retrieval candidates, not a committed held-out D7 result, unbounded generic ChatGPT baseline, or superiority claim.
 - **INV-7 fixture CLI aliases:** `qc_cli.py run-inv7-fixtures --output inv7.json` delegates to `scripts/run_inv7_fixtures.py`, and `qc_cli.py run-inv7-live-fixtures --output inv7_live.json --model ... [--fixtures manifest.json]` delegates to `scripts/run_inv7_live_fixtures.py`. `qc_cli.py validate-inv7-package`, `qc_cli.py validate-inv7-live-protocol`, and `qc_cli.py inv7-live-preflight` delegate to the canonical validation/preflight scripts. These generate or validate scorecard-compatible fixture packages only; external fixture manifests enable governed held-out execution, but no held-out benchmark evidence exists until a registered live run is executed, preflighted, and scored.
 - **D9 protocol input surface:** `make validate-d9-interpretive-preference-protocol PROTOCOL=protocol.json` / `scripts/validate_d9_interpretive_preference_protocol.py protocol.json` validates pre-evaluation D9 blind preference protocol metadata before forced-choice outcomes are collected or scored. `make d9-interpretive-preference-preflight PROTOCOL=protocol.json PREFERENCE=preference.json` / `scripts/preflight_d9_interpretive_preference_protocol.py protocol.json --preference-file preference.json` checks concrete D9 preference results against the registered protocol before scoring. `make bench D9_PROTOCOL=protocol.json PREFERENCE=preference.json` / `scripts/bench_phase0.py --d9-interpretive-preference-protocol-file protocol.json --interpretive-preference-file preference.json` enforces the same preflight at score time, blocks scorecard/output/artifact writes when it fails, records `_meta.preflight_reports.d9_interpretive_preference` when it passes, and uses the supplied protocol metadata for local D9 non-inferiority assessment without mutating saved project state. These validators and guards are orchestration/provenance only, not populated held-out benchmark evidence.

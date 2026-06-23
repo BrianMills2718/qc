@@ -42,6 +42,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         description="Score D7 retrieval prediction packages against one gold file"
     )
     parser.add_argument("project_id", help="Project ID to score")
+    parser.add_argument("--projects-dir", type=Path, help="Optional project store directory")
     parser.add_argument("--gold-file", required=True, type=Path, help="D7 gold JSON file")
     parser.add_argument(
         "--predictions-file",
@@ -63,7 +64,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
 
-    store = ProjectStore()
+    store = ProjectStore(projects_dir=args.projects_dir) if args.projects_dir else ProjectStore()
     try:
         state = store.load(args.project_id)
         gold_payload = load_d7_gold_file(args.gold_file)
