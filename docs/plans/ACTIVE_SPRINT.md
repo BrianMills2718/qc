@@ -28,13 +28,17 @@ highest-value documented lane.
    without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Plan #210
-`INV7_EXTERNAL_HELDOUT_SMOKE_ARTIFACT.md` is active. The next slice uses the
-external manifest runner from Plan #209 to generate a small protocol-registered
-external held-out INV-7 smoke artifact. This may spend live-model budget up to
-`max_budget=0.75` and remains a smoke artifact only, not prompt-injection
-robustness evidence, model-obedience proof, methodological-validity evidence,
-or SOTA evidence.
+**Active checkpoint:** No implementation plan is active. Plan #210
+`completed/INV7_EXTERNAL_HELDOUT_SMOKE_ARTIFACT.md` is complete. The external
+held-out smoke artifact produced 3 passing live fixtures and a Phase 0
+scorecard with passing INV-7 protocol/result preflight metadata. This is a
+small smoke artifact only, not prompt-injection robustness evidence,
+model-obedience proof, methodological-validity evidence, or SOTA evidence.
+
+**Completed checkpoint:** Plan #210
+`completed/INV7_EXTERNAL_HELDOUT_SMOKE_ARTIFACT.md` committed a
+protocol-registered 3-fixture external held-out INV-7 smoke artifact at
+`docs/benchmarks/inv7_external_heldout_smoke_2026_06_23/`.
 
 **Completed checkpoint:** Plan #209
 `completed/INV7_HELD_OUT_FIXTURE_MANIFEST_RUNNER.md` added external INV-7 live

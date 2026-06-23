@@ -1,10 +1,61 @@
 # Plan #210: INV-7 External Held-Out Smoke Artifact
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** #209
 **Blocks:** broader held-out/adversarial INV-7 benchmark execution
+
+---
+
+## Outcome
+
+Committed a protocol-registered external INV-7 held-out smoke artifact at
+`docs/benchmarks/inv7_external_heldout_smoke_2026_06_23/`:
+
+- `manifest.json` - external schema_version=1 live fixture manifest.
+- `protocol.json` - held-out protocol metadata with exact prompt hashes.
+- `result.json` - live `gpt-5-mini` result package produced through
+  `FIXTURES=manifest.json`.
+- `preflight.json` - protocol/result preflight report with `status="pass"`.
+- `scorecard.json` - Phase 0 scorecard with
+  `_meta.preflight_reports.inv7_live.status="pass"`.
+- `README.md` - command replay instructions, result summary, and claim caveats.
+- `projects/inv7_external_heldout_smoke_project.json` - synthetic project shell
+  used only for scorecard reproducibility.
+
+The live run produced 3 fixture outcomes, all passing:
+`attack_success_rate=0.0`; the Wilson 95% upper bound is approximately
+`0.5615` because the denominator is only 3. D10 cost remains `not_available`
+because no matching `llm_calls` rows were found for the exact trace selector;
+no cost was estimated from runner fallback text.
+
+Implementation commit: `69a32e00`
+(`[Plan: INV7_HELDOUT_SMOKE] Add external held-out smoke artifact`).
+
+Verification:
+
+- `make validate-inv7-live-protocol PROTOCOL=docs/benchmarks/inv7_external_heldout_smoke_2026_06_23/protocol.json`
+  -> valid protocol, 3 fixtures.
+- `make run-inv7-live-fixtures OUTPUT=docs/benchmarks/inv7_external_heldout_smoke_2026_06_23/result.json MODEL=gpt-5-mini TRACE_ID=qualitative_coding/inv7-external-heldout-smoke-2026-06-23 MAX_BUDGET=0.75 FIXTURES=docs/benchmarks/inv7_external_heldout_smoke_2026_06_23/manifest.json`
+  -> 3 passed, 0 failed.
+- `make validate-inv7-package PACKAGE=docs/benchmarks/inv7_external_heldout_smoke_2026_06_23/result.json`
+  -> valid package, 3 passed, 0 failed.
+- `make inv7-live-preflight PROTOCOL=docs/benchmarks/inv7_external_heldout_smoke_2026_06_23/protocol.json PACKAGE=docs/benchmarks/inv7_external_heldout_smoke_2026_06_23/result.json`
+  -> `status="pass"`.
+- `python scripts/bench_phase0.py inv7_external_heldout_smoke_project --projects-dir docs/benchmarks/inv7_external_heldout_smoke_2026_06_23/projects --prompt-injection-file docs/benchmarks/inv7_external_heldout_smoke_2026_06_23/result.json --inv7-live-protocol-file docs/benchmarks/inv7_external_heldout_smoke_2026_06_23/protocol.json --trace-id qualitative_coding/inv7-external-heldout-smoke-2026-06-23 --output docs/benchmarks/inv7_external_heldout_smoke_2026_06_23/scorecard.json`
+  -> scorecard written with `total_fixtures=3`, `passed=3`, `failed=0`, and
+  INV-7 preflight status `pass`.
+- `python -m pytest tests/test_inv7_fixture_runner.py tests/test_inv7_prompt_injection_package.py tests/test_inv7_live_protocol.py tests/test_inv7_live_preflight.py tests/test_bench_phase0_script.py -k "inv7 or prompt_injection" -q`
+  -> 35 passed, 42 deselected.
+- `make docs-check` -> passed.
+- `git diff --check` -> passed.
+- `make check` -> 1293 passed, 1 skipped, 8 deselected; Ruff and docs gates
+  passed.
+
+This is a small external held-out smoke artifact, not a full held-out
+adversarial benchmark. It is not prompt-injection robustness evidence,
+model-obedience proof, methodological-validity evidence, or a SOTA claim.
 
 ---
 
@@ -138,26 +189,26 @@ This lane exercises already tested script/Make/CLI surfaces.
 
 Feature-level criteria:
 
-- [ ] External `manifest.json` validates through the runner and contains
+- [x] External `manifest.json` validates through the runner and contains
   non-built-in fixture IDs/prompts.
-- [ ] Held-out protocol validates before execution.
-- [ ] Live result package validates and carries manifest metadata/prompt
+- [x] Held-out protocol validates before execution.
+- [x] Live result package validates and carries manifest metadata/prompt
   hashes.
-- [ ] Preflight report has `status="pass"`.
-- [ ] Scorecard includes `prompt_injection_inv7` for the external manifest
+- [x] Preflight report has `status="pass"`.
+- [x] Scorecard includes `prompt_injection_inv7` for the external manifest
   result and `_meta.preflight_reports.inv7_live.status="pass"`.
-- [ ] README/status docs state this is a small external held-out smoke
+- [x] README/status docs state this is a small external held-out smoke
   artifact, not prompt-injection robustness evidence, model-obedience proof,
   methodological-validity evidence, or SOTA evidence.
 
 Process criteria:
 
-- [ ] Required validation/preflight/score commands pass.
-- [ ] Focused INV-7 tests pass.
-- [ ] `make docs-check` passes.
-- [ ] `git diff --check` passes.
-- [ ] `make check` passes.
-- [ ] Verified increment is committed and pushed.
+- [x] Required validation/preflight/score commands pass.
+- [x] Focused INV-7 tests pass.
+- [x] `make docs-check` passes.
+- [x] `git diff --check` passes.
+- [x] `make check` passes.
+- [x] Verified increment is committed and pushed.
 
 ---
 

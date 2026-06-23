@@ -6,12 +6,12 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 210 | INV-7 External Held-Out Smoke Artifact | High | Planned | `INV7_EXTERNAL_HELDOUT_SMOKE_ARTIFACT.md` |
 
 ## Completed Plans
 
 | Name | Outcome | Record |
 |------|---------|--------|
+| INV-7 external held-out smoke artifact | A protocol-registered 3-fixture external held-out INV-7 smoke artifact is committed and scored with passing preflight, while remaining explicitly non-evidentiary for robustness, model obedience, methodological validity, or SOTA | `completed/INV7_EXTERNAL_HELDOUT_SMOKE_ARTIFACT.md` |
 | INV-7 held-out fixture manifest runner | `run-inv7-live-fixtures` now accepts schema_version=1 external live fixture manifests through script, Make, and `qc_cli.py`, preserving manifest split/provenance metadata and enforcing held-out prompt-frozen/contamination/pre-run-registration invariants without claiming held-out evidence | `completed/INV7_HELD_OUT_FIXTURE_MANIFEST_RUNNER.md` |
 | Graph and review UI clarity fixes | Review UI now labels bulk approval as code-only, and Graph UI now survives tab switches, explains flat code hierarchies, and renders relationship/entity edges that were already present in graph API data | `completed/GRAPH_REVIEW_UI_CLARITY_FIXES.md` |
 | Review UI orientation aids | Browser review UI now includes a visible Start Here checklist, legend chips, tab-specific What to Inspect guidance, and tooltips/ARIA labels for ambiguous controls and metrics without changing review APIs or decision semantics | `completed/REVIEW_UI_ORIENTATION_AIDS.md` |
