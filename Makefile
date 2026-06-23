@@ -1,4 +1,4 @@
-.PHONY: help test test-quick test-e2e test-all bench bench-package verify-phase0-benchmark-artifact write-phase0-adjudication-package validate-d3-gold validate-d7-gold validate-d3-baseline-package validate-d7-baseline-package validate-inv7-package validate-inv7-live-protocol inv7-live-preflight compare-inv7-packages validate-d6-bias-protocol d6-bias-preflight validate-d4-codebook-quality-protocol d4-codebook-quality-preflight validate-d8-gt-fidelity-protocol d8-gt-fidelity-preflight validate-d9-interpretive-preference-protocol d9-interpretive-preference-preflight validate-confidence-calibration-protocol confidence-calibration-preflight validate-theoretical-sampling-protocol theoretical-sampling-preflight export-theoretical-sampling-candidates export-theoretical-sampling-results validate-d3-comparison-protocol d3-comparison-preflight validate-d7-comparison-protocol d7-comparison-preflight validate-adjudication-responses validate-adjudication-protocol adjudication-protocol-preflight adjudication-response-preflight import-adjudication-responses lint-scope-phrasing lint-prompt-overrides export-audit-manifest verify-export-audit-manifest export-publish-preflight verify-export-audit-log mirror-export-audit-db verify-export-audit-db run-d7-retrieval run-d7-live-baseline compare-d7-retrieval write-d7-comparison-package compare-d7-package verify-d7-comparison-artifact run-inv7-fixtures run-inv7-live-fixtures adjudication-sample reviewer-demo check lint docs-check clean status cost errors
+.PHONY: help test test-quick test-e2e test-all bench bench-package verify-phase0-benchmark-artifact write-phase0-adjudication-package validate-d3-gold validate-d7-gold validate-d3-baseline-package validate-d7-baseline-package validate-inv7-package validate-inv7-live-protocol inv7-live-preflight compare-inv7-packages validate-d6-bias-protocol d6-bias-preflight validate-d4-codebook-quality-protocol d4-codebook-quality-preflight validate-d8-gt-fidelity-protocol d8-gt-fidelity-preflight validate-sampling-frame-adequacy-protocol sampling-frame-adequacy-preflight validate-d9-interpretive-preference-protocol d9-interpretive-preference-preflight validate-confidence-calibration-protocol confidence-calibration-preflight validate-theoretical-sampling-protocol theoretical-sampling-preflight export-theoretical-sampling-candidates export-theoretical-sampling-results validate-d3-comparison-protocol d3-comparison-preflight validate-d7-comparison-protocol d7-comparison-preflight validate-adjudication-responses validate-adjudication-protocol adjudication-protocol-preflight adjudication-response-preflight import-adjudication-responses lint-scope-phrasing lint-prompt-overrides export-audit-manifest verify-export-audit-manifest export-publish-preflight verify-export-audit-log mirror-export-audit-db verify-export-audit-db run-d7-retrieval run-d7-live-baseline compare-d7-retrieval write-d7-comparison-package compare-d7-package verify-d7-comparison-artifact run-inv7-fixtures run-inv7-live-fixtures adjudication-sample reviewer-demo check lint docs-check clean status cost errors
 
 DAYS ?= 7
 PROJECT ?= qualitative_coding
@@ -139,6 +139,21 @@ ifndef GT_FIDELITY
 	$(error GT_FIDELITY is required. Usage: make d8-gt-fidelity-preflight PROTOCOL=protocol.json GT_FIDELITY=gt_fidelity.json)
 endif
 	python scripts/preflight_d8_gt_fidelity_protocol.py $(PROTOCOL) --gt-fidelity-file $(GT_FIDELITY)
+
+validate-sampling-frame-adequacy-protocol:  ## Validate a sampling-frame adequacy protocol (PROTOCOL=protocol.json)
+ifndef PROTOCOL
+	$(error PROTOCOL is required. Usage: make validate-sampling-frame-adequacy-protocol PROTOCOL=protocol.json)
+endif
+	python scripts/validate_sampling_frame_adequacy_protocol.py $(PROTOCOL)
+
+sampling-frame-adequacy-preflight:  ## Preflight sampling-frame adequacy results against a protocol (PROTOCOL=protocol.json ADEQUACY=adequacy.json)
+ifndef PROTOCOL
+	$(error PROTOCOL is required. Usage: make sampling-frame-adequacy-preflight PROTOCOL=protocol.json ADEQUACY=adequacy.json)
+endif
+ifndef ADEQUACY
+	$(error ADEQUACY is required. Usage: make sampling-frame-adequacy-preflight PROTOCOL=protocol.json ADEQUACY=adequacy.json)
+endif
+	python scripts/preflight_sampling_frame_adequacy_protocol.py $(PROTOCOL) --adequacy-file $(ADEQUACY)
 
 validate-d9-interpretive-preference-protocol:  ## Validate a pre-evaluation D9 interpretive-preference protocol (PROTOCOL=protocol.json)
 ifndef PROTOCOL

@@ -68,6 +68,10 @@ make confidence-calibration-preflight PROTOCOL=protocol.json CALIBRATION=calibra
 python qc_cli.py validate-confidence-calibration-protocol protocol.json  # Canonical CLI wrapper for confidence-calibration protocol validation
 python qc_cli.py confidence-calibration-preflight protocol.json --calibration-file calibration.json  # Canonical CLI wrapper for confidence-calibration protocol/result preflight
 make bench ID=<project_id> CONFIDENCE_PROTOCOL=protocol.json CALIBRATION=calibration.json  # Guard calibration scoring with protocol preflight
+make validate-sampling-frame-adequacy-protocol PROTOCOL=protocol.json  # Validate pre-evaluation sampling-frame adequacy protocol metadata
+make sampling-frame-adequacy-preflight PROTOCOL=protocol.json ADEQUACY=adequacy.json  # Preflight sampling-frame adequacy result file against protocol
+python qc_cli.py validate-sampling-frame-adequacy-protocol protocol.json  # Canonical CLI wrapper for sampling-frame adequacy protocol validation
+python qc_cli.py sampling-frame-adequacy-preflight protocol.json --adequacy-file adequacy.json  # Canonical CLI wrapper for sampling-frame adequacy protocol/result preflight
 make bench ID=<project_id> GOLD=gold.json BASELINES=baselines.json  # Add external D7 gold/baselines without mutating project state
 make bench ID=<project_id> BIAS_STRATIFIED=bias_stratified.json  # Add external D6 stratified correctness rows without mutating state
 make bench ID=<project_id> PROMPT_INJECTION=inv7.json  # Add external INV-7 fixture results without mutating state

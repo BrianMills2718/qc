@@ -59,6 +59,8 @@ Examples:
   qc_cli d6-bias-preflight d6_protocol.json --stratified-file stratified.json --counterfactual-file counterfactual.json
   qc_cli validate-d8-gt-fidelity-protocol d8_protocol.json
   qc_cli d8-gt-fidelity-preflight d8_protocol.json --gt-fidelity-file gt_fidelity.json
+  qc_cli validate-sampling-frame-adequacy-protocol sampling_frame_protocol.json
+  qc_cli sampling-frame-adequacy-preflight sampling_frame_protocol.json --adequacy-file adequacy.json
   qc_cli validate-d9-interpretive-preference-protocol d9_protocol.json
   qc_cli d9-interpretive-preference-preflight d9_protocol.json --preference-file preference.json
   qc_cli validate-confidence-calibration-protocol confidence_protocol.json
@@ -613,6 +615,30 @@ Examples:
     d8_preflight_parser.add_argument(
         '--gt-fidelity-file',
         help='Optional D8 GT-fidelity result JSON file',
+    )
+
+    sampling_frame_protocol_validator_parser = subparsers.add_parser(
+        'validate-sampling-frame-adequacy-protocol',
+        help='Validate a sampling-frame adequacy protocol package',
+        description='Validate a schema_version=1 sampling-frame adequacy protocol package',
+    )
+    sampling_frame_protocol_validator_parser.add_argument(
+        'protocol',
+        help='Path to a schema_version=1 sampling-frame adequacy protocol JSON',
+    )
+
+    sampling_frame_preflight_parser = subparsers.add_parser(
+        'sampling-frame-adequacy-preflight',
+        help='Preflight sampling-frame adequacy results',
+        description='Preflight sampling-frame adequacy results against a registered protocol',
+    )
+    sampling_frame_preflight_parser.add_argument(
+        'protocol',
+        help='Path to a schema_version=1 sampling-frame adequacy protocol JSON',
+    )
+    sampling_frame_preflight_parser.add_argument(
+        '--adequacy-file',
+        help='Optional sampling-frame adequacy result JSON file',
     )
 
     d9_protocol_validator_parser = subparsers.add_parser(
@@ -1496,6 +1522,10 @@ def main() -> int:
             return handle_validate_d8_gt_fidelity_protocol_command(args)
         elif args.command == 'd8-gt-fidelity-preflight':
             return handle_d8_gt_fidelity_preflight_command(args)
+        elif args.command == 'validate-sampling-frame-adequacy-protocol':
+            return handle_validate_sampling_frame_adequacy_protocol_command(args)
+        elif args.command == 'sampling-frame-adequacy-preflight':
+            return handle_sampling_frame_adequacy_preflight_command(args)
         elif args.command == 'validate-d9-interpretive-preference-protocol':
             return handle_validate_d9_interpretive_preference_protocol_command(args)
         elif args.command == 'd9-interpretive-preference-preflight':
@@ -1856,6 +1886,23 @@ def handle_d8_gt_fidelity_preflight_command(args) -> int:
     if args.gt_fidelity_file is not None:
         argv.extend(["--gt-fidelity-file", args.gt_fidelity_file])
     return preflight_d8_gt_fidelity_protocol.main(argv)
+
+
+def handle_validate_sampling_frame_adequacy_protocol_command(args) -> int:
+    """Validate a sampling-frame adequacy protocol through the canonical CLI."""
+    from scripts import validate_sampling_frame_adequacy_protocol
+
+    return validate_sampling_frame_adequacy_protocol.main([args.protocol])
+
+
+def handle_sampling_frame_adequacy_preflight_command(args) -> int:
+    """Preflight sampling-frame adequacy results through the canonical CLI."""
+    from scripts import preflight_sampling_frame_adequacy_protocol
+
+    argv = [args.protocol]
+    if args.adequacy_file is not None:
+        argv.extend(["--adequacy-file", args.adequacy_file])
+    return preflight_sampling_frame_adequacy_protocol.main(argv)
 
 
 def handle_validate_d9_interpretive_preference_protocol_command(args) -> int:
