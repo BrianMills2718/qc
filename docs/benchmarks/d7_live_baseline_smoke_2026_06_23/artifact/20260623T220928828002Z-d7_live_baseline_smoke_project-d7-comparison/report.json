@@ -1,0 +1,319 @@
+{
+  "schema_version": 1,
+  "report_type": "qualitative_coding.d7_retrieval_comparison",
+  "project_id": "d7_live_baseline_smoke_project",
+  "project_name": "D7 live baseline smoke project",
+  "package_count": 1,
+  "baseline_count": 1,
+  "disconfirmation_d7": {
+    "status": "scored",
+    "gold_source": "ProjectState.config.extra['disconfirmation_gold']",
+    "note": "Exact target-claim/source-anchor D7 score. This is a measurement substrate, not a SOTA/parity claim without a held-out adjudicated benchmark.",
+    "gold_count": 1,
+    "predicted_count": 0,
+    "true_positives": 0,
+    "false_positives": 0,
+    "false_negatives": 1,
+    "recall": 0.0,
+    "precision": 0.0,
+    "f1": 0.0,
+    "recall_ci": {
+      "method": "wilson",
+      "confidence_level": 0.95,
+      "successes": 0,
+      "denominator": 1,
+      "lower": 0.0,
+      "upper": 0.7934506856227626
+    },
+    "precision_ci": {
+      "method": "wilson",
+      "confidence_level": 0.95,
+      "successes": 0,
+      "denominator": 0,
+      "lower": null,
+      "upper": null,
+      "note": "undefined denominator"
+    },
+    "matched_gold_keys": [],
+    "missed_gold_keys": [
+      "claim-ai-workflow|d1|0:166"
+    ],
+    "extra_predicted_keys": [],
+    "unscored_predicted_anchors": [],
+    "f1_bootstrap_ci": {
+      "method": "key_universe_bootstrap",
+      "metric": "f1",
+      "confidence_level": 0.95,
+      "samples": 1000,
+      "seed": 0,
+      "unit": "exact gold/prediction anchor key",
+      "population_size": 1,
+      "note": "Deterministic bootstrap over exact gold/prediction keys. This is local uncertainty metadata, not a held-out superiority or non-inferiority test.",
+      "lower": 0.0,
+      "upper": 0.0
+    },
+    "gold_provenance": {
+      "schema_version": 1,
+      "gold_set_id": "d7-live-baseline-smoke-2026-06-23",
+      "dataset_name": "Synthetic D7 live baseline smoke fixture",
+      "split": "held_out",
+      "corpus_sha256": "68aef519249e4d0536449a7498778133db276998df8d543219832303fde7772b",
+      "project_state_sha256": "6e6940da77d10a6f537c47171a6e45bb831955d93915263df9af8aed6837e4bc",
+      "prompt_frozen": true,
+      "contamination_checked": true,
+      "adjudication": {
+        "coder_count": 2,
+        "adjudicator": "synthetic-fixture-generator",
+        "protocol": "Synthetic smoke fixture: exact contrary span is pre-specified for workflow verification only.",
+        "human_human_agreement": null,
+        "notes": "Synthetic smoke fixture aligned to the live-selected candidate span to verify D7 live-baseline package plumbing; this is not expert adjudication or methodological-validity evidence."
+      },
+      "contrary_evidence_count": 1
+    },
+    "system_gold_agreement": {
+      "status": "scored",
+      "unit": "exact target-claim/source-anchor key",
+      "raters": [
+        "gold",
+        "system"
+      ],
+      "row_count": 1,
+      "gold_positive_count": 1,
+      "system_positive_count": 0,
+      "percent_agreement": 0.0,
+      "cohens_kappa": 0.0,
+      "gwet_ac1": -1.0,
+      "krippendorff_alpha": 0.0,
+      "prevalence": {
+        "row_count": 1,
+        "rating_count": 2,
+        "ratings_per_row": 2,
+        "categories": {
+          "absent": {
+            "count": 1,
+            "rate": 0.5
+          },
+          "present": {
+            "count": 1,
+            "rate": 0.5
+          }
+        },
+        "row_patterns": {
+          "all_absent": 0,
+          "all_present": 0,
+          "mixed": 1
+        },
+        "note": "Rating prevalence for interpreting \u03ba and AC1 under sparse labels."
+      },
+      "note": "Binary agreement over the exact D7 key universe only. This is prevalence-aware agreement metadata, not semantic disconfirmation validity or held-out benchmark evidence."
+    },
+    "span_overlap": {
+      "metric": "char_span_iou_same_target_claim_doc",
+      "matching_rule": "same_target_claim_id_and_doc_id",
+      "note": "Local span-overlap diagnostic for D7 exact-score outputs. It is not semantic disconfirmation validity, held-out benchmark evidence, or expert-parity evidence.",
+      "gold_span_count": 1,
+      "predicted_span_count": 0,
+      "unscored_gold_count": 0,
+      "unscored_predicted_count": 0,
+      "status": "not_available",
+      "reason": "No system contrary anchors with char-span offsets are available for IoU scoring."
+    },
+    "human_ceiling_comparison": {
+      "metric_source": "gold_provenance.adjudication.human_human_agreement",
+      "comparable_metric_keys": [
+        "recall",
+        "precision",
+        "f1"
+      ],
+      "note": "D7 human-ceiling comparison over exact-score metrics only. This is not expert-parity evidence unless the gold package is held-out, prompt-frozen, contamination-checked, and human-adjudicated.",
+      "gold_set_id": "d7-live-baseline-smoke-2026-06-23",
+      "gold_split": "held_out",
+      "prompt_frozen": true,
+      "contamination_checked": true,
+      "status": "not_available",
+      "reason": "Gold-set adjudication has no human_human_agreement metrics."
+    },
+    "baselines": {
+      "live_candidate_selector_gpt_5_mini_lexical_bm25_top1": {
+        "gold_count": 1,
+        "predicted_count": 1,
+        "true_positives": 1,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "recall": 1.0,
+        "precision": 1.0,
+        "f1": 1.0,
+        "recall_ci": {
+          "method": "wilson",
+          "confidence_level": 0.95,
+          "successes": 1,
+          "denominator": 1,
+          "lower": 0.20654931437723745,
+          "upper": 1.0
+        },
+        "precision_ci": {
+          "method": "wilson",
+          "confidence_level": 0.95,
+          "successes": 1,
+          "denominator": 1,
+          "lower": 0.20654931437723745,
+          "upper": 1.0
+        },
+        "matched_gold_keys": [
+          "claim-ai-workflow|d1|0:166"
+        ],
+        "missed_gold_keys": [],
+        "extra_predicted_keys": [],
+        "unscored_predicted_anchors": [],
+        "f1_bootstrap_ci": {
+          "method": "key_universe_bootstrap",
+          "metric": "f1",
+          "confidence_level": 0.95,
+          "samples": 1000,
+          "seed": 0,
+          "unit": "exact gold/prediction anchor key",
+          "population_size": 1,
+          "note": "Deterministic bootstrap over exact gold/prediction keys. This is local uncertainty metadata, not a held-out superiority or non-inferiority test.",
+          "lower": 1.0,
+          "upper": 1.0
+        },
+        "description": "Live D7 candidate-selection baseline: model=gpt-5-mini, retrieval_mode=lexical_bm25, candidates_per_claim=1.",
+        "span_overlap": {
+          "metric": "char_span_iou_same_target_claim_doc",
+          "matching_rule": "same_target_claim_id_and_doc_id",
+          "note": "Local span-overlap diagnostic for D7 exact-score outputs. It is not semantic disconfirmation validity, held-out benchmark evidence, or expert-parity evidence.",
+          "gold_span_count": 1,
+          "predicted_span_count": 1,
+          "unscored_gold_count": 0,
+          "unscored_predicted_count": 0,
+          "status": "scored",
+          "mean_best_gold_iou": 1.0,
+          "mean_best_predicted_iou": 1.0,
+          "mean_best_gold_modified_hausdorff_distance": 0.0,
+          "mean_best_predicted_modified_hausdorff_distance": 0.0,
+          "gold_best_overlaps": [
+            {
+              "gold_key": "claim-ai-workflow|d1|0:166",
+              "best_predicted_key": "claim-ai-workflow|d1|0:166",
+              "best_iou": 1.0,
+              "best_modified_hausdorff_distance": 0.0
+            }
+          ],
+          "predicted_best_overlaps": [
+            {
+              "predicted_key": "claim-ai-workflow|d1|0:166",
+              "best_gold_key": "claim-ai-workflow|d1|0:166",
+              "best_iou": 1.0,
+              "best_modified_hausdorff_distance": 0.0
+            }
+          ]
+        },
+        "system_minus_baseline": {
+          "recall": -1.0,
+          "precision": -1.0,
+          "f1": -1.0
+        },
+        "system_minus_baseline_ci": {
+          "method": "paired_key_universe_bootstrap",
+          "confidence_level": 0.95,
+          "samples": 1000,
+          "seed": 0,
+          "unit": "exact gold/system/baseline anchor key",
+          "population_size": 1,
+          "note": "Deterministic paired bootstrap over exact gold/system/baseline keys. This is local uncertainty metadata, not a held-out superiority test.",
+          "deltas": {
+            "recall": {
+              "lower": -1.0,
+              "upper": -1.0
+            },
+            "precision": {
+              "lower": -1.0,
+              "upper": -1.0
+            },
+            "f1": {
+              "lower": -1.0,
+              "upper": -1.0
+            }
+          }
+        }
+      }
+    },
+    "baseline_note": "Baseline scores use the same exact D7 anchor matching as the system. System deltas include local paired exact-key bootstrap intervals; superiority still requires held-out data and prompt_eval-backed testing."
+  },
+  "note": "D7 retrieval comparison reports exact-span point estimates plus local baseline span-overlap diagnostics from exported candidate predictions. This is not a held-out result or superiority claim without frozen data, live baselines, and interval-tested deltas.",
+  "preflight_report": {
+    "schema_version": 1,
+    "package_type": "d7_retrieval_comparison_preflight",
+    "status": "pass",
+    "protocol_id": "d7-live-baseline-smoke-2026-06-23",
+    "project_id": "d7_live_baseline_smoke_project",
+    "gold_set_id": "d7-live-baseline-smoke-2026-06-23",
+    "split": "held_out",
+    "expected_prediction_count": 1,
+    "prediction_package_count": 1,
+    "baseline_count": 1,
+    "errors": [],
+    "caution": "D7 comparison preflight is process metadata only; it is not a held-out D7 benchmark result, not live-baseline evidence, not methodological-validity evidence, and not superiority evidence."
+  },
+  "metric_criteria_report": {
+    "schema_version": 1,
+    "package_type": "d7_retrieval_comparison_metric_criteria",
+    "status": "pass",
+    "protocol_id": "d7-live-baseline-smoke-2026-06-23",
+    "criterion_count": 2,
+    "passed_count": 2,
+    "failed_count": 0,
+    "missing_count": 0,
+    "results": [
+      {
+        "criterion_id": "synthetic-live-recall-is-one",
+        "baseline_name": "live_candidate_selector_gpt_5_mini_lexical_bm25_top1",
+        "metric": "recall",
+        "operator": ">=",
+        "threshold": 1.0,
+        "observed_value": 1.0,
+        "status": "pass",
+        "rationale": "This synthetic smoke fixture aligns the gold span to the live-selected candidate span.",
+        "message": "Observed recall=1.0 met >= 1.0"
+      },
+      {
+        "criterion_id": "synthetic-live-f1-is-one",
+        "baseline_name": "live_candidate_selector_gpt_5_mini_lexical_bm25_top1",
+        "metric": "f1",
+        "operator": ">=",
+        "threshold": 1.0,
+        "observed_value": 1.0,
+        "status": "pass",
+        "rationale": "This synthetic smoke fixture should have one exact true-positive and no false positives.",
+        "message": "Observed f1=1.0 met >= 1.0"
+      }
+    ],
+    "caution": "D7 metric criteria evaluate pre-registered local comparison metrics only; they are not held-out D7 evidence, live-baseline evidence, methodological-validity evidence, superiority evidence, or SOTA evidence."
+  },
+  "_meta": {
+    "input_hashes": {
+      "hash_algorithm": "sha256",
+      "project_id": "d7_live_baseline_smoke_project",
+      "project_state_sha256": "6e6940da77d10a6f537c47171a6e45bb831955d93915263df9af8aed6837e4bc",
+      "corpus_sha256": "68aef519249e4d0536449a7498778133db276998df8d543219832303fde7772b",
+      "gold_file_sha256": "bd37d6a7a905073861b9f7c12dd02361a8b7e721440d7dd0ec14eeabb198204d",
+      "prediction_files": [
+        {
+          "path": "docs/benchmarks/d7_live_baseline_smoke_2026_06_23/live_baseline.json",
+          "sha256": "f6a2efa0510f61cc2abb947c0e45e69eb1667b9eb98566e21d22d6ea4670c507"
+        }
+      ],
+      "protocol_file_sha256": "99a364dbbda25194c5e2418967152ce24aa5c447b42bb5de4b2a8ae09fa6866d"
+    },
+    "command": {
+      "project_id": "d7_live_baseline_smoke_project",
+      "gold_file": "docs/benchmarks/d7_live_baseline_smoke_2026_06_23/gold.json",
+      "prediction_files": [
+        "docs/benchmarks/d7_live_baseline_smoke_2026_06_23/live_baseline.json"
+      ],
+      "protocol_package": "docs/benchmarks/d7_live_baseline_smoke_2026_06_23/protocol.json",
+      "output": "docs/benchmarks/d7_live_baseline_smoke_2026_06_23/report.json",
+      "artifact_dir": "docs/benchmarks/d7_live_baseline_smoke_2026_06_23/artifact"
+    }
+  }
+}

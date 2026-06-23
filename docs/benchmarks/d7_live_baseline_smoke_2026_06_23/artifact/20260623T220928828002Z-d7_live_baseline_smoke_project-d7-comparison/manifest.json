@@ -1,0 +1,41 @@
+{
+  "artifact_type": "qualitative_coding.d7_retrieval_comparison",
+  "claim_discipline": {
+    "caveat": "This D7 comparison artifact is local provenance/accounting metadata only; it is not held-out D7 evidence, live-baseline evidence, superiority evidence, methodological-validity evidence, or SOTA evidence."
+  },
+  "command": {
+    "artifact_dir": "docs/benchmarks/d7_live_baseline_smoke_2026_06_23/artifact",
+    "gold_file": "docs/benchmarks/d7_live_baseline_smoke_2026_06_23/gold.json",
+    "output": "docs/benchmarks/d7_live_baseline_smoke_2026_06_23/report.json",
+    "prediction_files": [
+      "docs/benchmarks/d7_live_baseline_smoke_2026_06_23/live_baseline.json"
+    ],
+    "project_id": "d7_live_baseline_smoke_project",
+    "protocol_package": "docs/benchmarks/d7_live_baseline_smoke_2026_06_23/protocol.json"
+  },
+  "generated_at": "2026-06-23T22:09:28.828002Z",
+  "input_hashes": {
+    "corpus_sha256": "68aef519249e4d0536449a7498778133db276998df8d543219832303fde7772b",
+    "gold_file_sha256": "bd37d6a7a905073861b9f7c12dd02361a8b7e721440d7dd0ec14eeabb198204d",
+    "hash_algorithm": "sha256",
+    "prediction_files": [
+      {
+        "path": "docs/benchmarks/d7_live_baseline_smoke_2026_06_23/live_baseline.json",
+        "sha256": "f6a2efa0510f61cc2abb947c0e45e69eb1667b9eb98566e21d22d6ea4670c507"
+      }
+    ],
+    "project_id": "d7_live_baseline_smoke_project",
+    "project_state_sha256": "6e6940da77d10a6f537c47171a6e45bb831955d93915263df9af8aed6837e4bc",
+    "protocol_file_sha256": "99a364dbbda25194c5e2418967152ce24aa5c447b42bb5de4b2a8ae09fa6866d"
+  },
+  "project_id": "d7_live_baseline_smoke_project",
+  "project_name": "D7 live baseline smoke project",
+  "prompt_eval": {
+    "note": "D7 comparison artifact packaging only; held-out datasets, live baseline runs, statistical comparisons, and experiment tracking belong to the future prompt_eval-backed suite.",
+    "owner": "prompt_eval",
+    "status": "not_run"
+  },
+  "report_file": "report.json",
+  "report_sha256": "f84e46ed02af7949dc4bfa25e7cb795d23c42b73d166dbfcfe2707dd01e50025",
+  "schema_version": 1
+}

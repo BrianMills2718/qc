@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "package_type": "qualitative_coding.d7_retrieval_comparison_protocol",
+  "protocol_id": "d7-live-baseline-smoke-2026-06-23",
+  "project_id": "d7_live_baseline_smoke_project",
+  "dataset_name": "Synthetic D7 live baseline smoke fixture",
+  "split": "held_out",
+  "gold_set_id": "d7-live-baseline-smoke-2026-06-23",
+  "corpus_sha256": "68aef519249e4d0536449a7498778133db276998df8d543219832303fde7772b",
+  "project_state_sha256": "6e6940da77d10a6f537c47171a6e45bb831955d93915263df9af8aed6837e4bc",
+  "prompt_frozen": true,
+  "contamination_checked": true,
+  "registered_before_run": true,
+  "expected_predictions": [
+    {
+      "baseline_name": "live_candidate_selector_gpt_5_mini_lexical_bm25_top1",
+      "baseline_mode": "live_candidate_selector",
+      "retrieval_mode": "lexical_bm25",
+      "candidates_per_claim": 1,
+      "max_targets": 20,
+      "embedding_model": null,
+      "embedding_dimensions": null,
+      "trace_id": "qualitative_coding/d7-live-baseline-smoke-2026-06-23",
+      "max_budget": 1.0,
+      "prediction_file_sha256": "f6a2efa0510f61cc2abb947c0e45e69eb1667b9eb98566e21d22d6ea4670c507",
+      "model": "gpt-5-mini"
+    }
+  ],
+  "success_criteria": [
+    "The live-baseline smoke comparison should run from repo-local projects_dir without default-store mutation.",
+    "The synthetic live candidate selector should recover the one registered exact D7 anchor."
+  ],
+  "metric_criteria": [
+    {
+      "criterion_id": "synthetic-live-recall-is-one",
+      "baseline_name": "live_candidate_selector_gpt_5_mini_lexical_bm25_top1",
+      "metric": "recall",
+      "operator": ">=",
+      "threshold": 1.0,
+      "rationale": "This synthetic smoke fixture aligns the gold span to the live-selected candidate span."
+    },
+    {
+      "criterion_id": "synthetic-live-f1-is-one",
+      "baseline_name": "live_candidate_selector_gpt_5_mini_lexical_bm25_top1",
+      "metric": "f1",
+      "operator": ">=",
+      "threshold": 1.0,
+      "rationale": "This synthetic smoke fixture should have one exact true-positive and no false positives."
+    }
+  ],
+  "caution": "D7 comparison protocol validation is process metadata only; this synthetic live-baseline smoke artifact is not held-out D7 validity evidence, live-baseline quality evidence, methodological-validity evidence, superiority evidence, or SOTA evidence."
+}

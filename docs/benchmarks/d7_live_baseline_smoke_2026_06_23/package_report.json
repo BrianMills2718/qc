@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "package_type": "d7_comparison_package_write",
+  "status": "complete",
+  "project_id": "d7_live_baseline_smoke_project",
+  "projects_dir": "docs/benchmarks/d7_live_baseline_smoke_2026_06_23/projects",
+  "package_file": "docs/benchmarks/d7_live_baseline_smoke_2026_06_23/package.json",
+  "gold_file": "docs/benchmarks/d7_live_baseline_smoke_2026_06_23/gold.json",
+  "prediction_files": [
+    "docs/benchmarks/d7_live_baseline_smoke_2026_06_23/live_baseline.json"
+  ],
+  "protocol_package": "docs/benchmarks/d7_live_baseline_smoke_2026_06_23/protocol.json",
+  "comparison_output": "package_replay_report.json",
+  "artifact_dir": null,
+  "verify_artifact": false,
+  "preflight_status": "pass",
+  "caution": "D7 comparison package writing is orchestration/provenance infrastructure only; it is not held-out D7 evidence, live-baseline evidence, methodological-validity evidence, superiority evidence, or SOTA evidence."
+}

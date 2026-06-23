@@ -171,6 +171,7 @@ Each dimension maps to a SOTA claim and (where relevant) an invariant. The bar i
   delegates that project-store path to `scripts/compare_d7_retrieval.py`.
   This is a canonical execution surface for portable comparison artifacts, not
   held-out D7 evidence by itself.
+- **D7 committed smoke artifacts:** `docs/benchmarks/d7_portable_retrieval_smoke_2026_06_23/` stores a deterministic retrieval comparison smoke artifact, and `docs/benchmarks/d7_live_baseline_smoke_2026_06_23/` stores an opt-in live candidate-selection baseline smoke artifact. These prove local workflow/provenance plumbing over synthetic data only; they are not held-out D7 validity evidence, live-baseline quality evidence, superiority evidence, methodological-validity evidence, or SOTA evidence.
 - D7 live-baseline CLI portability:
   `qc_cli.py run-d7-live-baseline <project_id> --projects-dir path ...`
   delegates that project-store path to `scripts/run_d7_live_baseline.py`. This

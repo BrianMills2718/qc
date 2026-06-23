@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "package_type": "qualitative_coding.d7_live_baseline_predictions",
+  "live_baseline_run": {
+    "schema_version": 1,
+    "project_id": "d7_live_baseline_smoke_project",
+    "project_state_sha256": "6e6940da77d10a6f537c47171a6e45bb831955d93915263df9af8aed6837e4bc",
+    "corpus_sha256": "68aef519249e4d0536449a7498778133db276998df8d543219832303fde7772b",
+    "baseline_mode": "live_candidate_selector",
+    "model": "gpt-5-mini",
+    "retrieval_mode": "lexical_bm25",
+    "embedding_model": null,
+    "embedding_dimensions": null,
+    "max_targets": 20,
+    "target_claim_count": 1,
+    "candidates_per_claim": 1,
+    "candidate_count": 1,
+    "selected_candidate_count": 1,
+    "bm25_k1": 1.2,
+    "bm25_b": 0.75,
+    "contrary_cue_weight": 1.25,
+    "expanded_term_weight": 0.5,
+    "semantic_weight": 1.0,
+    "min_semantic_similarity": 0.0,
+    "trace_id": "qualitative_coding/d7-live-baseline-smoke-2026-06-23",
+    "max_budget": 1.0,
+    "prompt_hashes": {
+      "claim-ai-workflow": "6939e8cb710d86d12ae01c2c2a0d601c34f95d2623b78cd5cb69c6501e8dd367"
+    },
+    "note": "Live D7 candidate-selection baselines are model predictions over bounded retrieved candidates. They are not human-adjudicated D7 evidence, not a held-out benchmark result, and not a superiority claim."
+  },
+  "selection_records": [
+    {
+      "target_claim_id": "claim-ai-workflow",
+      "candidate_count": 1,
+      "selected_candidate_ids": [
+        "dc-0-1"
+      ],
+      "rationale": "The passage explicitly states the AI 'failed badly after rollout,' that nurses reported it 'slowed triage and caused rework,' and that improvements only occurred after adding manual overrides, which directly contradicts the claim that AI improves clinical workflow without major friction.",
+      "prompt_sha256": "6939e8cb710d86d12ae01c2c2a0d601c34f95d2623b78cd5cb69c6501e8dd367"
+    }
+  ],
+  "disconfirmation_baselines": [
+    {
+      "name": "live_candidate_selector_gpt_5_mini_lexical_bm25_top1",
+      "description": "Live D7 candidate-selection baseline: model=gpt-5-mini, retrieval_mode=lexical_bm25, candidates_per_claim=1.",
+      "contrary_evidence": [
+        {
+          "target_claim_id": "claim-ai-workflow",
+          "doc_id": "d1",
+          "start_char": 0,
+          "end_char": 166,
+          "segment_id": "0fa21b71-8a97-4bc5-81b2-6bbbe4e38579",
+          "quote_text": "AI failed badly after rollout. Nurses said the tool slowed triage and caused rework.\nA later team reported modest improvements only after manual overrides were added."
+        }
+      ]
+    }
+  ]
+}

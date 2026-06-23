@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "project_id": "d7_live_baseline_smoke_project",
+  "projects_dir": "projects",
+  "gold_file": "gold.json",
+  "prediction_files": [
+    "live_baseline.json"
+  ],
+  "protocol_package": "protocol.json",
+  "output": "package_replay_report.json",
+  "verify_artifact": false
+}

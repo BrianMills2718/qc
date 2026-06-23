@@ -1,0 +1,110 @@
+{
+  "id": "d7_live_baseline_smoke_project",
+  "name": "D7 live baseline smoke project",
+  "created_at": "2026-06-23T00:00:00",
+  "updated_at": "2026-06-23T00:00:00",
+  "config": {
+    "methodology": "default",
+    "model_name": "gpt-5-mini",
+    "auto_refresh_higher_order_on_recode": false,
+    "created_at": "2026-06-23T00:00:00",
+    "extra": {}
+  },
+  "corpus": {
+    "documents": [
+      {
+        "id": "d1",
+        "name": "interview.txt",
+        "content": "AI failed badly after rollout. Nurses said the tool slowed triage and caused rework.\nA later team reported modest improvements only after manual overrides were added.\n",
+        "metadata": {},
+        "detected_speakers": [],
+        "is_truncated": false
+      }
+    ]
+  },
+  "corpus_scope": null,
+  "codebook": {
+    "version": 1,
+    "methodology": "default",
+    "created_by": "llm",
+    "codes": [
+      {
+        "id": "AI_USE",
+        "name": "AI Use",
+        "description": "Use of AI in clinical workflow",
+        "definition": "",
+        "parent_id": null,
+        "level": 0,
+        "properties": [],
+        "dimensions": [],
+        "provenance": "llm",
+        "version": 1,
+        "example_quotes": [],
+        "mention_count": 0,
+        "confidence": 0.0,
+        "reasoning": ""
+      }
+    ],
+    "created_at": "2026-06-23T14:36:27.095087"
+  },
+  "code_applications": [],
+  "segments": [
+    {
+      "id": "0fa21b71-8a97-4bc5-81b2-6bbbe4e38579",
+      "doc_id": "d1",
+      "index": 0,
+      "start_char": 0,
+      "end_char": 166,
+      "speaker": "",
+      "text": "AI failed badly after rollout. Nurses said the tool slowed triage and caused rework.\nA later team reported modest improvements only after manual overrides were added.",
+      "decision": null
+    }
+  ],
+  "code_relationships": [],
+  "entities": [],
+  "entity_relationships": [],
+  "perspective_analysis": null,
+  "synthesis": null,
+  "core_categories": [],
+  "theoretical_model": null,
+  "irr_result": null,
+  "stability_result": null,
+  "memos": [],
+  "claims": [
+    {
+      "id": "claim-ai-workflow",
+      "claim_kind": "synthesis_finding",
+      "source_stage": "synthesis",
+      "claim_text": "AI improves clinical workflow without major friction.",
+      "scope": {
+        "corpus_level": true,
+        "claim_ids": [],
+        "doc_ids": [],
+        "code_ids": [
+          "AI_USE"
+        ],
+        "segment_ids": [],
+        "application_ids": [],
+        "entity_ids": [],
+        "relationship_ids": [],
+        "participant_names": []
+      },
+      "origin_object_type": "synthesis",
+      "origin_object_id": "finding:0",
+      "supporting_anchors": [],
+      "contrary_anchors": [],
+      "support_status": "needs_anchor",
+      "adjudication_status": "pending",
+      "revision_history": [],
+      "created_by": "llm",
+      "created_at": "2026-06-23T14:36:27.095107"
+    }
+  ],
+  "review_decisions": [],
+  "phase_results": [],
+  "current_phase": null,
+  "pipeline_status": "pending",
+  "iteration": 1,
+  "codebook_history": [],
+  "data_warnings": []
+}
