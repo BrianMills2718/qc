@@ -26,6 +26,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         description="Export loaded-document theoretical-sampling candidates"
     )
     parser.add_argument("project_id", help="Project ID to export candidates for")
+    parser.add_argument("--projects-dir", type=Path, help="Optional project store directory")
     parser.add_argument(
         "--protocol",
         required=True,
@@ -42,7 +43,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--max-suggestions", type=int, help="Optional suggestion limit")
     args = parser.parse_args(argv)
 
-    store = ProjectStore()
+    store = ProjectStore(projects_dir=args.projects_dir) if args.projects_dir else ProjectStore()
     try:
         state = store.load(args.project_id)
         protocol = load_theoretical_sampling_protocol(args.protocol)

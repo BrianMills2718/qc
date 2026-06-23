@@ -185,17 +185,17 @@ ifndef CANDIDATES
 endif
 	python scripts/preflight_theoretical_sampling_protocol.py $(PROTOCOL) --candidates-file $(CANDIDATES) $(if $(RESULTS),--results-file $(RESULTS),)
 
-export-theoretical-sampling-candidates:  ## Export loaded-document theoretical-sampling candidates (ID=project_id PROTOCOL=protocol.json OUTPUT=candidates.json [MAX=5])
+export-theoretical-sampling-candidates:  ## Export loaded-document theoretical-sampling candidates (ID=project_id PROTOCOL=protocol.json OUTPUT=candidates.json [PROJECTS_DIR=path] [MAX=5])
 ifndef ID
-	$(error ID is required. Usage: make export-theoretical-sampling-candidates ID=project_id PROTOCOL=protocol.json OUTPUT=candidates.json [MAX=5])
+	$(error ID is required. Usage: make export-theoretical-sampling-candidates ID=project_id PROTOCOL=protocol.json OUTPUT=candidates.json [PROJECTS_DIR=path] [MAX=5])
 endif
 ifndef PROTOCOL
-	$(error PROTOCOL is required. Usage: make export-theoretical-sampling-candidates ID=project_id PROTOCOL=protocol.json OUTPUT=candidates.json [MAX=5])
+	$(error PROTOCOL is required. Usage: make export-theoretical-sampling-candidates ID=project_id PROTOCOL=protocol.json OUTPUT=candidates.json [PROJECTS_DIR=path] [MAX=5])
 endif
 ifndef OUTPUT
-	$(error OUTPUT is required. Usage: make export-theoretical-sampling-candidates ID=project_id PROTOCOL=protocol.json OUTPUT=candidates.json [MAX=5])
+	$(error OUTPUT is required. Usage: make export-theoretical-sampling-candidates ID=project_id PROTOCOL=protocol.json OUTPUT=candidates.json [PROJECTS_DIR=path] [MAX=5])
 endif
-	python scripts/export_theoretical_sampling_candidates.py $(ID) --protocol $(PROTOCOL) --output $(OUTPUT) $(if $(MAX),--max-suggestions $(MAX),)
+	python scripts/export_theoretical_sampling_candidates.py $(ID) $(if $(PROJECTS_DIR),--projects-dir $(PROJECTS_DIR),) --protocol $(PROTOCOL) --output $(OUTPUT) $(if $(MAX),--max-suggestions $(MAX),)
 
 export-theoretical-sampling-results:  ## Export selected theoretical-sampling candidates as a result package (PROTOCOL=protocol.json CANDIDATES=candidates.json SELECTED=candidate_id SUCCESS_CRITERION="..." OUTPUT=results.json)
 ifndef PROTOCOL

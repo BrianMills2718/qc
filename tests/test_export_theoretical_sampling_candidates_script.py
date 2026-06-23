@@ -49,6 +49,34 @@ def test_export_theoretical_sampling_candidates_writes_output_and_stdout(
     assert stdout_payload["candidates"][0]["doc_id"] == "doc-2"
 
 
+def test_export_theoretical_sampling_candidates_accepts_projects_dir(tmp_path, capsys):
+    state = _state_with_uncoded_document()
+    store = ProjectStore(projects_dir=tmp_path / "projects")
+    store.save(state)
+    protocol_path = tmp_path / "protocol.json"
+    output_file = tmp_path / "candidates.json"
+    protocol_path.write_text(json.dumps(_valid_protocol(state)), encoding="utf-8")
+
+    exit_code = export_theoretical_sampling_candidates.main([
+        state.id,
+        "--projects-dir",
+        str(store.projects_dir),
+        "--protocol",
+        str(protocol_path),
+        "--output",
+        str(output_file),
+        "--max-suggestions",
+        "1",
+    ])
+
+    stdout_payload = json.loads(capsys.readouterr().out)
+    file_payload = json.loads(output_file.read_text(encoding="utf-8"))
+    assert exit_code == 0
+    assert stdout_payload == file_payload
+    assert stdout_payload["project_id"] == state.id
+    assert stdout_payload["candidates"][0]["candidate_id"] == "loaded-doc-2"
+
+
 def test_export_theoretical_sampling_candidates_missing_project_returns_json_error(
     tmp_path,
     monkeypatch,

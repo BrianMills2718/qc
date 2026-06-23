@@ -477,6 +477,10 @@ Examples:
         help='Project ID to export candidates for',
     )
     theoretical_sampling_candidates_parser.add_argument(
+        '--projects-dir',
+        help='Optional project store directory',
+    )
+    theoretical_sampling_candidates_parser.add_argument(
         '--protocol',
         required=True,
         help='Path to a schema_version=1 theoretical-sampling protocol JSON package',
@@ -1772,7 +1776,10 @@ def handle_export_theoretical_sampling_candidates_command(args) -> int:
     """Export theoretical-sampling candidates through the canonical CLI."""
     from scripts import export_theoretical_sampling_candidates
 
-    argv = [args.project_id, "--protocol", args.protocol]
+    argv = [args.project_id]
+    if args.projects_dir is not None:
+        argv.extend(["--projects-dir", args.projects_dir])
+    argv.extend(["--protocol", args.protocol])
     if args.output is not None:
         argv.extend(["--output", args.output])
     for candidate_name in args.candidate_names or []:

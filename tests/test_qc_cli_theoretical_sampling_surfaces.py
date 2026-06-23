@@ -105,6 +105,42 @@ def test_qc_cli_export_theoretical_sampling_candidates_forwards_args(monkeypatch
     ]
 
 
+def test_qc_cli_export_theoretical_sampling_candidates_forwards_projects_dir(monkeypatch):
+    captured = {}
+
+    def fake_main(argv):
+        captured["argv"] = argv
+        return 0
+
+    monkeypatch.setattr(export_theoretical_sampling_candidates, "main", fake_main)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "qc_cli.py",
+            "export-theoretical-sampling-candidates",
+            "project-alpha",
+            "--projects-dir",
+            "projects",
+            "--protocol",
+            "protocol.json",
+            "--output",
+            "candidates.json",
+        ],
+    )
+
+    assert qc_cli.main() == 0
+    assert captured["argv"] == [
+        "project-alpha",
+        "--projects-dir",
+        "projects",
+        "--protocol",
+        "protocol.json",
+        "--output",
+        "candidates.json",
+    ]
+
+
 def test_qc_cli_export_theoretical_sampling_results_forwards_args(monkeypatch):
     captured = {}
 
