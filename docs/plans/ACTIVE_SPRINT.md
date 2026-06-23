@@ -26,8 +26,11 @@ highest-value documented lane.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Plan #205
-`REVIEW_SURFACE_OFFSET_PAGINATION.md` is active. Add offset traversal to
+**Active checkpoint:** No implementation plan is active. Select and plan the
+next deterministic roadmap lane before editing code.
+
+**Completed checkpoint:** Plan #205
+`completed/REVIEW_SURFACE_OFFSET_PAGINATION.md` added offset traversal to
 review-specific API/MCP claim, negative-case, and relationship list surfaces.
 This is review-surface pagination/accounting only, not claim-validity evidence,
 human/expert adjudication, held-out D3/D7 evidence, relationship validity,

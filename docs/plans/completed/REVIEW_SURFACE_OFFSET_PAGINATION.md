@@ -1,12 +1,39 @@
 # Plan #205: Review Surface Offset Pagination
 
-**Status:** In Progress
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Claim Ledger CLI/MCP Offset Pagination
 **Blocks:** INV-10 agent-drivable review traversal
 
 ---
+
+## Outcome
+
+Completed 2026-06-22. API and MCP review list surfaces for claims, negative
+cases, and relationships now accept `offset`, clamp negative offsets to zero,
+slice rows by the applied page, and report applied `offset` metadata while
+preserving existing row payload fields and per-surface limit behavior. This is
+review-surface pagination/accounting only; it is not expert adjudication,
+held-out D3/D7 evidence, relationship validity, disconfirmation validity, or
+SOTA evidence.
+
+## Verification
+
+- TDD red:
+  `python -m pytest tests/test_review_api.py tests/test_mcp_server.py -q`
+  initially failed on missing API/MCP review offset behavior and metadata.
+- Focused tests:
+  `python -m pytest tests/test_review_api.py tests/test_mcp_server.py -q`
+  (`129 passed`).
+- Focused Ruff:
+  `python -m ruff check qc_clean/plugins/api/api_server.py qc_mcp_server.py tests/test_review_api.py tests/test_mcp_server.py`.
+- Docs gate: `make docs-check`.
+- Whitespace gate: `git diff --check`.
+- Full gate: `make check` (`1282 passed, 1 skipped, 8 deselected`; Ruff/docs
+  passed; type check not configured).
+- Implementation commit pushed:
+  `88b8dd4b [Plan: REVIEW_OFFSET] Add review list offsets`.
 
 ## Gap
 
@@ -129,24 +156,24 @@ capability.
 
 Feature-level criteria:
 
-- [ ] API review claims accepts `limit` and `offset`, reports both, and pages
+- [x] API review claims accepts `limit` and `offset`, reports both, and pages
   rows.
-- [ ] API review negative cases accepts `offset`, reports it, and pages rows.
-- [ ] API review relationships accepts `offset`, reports it, and pages rows.
-- [ ] MCP review claims accepts `offset`, reports it, and pages rows.
-- [ ] MCP review negative cases accepts `offset`, reports it, and pages rows.
-- [ ] MCP review relationships accepts `offset`, reports it, and pages rows.
-- [ ] Negative offsets clamp to zero where exercised by existing/new limit
+- [x] API review negative cases accepts `offset`, reports it, and pages rows.
+- [x] API review relationships accepts `offset`, reports it, and pages rows.
+- [x] MCP review claims accepts `offset`, reports it, and pages rows.
+- [x] MCP review negative cases accepts `offset`, reports it, and pages rows.
+- [x] MCP review relationships accepts `offset`, reports it, and pages rows.
+- [x] Negative offsets clamp to zero where exercised by existing/new limit
   tests.
-- [ ] Existing review row payload fields remain unchanged.
+- [x] Existing review row payload fields remain unchanged.
 
 Process criteria:
 
-- [ ] Required focused tests pass.
-- [ ] Focused Ruff passes.
-- [ ] `make docs-check` passes.
-- [ ] `make check` passes or any failure is documented with evidence.
-- [ ] Verified work is committed and pushed.
+- [x] Required focused tests pass.
+- [x] Focused Ruff passes.
+- [x] `make docs-check` passes.
+- [x] `make check` passes or any failure is documented with evidence.
+- [x] Verified work is committed and pushed.
 
 ---
 
