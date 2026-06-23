@@ -79,6 +79,41 @@ def test_d7_comparison_package_rejects_invalid_manifest(tmp_path, monkeypatch, c
     assert "prediction_files" in output["error"]
 
 
+def test_package_projects_dir_forwards_to_compare(tmp_path, monkeypatch):
+    captured = {}
+
+    def fake_compare_main(argv):
+        captured["argv"] = argv
+        return 0
+
+    monkeypatch.setattr(compare_d7_retrieval, "main", fake_compare_main)
+    package_dir = tmp_path / "package"
+    package_dir.mkdir()
+    package_path = _write_package(
+        package_dir,
+        {
+            "schema_version": 1,
+            "project_id": "project-d7",
+            "projects_dir": "projects",
+            "gold_file": "gold.json",
+            "prediction_files": ["lexical.json"],
+        },
+    )
+
+    exit_code = run_d7_comparison_package.main([str(package_path)])
+
+    assert exit_code == 0
+    assert captured["argv"] == [
+        "project-d7",
+        "--projects-dir",
+        str(package_dir / "projects"),
+        "--gold-file",
+        str(package_dir / "gold.json"),
+        "--predictions-file",
+        str(package_dir / "lexical.json"),
+    ]
+
+
 def test_d7_comparison_package_verifies_created_artifact_when_requested(
     tmp_path,
     monkeypatch,

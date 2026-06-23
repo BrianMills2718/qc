@@ -39,6 +39,10 @@ class D7ComparisonPackageWriteReport(BaseModel):
     )
     status: Literal["complete"] = Field(description="Manifest write status")
     project_id: str = Field(description="Project ID recorded in the manifest")
+    projects_dir: str | None = Field(
+        default=None,
+        description="Optional project store directory recorded in the manifest",
+    )
     package_file: str = Field(description="Written D7 comparison package path")
     gold_file: str = Field(description="Validated D7 gold package path")
     prediction_files: list[str] = Field(
@@ -71,6 +75,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         description="Write a D7 comparison package manifest from validated inputs"
     )
     parser.add_argument("project_id", help="Project ID to compare with the package")
+    parser.add_argument(
+        "--projects-dir",
+        type=Path,
+        help="Optional project store directory recorded in the package",
+    )
     parser.add_argument("--output", required=True, type=Path, help="Output manifest path")
     parser.add_argument(
         "--gold-file",
@@ -110,6 +119,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     try:
         report = write_d7_comparison_package(
             project_id=args.project_id,
+            projects_dir=args.projects_dir,
             output_file=args.output,
             gold_file=args.gold_file,
             prediction_files=args.predictions_file,
@@ -129,6 +139,7 @@ def main(argv: Sequence[str] | None = None) -> int:
 def write_d7_comparison_package(
     *,
     project_id: str,
+    projects_dir: str | Path | None = None,
     output_file: str | Path,
     gold_file: str | Path,
     prediction_files: Sequence[str | Path],
@@ -140,6 +151,7 @@ def write_d7_comparison_package(
     """Write and verify a D7 comparison package manifest."""
     manifest, preflight_status = build_d7_comparison_package_manifest(
         project_id=project_id,
+        projects_dir=projects_dir,
         output_file=output_file,
         gold_file=gold_file,
         prediction_files=prediction_files,
@@ -160,6 +172,7 @@ def write_d7_comparison_package(
         package_type="d7_comparison_package_write",
         status="complete",
         project_id=manifest.project_id,
+        projects_dir=str(projects_dir) if projects_dir is not None else None,
         package_file=str(output_path),
         gold_file=str(gold_file),
         prediction_files=[str(path) for path in prediction_files],
@@ -175,6 +188,7 @@ def write_d7_comparison_package(
 def build_d7_comparison_package_manifest(
     *,
     project_id: str,
+    projects_dir: str | Path | None = None,
     output_file: str | Path,
     gold_file: str | Path,
     prediction_files: Sequence[str | Path],
@@ -205,6 +219,11 @@ def build_d7_comparison_package_manifest(
         D7ComparisonPackage(
             schema_version=1,
             project_id=project_id,
+            projects_dir=(
+                _manifest_input_path(manifest_dir, projects_dir)
+                if projects_dir is not None
+                else None
+            ),
             gold_file=_manifest_input_path(manifest_dir, gold_file),
             prediction_files=[
                 _manifest_input_path(manifest_dir, prediction_file)

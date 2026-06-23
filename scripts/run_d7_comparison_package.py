@@ -25,6 +25,10 @@ class D7ComparisonPackage(BaseModel):
 
     schema_version: int = Field(description="Manifest schema version; currently 1")
     project_id: str = Field(description="Project ID to compare")
+    projects_dir: str | None = Field(
+        default=None,
+        description="Optional project store directory path",
+    )
     gold_file: str = Field(description="D7 gold JSON path")
     prediction_files: list[str] = Field(
         description="Ordered D7 retrieval/live-baseline prediction package paths"
@@ -51,6 +55,8 @@ class D7ComparisonPackage(BaseModel):
         self.project_id = self.project_id.strip()
         if not self.project_id:
             raise ValueError("D7 comparison package project_id must be non-empty")
+        if self.projects_dir is not None:
+            self.projects_dir = self.projects_dir.strip() or None
         self.gold_file = self.gold_file.strip()
         if not self.gold_file:
             raise ValueError("D7 comparison package gold_file must be non-empty")
@@ -129,9 +135,16 @@ def d7_package_to_compare_argv(
     """Convert a D7 comparison package to canonical compare argv."""
     argv = [
         package.project_id,
+    ]
+    if package.projects_dir is not None:
+        argv.extend([
+            "--projects-dir",
+            str(_resolve_manifest_path(package_dir, package.projects_dir)),
+        ])
+    argv.extend([
         "--gold-file",
         str(_resolve_manifest_path(package_dir, package.gold_file)),
-    ]
+    ])
     for prediction_file in package.prediction_files:
         argv.extend([
             "--predictions-file",

@@ -948,6 +948,10 @@ Examples:
     )
     d7_comparison_package_writer_parser.add_argument('project_id', help='Project ID to compare')
     d7_comparison_package_writer_parser.add_argument(
+        '--projects-dir',
+        help='Optional project store directory recorded in the package',
+    )
+    d7_comparison_package_writer_parser.add_argument(
         '--output',
         required=True,
         help='Output D7 comparison package manifest path',
@@ -2070,7 +2074,10 @@ def handle_write_d7_comparison_package_command(args) -> int:
     """Write a D7 comparison package through the canonical CLI."""
     from scripts import write_d7_comparison_package
 
-    argv = [args.project_id, "--output", args.output, "--gold-file", args.gold_file]
+    argv = [args.project_id]
+    if args.projects_dir is not None:
+        argv.extend(["--projects-dir", args.projects_dir])
+    argv.extend(["--output", args.output, "--gold-file", args.gold_file])
     for prediction_file in args.predictions_file:
         argv.extend(["--predictions-file", prediction_file])
     if args.protocol_package is not None:

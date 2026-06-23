@@ -70,6 +70,31 @@ def test_rejects_non_versioned_d7_gold_file(tmp_path):
         )
 
 
+def test_writer_records_projects_dir(tmp_path):
+    package_dir = tmp_path / "package"
+    package_dir.mkdir()
+    projects_dir = package_dir / "projects"
+    projects_dir.mkdir()
+    gold_file = _write_json(package_dir / "gold.json", _d7_gold_package())
+    prediction_file = _write_json(
+        package_dir / "predictions.json",
+        _prediction_package("lexical"),
+    )
+    output = package_dir / "d7_comparison_package.json"
+
+    report = write_d7_comparison_package.write_d7_comparison_package(
+        project_id="project-d7",
+        projects_dir=projects_dir,
+        output_file=output,
+        gold_file=gold_file,
+        prediction_files=[prediction_file],
+    )
+
+    manifest = run_d7_comparison_package.load_d7_comparison_package(output)
+    assert manifest.projects_dir == "projects"
+    assert report.projects_dir == str(projects_dir)
+
+
 def test_rejects_invalid_prediction_package(tmp_path):
     gold_file = _write_json(tmp_path / "gold.json", _d7_gold_package())
     prediction_file = _write_json(

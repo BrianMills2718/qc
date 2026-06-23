@@ -318,6 +318,46 @@ def test_qc_cli_write_d7_comparison_package_forwards_args(monkeypatch):
     ]
 
 
+def test_qc_cli_write_d7_comparison_package_forwards_projects_dir(monkeypatch):
+    captured = {}
+
+    def fake_main(argv):
+        captured["argv"] = argv
+        return 0
+
+    monkeypatch.setattr(write_d7_comparison_package, "main", fake_main)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "qc_cli.py",
+            "write-d7-comparison-package",
+            "project-d7",
+            "--projects-dir",
+            "portable_projects",
+            "--output",
+            "d7_comparison_package.json",
+            "--gold-file",
+            "gold.json",
+            "--predictions-file",
+            "lexical.json",
+        ],
+    )
+
+    assert qc_cli.main() == 0
+    assert captured["argv"] == [
+        "project-d7",
+        "--projects-dir",
+        "portable_projects",
+        "--output",
+        "d7_comparison_package.json",
+        "--gold-file",
+        "gold.json",
+        "--predictions-file",
+        "lexical.json",
+    ]
+
+
 def test_qc_cli_validate_d7_baseline_package_forwards_path(monkeypatch):
     captured = {}
 

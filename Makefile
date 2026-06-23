@@ -358,7 +358,7 @@ ifndef PREDICTIONS
 endif
 	python scripts/compare_d7_retrieval.py $(ID) $(if $(PROJECTS_DIR),--projects-dir $(PROJECTS_DIR),) --gold-file $(GOLD) $(foreach file,$(PREDICTIONS),--predictions-file $(file)) $(if $(PROTOCOL),--protocol-package $(PROTOCOL),) $(if $(OUTPUT),--output $(OUTPUT),) $(if $(ARTIFACT_DIR),--artifact-dir $(ARTIFACT_DIR),)
 
-write-d7-comparison-package:  ## Write D7 comparison package manifest (ID=<project_id> GOLD=gold.json PREDICTIONS="a.json b.json" OUTPUT=d7_package.json)
+write-d7-comparison-package:  ## Write D7 comparison package manifest (ID=<project_id> GOLD=gold.json PREDICTIONS="a.json b.json" OUTPUT=d7_package.json [PROJECTS_DIR=path])
 ifndef ID
 	$(error ID is required. Usage: make write-d7-comparison-package ID=<project_id> GOLD=gold.json PREDICTIONS="a.json b.json" OUTPUT=d7_package.json)
 endif
@@ -371,7 +371,7 @@ endif
 ifndef OUTPUT
 	$(error OUTPUT is required. Usage: make write-d7-comparison-package ID=<project_id> GOLD=gold.json PREDICTIONS="a.json b.json" OUTPUT=d7_package.json)
 endif
-	python scripts/write_d7_comparison_package.py $(ID) --output $(OUTPUT) --gold-file $(GOLD) $(foreach file,$(PREDICTIONS),--predictions-file $(file)) $(if $(PROTOCOL),--protocol-package $(PROTOCOL),) $(if $(COMPARISON_OUTPUT),--comparison-output $(COMPARISON_OUTPUT),) $(if $(ARTIFACT_DIR),--artifact-dir $(ARTIFACT_DIR),) $(if $(VERIFY_ARTIFACT),--verify-artifact,)
+	python scripts/write_d7_comparison_package.py $(ID) $(if $(PROJECTS_DIR),--projects-dir $(PROJECTS_DIR),) --output $(OUTPUT) --gold-file $(GOLD) $(foreach file,$(PREDICTIONS),--predictions-file $(file)) $(if $(PROTOCOL),--protocol-package $(PROTOCOL),) $(if $(COMPARISON_OUTPUT),--comparison-output $(COMPARISON_OUTPUT),) $(if $(ARTIFACT_DIR),--artifact-dir $(ARTIFACT_DIR),) $(if $(VERIFY_ARTIFACT),--verify-artifact,)
 
 verify-d7-comparison-artifact:  ## Verify a D7 comparison artifact package (ARTIFACT=run-dir-or-manifest.json)
 ifndef ARTIFACT

@@ -126,7 +126,7 @@ python qc_cli.py theoretical-sampling-preflight theoretical_sampling_protocol.js
 make validate-d7-comparison-protocol PROTOCOL=d7_protocol.json  # Validate pre-run D7 retrieval comparison protocol, including optional metric criteria
 make d7-comparison-preflight PROTOCOL=d7_protocol.json GOLD=d7_gold.json PREDICTIONS="lexical.json embedding.json"  # Preflight D7 comparison inputs before scoring
 make compare-d7-retrieval ID=<project_id> GOLD=d7_gold.json PREDICTIONS="lexical.json embedding.json" PROJECTS_DIR=projects PROTOCOL=d7_protocol.json ARTIFACT_DIR=benchmark_results  # Score D7 retrieval predictions with preflight guard, metric-criteria report when configured, input-hash provenance, and optional artifact package
-make write-d7-comparison-package ID=<project_id> GOLD=d7_gold.json PREDICTIONS="lexical.json embedding.json" OUTPUT=d7_comparison_package.json  # Write strict D7 comparison package manifest after validation/preflight
+make write-d7-comparison-package ID=<project_id> GOLD=d7_gold.json PREDICTIONS="lexical.json embedding.json" OUTPUT=d7_comparison_package.json PROJECTS_DIR=projects  # Write strict D7 comparison package manifest after validation/preflight, including package-local projects_dir when supplied
 make compare-d7-package PACKAGE=d7_comparison_package.json  # Run D7 retrieval comparison from a strict package manifest
 make verify-d7-comparison-artifact ARTIFACT=benchmark_results/run-dir  # Verify D7 comparison artifact report/manifest hashes
 make run-d7-retrieval ID=<project_id> OUTPUT=predictions.json PROJECTS_DIR=projects  # Export D7 retrieval predictions from an explicit project store
@@ -136,7 +136,7 @@ python qc_cli.py run-d7-live-baseline <project_id> --projects-dir projects --out
 python qc_cli.py validate-d7-comparison-protocol d7_protocol.json  # Canonical CLI wrapper for D7 comparison protocol validation
 python qc_cli.py d7-comparison-preflight d7_protocol.json d7_gold.json lexical.json embedding.json  # Canonical CLI wrapper for D7 comparison preflight
 python qc_cli.py compare-d7-retrieval <project_id> --projects-dir projects --gold-file d7_gold.json --predictions-file lexical.json --predictions-file embedding.json --protocol-package d7_protocol.json --artifact-dir benchmark_results  # Canonical CLI wrapper for D7 retrieval comparison
-python qc_cli.py write-d7-comparison-package <project_id> --output d7_comparison_package.json --gold-file d7_gold.json --predictions-file lexical.json  # Canonical CLI wrapper for D7 comparison package writer
+python qc_cli.py write-d7-comparison-package <project_id> --projects-dir projects --output d7_comparison_package.json --gold-file d7_gold.json --predictions-file lexical.json  # Canonical CLI wrapper for D7 comparison package writer
 python qc_cli.py compare-d7-package d7_comparison_package.json  # Canonical CLI wrapper for D7 comparison package runner
 python qc_cli.py verify-d7-comparison-artifact benchmark_results/run-dir/manifest.json  # Canonical CLI wrapper for D7 comparison artifact verification
 make run-inv7-fixtures OUTPUT=inv7.json  # Write structural INV-7 fixture package for PROMPT_INJECTION=
