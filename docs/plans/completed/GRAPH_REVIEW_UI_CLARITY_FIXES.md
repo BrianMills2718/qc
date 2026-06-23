@@ -1,12 +1,24 @@
 # Plan #208: Graph and Review UI Clarity Fixes
 
-**Status:** Active
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Review UI Orientation Aids
 **Blocks:** Brian review usability
 
 ---
+
+## Outcome
+
+Completed 2026-06-23. The review UI now labels the bulk action as
+`Approve All Codes`, with tooltip text clarifying that it does not approve
+claims, negative cases, or relationships. The graph UI now survives repeated
+tab renders, explains flat code hierarchies, and renders the reviewer demo's
+Code Relationships and Entity Map edges.
+
+This is UI clarification and rendering repair only. It does not change API
+payloads, project state contracts, review decision semantics, graph endpoint
+contracts, claim meanings, methodological-validity claims, or SOTA claims.
 
 ## Gap
 
@@ -54,7 +66,7 @@ contracts, or claim meanings should change.
 - [x] Focused tests and Ruff pass.
 - [x] Demo server is restarted and verified in a browser.
 - [x] `make docs-check` and `git diff --check` pass.
-- [ ] Verified work is committed and pushed.
+- [x] Verified work is committed and pushed.
 
 ## Implementation Notes
 

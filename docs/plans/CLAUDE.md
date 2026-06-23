@@ -6,12 +6,12 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 208 | Graph and review UI clarity fixes | High | Active | `GRAPH_REVIEW_UI_CLARITY_FIXES.md` |
 
 ## Completed Plans
 
 | Name | Outcome | Record |
 |------|---------|--------|
+| Graph and review UI clarity fixes | Review UI now labels bulk approval as code-only, and Graph UI now survives tab switches, explains flat code hierarchies, and renders relationship/entity edges that were already present in graph API data | `completed/GRAPH_REVIEW_UI_CLARITY_FIXES.md` |
 | Review UI orientation aids | Browser review UI now includes a visible Start Here checklist, legend chips, tab-specific What to Inspect guidance, and tooltips/ARIA labels for ambiguous controls and metrics without changing review APIs or decision semantics | `completed/REVIEW_UI_ORIENTATION_AIDS.md` |
 | Reviewer demo run packet | `make reviewer-demo` now builds an isolated synthetic review packet with fixture transcripts, project state, exports, API/review/graph snapshots, Phase 0 scorecard artifacts, and explicit caveats; `QC_PROJECTS_DIR` lets CLI/API/browser surfaces inspect the packet without mutating the default store | `completed/REVIEWER_DEMO_RUN_PACKET.md` |
 | Review surface offset pagination | API/MCP review list surfaces for claims, negative cases, and relationships now support bounded `limit`/`offset` traversal and report applied offset metadata without changing row payload fields | `completed/REVIEW_SURFACE_OFFSET_PAGINATION.md` |

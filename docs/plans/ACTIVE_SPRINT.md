@@ -22,18 +22,25 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #208 `GRAPH_REVIEW_UI_CLARITY_FIXES.md`: clarify that
-   Approve All applies only to codes and repair graph tab rendering so
-   relationship/entity edges appear.
-2. Restart the demo server and verify the improved review and graph surfaces.
-3. After review or explicit continuation, continue through the ranked roadmap
+1. Brian review gate: Plan #208 clarified code-only bulk approval and repaired
+   graph tab rendering. The corrected demo server is running for review.
+2. After review or explicit continuation, continue through the ranked roadmap
    without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Plan #208 `GRAPH_REVIEW_UI_CLARITY_FIXES.md` is active.
-This is UI clarification/rendering repair only. Do not change API payloads,
-project state, review decision semantics, graph endpoint contracts, claim
-meanings, methodological-validity claims, or SOTA claims.
+**Active checkpoint:** No implementation plan is active. Plan #208
+`completed/GRAPH_REVIEW_UI_CLARITY_FIXES.md` is complete. The live review UI
+now labels bulk approval as `Approve All Codes`, and the graph UI renders the
+demo Code Relationships and Entity Map edges while explaining flat hierarchy
+edge counts. This is UI clarification/rendering repair only, not a change to
+API payloads, project state, review decision semantics, graph endpoint
+contracts, claim meanings, methodological-validity claims, or SOTA claims.
+
+**Completed checkpoint:** Plan #208
+`completed/GRAPH_REVIEW_UI_CLARITY_FIXES.md` clarified code-only bulk approval
+and fixed graph tab re-rendering after the Cytoscape loading placeholder was
+removed. Browser verification confirmed Code Relationships renders 3 nodes /
+2 edges and Entity Map renders 2 nodes / 1 edge.
 
 **Completed checkpoint:** Plan #207
 `completed/REVIEW_UI_ORIENTATION_AIDS.md` added concise reviewer guidance and
