@@ -28,13 +28,17 @@ highest-value documented lane.
    without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Plan #219
-`INV7_THEORY_LEDGER_REFRESH.md` is the current roadmap slice. It will update the
-canonical strategic ledger in `docs/PROJECT_THEORY_AND_GOALS.md` so INV-7 status
-matches the committed held-out live v1 artifact and package-comparison surface,
-while preserving caveats that these are bounded measurement/provenance outputs
-and not robustness, model-obedience, methodological-validity, superiority, or
-SOTA evidence.
+**Active checkpoint:** None. Select the next highest-value documented lane from
+the roadmap and create its plan before implementation.
+
+**Completed checkpoint:** Plan #219
+`completed/INV7_THEORY_LEDGER_REFRESH.md` refreshed the canonical strategic
+ledger in `docs/PROJECT_THEORY_AND_GOALS.md` so INV-7 status matches the
+committed held-out live v1 artifact and package-comparison surface. It removed
+stale wording that said no broader held-out live adversarial result exists while
+preserving caveats that current artifacts and comparison reports are bounded
+measurement/provenance outputs, not robustness, model-obedience,
+methodological-validity, model/provider superiority, or SOTA evidence.
 
 **Completed checkpoint:** Plan #218
 `completed/INV7_PACKAGE_COMPARISON_REPORT.md` added deterministic comparison

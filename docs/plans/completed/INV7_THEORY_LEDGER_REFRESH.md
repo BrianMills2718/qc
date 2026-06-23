@@ -1,6 +1,6 @@
 # Plan #219: INV-7 Theory Ledger Refresh
 
-**Status:** Planned
+**Status:** Completed
 **Type:** implementation
 **Priority:** High
 **Blocked By:** None
@@ -112,20 +112,55 @@ This is a doc-only ledger refresh; no new code tests are required.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] `docs/PROJECT_THEORY_AND_GOALS.md` no longer says no broader held-out
+- [x] `docs/PROJECT_THEORY_AND_GOALS.md` no longer says no broader held-out
   live adversarial benchmark result exists.
-- [ ] INV-7 status names the committed 10-fixture external held-out live v1
+- [x] INV-7 status names the committed 10-fixture external held-out live v1
   artifact and package-comparison report surface.
-- [ ] Updated text keeps caveats explicit: measurement/provenance only, not
+- [x] Updated text keeps caveats explicit: measurement/provenance only, not
   robustness, model obedience, methodological validity, superiority, or SOTA.
-- [ ] Remaining work still includes larger independently curated suites and
+- [x] Remaining work still includes larger independently curated suites and
   model/provider comparisons before robustness claims.
 
 > Process criteria:
-- [ ] `make docs-check` passes.
-- [ ] `git diff --check` passes.
-- [ ] `make check` passes.
-- [ ] Plan, implementation, and closeout are committed and pushed.
+- [x] `make docs-check` passes.
+- [x] `git diff --check` passes.
+- [x] `make check` passes.
+- [x] Plan, implementation, and closeout are committed and pushed.
+
+---
+
+## Outcome
+
+Completed in implementation commit `458fab5f`. The canonical theory ledger now:
+
+- records version `3.3 — 2026-06-23`;
+- states that external held-out live fixture manifests can be run under
+  protocol/preflight guards;
+- states that committed held-out live artifacts exist, including the 10-fixture
+  held-out live v1 package;
+- states that INV-7 packages can be compared deterministically;
+- removes stale wording that said no broader held-out live adversarial result
+  exists;
+- keeps the remaining-work bar at larger independently curated suites and
+  model/provider comparisons before any robustness claim.
+
+This was documentation/governance ledger work only. It added no new benchmark
+evidence and did not change runtime behavior.
+
+---
+
+## Verification
+
+- `rg -n "no broader|broader held-out|beyond the built-in canary|larger independently curated|10-fixture held-out|compare-inv7|package-comparison" docs/PROJECT_THEORY_AND_GOALS.md`
+  - No stale "no broader held-out" claim remains; current status names the
+    10-fixture held-out live v1 artifact and package-comparison surface.
+- `make docs-check`
+  - Markdown links, doc coupling, plan sync, and AGENTS sync passed.
+- `git diff --check`
+  - Passed.
+- `make check`
+  - 1306 passed, 1 skipped, 8 deselected; Ruff passed; docs-check passed; type
+    check not yet configured.
 
 ---
 
