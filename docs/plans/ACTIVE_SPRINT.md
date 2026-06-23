@@ -28,14 +28,17 @@ highest-value documented lane.
    without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Plan #214
-`D7_LIVE_BASELINE_PROJECTS_DIR_PARITY.md` is active. The next slice adds
-explicit `PROJECTS_DIR` / `--projects-dir` support to D7 live-baseline export
-through script, Make, and `qc_cli.py`, so future live-baseline packages can load
-the same repo-local project stores used by retrieval export and comparison.
-This is portability/provenance support only, not live-baseline evidence,
-held-out D7 evidence, superiority evidence, methodological-validity evidence,
-or SOTA evidence.
+**Active checkpoint:** None at this commit boundary. Select the next highest-
+value documented roadmap lane before editing code.
+
+**Completed checkpoint:** Plan #214
+`completed/D7_LIVE_BASELINE_PROJECTS_DIR_PARITY.md` added explicit
+`PROJECTS_DIR` / `--projects-dir` support to D7 live-baseline export through
+script, Make, and `qc_cli.py`, so future live-baseline packages can load the
+same repo-local project stores used by retrieval export and comparison. This is
+portability/provenance support only, not live-baseline evidence, held-out D7
+evidence, superiority evidence, methodological-validity evidence, or SOTA
+evidence.
 
 **Completed checkpoint:** Plan #213
 `completed/D7_PORTABLE_RETRIEVAL_SMOKE_ARTIFACT.md` committed a small synthetic

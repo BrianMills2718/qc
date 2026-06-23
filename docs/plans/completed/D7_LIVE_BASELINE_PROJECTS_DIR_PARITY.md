@@ -1,6 +1,6 @@
 # Plan #214: D7 Live Baseline Projects Dir Parity
 
-**Status:** Planned
+**Status:** Completed
 **Type:** implementation
 **Priority:** High
 **Blocked By:** None
@@ -10,11 +10,11 @@
 
 ## Gap
 
-**Current:** D7 retrieval export and D7 comparison support explicit repo-local
-project stores through `PROJECTS_DIR` / `--projects-dir`, but
-`scripts/run_d7_live_baseline.py` still constructs the default `ProjectStore()`.
-That blocks a fully explicit portable workflow for opt-in live D7
-candidate-selection baseline packages.
+**Current at plan start:** D7 retrieval export and D7 comparison supported
+explicit repo-local project stores through `PROJECTS_DIR` / `--projects-dir`,
+but `scripts/run_d7_live_baseline.py` still constructed the default
+`ProjectStore()`. That blocked a fully explicit portable workflow for opt-in
+live D7 candidate-selection baseline packages.
 
 **Target:** Add optional `--projects-dir` / `PROJECTS_DIR=` support to D7 live
 baseline export through script, Make, and `qc_cli.py run-d7-live-baseline`,
@@ -132,24 +132,56 @@ project-local script and CLI surface.
 
 Feature-level criteria:
 
-- [ ] `scripts/run_d7_live_baseline.py --projects-dir path` loads from that
+- [x] `scripts/run_d7_live_baseline.py --projects-dir path` loads from that
   store.
-- [ ] `make run-d7-live-baseline PROJECTS_DIR=path ...` forwards the path.
-- [ ] `qc_cli.py run-d7-live-baseline --projects-dir path ...` forwards the
+- [x] `make run-d7-live-baseline PROJECTS_DIR=path ...` forwards the path.
+- [x] `qc_cli.py run-d7-live-baseline --projects-dir path ...` forwards the
   path.
-- [ ] Default behavior without `--projects-dir` remains unchanged.
-- [ ] Docs preserve claim discipline: this is portability/provenance support,
+- [x] Default behavior without `--projects-dir` remains unchanged.
+- [x] Docs preserve claim discipline: this is portability/provenance support,
   not live-baseline evidence, held-out D7 evidence, superiority evidence,
   methodological-validity evidence, or SOTA evidence.
 
 Process criteria:
 
-- [ ] Focused tests pass.
-- [ ] Touched Python Ruff gate passes.
-- [ ] `make docs-check` passes.
-- [ ] `git diff --check` passes.
-- [ ] `make check` passes.
-- [ ] Verified increment is committed and pushed.
+- [x] Focused tests pass.
+- [x] Touched Python Ruff gate passes.
+- [x] `make docs-check` passes.
+- [x] `git diff --check` passes.
+- [x] `make check` passes.
+- [x] Verified increment is committed and pushed.
+
+---
+
+## Outcome
+
+Completed in commit `b3ffb0a0`.
+
+Implemented optional explicit project-store loading for D7 live-baseline export:
+
+- `scripts/run_d7_live_baseline.py` accepts `--projects-dir path` and
+  constructs `ProjectStore(projects_dir=...)` only when supplied.
+- `make run-d7-live-baseline PROJECTS_DIR=path ...` forwards the option.
+- `qc_cli.py run-d7-live-baseline --projects-dir path ...` forwards the option
+  to the canonical script.
+- Tests cover direct script loading from a repo-local project store and
+  top-level CLI forwarding without live LLM calls.
+- `CLAUDE.md`, generated `AGENTS.md`, and `docs/EVALUATION_HARNESS.md` document
+  the portability surface while preserving the non-evidentiary claim caveat.
+
+Verification:
+
+- `python -m pytest tests/test_run_d7_live_baseline_script.py tests/test_qc_cli_d7_live_baseline.py -q`
+  - 5 passed
+- `python -m ruff check scripts/run_d7_live_baseline.py qc_cli.py tests/test_run_d7_live_baseline_script.py tests/test_qc_cli_d7_live_baseline.py`
+  - passed
+- `make docs-check`
+  - passed
+- `git diff --check`
+  - passed
+- `make check`
+  - 1299 passed, 1 skipped, 8 deselected; Ruff passed; docs-check passed;
+    type check is not yet configured
 
 ---
 
