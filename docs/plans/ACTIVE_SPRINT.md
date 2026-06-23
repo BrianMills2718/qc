@@ -28,13 +28,17 @@ highest-value documented lane.
    without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Plan #213
-`D7_PORTABLE_RETRIEVAL_SMOKE_ARTIFACT.md` is active. The next slice commits a
-small synthetic D7 retrieval-comparison smoke artifact under `docs/benchmarks/`
-that runs from a repo-local project store through retrieval export, protocol
-preflight, comparison report, artifact manifest, and artifact verification. This
-is workflow/provenance smoke evidence only, not semantic disconfirmation
-validity, expert adjudication, live-baseline evidence, superiority evidence,
+**Active checkpoint:** None at this commit boundary. Select the next highest-
+value documented roadmap lane before editing code.
+
+**Completed checkpoint:** Plan #213
+`completed/D7_PORTABLE_RETRIEVAL_SMOKE_ARTIFACT.md` committed a small synthetic
+D7 retrieval-comparison smoke artifact under
+`docs/benchmarks/d7_portable_retrieval_smoke_2026_06_23/` that runs from a
+repo-local project store through retrieval export, protocol preflight,
+comparison report, artifact manifest, and artifact verification. This is
+workflow/provenance smoke evidence only, not semantic disconfirmation validity,
+expert adjudication, live-baseline evidence, superiority evidence,
 methodological-validity evidence, or SOTA evidence.
 
 **Completed checkpoint:** Plan #212

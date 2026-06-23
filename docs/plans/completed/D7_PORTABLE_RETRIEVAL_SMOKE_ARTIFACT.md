@@ -1,6 +1,6 @@
 # Plan #213: D7 Portable Retrieval Smoke Artifact
 
-**Status:** Planned
+**Status:** Completed
 **Type:** artifact
 **Priority:** High
 **Blocked By:** None
@@ -10,11 +10,12 @@
 
 ## Gap
 
-**Current:** D7 retrieval export and D7 comparison can now both load explicit
-repo-local project stores through `PROJECTS_DIR` / `--projects-dir`, but there
-is no committed D7 artifact proving the portable workflow runs end to end from
-a repo-local project state through prediction export, protocol preflight,
-comparison report, artifact manifest, and artifact verification.
+**Current at plan start:** D7 retrieval export and D7 comparison could both
+load explicit repo-local project stores through `PROJECTS_DIR` /
+`--projects-dir`, but there was no committed D7 artifact proving the portable
+workflow runs end to end from a repo-local project state through prediction
+export, protocol preflight, comparison report, artifact manifest, and artifact
+verification.
 
 **Target:** Commit a small synthetic D7 retrieval-comparison smoke artifact
 under `docs/benchmarks/` that includes a repo-local project store, D7 gold
@@ -129,23 +130,67 @@ not a new callable capability.
 
 Feature/artifact criteria:
 
-- [ ] Artifact directory contains project state, gold, prediction, protocol,
+- [x] Artifact directory contains project state, gold, prediction, protocol,
   comparison report, artifact report/manifest, and README.
-- [ ] Retrieval export uses `PROJECTS_DIR=...` and does not require the default
+- [x] Retrieval export uses `PROJECTS_DIR=...` and does not require the default
   user project store.
-- [ ] Comparison uses `PROJECTS_DIR=...` and does not require the default user
+- [x] Comparison uses `PROJECTS_DIR=...` and does not require the default user
   project store.
-- [ ] D7 gold, prediction, protocol, preflight, comparison, and artifact
+- [x] D7 gold, prediction, protocol, preflight, comparison, and artifact
   verification all pass.
-- [ ] README and docs preserve claim discipline: smoke/provenance artifact only,
+- [x] README and docs preserve claim discipline: smoke/provenance artifact only,
   not held-out D7 validity evidence.
 
 Process criteria:
 
-- [ ] `make docs-check` passes.
-- [ ] `git diff --check` passes.
-- [ ] `make check` passes.
-- [ ] Verified increment is committed and pushed.
+- [x] `make docs-check` passes.
+- [x] `git diff --check` passes.
+- [x] `make check` passes.
+- [x] Verified increment is committed and pushed.
+
+---
+
+## Outcome
+
+Completed in commit `39ee918f`.
+
+Committed `docs/benchmarks/d7_portable_retrieval_smoke_2026_06_23/` with:
+
+- repo-local project state:
+  `projects/d7_portable_retrieval_smoke_project.json`
+- D7 gold package: `gold.json`
+- retrieval prediction package generated via explicit `PROJECTS_DIR`:
+  `predictions.json`
+- D7 comparison protocol: `protocol.json`
+- preflight report: `preflight.json`
+- comparison report: `report.json`
+- versioned comparison artifact:
+  `artifact/20260623T213742348279Z-d7_portable_retrieval_smoke_project-d7-comparison/`
+- artifact verifier output: `verification.json`
+- README with replay commands and caveats.
+
+Verification:
+
+- `make validate-d7-gold GOLD=docs/benchmarks/d7_portable_retrieval_smoke_2026_06_23/gold.json`
+  - valid, contrary_evidence_count=1
+- `make validate-d7-baseline-package PACKAGE=docs/benchmarks/d7_portable_retrieval_smoke_2026_06_23/predictions.json`
+  - status pass, baseline_count=1, candidate_count=1
+- `make validate-d7-comparison-protocol PROTOCOL=docs/benchmarks/d7_portable_retrieval_smoke_2026_06_23/protocol.json`
+  - status valid, expected_prediction_count=1, metric_criteria_count=2
+- `make d7-comparison-preflight PROTOCOL=docs/benchmarks/d7_portable_retrieval_smoke_2026_06_23/protocol.json GOLD=docs/benchmarks/d7_portable_retrieval_smoke_2026_06_23/gold.json PREDICTIONS=docs/benchmarks/d7_portable_retrieval_smoke_2026_06_23/predictions.json`
+  - status pass, baseline_count=1
+- `make compare-d7-retrieval ID=d7_portable_retrieval_smoke_project PROJECTS_DIR=docs/benchmarks/d7_portable_retrieval_smoke_2026_06_23/projects GOLD=docs/benchmarks/d7_portable_retrieval_smoke_2026_06_23/gold.json PREDICTIONS=docs/benchmarks/d7_portable_retrieval_smoke_2026_06_23/predictions.json PROTOCOL=docs/benchmarks/d7_portable_retrieval_smoke_2026_06_23/protocol.json OUTPUT=docs/benchmarks/d7_portable_retrieval_smoke_2026_06_23/report.json ARTIFACT_DIR=docs/benchmarks/d7_portable_retrieval_smoke_2026_06_23/artifact`
+  - comparison completed; synthetic baseline recall/precision/F1 = 1.0/1.0/1.0;
+    metric criteria passed
+- `make verify-d7-comparison-artifact ARTIFACT=docs/benchmarks/d7_portable_retrieval_smoke_2026_06_23/artifact/20260623T213742348279Z-d7_portable_retrieval_smoke_project-d7-comparison/manifest.json`
+  - status verified
+- `make docs-check`
+  - passed
+- `git diff --check`
+  - passed
+- `make check`
+  - 1297 passed, 1 skipped, 8 deselected; Ruff passed; docs-check passed;
+    type check is not yet configured
 
 ---
 

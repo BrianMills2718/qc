@@ -6,12 +6,13 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 213 | D7 Portable Retrieval Smoke Artifact | High | Planned | `D7_PORTABLE_RETRIEVAL_SMOKE_ARTIFACT.md` |
+| _None_ | _No active plan at this checkpoint_ | _-_ | _-_ | _-_ |
 
 ## Completed Plans
 
 | Name | Outcome | Record |
 |------|---------|--------|
+| D7 portable retrieval smoke artifact | A synthetic D7 retrieval-comparison smoke artifact is committed under `docs/benchmarks/`, proving repo-local project-store retrieval export, protocol preflight, comparison, artifact manifest writing, and artifact verification without claiming D7 validity evidence | `completed/D7_PORTABLE_RETRIEVAL_SMOKE_ARTIFACT.md` |
 | D7 comparison projects-dir parity | `compare-d7-retrieval` now accepts explicit project stores through script, Make, and `qc_cli.py`, enabling portable D7 comparison artifact production without mutating the default store or claiming held-out D7 evidence | `completed/D7_COMPARISON_PROJECTS_DIR_PARITY.md` |
 | D7 retrieval projects-dir parity | `run-d7-retrieval` now accepts explicit project stores through script, Make, and `qc_cli.py`, enabling portable D7 retrieval package production without mutating the default store or claiming held-out D7 evidence | `completed/D7_RETRIEVAL_PROJECTS_DIR_PARITY.md` |
 | INV-7 external held-out smoke artifact | A protocol-registered 3-fixture external held-out INV-7 smoke artifact is committed and scored with passing preflight, while remaining explicitly non-evidentiary for robustness, model obedience, methodological validity, or SOTA | `completed/INV7_EXTERNAL_HELDOUT_SMOKE_ARTIFACT.md` |
