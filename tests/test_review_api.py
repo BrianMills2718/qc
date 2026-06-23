@@ -200,6 +200,7 @@ class TestReviewUIPage:
         assert "What to inspect" in resp.text
         assert "This is a software review surface" in resp.text
         assert 'title="Review code labels, descriptions, and example quotes."' in resp.text
+        assert "Approve All Codes" in resp.text
         assert "function renderModeHelp" in resp.text
         assert "function actionTooltip" in resp.text
         assert "Evidence anchors" in resp.text

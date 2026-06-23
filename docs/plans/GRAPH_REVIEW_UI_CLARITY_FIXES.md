@@ -45,16 +45,57 @@ contracts, or claim meanings should change.
 
 ## Acceptance Criteria
 
-- [ ] Review UI bulk button reads `Approve All Codes`.
-- [ ] Graph UI no longer aborts tab re-render when `loadingMsg` is absent.
-- [ ] Code Relationships renders the demo's 2 relationship edges in the browser.
-- [ ] Entity Map renders the demo's 1 entity edge in the browser.
-- [ ] Code Hierarchy explains that no parent-child links can be a flat codebook,
+- [x] Review UI bulk button reads `Approve All Codes`.
+- [x] Graph UI no longer aborts tab re-render when `loadingMsg` is absent.
+- [x] Code Relationships renders the demo's 2 relationship edges in the browser.
+- [x] Entity Map renders the demo's 1 entity edge in the browser.
+- [x] Code Hierarchy explains that no parent-child links can be a flat codebook,
   not necessarily missing relationship data.
-- [ ] Focused tests and Ruff pass.
-- [ ] Demo server is restarted and verified in a browser.
-- [ ] `make docs-check` and `git diff --check` pass.
+- [x] Focused tests and Ruff pass.
+- [x] Demo server is restarted and verified in a browser.
+- [x] `make docs-check` and `git diff --check` pass.
 - [ ] Verified work is committed and pushed.
+
+## Implementation Notes
+
+- Renamed the review UI bulk action from `Approve All` to `Approve All Codes`
+  and updated its tooltip to say it does not approve claims, negative cases, or
+  relationships.
+- Guarded the graph render path when the loading placeholder has already been
+  removed after first Cytoscape initialization.
+- Moved the graph empty-state note outside the Cytoscape-owned container so it
+  survives tab switches.
+- Added graph guidance text explaining the difference between Code Hierarchy,
+  Code Relationships, and Entity Map.
+- Added a flat-codebook note when Code Hierarchy has nodes but no parent-child
+  edges.
+- Regenerated `test_output/reviewer_demo` to reset accidental code approvals
+  recorded during review of the old ambiguous button.
+
+## Verification
+
+- TDD red:
+  `python -m pytest tests/test_review_api.py tests/test_graph_ui.py -q`
+  initially failed because `Approve All Codes`, the graph render guard, and
+  graph guidance text were absent.
+- Focused tests:
+  `python -m pytest tests/test_review_api.py tests/test_graph_ui.py -q`
+  (`62 passed`).
+- Focused Ruff:
+  `python -m ruff check qc_clean/plugins/api/review_ui.py qc_clean/plugins/api/graph_ui.py tests/test_review_api.py tests/test_graph_ui.py`.
+- Demo reset:
+  `make reviewer-demo OUTPUT=test_output/reviewer_demo`.
+- Browser verification after server restart:
+  - Code Hierarchy rendered 3 nodes, 0 edges, and a visible flat-codebook note.
+  - Code Relationships rendered 3 nodes and 2 edges with labels
+    `tension_with` and `qualifies`.
+  - Entity Map rendered 2 nodes and 1 edge labeled `requires_backup`.
+  - Review UI rendered `Approve All Codes` with tooltip
+    `Approve all visible codes only. This does not approve claims, negative cases, or relationships.`
+- Docs gate: `make docs-check`.
+- Whitespace gate: `git diff --check`.
+- Full gate: `make check` (`1288 passed, 1 skipped, 8 deselected`; Ruff/docs
+  passed; type check not configured).
 
 ## Notes
 

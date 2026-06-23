@@ -43,9 +43,12 @@ a:hover { text-decoration: underline; }
 .btn-primary { background: #2563eb; color: #fff; border-color: #2563eb; }
 .btn-primary:hover { background: #1d4ed8; }
 .stats-bar { margin-left: auto; font-size: 12px; color: #888; }
+.graph-help { background: #eff6ff; border-bottom: 1px solid #bfdbfe; padding: 8px 24px; font-size: 13px; color: #1f2937; }
+.graph-help strong { margin-right: 6px; }
+.empty-note { position: absolute; left: 24px; top: 158px; z-index: 10; max-width: 360px; background: #fff; border: 1px solid #d1d5db; border-radius: 8px; padding: 10px 12px; font-size: 13px; color: #374151; box-shadow: 0 2px 8px rgba(0,0,0,0.08); display: none; }
 
 /* Graph container */
-#cy { flex: 1; background: #fafafa; }
+#cy { flex: 1; background: #fafafa; position: relative; }
 
 /* Detail panel */
 .detail-panel { position: fixed; right: 20px; top: 140px; width: 320px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); display: none; z-index: 50; max-height: 60vh; overflow-y: auto; }
@@ -84,9 +87,15 @@ a:hover { text-decoration: underline; }
   <span class="stats-bar" id="statsBar"></span>
 </div>
 
+<div class="graph-help" id="graphHelp">
+  <strong>What this graph shows:</strong>
+  Code Hierarchy shows parent-child codebook links. Code Relationships shows non-hierarchy analytic links. Entity Map shows extracted entities and entity links.
+</div>
+
 <div id="cy">
   <div class="loading" id="loadingMsg">Loading graph data...</div>
 </div>
+<div class="empty-note" id="emptyNote"></div>
 
 <div class="detail-panel" id="detailPanel">
   <button class="close-btn" onclick="closeDetail()">&times;</button>
@@ -144,7 +153,9 @@ async function loadEntityData() {
 // -------------------------------------------------------------------
 function initCytoscape(elements, layout) {
   if (cy) cy.destroy();
-  document.getElementById("loadingMsg").style.display = "none";
+  const loading = document.getElementById("loadingMsg");
+  if (loading) loading.style.display = "none";
+  setEmptyNote("");
 
   cy = cytoscape({
     container: document.getElementById("cy"),
@@ -255,6 +266,8 @@ function renderHierarchy() {
   var stats = codeData.nodes.length + " codes";
   if (codeData.hierarchy_edges) stats += ", " + codeData.hierarchy_edges.length + " parent-child links";
   document.getElementById("statsBar").textContent = stats;
+  document.getElementById("graphHelp").innerHTML =
+    "<strong>What this graph shows:</strong> Code Hierarchy shows parent-child codebook links. A flat codebook can have nodes but no parent-child edges.";
 
   initCytoscape(elements, {
     name: "dagre",
@@ -263,6 +276,9 @@ function renderHierarchy() {
     rankSep: 80,
     padding: 30,
   });
+  if ((codeData.hierarchy_edges || []).length === 0) {
+    setEmptyNote("No parent-child hierarchy links in this view. This can be normal for a flat codebook; use Code Relationships for analytic links between codes.");
+  }
 }
 
 function renderRelationships() {
@@ -315,6 +331,8 @@ function renderRelationships() {
   var stats = elements.filter(function(e) { return !e.data.source; }).length + " codes, " +
               (codeData.relationship_edges || []).length + " relationships";
   document.getElementById("statsBar").textContent = stats;
+  document.getElementById("graphHelp").innerHTML =
+    "<strong>What this graph shows:</strong> Code Relationships shows analytic links between codes, such as tension, influence, or qualification.";
 
   initCytoscape(elements, {
     name: "cose",
@@ -323,6 +341,9 @@ function renderRelationships() {
     padding: 30,
     animate: false,
   });
+  if ((codeData.relationship_edges || []).length === 0) {
+    setEmptyNote("No code relationship edges are available for this project.");
+  }
 }
 
 function renderEntities() {
@@ -367,6 +388,8 @@ function renderEntities() {
 
   var stats = entityData.nodes.length + " entities, " + (entityData.edges || []).length + " relationships";
   document.getElementById("statsBar").textContent = stats;
+  document.getElementById("graphHelp").innerHTML =
+    "<strong>What this graph shows:</strong> Entity Map shows extracted entities and links between them.";
 
   initCytoscape(elements, {
     name: "cose",
@@ -375,6 +398,21 @@ function renderEntities() {
     padding: 30,
     animate: false,
   });
+  if ((entityData.edges || []).length === 0) {
+    setEmptyNote("No entity relationship edges are available for this project.");
+  }
+}
+
+function setEmptyNote(message) {
+  const note = document.getElementById("emptyNote");
+  if (!note) return;
+  if (!message) {
+    note.textContent = "";
+    note.style.display = "none";
+    return;
+  }
+  note.textContent = message;
+  note.style.display = "block";
 }
 
 // -------------------------------------------------------------------

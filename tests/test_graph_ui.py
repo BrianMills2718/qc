@@ -169,6 +169,13 @@ class TestGraphUI:
         assert "searchInput" in html
         assert "searchNodes" in html
 
+    def test_graph_page_handles_repeated_tab_renders(self):
+        html = render_graph_page("proj1")
+
+        assert 'const loading = document.getElementById("loadingMsg")' in html
+        assert "No parent-child hierarchy links" in html
+        assert "What this graph shows" in html
+
 
 # ---------------------------------------------------------------------------
 # Graph data endpoint tests

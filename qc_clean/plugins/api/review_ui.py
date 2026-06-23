@@ -180,7 +180,7 @@ a { color: #2563eb; }
     <button class="btn mode-btn" id="negativeCaseModeBtn" onclick="setReviewMode('negative_cases')" title="Review contrary or disconfirming evidence against claims." aria-label="Show negative cases for review">Negative Cases</button>
     <button class="btn mode-btn" id="relationshipModeBtn" onclick="setReviewMode('relationships')" title="Review proposed code and entity relationships plus their evidence." aria-label="Show relationships for review">Relationships</button>
   </div>
-  <button class="btn btn-success" id="approveAllBtn" onclick="approveAll()" title="Approve all visible codes. Use only when you deliberately want to record bulk approval.">Approve All</button>
+  <button class="btn btn-success" id="approveAllBtn" onclick="approveAll()" title="Approve all visible codes only. This does not approve claims, negative cases, or relationships.">Approve All Codes</button>
   <button class="btn btn-primary" id="saveBtn" onclick="submitDecisions(false)" title="Save the decisions you selected on this page.">Save Decisions</button>
   <button class="btn btn-primary" id="saveResumeBtn" onclick="submitDecisions(true)" title="Save decisions and ask the pipeline to resume if it is paused. Not needed for simply inspecting this demo.">Save &amp; Resume Pipeline</button>
   <span class="decision-count" id="decisionCount"></span>
