@@ -6,7 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| — | — | — | — | — |
+| 222 | Theoretical sampling smoke artifact | High | Active | `THEORETICAL_SAMPLING_SMOKE_ARTIFACT.md` |
 
 ## Completed Plans
 

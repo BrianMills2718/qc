@@ -28,8 +28,13 @@ highest-value documented lane.
    without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** None. Select the next highest-value documented lane from
-the roadmap and create its plan before implementation.
+**Active checkpoint:** Plan #222
+`THEORETICAL_SAMPLING_SMOKE_ARTIFACT.md` will commit a synthetic repo-local
+INV-4 theoretical-sampling smoke artifact under `docs/benchmarks/`, exercising
+protocol validation, explicit-`PROJECTS_DIR` candidate export, result export,
+and preflight. This is workflow/provenance smoke evidence only, not theoretical
+sampling execution, sampling adequacy evidence, saturation evidence,
+GT-fidelity evidence, methodological-validity evidence, or SOTA evidence.
 
 **Completed checkpoint:** Plan #221
 `completed/THEORETICAL_SAMPLING_PROJECTS_DIR_PARITY.md` added explicit
