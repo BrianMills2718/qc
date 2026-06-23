@@ -427,11 +427,11 @@ ifndef OUTPUT
 endif
 	python scripts/run_inv7_fixtures.py --output $(OUTPUT)
 
-run-inv7-live-fixtures:  ## Run live INV-7 model fixtures (OUTPUT=inv7_live.json [MODEL=gpt-5-mini] [TRACE_ID=id] [MAX_BUDGET=1.0])
+run-inv7-live-fixtures:  ## Run live INV-7 model fixtures (OUTPUT=inv7_live.json [MODEL=gpt-5-mini] [TRACE_ID=id] [MAX_BUDGET=1.0] [FIXTURES=manifest.json])
 ifndef OUTPUT
 	$(error OUTPUT is required. Usage: make run-inv7-live-fixtures OUTPUT=inv7_live.json MODEL=<model>)
 endif
-	python scripts/run_inv7_live_fixtures.py --output $(OUTPUT) $(if $(MODEL),--model $(MODEL),) $(if $(TRACE_ID),--trace-id $(TRACE_ID),) $(if $(MAX_BUDGET),--max-budget $(MAX_BUDGET),)
+	python scripts/run_inv7_live_fixtures.py --output $(OUTPUT) $(if $(FIXTURES),--fixtures $(FIXTURES),) $(if $(MODEL),--model $(MODEL),) $(if $(TRACE_ID),--trace-id $(TRACE_ID),) $(if $(MAX_BUDGET),--max-budget $(MAX_BUDGET),)
 
 adjudication-sample:  ## Export an unlabeled adjudication sample package (ID=<project_id> OUTPUT=sample.json [LIMIT=20] [CONTEXT_CHARS=120])
 ifndef ID

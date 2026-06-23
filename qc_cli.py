@@ -1101,6 +1101,10 @@ Examples:
         required=True,
         help='Path to write INV-7 live fixture results JSON',
     )
+    inv7_live_fixture_parser.add_argument(
+        '--fixtures',
+        help='Optional schema_version=1 INV-7 live fixture manifest JSON',
+    )
     inv7_live_fixture_parser.add_argument('--model', help='Live model name')
     inv7_live_fixture_parser.add_argument('--trace-id', help='llm_client trace ID prefix')
     inv7_live_fixture_parser.add_argument(
@@ -2142,6 +2146,7 @@ def handle_run_inv7_live_fixtures_command(args) -> int:
 
     argv = ["--output", args.output]
     for attr, flag in [
+        ("fixtures", "--fixtures"),
         ("model", "--model"),
         ("trace_id", "--trace-id"),
         ("max_budget", "--max-budget"),

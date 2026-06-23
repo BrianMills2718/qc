@@ -140,8 +140,10 @@ python qc_cli.py compare-d7-package d7_comparison_package.json  # Canonical CLI 
 python qc_cli.py verify-d7-comparison-artifact benchmark_results/run-dir/manifest.json  # Canonical CLI wrapper for D7 comparison artifact verification
 make run-inv7-fixtures OUTPUT=inv7.json  # Write structural INV-7 fixture package for PROMPT_INJECTION=
 make run-inv7-live-fixtures OUTPUT=inv7_live.json MODEL=<model>  # Write opt-in live canary package for PROMPT_INJECTION=
+make run-inv7-live-fixtures OUTPUT=inv7_live.json MODEL=<model> FIXTURES=manifest.json  # Run an external INV-7 live fixture manifest
 python qc_cli.py run-inv7-fixtures --output inv7.json  # Canonical CLI wrapper for structural INV-7 fixtures
 python qc_cli.py run-inv7-live-fixtures --output inv7_live.json --model <model>  # Canonical CLI wrapper for opt-in live INV-7 fixtures
+python qc_cli.py run-inv7-live-fixtures --output inv7_live.json --model <model> --fixtures manifest.json  # Canonical CLI wrapper for external live fixture manifests
 make validate-inv7-live-protocol PROTOCOL=inv7_live_protocol.json  # Validate pre-run live protocol metadata
 make inv7-live-preflight PROTOCOL=inv7_live_protocol.json PACKAGE=inv7_live.json  # Preflight live result against protocol before scoring
 make validate-inv7-package PACKAGE=inv7.json  # Validate schema_version=1 INV-7 package metadata

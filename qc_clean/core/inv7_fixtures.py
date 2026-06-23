@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 import hashlib
+import json
 from collections.abc import Awaitable, Callable
-from typing import Any
+from pathlib import Path
+from typing import Any, Literal
 
 from llm_client import acall_llm
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, ValidationError, model_validator
 
 from qc_clean.core.prompt_override_registry import get_prompt_override_surface
 from qc_clean.core.prompting import (
@@ -32,6 +34,7 @@ _ALLOWED_BOUNDARY_SENTINELS = {
     "END UNTRUSTED DATA BLOCK",
 }
 Inv7LiveModelCaller = Callable[["Inv7LiveFixture", str, str, float], Awaitable[str]]
+Inv7LiveSplit = Literal["canary", "dev", "held_out", "public_comparator"]
 
 
 class Inv7StructuralFixture(BaseModel):
@@ -84,6 +87,85 @@ class Inv7LiveFixture(BaseModel):
         if not self.forbidden_markers:
             raise ValueError("INV-7 live fixture requires at least one forbidden marker")
         return self
+
+
+class Inv7LiveFixtureManifest(BaseModel):
+    """Versioned external live fixture manifest for INV-7 runs."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    schema_version: Literal[1] = Field(description="Manifest schema version")
+    package_type: Literal["inv7_live_fixture_manifest"] = Field(description="Manifest package kind")
+    package_id: str = Field(description="Stable result package ID to write")
+    split: Inv7LiveSplit = Field(description="Evaluation split represented by these fixtures")
+    fixture_set_id: str = Field(description="Stable ID for the external fixture set")
+    fixture_set_version: str = Field(description="Version of the external fixture set")
+    prompt_frozen: bool = Field(description="Whether fixture prompts were frozen before the run")
+    contamination_checked: bool = Field(description="Whether contamination checks were performed")
+    registered_before_run: bool = Field(description="Whether the manifest was registered before execution")
+    fixtures: list[Inv7LiveFixture] = Field(description="Live prompt-injection fixtures to run")
+    note: str = Field(default="", description="Human-readable result package caveat")
+
+    @model_validator(mode="after")
+    def require_manifest_invariants(self) -> "Inv7LiveFixtureManifest":
+        """Enforce stable metadata and held-out provenance requirements."""
+        self.package_id = self.package_id.strip()
+        self.fixture_set_id = self.fixture_set_id.strip()
+        self.fixture_set_version = self.fixture_set_version.strip()
+        self.note = self.note.strip()
+        if not self.package_id:
+            raise ValueError("INV-7 live fixture manifest package_id must be non-empty")
+        if not self.fixture_set_id:
+            raise ValueError("INV-7 live fixture manifest fixture_set_id must be non-empty")
+        if not self.fixture_set_version:
+            raise ValueError("INV-7 live fixture manifest fixture_set_version must be non-empty")
+        if not self.fixtures:
+            raise ValueError("INV-7 live fixture manifest requires at least one fixture")
+
+        fixture_ids = [fixture.fixture_id for fixture in self.fixtures]
+        duplicates = sorted(fixture_id for fixture_id in set(fixture_ids) if fixture_ids.count(fixture_id) > 1)
+        if duplicates:
+            raise ValueError("Duplicate INV-7 live fixture_id(s): " + ", ".join(duplicates))
+
+        if self.split == "held_out":
+            if not self.prompt_frozen:
+                raise ValueError("held_out INV-7 live fixture manifests require prompt_frozen=true")
+            if not self.contamination_checked:
+                raise ValueError(
+                    "held_out INV-7 live fixture manifests require contamination_checked=true"
+                )
+            if not self.registered_before_run:
+                raise ValueError(
+                    "held_out INV-7 live fixture manifests require registered_before_run=true"
+                )
+        return self
+
+
+def load_inv7_live_fixture_manifest(path_or_payload: Path | str | dict[str, Any]) -> Inv7LiveFixtureManifest:
+    """Load and validate a schema_version=1 external INV-7 live fixture manifest."""
+    if isinstance(path_or_payload, dict):
+        raw = path_or_payload
+    else:
+        path = Path(path_or_payload)
+        try:
+            raw = json.loads(path.read_text(encoding="utf-8"))
+        except OSError as exc:
+            raise ValueError(f"INV-7 live fixture manifest '{path}' could not be read: {exc}") from exc
+        except json.JSONDecodeError as exc:
+            raise ValueError(f"INV-7 live fixture manifest '{path}' is not valid JSON: {exc}") from exc
+    return validate_inv7_live_fixture_manifest_payload(raw)
+
+
+def validate_inv7_live_fixture_manifest_payload(payload: Any) -> Inv7LiveFixtureManifest:
+    """Validate a raw JSON payload as an external INV-7 live fixture manifest."""
+    if not isinstance(payload, dict):
+        raise ValueError("INV-7 live fixture manifest must be a JSON object")
+    if payload.get("schema_version") != 1:
+        raise ValueError("INV-7 live fixture manifest must include schema_version=1")
+    try:
+        return Inv7LiveFixtureManifest.model_validate(payload)
+    except ValidationError as exc:
+        raise ValueError(f"Invalid INV-7 live fixture manifest: {exc}") from exc
 
 
 def run_inv7_structural_fixtures(
@@ -344,6 +426,13 @@ async def run_inv7_live_fixtures_async(
     max_budget: float,
     fixtures: list[Inv7LiveFixture] | None = None,
     call_model: Inv7LiveModelCaller | None = None,
+    package_id: str | None = None,
+    split: Inv7LiveSplit | None = None,
+    fixture_set_id: str | None = None,
+    fixture_set_version: str | None = None,
+    prompt_frozen: bool | None = None,
+    contamination_checked: bool | None = None,
+    note: str | None = None,
 ) -> dict[str, Any]:
     """Run live INV-7 fixtures and return bench-compatible JSON."""
     is_custom = fixtures is not None
@@ -355,13 +444,13 @@ async def run_inv7_live_fixtures_async(
         evaluations.append(_evaluate_live_fixture_response(fixture, response_text, model_name))
     return {
         "schema_version": 1,
-        "package_id": "inv7-live-custom" if is_custom else "inv7-live-built-in",
+        "package_id": package_id or ("inv7-live-custom" if is_custom else "inv7-live-built-in"),
         "mode": "live_model",
-        "split": "canary",
-        "fixture_set_id": "custom_inv7_live" if is_custom else "built_in_inv7_live",
-        "fixture_set_version": "custom" if is_custom else "2",
-        "prompt_frozen": not is_custom,
-        "contamination_checked": False,
+        "split": split or "canary",
+        "fixture_set_id": fixture_set_id or ("custom_inv7_live" if is_custom else "built_in_inv7_live"),
+        "fixture_set_version": fixture_set_version or ("custom" if is_custom else "2"),
+        "prompt_frozen": (not is_custom) if prompt_frozen is None else prompt_frozen,
+        "contamination_checked": False if contamination_checked is None else contamination_checked,
         "evaluator": "live_model_canary",
         "model": model_name,
         "trace_id": trace_id,
@@ -370,7 +459,7 @@ async def run_inv7_live_fixtures_async(
             fixture.fixture_id: _sha256_text(fixture.prompt)
             for fixture in selected
         },
-        "note": (
+        "note": note or (
             "Live model prompt-injection canary fixtures. Passing these fixtures "
             "does not prove prompt-injection robustness."
         ),
