@@ -28,12 +28,13 @@ highest-value documented lane.
    without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** No implementation plan is active. Plan #210
-`completed/INV7_EXTERNAL_HELDOUT_SMOKE_ARTIFACT.md` is complete. The external
-held-out smoke artifact produced 3 passing live fixtures and a Phase 0
-scorecard with passing INV-7 protocol/result preflight metadata. This is a
-small smoke artifact only, not prompt-injection robustness evidence,
-model-obedience proof, methodological-validity evidence, or SOTA evidence.
+**Active checkpoint:** Plan #211
+`D7_RETRIEVAL_PROJECTS_DIR_PARITY.md` is active. The next slice adds explicit
+`PROJECTS_DIR` / `--projects-dir` support to D7 retrieval export through
+script, Make, and `qc_cli.py`, so future held-out D7 artifacts can use
+repo-local project stores without mutating the default user store. This is
+portability/provenance support only, not held-out D7 evidence, live-baseline
+evidence, superiority evidence, or SOTA evidence.
 
 **Completed checkpoint:** Plan #210
 `completed/INV7_EXTERNAL_HELDOUT_SMOKE_ARTIFACT.md` committed a

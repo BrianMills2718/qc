@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 211 | D7 Retrieval Projects Dir Parity | High | Planned | `D7_RETRIEVAL_PROJECTS_DIR_PARITY.md` |
 
 ## Completed Plans
 
