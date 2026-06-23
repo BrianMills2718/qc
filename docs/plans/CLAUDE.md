@@ -6,7 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| — | — | — | — | — |
+| 223 | INV-4 theory ledger refresh | High | Active | `INV4_THEORY_LEDGER_REFRESH.md` |
 
 ## Completed Plans
 
