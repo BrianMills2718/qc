@@ -6,12 +6,12 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 207 | Review UI orientation aids | High | Active | `REVIEW_UI_ORIENTATION_AIDS.md` |
 
 ## Completed Plans
 
 | Name | Outcome | Record |
 |------|---------|--------|
+| Review UI orientation aids | Browser review UI now includes a visible Start Here checklist, legend chips, tab-specific What to Inspect guidance, and tooltips/ARIA labels for ambiguous controls and metrics without changing review APIs or decision semantics | `completed/REVIEW_UI_ORIENTATION_AIDS.md` |
 | Reviewer demo run packet | `make reviewer-demo` now builds an isolated synthetic review packet with fixture transcripts, project state, exports, API/review/graph snapshots, Phase 0 scorecard artifacts, and explicit caveats; `QC_PROJECTS_DIR` lets CLI/API/browser surfaces inspect the packet without mutating the default store | `completed/REVIEWER_DEMO_RUN_PACKET.md` |
 | Review surface offset pagination | API/MCP review list surfaces for claims, negative cases, and relationships now support bounded `limit`/`offset` traversal and report applied offset metadata without changing row payload fields | `completed/REVIEW_SURFACE_OFFSET_PAGINATION.md` |
 | Claim ledger CLI/MCP offset pagination | MCP `qc_get_claims` and CLI `project claims --offset` now support bounded offset traversal with visible pagination metadata while preserving existing scope and anchor-detail fields/output | `completed/CLAIM_LEDGER_CLI_MCP_OFFSET_PAGINATION.md` |

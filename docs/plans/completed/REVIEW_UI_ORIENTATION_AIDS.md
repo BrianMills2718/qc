@@ -1,12 +1,25 @@
 # Plan #207: Review UI Orientation Aids
 
-**Status:** Active
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Reviewer Demo Run Packet
 **Blocks:** Brian review usability
 
 ---
+
+## Outcome
+
+Completed 2026-06-23. The review UI now has a visible `Start here` checklist,
+legend chips for Confidence/Support/Evidence anchors/Decisions, a dynamic
+`What to inspect` help panel for each tab, and native tooltips/ARIA labels for
+ambiguous controls and metrics. The updated demo server was restarted against
+`test_output/reviewer_demo/projects`, and headless browser verification
+confirmed the instructions render and update when switching to Negative Cases.
+
+This is a usability/orientation improvement only. It does not change review
+decision semantics, API payloads, claim meanings, pipeline execution,
+methodological-validity evidence, or SOTA evidence.
 
 ## Gap
 
@@ -128,7 +141,7 @@ return existing data.
 - [x] Demo server serves the updated review page and headless browser confirms
   the orientation text appears.
 - [x] `make docs-check` and `git diff --check` pass.
-- [ ] Verified work is committed and pushed.
+- [x] Verified work is committed and pushed.
 
 ## Implementation Notes
 

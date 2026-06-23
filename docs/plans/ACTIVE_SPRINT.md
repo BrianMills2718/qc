@@ -22,20 +22,25 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #207 `REVIEW_UI_ORIENTATION_AIDS.md`: add concise reviewer
-   instructions, per-tab guidance, and tooltips/labels to the live review UI
-   because the current page does not make clear what Brian is looking at.
-2. After verification, restart the demo server so Brian can review the improved
-   HTML surface.
-3. After review or explicit continuation, continue through the ranked roadmap
+1. Brian review gate: Plan #207 improved the live review UI with concise
+   instructions, per-tab guidance, and tooltips/labels, and the updated demo
+   server is running for review.
+2. After review or explicit continuation, continue through the ranked roadmap
    without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Plan #207 `REVIEW_UI_ORIENTATION_AIDS.md` is active.
-This is a UI usability slice over the existing review page only: add
-orientation text, tooltips, and labels without changing API payloads, review
-decision semantics, claim meaning, pipeline execution, methodological-validity
-claims, or SOTA claims.
+**Active checkpoint:** No implementation plan is active. Plan #207
+`completed/REVIEW_UI_ORIENTATION_AIDS.md` is complete, and the live review UI
+now has a visible Start Here checklist, legend chips, tab-specific What to
+Inspect guidance, and tooltips/ARIA labels. This is UI usability only; it does
+not change API payloads, review decision semantics, claim meaning, pipeline
+execution, methodological-validity claims, or SOTA claims.
+
+**Completed checkpoint:** Plan #207
+`completed/REVIEW_UI_ORIENTATION_AIDS.md` added concise reviewer guidance and
+tooltips to the browser review page. Verification included focused UI tests,
+Ruff, docs checks, full `make check`, HTTP route checks, and headless browser
+confirmation that the Start Here guidance and Negative Cases tab help render.
 
 **Completed checkpoint:** Plan #206
 `completed/REVIEWER_DEMO_RUN_PACKET.md` added `make reviewer-demo` and
