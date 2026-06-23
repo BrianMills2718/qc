@@ -116,19 +116,54 @@ return existing data.
 
 ## Acceptance Criteria
 
-- [ ] Review page gives a concise "Start here" instruction strip before cards.
-- [ ] Review page gives per-tab "What to inspect" guidance for Codes, Claims,
+- [x] Review page gives a concise "Start here" instruction strip before cards.
+- [x] Review page gives per-tab "What to inspect" guidance for Codes, Claims,
   Negative Cases, and Relationships.
-- [ ] Ambiguous buttons and metrics have native tooltips and accessible labels.
-- [ ] The guidance distinguishes software review from methodological validity
+- [x] Ambiguous buttons and metrics have native tooltips and accessible labels.
+- [x] The guidance distinguishes software review from methodological validity
   or SOTA evidence.
-- [ ] Existing review API routes and decision actions remain unchanged.
-- [ ] Focused review UI tests pass.
-- [ ] Focused Ruff passes.
-- [ ] Demo server serves the updated review page and headless browser confirms
+- [x] Existing review API routes and decision actions remain unchanged.
+- [x] Focused review UI tests pass.
+- [x] Focused Ruff passes.
+- [x] Demo server serves the updated review page and headless browser confirms
   the orientation text appears.
-- [ ] `make docs-check` and `git diff --check` pass.
+- [x] `make docs-check` and `git diff --check` pass.
 - [ ] Verified work is committed and pushed.
+
+## Implementation Notes
+
+- Added a visible `Start here` orientation strip before the review cards.
+- Added legend chips for Confidence, Support, Evidence anchors, and Decisions.
+- Added a dynamic `What to inspect` help panel that changes for Codes, Claims,
+  Negative Cases, and Relationships.
+- Added native `title` tooltips and ARIA labels to tab buttons, graph link,
+  global action buttons, card action buttons, confidence/status/review pills,
+  evidence anchors, application toggles, and rationale fields.
+- Preserved existing API routes and decision payload semantics.
+
+## Verification
+
+- TDD red:
+  `python -m pytest tests/test_review_api.py -q` initially failed because
+  orientation text and tooltip assertions were not present.
+- Focused tests:
+  `python -m pytest tests/test_review_api.py -q` (`46 passed`).
+- Focused Ruff:
+  `python -m ruff check qc_clean/plugins/api/review_ui.py tests/test_review_api.py`.
+- Demo server HTTP checks:
+  `curl -sS http://127.0.0.1:8002/review/reviewer-demo | rg "Start here|What to inspect|title=\"Review code|Evidence anchors|software review surface"`
+  and negative-case API route check.
+- Headless browser check:
+  `/review/reviewer-demo` rendered `Start here`, Codes help, tooltip titles,
+  then after clicking Negative Cases rendered negative-case-specific help and
+  contrary evidence.
+- Screenshot checkpoint:
+  `review-ui-orientation` at 1280x900 showed orientation, legend, tab help,
+  and negative-case contrary evidence.
+- Docs gate: `make docs-check`.
+- Whitespace gate: `git diff --check`.
+- Full gate: `make check` (`1287 passed, 1 skipped, 8 deselected`; Ruff/docs
+  passed; type check not configured).
 
 ## Open Questions
 

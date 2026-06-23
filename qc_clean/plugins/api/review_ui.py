@@ -29,6 +29,21 @@ a { color: #2563eb; }
 .badge-pending { background: #e5e7eb; color: #374151; }
 .stats { margin-left: auto; font-size: 13px; color: #666; display: flex; gap: 16px; }
 
+/* Reviewer orientation */
+.orientation { max-width: 900px; margin: 14px auto 0; padding: 14px 16px; background: #fff; border: 1px solid #d9e2ec; border-radius: 8px; }
+.orientation-title { font-weight: 700; font-size: 14px; color: #111827; margin-bottom: 6px; }
+.orientation-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; }
+.orientation-list { padding-left: 20px; font-size: 13px; color: #374151; }
+.orientation-list li { margin: 2px 0; }
+.orientation-note { font-size: 12px; color: #4b5563; border-top: 1px solid #edf2f7; padding-top: 8px; }
+.legend { display: flex; gap: 8px; flex-wrap: wrap; font-size: 12px; }
+.legend-item { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border: 1px solid #d1d5db; border-radius: 999px; background: #f9fafb; cursor: help; }
+.hint { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; border-radius: 50%; background: #e5e7eb; color: #374151; font-size: 11px; font-weight: 700; cursor: help; }
+.mode-help { max-width: 900px; margin: 10px auto 0; padding: 10px 14px; border-left: 4px solid #2563eb; background: #eff6ff; color: #1f2937; font-size: 13px; border-radius: 6px; }
+.mode-help-title { font-weight: 700; margin-bottom: 3px; }
+.mode-help ul { padding-left: 18px; }
+.mode-help li { margin: 2px 0; }
+
 /* Action bar */
 .action-bar { background: #fff; border-bottom: 1px solid #e0e0e0; padding: 10px 24px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; position: sticky; top: 55px; z-index: 99; }
 .btn { padding: 7px 16px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; background: #fff; transition: all 0.15s; }
@@ -135,21 +150,43 @@ a { color: #2563eb; }
   <h1 id="projectName">Loading...</h1>
   <span class="badge badge-pending" id="statusBadge">...</span>
   <div class="stats" id="stats"></div>
-  <a href="/graph/$project_id" style="font-size:13px;margin-left:8px;">View Graph</a>
+  <a href="/graph/$project_id" style="font-size:13px;margin-left:8px;" title="Open the graph view for the same project. Use it to inspect relationships after reviewing cards.">View Graph</a>
+</div>
+
+<div class="orientation" aria-label="Review instructions">
+  <div class="orientation-grid">
+    <div>
+      <div class="orientation-title">Start here</div>
+      <ol class="orientation-list">
+        <li>Read each tab as a review checklist, not as a finished research report.</li>
+        <li>Check whether every claim is understandable, scoped, and tied to visible evidence.</li>
+        <li>Only use Approve/Reject/Modify if you want to test the review controls.</li>
+      </ol>
+    </div>
+    <div class="legend" aria-label="Review legend">
+      <span class="legend-item" title="Confidence is model/system supplied confidence. Treat it as a review cue, not proof.">Confidence <span class="hint">?</span></span>
+      <span class="legend-item" title="Support status describes whether source anchors are present or mixed; it does not mean the claim is true.">Support <span class="hint">?</span></span>
+      <span class="legend-item" title="Evidence anchors show source document, character offsets, quote hash, and application ID when available.">Evidence anchors <span class="hint">?</span></span>
+      <span class="legend-item" title="Decisions are pending until you save them. The demo is safe to inspect without saving.">Decisions <span class="hint">?</span></span>
+    </div>
+    <div class="orientation-note">This is a software review surface: judge whether the outputs are readable, scoped, and auditable. This demo is not methodological validity evidence or SOTA evidence.</div>
+  </div>
 </div>
 
 <div class="action-bar">
   <div class="mode-switch" aria-label="Review mode">
-    <button class="btn mode-btn active" id="codeModeBtn" onclick="setReviewMode('codes')">Codes</button>
-    <button class="btn mode-btn" id="claimModeBtn" onclick="setReviewMode('claims')">Claims</button>
-    <button class="btn mode-btn" id="negativeCaseModeBtn" onclick="setReviewMode('negative_cases')">Negative Cases</button>
-    <button class="btn mode-btn" id="relationshipModeBtn" onclick="setReviewMode('relationships')">Relationships</button>
+    <button class="btn mode-btn active" id="codeModeBtn" onclick="setReviewMode('codes')" title="Review code labels, descriptions, and example quotes." aria-label="Show codes for review">Codes</button>
+    <button class="btn mode-btn" id="claimModeBtn" onclick="setReviewMode('claims')" title="Review analytic claims, scopes, support status, and evidence anchors." aria-label="Show claims for review">Claims</button>
+    <button class="btn mode-btn" id="negativeCaseModeBtn" onclick="setReviewMode('negative_cases')" title="Review contrary or disconfirming evidence against claims." aria-label="Show negative cases for review">Negative Cases</button>
+    <button class="btn mode-btn" id="relationshipModeBtn" onclick="setReviewMode('relationships')" title="Review proposed code and entity relationships plus their evidence." aria-label="Show relationships for review">Relationships</button>
   </div>
-  <button class="btn btn-success" id="approveAllBtn" onclick="approveAll()">Approve All</button>
-  <button class="btn btn-primary" id="saveBtn" onclick="submitDecisions(false)">Save Decisions</button>
-  <button class="btn btn-primary" id="saveResumeBtn" onclick="submitDecisions(true)">Save &amp; Resume Pipeline</button>
+  <button class="btn btn-success" id="approveAllBtn" onclick="approveAll()" title="Approve all visible codes. Use only when you deliberately want to record bulk approval.">Approve All</button>
+  <button class="btn btn-primary" id="saveBtn" onclick="submitDecisions(false)" title="Save the decisions you selected on this page.">Save Decisions</button>
+  <button class="btn btn-primary" id="saveResumeBtn" onclick="submitDecisions(true)" title="Save decisions and ask the pipeline to resume if it is paused. Not needed for simply inspecting this demo.">Save &amp; Resume Pipeline</button>
   <span class="decision-count" id="decisionCount"></span>
 </div>
+
+<div class="mode-help" id="modeHelp" aria-live="polite"></div>
 
 <div class="toast" id="toast"></div>
 
@@ -233,6 +270,7 @@ function render() {
   }
 
   updateDecisionCount();
+  renderModeHelp();
 
   if (reviewMode === "claims") {
     renderClaims();
@@ -313,6 +351,60 @@ function renderRelationships() {
   document.getElementById("content").innerHTML = html;
 }
 
+function renderModeHelp() {
+  const el = document.getElementById("modeHelp");
+  if (!el) return;
+  const help = modeHelp(reviewMode);
+  let html = '<div class="mode-help-title">What to inspect: ' + escapeHtml(help.title) + '</div>';
+  html += '<ul>';
+  for (const item of help.items) {
+    html += '<li>' + escapeHtml(item) + '</li>';
+  }
+  html += '</ul>';
+  el.innerHTML = html;
+}
+
+function modeHelp(mode) {
+  if (mode === "claims") {
+    return {
+      title: "Claims",
+      items: [
+        "Can you understand the claim without reading source code?",
+        "Is the scope clear enough to know what the claim applies to?",
+        "Do the supporting and contrary evidence boxes make the claim auditable?",
+      ],
+    };
+  }
+  if (mode === "negative_cases") {
+    return {
+      title: "Negative Cases",
+      items: [
+        "Look for evidence that challenges or qualifies a claim.",
+        "Check whether the contrary quote is visible and tied to a source span.",
+        "This tab shows disconfirmation candidates; it does not prove the system found every contrary case.",
+      ],
+    };
+  }
+  if (mode === "relationships") {
+    return {
+      title: "Relationships",
+      items: [
+        "Check whether the linked codes/entities and relationship label are understandable.",
+        "Use strength as a review cue, not as proof.",
+        "Inspect evidence text before approving a relationship.",
+      ],
+    };
+  }
+  return {
+    title: "Codes",
+    items: [
+      "Check whether each label and description is understandable.",
+      "Expand Applications to inspect the source quotes behind the code.",
+      "Use confidence as a triage cue; it is not validation.",
+    ],
+  };
+}
+
 function renderCodeCard(code) {
   const d = decisions.get(code.id);
   const action = d ? d.action : null;
@@ -328,18 +420,21 @@ function renderCodeCard(code) {
   html += '<div class="card-actions">';
   for (const act of ["approve", "reject", "modify", "merge", "split"]) {
     const activeClass = action === act ? " active" : "";
+    const tooltip = actionTooltip("code", act);
     html += '<button class="btn' + activeClass + '" onclick="setDecision(\'' +
-            code.id + '\',\'' + act + '\')">' + capitalize(act) + '</button>';
+            code.id + '\',\'' + act + '\')" title="' + escapeAttr(tooltip) +
+            '" aria-label="' + escapeAttr(capitalize(act) + " code " + code.name) + '">' +
+            capitalize(act) + '</button>';
   }
   html += '</div>';
-  html += '<span class="card-confidence">' + (code.confidence != null ? code.confidence.toFixed(2) : "") + '</span>';
+  html += '<span class="card-confidence" title="Confidence is a review cue, not proof of correctness.">' + (code.confidence != null ? code.confidence.toFixed(2) : "") + '</span>';
   html += '</div>';
 
   // Name row
   html += '<div class="card-body">';
   html += '<div class="card-name">' + escapeHtml(code.name) +
           ' <span class="card-mentions">(' + (code.mention_count || 0) + ' mentions)</span>' +
-          ' <span class="card-provenance">' + escapeHtml(code.provenance || "llm") + '</span></div>';
+          ' <span class="card-provenance" title="Who created or last owns this artifact.">' + escapeHtml(code.provenance || "llm") + '</span></div>';
   html += '<div class="card-desc">' + escapeHtml(code.description || "") + '</div>';
 
   // Example quotes
@@ -401,7 +496,7 @@ function renderCodeCard(code) {
   // Applications accordion
   if (apps.length > 0) {
     html += '<div class="app-toggle' + (isExpanded ? " open" : "") +
-            '" onclick="toggleApps(\'' + code.id + '\')">';
+            '" onclick="toggleApps(\'' + code.id + '\')" title="Show or hide source quote applications for this code.">';
     html += '<span class="arrow">&#9654;</span> Applications (' + apps.length + ')';
     html += '</div>';
     html += '<div class="app-list' + (isExpanded ? " open" : "") + '">';
@@ -416,7 +511,7 @@ function renderCodeCard(code) {
   html += '<label>Rationale</label>';
   html += '<input type="text" placeholder="Optional rationale for this decision" value="' +
           escapeAttr(d ? d.rationale || "" : "") +
-          '" onchange="updateRationale(\'' + code.id + '\',this.value)">';
+          '" title="Optional note explaining why you made this review decision." onchange="updateRationale(\'' + code.id + '\',this.value)">';
   html += '</div>';
 
   html += '</div>';  // card
@@ -433,21 +528,24 @@ function renderClaimCard(claim) {
   html += '<div class="card-actions">';
   for (const act of ["approve", "reject", "modify"]) {
     const activeClass = action === act ? " active" : "";
+    const tooltip = actionTooltip("claim", act);
     html += '<button class="btn' + activeClass + '" onclick="setClaimDecision(\'' +
-            claim.id + '\',\'' + act + '\')">' + capitalize(act) + '</button>';
+            claim.id + '\',\'' + act + '\')" title="' + escapeAttr(tooltip) +
+            '" aria-label="' + escapeAttr(capitalize(act) + " claim") + '">' +
+            capitalize(act) + '</button>';
   }
   html += '</div>';
-  html += '<span class="card-provenance">' + escapeHtml(claim.created_by || "llm") + '</span>';
+  html += '<span class="card-provenance" title="Who created this claim.">' + escapeHtml(claim.created_by || "llm") + '</span>';
   html += '</div>';
 
   html += '<div class="card-body">';
   html += '<div class="claim-text">' + escapeHtml(claim.claim_text || "") + '</div>';
   html += '<div class="claim-meta">';
-  html += '<span class="claim-pill">' + escapeHtml(claim.kind || "claim") + '</span>';
-  html += '<span class="claim-pill">' + escapeHtml(claim.source_stage || "unknown stage") + '</span>';
-  html += '<span class="claim-pill">support: ' + escapeHtml(claim.support_status || "unknown") + '</span>';
-  html += '<span class="claim-pill">review: ' + escapeHtml(claim.adjudication_status || "pending") + '</span>';
-  html += '<span class="claim-pill">anchors: ' + (claim.supporting_anchors || 0) + ' / ' + (claim.contrary_anchors || 0) + '</span>';
+  html += '<span class="claim-pill" title="Claim kind: the type of analytic assertion.">' + escapeHtml(claim.kind || "claim") + '</span>';
+  html += '<span class="claim-pill" title="Source stage: where this claim was generated.">' + escapeHtml(claim.source_stage || "unknown stage") + '</span>';
+  html += '<span class="claim-pill" title="Support status: anchor/accounting state, not truth.">support: ' + escapeHtml(claim.support_status || "unknown") + '</span>';
+  html += '<span class="claim-pill" title="Review status: whether this claim has been adjudicated.">review: ' + escapeHtml(claim.adjudication_status || "pending") + '</span>';
+  html += '<span class="claim-pill" title="Supporting anchors / contrary anchors. Click through the evidence boxes below.">anchors: ' + (claim.supporting_anchors || 0) + ' / ' + (claim.contrary_anchors || 0) + '</span>';
   html += '</div>';
   html += '<div class="claim-scope">Scope: ' + escapeHtml(formatClaimScope(claim.scope || {})) + '</div>';
   if (claim.origin_object_type || claim.origin_object_id) {
@@ -469,7 +567,7 @@ function renderClaimCard(claim) {
   html += '<label>Rationale</label>';
   html += '<input type="text" placeholder="Optional rationale for this decision" value="' +
           escapeAttr(d ? d.rationale || "" : "") +
-          '" onchange="updateRationale(\'' + claim.id + '\',this.value)">';
+          '" title="Optional note explaining why you made this review decision." onchange="updateRationale(\'' + claim.id + '\',this.value)">';
   html += '</div>';
   html += '</div>';
   return html;
@@ -484,7 +582,7 @@ function renderAnchorDetails(label, anchors) {
       : "unpositioned";
     const hash = anchor.quote_hash ? " hash " + anchor.quote_hash : "";
     const app = anchor.code_application_id ? " app " + anchor.code_application_id : "";
-    html += '<div class="anchor-row">';
+    html += '<div class="anchor-row" title="Evidence anchor: source document, source character span, quote hash, and application ID when available.">';
     html += '<div class="anchor-title">' + escapeHtml(label) + '</div>';
     html += '<div class="anchor-quote">' + escapeHtml(anchor.quote_text || "") + '</div>';
     html += '<div class="anchor-meta">' + escapeHtml((anchor.doc_id || "unknown doc") + " " + span + hash + app) + '</div>';
@@ -504,11 +602,14 @@ function renderRelationshipCard(relationship) {
   html += '<div class="card-actions">';
   for (const act of ["approve", "reject", "modify"]) {
     const activeClass = action === act ? " active" : "";
+    const tooltip = actionTooltip("relationship", act);
     html += '<button class="btn' + activeClass + '" onclick="setRelationshipDecision(\'' +
-            relationship.id + '\',\'' + act + '\')">' + capitalize(act) + '</button>';
+            relationship.id + '\',\'' + act + '\')" title="' + escapeAttr(tooltip) +
+            '" aria-label="' + escapeAttr(capitalize(act) + " relationship") + '">' +
+            capitalize(act) + '</button>';
   }
   html += '</div>';
-  html += '<span class="card-confidence">' + (relationship.strength != null ? Number(relationship.strength).toFixed(2) : "") + '</span>';
+  html += '<span class="card-confidence" title="Relationship strength from the producing stage; use as a review cue, not proof.">' + (relationship.strength != null ? Number(relationship.strength).toFixed(2) : "") + '</span>';
   html += '</div>';
 
   html += '<div class="card-body">';
@@ -563,7 +664,7 @@ function renderRelationshipCard(relationship) {
   html += '<label>Rationale</label>';
   html += '<input type="text" placeholder="Optional rationale for this decision" value="' +
           escapeAttr(d ? d.rationale || "" : "") +
-          '" onchange="updateRationale(\'' + relationship.id + '\',this.value)">';
+          '" title="Optional note explaining why you made this review decision." onchange="updateRationale(\'' + relationship.id + '\',this.value)">';
   html += '</div>';
   html += '</div>';
   return html;
@@ -584,8 +685,11 @@ function renderAppItem(app, codeId) {
   html += '<div class="app-actions">';
   for (const act of ["approve", "reject"]) {
     const activeClass = action === act ? " active" : "";
+    const tooltip = actionTooltip("application", act);
     html += '<button class="btn' + activeClass + '" onclick="setAppDecision(\'' +
-            app.id + '\',\'' + act + '\',event)">' + capitalize(act) + '</button>';
+            app.id + '\',\'' + act + '\',event)" title="' + escapeAttr(tooltip) +
+            '" aria-label="' + escapeAttr(capitalize(act) + " quote application") + '">' +
+            capitalize(act) + '</button>';
   }
   html += '</div>';
   html += '</div>';
@@ -598,6 +702,23 @@ function renderAppItem(app, codeId) {
 
 function currentClaimRows() {
   return (projectData.claims || []).concat(projectData.negative_cases || []);
+}
+
+function actionTooltip(targetType, action) {
+  const labels = {
+    approve: "Mark this item as acceptable for this review pass.",
+    reject: "Mark this item as not acceptable for this review pass.",
+    modify: "Edit this item before accepting it.",
+    merge: "Combine this code into another code.",
+    split: "Split this code into multiple codes.",
+  };
+  const suffixes = {
+    code: "This affects a code label/definition, not the source transcript.",
+    claim: "This affects the claim ledger review state.",
+    relationship: "This affects a proposed code/entity relationship.",
+    application: "This affects one quote-to-code application.",
+  };
+  return (labels[action] || "Review this item.") + " " + (suffixes[targetType] || "");
 }
 
 function setDecision(codeId, action) {

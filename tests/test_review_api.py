@@ -192,6 +192,18 @@ class TestReviewUIPage:
         assert "function renderNegativeCases" in resp.text
         assert "renderClaimCard(negativeCase)" in resp.text
 
+    def test_review_page_exposes_orientation_aids(self, client):
+        resp = client.get("/review/test-project-123")
+
+        assert resp.status_code == 200
+        assert "Start here" in resp.text
+        assert "What to inspect" in resp.text
+        assert "This is a software review surface" in resp.text
+        assert 'title="Review code labels, descriptions, and example quotes."' in resp.text
+        assert "function renderModeHelp" in resp.text
+        assert "function actionTooltip" in resp.text
+        assert "Evidence anchors" in resp.text
+
     def test_review_page_exposes_anchor_detail_rendering(self, client):
         resp = client.get("/review/test-project-123")
 
