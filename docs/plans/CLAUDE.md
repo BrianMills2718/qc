@@ -6,7 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| — | — | — | — | — |
+| 221 | Theoretical sampling projects-dir parity | High | Active | `THEORETICAL_SAMPLING_PROJECTS_DIR_PARITY.md` |
 
 ## Completed Plans
 

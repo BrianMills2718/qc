@@ -28,8 +28,14 @@ highest-value documented lane.
    without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** None. Select the next highest-value documented lane from
-the roadmap and create its plan before implementation.
+**Active checkpoint:** Plan #221
+`THEORETICAL_SAMPLING_PROJECTS_DIR_PARITY.md` will add explicit
+`PROJECTS_DIR` / `--projects-dir` support to theoretical-sampling candidate
+export through script, Make, and `qc_cli.py`, preserving default behavior while
+enabling portable repo-local INV-4 artifact workflows. This is
+portability/provenance plumbing only, not theoretical sampling execution,
+sampling adequacy evidence, saturation evidence, GT-fidelity evidence,
+methodological-validity evidence, or SOTA evidence.
 
 **Completed checkpoint:** Plan #220
 `completed/INV7_COMMITTED_PACKAGE_COMPARISON_ARTIFACT.md` committed
