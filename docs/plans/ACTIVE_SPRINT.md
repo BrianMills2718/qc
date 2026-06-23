@@ -28,8 +28,13 @@ highest-value documented lane.
    without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** None at this commit boundary. Select the next highest-
-value documented roadmap lane before editing code.
+**Active checkpoint:** Plan #215
+`D7_COMPARISON_PACKAGE_PROJECTS_DIR_SUPPORT.md` is active. The next slice adds
+optional `projects_dir` to strict D7 comparison package manifests and writer
+surfaces, so `compare-d7-package` can replay repo-local project stores without
+hidden environment coupling. This is repeatability/provenance support only, not
+held-out D7 evidence, live-baseline evidence, superiority evidence,
+methodological-validity evidence, or SOTA evidence.
 
 **Completed checkpoint:** Plan #214
 `completed/D7_LIVE_BASELINE_PROJECTS_DIR_PARITY.md` added explicit

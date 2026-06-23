@@ -6,7 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| _None_ | _No active plan at this checkpoint_ | _-_ | _-_ | _-_ |
+| 215 | D7 Comparison Package Projects Dir Support | High | Planned | `D7_COMPARISON_PACKAGE_PROJECTS_DIR_SUPPORT.md` |
 
 ## Completed Plans
 
