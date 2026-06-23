@@ -1,6 +1,6 @@
 # Plan #205: Review Surface Offset Pagination
 
-**Status:** Planned
+**Status:** In Progress
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Claim Ledger CLI/MCP Offset Pagination

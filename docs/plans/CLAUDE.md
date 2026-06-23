@@ -6,7 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 205 | Review surface offset pagination | High | Planned | `REVIEW_SURFACE_OFFSET_PAGINATION.md` |
+| 205 | Review surface offset pagination | High | In Progress | `REVIEW_SURFACE_OFFSET_PAGINATION.md` |
 
 ## Completed Plans
 

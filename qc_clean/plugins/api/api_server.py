@@ -463,7 +463,11 @@ class QCAPIServer:
             }
 
         @self._app.get("/projects/{project_id}/review/claims")
-        async def get_review_claims(project_id: str):
+        async def get_review_claims(
+            project_id: str,
+            limit: int = 100,
+            offset: int = 0,
+        ):
             """Get analytic claims as review targets."""
             from qc_clean.core.persistence.project_store import ProjectStore
             from qc_clean.core.pipeline.review import ReviewManager
@@ -474,7 +478,15 @@ class QCAPIServer:
                 raise HTTPException(status_code=404, detail=f"Project not found: {project_id}")
 
             rm = ReviewManager(state)
-            claims = [claim_review_row(claim) for claim in rm.get_pending_claims()[:100]]
+            bounded_limit = min(max(0, limit), 100)
+            bounded_offset = max(0, offset)
+            all_claims = rm.get_pending_claims()
+            claims = [
+                claim_review_row(claim)
+                for claim in all_claims[
+                    bounded_offset : bounded_offset + bounded_limit
+                ]
+            ]
 
             return {
                 "project_id": state.id,
@@ -482,12 +494,18 @@ class QCAPIServer:
                 "pipeline_status": state.pipeline_status.value,
                 "claims": claims,
                 "returned": len(claims),
-                "total_claims": len(state.claims),
+                "total_claims": len(all_claims),
+                "limit": bounded_limit,
+                "offset": bounded_offset,
                 "summary": rm.get_review_summary().model_dump(mode="json"),
             }
 
         @self._app.get("/projects/{project_id}/review/negative-cases")
-        async def get_review_negative_cases(project_id: str, limit: int = 100):
+        async def get_review_negative_cases(
+            project_id: str,
+            limit: int = 100,
+            offset: int = 0,
+        ):
             """Get negative-case claims as review targets."""
             from qc_clean.core.persistence.project_store import ProjectStore
             from qc_clean.core.pipeline.review import ReviewManager
@@ -499,13 +517,17 @@ class QCAPIServer:
 
             rm = ReviewManager(state)
             bounded_limit = min(max(0, limit), 100)
+            bounded_offset = max(0, offset)
             all_negative_cases = [
                 claim
                 for claim in rm.get_pending_claims()
                 if claim.claim_kind == ClaimKind.NEGATIVE_CASE
             ]
             negative_cases = [
-                claim_review_row(claim) for claim in all_negative_cases[:bounded_limit]
+                claim_review_row(claim)
+                for claim in all_negative_cases[
+                    bounded_offset : bounded_offset + bounded_limit
+                ]
             ]
 
             return {
@@ -516,11 +538,16 @@ class QCAPIServer:
                 "returned": len(negative_cases),
                 "total_negative_cases": len(all_negative_cases),
                 "limit": bounded_limit,
+                "offset": bounded_offset,
                 "summary": rm.get_review_summary().model_dump(mode="json"),
             }
 
         @self._app.get("/projects/{project_id}/review/relationships")
-        async def get_review_relationships(project_id: str, limit: int = 100):
+        async def get_review_relationships(
+            project_id: str,
+            limit: int = 100,
+            offset: int = 0,
+        ):
             """Get code/entity relationships as review targets."""
             from qc_clean.core.persistence.project_store import ProjectStore
             from qc_clean.core.pipeline.review import ReviewManager
@@ -532,8 +559,11 @@ class QCAPIServer:
 
             rm = ReviewManager(state)
             bounded_limit = max(0, limit)
+            bounded_offset = max(0, offset)
             all_relationships = rm.get_pending_relationships()
-            relationships = all_relationships[:bounded_limit]
+            relationships = all_relationships[
+                bounded_offset : bounded_offset + bounded_limit
+            ]
 
             return {
                 "project_id": state.id,
@@ -543,6 +573,7 @@ class QCAPIServer:
                 "returned": len(relationships),
                 "total_relationships": len(all_relationships),
                 "limit": bounded_limit,
+                "offset": bounded_offset,
                 "summary": rm.get_review_summary().model_dump(mode="json"),
             }
 

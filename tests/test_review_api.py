@@ -454,6 +454,39 @@ class TestReviewClaimsEndpoint:
         assert claim["revision_history_count"] == 0
         assert claim["created_by"] == "llm"
 
+    def test_review_claims_limit_offset(self, client, tmp_store, review_project):
+        review_project.claims = [
+            AnalyticClaim(
+                id="claim-1",
+                claim_kind=ClaimKind.CODE,
+                source_stage="thematic_coding",
+                claim_text="Claim 1.",
+                scope=ClaimScope(code_ids=["C1"]),
+                origin_object_type="code",
+                origin_object_id="C1",
+            ),
+            AnalyticClaim(
+                id="claim-2",
+                claim_kind=ClaimKind.CODE,
+                source_stage="thematic_coding",
+                claim_text="Claim 2.",
+                scope=ClaimScope(code_ids=["C2"]),
+                origin_object_type="code",
+                origin_object_id="C2",
+            ),
+        ]
+        tmp_store.save(review_project)
+
+        resp = client.get("/projects/test-project-123/review/claims?limit=1&offset=1")
+
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["returned"] == 1
+        assert data["total_claims"] == 2
+        assert data["limit"] == 1
+        assert data["offset"] == 1
+        assert data["claims"][0]["id"] == "claim-2"
+
     def test_404_for_missing_project(self, client):
         resp = client.get("/projects/nonexistent/review/claims")
         assert resp.status_code == 404
@@ -519,6 +552,43 @@ class TestReviewNegativeCasesEndpoint:
             }
         ]
 
+    def test_review_negative_cases_limit_offset(
+        self, client, tmp_store, review_project
+    ):
+        review_project.claims = [
+            AnalyticClaim(
+                id="neg-1",
+                claim_kind=ClaimKind.NEGATIVE_CASE,
+                source_stage="negative_case_analysis",
+                claim_text="Negative case 1.",
+                scope=ClaimScope(code_ids=["C1"]),
+                origin_object_type="negative_case",
+                origin_object_id="negative_case:0",
+            ),
+            AnalyticClaim(
+                id="neg-2",
+                claim_kind=ClaimKind.NEGATIVE_CASE,
+                source_stage="negative_case_analysis",
+                claim_text="Negative case 2.",
+                scope=ClaimScope(code_ids=["C2"]),
+                origin_object_type="negative_case",
+                origin_object_id="negative_case:1",
+            ),
+        ]
+        tmp_store.save(review_project)
+
+        resp = client.get(
+            "/projects/test-project-123/review/negative-cases?limit=1&offset=1"
+        )
+
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["returned"] == 1
+        assert data["total_negative_cases"] == 2
+        assert data["limit"] == 1
+        assert data["offset"] == 1
+        assert data["negative_cases"][0]["id"] == "neg-2"
+
     def test_404_for_missing_project(self, client):
         resp = client.get("/projects/nonexistent/review/negative-cases")
         assert resp.status_code == 404
@@ -550,6 +620,19 @@ class TestReviewRelationshipsEndpoint:
         assert entity_rel["target_name"] == "Front desk"
         assert entity_rel["relationship_type"] == "used_by"
         assert entity_rel["evidence_count"] == 1
+
+    def test_review_relationships_limit_offset(self, client):
+        resp = client.get(
+            "/projects/test-project-123/review/relationships?limit=1&offset=1"
+        )
+
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["returned"] == 1
+        assert data["total_relationships"] == 2
+        assert data["limit"] == 1
+        assert data["offset"] == 1
+        assert data["relationships"][0]["id"] == "ER1"
 
     def test_404_for_missing_project(self, client):
         resp = client.get("/projects/nonexistent/review/relationships")

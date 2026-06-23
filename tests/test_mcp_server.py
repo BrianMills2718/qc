@@ -743,6 +743,39 @@ class TestReview:
         assert negative["total_claims"] == 2
         assert negative["limit"] == 0
 
+    def test_review_claims_limit_offset(self, completed_project, tmp_store):
+        completed_project.claims = [
+            AnalyticClaim(
+                id="claim-1",
+                claim_kind=ClaimKind.CODE,
+                source_stage="thematic_coding",
+                claim_text="Claim 1.",
+                scope=ClaimScope(code_ids=["C1"]),
+                origin_object_type="code",
+                origin_object_id="C1",
+            ),
+            AnalyticClaim(
+                id="claim-2",
+                claim_kind=ClaimKind.CODE,
+                source_stage="thematic_coding",
+                claim_text="Claim 2.",
+                scope=ClaimScope(code_ids=["C2"]),
+                origin_object_type="code",
+                origin_object_id="C2",
+            ),
+        ]
+        tmp_store.save(completed_project)
+
+        result = json.loads(
+            qc_mcp_server.qc_review_claims("proj-done", limit=1, offset=1)
+        )
+
+        assert result["returned"] == 1
+        assert result["total_claims"] == 2
+        assert result["limit"] == 1
+        assert result["offset"] == 1
+        assert result["claims"][0]["id"] == "claim-2"
+
     def test_review_claims_not_found(self, tmp_store):
         result = json.loads(qc_mcp_server.qc_review_claims("nope"))
         assert "error" in result
@@ -841,6 +874,39 @@ class TestReview:
         assert negative["total_negative_cases"] == 2
         assert negative["limit"] == 0
 
+    def test_review_negative_cases_limit_offset(self, completed_project, tmp_store):
+        completed_project.claims = [
+            AnalyticClaim(
+                id="neg-1",
+                claim_kind=ClaimKind.NEGATIVE_CASE,
+                source_stage="negative_case_analysis",
+                claim_text="Negative case 1.",
+                scope=ClaimScope(code_ids=["C1"]),
+                origin_object_type="negative_case",
+                origin_object_id="negative_case:0",
+            ),
+            AnalyticClaim(
+                id="neg-2",
+                claim_kind=ClaimKind.NEGATIVE_CASE,
+                source_stage="negative_case_analysis",
+                claim_text="Negative case 2.",
+                scope=ClaimScope(code_ids=["C2"]),
+                origin_object_type="negative_case",
+                origin_object_id="negative_case:1",
+            ),
+        ]
+        tmp_store.save(completed_project)
+
+        result = json.loads(
+            qc_mcp_server.qc_review_negative_cases("proj-done", limit=1, offset=1)
+        )
+
+        assert result["returned"] == 1
+        assert result["total_negative_cases"] == 2
+        assert result["limit"] == 1
+        assert result["offset"] == 1
+        assert result["negative_cases"][0]["id"] == "neg-2"
+
     def test_review_negative_cases_not_found(self, tmp_store):
         result = json.loads(qc_mcp_server.qc_review_negative_cases("nope"))
         assert "error" in result
@@ -910,6 +976,23 @@ class TestReview:
         assert negative["returned"] == 0
         assert negative["total_relationships"] == 2
         assert negative["limit"] == 0
+
+    def test_review_relationships_limit_offset(self, completed_project, tmp_store):
+        completed_project.code_relationships = [
+            CodeRelationship(id="CR1", source_code_id="C1", target_code_id="C2"),
+            CodeRelationship(id="CR2", source_code_id="C2", target_code_id="C1"),
+        ]
+        tmp_store.save(completed_project)
+
+        result = json.loads(
+            qc_mcp_server.qc_review_relationships("proj-done", limit=1, offset=1)
+        )
+
+        assert result["returned"] == 1
+        assert result["total_relationships"] == 2
+        assert result["limit"] == 1
+        assert result["offset"] == 1
+        assert result["relationships"][0]["id"] == "CR2"
 
     def test_review_relationships_not_found(self, tmp_store):
         result = json.loads(qc_mcp_server.qc_review_relationships("nope"))

@@ -396,12 +396,13 @@ def _claim_review_row(claim) -> Dict[str, Any]:
 
 
 @mcp.tool()
-def qc_review_claims(project_id: str, limit: int = 100) -> str:
+def qc_review_claims(project_id: str, limit: int = 100, offset: int = 0) -> str:
     """List analytic claims as bounded review targets.
 
     Args:
         project_id: The project ID
         limit: Maximum claim rows to return, capped at 100
+        offset: Number of claim rows to skip before returning rows
     """
     try:
         state = store.load(project_id)
@@ -409,8 +410,12 @@ def qc_review_claims(project_id: str, limit: int = 100) -> str:
         return json.dumps({"error": f"Project '{project_id}' not found."})
 
     safe_limit = min(max(0, limit), 100)
+    safe_offset = max(0, offset)
     rm = ReviewManager(state)
-    claims = [_claim_review_row(claim) for claim in state.claims[:safe_limit]]
+    claims = [
+        _claim_review_row(claim)
+        for claim in state.claims[safe_offset : safe_offset + safe_limit]
+    ]
     return json.dumps({
         "project_id": state.id,
         "project_name": state.name,
@@ -419,13 +424,18 @@ def qc_review_claims(project_id: str, limit: int = 100) -> str:
         "returned": len(claims),
         "total_claims": len(state.claims),
         "limit": safe_limit,
+        "offset": safe_offset,
         "summary": rm.get_review_summary().model_dump(mode="json"),
         "can_resume": rm.can_resume(),
     }, indent=2)
 
 
 @mcp.tool()
-def qc_review_negative_cases(project_id: str, limit: int = 100) -> str:
+def qc_review_negative_cases(
+    project_id: str,
+    limit: int = 100,
+    offset: int = 0,
+) -> str:
     """List negative-case claims as bounded review targets.
 
     Decisions for these rows should use target_type="claim" because negative
@@ -434,6 +444,7 @@ def qc_review_negative_cases(project_id: str, limit: int = 100) -> str:
     Args:
         project_id: The project ID
         limit: Maximum negative-case rows to return, capped at 100
+        offset: Number of negative-case rows to skip before returning rows
     """
     try:
         state = store.load(project_id)
@@ -441,12 +452,14 @@ def qc_review_negative_cases(project_id: str, limit: int = 100) -> str:
         return json.dumps({"error": f"Project '{project_id}' not found."})
 
     safe_limit = min(max(0, limit), 100)
+    safe_offset = max(0, offset)
     rm = ReviewManager(state)
     all_negative_cases = [
         claim for claim in state.claims if claim.claim_kind == ClaimKind.NEGATIVE_CASE
     ]
     negative_cases = [
-        _claim_review_row(claim) for claim in all_negative_cases[:safe_limit]
+        _claim_review_row(claim)
+        for claim in all_negative_cases[safe_offset : safe_offset + safe_limit]
     ]
     return json.dumps({
         "project_id": state.id,
@@ -456,18 +469,24 @@ def qc_review_negative_cases(project_id: str, limit: int = 100) -> str:
         "returned": len(negative_cases),
         "total_negative_cases": len(all_negative_cases),
         "limit": safe_limit,
+        "offset": safe_offset,
         "summary": rm.get_review_summary().model_dump(mode="json"),
         "can_resume": rm.can_resume(),
     }, indent=2)
 
 
 @mcp.tool()
-def qc_review_relationships(project_id: str, limit: int = 100) -> str:
+def qc_review_relationships(
+    project_id: str,
+    limit: int = 100,
+    offset: int = 0,
+) -> str:
     """List code/entity relationships as bounded review targets.
 
     Args:
         project_id: The project ID
         limit: Maximum relationship rows to return, capped at 100
+        offset: Number of relationship rows to skip before returning rows
     """
     try:
         state = store.load(project_id)
@@ -475,9 +494,10 @@ def qc_review_relationships(project_id: str, limit: int = 100) -> str:
         return json.dumps({"error": f"Project '{project_id}' not found."})
 
     safe_limit = min(max(0, limit), 100)
+    safe_offset = max(0, offset)
     rm = ReviewManager(state)
     all_relationships = rm.get_pending_relationships()
-    relationships = all_relationships[:safe_limit]
+    relationships = all_relationships[safe_offset : safe_offset + safe_limit]
     return json.dumps({
         "project_id": state.id,
         "project_name": state.name,
@@ -486,6 +506,7 @@ def qc_review_relationships(project_id: str, limit: int = 100) -> str:
         "returned": len(relationships),
         "total_relationships": len(all_relationships),
         "limit": safe_limit,
+        "offset": safe_offset,
         "summary": rm.get_review_summary().model_dump(mode="json"),
         "can_resume": rm.can_resume(),
     }, indent=2)
