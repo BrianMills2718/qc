@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 206 | Reviewer demo run packet | High | Active | `REVIEWER_DEMO_RUN_PACKET.md` |
 
 ## Completed Plans
 

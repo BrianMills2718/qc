@@ -22,12 +22,17 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Select and plan the next deterministic, high-value roadmap lane.
+1. Execute Plan #206 `REVIEWER_DEMO_RUN_PACKET.md`: build an isolated
+   deterministic review packet, run it locally, inspect the generated outputs,
+   and only then declare it ready for Brian review.
 2. Continue through the ranked roadmap without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** No implementation plan is active. Select and plan the
-next deterministic roadmap lane before editing code.
+**Active checkpoint:** Plan #206 `REVIEWER_DEMO_RUN_PACKET.md` is active. This
+is the review-readiness lane: create a sanitized, reproducible packet that
+shows the CLI/API/export/scorecard surfaces on a local fixture. It is not live
+LLM validity evidence, expert adjudication, held-out D3/D7 evidence,
+methodological-validity evidence, or SOTA evidence.
 
 **Completed checkpoint:** Plan #205
 `completed/REVIEW_SURFACE_OFFSET_PAGINATION.md` added offset traversal to
