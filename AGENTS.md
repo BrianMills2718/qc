@@ -148,9 +148,11 @@ python qc_cli.py run-inv7-live-fixtures --output inv7_live.json --model <model> 
 make validate-inv7-live-protocol PROTOCOL=inv7_live_protocol.json  # Validate pre-run live protocol metadata
 make inv7-live-preflight PROTOCOL=inv7_live_protocol.json PACKAGE=inv7_live.json  # Preflight live result against protocol before scoring
 make validate-inv7-package PACKAGE=inv7.json  # Validate schema_version=1 INV-7 package metadata
+make compare-inv7-packages PACKAGES="inv7_a.json inv7_b.json" OUTPUT=inv7_compare.json  # Compare schema_version=1 INV-7 package outcomes
 python qc_cli.py validate-inv7-package inv7.json  # Canonical CLI wrapper for INV-7 package validation
 python qc_cli.py validate-inv7-live-protocol inv7_live_protocol.json  # Canonical CLI wrapper for INV-7 live protocol validation
 python qc_cli.py inv7-live-preflight inv7_live_protocol.json inv7_live.json  # Canonical CLI wrapper for INV-7 live preflight
+python qc_cli.py compare-inv7-packages inv7_a.json inv7_b.json --output inv7_compare.json  # Canonical CLI wrapper for INV-7 package comparison
 python qc_cli.py validate-d3-gold d3_gold.json  # Canonical CLI wrapper for D3 gold package validation
 python qc_cli.py validate-d7-gold d7_gold.json  # Canonical CLI wrapper for D7 gold package validation
 make lint-prompt-overrides  # Check prompt override source uses against registry declarations

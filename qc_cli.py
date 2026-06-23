@@ -91,6 +91,7 @@ Examples:
   qc_cli validate-inv7-package inv7.json
   qc_cli validate-inv7-live-protocol inv7_protocol.json
   qc_cli inv7-live-preflight inv7_protocol.json inv7_live.json
+  qc_cli compare-inv7-packages inv7_a.json inv7_b.json --output inv7_compare.json
   qc_cli project export <project_id> --format markdown --output-file report.md
   qc_cli project export <project_id> --format markdown --output-file report.md --audit-manifest manifest.json --publish-preflight --scope-lint
   qc_cli status --server
@@ -1154,6 +1155,21 @@ Examples:
         help='Path to the INV-7 live result package JSON file',
     )
 
+    inv7_package_comparison_parser = subparsers.add_parser(
+        'compare-inv7-packages',
+        help='Compare INV-7 package outcomes',
+        description='Compare two or more schema_version=1 INV-7 prompt-injection packages',
+    )
+    inv7_package_comparison_parser.add_argument(
+        'package_files',
+        nargs='+',
+        help='Two or more INV-7 package JSON files',
+    )
+    inv7_package_comparison_parser.add_argument(
+        '--output',
+        help='Optional path to write the comparison report JSON',
+    )
+
     # Server command
     server_parser = subparsers.add_parser(
         'server',
@@ -1540,6 +1556,8 @@ def main() -> int:
             return handle_validate_inv7_live_protocol_command(args)
         elif args.command == 'inv7-live-preflight':
             return handle_inv7_live_preflight_command(args)
+        elif args.command == 'compare-inv7-packages':
+            return handle_compare_inv7_packages_command(args)
         elif args.command == 'server':
             return handle_server_command(args)
         elif args.command == 'project':
@@ -2190,6 +2208,16 @@ def handle_inv7_live_preflight_command(args) -> int:
     from scripts import preflight_inv7_live_package
 
     return preflight_inv7_live_package.main([args.protocol_file, args.package_file])
+
+
+def handle_compare_inv7_packages_command(args) -> int:
+    """Compare INV-7 packages through the canonical CLI."""
+    from scripts import compare_inv7_packages
+
+    argv = [*args.package_files]
+    if args.output:
+        argv.extend(["--output", args.output])
+    return compare_inv7_packages.main(argv)
 
 
 if __name__ == "__main__":
