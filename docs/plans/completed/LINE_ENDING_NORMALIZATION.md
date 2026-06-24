@@ -1,6 +1,6 @@
 # Plan #156: Line Ending Normalization
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** Medium
 **Blocked By:** None

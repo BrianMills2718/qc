@@ -1,6 +1,6 @@
 # Plan #86: Scope-Bound Claim Export Rows
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Corpus scope completeness warnings

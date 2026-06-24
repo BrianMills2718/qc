@@ -1,6 +1,6 @@
 # Plan #75: D10 Tool-Call Costs
 
-**Status:** In Progress
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Plan #27 D10 cost latency scorecard

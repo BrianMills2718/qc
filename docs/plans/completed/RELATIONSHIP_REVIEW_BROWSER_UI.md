@@ -1,6 +1,6 @@
 # Plan #89: Relationship Review Browser UI
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Relationship review API decisions; MCP relationship review

@@ -1,6 +1,6 @@
 # Plan #73: D2 Coded Segment Rate
 
-**Status:** In Progress
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** Plan #3 segment universe; Plan #58 D1/D2 structural rate Wilson intervals

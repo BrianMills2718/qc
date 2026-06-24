@@ -1,6 +1,6 @@
 # Plan #87: Relationship Review API Decisions
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** INV-10 claim review first slices

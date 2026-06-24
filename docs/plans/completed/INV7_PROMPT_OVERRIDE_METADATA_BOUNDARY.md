@@ -1,6 +1,6 @@
 # Plan #158: INV-7 Prompt Override Metadata Boundary
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** None
