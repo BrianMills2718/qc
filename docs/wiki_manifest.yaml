@@ -13,6 +13,10 @@ publish:
     type: Methodology
     title: Qualitative Coding Methodology
     tags: [portfolio, qualitative-coding, methodology]
+  - path: docs/LONG_TERM_EXECUTION_PLAN.md
+    type: Roadmap
+    title: Qualitative Coding Long-Term Execution Plan
+    tags: [qualitative-coding, roadmap, design-plan]
   - path: docs/ARTIFACTS.md
     type: ArtifactRegister
     title: Qualitative Coding Artifact Register

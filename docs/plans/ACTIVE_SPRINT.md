@@ -22,18 +22,23 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Complete Plan #231, the design-plan long-term execution spine. This is a
-   planning/documentation alignment slice that makes the continuation path
-   explicit before the next implementation slice.
-2. Continue to the next unambiguous slice named by that execution spine without
+1. Create and execute Plan #232, abductive candidate review workflow, as named
+   by `docs/LONG_TERM_EXECUTION_PLAN.md`.
+2. Continue to Plan #233, process-tracing handoff package, after Plan #232
+   closes unless concern triage changes the risk order.
+3. Continue through the execution spine without
    pausing after the verified commit unless a canonical stop condition is
    reached.
 
-**Active checkpoint:** Plan #231
-`DESIGN_PLAN_LONG_TERM_EXECUTION_SPINE.md` will consolidate the scattered
-design-plan ingredients into one long-term execution plan with explicit next
-slices, concern-register cadence, dependency subplans, and stop conditions.
-This is planning/governance work only, not methodology evidence or SOTA proof.
+**Active checkpoint:** None. Create Plan #232 before implementation.
+
+**Completed checkpoint:** Plan #231
+`completed/DESIGN_PLAN_LONG_TERM_EXECUTION_SPINE.md` added
+`docs/LONG_TERM_EXECUTION_PLAN.md`, a design-plan-aligned execution spine with
+frame, authority order, modality split, risk-ordered roadmap, explicit next
+two slices, dependency subplans, concern cadence, and stop conditions. This is
+planning/governance work only, not methodology evidence, causal proof,
+process-tracing evidence, or SOTA proof.
 
 **Completed checkpoint:** Plan #230
 `completed/ABDUCTIVE_REVIEWER_DEMO_PACKET.md` extended the deterministic

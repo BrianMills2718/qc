@@ -1,6 +1,24 @@
 # Plan #231: Design-Plan Long-Term Execution Spine
 
-**Status:** Planned
+## Outcome
+
+Completed 2026-06-25. Added
+`docs/LONG_TERM_EXECUTION_PLAN.md` as the design-plan-aligned execution spine
+for continued qualitative-coding work. The spine names the frame, authority
+order, modality split, risk-ordered roadmap, next two slices, dependency
+subplans, concern cadence, and canonical stop conditions. It points Plan #232
+at abductive candidate review workflow and Plan #233 at a typed
+process-tracing handoff package. Updated methodology, artifact, concern, wiki,
+plan-index, and active-sprint docs. This is planning/governance work only, not
+methodological-validity evidence, causal proof, process-tracing evidence, or
+SOTA evidence.
+
+Verification:
+
+- `make docs-check` — passed.
+- `git diff --check` — passed.
+
+**Status:** Complete
 **Type:** design
 **Priority:** High
 **Blocked By:** None
@@ -130,21 +148,21 @@ No new code tests are required for a docs-only plan.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] A canonical long-term execution plan exists and explicitly maps to the
+- [x] A canonical long-term execution plan exists and explicitly maps to the
   design-plan outputs.
-- [ ] The plan names the next 1-2 slices unambiguously with acceptance/audit
+- [x] The plan names the next 1-2 slices unambiguously with acceptance/audit
   criteria.
-- [ ] Open exploratory surfaces are framed as instruments/readouts, not fake
+- [x] Open exploratory surfaces are framed as instruments/readouts, not fake
   precision.
-- [ ] Dependency subplans cover unresolved process-tracing/workbench seams.
-- [ ] The concern register is triaged and includes abductive review/handoff
+- [x] Dependency subplans cover unresolved process-tracing/workbench seams.
+- [x] The concern register is triaged and includes abductive review/handoff
   risks.
-- [ ] Artifact register and wiki manifest point to the new execution spine.
+- [x] Artifact register and wiki manifest point to the new execution spine.
 
 > Process criteria:
-- [ ] `make docs-check` passes.
-- [ ] `git diff --check` passes.
-- [ ] Verified work is committed and pushed.
+- [x] `make docs-check` passes.
+- [x] `git diff --check` passes.
+- [x] Verified work is committed and pushed.
 
 ---
 

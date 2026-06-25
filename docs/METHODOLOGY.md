@@ -69,6 +69,12 @@ Exploratory / ladder surfaces:
 For exploratory surfaces, the right next step is an instrumented corpus and
 readout, not a stronger assertion in documentation.
 
+The current long-running execution spine is
+[docs/LONG_TERM_EXECUTION_PLAN.md](LONG_TERM_EXECUTION_PLAN.md). It applies this
+modality split to the roadmap by naming the next unambiguous slices, separating
+deductive contracts from exploratory readouts, and preserving the concern
+register as the steering loop between slices.
+
 ## ADR Map
 
 - [docs/adr/0001_qualitative_coding_methodology_spine.md](adr/0001_qualitative_coding_methodology_spine.md)
@@ -96,4 +102,3 @@ held-out protocol with appropriate statistical comparison and explicit caveats.
 | Calling the GT path "full grounded theory" | Current stages mimic parts of GT but do not complete GT's epistemic loop. | Use "grounded-theory-inspired" unless D8/GT-fidelity evidence is available. |
 | Treating negative-case output as proof of disconfirmation coverage | Prompting for contrary evidence is not a held-out D7 result. | Use D7 gold packages and comparison artifacts before making recall claims. |
 | Treating prompt-boundary fixtures as general robustness | Fixture/canary success is not a broad adversarial guarantee. | Keep INV-7 caveats and expand held-out adversarial evaluation. |
-

@@ -18,6 +18,7 @@ Wiki home: http://localhost:8088/index.php/Project_Wiki
 | Artifact | Role | Notes |
 |---|---|---|
 | [docs/METHODOLOGY.md](METHODOLOGY.md) | Methodology spine | Summarizes goals, modality, evidence-promotion rules, and failure modes. |
+| [docs/LONG_TERM_EXECUTION_PLAN.md](LONG_TERM_EXECUTION_PLAN.md) | Long-term execution spine | Maps the design-plan protocol to current roadmap slices, next actions, dependency subplans, and stop conditions. |
 | [docs/VALIDATION.md](VALIDATION.md) | Validation register | Separates software evidence from methodological evidence. |
 | [docs/CONCERNS.md](CONCERNS.md) | Concern register | Tracks the remaining blockers to a stronger public portfolio page. |
 | [docs/adr/0001_qualitative_coding_methodology_spine.md](adr/0001_qualitative_coding_methodology_spine.md) | ADR | Records the dossier framing decision. |
@@ -59,4 +60,3 @@ The main missing artifacts are not more documentation. They are evidence:
 - a benchmark artifact package created from that corpus;
 - a concise portfolio report that licenses only the claims supported by the
   artifact package.
-
