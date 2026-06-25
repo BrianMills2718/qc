@@ -22,25 +22,22 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Resume Plan #234, local Africa corpus plus adjudication seed, with the
-   current local packet treated as a successful review instrument rather than a
-   completed default-path product proof.
-2. Continue through the execution spine without
-   pausing after the verified commit unless a canonical stop condition is
-   reached.
+- No active slices. Continue through the execution spine from
+  `docs/LONG_TERM_EXECUTION_PLAN.md` without pausing unless a canonical stop
+  condition is reached.
 
-**Active checkpoints:**
+**Active checkpoints:** None.
 
-- **Plan #234** `SANITIZED_CORPUS_ADJUDICATION_SEED.md`
-  is the current execution-roadmap slice after governance alignment. It
-  should create a local Africa corpus instrument, scope record, output packet,
-  unlabeled adjudication sample, and validated/preflighted protocol. If real
-  human labels are supplied, it can import D3/D7 packages and run a strict
-  Phase 0 package; otherwise it must stop at a manual-ready packet and say no
-  expert evidence exists yet. The corpus remains local/restricted in this
-  slice; sanitization and public-shareability are deferred. The first local
-  seed packet now exists, and the separate default-path graph utility gap that
-  had blocked continuation has now been addressed in completed Plan #238.
+**Completed checkpoint:** Plan #234
+`SANITIZED_CORPUS_ADJUDICATION_SEED.md` — 3-document Africa transcript subset
+run in an isolated project store; corpus policy, scope record, inventory, and
+sanitization-deferred note created; output packet (15 codes, 38 apps, 139
+claims) with full audit manifest exported; unlabeled adjudication sample,
+validated adjudication protocol, and passing protocol/sample preflight
+exported. Stopped at manual-ready packet as designed — no expert labels have
+been supplied, no D3/D7 packages exist, and no expert evidence is claimed.
+Plan #238 graph hardening was also validated on this seed corpus: a
+relationship-stage replay produced 6 first-class thematic code relationships.
 
 **Completed checkpoint:** Plan #238
 `THEMATIC_GRAPH_RELATIONSHIP_HARDENING.md` made the default thematic graph path

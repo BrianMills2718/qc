@@ -189,7 +189,12 @@ unsupported surface before a stronger producer lands, do that first.
 
 Completed on 2026-06-25. Real-run validation used the saved 3-document local
 seed from Plan #234 and replayed the patched relationship stage into
-`test_output/plan238_graph_hardening_2026_06_25/relationship_stage_replay_state.json`.
+`test_output/plan238_graph_hardening_2026_06_25/projects/6fd90de6-600a-42b4-a7e0-d9d6417ef1c2.json`.
 That replay produced 6 thematic code relationships, 8 entity relationships, and
-15 linked entities, replacing the earlier sparse default-path result of 0 code
-relationships, 14 entity relationships, and 59 extracted entities.
+linked entities, replacing the earlier sparse default-path result of 0 code
+relationships, 14 entity relationships. Sample code relationships:
+  MONITORING_TOOLS_AND_DATA_GAPS --[constrains]--> ORGANIZATIONAL_CAPACITY_AND_COORDINATION
+  ORGANIZATIONAL_CAPACITY_AND_COORDINATION --[enables]--> RESPONSES_AND_STRATEGIES
+  EDUCATION_AND_MEDIA_LITERACY --[co-occurs_with]--> PROGRAMMATIC_INTERVENTIONS_AND_PREDEBUNK
+  ATTRIBUTION_LOCAL_AND_DIASPORA --[tensions_with]--> ATTRIBUTION_RUSSIA
+  INFORMATION_THREATS_AND_TERMINOLOGY --[qualifies]--> RESPONSES_AND_STRATEGIES

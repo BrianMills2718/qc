@@ -1,6 +1,6 @@
 # Plan #234: Local Africa Corpus And Adjudication Seed
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** None
@@ -205,27 +205,30 @@ implementation uncovers a missing CLI/Make/project-store capability.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] Corpus policy is chosen and recorded with provenance/license caveats.
-- [ ] Candidate Africa-related transcripts are inventoried before ingestion;
+- [x] Corpus policy is chosen and recorded with provenance/license caveats.
+- [x] Candidate Africa-related transcripts are inventoried before ingestion;
   raw files are not committed.
-- [ ] Sanitization/de-identification tooling is explicitly deferred.
-- [ ] Scope record exists before output claims are written.
-- [ ] Seed project runs in an isolated project store.
-- [ ] Project output packet and audit manifest exist.
-- [ ] Unlabeled adjudication sample is exported.
-- [ ] Pre-registered adjudication protocol validates.
-- [ ] Protocol/sample preflight passes.
-- [ ] Any imported D3/D7 labels come only from explicit human labeling or from
-  a clearly marked synthetic smoke package.
-- [ ] If D3/D7 packages exist, strict Phase 0 package replay passes.
-- [ ] Documentation states what evidence this slice does and does not support.
+- [x] Sanitization/de-identification tooling is explicitly deferred.
+- [x] Scope record exists before output claims are written.
+- [x] Seed project runs in an isolated project store.
+- [x] Project output packet and audit manifest exist.
+- [x] Unlabeled adjudication sample is exported.
+- [x] Pre-registered adjudication protocol validates.
+- [x] Protocol/sample preflight passes.
+- [x] Any imported D3/D7 labels come only from explicit human labeling or from
+  a clearly marked synthetic smoke package. (No labels imported — stopped at
+  manual-ready packet as designed.)
+- [x] If D3/D7 packages exist, strict Phase 0 package replay passes. (N/A —
+  no D3/D7 packages exist yet.)
+- [x] Documentation states what evidence this slice does and does not support.
 
 > Process criteria:
-- [ ] Required gates pass.
-- [ ] Full deterministic `make check` passes if code changes are made.
-- [ ] `make docs-check` passes.
-- [ ] `git diff --check` passes.
-- [ ] Verified work is committed and pushed.
+- [x] Required gates pass.
+- [x] Full deterministic `make check` passes if code changes are made. (No code
+  changes in this plan; Plan #238 code changes validated separately.)
+- [x] `make docs-check` passes.
+- [x] `git diff --check` passes.
+- [x] Verified work is committed and pushed.
 
 ---
 
@@ -268,3 +271,21 @@ Longer term, sanitization should become an agent-drivable capability with
 review checkpoints, not an informal manual pre-step. That work is deferred and
 should be planned separately after the local corpus/adjudication seed proves the
 core workflow.
+
+**Completed 2026-06-25.** Artifacts in
+`test_output/plan234_local_africa_seed_2026_06_25/`:
+- `projects/6fd90de6-600a-42b4-a7e0-d9d6417ef1c2.json` — isolated project
+  store with 3 docs, 15 codes, 38 applications, 139 claims (pre-Plan #238 fix;
+  code_relationships=0 in this state).
+- `artifacts/adjudication_protocol.json` — validates OK.
+- `artifacts/adjudication_sample.json` — protocol/sample preflight passes.
+- `artifacts/report.md`, `report.json`, `export_manifest.json`,
+  `export_audit_events.jsonl`, `export_audit_events.sqlite` — full audit
+  trail.
+
+Plan #238 ran a targeted relationship-stage replay using this project's
+documents and codebook, producing 6 thematic code relationships
+(`test_output/plan238_graph_hardening_2026_06_25/`). The Plan #234 artifact set
+reflects the pre-fix pipeline state; the Plan #238 store holds the validated
+post-fix result. No labels have been supplied; this remains a manual-ready
+adjudication packet only.
