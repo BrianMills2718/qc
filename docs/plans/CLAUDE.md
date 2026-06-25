@@ -6,7 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| — | — | — | — | — |
+| 225 | GT canonical segment universe | High | Planned | `GT_CANONICAL_SEGMENT_UNIVERSE.md` |
 
 ## Completed Plans
 
