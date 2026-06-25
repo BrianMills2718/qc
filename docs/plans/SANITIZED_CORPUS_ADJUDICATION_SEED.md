@@ -17,12 +17,15 @@ shareable corpus, adjudication seed, populated human labels, grounded-theory
 fidelity evidence, or SOTA evidence.
 
 **Target:** Create the first small, shareable QC evidence instrument: a
-sanitized corpus seed, explicit scope record, pipeline output packet,
-unlabeled adjudication sample, pre-registered adjudication protocol, and
-preflighted handoff point for human labeling. If labels are supplied by Brian
-or another qualified reviewer, import them into D3/D7 gold packages and write a
-strict Phase 0 package manifest. If labels are not supplied, stop at a
-manual-ready adjudication packet and do not claim expert evidence.
+sanitized corpus seed, explicit provenance/de-identification record, explicit
+scope record, pipeline output packet, unlabeled adjudication sample,
+pre-registered adjudication protocol, and preflighted handoff point for human
+labeling. If Brian's old Africa-related transcripts can be located, treat them
+as candidate raw material only until provenance, rights/consent, and
+de-identification checks pass. If labels are supplied by Brian or another
+qualified reviewer, import them into D3/D7 gold packages and write a strict
+Phase 0 package manifest. If labels are not supplied, stop at a manual-ready
+adjudication packet and do not claim expert evidence.
 
 **Why:** The capability graph says the next risk is not more abductive UI; it
 is whether the qualitative evidence engine can produce and govern reviewable
@@ -45,6 +48,8 @@ tracing integration.
   discipline caveats.
 - `docs/plans/ACTIVE_SPRINT.md` - current long-running sprint tracker.
 - `docs/plans/TEMPLATE.md` - required plan structure.
+- User note on 2026-06-25 - Brian may have old Africa-related transcripts
+  somewhere; long-run repo should have an agent-drivable sanitization mechanism.
 - `Makefile` - adjudication, D3/D7, Phase 0, and publish-preflight targets.
 - `scripts/validate_adjudication_protocol.py` - adjudication protocol
   validator.
@@ -82,6 +87,7 @@ and fitness before ingestion.
 
 | Capability | Input Schema | Output Schema | Producer | Consumer(s) | Cost Tier |
 |-----------|-------------|---------------|----------|-------------|-----------|
+| Corpus provenance + sanitization gate | candidate documents + source metadata | corpus manifest + de-identification log + residual-risk caveat | QC implementation slice; future sanitizer | QC ingestion, Brian, evaluators | free unless LLM-assisted redaction is used |
 | Sanitized corpus seed package | source documents, scope metadata, corpus policy | corpus manifest + isolated project store | QC implementation slice | Brian, QC evaluators, future workbench | free unless pipeline is run live |
 | Adjudication seed packet | project state + sampling policy | schema_version=1 adjudication sample + protocol | QC adjudication surfaces | Brian/human adjudicators, D3/D7 import | free |
 | Optional D3/D7 import from labels | completed response package + protocol/sample | D3 gold package, D7 gold package, Phase 0 manifest | QC import/package surfaces | Phase 0 scorecard | free |
@@ -90,6 +96,11 @@ and fitness before ingestion.
 
 - [ ] Corpus policy records whether the seed is public, Brian-provided
   sanitized material, or synthetic software-smoke material.
+- [ ] Candidate Africa-related transcripts, if found, are treated as raw
+  restricted material until source, rights/consent, PII/sensitive detail, and
+  residual re-identification risk are documented.
+- [ ] Long-run sanitizer mechanism is captured as a follow-up capability, not
+  an implicit manual expectation.
 - [ ] Scope metadata states what population or phenomenon may and may not be
   inferred from the corpus.
 - [ ] Adjudication protocol validates before any labeling.
@@ -124,28 +135,40 @@ Potential implementation paths if gaps are found:
 
 1. Choose corpus policy:
    - default to Brian-provided sanitized material if available;
+   - candidate Africa-related transcripts are allowed as a source only after
+     provenance and sanitization review;
    - otherwise research a small public/shareable corpus before use;
    - use hand-authored synthetic material only for software-smoke artifacts and
      label it as non-evidentiary.
-2. Define the scope record before ingestion: phenomenon, source policy,
+2. Locate candidate materials without committing raw files. If the old
+   Africa-related transcripts are found, inventory only filenames, location,
+   document count, rough domain, and sensitivity notes in an untracked working
+   note until they pass the sanitization gate.
+3. Run the initial manual sanitization gate before ingestion: remove or
+   generalize direct identifiers, unique incidents, exact locations, named
+   organizations, dates, contact details, and any third-party details that
+   increase re-identification risk. Record omissions and residual risk.
+4. Define the scope record before ingestion: phenomenon, source policy,
    inclusion/exclusion boundaries, population-generalization caveats, and
    license/provenance.
-3. Create an isolated repo-local project store for the seed so no default
+5. Create an isolated repo-local project store for the seed so no default
    project state is mutated.
-4. Ingest and run the QC pipeline on the seed with the smallest defensible
+6. Ingest and run the QC pipeline on the seed with the smallest defensible
    settings for reviewable output. Record trace IDs, model/config metadata, and
    D10 observability if live LLM calls are made.
-5. Export the project report and an audit manifest for the output artifacts.
-6. Export an unlabeled adjudication sample over applications, claims, negative
+7. Export the project report and an audit manifest for the output artifacts.
+8. Export an unlabeled adjudication sample over applications, claims, negative
    cases, and relationships.
-7. Write and validate a pre-registered adjudication protocol for the sample.
-8. Run protocol/sample preflight and fix any provenance or sample mismatch.
-9. If human labels are supplied, validate completed responses, run response
+9. Write and validate a pre-registered adjudication protocol for the sample.
+10. Run protocol/sample preflight and fix any provenance or sample mismatch.
+11. If human labels are supplied, validate completed responses, run response
    preflight, import D3/D7 packages, write a strict Phase 0 adjudication
    package, and run `bench-package`.
-10. If labels are not supplied, stop at the manual-ready packet and record that
+12. If labels are not supplied, stop at the manual-ready packet and record that
     no expert evidence exists yet.
-11. Update claim-discipline docs and active sprint status with exact caveats.
+13. Add a follow-up plan for an agent-drivable sanitization mechanism after the
+    manual gate reveals the needed fields, checks, and failure modes.
+14. Update claim-discipline docs and active sprint status with exact caveats.
 
 ---
 
@@ -177,6 +200,9 @@ implementation uncovers a missing CLI/Make/project-store capability.
 
 > Feature-level criteria:
 - [ ] Corpus policy is chosen and recorded with provenance/license caveats.
+- [ ] Any candidate Africa-related transcripts are inventoried and sanitized
+  before ingestion; raw restricted files are not committed.
+- [ ] Sanitization decisions and residual re-identification risks are recorded.
 - [ ] Scope record exists before output claims are written.
 - [ ] Seed project runs in an isolated project store.
 - [ ] Project output packet and audit manifest exist.
@@ -203,6 +229,9 @@ implementation uncovers a missing CLI/Make/project-store capability.
   provided sanitized material if available; otherwise research and choose a
   small public/shareable corpus before ingestion. Synthetic material is
   acceptable only for software smoke, not methodological evidence.
+- [ ] Can the old Africa-related transcripts be located and safely sanitized?
+  Status: OPEN. They are promising candidate material, but they are not
+  ingest-ready until provenance, rights/consent, and de-identification pass.
 - [ ] Who labels the adjudication responses? Status: OPEN. Human or qualified
   reviewer labels are required before claiming D3/D7 adjudication evidence.
   Agent-generated responses can exercise tooling only and must be caveated as
@@ -211,6 +240,11 @@ implementation uncovers a missing CLI/Make/project-store capability.
   OPEN. The current target does not expose `PROJECTS_DIR`; implementation must
   verify whether `QC_PROJECTS_DIR` is sufficient or whether a code change is
   needed for package portability.
+- [ ] What should the long-run sanitizer mechanism do? Status: OPEN. Initial
+  target: CLI/Make flow that inventories raw docs, detects likely identifiers,
+  supports reviewed redaction/generalization, writes a de-identification log,
+  hashes raw/sanitized versions, and blocks ingestion unless the manifest
+  records residual-risk caveats.
 
 ---
 
@@ -220,3 +254,8 @@ Do not use this slice to claim methodological validity, full grounded theory,
 human adjudication, SOTA evidence, causal/process-tracing proof, or abductive
 quality. The first valid outcome is a reviewable, shareable instrument. Evidence
 claims start only after real labels and scorecards exist.
+
+Longer term, sanitization should become an agent-drivable capability with
+review checkpoints, not an informal manual pre-step. The first implementation
+of this plan should document the manual protocol well enough to convert it into
+that tool later.

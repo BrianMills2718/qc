@@ -13,12 +13,20 @@ policy:
     software: "Typed, tested, agent-drivable, fail-loud implementation."
     methodological: "Frozen inputs, protocols, reviewer or benchmark evidence, statistical gates where relevant, and caveats."
 capabilities:
+  - id: Q0
+    capability: "Corpus provenance + sanitization gate"
+    owner: qualitative_coding
+    depends_on: []
+    status: planned
+    success_criteria: "Candidate corpus has recorded source, rights/consent/license status, de-identification decisions, exclusion log, and residual-risk caveat before ingestion."
+    verification: "Corpus manifest, sanitization/de-identification checklist, and future sanitizer tests."
+    claim_licensed: "Material is safe enough for the stated use; not proof of representativeness or validity."
   - id: Q1
     capability: "Ingestion + ProjectState"
     owner: qualitative_coding
-    depends_on: []
+    depends_on: [Q0]
     status: implemented
-    success_criteria: "Supported files load into one typed ProjectState; failures are explicit."
+    success_criteria: "Supported files load into one typed ProjectState; failures are explicit. For shareable/evidence corpora, Q0 passes before ingestion."
     verification: "Deterministic tests and project-run smoke/e2e."
     claim_licensed: "Software can ingest and persist project state."
   - id: Q2

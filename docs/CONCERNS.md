@@ -7,6 +7,7 @@ Wiki home: http://localhost:8088/index.php/Project_Wiki
 | ID | Concern | Severity | Current mitigation | Next evidence/action |
 |---|---|---:|---|---|
 | QC-PORT-001 | No sanitized reviewer corpus is published. | High | Existing docs clearly state that public methodological evidence is missing. | Create a small corpus with scope, run outputs, and export artifacts. |
+| QC-PORT-010 | Candidate real transcripts may contain identifying or sensitive material if used before a sanitization gate exists. | High | Plan #234 now treats Brian's possible Africa-related transcripts as raw restricted material until provenance, rights/consent, de-identification, and residual-risk checks pass. | Locate candidate transcripts, inventory without committing raw files, run a manual sanitization gate, then design an agent-drivable sanitizer from the observed workflow. |
 | QC-PORT-002 | D3/D7 gold packages are substrates, not populated held-out results. | High | `docs/EVALUATION_HARNESS.md` distinguishes protocol/preflight from evidence. | Adjudicate a small code-application and contrary-evidence set. |
 | QC-PORT-003 | Grounded-theory language can overclaim methodological fidelity. | High | Docs use "grounded-theory-inspired" and warn against "full GT". | Create D8 GT-fidelity protocol results before any stronger GT claim. |
 | QC-PORT-004 | Prompt-boundary evidence can be mistaken for broad prompt-injection robustness. | Medium | INV-7 docs and canary READMEs caveat fixture/canary scope. | Run broader held-out adversarial fixtures under a committed protocol. |
