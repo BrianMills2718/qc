@@ -788,6 +788,9 @@ def _write_api_snapshots(projects_dir: Path, snapshots_dir: Path) -> dict[str, s
             "review_relationships_snapshot": (
                 f"/projects/{PROJECT_ID}/review/relationships?limit=2&offset=0"
             ),
+            "review_abductive_candidates_snapshot": (
+                f"/projects/{PROJECT_ID}/review/abductive-candidates?limit=5&offset=0"
+            ),
             "graph_codes_snapshot": f"/projects/{PROJECT_ID}/graph/codes",
             "graph_entities_snapshot": f"/projects/{PROJECT_ID}/graph/entities",
         }
@@ -872,6 +875,7 @@ def _write_readme(readme: Path, output_dir: Path, projects_dir: Path) -> None:
                 f"- Claim API: http://localhost:8002/projects/{PROJECT_ID}/claims?limit=2&offset=0",
                 f"- Observed Pattern API: http://localhost:8002/projects/{PROJECT_ID}/patterns?limit=5&offset=0",
                 f"- Abductive Candidate API: http://localhost:8002/projects/{PROJECT_ID}/abductive-explanations?limit=5&offset=0",
+                f"- Abductive Candidate Review API: http://localhost:8002/projects/{PROJECT_ID}/review/abductive-candidates?limit=5&offset=0",
                 "",
                 "## Main Files",
                 "",

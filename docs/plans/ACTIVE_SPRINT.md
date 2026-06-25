@@ -22,20 +22,23 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #232, abductive candidate review workflow, as named by
+1. Create and execute Plan #233, process-tracing handoff package, as named by
    `docs/LONG_TERM_EXECUTION_PLAN.md`.
-2. Continue to Plan #233, process-tracing handoff package, after Plan #232
-   closes unless concern triage changes the risk order.
-3. Continue through the execution spine without
+2. Continue through the execution spine without
    pausing after the verified commit unless a canonical stop condition is
    reached.
 
-**Active checkpoint:** Plan #232
-`ABDUCTIVE_CANDIDATE_REVIEW_WORKFLOW.md` will add first-class review semantics
-for provisional abductive candidates through manager/API/CLI-compatible
-decision surfaces while deferring browser UI. This governs hypotheses before
-handoff; it is not causal proof, process-tracing evidence, methodological
-validity, or SOTA proof.
+**Active checkpoint:** None. Create Plan #233 before implementation.
+
+**Completed checkpoint:** Plan #232
+`completed/ABDUCTIVE_CANDIDATE_REVIEW_WORKFLOW.md` added first-class review
+semantics for provisional abductive candidates through `ReviewManager`,
+`/projects/{project_id}/review/abductive-candidates`, shared review-decision
+POST handling, CLI review summary/JSON-file decision compatibility, and
+reviewer-demo candidate-review snapshots. Approval moves candidates to
+`needs_evidence_review`; rejection marks `rejected`; modification is restricted
+to bounded explanatory fields. This is governed hypothesis review only, not
+causal proof, process-tracing evidence, methodological validity, or SOTA proof.
 
 **Completed checkpoint:** Plan #231
 `completed/DESIGN_PLAN_LONG_TERM_EXECUTION_SPINE.md` added

@@ -1,6 +1,45 @@
 # Plan #232: Abductive Candidate Review Workflow
 
-**Status:** Planned
+## Outcome
+
+Completed 2026-06-25. Added first-class review semantics for provisional
+abductive candidate explanations. `ReviewManager` now lists candidates as
+review targets, `ReviewSummary` reports `abductive_candidates_count`, and
+`target_type="abductive_candidate"` decisions can approve candidates into
+`needs_evidence_review`, reject them without deleting evidence history, or
+modify bounded explanatory fields. The API now exposes
+`/projects/{project_id}/review/abductive-candidates`, review decision POST
+responses include candidate counts, the CLI review summary reports candidate
+counts, JSON-file review decisions work through the existing CLI path, and the
+deterministic reviewer demo packet includes a candidate-review API snapshot.
+This governs provisional hypotheses before handoff; it is not causal proof,
+process-tracing evidence, methodological-validity evidence, or SOTA evidence.
+
+Verification:
+
+- `python -m pytest tests/test_review.py tests/test_review_api.py -q` — 77
+  passed.
+- `python -m pytest tests/test_reviewer_demo.py tests/test_review.py
+  tests/test_review_api.py tests/test_project_commands.py::TestAPIEndpoints::test_get_project_endpoint_registered
+  -q` — 80 passed.
+- `python -m ruff check qc_cli.py qc_clean/core/cli/commands/review.py
+  qc_clean/core/pipeline/review.py qc_clean/plugins/api/api_server.py
+  qc_clean/schemas/domain.py scripts/build_reviewer_demo.py tests/test_review.py
+  tests/test_review_api.py tests/test_reviewer_demo.py
+  tests/test_project_commands.py` — passed.
+- `make reviewer-demo OUTPUT=test_output/reviewer_demo` — passed.
+- `python -m json.tool
+  test_output/reviewer_demo/api_snapshots/review_abductive_candidates_snapshot.json`
+  — self-inspected bounded candidate review rows and caveats.
+- Temp-store CLI check with `qc_cli.py review reviewer-demo --file
+  decision.json` — applied one `abductive_candidate` approval and
+  `project abductive` showed `needs_evidence_review`.
+- `make docs-check` — passed.
+- `git diff --check` — passed.
+- `make check` — 1347 passed, 1 skipped, 8 deselected; Ruff/docs passed; type
+  check not configured.
+
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** #231
@@ -64,11 +103,11 @@ existing domain models and API/CLI patterns.
 
 ### Capability Validation
 
-- [ ] Manager accepts `approve`, `reject`, and `modify` for
+- [x] Manager accepts `approve`, `reject`, and `modify` for
   `abductive_candidate`.
-- [ ] Manager fails loud for missing candidate IDs and unsupported actions.
-- [ ] API review list returns bounded candidate rows and summary counts.
-- [ ] Existing review decision POST can persist candidate decisions.
+- [x] Manager fails loud for missing candidate IDs and unsupported actions.
+- [x] API review list returns bounded candidate rows and summary counts.
+- [x] Existing review decision POST can persist candidate decisions.
 
 ---
 
@@ -133,25 +172,25 @@ existing domain models and API/CLI patterns.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] `ReviewSummary` reports abductive candidate count.
-- [ ] `ReviewManager` lists candidate rows for review.
-- [ ] `target_type="abductive_candidate"` supports approve, reject, and modify.
-- [ ] Approve marks candidates as `needs_evidence_review`, not causal proof.
-- [ ] Reject marks candidates `rejected` without deleting evidence history.
-- [ ] Modify can update explanatory fields and status but rejects unsupported
+- [x] `ReviewSummary` reports abductive candidate count.
+- [x] `ReviewManager` lists candidate rows for review.
+- [x] `target_type="abductive_candidate"` supports approve, reject, and modify.
+- [x] Approve marks candidates as `needs_evidence_review`, not causal proof.
+- [x] Reject marks candidates `rejected` without deleting evidence history.
+- [x] Modify can update explanatory fields and status but rejects unsupported
   fields.
-- [ ] API exposes `/projects/{project_id}/review/abductive-candidates` with
+- [x] API exposes `/projects/{project_id}/review/abductive-candidates` with
   pagination metadata.
-- [ ] Existing review decision POST persists candidate decisions.
-- [ ] Existing code/claim/relationship review behavior remains unchanged.
+- [x] Existing review decision POST persists candidate decisions.
+- [x] Existing code/claim/relationship review behavior remains unchanged.
 
 > Process criteria:
-- [ ] Focused tests pass.
-- [ ] Ruff passes for touched files.
-- [ ] `make docs-check` passes.
-- [ ] `git diff --check` passes.
-- [ ] `make check` passes.
-- [ ] Verified work is committed and pushed.
+- [x] Focused tests pass.
+- [x] Ruff passes for touched files.
+- [x] `make docs-check` passes.
+- [x] `git diff --check` passes.
+- [x] `make check` passes.
+- [x] Verified work is committed and pushed.
 
 ---
 

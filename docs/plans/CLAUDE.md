@@ -6,12 +6,13 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 232 | Abductive candidate review workflow | High | Planned | `ABDUCTIVE_CANDIDATE_REVIEW_WORKFLOW.md` |
+| — | — | — | — | — |
 
 ## Completed Plans
 
 | Name | Outcome | Record |
 |------|---------|--------|
+| Abductive candidate review workflow | `ReviewManager`, API review-list, shared review decision POST, CLI summary/JSON-file path, and reviewer-demo snapshots now support `target_type="abductive_candidate"` review for provisional candidate explanations; approve moves candidates to `needs_evidence_review`, reject marks `rejected`, and modify is restricted to bounded explanatory fields; this is governed hypothesis review, not causal proof, process-tracing evidence, methodological-validity evidence, or SOTA evidence | `completed/ABDUCTIVE_CANDIDATE_REVIEW_WORKFLOW.md` |
 | Design-plan long-term execution spine | `docs/LONG_TERM_EXECUTION_PLAN.md` now provides a design-plan-aligned execution spine with frame, authority order, modality split, risk-ordered roadmap, explicit next two slices, dependency subplans, concern cadence, and stop conditions; this is planning/governance only, not methodology evidence, causal proof, process-tracing evidence, or SOTA evidence | `completed/DESIGN_PLAN_LONG_TERM_EXECUTION_SPINE.md` |
 | Abductive reviewer demo packet | `make reviewer-demo` now builds a deterministic synthetic packet with observed-pattern and provisional abductive-candidate fixture rows, API snapshots, README inspection commands, and Markdown report sections; the packet was generated and self-inspected locally and remains a software-surface demo only, not live LLM evidence, causal proof, methodological-validity evidence, or SOTA evidence | `completed/ABDUCTIVE_REVIEWER_DEMO_PACKET.md` |
 | Abductive candidate read surfaces | `project abductive`, `/projects/{project_id}/abductive-explanations`, project summary counts, and Markdown report output now expose bounded provisional abductive candidate explanation rows with source pattern IDs, mechanisms, rivals, observable implications, evidence gaps, confidence, and candidate status; this is inspection only, not causal proof, process-tracing results, methodological-validity evidence, or SOTA evidence | `completed/ABDUCTIVE_CANDIDATE_READ_SURFACES.md` |

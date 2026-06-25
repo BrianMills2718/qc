@@ -1466,7 +1466,10 @@ Examples:
     review_parser = subparsers.add_parser(
         'review',
         help='Review analysis results',
-        description='Review and approve/reject codes and code applications'
+        description=(
+            'Review and approve/reject codes, code applications, claims, '
+            'relationships, and abductive candidates'
+        )
     )
     review_parser.add_argument('project_id', help='Project ID')
     review_parser.add_argument(

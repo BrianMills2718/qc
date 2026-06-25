@@ -2321,6 +2321,7 @@ class TestAPIEndpoints:
             assert "/projects/{project_id}/patterns" in paths
             assert "/projects/{project_id}/abductive-explanations" in paths
             assert "/projects/{project_id}/review/claims" in paths
+            assert "/projects/{project_id}/review/abductive-candidates" in paths
             assert "/projects/{project_id}/resume" in paths
         except ImportError:
             pytest.skip("FastAPI not installed")

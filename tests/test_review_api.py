@@ -14,6 +14,7 @@ from qc_clean.core.persistence.project_store import ProjectStore
 from qc_clean.schemas.domain import (
     AnalyticClaim,
     AbductiveCandidateExplanation,
+    AbductiveExplanationStatus,
     ClaimAnchor,
     ClaimKind,
     ClaimScope,
@@ -823,6 +824,41 @@ class TestReviewRelationshipsEndpoint:
         assert resp.status_code == 404
 
 
+class TestReviewAbductiveCandidatesEndpoint:
+    def test_returns_abductive_candidates_for_review(
+        self,
+        client,
+        tmp_store,
+        review_project,
+    ):
+        _replace_with_two_abductive_candidates(tmp_store, review_project)
+
+        resp = client.get(
+            "/projects/test-project-123/review/abductive-candidates?limit=1&offset=1"
+        )
+
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["project_id"] == "test-project-123"
+        assert data["project_name"] == "Test Review Project"
+        assert data["pipeline_status"] == "paused_for_review"
+        assert data["summary"]["abductive_candidates_count"] == 2
+        assert data["returned"] == 1
+        assert data["total_abductive_candidates"] == 2
+        assert data["limit"] == 1
+        assert data["offset"] == 1
+        candidate = data["abductive_candidates"][0]
+        assert candidate["target_type"] == "abductive_candidate"
+        assert candidate["id"] == "abductive-2"
+        assert candidate["status"] == "candidate"
+        assert candidate["source_pattern_ids"] == ["pattern-2"]
+        assert "not causal proof" in data["caveat"]
+
+    def test_404_for_missing_project(self, client):
+        resp = client.get("/projects/nonexistent/review/abductive-candidates")
+        assert resp.status_code == 404
+
+
 class TestReviewDecisionsEndpoint:
     def test_submit_decisions(self, client):
         resp = client.post("/projects/test-project-123/review/decisions", json={
@@ -947,6 +983,46 @@ class TestReviewDecisionsEndpoint:
         assert rel.relationship_type == "moderates"
         assert rel.strength == 0.9
         assert rel.evidence == ["reviewed evidence"]
+
+    def test_abductive_candidate_decision_persists(
+        self,
+        client,
+        tmp_store,
+        review_project,
+    ):
+        _replace_with_two_abductive_candidates(tmp_store, review_project)
+
+        resp = client.post("/projects/test-project-123/review/decisions", json={
+            "decisions": [
+                {
+                    "target_type": "abductive_candidate",
+                    "target_id": "abductive-1",
+                    "action": "modify",
+                    "rationale": "Reviewer narrowed the mechanism.",
+                    "new_value": {
+                        "explanation_text": "Handoff friction may explain adoption.",
+                        "status": "needs_evidence_review",
+                    },
+                },
+                {
+                    "target_type": "abductive_candidate",
+                    "target_id": "abductive-2",
+                    "action": "reject",
+                    "rationale": "Candidate was unsupported.",
+                },
+            ]
+        })
+
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["applied"] == 2
+        assert data["abductive_candidates_count"] == 2
+        state = tmp_store.load("test-project-123")
+        candidate_1 = state.abductive_explanations[0]
+        candidate_2 = state.abductive_explanations[1]
+        assert candidate_1.explanation_text == "Handoff friction may explain adoption."
+        assert candidate_1.status == AbductiveExplanationStatus.NEEDS_EVIDENCE_REVIEW
+        assert candidate_2.status == AbductiveExplanationStatus.REJECTED
 
     def test_empty_decisions(self, client):
         resp = client.post("/projects/test-project-123/review/decisions", json={

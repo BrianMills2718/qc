@@ -12,6 +12,8 @@ import logging
 from typing import Dict, List, Optional
 
 from qc_clean.schemas.domain import (
+    AbductiveCandidateExplanation,
+    AbductiveExplanationStatus,
     AnalyticClaim,
     ClaimAdjudicationStatus,
     ClaimRevision,
@@ -94,6 +96,27 @@ class ReviewManager:
 
         return rows
 
+    def get_pending_abductive_candidates(self) -> List[Dict]:
+        """Get provisional abductive candidates available for review."""
+        rows: List[Dict] = []
+        for candidate in self.state.abductive_explanations:
+            rows.append({
+                "target_type": "abductive_candidate",
+                "id": candidate.id,
+                "source_stage": candidate.source_stage,
+                "source_pattern_ids": list(candidate.source_pattern_ids),
+                "explanation_text": candidate.explanation_text,
+                "mechanism_summary": candidate.mechanism_summary,
+                "rival_explanations": list(candidate.rival_explanations),
+                "observable_implications": list(candidate.observable_implications),
+                "evidence_gaps": list(candidate.evidence_gaps),
+                "confidence": candidate.confidence,
+                "status": candidate.status.value,
+                "created_by": candidate.created_by.value,
+                "created_at": candidate.created_at,
+            })
+        return rows
+
     def get_review_summary(self) -> ReviewSummary:
         """Summary of what's available for review."""
         active_decisions = sum(1 for decision in self.state.review_decisions if decision.is_active)
@@ -104,6 +127,7 @@ class ReviewManager:
             relationships_count=(
                 len(self.state.code_relationships) + len(self.state.entity_relationships)
             ),
+            abductive_candidates_count=len(self.state.abductive_explanations),
             existing_decisions=len(self.state.review_decisions),
             active_decisions=active_decisions,
             inactive_decisions=len(self.state.review_decisions) - active_decisions,
@@ -131,11 +155,13 @@ class ReviewManager:
             self._apply_code_relationship_decision(decision)
         elif decision.target_type == "entity_relationship":
             self._apply_entity_relationship_decision(decision)
+        elif decision.target_type == "abductive_candidate":
+            self._apply_abductive_candidate_decision(decision)
         else:
             raise ValueError(
                 f"Unknown target_type: '{decision.target_type}'. "
                 "Must be 'code', 'code_application', 'codebook', 'claim', "
-                "'code_relationship', or 'entity_relationship'."
+                "'code_relationship', 'entity_relationship', or 'abductive_candidate'."
             )
 
         self.state.touch()
@@ -427,6 +453,67 @@ class ReviewManager:
             if rel.id == relationship_id:
                 return rel
         return None
+
+    def _apply_abductive_candidate_decision(self, decision: HumanReviewDecision) -> None:
+        candidate = self._get_abductive_candidate(decision.target_id)
+        if candidate is None:
+            raise ValueError(f"Abductive candidate not found: {decision.target_id}")
+
+        if decision.action == ReviewAction.APPROVE:
+            candidate.status = AbductiveExplanationStatus.NEEDS_EVIDENCE_REVIEW
+            logger.info("Approved abductive candidate for evidence review: %s", decision.target_id)
+        elif decision.action == ReviewAction.REJECT:
+            candidate.status = AbductiveExplanationStatus.REJECTED
+            logger.info("Rejected abductive candidate: %s", decision.target_id)
+        elif decision.action == ReviewAction.MODIFY:
+            self._update_abductive_candidate_fields(candidate, decision)
+            logger.info("Modified abductive candidate: %s", decision.target_id)
+        else:
+            raise ValueError(
+                f"Action '{decision.action.value}' not supported for abductive_candidate targets. "
+                f"Supported: approve, reject, modify."
+            )
+
+    def _get_abductive_candidate(
+        self,
+        candidate_id: str,
+    ) -> AbductiveCandidateExplanation | None:
+        """Return an abductive candidate by ID."""
+        for candidate in self.state.abductive_explanations:
+            if candidate.id == candidate_id:
+                return candidate
+        return None
+
+    def _update_abductive_candidate_fields(
+        self,
+        candidate: AbductiveCandidateExplanation,
+        decision: HumanReviewDecision,
+    ) -> None:
+        """Apply an abductive-candidate modification after rejecting unknown fields."""
+        if not decision.new_value:
+            return
+
+        allowed_fields = {
+            "explanation_text",
+            "mechanism_summary",
+            "rival_explanations",
+            "observable_implications",
+            "evidence_gaps",
+            "confidence",
+            "status",
+        }
+        unknown_fields = sorted(set(decision.new_value) - allowed_fields)
+        if unknown_fields:
+            raise ValueError(
+                "Unsupported fields for abductive_candidate modify: "
+                f"{', '.join(unknown_fields)}"
+            )
+
+        for key, value in decision.new_value.items():
+            if key == "status":
+                candidate.status = AbductiveExplanationStatus(value)
+            else:
+                setattr(candidate, key, value)
 
     def _update_relationship_fields(
         self,

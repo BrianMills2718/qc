@@ -5,6 +5,8 @@ Tests for the human review loop (qc_clean.core.pipeline.review).
 import pytest
 
 from qc_clean.schemas.domain import (
+    AbductiveCandidateExplanation,
+    AbductiveExplanationStatus,
     AnalyticClaim,
     ClaimAdjudicationStatus,
     ClaimKind,
@@ -244,6 +246,118 @@ class TestReviewManager:
                 target_type="claim",
                 target_id="claim-1",
                 action=ReviewAction.MERGE,
+            ))
+
+    def test_abductive_candidate_review_summary_and_pending_rows(self, review_state):
+        review_state.abductive_explanations = [
+            AbductiveCandidateExplanation(
+                id="abductive-1",
+                source_stage="abductive_synthesis",
+                source_pattern_ids=["pattern-1"],
+                explanation_text="Coordination friction may explain the pattern.",
+                mechanism_summary="More handoffs create adoption friction.",
+                rival_explanations=["Documentation artifact"],
+                observable_implications=["High-handoff teams show more friction."],
+                evidence_gaps=["Need process evidence."],
+                confidence=0.4,
+            )
+        ]
+        rm = ReviewManager(review_state)
+
+        summary = rm.get_review_summary()
+        rows = rm.get_pending_abductive_candidates()
+
+        assert summary.abductive_candidates_count == 1
+        assert rows[0]["target_type"] == "abductive_candidate"
+        assert rows[0]["id"] == "abductive-1"
+        assert rows[0]["status"] == "candidate"
+        assert rows[0]["source_pattern_ids"] == ["pattern-1"]
+        assert rows[0]["rival_explanations"] == ["Documentation artifact"]
+
+    def test_abductive_candidate_review_approve_reject_modify_updates_status_and_fields(
+        self,
+        review_state,
+    ):
+        review_state.abductive_explanations = [
+            AbductiveCandidateExplanation(
+                id="abductive-1",
+                source_stage="abductive_synthesis",
+                source_pattern_ids=["pattern-1"],
+                explanation_text="Coordination friction may explain the pattern.",
+                mechanism_summary="More handoffs create adoption friction.",
+                confidence=0.4,
+            )
+        ]
+        rm = ReviewManager(review_state)
+
+        rm.apply_decision(HumanReviewDecision(
+            target_type="abductive_candidate",
+            target_id="abductive-1",
+            action=ReviewAction.APPROVE,
+            rationale="Worth evidence review.",
+        ))
+        candidate = review_state.abductive_explanations[0]
+        assert candidate.status == AbductiveExplanationStatus.NEEDS_EVIDENCE_REVIEW
+
+        rm.apply_decision(HumanReviewDecision(
+            target_type="abductive_candidate",
+            target_id="abductive-1",
+            action=ReviewAction.MODIFY,
+            rationale="Narrowed by reviewer.",
+            new_value={
+                "explanation_text": "Handoff friction may explain the pattern.",
+                "mechanism_summary": "Extra handoffs slow adoption.",
+                "rival_explanations": ["Training access"],
+                "observable_implications": ["More handoffs predict slower uptake."],
+                "evidence_gaps": ["Need handoff chronology."],
+                "confidence": 0.55,
+                "status": "needs_evidence_review",
+            },
+        ))
+        assert candidate.explanation_text == "Handoff friction may explain the pattern."
+        assert candidate.mechanism_summary == "Extra handoffs slow adoption."
+        assert candidate.rival_explanations == ["Training access"]
+        assert candidate.observable_implications == ["More handoffs predict slower uptake."]
+        assert candidate.evidence_gaps == ["Need handoff chronology."]
+        assert candidate.confidence == 0.55
+        assert candidate.status == AbductiveExplanationStatus.NEEDS_EVIDENCE_REVIEW
+
+        rm.apply_decision(HumanReviewDecision(
+            target_type="abductive_candidate",
+            target_id="abductive-1",
+            action=ReviewAction.REJECT,
+            rationale="Alternative explains it better.",
+        ))
+        assert review_state.abductive_explanations[0].status == AbductiveExplanationStatus.REJECTED
+        assert len(review_state.abductive_explanations) == 1
+
+    def test_abductive_candidate_review_invalid_id_fails_loud(self, review_state):
+        rm = ReviewManager(review_state)
+        with pytest.raises(ValueError, match="Abductive candidate not found"):
+            rm.apply_decision(HumanReviewDecision(
+                target_type="abductive_candidate",
+                target_id="missing-candidate",
+                action=ReviewAction.APPROVE,
+            ))
+
+    def test_abductive_candidate_review_rejects_unsupported_fields(self, review_state):
+        review_state.abductive_explanations = [
+            AbductiveCandidateExplanation(
+                id="abductive-1",
+                source_stage="abductive_synthesis",
+                source_pattern_ids=["pattern-1"],
+                explanation_text="Coordination friction may explain the pattern.",
+                mechanism_summary="More handoffs create adoption friction.",
+            )
+        ]
+        rm = ReviewManager(review_state)
+
+        with pytest.raises(ValueError, match="Unsupported fields for abductive_candidate"):
+            rm.apply_decision(HumanReviewDecision(
+                target_type="abductive_candidate",
+                target_id="abductive-1",
+                action=ReviewAction.MODIFY,
+                new_value={"source_stage": "reviewer_override"},
             ))
 
     def test_relationship_review_summary_and_pending_rows(self, review_state):

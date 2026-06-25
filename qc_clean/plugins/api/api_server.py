@@ -577,6 +577,45 @@ class QCAPIServer:
                 "summary": rm.get_review_summary().model_dump(mode="json"),
             }
 
+        @self._app.get("/projects/{project_id}/review/abductive-candidates")
+        async def get_review_abductive_candidates(
+            project_id: str,
+            limit: int = 100,
+            offset: int = 0,
+        ):
+            """Get provisional abductive candidates as review targets."""
+            from qc_clean.core.persistence.project_store import ProjectStore
+            from qc_clean.core.pipeline.review import ReviewManager
+            store = ProjectStore()
+            try:
+                state = store.load(project_id)
+            except FileNotFoundError:
+                raise HTTPException(status_code=404, detail=f"Project not found: {project_id}")
+
+            rm = ReviewManager(state)
+            bounded_limit = max(0, limit)
+            bounded_offset = max(0, offset)
+            all_candidates = rm.get_pending_abductive_candidates()
+            candidates = all_candidates[
+                bounded_offset : bounded_offset + bounded_limit
+            ]
+
+            return {
+                "project_id": state.id,
+                "project_name": state.name,
+                "pipeline_status": state.pipeline_status.value,
+                "abductive_candidates": candidates,
+                "returned": len(candidates),
+                "total_abductive_candidates": len(all_candidates),
+                "limit": bounded_limit,
+                "offset": bounded_offset,
+                "summary": rm.get_review_summary().model_dump(mode="json"),
+                "caveat": (
+                    "Abductive candidates are provisional hypotheses for review; "
+                    "not causal proof or process-tracing results."
+                ),
+            }
+
         @self._app.get("/projects/{project_id}/review")
         async def get_review_items(project_id: str):
             """Get pending review items for a project."""
@@ -624,6 +663,7 @@ class QCAPIServer:
                 "relationships_count": (
                     len(state.code_relationships) + len(state.entity_relationships)
                 ),
+                "abductive_candidates_count": len(state.abductive_explanations),
                 "can_resume": rm.can_resume(),
             }
 
@@ -922,6 +962,7 @@ class QCAPIServer:
             {"method": "GET", "path": "/projects/{project_id}/review/claims", "description": "Get claims for review UI"},
             {"method": "GET", "path": "/projects/{project_id}/review/negative-cases", "description": "Get negative-case claims for review API"},
             {"method": "GET", "path": "/projects/{project_id}/review/relationships", "description": "Get relationships for review API"},
+            {"method": "GET", "path": "/projects/{project_id}/review/abductive-candidates", "description": "Get abductive candidates for review API"},
             {"method": "GET", "path": "/projects/{project_id}/review", "description": "Get review summary"},
             {"method": "POST", "path": "/projects/{project_id}/review/decisions", "description": "Submit review decisions"},
             {"method": "POST", "path": "/projects/{project_id}/review/approve-all", "description": "Approve all codes"},

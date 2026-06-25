@@ -656,6 +656,7 @@ class ReviewSummary(BaseModel):
     applications_count: int = 0
     claims_count: int = 0
     relationships_count: int = 0
+    abductive_candidates_count: int = 0
     existing_decisions: int = 0
     active_decisions: int = Field(
         default=0,

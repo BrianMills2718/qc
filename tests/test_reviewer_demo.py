@@ -22,6 +22,7 @@ def test_build_reviewer_demo_writes_packet(tmp_path):
         "claims_snapshot",
         "patterns_snapshot",
         "abductive_snapshot",
+        "review_abductive_candidates_snapshot",
         "review_claims_snapshot",
         "review_codes_snapshot",
         "graph_codes_snapshot",
@@ -37,6 +38,7 @@ def test_build_reviewer_demo_writes_packet(tmp_path):
     assert "QC_PROJECTS_DIR" in readme
     assert "project patterns" in readme
     assert "project abductive" in readme
+    assert "review/abductive-candidates" in readme
     assert "not methodological validity evidence" in self_review
     assert "not SOTA evidence" in self_review
     assert "Workflow Visibility" in markdown
