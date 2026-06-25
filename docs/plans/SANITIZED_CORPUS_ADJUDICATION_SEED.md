@@ -40,6 +40,8 @@ tracing integration.
 - `docs/CAPABILITY_DEPENDENCY_GRAPH.md` - dependency graph and sequencing
   recommendation for QC, grounded research, and future mixed-methods work.
 - `docs/capability_dependency_graph.yaml` - machine-readable capability graph.
+- `docs/LOCAL_DATA_INVENTORY.md` - metadata-only inventory of ignored local
+  candidate Africa transcript materials.
 - `docs/LONG_TERM_EXECUTION_PLAN.md` - execution spine and current-position
   recommendation.
 - `docs/EVALUATION_HARNESS.md` - adjudication protocol, sample, response,
@@ -230,8 +232,10 @@ implementation uncovers a missing CLI/Make/project-store capability.
   small public/shareable corpus before ingestion. Synthetic material is
   acceptable only for software smoke, not methodological evidence.
 - [ ] Can the old Africa-related transcripts be located and safely sanitized?
-  Status: OPEN. They are promising candidate material, but they are not
-  ingest-ready until provenance, rights/consent, and de-identification pass.
+  Status: PARTIALLY RESOLVED. Candidate materials were located in ignored local
+  `data/interviews/` and `data/samples/temp_test_interviews/` paths and
+  recorded in `docs/LOCAL_DATA_INVENTORY.md`. They remain not ingest-ready
+  until provenance, rights/consent, and de-identification pass.
 - [ ] Who labels the adjudication responses? Status: OPEN. Human or qualified
   reviewer labels are required before claiming D3/D7 adjudication evidence.
   Agent-generated responses can exercise tooling only and must be caveated as

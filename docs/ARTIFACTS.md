@@ -22,6 +22,7 @@ Wiki home: http://localhost:8088/index.php/Project_Wiki
 | [docs/CAPABILITY_DEPENDENCY_GRAPH.md](CAPABILITY_DEPENDENCY_GRAPH.md) | Capability dependency graph | Orders QC, grounded-research, abductive, process-tracing, and mixed-methods workbench capabilities by dependency and success criteria. |
 | [docs/VALIDATION.md](VALIDATION.md) | Validation register | Separates software evidence from methodological evidence. |
 | [docs/CONCERNS.md](CONCERNS.md) | Concern register | Tracks the remaining blockers to a stronger public portfolio page. |
+| [docs/LOCAL_DATA_INVENTORY.md](LOCAL_DATA_INVENTORY.md) | Metadata-only local data inventory | Records ignored local candidate corpora without exposing transcript contents; raw files remain restricted until provenance/sanitization passes. |
 | [docs/adr/0001_qualitative_coding_methodology_spine.md](adr/0001_qualitative_coding_methodology_spine.md) | ADR | Records the dossier framing decision. |
 | [docs/plans/ACTIVE_SPRINT.md](plans/ACTIVE_SPRINT.md) | Active sprint tracker | Shows ongoing implementation work and stop conditions. |
 | [docs/plans/CLAUDE.md](plans/CLAUDE.md) | Plan index | Lists active and completed implementation records. |
