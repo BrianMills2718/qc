@@ -6,12 +6,13 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| #227 | Observed pattern read surfaces | High | Planned | `OBSERVED_PATTERN_READ_SURFACES.md` |
+| — | — | — | — | — |
 
 ## Completed Plans
 
 | Name | Outcome | Record |
 |------|---------|--------|
+| Observed pattern read surfaces | `project patterns`, `/projects/{project_id}/patterns`, project summary counts, and Markdown report output now expose bounded first-class observed-pattern rows with kind/stage/scope/count metadata and descriptive-only causal interpretation status; this is read-surface work only, not causal proof, abductive synthesis, methodological-validity evidence, or SOTA evidence | `completed/OBSERVED_PATTERN_READ_SURFACES.md` |
 | Observed pattern substrate | Cross-interview consensus, divergent-code, and code co-occurrence outputs now become first-class descriptive `ObservedPattern` records with code/doc/application scope, anchors where available, and default `causal_interpretation_status="descriptive_only"`; this is descriptive pattern accounting only, not causal proof or abductive synthesis | `completed/OBSERVED_PATTERN_SUBSTRATE.md` |
 | GT canonical segment universe | GT constant comparison now traverses canonical char-anchored `Segment` records, populates `ProjectState.segments` when missing, preserves existing segment universes when present, and carries segment IDs/offsets into prompt data without claiming GT saturation, methodological validity, abductive synthesis, or SOTA evidence | `completed/GT_CANONICAL_SEGMENT_UNIVERSE.md` |
 | Sampling-frame adequacy protocol preflight | Sampling-frame adequacy protocols and reviewer result packages can now be validated/preflighted through core contracts, scripts, Make, and `qc_cli.py`, while remaining protocol/preflight infrastructure only rather than sampling-frame adequacy evidence, population-generalization permission, methodological validity, or SOTA evidence | `completed/SAMPLING_FRAME_ADEQUACY_PROTOCOL_PREFLIGHT.md` |

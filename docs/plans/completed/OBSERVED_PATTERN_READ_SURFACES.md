@@ -1,6 +1,26 @@
 # Plan #227: Observed Pattern Read Surfaces
 
-**Status:** Planned
+## Outcome
+
+Completed 2026-06-25. Added bounded observed-pattern read surfaces through
+`qc_cli.py project patterns`, API `/projects/{project_id}/patterns`, project
+summary counts, and Markdown report output. Rows expose descriptive pattern
+kind, source stage, scope IDs, count/denominator metadata, bounded anchor
+details where requested/applicable, and
+`causal_interpretation_status="descriptive_only"`. Documentation now states
+these are descriptive pattern records for inspection and future
+abductive/workbench input, not causal proof, abductive synthesis,
+methodological-validity evidence, or SOTA evidence.
+
+Verification:
+
+- `python -m pytest tests/test_project_commands.py tests/test_review_api.py tests/test_claim_ledger_exports.py -q` — 145 passed.
+- `python -m ruff check qc_cli.py qc_clean/core/cli/commands/project.py qc_clean/plugins/api/api_server.py qc_clean/core/export/data_exporter.py qc_clean/core/patterns.py tests/test_project_commands.py tests/test_review_api.py tests/test_claim_ledger_exports.py` — passed.
+- `make docs-check` — passed.
+- `git diff --check` — passed.
+- `make check` — 1331 passed, 1 skipped, 8 deselected; Ruff/docs passed; type check not configured.
+
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** #226
@@ -130,25 +150,25 @@ Pydantic contract for pattern bundles.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] `qc_cli.py project patterns <project_id>` lists observed patterns with
+- [x] `qc_cli.py project patterns <project_id>` lists observed patterns with
   bounded pagination and compact scope.
-- [ ] `/projects/{project_id}/patterns` returns bounded machine-readable
+- [x] `/projects/{project_id}/patterns` returns bounded machine-readable
   pattern rows and pagination metadata.
-- [ ] Markdown export includes an observed-pattern section when patterns exist.
-- [ ] Read surfaces expose `causal_interpretation_status` and preserve the
+- [x] Markdown export includes an observed-pattern section when patterns exist.
+- [x] Read surfaces expose `causal_interpretation_status` and preserve the
   descriptive-only caveat.
-- [ ] Empty projects remain quiet/compatible; no report section appears when
+- [x] Empty projects remain quiet/compatible; no report section appears when
   no patterns exist.
-- [ ] No surface claims causal proof, abductive synthesis, methodological
+- [x] No surface claims causal proof, abductive synthesis, methodological
   validity, or SOTA evidence.
 
 > Process criteria:
-- [ ] Required focused tests pass.
-- [ ] Ruff passes for touched files.
-- [ ] `make docs-check` passes.
-- [ ] `git diff --check` passes.
-- [ ] `make check` passes.
-- [ ] Verified work is committed and pushed.
+- [x] Required focused tests pass.
+- [x] Ruff passes for touched files.
+- [x] `make docs-check` passes.
+- [x] `git diff --check` passes.
+- [x] `make check` passes.
+- [x] Verified work is committed and pushed.
 
 ---
 

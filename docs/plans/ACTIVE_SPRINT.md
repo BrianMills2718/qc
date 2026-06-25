@@ -28,11 +28,17 @@ highest-value documented lane.
    without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Plan #227 `OBSERVED_PATTERN_READ_SURFACES.md` will add
-bounded read surfaces for first-class descriptive observed patterns through
-CLI/API/Markdown report outputs. This is read-surface work only; it does not
-add causal proof, abductive synthesis, methodological-validity evidence, or
-SOTA evidence.
+**Active checkpoint:** None. Select the next highest-value documented lane from
+the roadmap and create its plan before implementation.
+
+**Completed checkpoint:** Plan #227
+`completed/OBSERVED_PATTERN_READ_SURFACES.md` added bounded read surfaces for
+first-class descriptive observed patterns through `project patterns`,
+`/projects/{project_id}/patterns`, project summary counts, and Markdown report
+output. Pattern rows expose kind/stage/scope/count metadata and
+`causal_interpretation_status="descriptive_only"`. This is read-surface work
+only, not causal proof, abductive synthesis, methodological-validity evidence,
+or SOTA evidence.
 
 **Completed checkpoint:** Plan #226
 `completed/OBSERVED_PATTERN_SUBSTRATE.md` added first-class descriptive
