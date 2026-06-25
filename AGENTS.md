@@ -37,6 +37,16 @@ modeling, disconfirmation, reproducibility, and auditable exports. Do not frame
 the product as merely an LLM coding tool or a grounded-theory tool; grounded
 theory is one analytic mode inside the broader ambition.
 
+**Future workbench alignment:** This repo is the qualitative evidence engine for
+a future `mixed_methods_workbench`, alongside `~/projects/process_tracing` as
+the causal/process-tracing engine. Preserve the boundary: this repo owns
+ingestion, coding, span anchors, segment coverage, code/entity relationships,
+grounded claims, negative-case review, adjudication packets, QDA export, and
+qualitative/mixed-methods evaluation scaffolds. Do **not** reimplement
+process-tracing likelihood-vector Bayesian support here; instead make QC outputs
+exportable as evidence, patterns, claims, and candidate explanations that a
+causal/process-tracing engine can consume through typed contracts.
+
 ## Commands
 
 ```bash
