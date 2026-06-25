@@ -102,7 +102,7 @@ make bench ID=<project_id> PROMPT_INJECTION=inv7.json INV7_PROTOCOL=inv7_live_pr
 make bench ID=<project_id> OBS_DB=path TRACE_ID=trace  # Override D10 observability DB / exact trace
 make bench ID=<project_id> ARTIFACT_DIR=benchmark_results  # Write versioned Phase 0 scorecard package
 make verify-phase0-benchmark-artifact ARTIFACT=benchmark_results/run-dir  # Verify Phase 0 artifact scorecard/timing/manifest hashes
-make adjudication-sample ID=<project_id> OUTPUT=sample.json  # Export unlabeled human/expert review sample packet
+make adjudication-sample ID=<project_id> OUTPUT=sample.json PROJECTS_DIR=projects  # Export unlabeled human/expert review sample packet from an explicit project store when needed
 make validate-adjudication-protocol PROTOCOL=protocol.json  # Validate pre-registered adjudication protocol metadata
 python qc_cli.py validate-adjudication-protocol protocol.json  # Canonical CLI wrapper for protocol validation
 make adjudication-protocol-preflight PROTOCOL=protocol.json SAMPLE=sample.json  # Preflight protocol/sample package match before labeling

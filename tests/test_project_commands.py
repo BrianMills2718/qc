@@ -1829,6 +1829,8 @@ class TestCLIParsing:
 
         args = parser.parse_args([
             "project",
+            "--projects-dir",
+            "projects",
             "adjudication-sample",
             "pid",
             "--output-file",
@@ -1840,6 +1842,7 @@ class TestCLIParsing:
         ])
 
         assert args.command == "project"
+        assert args.projects_dir == "projects"
         assert args.project_action == "adjudication-sample"
         assert args.project_id == "pid"
         assert args.output_file == "sample.json"

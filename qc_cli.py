@@ -1247,6 +1247,10 @@ Examples:
         help='Project management',
         description='Create, list, and manage analysis projects'
     )
+    project_parser.add_argument(
+        '--projects-dir',
+        help='Optional project store directory',
+    )
     project_subparsers = project_parser.add_subparsers(
         dest='project_action',
         help='Project actions',

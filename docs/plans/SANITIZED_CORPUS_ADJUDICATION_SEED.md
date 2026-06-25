@@ -149,9 +149,9 @@ Potential implementation paths if gaps are found:
    inclusion/exclusion boundaries, population-generalization caveats, and
    license/provenance.
 4. Create an isolated repo-local project store for the seed so no default
-   project state is mutated. Use `QC_PROJECTS_DIR=<repo-local path>` for
-   commands that do not yet expose explicit `--projects-dir` / `PROJECTS_DIR`
-   flags, including the current adjudication-sample surface.
+   project state is mutated. Prefer explicit `--projects-dir` /
+   `PROJECTS_DIR` flags where available so the isolated store is visible in
+   commands and artifact provenance.
 5. Ingest and run the QC pipeline on the seed with the smallest defensible
    settings for reviewable output. Record trace IDs, model/config metadata, and
    D10 observability if live LLM calls are made.
@@ -236,9 +236,10 @@ implementation uncovers a missing CLI/Make/project-store capability.
   Agent-generated responses can exercise tooling only and must be caveated as
   synthetic.
 - [ ] Should `make adjudication-sample` gain `PROJECTS_DIR` parity? Status:
-  OPEN. The current target does not expose `PROJECTS_DIR`; implementation must
-  verify whether `QC_PROJECTS_DIR` is sufficient or whether a code change is
-  needed for package portability.
+  RESOLVED. `project --projects-dir` and `make adjudication-sample
+  PROJECTS_DIR=...` now support explicit isolated project stores, so Plan #234
+  can keep sample/export provenance repo-local without relying on environment
+  variables.
 - [ ] What should the long-run sanitizer mechanism do? Status: DEFERRED. Initial
   target: CLI/Make flow that inventories raw docs, detects likely identifiers,
   supports reviewed redaction/generalization, writes a de-identification log,

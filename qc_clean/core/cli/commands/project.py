@@ -35,7 +35,8 @@ logger = logging.getLogger(__name__)
 
 def handle_project_command(args) -> int:
     """Route project subcommands."""
-    store = ProjectStore()
+    projects_dir = getattr(args, "projects_dir", None)
+    store = ProjectStore(Path(projects_dir) if projects_dir else None)
 
     if args.project_action == "create":
         return _create_project(store, args)

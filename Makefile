@@ -469,14 +469,14 @@ ifndef OUTPUT
 endif
 	python scripts/run_inv7_live_fixtures.py --output $(OUTPUT) $(if $(FIXTURES),--fixtures $(FIXTURES),) $(if $(MODEL),--model $(MODEL),) $(if $(TRACE_ID),--trace-id $(TRACE_ID),) $(if $(MAX_BUDGET),--max-budget $(MAX_BUDGET),)
 
-adjudication-sample:  ## Export an unlabeled adjudication sample package (ID=<project_id> OUTPUT=sample.json [LIMIT=20] [CONTEXT_CHARS=120])
+adjudication-sample:  ## Export an unlabeled adjudication sample package (ID=<project_id> OUTPUT=sample.json [PROJECTS_DIR=path] [LIMIT=20] [CONTEXT_CHARS=120])
 ifndef ID
 	$(error ID is required. Usage: make adjudication-sample ID=<project_id> OUTPUT=sample.json)
 endif
 ifndef OUTPUT
 	$(error OUTPUT is required. Usage: make adjudication-sample ID=<project_id> OUTPUT=sample.json)
 endif
-	python qc_cli.py project adjudication-sample $(ID) --output-file $(OUTPUT) --limit-per-type $(LIMIT) --context-chars $(CONTEXT_CHARS)
+	python qc_cli.py project $(if $(PROJECTS_DIR),--projects-dir $(PROJECTS_DIR),) adjudication-sample $(ID) --output-file $(OUTPUT) --limit-per-type $(LIMIT) --context-chars $(CONTEXT_CHARS)
 
 reviewer-demo:  ## Build deterministic local reviewer packet (OUTPUT=test_output/reviewer_demo)
 	python scripts/build_reviewer_demo.py --output-dir $(or $(OUTPUT),test_output/reviewer_demo)

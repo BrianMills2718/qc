@@ -101,8 +101,8 @@ Vertical scope: corpus policy, scope record, isolated project store, pipeline
 output packet, audit manifest, unlabeled adjudication sample, pre-registered
 adjudication protocol, and protocol/sample preflight. If human labels are
 supplied, include response validation, response preflight, D3/D7 import, strict
-Phase 0 package writing, and package replay. Use `QC_PROJECTS_DIR` for any
-command path that still lacks explicit isolated-store flags.
+Phase 0 package writing, and package replay. Prefer explicit isolated-store
+flags for project and Make command paths.
 
 De-risks: building more abductive UI or workbench integration on top of
 synthetic-only software demos.
