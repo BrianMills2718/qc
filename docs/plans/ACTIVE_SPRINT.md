@@ -22,22 +22,28 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-- No active slices. Continue through the execution spine from
-  `docs/LONG_TERM_EXECUTION_PLAN.md` without pausing unless a canonical stop
-  condition is reached.
+1. Execute Plan #239, agent-drivable sanitization workflow design, before any
+   public/shareable corpus packaging or publication-cleared reviewer packet
+   work.
+2. Keep D3/D7 populated evidence lanes blocked on explicit human labels; do not
+   simulate expert evidence to bypass that dependency.
 
-**Active checkpoints:** None.
+**Active checkpoints:**
+
+- **Plan #239** `AGENT_DRIVABLE_SANITIZATION_WORKFLOW.md`
+  is the current design/governance slice. It should define the reviewed
+  sanitizer workflow boundary now that the local restricted Plan #234 packet is
+  complete.
 
 **Completed checkpoint:** Plan #234
-`SANITIZED_CORPUS_ADJUDICATION_SEED.md` — 3-document Africa transcript subset
-run in an isolated project store; corpus policy, scope record, inventory, and
-sanitization-deferred note created; output packet (15 codes, 38 apps, 139
-claims) with full audit manifest exported; unlabeled adjudication sample,
-validated adjudication protocol, and passing protocol/sample preflight
-exported. Stopped at manual-ready packet as designed — no expert labels have
-been supplied, no D3/D7 packages exist, and no expert evidence is claimed.
-Plan #238 graph hardening was also validated on this seed corpus: a
-relationship-stage replay produced 6 first-class thematic code relationships.
+`SANITIZED_CORPUS_ADJUDICATION_SEED.md` — a fresh post-fix rerun on the
+3-document Africa transcript subset completed in an isolated project store with
+13 codes, 18 applications, 103 claims, 7 code relationships, 8 entity
+relationships, and 3 negative cases. A full audited packet was exported under
+`test_output/plan234_local_africa_seed_rerun4_2026_06_25/`, including a
+56-item unlabeled adjudication sample, validated adjudication protocol, and
+passing protocol/sample preflight. No expert labels have been supplied, no
+D3/D7 packages exist, and no expert evidence is claimed.
 
 **Completed checkpoint:** Plan #238
 `THEMATIC_GRAPH_RELATIONSHIP_HARDENING.md` made the default thematic graph path

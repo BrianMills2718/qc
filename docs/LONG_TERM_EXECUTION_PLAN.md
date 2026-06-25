@@ -229,15 +229,13 @@ The latest completed implementation slice is Plan #233, process-tracing
 handoff package. Process-tracing consumer review of the deterministic fixture
 completed on 2026-06-25 with no requested QC schema changes.
 
-Plan #237 is now the active governance slice. The immediate trigger was a real
-local Plan #234 seed run whose graph/review inspection exposed a default-path
-operational-credibility gap: a visible code-relationships graph surface was not
-actually produced on the default thematic path, and the entity map remained too
-sparse to justify a polish-stage interpretation.
+Plans #234, #237, and #238 are now complete. The repo has:
+- a fresh post-fix local restricted corpus packet from Plan #234;
+- a repo-enforced default-path operational-credibility policy from Plan #237;
+- and a validated thematic graph remediation from Plan #238.
 
-Plan #234 remains the active QC-local evidence slice, but only as a bounded
-local review instrument until Plan #237 lands the policy/enforcement needed to
-stop similar false-completion signals earlier. The recommended order is now:
-default-path operational-credibility policy, resume local Africa corpus and
-adjudication seed follow-through, populated D3/D7 evidence, deferred
-sanitizer/public-corpus work, then more abductive UI/workbench integration.
+The current nonblocked next slice is the deferred sanitizer/public-corpus work.
+Populated D3/D7 evidence remains blocked on explicit human labels. The
+recommended order is now: reviewed sanitizer/public-corpus workflow design,
+then populated D3/D7 evidence when labels exist, then more abductive
+UI/workbench integration.

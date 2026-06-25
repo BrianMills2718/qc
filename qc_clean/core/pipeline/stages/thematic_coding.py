@@ -97,6 +97,7 @@ class ThematicCodingStage(PipelineStage):
                     code_id=tc.id, codebook_version=codebook.version,
                     confidence=tc.discovery_confidence,
                     segments=state.segments,
+                    allow_fuzzy=False,
                 )
                 if app is not None:
                     all_applications.append(app)
@@ -305,5 +306,4 @@ ANALYTICAL MEMO: After completing the analysis above, write a brief analytical m
 - Key analytical decisions you made and why
 - Patterns or surprises that emerged during analysis
 - Uncertainties or areas needing further investigation"""
-
 

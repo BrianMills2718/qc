@@ -178,7 +178,11 @@ def claims_for_relationships(
             entity_names.get(rel.entity_2_id, rel.entity_2_id),
             scope,
             "domain_entity_relationship",
-            supporting_anchors=_anchors_for_evidence(state, rel.supporting_evidence),
+            supporting_anchors=_anchors_for_evidence(
+                state,
+                rel.supporting_evidence,
+                allow_fuzzy=False,
+            ),
         ))
 
     for rel in state.code_relationships:
@@ -187,7 +191,7 @@ def claims_for_relationships(
             relationship_ids=[rel.id],
         )
         scoped_anchors = _anchors_for_scope(state, scope)
-        evidence_anchors = _anchors_for_evidence(state, rel.evidence)
+        evidence_anchors = _anchors_for_evidence(state, rel.evidence, allow_fuzzy=False)
         claims.append(_relationship_claim(
             rel,
             source_stage,
@@ -632,6 +636,8 @@ def _anchors_for_scope(state: ProjectState, scope: ClaimScope) -> list[ClaimAnch
 def _anchors_for_evidence(
     state: ProjectState,
     evidence_items: Iterable[str],
+    *,
+    allow_fuzzy: bool = True,
 ) -> list[ClaimAnchor]:
     """Resolve unique evidence strings into exact source anchors."""
     anchors: list[ClaimAnchor] = []
@@ -639,7 +645,7 @@ def _anchors_for_evidence(
     for evidence in evidence_items:
         if not _should_attempt_evidence_anchor(evidence):
             continue
-        anchor = _anchor_from_quote(state, evidence)
+        anchor = _anchor_from_quote(state, evidence, allow_fuzzy=allow_fuzzy)
         if anchor is None:
             continue
         key = _anchor_span_key(anchor)
@@ -842,9 +848,14 @@ def _anchor_for_negative_case(
     return _anchor_from_quote(state, negative_case.disconfirming_evidence)
 
 
-def _anchor_from_quote(state: ProjectState, quote: str) -> ClaimAnchor | None:
+def _anchor_from_quote(
+    state: ProjectState,
+    quote: str,
+    *,
+    allow_fuzzy: bool = True,
+) -> ClaimAnchor | None:
     """Resolve a quote across project documents into an exact claim anchor."""
-    match = resolve_against_docs(quote, state.corpus.documents)
+    match = resolve_against_docs(quote, state.corpus.documents, allow_fuzzy=allow_fuzzy)
     if match.status is not MatchStatus.UNIQUE or match.doc_id is None:
         return None
     return ClaimAnchor(

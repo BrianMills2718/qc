@@ -6,12 +6,13 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 239 | Agent-drivable sanitization workflow | High | Planned | `AGENT_DRIVABLE_SANITIZATION_WORKFLOW.md` |
 
 ## Completed Plans
 
 | Name | Outcome | Record |
 |------|---------|--------|
-| Local Africa corpus and adjudication seed | 3-document Africa transcript subset run in an isolated project store; corpus policy, scope record, inventory, and sanitization-deferred note created; output packet (15 codes, 38 apps, 139 claims) with audit manifest exported; unlabeled adjudication sample + validated protocol + passing preflight exported; stopped at manual-ready packet as designed — no expert labels exist | `SANITIZED_CORPUS_ADJUDICATION_SEED.md` |
+| Local Africa corpus and adjudication seed | A fresh post-fix rerun on the 3-document Africa transcript subset completed in an isolated project store, exporting a full audited packet with 13 codes, 18 applications, 103 claims, 7 code relationships, 8 entity relationships, a 56-item unlabeled adjudication sample, a validated adjudication protocol, and a passing protocol/sample preflight; no expert labels exist, so this remains a manual-ready packet only | `SANITIZED_CORPUS_ADJUDICATION_SEED.md` |
 | Thematic graph relationship hardening | The default thematic relationship stage now emits first-class code relationships, graph API/UI empty states are truthful, linked-only entity rendering reduces misleading sparsity, long relationship-evidence paraphrases no longer trigger pathological fuzzy grounding, and real-run replay on the 3-document local seed produced 6 code relationships plus a denser 15-node/8-edge entity map | `THEMATIC_GRAPH_RELATIONSHIP_HARDENING.md` |
 | Default-path operational credibility policy | Canonical docs now distinguish structural completion, operational verification, and methodological validation; a machine-readable surface-contract registry exists; active plans must declare operational-validation burden; and the docs gate validates the new policy while making default-path producer gaps explicit instead of leaving them only in chat | `DEFAULT_PATH_OPERATIONAL_CREDIBILITY_POLICY.md` |
 | Governance default enforcement hardening | Default `docs-check` now validates active plan files through the canonical plan validator, planning docs describe the stricter gate explicitly, and required-reading remains opt-in/session-based by deliberate decision rather than ambiguity | `completed/GOVERNANCE_DEFAULT_ENFORCEMENT_HARDENING.md` |

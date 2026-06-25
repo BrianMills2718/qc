@@ -272,20 +272,20 @@ review checkpoints, not an informal manual pre-step. That work is deferred and
 should be planned separately after the local corpus/adjudication seed proves the
 core workflow.
 
-**Completed 2026-06-25.** Artifacts in
-`test_output/plan234_local_africa_seed_2026_06_25/`:
-- `projects/6fd90de6-600a-42b4-a7e0-d9d6417ef1c2.json` — isolated project
-  store with 3 docs, 15 codes, 38 applications, 139 claims (pre-Plan #238 fix;
-  code_relationships=0 in this state).
+**Completed 2026-06-25.** Fresh post-fix artifacts in
+`test_output/plan234_local_africa_seed_rerun4_2026_06_25/`:
+- `projects/94e72b5f-ad46-4fcb-b8bc-aab37aa01391.json` — isolated project
+  store with 3 docs, 13 codes, 18 applications, 103 claims, 7 code
+  relationships, 8 entity relationships, and 3 negative cases.
 - `artifacts/adjudication_protocol.json` — validates OK.
-- `artifacts/adjudication_sample.json` — protocol/sample preflight passes.
+- `artifacts/adjudication_sample.json` — 56-item unlabeled packet; protocol/
+  sample preflight passes.
+- `artifacts/adjudication_preflight.json` — passing protocol/sample preflight.
 - `artifacts/report.md`, `report.json`, `export_manifest.json`,
   `export_audit_events.jsonl`, `export_audit_events.sqlite` — full audit
-  trail.
+  trail, verified and publish-preflighted.
 
-Plan #238 ran a targeted relationship-stage replay using this project's
-documents and codebook, producing 6 thematic code relationships
-(`test_output/plan238_graph_hardening_2026_06_25/`). The Plan #234 artifact set
-reflects the pre-fix pipeline state; the Plan #238 store holds the validated
-post-fix result. No labels have been supplied; this remains a manual-ready
-adjudication packet only.
+Earlier pre-fix artifacts remain in `test_output/plan234_local_africa_seed_2026_06_25/`
+for historical comparison only. Plan #238 plus the follow-on quote/relationship
+grounding fixes were validated by this fresh rerun4 packet. No labels have been
+supplied; this remains a manual-ready adjudication packet only.

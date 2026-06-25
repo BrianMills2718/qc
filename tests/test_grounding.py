@@ -346,3 +346,39 @@ def test_resolve_and_anchor_leaves_speaker_empty_without_containing_segment():
     assert status is MatchStatus.UNIQUE
     assert app is not None
     assert app.speaker is None
+
+
+def test_long_quotes_do_not_use_fuzzy_fallback():
+    from qc_clean.core.grounding import MatchStatus, resolve_span
+
+    content = (
+        "The clinic team described layered communication risks, staff exposure, "
+        "and operational adaptation across several concrete incidents."
+    )
+    long_quote = (
+        "The clinic team described layered communication risks and staff exposure "
+        "across several concrete incidents while also adapting operationally in ways "
+        "that changed the timing and structure of response work."
+    )
+
+    match = resolve_span(long_quote, content)
+
+    assert match.status is MatchStatus.NONE
+
+
+def test_resolve_and_anchor_can_disable_fuzzy_fallback():
+    from qc_clean.core.grounding import MatchStatus, resolve_and_anchor
+
+    docs = [_Doc("d1", "I do my best work when no one is hovering nearby during planning.")]
+
+    app, status = resolve_and_anchor(
+        "I do best work when no one hovering nearby during planning",
+        docs,
+        code_id="C1",
+        codebook_version=1,
+        confidence=0.9,
+        allow_fuzzy=False,
+    )
+
+    assert app is None
+    assert status is MatchStatus.NONE

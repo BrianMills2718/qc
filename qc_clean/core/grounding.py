@@ -37,6 +37,8 @@ DEFAULT_FUZZY_MIN_RATIO = 0.9
 DEFAULT_FUZZY_MIN_TOKENS = 4
 DEFAULT_FUZZY_MIN_TOKEN_RATIO = 0.75
 DEFAULT_FUZZY_MAX_TOKEN_RATIO = 1.35
+DEFAULT_FUZZY_MAX_QUOTE_TOKENS = 40
+DEFAULT_FUZZY_MAX_QUOTE_CHARS = 280
 _SOURCE_PREFIX_SPEAKER_RE = re.compile(r"\s*([A-Z][A-Za-z0-9 ._'\-]{0,60}?):\s*")
 
 
@@ -106,7 +108,7 @@ def _normalize_with_map(text: str) -> tuple[str, List[int]]:
     return "".join(norm_chars), index_map
 
 
-def resolve_span(quote: str, content: str) -> SpanMatch:
+def resolve_span(quote: str, content: str, *, allow_fuzzy: bool = True) -> SpanMatch:
     """Resolve ``quote`` to a unique char span in a single document's ``content``."""
     norm_doc, index_map = _normalize_with_map(content)
     norm_quote = _normalize_with_map(quote)[0].strip()
@@ -120,6 +122,8 @@ def resolve_span(quote: str, content: str) -> SpanMatch:
         pos = norm_doc.find(norm_quote, pos + 1)
 
     if not starts:
+        if not allow_fuzzy:
+            return SpanMatch(status=MatchStatus.NONE, occurrences=0)
         return _resolve_fuzzy_span(norm_quote, norm_doc, index_map, content)
     if len(starts) > 1:
         return SpanMatch(status=MatchStatus.AMBIGUOUS, occurrences=len(starts))
@@ -160,8 +164,13 @@ def _resolve_fuzzy_span(
     min_tokens: int = DEFAULT_FUZZY_MIN_TOKENS,
 ) -> SpanMatch:
     """Resolve a near-verbatim quote with conservative fuzzy token windows."""
+    if len(norm_quote) > DEFAULT_FUZZY_MAX_QUOTE_CHARS:
+        return SpanMatch(status=MatchStatus.NONE, occurrences=0)
+
     quote_tokens = _token_spans(norm_quote)
     doc_tokens = _token_spans(norm_doc)
+    if len(quote_tokens) > DEFAULT_FUZZY_MAX_QUOTE_TOKENS:
+        return SpanMatch(status=MatchStatus.NONE, occurrences=0)
     if len(quote_tokens) < min_tokens or not doc_tokens:
         return SpanMatch(status=MatchStatus.NONE, occurrences=0)
 
@@ -242,13 +251,18 @@ def _token_ranges_overlap(left: _FuzzyCandidate, right: _FuzzyCandidate) -> bool
     return left.token_start < right.token_end and right.token_start < left.token_end
 
 
-def resolve_against_docs(quote: str, documents: Sequence) -> DocSpanMatch:
+def resolve_against_docs(
+    quote: str,
+    documents: Sequence,
+    *,
+    allow_fuzzy: bool = True,
+) -> DocSpanMatch:
     """Resolve ``quote`` across a corpus. UNIQUE only if it occurs exactly once
     in the entire corpus; otherwise AMBIGUOUS (>1) or NONE (0)."""
     total = 0
     unique_hit: Optional[tuple] = None
     for doc in documents:
-        m = resolve_span(quote, doc.content)
+        m = resolve_span(quote, doc.content, allow_fuzzy=allow_fuzzy)
         total += m.occurrences
         if m.status == MatchStatus.UNIQUE:
             unique_hit = (doc, m)
@@ -321,6 +335,7 @@ def resolve_and_anchor(
     codebook_version,
     confidence,
     segments: Optional[Sequence] = None,
+    allow_fuzzy: bool = True,
 ):
     """Resolve ``quote`` across ``documents`` and build an anchored application.
 
@@ -331,7 +346,7 @@ def resolve_and_anchor(
     supplied, speaker is copied from the containing same-document segment.
     """
     from qc_clean.schemas.domain import CodeApplication, Provenance
-    m = resolve_against_docs(quote, documents)
+    m = resolve_against_docs(quote, documents, allow_fuzzy=allow_fuzzy)
     if m.status is not MatchStatus.UNIQUE:
         return None, m.status
     segment_speaker = _speaker_for_containing_segment(
