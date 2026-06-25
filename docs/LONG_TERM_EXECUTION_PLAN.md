@@ -81,7 +81,7 @@ triage, commit, and push.
 |---:|---|---|---|---|
 | 1 | Abductive candidate review workflow | Deductive semantics over exploratory content | Provisional explanations now exist but cannot yet be adjudicated as first-class review targets. Without review semantics, downstream handoff would export unchecked hypotheses. | CLI/API/manager review can approve/reject/modify candidates, tests pass, demo packet shows reviewable candidates, and caveats remain provisional. |
 | 2 | Process-tracing handoff package | Deductive boundary, exploratory consumer quality | The future workbench boundary needs a typed export before process-tracing agents can align safely. | A versioned package exports patterns, candidate explanations, claims, anchors, scope, and caveats with validation and no Bayesian/process-tracing internals. |
-| 3 | Abductive/process-tracing smoke artifact | Exploratory instrument | The package needs a small runnable readout before being treated as a stable seam. | A synthetic or sanitized fixture proves export, validation, and consumer-readable shape; findings update this plan and concerns. |
+| 3 | Process-tracing consumer review | Exploratory instrument | The QC-side package needs a consumer readout before being treated as a stable seam. | The process-tracing agent can map the deterministic fixture to its own input expectations or returns concrete contract-change requests. |
 | 4 | Reviewer-facing abductive UI | Deductive UI contract over stabilized review semantics | Browser UI should follow stable CLI/API semantics, not define them. | UI plan exists first; browser surfaces expose candidate review without changing API semantics; screenshots/manual inspection pass. |
 | 5 | Sanitized corpus and adjudication seed | Exploratory evidence instrument | Software surfaces are now visible; next proof requires real or shareable data. | A small corpus, scope record, output packet, and adjudication protocol exist without claiming broad validity. |
 | 6 | Populated D3/D7/D8/D9 evaluation lanes | Deductive packages over exploratory quality | Existing protocols need populated results to become evidence. | Frozen inputs, protocols, result packages, scorecards, and caveated reports exist. |
@@ -204,6 +204,6 @@ Stop only for:
 
 ## Current Position
 
-The latest completed implementation slice is Plan #232, abductive candidate
-review workflow. The next implementation slice is Plan #233, process-tracing
-handoff package.
+The latest completed implementation slice is Plan #233, process-tracing
+handoff package. The next slice is process-tracing consumer review of the
+deterministic handoff fixture, unless concern triage changes the risk order.

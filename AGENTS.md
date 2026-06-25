@@ -190,6 +190,8 @@ python qc_cli.py project scope <project_id> --phenomenon "..."  # show/update co
 python qc_cli.py project claims <project_id> --limit 20 --offset 0 --show-scope --show-anchors  # inspect first-class claim ledger scope/anchors (INV-9)
 python qc_cli.py project patterns <project_id> --limit 20 --offset 0 --show-anchors  # inspect descriptive observed patterns
 python qc_cli.py project abductive <project_id> --limit 20 --offset 0  # inspect provisional abductive candidates
+python qc_cli.py export-process-tracing-handoff <project_id> --output handoff.json  # export QC-side handoff package
+python qc_cli.py validate-process-tracing-handoff handoff.json  # validate QC-side handoff package
 python qc_cli.py project add-docs <project_id> --files new.txt --recode  # add then incremental recode
 ```
 
@@ -214,7 +216,9 @@ read `CLAUDE.md` directly.
 4. Inspect claim ledger via `project claims` or `/projects/{project_id}/claims?limit=100&offset=0`
 5. Inspect descriptive observed patterns via `project patterns` or `/projects/{project_id}/patterns?limit=100&offset=0`
 6. Inspect provisional abductive candidates via `project abductive` or `/projects/{project_id}/abductive-explanations?limit=100&offset=0`
-7. Export to JSON/CSV/Markdown/QDPX
+7. Export to JSON/CSV/Markdown/QDPX; export a QC-to-process-tracing handoff
+   package with `export-process-tracing-handoff` only as qualitative evidence
+   context, not process-tracing proof.
 
 ## Machine-Readable Governance
 

@@ -94,6 +94,8 @@ Examples:
   qc_cli validate-inv7-live-protocol inv7_protocol.json
   qc_cli inv7-live-preflight inv7_protocol.json inv7_live.json
   qc_cli compare-inv7-packages inv7_a.json inv7_b.json --output inv7_compare.json
+  qc_cli export-process-tracing-handoff <project_id> --output handoff.json
+  qc_cli validate-process-tracing-handoff handoff.json
   qc_cli project export <project_id> --format markdown --output-file report.md
   qc_cli project export <project_id> --format markdown --output-file report.md --audit-manifest manifest.json --publish-preflight --scope-lint
   qc_cli status --server
@@ -1200,6 +1202,22 @@ Examples:
         help='Optional path to write the comparison report JSON',
     )
 
+    pt_handoff_export_parser = subparsers.add_parser(
+        'export-process-tracing-handoff',
+        help='Export a QC process-tracing handoff package',
+        description='Export a strict QC-to-process-tracing handoff package',
+    )
+    pt_handoff_export_parser.add_argument('project_id', help='QC project ID')
+    pt_handoff_export_parser.add_argument('--output', required=True, help='Output package JSON path')
+    pt_handoff_export_parser.add_argument('--projects-dir', help='Explicit project store directory')
+
+    pt_handoff_validate_parser = subparsers.add_parser(
+        'validate-process-tracing-handoff',
+        help='Validate a QC process-tracing handoff package',
+        description='Validate a strict QC-to-process-tracing handoff package',
+    )
+    pt_handoff_validate_parser.add_argument('package', help='Handoff package JSON path')
+
     # Server command
     server_parser = subparsers.add_parser(
         'server',
@@ -1615,6 +1633,10 @@ def main() -> int:
             return handle_inv7_live_preflight_command(args)
         elif args.command == 'compare-inv7-packages':
             return handle_compare_inv7_packages_command(args)
+        elif args.command == 'export-process-tracing-handoff':
+            return handle_export_process_tracing_handoff_command(args)
+        elif args.command == 'validate-process-tracing-handoff':
+            return handle_validate_process_tracing_handoff_command(args)
         elif args.command == 'server':
             return handle_server_command(args)
         elif args.command == 'project':
@@ -2295,6 +2317,23 @@ def handle_compare_inv7_packages_command(args) -> int:
     if args.output:
         argv.extend(["--output", args.output])
     return compare_inv7_packages.main(argv)
+
+
+def handle_export_process_tracing_handoff_command(args) -> int:
+    """Export a process-tracing handoff package through the canonical CLI."""
+    from scripts import export_process_tracing_handoff
+
+    argv = [args.project_id, "--output", args.output]
+    if args.projects_dir:
+        argv.extend(["--projects-dir", args.projects_dir])
+    return export_process_tracing_handoff.main(argv)
+
+
+def handle_validate_process_tracing_handoff_command(args) -> int:
+    """Validate a process-tracing handoff package through the canonical CLI."""
+    from scripts import validate_process_tracing_handoff
+
+    return validate_process_tracing_handoff.main([args.package])
 
 
 if __name__ == "__main__":

@@ -29,6 +29,7 @@ from fastapi.testclient import TestClient
 
 from qc_clean.core.export.data_exporter import ProjectExporter
 from qc_clean.core.persistence.project_store import ProjectStore
+from qc_clean.core.process_tracing_handoff import write_process_tracing_handoff_package
 from qc_clean.plugins.api.api_server import QCAPIServer
 from qc_clean.schemas.domain import (
     AbductiveCandidateExplanation,
@@ -80,6 +81,7 @@ def build_reviewer_demo(output_dir: Path | str = DEFAULT_OUTPUT_DIR) -> dict[str
     exports_dir = output_dir / "exports"
     snapshots_dir = output_dir / "api_snapshots"
     benchmark_dir = output_dir / "benchmark_artifacts"
+    handoff_dir = output_dir / "handoff"
 
     for directory in [
         output_dir,
@@ -88,6 +90,7 @@ def build_reviewer_demo(output_dir: Path | str = DEFAULT_OUTPUT_DIR) -> dict[str
         exports_dir,
         snapshots_dir,
         benchmark_dir,
+        handoff_dir,
     ]:
         directory.mkdir(parents=True, exist_ok=True)
 
@@ -112,6 +115,8 @@ def build_reviewer_demo(output_dir: Path | str = DEFAULT_OUTPUT_DIR) -> dict[str
     )
 
     snapshots = _write_api_snapshots(projects_dir, snapshots_dir)
+    process_tracing_handoff = handoff_dir / "process_tracing_handoff.json"
+    write_process_tracing_handoff_package(state, process_tracing_handoff)
     scorecard, benchmark_manifest = _write_scorecard_artifacts(
         projects_dir,
         output_dir,
@@ -137,6 +142,7 @@ def build_reviewer_demo(output_dir: Path | str = DEFAULT_OUTPUT_DIR) -> dict[str
         "json_export": str(json_export),
         "scorecard": str(scorecard),
         "benchmark_manifest": str(benchmark_manifest),
+        "process_tracing_handoff": str(process_tracing_handoff),
         **snapshots,
     }
     manifest_path = output_dir / "packet_manifest.json"
@@ -861,6 +867,7 @@ def _write_readme(readme: Path, output_dir: Path, projects_dir: Path) -> None:
                 f"QC_PROJECTS_DIR={projects_dir} python qc_cli.py project claims {PROJECT_ID} --show-scope --show-anchors --limit 2",
                 f"QC_PROJECTS_DIR={projects_dir} python qc_cli.py project patterns {PROJECT_ID} --show-anchors --limit 5",
                 f"QC_PROJECTS_DIR={projects_dir} python qc_cli.py project abductive {PROJECT_ID} --limit 5",
+                f"QC_PROJECTS_DIR={projects_dir} python qc_cli.py export-process-tracing-handoff {PROJECT_ID} --output {output_dir / 'handoff' / 'rerun_process_tracing_handoff.json'}",
                 f"QC_PROJECTS_DIR={projects_dir} python qc_cli.py project export {PROJECT_ID} --format markdown --output-file {output_dir / 'exports' / 'rerun-report.md'}",
                 "```",
                 "",
@@ -882,6 +889,7 @@ def _write_readme(readme: Path, output_dir: Path, projects_dir: Path) -> None:
                 "- `SELF_REVIEW.md` - readiness critique and caveats",
                 "- `exports/reviewer-demo-report.md` - Markdown report export",
                 "- `exports/reviewer-demo-export.json` - full JSON export",
+                "- `handoff/process_tracing_handoff.json` - QC-to-process-tracing handoff package",
                 "- `api_snapshots/` - JSON snapshots from API/review/graph routes",
                 "- `phase0_scorecard.json` - deterministic structural scorecard",
                 "- `benchmark_artifacts/` - versioned Phase 0 artifact package",

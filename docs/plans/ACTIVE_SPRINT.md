@@ -22,18 +22,24 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #233, process-tracing handoff package, as named by
-   `docs/LONG_TERM_EXECUTION_PLAN.md`.
+1. Request or prepare process-tracing consumer review of the deterministic
+   handoff fixture produced by Plan #233.
 2. Continue through the execution spine without
    pausing after the verified commit unless a canonical stop condition is
    reached.
 
-**Active checkpoint:** Plan #233
-`PROCESS_TRACING_HANDOFF_PACKAGE.md` will add a strict, versioned QC-side
-handoff package for process-tracing consumer review. It exports qualitative
-evidence objects and caveats only; it does not export likelihood vectors,
-Bayesian updates, comparative support, causal proof, methodological-validity
-evidence, or SOTA evidence.
+**Active checkpoint:** None. Next action is process-tracing consumer review or
+the next documented execution-spine slice.
+
+**Completed checkpoint:** Plan #233
+`completed/PROCESS_TRACING_HANDOFF_PACKAGE.md` added a strict schema_version=1
+QC-side handoff package and validator through core Pydantic models, script
+wrappers, `qc_cli.py`, Make targets, tests, and reviewer-demo fixture output.
+The package contains scope, document hashes, observed patterns, abductive
+candidates, analytic claims, anchors, provenance, and caveats while rejecting
+process-tracing inference fields. This is a boundary artifact for consumer
+review only, not causal proof, process-tracing results, methodological
+validity, or SOTA proof.
 
 **Completed checkpoint:** Plan #232
 `completed/ABDUCTIVE_CANDIDATE_REVIEW_WORKFLOW.md` added first-class review

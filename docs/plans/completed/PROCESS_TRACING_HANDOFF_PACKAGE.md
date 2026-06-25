@@ -1,6 +1,47 @@
 # Plan #233: Process-Tracing Handoff Package
 
-**Status:** Planned
+## Outcome
+
+Completed 2026-06-25. Added a strict schema_version=1 QC-to-process-tracing
+handoff package with Pydantic models, exporter, validator, script wrappers,
+top-level `qc_cli.py` commands, Make targets, focused tests, and deterministic
+reviewer-demo fixture output. The package contains project/corpus/scope
+metadata, document content hashes, observed patterns, abductive candidates,
+analytic claims, package-local anchors, provenance hashes, and caveats. It
+rejects missing candidate pattern references, missing anchor document
+references, and forbidden process-tracing inference fields. It deliberately
+excludes likelihood vectors, posterior/comparative-support fields, Bayesian
+updates, and process-tracing internal result artifacts. This is a QC-side
+boundary artifact for consumer review, not causal proof, process-tracing
+results, methodological-validity evidence, or SOTA evidence.
+
+Verification:
+
+- `python -m pytest tests/test_process_tracing_handoff.py -q` — 5 passed.
+- `python -m pytest tests/test_process_tracing_handoff.py
+  tests/test_reviewer_demo.py -q` — 8 passed.
+- `python -m ruff check qc_clean/core/process_tracing_handoff.py
+  scripts/export_process_tracing_handoff.py
+  scripts/validate_process_tracing_handoff.py qc_cli.py
+  scripts/build_reviewer_demo.py tests/test_process_tracing_handoff.py
+  tests/test_reviewer_demo.py` — passed.
+- `make reviewer-demo OUTPUT=test_output/reviewer_demo` — passed and wrote
+  `handoff/process_tracing_handoff.json`.
+- `make export-process-tracing-handoff ID=reviewer-demo
+  PROJECTS_DIR=test_output/reviewer_demo/projects
+  OUTPUT=test_output/reviewer_demo/handoff/make_handoff.json` — passed.
+- `make validate-process-tracing-handoff
+  PACKAGE=test_output/reviewer_demo/handoff/process_tracing_handoff.json` —
+  passed.
+- `QC_PROJECTS_DIR=test_output/reviewer_demo/projects python qc_cli.py
+  export-process-tracing-handoff reviewer-demo --output
+  test_output/reviewer_demo/handoff/qc_cli_handoff.json` — passed.
+- `python qc_cli.py validate-process-tracing-handoff
+  test_output/reviewer_demo/handoff/qc_cli_handoff.json` — passed.
+- `make docs-check` — passed.
+- `git diff --check` — passed.
+
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** #231, #232
@@ -72,11 +113,11 @@ based on the explicit QC and process-tracing repo boundary docs.
 
 ### Capability Validation
 
-- [ ] Package model uses Pydantic fields with descriptions.
-- [ ] Validator enforces schema version, candidate source-pattern references,
+- [x] Package model uses Pydantic fields with descriptions.
+- [x] Validator enforces schema version, candidate source-pattern references,
   anchor document references, and absence of PT inference fields.
-- [ ] CLI/Make surfaces are agent-drivable.
-- [ ] Reviewer demo can generate a deterministic handoff fixture.
+- [x] CLI/Make surfaces are agent-drivable.
+- [x] Reviewer demo can generate a deterministic handoff fixture.
 
 ---
 
@@ -142,26 +183,26 @@ based on the explicit QC and process-tracing repo boundary docs.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] Package schema version is explicit and strict.
-- [ ] Package contains project/corpus/scope metadata, document hashes,
+- [x] Package schema version is explicit and strict.
+- [x] Package contains project/corpus/scope metadata, document hashes,
   observed patterns, abductive candidates, analytic claims, anchors,
   provenance, and caveats.
-- [ ] Package excludes PT likelihood vectors, posterior/support fields,
+- [x] Package excludes PT likelihood vectors, posterior/support fields,
   Bayesian update fields, and PT internal result artifacts.
-- [ ] Validator fails loud on bad schema version, missing candidate
+- [x] Validator fails loud on bad schema version, missing candidate
   source-pattern IDs, missing anchor document IDs, and forbidden PT fields.
-- [ ] CLI and Make surfaces can export and validate a package from an explicit
+- [x] CLI and Make surfaces can export and validate a package from an explicit
   or environment-provided project store.
-- [ ] Demo packet includes a deterministic handoff fixture if added.
+- [x] Demo packet includes a deterministic handoff fixture if added.
 
 > Process criteria:
-- [ ] Focused tests pass.
-- [ ] Ruff passes for touched files.
-- [ ] `make reviewer-demo OUTPUT=test_output/reviewer_demo` passes.
-- [ ] `make docs-check` passes.
-- [ ] `git diff --check` passes.
-- [ ] `make check` passes.
-- [ ] Verified work is committed and pushed.
+- [x] Focused tests pass.
+- [x] Ruff passes for touched files.
+- [x] `make reviewer-demo OUTPUT=test_output/reviewer_demo` passes.
+- [x] `make docs-check` passes.
+- [x] `git diff --check` passes.
+- [x] `make check` passes.
+- [x] Verified work is committed and pushed.
 
 ---
 

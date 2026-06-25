@@ -17,6 +17,7 @@ def test_build_reviewer_demo_writes_packet(tmp_path):
         "project_state",
         "markdown_export",
         "json_export",
+        "process_tracing_handoff",
         "scorecard",
         "benchmark_manifest",
         "claims_snapshot",
@@ -38,6 +39,7 @@ def test_build_reviewer_demo_writes_packet(tmp_path):
     assert "QC_PROJECTS_DIR" in readme
     assert "project patterns" in readme
     assert "project abductive" in readme
+    assert "export-process-tracing-handoff" in readme
     assert "review/abductive-candidates" in readme
     assert "not methodological validity evidence" in self_review
     assert "not SOTA evidence" in self_review
@@ -45,6 +47,10 @@ def test_build_reviewer_demo_writes_packet(tmp_path):
     assert "## Observed Patterns" in markdown
     assert "## Abductive Candidate Explanations" in markdown
     assert "not causal proof" in markdown
+
+    handoff = Path(manifest["process_tracing_handoff"]).read_text(encoding="utf-8")
+    assert "qualitative_coding.process_tracing_handoff" in handoff
+    assert "comparative_support" not in handoff
 
 
 def test_reviewer_demo_project_loads_from_env_store(tmp_path, monkeypatch):
