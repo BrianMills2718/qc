@@ -6,7 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| — | — | — | — | — |
+| 232 | Abductive candidate review workflow | High | Planned | `ABDUCTIVE_CANDIDATE_REVIEW_WORKFLOW.md` |
 
 ## Completed Plans
 
