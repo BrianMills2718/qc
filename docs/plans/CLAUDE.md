@@ -6,7 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| — | — | — | — | — |
+| 233 | Process-tracing handoff package | High | Planned | `PROCESS_TRACING_HANDOFF_PACKAGE.md` |
 
 ## Completed Plans
 

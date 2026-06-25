@@ -22,13 +22,18 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Create and execute Plan #233, process-tracing handoff package, as named by
+1. Execute Plan #233, process-tracing handoff package, as named by
    `docs/LONG_TERM_EXECUTION_PLAN.md`.
 2. Continue through the execution spine without
    pausing after the verified commit unless a canonical stop condition is
    reached.
 
-**Active checkpoint:** None. Create Plan #233 before implementation.
+**Active checkpoint:** Plan #233
+`PROCESS_TRACING_HANDOFF_PACKAGE.md` will add a strict, versioned QC-side
+handoff package for process-tracing consumer review. It exports qualitative
+evidence objects and caveats only; it does not export likelihood vectors,
+Bayesian updates, comparative support, causal proof, methodological-validity
+evidence, or SOTA evidence.
 
 **Completed checkpoint:** Plan #232
 `completed/ABDUCTIVE_CANDIDATE_REVIEW_WORKFLOW.md` added first-class review
