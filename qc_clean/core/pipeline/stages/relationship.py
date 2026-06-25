@@ -10,7 +10,7 @@ from qc_clean.core.claims import claims_for_relationships, replace_claims_for_st
 from qc_clean.core.prompting import format_untrusted_data_block, format_untrusted_documents
 from qc_clean.schemas.analysis_schemas import EntityMapping
 from qc_clean.schemas.adapters import entity_mapping_to_entities
-from qc_clean.schemas.domain import ProjectState
+from qc_clean.schemas.domain import Codebook, ProjectState
 from ..pipeline_engine import PipelineContext, PipelineStage
 
 logger = logging.getLogger(__name__)
@@ -105,16 +105,23 @@ def _build_phase3_prompt(
     combined_text: str,
     phase1_text: str,
     phase2_text: str,
+    codebook: Codebook | None = None,
 ) -> str:
-    return f"""Identify key entities, thematic-code relationships, and their relationships in the interview data.
+    code_reference = ""
+    if codebook and codebook.codes:
+        lines = ["THEMATIC CODE REFERENCE (use exact code IDs in code_relationships):"]
+        for code in codebook.codes:
+            desc = f" — {code.description[:80]}" if code.description else ""
+            lines.append(f"  {code.id}: {code.name}{desc}")
+        code_reference = "\n".join(lines) + "\n\n"
 
-INSTRUCTIONS:
-1. Extract only important entities that participate in at least one supported relationship, causal chain, or conceptual connection.
-2. Map meaningful entity relationships — only include relationships that have clear evidence in the text.
-3. Map meaningful thematic code relationships using the exact code IDs or exact code names from Phase 1.
-4. Prefer a reusable graph over a long flat list: return roughly 6-12 entity relationships and 4-8 code relationships when the evidence supports them.
-5. Identify cause-effect chains grounded in what the interviewee(s) actually said.
-6. Relationship types should be specific verbs (e.g., "leads_to", "uses", "constrains", "qualifies") not vague labels.
+    return f"""Identify thematic code relationships and entity relationships in the interview data.
+
+{code_reference}INSTRUCTIONS:
+1. THEMATIC CODE RELATIONSHIPS (primary task): Map analytic relationships between the codes listed above. Use exact code IDs from the reference list. Produce 4-8 code relationships when the data supports them. Relationship types should be specific (e.g., "leads_to", "enables", "constrains", "qualifies", "tensions_with", "co-occurs_with").
+2. ENTITY EXTRACTION: Extract only important entities that appear in at least one relationship, causal chain, or conceptual connection.
+3. ENTITY RELATIONSHIPS: Map entity-to-entity relationships with clear evidence. Return roughly 4-10 entity relationships.
+4. Identify cause-effect chains grounded in what the interviewee(s) actually said.
 
 PREVIOUS ANALYSIS:
 Phase 1 Codes: {phase1_text}
@@ -128,4 +135,4 @@ ANALYTICAL MEMO: After completing the analysis above, write a brief analytical m
 - Patterns or surprises that emerged during analysis
 - Uncertainties or areas needing further investigation
 
-Provide focused entity relationship mapping."""
+Provide focused code and entity relationship mapping. The code_relationships field is required — populate it with analytic links between the thematic codes listed above."""

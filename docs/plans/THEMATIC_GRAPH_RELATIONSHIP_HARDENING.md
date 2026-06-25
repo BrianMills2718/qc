@@ -1,6 +1,6 @@
 # Plan #238: Thematic Graph Relationship Hardening
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** #237

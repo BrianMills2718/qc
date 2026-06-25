@@ -6,13 +6,13 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 238 | Thematic graph relationship hardening | High | Planned | `THEMATIC_GRAPH_RELATIONSHIP_HARDENING.md` |
 | 234 | Local Africa corpus and adjudication seed | High | Planned | `SANITIZED_CORPUS_ADJUDICATION_SEED.md` |
 
 ## Completed Plans
 
 | Name | Outcome | Record |
 |------|---------|--------|
+| Thematic graph relationship hardening | Relationship stage now passes explicit codebook reference to the LLM so thematic code relationships are reliably extracted; `state.code_relationships` is populated on the thematic path; surface registry updated to partial/warning-until-density-criteria-exist; 4 required tests pass; 1366/1366 deterministic tests pass | `THEMATIC_GRAPH_RELATIONSHIP_HARDENING.md` |
 | Default-path operational credibility policy | Canonical docs now distinguish structural completion, operational verification, and methodological validation; a machine-readable surface-contract registry exists; active plans must declare operational-validation burden; and the docs gate validates the new policy while making default-path producer gaps explicit instead of leaving them only in chat | `DEFAULT_PATH_OPERATIONAL_CREDIBILITY_POLICY.md` |
 | Governance default enforcement hardening | Default `docs-check` now validates active plan files through the canonical plan validator, planning docs describe the stricter gate explicitly, and required-reading remains opt-in/session-based by deliberate decision rather than ambiguity | `completed/GOVERNANCE_DEFAULT_ENFORCEMENT_HARDENING.md` |
 | Governance review cleanup doc alignment | `CLAUDE.md`, `docs/plans/CLAUDE.md`, and `docs/plans/ACTIVE_SPRINT.md` now align on the repo-local governance workflow order, the sprint tracker no longer tells conflicting active-slice stories, the wrapper layer and soft-coupling policy are explicitly explained, and unresolved enforcement-scope concerns are carried forward into Plan #236 instead of being left only in chat | `completed/GOVERNANCE_REVIEW_CLEANUP_DOC_ALIGNMENT.md` |

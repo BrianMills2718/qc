@@ -22,24 +22,14 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #238, thematic graph relationship hardening, before resuming
-   broader default-path feature expansion or treating current UI/graph surfaces
-   as polish-stage work.
-2. Resume Plan #234, local Africa corpus plus adjudication seed, with the
+1. Resume Plan #234, local Africa corpus plus adjudication seed, with the
    current local packet treated as a successful review instrument rather than a
    completed default-path product proof.
-3. Continue through the execution spine without
+2. Continue through the execution spine without
    pausing after the verified commit unless a canonical stop condition is
    reached.
 
 **Active checkpoints:**
-
-- **Plan #238** `THEMATIC_GRAPH_RELATIONSHIP_HARDENING.md`
-  is the current implementation slice before broader default-path qualitative-
-  coding expansion continues. It should make the graph UI truthful and useful
-  on the thematic path by producing first-class thematic code relationships or
-  explicitly disabling unsupported surfaces, then revalidate the local seed
-  graph on a real run.
 
 - **Plan #234** `SANITIZED_CORPUS_ADJUDICATION_SEED.md`
   is the current execution-roadmap slice after governance alignment. It
@@ -51,6 +41,14 @@ highest-value documented lane.
   slice; sanitization and public-shareability are deferred. The first local
   seed packet now exists, but graph inspection exposed a separate default-path
   graph utility gap, which is why Plan #238 now precedes further continuation.
+
+**Completed checkpoint:** Plan #238
+`THEMATIC_GRAPH_RELATIONSHIP_HARDENING.md` made the thematic relationship stage
+reliably produce `state.code_relationships` by passing an explicit codebook
+reference list to the LLM prompt. Surface registry updated from missing/warning
+to partial/warning-until-density-criteria-exist. All 4 required tests pass
+(test_relationship_stage.py, test_graph_api.py); 1366/1366 deterministic tests
+pass.
 
 **Completed checkpoint:** Plan #237
 `DEFAULT_PATH_OPERATIONAL_CREDIBILITY_POLICY.md` established the repo-wide but
