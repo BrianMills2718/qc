@@ -6,7 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| — | — | — | — | — |
+| #227 | Observed pattern read surfaces | High | Planned | `OBSERVED_PATTERN_READ_SURFACES.md` |
 
 ## Completed Plans
 
