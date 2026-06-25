@@ -5,9 +5,11 @@ whose char offsets index the *original* ``Document.content``. This is the
 denominator the system was missing: coverage, application-level agreement,
 prevalence, and "absence of evidence" can all be computed against this set.
 
-Unlike the GT constant-comparison segmenter (which strips text and tracks no
-offsets), every segment here round-trips: ``doc.content[seg.start_char:seg.end_char]
-== seg.text``. Speaker transcripts split by speaker turn; otherwise by paragraph.
+Every segment here round-trips: ``doc.content[seg.start_char:seg.end_char] ==
+seg.text``. Speaker transcripts split by speaker turn; otherwise by paragraph.
+Grounded-theory constant comparison consumes this same canonical segment
+universe through a compatibility wrapper, so GT and coverage/review/export
+surfaces share one evidence denominator.
 
 This module only builds the registry; it adds no LLM calls. Forcing a coding
 decision on *every* segment (exhaustive coding) is the separate, cost-bearing

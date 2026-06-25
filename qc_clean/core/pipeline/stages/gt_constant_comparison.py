@@ -26,6 +26,7 @@ from qc_clean.core.claims import (
 from qc_clean.core.prompting import format_untrusted_data_block, render_prompt_override
 from qc_clean.core.prompt_override_registry import get_prompt_override_surface
 from qc_clean.core.pipeline.saturation import calculate_codebook_change
+from qc_clean.core.segmentation import segment_corpus
 from qc_clean.schemas.domain import (
     AnalysisMemo,
     Code,
@@ -34,6 +35,7 @@ from qc_clean.schemas.domain import (
     Document,
     ProjectState,
     Provenance,
+    Segment,
 )
 from qc_clean.schemas.gt_schemas import OpenCode
 from ..pipeline_engine import PipelineContext, PipelineStage
@@ -93,35 +95,34 @@ def segment_documents(documents: List[Document]) -> List[Dict]:
     """
     Split documents into codeable segments.
 
+    Compatibility wrapper over the canonical char-anchored segment universe.
     Uses speaker turns for interview transcripts (when speakers are detected),
-    otherwise groups paragraphs into ~500-word chunks.
+    otherwise uses paragraph-level canonical segments. Returned dicts preserve
+    the historical GT prompt shape while carrying segment IDs and offsets.
     """
-    segments = []
-    for doc in documents:
-        if doc.detected_speakers:
-            turns = split_by_speaker_turns(doc.content, doc.detected_speakers)
-            for i, turn in enumerate(turns):
-                if turn["text"].strip():
-                    segments.append({
-                        "doc_id": doc.id,
-                        "doc_name": doc.name,
-                        "segment_index": i,
-                        "text": turn["text"],
-                        "speaker": turn.get("speaker", ""),
-                    })
-        else:
-            paragraphs = [p.strip() for p in doc.content.split("\n\n") if p.strip()]
-            chunks = group_into_chunks(paragraphs, target_words=500)
-            for i, chunk in enumerate(chunks):
-                if chunk.strip():
-                    segments.append({
-                        "doc_id": doc.id,
-                        "doc_name": doc.name,
-                        "segment_index": i,
-                        "text": chunk,
-                        "speaker": "",
-                    })
-    return segments
+    return _segments_to_gt_dicts(segment_corpus(documents), documents)
+
+
+def _segments_to_gt_dicts(
+    segments: List[Segment],
+    documents: List[Document],
+) -> List[Dict]:
+    """Convert canonical Segment records into GT's prompt/merge dict shape."""
+    doc_names = {doc.id: doc.name for doc in documents}
+    return [
+        {
+            "doc_id": segment.doc_id,
+            "doc_name": doc_names.get(segment.doc_id, segment.doc_id),
+            "segment_index": segment.index,
+            "segment_id": segment.id,
+            "start_char": segment.start_char,
+            "end_char": segment.end_char,
+            "text": segment.text,
+            "speaker": segment.speaker,
+        }
+        for segment in segments
+        if segment.text.strip()
+    ]
 
 
 def split_by_speaker_turns(
@@ -218,8 +219,10 @@ class GTConstantComparisonStage(PipelineStage):
         )
         llm = LLMHandler(model_name=ctx.model_name)
 
-        segments = segment_documents(state.corpus.documents)
         doc_lookup = {d.id: d.content for d in state.corpus.documents}
+        if not state.segments:
+            state.segments = segment_corpus(state.corpus.documents)
+        segments = _segments_to_gt_dicts(state.segments, state.corpus.documents)
         if not segments:
             raise RuntimeError(
                 "No segments found in documents — cannot perform constant comparison. "
@@ -382,6 +385,12 @@ def _format_segment_data_block(segment: Dict, seg_idx: int) -> str:
         f"Document: {segment.get('doc_name', '')}",
         f"Segment index: {seg_idx}",
     ]
+    if segment.get("segment_id"):
+        payload.append(f"Segment ID: {segment['segment_id']}")
+    if segment.get("start_char") is not None and segment.get("end_char") is not None:
+        payload.append(
+            f"Character span: {segment['start_char']}..{segment['end_char']}"
+        )
     if segment.get("speaker"):
         payload.append(f"Speaker: {segment['speaker']}")
     payload.extend(["Text:", segment["text"]])

@@ -148,7 +148,7 @@ Each stage implements `PipelineStage` (`can_execute(state) -> bool`, `execute(st
 
 **Grounded-theory-specific:**
 
-- **Constant Comparison Coding** (`gt_constant_comparison.py`) — segments documents (speaker turn or paragraph), iteratively codes each segment against the *evolving* codebook, checks codebook-stability saturation per pass (this is codebook convergence, **not** GT category saturation; INV-4). *Schema:* `OpenCode` (per segment). *Writes:* `codebook.codes`, `code_applications`. *Prompt overridable.* Replaces the legacy batch `gt_open_coding.py`.
+- **Constant Comparison Coding** (`gt_constant_comparison.py`) — consumes the canonical char-anchored `ProjectState.segments` universe (speaker turn or paragraph, populated via `segment_corpus()` when absent), iteratively codes each segment against the *evolving* codebook, checks codebook-stability saturation per pass (this is codebook convergence, **not** GT category saturation; INV-4). *Schema:* `OpenCode` (per segment). *Writes:* `codebook.codes`, `code_applications`. *Prompt overridable.* Replaces the legacy batch `gt_open_coding.py`.
 - **Axial Coding** (`gt_axial_coding.py`) — relates categories (partial Strauss & Corbin paradigm: conditions, consequences). *Schema:* `AxialRelationship`. *Writes:* `code_relationships`. *Requires:* codebook.
 - **Selective Coding** (`gt_selective_coding.py`) — identifies the core category. *Schema:* `CoreCategory`. *Writes:* `core_categories`. *Requires:* axial output.
 - **Theory Integration** (`gt_theory_integration.py`) — assembles a theoretical model (framework, propositions, conceptual relationships, scope conditions, implications). *Schema:* `TheoreticalModel`. *Writes:* `theoretical_model`. *Requires:* core categories.

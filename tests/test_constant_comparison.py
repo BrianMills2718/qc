@@ -35,6 +35,7 @@ from qc_clean.schemas.domain import (
     ProjectConfig,
     ProjectState,
     Provenance,
+    Segment,
 )
 from qc_clean.schemas.gt_schemas import OpenCode
 
@@ -76,15 +77,20 @@ def _make_segment_response(
 
 class TestSegmentation:
 
-    def test_segment_by_paragraphs(self):
+    def test_segment_documents_delegates_to_canonical_segments_with_offsets(self):
         doc = Document(
             id="d1", name="doc.txt",
             content="First paragraph about AI.\n\nSecond paragraph about privacy.\n\nThird paragraph about workflows.",
         )
         segments = segment_documents([doc])
-        # With 500-word target, these short paragraphs should be in one chunk
-        assert len(segments) >= 1
+        assert len(segments) == 3
         assert all(s["doc_id"] == "d1" for s in segments)
+        assert all(s["segment_id"] for s in segments)
+        assert segments[0]["start_char"] == 0
+        assert segments[0]["end_char"] == len("First paragraph about AI.")
+        assert doc.content[segments[1]["start_char"]:segments[1]["end_char"]] == (
+            "Second paragraph about privacy."
+        )
 
     def test_segment_by_speakers(self):
         doc = Document(
@@ -97,6 +103,10 @@ class TestSegmentation:
         assert len(segments) == 4
         assert segments[0]["speaker"] == "Alice"
         assert segments[2]["speaker"] == "Bob"
+        assert segments[0]["start_char"] == len("Alice: ")
+        assert doc.content[segments[0]["start_char"]:segments[0]["end_char"]] == (
+            "I think AI is great."
+        )
 
     def test_segment_empty_doc(self):
         doc = Document(id="d1", name="empty.txt", content="")
@@ -325,6 +335,72 @@ class TestGTConstantComparisonStage:
         assert len(result.codebook.codes) > 0
         assert len(result.code_applications) > 0
         assert result.iteration >= 1
+        assert result.segments
+
+    def test_stage_populates_missing_canonical_segments(self):
+        state = _make_state()
+        assert state.segments == []
+
+        response = _make_segment_response(
+            new_codes=[
+                OpenCode(
+                    code_name="AI Usage",
+                    description="Use of AI",
+                    properties=[],
+                    dimensions=[],
+                    supporting_quotes=["We use AI"],
+                    frequency=1,
+                    confidence=0.8,
+                ),
+            ],
+        )
+
+        with patch("qc_clean.core.llm.llm_handler.LLMHandler") as MockLLM:
+            instance = MockLLM.return_value
+            instance.extract_structured = AsyncMock(return_value=response)
+            result = asyncio.run(
+                GTConstantComparisonStage(max_iterations=1).execute(
+                    state, PipelineContext()
+                )
+            )
+
+        assert result.segments
+        assert all(seg.start_char < seg.end_char for seg in result.segments)
+        assert result.corpus.documents[0].content[
+            result.segments[0].start_char:result.segments[0].end_char
+        ] == result.segments[0].text
+
+    def test_stage_preserves_existing_canonical_segments(self):
+        state = _make_state()
+        state.segments = [
+            Segment(
+                id="seg_custom",
+                doc_id=state.corpus.documents[0].id,
+                index=99,
+                start_char=0,
+                end_char=21,
+                speaker="Pat",
+                text="Custom segment text.",
+            )
+        ]
+
+        response = _make_segment_response()
+
+        with patch("qc_clean.core.llm.llm_handler.LLMHandler") as MockLLM:
+            instance = MockLLM.return_value
+            instance.extract_structured = AsyncMock(return_value=response)
+            asyncio.run(
+                GTConstantComparisonStage(max_iterations=1).execute(
+                    state, PipelineContext()
+                )
+            )
+
+        assert [seg.id for seg in state.segments] == ["seg_custom"]
+        assert instance.extract_structured.await_count == 1
+        prompt = instance.extract_structured.await_args.args[0]
+        assert "Segment ID: seg_custom" in prompt
+        assert "Character span: 0..21" in prompt
+        assert "Custom segment text." in prompt
 
     def test_saturation_stops_iteration(self):
         """Stage should stop when codebook stabilizes."""
