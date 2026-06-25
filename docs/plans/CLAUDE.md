@@ -6,7 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| — | — | — | — | — |
+| 226 | Observed pattern substrate | High | Planned | `OBSERVED_PATTERN_SUBSTRATE.md` |
 
 ## Completed Plans
 
