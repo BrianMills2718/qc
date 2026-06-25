@@ -1,0 +1,52 @@
+updated: "2026-06-25T08:30:30"
+project: qualitative_coding
+scope: repo
+status: active
+git_commit: "dc103db4"
+git_branch: "main"
+summary: "Set up a design-plan-aligned long-term execution spine, added abductive candidate review workflow, and added a strict QC-to-process-tracing handoff package."
+next_action: "Start with an adversarial audit of commits 35b0498f through dc103db4, especially docs/LONG_TERM_EXECUTION_PLAN.md, qc_clean/core/pipeline/review.py, qc_clean/core/process_tracing_handoff.py, and the generated reviewer-demo handoff fixture."
+completed:
+  - "Plan #231 created docs/LONG_TERM_EXECUTION_PLAN.md and aligned active sprint/concern/artifact docs (commits 35b0498f, 1e748735)."
+  - "Plan #232 added first-class abductive candidate review via ReviewManager, API review-list endpoint, CLI-compatible JSON decisions, tests, and demo snapshots (commits e7665731, dd725c48)."
+  - "Plan #233 added strict schema_version=1 QC-to-process-tracing handoff package, validator, scripts, qc_cli wrappers, Make targets, tests, and demo package output (commits b67e517b, dc103db4)."
+pending:
+  - id: P1
+    priority: high
+    effort: medium
+    summary: "Adversarially audit recent planning and implementation work before continuing."
+    details: "Review the six recent commits as if trying to reject them: check claim discipline, status docs, generated AGENTS sync, API/CLI contract consistency, review target semantics, validation completeness, and whether the handoff package leaks process-tracing inference concepts or under-specifies consumer needs. Run focused tests and make check after any fixes."
+  - id: P2
+    priority: high
+    effort: medium
+    summary: "Prepare process_tracing consumer review of the deterministic QC handoff fixture."
+    details: "Use test_output/reviewer_demo/handoff/process_tracing_handoff.json as the generated fixture, or regenerate with make reviewer-demo OUTPUT=test_output/reviewer_demo. Ask the process_tracing agent whether the package can map to its future adapter expectations without importing PT internals or adding likelihood/posterior fields to QC."
+  - id: P3
+    priority: medium
+    effort: medium
+    summary: "Decide next implementation slice after consumer review."
+    details: "Likely next slices are process-tracing consumer contract adjustments, browser-native abductive candidate review after UI planning, or a sanitized/adjudicated corpus seed. Use docs/LONG_TERM_EXECUTION_PLAN.md and docs/CONCERNS.md to choose risk order."
+uncertainties:
+  - id: U1
+    priority: high
+    summary: "The process_tracing consumer has not reviewed the QC handoff schema yet."
+    context: "QC-side validation is green, but the adjacent repo owns consumer semantics. Verify by asking the process_tracing agent to inspect the fixture and map fields to its planned adapter surface."
+    blocking: "Treating the QC-to-PT seam as stable or building mixed_methods_workbench bridge code."
+  - id: U2
+    priority: medium
+    summary: "The handoff package is strict but may be too narrow for real process-tracing source packets."
+    context: "It exports QC documents, patterns, claims, candidates, anchors, hashes, and caveats. It does not yet encode PT research_question, focal_window, outcome, source classes, or pre-specified tests; that omission is intentional until consumer review."
+    blocking: "Any claim that the package is sufficient for real PT execution rather than consumer review."
+warnings:
+  - "Do not edit AGENTS.md directly; update CLAUDE.md and run python scripts/meta/render_agents_md.py."
+  - "Do not add process-tracing likelihood vectors, Bayesian updates, final_posterior, or comparative_support fields to QC handoff packages; those belong to process_tracing."
+  - "test_output/reviewer_demo is generated local output and is not the source of truth; regenerate it if stale."
+sanity_checks:
+  - cmd: "git status --short --branch"
+    expect: "clean main branch at or after dc103db4"
+  - cmd: "make check"
+    expect: "exits 0; last run was 1353 passed, 1 skipped, 8 deselected"
+  - cmd: "make reviewer-demo OUTPUT=test_output/reviewer_demo"
+    expect: "exits 0 and writes handoff/process_tracing_handoff.json"
+  - cmd: "make validate-process-tracing-handoff PACKAGE=test_output/reviewer_demo/handoff/process_tracing_handoff.json"
+    expect: "exits 0 with status pass"
