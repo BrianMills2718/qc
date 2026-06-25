@@ -19,6 +19,7 @@ Wiki home: http://localhost:8088/index.php/Project_Wiki
 |---|---|---|
 | [docs/METHODOLOGY.md](METHODOLOGY.md) | Methodology spine | Summarizes goals, modality, evidence-promotion rules, and failure modes. |
 | [docs/LONG_TERM_EXECUTION_PLAN.md](LONG_TERM_EXECUTION_PLAN.md) | Long-term execution spine | Maps the design-plan protocol to current roadmap slices, next actions, dependency subplans, and stop conditions. |
+| [docs/CAPABILITY_DEPENDENCY_GRAPH.md](CAPABILITY_DEPENDENCY_GRAPH.md) | Capability dependency graph | Orders QC, grounded-research, abductive, process-tracing, and mixed-methods workbench capabilities by dependency and success criteria. |
 | [docs/VALIDATION.md](VALIDATION.md) | Validation register | Separates software evidence from methodological evidence. |
 | [docs/CONCERNS.md](CONCERNS.md) | Concern register | Tracks the remaining blockers to a stronger public portfolio page. |
 | [docs/adr/0001_qualitative_coding_methodology_spine.md](adr/0001_qualitative_coding_methodology_spine.md) | ADR | Records the dossier framing decision. |

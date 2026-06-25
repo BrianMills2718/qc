@@ -22,14 +22,15 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Choose the next execution-spine slice after the process-tracing consumer
-   review accepted the QC handoff fixture with no QC schema changes.
+1. Use `docs/CAPABILITY_DEPENDENCY_GRAPH.md` to choose the next execution-spine
+   slice. Default recommendation: sanitized corpus plus adjudication seed before
+   making abductive UI/workbench reasoning more product-central.
 2. Continue through the execution spine without
    pausing after the verified commit unless a canonical stop condition is
    reached.
 
 **Active checkpoint:** None. Next action is selecting the next documented
-execution-spine slice.
+execution-spine slice using the capability dependency graph.
 
 **Completed checkpoint:** Process-tracing consumer review
 On 2026-06-25, process-tracing consumer review accepted

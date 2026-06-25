@@ -1,0 +1,231 @@
+version: 1
+updated: "2026-06-25"
+project: qualitative_coding
+scope:
+  repos:
+    - qualitative_coding
+    - process_tracing
+    - mixed_methods_workbench
+  purpose: "Capability dependency graph for QC, grounded-research, process-tracing, and mixed-methods workbench sequencing."
+policy:
+  promotion_rule: "A later capability cannot become central until its dependencies license the claims it relies on."
+  success_types:
+    software: "Typed, tested, agent-drivable, fail-loud implementation."
+    methodological: "Frozen inputs, protocols, reviewer or benchmark evidence, statistical gates where relevant, and caveats."
+capabilities:
+  - id: Q1
+    capability: "Ingestion + ProjectState"
+    owner: qualitative_coding
+    depends_on: []
+    status: implemented
+    success_criteria: "Supported files load into one typed ProjectState; failures are explicit."
+    verification: "Deterministic tests and project-run smoke/e2e."
+    claim_licensed: "Software can ingest and persist project state."
+  - id: Q2
+    capability: "Span anchors + document hashes"
+    owner: qualitative_coding
+    depends_on: [Q1]
+    status: mostly_met
+    success_criteria: "Evidence quotes resolve to document ID, char offsets, and hash; unresolved or ambiguous quotes are surfaced."
+    verification: "make bench D1; verify_grounding."
+    claim_licensed: "Evidence is inspectable and anchored, not methodologically validated."
+  - id: Q3
+    capability: "Segment universe + coverage denominator"
+    owner: qualitative_coding
+    depends_on: [Q1, Q2]
+    status: met_exhaustive_partial_default
+    success_criteria: "Stable segment IDs and offsets; exhaustive mode records coded/no_code/not_examined."
+    verification: "make bench D2; project run --exhaustive."
+    claim_licensed: "Coverage denominator exists; not code validity."
+  - id: Q4
+    capability: "Code applications + codebook"
+    owner: qualitative_coding
+    depends_on: [Q2, Q3]
+    status: implemented
+    success_criteria: "Codes and applications preserve provenance, anchors where available, and codebook version."
+    verification: "Unit/e2e tests and exports."
+    claim_licensed: "Software coding workflow exists; not application correctness."
+  - id: Q5
+    capability: "Claim ledger + corpus scope"
+    owner: qualitative_coding
+    depends_on: [Q2, Q4]
+    status: mostly_met
+    success_criteria: "Assertions are typed claims with scope, support status, anchors, contrary anchors, and review state."
+    verification: "project claims; API/MCP; make bench claim-anchor coverage."
+    claim_licensed: "Claims are inspectable and scoped; not true or human-retained."
+  - id: Q6
+    capability: "Review/adjudication packets"
+    owner: qualitative_coding
+    depends_on: [Q4, Q5]
+    status: partial
+    success_criteria: "Codes, applications, claims, relationships, negative cases, and abductive candidates can be sampled/reviewed through typed packets and decisions."
+    verification: "Adjudication sample/protocol/response preflight commands."
+    claim_licensed: "Review workflow exists; not expert validity until populated."
+  - id: Q7
+    capability: "Evaluation evidence D1-D10"
+    owner: qualitative_coding
+    depends_on: [Q2, Q3, Q4, Q5, Q6]
+    status: phase0_substrate
+    success_criteria: "Protocols are frozen, populated, preflighted, scored, and caveated."
+    verification: "make bench and benchmark artifacts."
+    claim_licensed: "Per-dimension evidence only."
+  - id: Q8
+    capability: "Trusted QC evidence package"
+    owner: qualitative_coding
+    depends_on: [Q5, Q7]
+    status: partial
+    success_criteria: "Export contains scope, claims, anchors, caveats, hashes, review state, and benchmark references."
+    verification: "Export manifest, publish preflight, scorecard package."
+    claim_licensed: "Package can support downstream review; not causal proof."
+  - id: G1
+    capability: "GT-inspired constant comparison on canonical segments"
+    owner: qualitative_coding
+    depends_on: [Q3, Q4]
+    status: implemented
+    success_criteria: "GT path consumes canonical segments and preserves one denominator."
+    verification: "GT tests and segment compatibility tests."
+    claim_licensed: "GT-inspired coding substrate exists."
+  - id: G2
+    capability: "Category diagnostics"
+    owner: qualitative_coding
+    depends_on: [G1]
+    status: partial
+    success_criteria: "Category support and gaps are reported separately from codebook stability."
+    verification: "Saturation diagnostics and make bench."
+    claim_licensed: "Diagnostic guidance exists; not saturation proof."
+  - id: G3
+    capability: "Theoretical sampling protocol/results"
+    owner: qualitative_coding
+    depends_on: [G2]
+    status: protocol_substrate
+    success_criteria: "Protocol, candidate package, selected result, and preflight are run on real/shareable data."
+    verification: "Theoretical-sampling validate/export/preflight commands."
+    claim_licensed: "Sampling workflow evidence, not adequacy by itself."
+  - id: G4
+    capability: "D8 GT-fidelity evidence"
+    owner: qualitative_coding
+    depends_on: [G1, G2, G3, Q7]
+    status: protocol_substrate
+    success_criteria: "Expert rubric outcomes under pre-registered protocol pass stated criteria."
+    verification: "D8 protocol/result/preflight/scorecard package."
+    claim_licensed: "Stronger GT-fidelity claim for evaluated scope."
+  - id: A1
+    capability: "Observed patterns"
+    owner: qualitative_coding
+    depends_on: [Q4, Q5]
+    status: implemented
+    success_criteria: "Pattern outputs are descriptive records with anchors where available."
+    verification: "project patterns; API/Markdown."
+    claim_licensed: "Descriptive pattern accounting only."
+  - id: A2
+    capability: "Provisional abductive candidates"
+    owner: qualitative_coding
+    depends_on: [A1, Q5]
+    status: implemented_opt_in
+    success_criteria: "Candidates retain source pattern IDs, rivals, implications, evidence gaps, confidence caveats."
+    verification: "project run --abductive and candidate read surfaces."
+    claim_licensed: "Hypothesis-generation surface only."
+  - id: A3
+    capability: "Candidate review"
+    owner: qualitative_coding
+    depends_on: [A2, Q6]
+    status: first_slice_implemented
+    success_criteria: "Candidates can be listed, approved to needs_evidence_review, rejected, or modified in bounded fields."
+    verification: "Review API/CLI tests."
+    claim_licensed: "Governed candidate review, not causal validation."
+  - id: A4
+    capability: "QC-to-PT handoff fixture"
+    owner: qualitative_coding
+    depends_on: [A1, A2, A3, Q5]
+    status: accepted_qc_fixture
+    success_criteria: "Strict schema exports QC evidence objects and rejects PT inference fields."
+    verification: "make validate-process-tracing-handoff; consumer review 2026-06-25."
+    claim_licensed: "Acceptable adapter input; not runnable PT analysis."
+  - id: P1
+    capability: "Source packet / research design"
+    owner: process_tracing
+    depends_on: []
+    status: implemented
+    success_criteria: "Research question, focal window, outcome, sources, gaps, and tests are explicit."
+    verification: "PT source-packet validation."
+    claim_licensed: "Runnable PT scope exists."
+  - id: P2
+    capability: "Rival hypotheses + predictions"
+    owner: process_tracing
+    depends_on: [P1]
+    status: implemented
+    success_criteria: "Mutually discriminating hypotheses and predictions are generated/reviewed."
+    verification: "PT pipeline/tests/live runs."
+    claim_licensed: "Hypothesis space exists, not support result."
+  - id: P3
+    capability: "Diagnostic evidence testing"
+    owner: process_tracing
+    depends_on: [P1, P2]
+    status: implemented
+    success_criteria: "Evidence-by-hypothesis likelihood vectors are coherent and validated."
+    verification: "PT pass 3 validation and live run."
+    claim_licensed: "Diagnostic matrix exists."
+  - id: P4
+    capability: "Comparative support + sensitivity"
+    owner: process_tracing
+    depends_on: [P3]
+    status: implemented
+    success_criteria: "Deterministic update, sensitivity, robustness, and caveats are emitted."
+    verification: "PT result/report/audit."
+    claim_licensed: "Comparative within-case support."
+  - id: P5
+    capability: "PT export"
+    owner: process_tracing
+    depends_on: [P4]
+    status: planned
+    success_criteria: "Versioned export exposes source scope, hypotheses, support, absence findings, verdicts, and metadata without raw internals."
+    verification: "Future pt_export_v1.json."
+    claim_licensed: "PT results can be consumed by workbench."
+  - id: W1
+    capability: "Shared contracts"
+    owner: mixed_methods_workbench
+    depends_on: [Q8, A4, P1, P5]
+    status: planning_scaffold
+    success_criteria: "Contracts cover source scope, anchors, evidence, assertions, patterns, hypotheses, and estimands."
+    verification: "shared_contracts.md and future tests."
+    claim_licensed: "Contract readiness only."
+  - id: W2
+    capability: "QC adapter"
+    owner: mixed_methods_workbench
+    depends_on: [Q8, A4, W1]
+    status: planned
+    success_criteria: "QC artifacts map without lossy anchors/caveats and without PT internals in QC."
+    verification: "Fixture-backed adapter tests."
+    claim_licensed: "QC evidence can enter workbench."
+  - id: W3
+    capability: "PT adapter"
+    owner: mixed_methods_workbench
+    depends_on: [P5, W1]
+    status: planned
+    success_criteria: "PT export maps without flattening comparative support into confidence."
+    verification: "Fixture-backed adapter tests."
+    claim_licensed: "PT results can enter workbench."
+  - id: W4
+    capability: "Estimand-preserving synthesis"
+    owner: mixed_methods_workbench
+    depends_on: [W2, W3]
+    status: planned
+    success_criteria: "Synthesis keeps qualitative support, PT comparative support, and causal effects distinct."
+    verification: "Review payload tests and concern checks."
+    claim_licensed: "Mixed-methods synthesis surface exists."
+  - id: W5
+    capability: "Review/report shell"
+    owner: mixed_methods_workbench
+    depends_on: [W4]
+    status: planned
+    success_criteria: "Trace from question to evidence to claim/pattern to hypothesis to report with caveats visible."
+    verification: "UI/API snapshot or demo fixture."
+    claim_licensed: "Reviewer workflow exists."
+  - id: W6
+    capability: "Cross-case/statistical eligibility"
+    owner: mixed_methods_workbench
+    depends_on: [W4]
+    status: dependency_subplan
+    success_criteria: "Eligibility criteria decide when QCA/CausalQueries/statistical adapters are appropriate."
+    verification: "Future protocol and adapter tests."
+    claim_licensed: "Cross-case bridge readiness, not effect evidence."

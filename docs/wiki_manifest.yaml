@@ -17,6 +17,14 @@ publish:
     type: Roadmap
     title: Qualitative Coding Long-Term Execution Plan
     tags: [qualitative-coding, roadmap, design-plan]
+  - path: docs/CAPABILITY_DEPENDENCY_GRAPH.md
+    type: Roadmap
+    title: Qualitative Coding Capability Dependency Graph
+    tags: [qualitative-coding, roadmap, dependencies, mixed-methods]
+  - path: docs/capability_dependency_graph.yaml
+    type: Data
+    title: Qualitative Coding Capability Dependency Graph YAML
+    tags: [qualitative-coding, roadmap, dependencies, machine-readable]
   - path: docs/ARTIFACTS.md
     type: ArtifactRegister
     title: Qualitative Coding Artifact Register

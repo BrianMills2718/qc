@@ -40,9 +40,12 @@ blocked by `docs/PROJECT_THEORY_AND_GOALS.md` claim discipline.
    and permitted claims.
 3. `docs/EVALUATION_HARNESS.md` - benchmark/evaluation proof plan.
 4. `docs/LONG_TERM_EXECUTION_PLAN.md` - current long-running execution spine.
-5. `docs/plans/ACTIVE_SPRINT.md` - active checkpoint and latest verified
+5. `docs/CAPABILITY_DEPENDENCY_GRAPH.md` - capability dependencies and
+   success criteria across QC, grounded-research, process tracing, and the
+   future mixed-methods workbench.
+6. `docs/plans/ACTIVE_SPRINT.md` - active checkpoint and latest verified
    state.
-6. `docs/CONCERNS.md` - live concern register feeding slice selection.
+7. `docs/CONCERNS.md` - live concern register feeding slice selection.
 
 If these conflict on status or claim strength, `docs/PROJECT_THEORY_AND_GOALS.md`
 wins.
@@ -213,6 +216,11 @@ Stop only for:
 
 The latest completed implementation slice is Plan #233, process-tracing
 handoff package. Process-tracing consumer review of the deterministic fixture
-completed on 2026-06-25 with no requested QC schema changes. The next slice is
-either the future PT/workbench adapter overlay or, if staying inside QC,
-reviewer-facing abductive UI after UI planning.
+completed on 2026-06-25 with no requested QC schema changes.
+
+`docs/CAPABILITY_DEPENDENCY_GRAPH.md` now supersedes abductive-UI-first
+sequencing for choosing the next slice. The next QC-local slice should harden
+the qualitative/grounded-research foundation before making abductive reasoning
+more product-central; the recommended lane is a sanitized corpus plus
+adjudication seed, followed by populated D3/D7 evidence and only then more
+abductive UI/workbench integration.
