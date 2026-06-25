@@ -6,7 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| — | — | — | — | — |
+| #228 | Abductive candidate explanation substrate | High | Planned | `ABDUCTIVE_CANDIDATE_EXPLANATION_SUBSTRATE.md` |
 
 ## Completed Plans
 

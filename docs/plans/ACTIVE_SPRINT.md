@@ -28,8 +28,12 @@ highest-value documented lane.
    without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** None. Select the next highest-value documented lane from
-the roadmap and create its plan before implementation.
+**Active checkpoint:** Plan #228
+`ABDUCTIVE_CANDIDATE_EXPLANATION_SUBSTRATE.md` will add the first opt-in
+abductive candidate-explanation layer over observed patterns. The target is a
+typed provisional hypothesis substrate with rivals, observable implications,
+and evidence gaps, not causal proof, process-tracing results,
+methodological-validity evidence, or SOTA evidence.
 
 **Completed checkpoint:** Plan #227
 `completed/OBSERVED_PATTERN_READ_SURFACES.md` added bounded read surfaces for
