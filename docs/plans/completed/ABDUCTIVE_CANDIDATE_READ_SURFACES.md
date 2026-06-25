@@ -1,6 +1,25 @@
 # Plan #229: Abductive Candidate Read Surfaces
 
-**Status:** Planned
+## Outcome
+
+Completed 2026-06-25. Added bounded read surfaces for provisional abductive
+candidate explanations through `qc_cli.py project abductive`,
+`/projects/{project_id}/abductive-explanations`, project summary counts, and
+Markdown report output. Rows expose source pattern IDs, mechanism summaries,
+rival explanations, observable implications, evidence gaps, provisional
+confidence, and candidate status. Documentation now states these are inspection
+surfaces for provisional hypotheses only, not causal proof, process-tracing
+results, methodological-validity evidence, or SOTA evidence.
+
+Verification:
+
+- `python -m pytest tests/test_project_commands.py tests/test_review_api.py tests/test_claim_ledger_exports.py -q` — 149 passed.
+- `python -m ruff check qc_cli.py qc_clean/core/cli/commands/project.py qc_clean/plugins/api/api_server.py qc_clean/core/export/data_exporter.py qc_clean/core/abductive.py tests/test_project_commands.py tests/test_review_api.py tests/test_claim_ledger_exports.py` — passed.
+- `make docs-check` — passed.
+- `git diff --check` — passed.
+- `make check` — 1340 passed, 1 skipped, 8 deselected; Ruff/docs passed; type check not configured.
+
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** #228
@@ -117,24 +136,24 @@ workbench/process-tracing handoff plan should formalize the boundary contract.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] `qc_cli.py project abductive <project_id>` lists provisional candidate
+- [x] `qc_cli.py project abductive <project_id>` lists provisional candidate
   explanations with bounded pagination.
-- [ ] `/projects/{project_id}/abductive-explanations` returns bounded candidate
+- [x] `/projects/{project_id}/abductive-explanations` returns bounded candidate
   rows and pagination metadata.
-- [ ] Markdown export includes candidate explanations when present and omits the
+- [x] Markdown export includes candidate explanations when present and omits the
   section when absent.
-- [ ] Rows expose source pattern IDs, mechanism summary, rivals, observable
+- [x] Rows expose source pattern IDs, mechanism summary, rivals, observable
   implications, evidence gaps, confidence, and status.
-- [ ] Every surface preserves caveats that candidates are provisional
+- [x] Every surface preserves caveats that candidates are provisional
   hypotheses, not causal proof or process-tracing results.
 
 > Process criteria:
-- [ ] Required focused tests pass.
-- [ ] Ruff passes for touched files.
-- [ ] `make docs-check` passes.
-- [ ] `git diff --check` passes.
-- [ ] `make check` passes.
-- [ ] Verified work is committed and pushed.
+- [x] Required focused tests pass.
+- [x] Ruff passes for touched files.
+- [x] `make docs-check` passes.
+- [x] `git diff --check` passes.
+- [x] `make check` passes.
+- [x] Verified work is committed and pushed.
 
 ---
 

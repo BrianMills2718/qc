@@ -28,11 +28,17 @@ highest-value documented lane.
    without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Plan #229
-`ABDUCTIVE_CANDIDATE_READ_SURFACES.md` will add bounded CLI/API/Markdown read
-surfaces for provisional abductive candidate explanations. This is inspection
-only; it does not add review semantics, claim promotion, process-tracing
-handoff, causal proof, methodological-validity evidence, or SOTA evidence.
+**Active checkpoint:** None. Select the next highest-value documented lane from
+the roadmap and create its plan before implementation.
+
+**Completed checkpoint:** Plan #229
+`completed/ABDUCTIVE_CANDIDATE_READ_SURFACES.md` added bounded read surfaces for
+provisional abductive candidate explanations through `project abductive`,
+`/projects/{project_id}/abductive-explanations`, project summary counts, and
+Markdown report output. Candidate rows expose source pattern IDs, mechanisms,
+rivals, observable implications, evidence gaps, confidence, and candidate
+status. This is inspection only, not causal proof, process-tracing results,
+methodological-validity evidence, or SOTA evidence.
 
 **Completed checkpoint:** Plan #228
 `completed/ABDUCTIVE_CANDIDATE_EXPLANATION_SUBSTRATE.md` added an opt-in
