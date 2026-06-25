@@ -91,52 +91,33 @@ triage, commit, and push.
 
 ## Next Slices
 
-### Slice #232: Abductive Candidate Review Workflow
+### Slice #234: Sanitized Corpus And Adjudication Seed
 
-Advances: turns provisional abductive outputs into governed review targets.
+Advances: turns the existing software/provenance surfaces into a small
+shareable evidence instrument without claiming expert evidence before labels
+exist.
 
-Vertical scope: `ReviewManager`, CLI/API review-list and decision surfaces,
-tests, docs, and deterministic reviewer-demo packet updates. Browser UI is
-deferred unless the review semantics force an unavoidable UI change.
+Vertical scope: corpus policy, scope record, isolated project store, pipeline
+output packet, audit manifest, unlabeled adjudication sample, pre-registered
+adjudication protocol, and protocol/sample preflight. If human labels are
+supplied, include response validation, response preflight, D3/D7 import, strict
+Phase 0 package writing, and package replay.
 
-De-risks: exporting or presenting unreviewed hypotheses as if they had analyst
-authority.
+De-risks: building more abductive UI or workbench integration on top of
+synthetic-only software demos.
 
-Acceptance: a candidate can be listed, approved, rejected, and modified through
-agent-drivable surfaces; review decisions preserve candidate IDs, status,
-revision history, and caveats; existing code/claim/relationship review remains
-unchanged.
+Acceptance: a shareable corpus seed and manual-ready adjudication packet exist
+with explicit caveats. Any imported D3/D7 labels come only from explicit human
+review or from an explicitly synthetic smoke run. No methodological-validity,
+SOTA, full-GT, or causal/process-tracing claims are made.
 
-Audit: try to approve all candidates accidentally, mutate causal status beyond
-the allowed enum, review a missing candidate ID, and confuse candidate review
-with causal/process-tracing proof. Findings go to `docs/CONCERNS.md` or are
-fixed before completion.
+Audit: check corpus license/provenance, scope overreach, hidden default project
+store mutation, stale sample/protocol hashes, accidental agent-generated labels
+presented as expert review, and Phase 0 package replay drift.
 
-Cleanup: keep candidate review helpers near existing review code; remove any
-duplicate row serializers; update demo and docs only where they reflect tested
-behavior.
-
-### Slice #233: Process-Tracing Handoff Package
-
-Advances: gives `~/projects/process_tracing` and a future
-`mixed_methods_workbench` a stable QC export seam.
-
-Vertical scope: versioned package schema, validator, CLI export command,
-focused tests, artifact docs, and a small fixture package.
-
-De-risks: cross-repo drift and boundary confusion between qualitative evidence
-objects and process-tracing causal inference.
-
-Acceptance: package includes project/corpus/scope metadata, observed patterns,
-abductive candidates, referenced claims, anchors, caveats, and provenance
-hashes. It excludes process-tracing likelihood vectors and Bayesian updates.
-
-Audit: validate missing anchors, stale candidate references, absent scope,
-overclaiming language, and package-version mismatch. Findings are fixed or
-registered.
-
-Cleanup: put reusable boundary models in the appropriate contracts/adapters
-area, avoid one-off JSON assembly, and document the consumer contract.
+Cleanup: keep artifacts in a repo-local benchmark/evidence directory with
+hashes and README caveats; update only the active docs needed to describe the
+new evidence status.
 
 ## Dependency Subplans
 
@@ -218,9 +199,8 @@ The latest completed implementation slice is Plan #233, process-tracing
 handoff package. Process-tracing consumer review of the deterministic fixture
 completed on 2026-06-25 with no requested QC schema changes.
 
-`docs/CAPABILITY_DEPENDENCY_GRAPH.md` now supersedes abductive-UI-first
-sequencing for choosing the next slice. The next QC-local slice should harden
-the qualitative/grounded-research foundation before making abductive reasoning
-more product-central; the recommended lane is a sanitized corpus plus
-adjudication seed, followed by populated D3/D7 evidence and only then more
-abductive UI/workbench integration.
+Plan #234 is now the active QC-local slice. It follows
+`docs/CAPABILITY_DEPENDENCY_GRAPH.md` by hardening the qualitative/grounded-
+research foundation before making abductive reasoning more product-central.
+The recommended order remains: sanitized corpus plus adjudication seed,
+populated D3/D7 evidence, then more abductive UI/workbench integration.

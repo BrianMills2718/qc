@@ -22,15 +22,25 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Use `docs/CAPABILITY_DEPENDENCY_GRAPH.md` to choose the next execution-spine
-   slice. Default recommendation: sanitized corpus plus adjudication seed before
-   making abductive UI/workbench reasoning more product-central.
+1. Execute Plan #234, sanitized corpus plus adjudication seed, before making
+   abductive UI/workbench reasoning more product-central.
 2. Continue through the execution spine without
    pausing after the verified commit unless a canonical stop condition is
    reached.
 
-**Active checkpoint:** None. Next action is selecting the next documented
-execution-spine slice using the capability dependency graph.
+**Active checkpoint:** Plan #234
+`SANITIZED_CORPUS_ADJUDICATION_SEED.md` is the active slice. It should create a
+small shareable corpus instrument, scope record, output packet, unlabeled
+adjudication sample, and validated/preflighted protocol. If real human labels
+are supplied, it can import D3/D7 packages and run a strict Phase 0 package;
+otherwise it must stop at a manual-ready packet and say no expert evidence
+exists yet.
+
+**Completed checkpoint:** Capability dependency graph
+On 2026-06-25, `docs/CAPABILITY_DEPENDENCY_GRAPH.md` and
+`docs/capability_dependency_graph.yaml` made the next-slice dependency explicit:
+QC should harden corpus/adjudication/evaluation foundations before treating
+abductive UI or mixed-methods workbench reasoning as product-central.
 
 **Completed checkpoint:** Process-tracing consumer review
 On 2026-06-25, process-tracing consumer review accepted
