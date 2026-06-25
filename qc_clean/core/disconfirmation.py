@@ -66,6 +66,7 @@ _RETRIEVAL_MODES = {
     _LEXICAL_RETRIEVAL_MODE,
     _EMBEDDING_HYBRID_RETRIEVAL_MODE,
 }
+_MAX_PROMPT_CANDIDATE_CHARS = 600
 
 
 class EmbeddingProvider(Protocol):
@@ -320,7 +321,12 @@ def format_disconfirmation_candidates(candidates: Iterable[DisconfirmationCandid
             f"expanded_terms={','.join(candidate.expanded_terms)} "
             f"contrary_cues={','.join(candidate.contrary_cues)}"
         )
-        lines.append(format_untrusted_data_block(f"Disconfirmation candidate {candidate.id}", candidate.quote_text))
+        lines.append(
+            format_untrusted_data_block(
+                f"Disconfirmation candidate {candidate.id}",
+                _prompt_safe_candidate_quote(candidate.quote_text),
+            )
+        )
     return "\n".join(lines)
 
 
@@ -333,6 +339,17 @@ def anchor_for_candidate(candidate: DisconfirmationCandidate) -> ClaimAnchor:
         quote_text=candidate.quote_text,
         quote_hash=candidate.quote_hash,
         segment_id=candidate.segment_id,
+    )
+
+
+def _prompt_safe_candidate_quote(quote_text: str) -> str:
+    """Bound prompt-only candidate text while keeping stored anchors exact."""
+    if len(quote_text) <= _MAX_PROMPT_CANDIDATE_CHARS:
+        return quote_text
+    omitted = len(quote_text) - _MAX_PROMPT_CANDIDATE_CHARS
+    return (
+        quote_text[:_MAX_PROMPT_CANDIDATE_CHARS]
+        + f"... [truncated {omitted} chars for prompt budgeting]"
     )
 
 

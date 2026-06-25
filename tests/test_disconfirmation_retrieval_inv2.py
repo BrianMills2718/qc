@@ -7,6 +7,7 @@ import pytest
 
 from qc_clean.core.claims import claims_for_negative_cases
 from qc_clean.core.disconfirmation import (
+    DisconfirmationCandidate,
     anchor_for_candidate,
     format_disconfirmation_candidates,
     retrieve_disconfirmation_candidates,
@@ -222,6 +223,32 @@ def test_candidate_format_includes_ids_and_untrusted_data_boundaries():
     assert f"span={candidate.start_char}:{candidate.end_char}" in formatted
     assert "BEGIN UNTRUSTED DATA BLOCK" in formatted
     assert "DATA> AI failed for this team." in formatted
+
+
+def test_candidate_format_truncates_long_prompt_quote_text_only():
+    candidate = DisconfirmationCandidate(
+        id="dc-0-1",
+        target_claim_id="claim-ai",
+        claim_text="AI improves workflow across the corpus.",
+        doc_id="doc-1",
+        segment_id="seg-1",
+        start_char=0,
+        end_char=1200,
+        quote_text="A" * 1200,
+        quote_hash="h" * 64,
+        matched_terms=["ai"],
+        expanded_terms=[],
+        contrary_cues=["failed"],
+        retrieval_mode="lexical_bm25",
+        semantic_score=None,
+        score=4.2,
+    )
+
+    formatted = format_disconfirmation_candidates([candidate])
+
+    assert "truncated 600 chars for prompt budgeting" in formatted
+    assert "A" * 700 not in formatted
+    assert candidate.quote_text == "A" * 1200
 
 
 def test_anchor_for_candidate_preserves_exact_source_span():
