@@ -6,7 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| — | — | — | — | — |
+| #230 | Abductive reviewer demo packet | High | Planned | `ABDUCTIVE_REVIEWER_DEMO_PACKET.md` |
 
 ## Completed Plans
 
