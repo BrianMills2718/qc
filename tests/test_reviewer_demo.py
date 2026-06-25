@@ -20,6 +20,8 @@ def test_build_reviewer_demo_writes_packet(tmp_path):
         "scorecard",
         "benchmark_manifest",
         "claims_snapshot",
+        "patterns_snapshot",
+        "abductive_snapshot",
         "review_claims_snapshot",
         "review_codes_snapshot",
         "graph_codes_snapshot",
@@ -33,9 +35,14 @@ def test_build_reviewer_demo_writes_packet(tmp_path):
     markdown = Path(manifest["markdown_export"]).read_text(encoding="utf-8")
 
     assert "QC_PROJECTS_DIR" in readme
+    assert "project patterns" in readme
+    assert "project abductive" in readme
     assert "not methodological validity evidence" in self_review
     assert "not SOTA evidence" in self_review
     assert "Workflow Visibility" in markdown
+    assert "## Observed Patterns" in markdown
+    assert "## Abductive Candidate Explanations" in markdown
+    assert "not causal proof" in markdown
 
 
 def test_reviewer_demo_project_loads_from_env_store(tmp_path, monkeypatch):
@@ -48,4 +55,6 @@ def test_reviewer_demo_project_loads_from_env_store(tmp_path, monkeypatch):
     assert state.id == "reviewer-demo"
     assert state.corpus.num_documents == 2
     assert len(state.claims) >= 3
+    assert len(state.observed_patterns) >= 3
+    assert len(state.abductive_explanations) >= 2
     assert state.corpus_scope is not None

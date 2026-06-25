@@ -31,9 +31,11 @@ from qc_clean.core.export.data_exporter import ProjectExporter
 from qc_clean.core.persistence.project_store import ProjectStore
 from qc_clean.plugins.api.api_server import QCAPIServer
 from qc_clean.schemas.domain import (
+    AbductiveCandidateExplanation,
     AnalyticClaim,
     AnalysisMemo,
     AnalysisPhaseResult,
+    CausalInterpretationStatus,
     ClaimAdjudicationStatus,
     ClaimAnchor,
     ClaimKind,
@@ -49,6 +51,8 @@ from qc_clean.schemas.domain import (
     DomainEntityRelationship,
     Entity,
     Methodology,
+    ObservedPattern,
+    ObservedPatternKind,
     PipelineStatus,
     ProjectConfig,
     ProjectState,
@@ -265,6 +269,143 @@ def _demo_state() -> ProjectState:
 
     segments = _segments_for_documents(documents)
     app_by_id = {app.id: app for app in applications}
+    observed_patterns = [
+        ObservedPattern(
+            id="pattern:reviewer_demo:consensus_code:C_VISIBILITY",
+            source_stage="cross_interview",
+            pattern_kind=ObservedPatternKind.CONSENSUS_CODE,
+            summary=(
+                "Workflow visibility appears in both synthetic transcripts as a "
+                "coordination aid."
+            ),
+            code_ids=["C_VISIBILITY"],
+            doc_ids=["doc-avery", "doc-jordan"],
+            application_ids=["A_VISIBILITY_AVERY", "A_VISIBILITY_JORDAN"],
+            support_anchors=[
+                _anchor_from_application(app_by_id["A_VISIBILITY_AVERY"]),
+                _anchor_from_application(app_by_id["A_VISIBILITY_JORDAN"]),
+            ],
+            strength=1.0,
+            count=2,
+            total=2,
+            metadata={"denominator": "documents_with_code_applications"},
+            causal_interpretation_status=(
+                CausalInterpretationStatus.CANDIDATE_EXPLANATION_GENERATED
+            ),
+            created_by=Provenance.SYSTEM,
+        ),
+        ObservedPattern(
+            id="pattern:reviewer_demo:consensus_code:C_FALLBACK",
+            source_stage="cross_interview",
+            pattern_kind=ObservedPatternKind.CONSENSUS_CODE,
+            summary=(
+                "Fallback workaround talk appears in both synthetic transcripts."
+            ),
+            code_ids=["C_FALLBACK"],
+            doc_ids=["doc-avery", "doc-jordan"],
+            application_ids=["A_FALLBACK_AVERY", "A_FALLBACK_JORDAN"],
+            support_anchors=[
+                _anchor_from_application(app_by_id["A_FALLBACK_AVERY"]),
+                _anchor_from_application(app_by_id["A_FALLBACK_JORDAN"]),
+            ],
+            strength=1.0,
+            count=2,
+            total=2,
+            metadata={"denominator": "documents_with_code_applications"},
+            causal_interpretation_status=(
+                CausalInterpretationStatus.CANDIDATE_EXPLANATION_GENERATED
+            ),
+            created_by=Provenance.SYSTEM,
+        ),
+        ObservedPattern(
+            id="pattern:reviewer_demo:code_co_occurrence:C_VISIBILITY:C_MONITORING",
+            source_stage="cross_interview",
+            pattern_kind=ObservedPatternKind.CODE_CO_OCCURRENCE,
+            summary=(
+                "Visibility and monitoring concern co-occur in the fixture, "
+                "creating a tension for interpretation."
+            ),
+            code_ids=["C_VISIBILITY", "C_MONITORING"],
+            doc_ids=["doc-avery", "doc-jordan"],
+            application_ids=[
+                "A_VISIBILITY_AVERY",
+                "A_VISIBILITY_JORDAN",
+                "A_MONITORING_AVERY",
+                "A_MONITORING_JORDAN",
+            ],
+            support_anchors=[
+                _anchor_from_application(app_by_id["A_VISIBILITY_AVERY"]),
+                _anchor_from_application(app_by_id["A_MONITORING_AVERY"]),
+                _anchor_from_application(app_by_id["A_MONITORING_JORDAN"]),
+            ],
+            count=2,
+            total=2,
+            metadata={"denominator": "documents_with_both_codes"},
+            causal_interpretation_status=(
+                CausalInterpretationStatus.CANDIDATE_EXPLANATION_GENERATED
+            ),
+            created_by=Provenance.SYSTEM,
+        ),
+    ]
+    abductive_explanations = [
+        AbductiveCandidateExplanation(
+            id="abductive:reviewer_demo:coordination_control_tension",
+            source_stage="abductive_synthesis",
+            source_pattern_ids=[
+                "pattern:reviewer_demo:consensus_code:C_VISIBILITY",
+                "pattern:reviewer_demo:code_co_occurrence:C_VISIBILITY:C_MONITORING",
+            ],
+            explanation_text=(
+                "The board may help coordination when visibility is framed as "
+                "unblocking work, but create resistance when the same visibility "
+                "is interpreted as monitoring."
+            ),
+            mechanism_summary=(
+                "Shared visibility changes adoption through a framing mechanism: "
+                "coordination support versus performance surveillance."
+            ),
+            rival_explanations=[
+                "The monitoring concern may be a generic workplace concern rather than board-specific.",
+                "Differences between roles may explain the tension without a single mechanism.",
+            ],
+            observable_implications=[
+                "Future interviews should show stronger acceptance where supervisors use the board to unblock work.",
+                "Cases with scoring language should show more monitoring concern.",
+            ],
+            evidence_gaps=[
+                "No direct process trace yet shows how supervisors used board data.",
+                "The fixture has only two synthetic transcripts and no follow-up observations.",
+            ],
+            confidence=0.42,
+            created_by=Provenance.SYSTEM,
+        ),
+        AbductiveCandidateExplanation(
+            id="abductive:reviewer_demo:fallback_resilience",
+            source_stage="abductive_synthesis",
+            source_pattern_ids=[
+                "pattern:reviewer_demo:consensus_code:C_FALLBACK",
+            ],
+            explanation_text=(
+                "Fallback practices may be part of adoption rather than a sign "
+                "that the digital board failed."
+            ),
+            mechanism_summary=(
+                "Operational resilience depends on switching between digital "
+                "coordination and paper backup during outages."
+            ),
+            rival_explanations=[
+                "Fallback talk could indicate low trust in the digital tool.",
+            ],
+            observable_implications=[
+                "Teams with explicit fallback routines should recover faster from outages.",
+            ],
+            evidence_gaps=[
+                "No outage timeline or operational metric is included in the fixture.",
+            ],
+            confidence=0.35,
+            created_by=Provenance.SYSTEM,
+        ),
+    ]
 
     claims = [
         AnalyticClaim(
@@ -496,7 +637,22 @@ def _demo_state() -> ProjectState:
                 doc_refs=["doc-avery"],
                 created_by=Provenance.SYSTEM,
             ),
+            AnalysisMemo(
+                id="M_ABDUCTIVE_CANDIDATES",
+                memo_type="methodological",
+                title="Synthetic Abductive Candidate Memo",
+                content=(
+                    "The abductive candidates in this packet are hand-authored "
+                    "software fixtures. They demonstrate candidate-explanation "
+                    "storage and read surfaces only, not causal proof."
+                ),
+                code_refs=["C_VISIBILITY", "C_MONITORING", "C_FALLBACK"],
+                doc_refs=["doc-avery", "doc-jordan"],
+                created_by=Provenance.SYSTEM,
+            ),
         ],
+        observed_patterns=observed_patterns,
+        abductive_explanations=abductive_explanations,
         claims=claims,
         phase_results=[
             _phase("Ingest"),
@@ -619,6 +775,10 @@ def _write_api_snapshots(projects_dir: Path, snapshots_dir: Path) -> dict[str, s
             "scope_snapshot": f"/projects/{PROJECT_ID}/scope",
             "claims_snapshot": f"/projects/{PROJECT_ID}/claims?limit=2&offset=0",
             "claims_page_2_snapshot": f"/projects/{PROJECT_ID}/claims?limit=2&offset=2",
+            "patterns_snapshot": f"/projects/{PROJECT_ID}/patterns?limit=5&offset=0",
+            "abductive_snapshot": (
+                f"/projects/{PROJECT_ID}/abductive-explanations?limit=5&offset=0"
+            ),
             "review_summary_snapshot": f"/projects/{PROJECT_ID}/review",
             "review_codes_snapshot": f"/projects/{PROJECT_ID}/review/codes",
             "review_claims_snapshot": f"/projects/{PROJECT_ID}/review/claims?limit=2&offset=0",
@@ -696,6 +856,8 @@ def _write_readme(readme: Path, output_dir: Path, projects_dir: Path) -> None:
                 "```bash",
                 f"QC_PROJECTS_DIR={projects_dir} python qc_cli.py project show {PROJECT_ID}",
                 f"QC_PROJECTS_DIR={projects_dir} python qc_cli.py project claims {PROJECT_ID} --show-scope --show-anchors --limit 2",
+                f"QC_PROJECTS_DIR={projects_dir} python qc_cli.py project patterns {PROJECT_ID} --show-anchors --limit 5",
+                f"QC_PROJECTS_DIR={projects_dir} python qc_cli.py project abductive {PROJECT_ID} --limit 5",
                 f"QC_PROJECTS_DIR={projects_dir} python qc_cli.py project export {PROJECT_ID} --format markdown --output-file {output_dir / 'exports' / 'rerun-report.md'}",
                 "```",
                 "",
@@ -708,6 +870,8 @@ def _write_readme(readme: Path, output_dir: Path, projects_dir: Path) -> None:
                 f"- Review UI: http://localhost:8002/review/{PROJECT_ID}",
                 f"- Graph UI: http://localhost:8002/graph/{PROJECT_ID}",
                 f"- Claim API: http://localhost:8002/projects/{PROJECT_ID}/claims?limit=2&offset=0",
+                f"- Observed Pattern API: http://localhost:8002/projects/{PROJECT_ID}/patterns?limit=5&offset=0",
+                f"- Abductive Candidate API: http://localhost:8002/projects/{PROJECT_ID}/abductive-explanations?limit=5&offset=0",
                 "",
                 "## Main Files",
                 "",
