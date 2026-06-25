@@ -1,6 +1,31 @@
 # Plan #228: Abductive Candidate Explanation Substrate
 
-**Status:** Planned
+## Outcome
+
+Completed 2026-06-25. Added an opt-in abductive candidate explanation
+substrate. `ProjectState.abductive_explanations` now persists typed
+`AbductiveCandidateExplanation` records with source pattern IDs, mechanism
+summaries, rival explanations, observable implications, evidence gaps,
+provisional confidence, and candidate status. `project run --abductive` inserts
+`AbductiveSynthesisStage` after cross-interview analysis and before negative
+case analysis in both default and GT pipelines; default pipeline order remains
+unchanged. The stage validates candidate source pattern IDs, fails loudly on
+unknown references, marks referenced observed patterns
+`candidate_explanation_generated`, and writes a caveated methodological memo.
+These are provisional hypotheses for review and future process-tracing handoff,
+not causal proof, process-tracing results, methodological-validity evidence, or
+SOTA evidence.
+
+Verification:
+
+- `python -m pytest tests/test_abductive_synthesis.py tests/test_pipeline_stages.py -q` — 29 passed.
+- `python -m pytest tests/test_project_commands.py::TestProjectRun::test_run_project_records_wall_clock_timing tests/test_project_commands.py::TestProjectRun::test_run_project_records_wall_clock_timing_on_failure tests/test_abductive_synthesis.py -q` — 7 passed.
+- `python -m ruff check qc_clean/schemas/domain.py qc_clean/schemas/analysis_schemas.py qc_clean/core/pipeline/stages/abductive_synthesis.py qc_clean/core/pipeline/pipeline_factory.py qc_clean/core/cli/commands/project.py qc_cli.py tests/test_abductive_synthesis.py` — passed.
+- `make docs-check` — passed.
+- `git diff --check` — passed.
+- `make check` — 1336 passed, 1 skipped, 8 deselected; Ruff/docs passed; type check not configured.
+
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** #226, #227
@@ -254,25 +279,25 @@ after candidate rows exist and their shape has survived review.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] `ProjectState` can persist typed abductive candidate explanations.
-- [ ] Candidate explanations reference existing observed pattern IDs.
-- [ ] Candidate explanations include rival explanations, observable
+- [x] `ProjectState` can persist typed abductive candidate explanations.
+- [x] Candidate explanations reference existing observed pattern IDs.
+- [x] Candidate explanations include rival explanations, observable
   implications, and evidence gaps.
-- [ ] Referenced observed patterns are marked
+- [x] Referenced observed patterns are marked
   `candidate_explanation_generated`.
-- [ ] Default pipeline stage order is unchanged.
-- [ ] Opt-in pipeline stage order inserts abductive synthesis before negative
+- [x] Default pipeline stage order is unchanged.
+- [x] Opt-in pipeline stage order inserts abductive synthesis before negative
   case analysis.
-- [ ] Documentation states candidates are provisional hypotheses, not causal
+- [x] Documentation states candidates are provisional hypotheses, not causal
   proof, process-tracing results, methodological-validity evidence, or SOTA.
 
 > Process criteria:
-- [ ] Required focused tests pass.
-- [ ] Ruff passes for touched files.
-- [ ] `make docs-check` passes.
-- [ ] `git diff --check` passes.
-- [ ] `make check` passes.
-- [ ] Verified work is committed and pushed.
+- [x] Required focused tests pass.
+- [x] Ruff passes for touched files.
+- [x] `make docs-check` passes.
+- [x] `git diff --check` passes.
+- [x] `make check` passes.
+- [x] Verified work is committed and pushed.
 
 ---
 

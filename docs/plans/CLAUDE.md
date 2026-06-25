@@ -6,12 +6,13 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| #228 | Abductive candidate explanation substrate | High | Planned | `ABDUCTIVE_CANDIDATE_EXPLANATION_SUBSTRATE.md` |
+| — | — | — | — | — |
 
 ## Completed Plans
 
 | Name | Outcome | Record |
 |------|---------|--------|
+| Abductive candidate explanation substrate | `project run --abductive` now inserts an opt-in abductive synthesis stage after cross-interview analysis and before negative-case analysis, persisting typed provisional `AbductiveCandidateExplanation` records with source pattern IDs, mechanism summaries, rivals, observable implications, evidence gaps, and candidate status while keeping default pipeline order unchanged; these are hypotheses for review and future process-tracing handoff, not causal proof or methodological-validity/SOTA evidence | `completed/ABDUCTIVE_CANDIDATE_EXPLANATION_SUBSTRATE.md` |
 | Observed pattern read surfaces | `project patterns`, `/projects/{project_id}/patterns`, project summary counts, and Markdown report output now expose bounded first-class observed-pattern rows with kind/stage/scope/count metadata and descriptive-only causal interpretation status; this is read-surface work only, not causal proof, abductive synthesis, methodological-validity evidence, or SOTA evidence | `completed/OBSERVED_PATTERN_READ_SURFACES.md` |
 | Observed pattern substrate | Cross-interview consensus, divergent-code, and code co-occurrence outputs now become first-class descriptive `ObservedPattern` records with code/doc/application scope, anchors where available, and default `causal_interpretation_status="descriptive_only"`; this is descriptive pattern accounting only, not causal proof or abductive synthesis | `completed/OBSERVED_PATTERN_SUBSTRATE.md` |
 | GT canonical segment universe | GT constant comparison now traverses canonical char-anchored `Segment` records, populates `ProjectState.segments` when missing, preserves existing segment universes when present, and carries segment IDs/offsets into prompt data without claiming GT saturation, methodological validity, abductive synthesis, or SOTA evidence | `completed/GT_CANONICAL_SEGMENT_UNIVERSE.md` |

@@ -28,12 +28,19 @@ highest-value documented lane.
    without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Plan #228
-`ABDUCTIVE_CANDIDATE_EXPLANATION_SUBSTRATE.md` will add the first opt-in
-abductive candidate-explanation layer over observed patterns. The target is a
-typed provisional hypothesis substrate with rivals, observable implications,
-and evidence gaps, not causal proof, process-tracing results,
-methodological-validity evidence, or SOTA evidence.
+**Active checkpoint:** None. Select the next highest-value documented lane from
+the roadmap and create its plan before implementation.
+
+**Completed checkpoint:** Plan #228
+`completed/ABDUCTIVE_CANDIDATE_EXPLANATION_SUBSTRATE.md` added an opt-in
+abductive candidate-explanation layer over observed patterns. `project run
+--abductive` inserts a provisional `AbductiveSynthesisStage` after
+cross-interview analysis and before negative-case analysis, while default
+pipeline order remains unchanged. Candidate rows carry source pattern IDs,
+mechanism summaries, rivals, observable implications, evidence gaps, and
+candidate status. These are hypotheses for review and future process-tracing
+handoff, not causal proof, process-tracing results, methodological-validity
+evidence, or SOTA evidence.
 
 **Completed checkpoint:** Plan #227
 `completed/OBSERVED_PATTERN_READ_SURFACES.md` added bounded read surfaces for
