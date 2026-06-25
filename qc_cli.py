@@ -1285,6 +1285,16 @@ Examples:
         help='Show compact scope details for each displayed claim',
     )
 
+    proj_patterns = project_subparsers.add_parser('patterns', help='Show descriptive observed patterns')
+    proj_patterns.add_argument('project_id', help='Project ID')
+    proj_patterns.add_argument('--limit', type=int, default=20, help='Maximum patterns to show (default: 20)')
+    proj_patterns.add_argument('--offset', type=int, default=0, help='Number of patterns to skip before showing rows')
+    proj_patterns.add_argument(
+        '--show-anchors',
+        action='store_true',
+        help='Show bounded supporting anchor details for each displayed pattern',
+    )
+
     proj_scope = project_subparsers.add_parser('scope', help='Show or update project corpus scope')
     proj_scope.add_argument('project_id', help='Project ID')
     proj_scope.add_argument('--phenomenon', help='Phenomenon or topic the analysis is scoped to')

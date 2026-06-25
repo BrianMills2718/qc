@@ -19,6 +19,7 @@ from typing import Any, Dict, List, Optional
 from xml.etree.ElementTree import Element, SubElement, ElementTree
 
 from qc_clean.core.claims import format_claim_scope_summary, summarize_claim_ledger
+from qc_clean.core.patterns import summarize_observed_patterns
 from qc_clean.schemas.domain import ProjectState
 
 logger = logging.getLogger(__name__)
@@ -605,6 +606,56 @@ class ProjectExporter:
             if len(state.claims) > 50:
                 _a("")
                 _a(f"*... and {len(state.claims) - 50} more claims*")
+            _a("")
+
+        # Descriptive observed patterns
+        if state.observed_patterns:
+            summary = summarize_observed_patterns(state)
+            _a("## Observed Patterns")
+            _a("")
+            _a(
+                "*Descriptive observed patterns only; not causal proof, "
+                "abductive synthesis, methodological-validity evidence, or SOTA evidence.*"
+            )
+            _a("")
+            _a(f"**Total patterns**: {summary['total_patterns']}")
+            _a("")
+            _a("### Counts")
+            _a("")
+            _a(f"- By kind: {summary['by_kind']}")
+            _a(f"- By stage: {summary['by_stage']}")
+            _a(
+                "- By causal interpretation status: "
+                f"{summary['by_causal_interpretation_status']}"
+            )
+            _a("")
+            _a("### Patterns")
+            _a("")
+            _a("| Kind | Stage | Status | Count | Scope | Pattern |")
+            _a("|------|-------|--------|-------|-------|---------|")
+            for pattern in state.observed_patterns[:50]:
+                text = _markdown_table_cell(pattern.summary)
+                if len(text) > 120:
+                    text = text[:117] + "..."
+                scope_parts = []
+                if pattern.code_ids:
+                    scope_parts.append(f"codes={','.join(pattern.code_ids)}")
+                if pattern.doc_ids:
+                    scope_parts.append(f"docs={','.join(pattern.doc_ids)}")
+                if pattern.application_ids:
+                    scope_parts.append(
+                        f"applications={','.join(pattern.application_ids)}"
+                    )
+                scope = _markdown_table_cell("; ".join(scope_parts) or "not recorded")
+                count = f"{pattern.count}/{pattern.total}" if pattern.total else str(pattern.count)
+                _a(
+                    f"| {pattern.pattern_kind.value} | {pattern.source_stage} | "
+                    f"{pattern.causal_interpretation_status.value} | {count} | "
+                    f"{scope} | {text} |"
+                )
+            if len(state.observed_patterns) > 50:
+                _a("")
+                _a(f"*... and {len(state.observed_patterns) - 50} more patterns*")
             _a("")
 
         # Perspectives

@@ -25,6 +25,8 @@ from qc_clean.schemas.domain import (
     DomainEntityRelationship,
     Document,
     Entity,
+    ObservedPattern,
+    ObservedPatternKind,
     PipelineStatus,
     ProjectState,
     Provenance,
@@ -151,6 +153,42 @@ def _replace_with_two_claims(tmp_store, review_project):
             scope=ClaimScope(code_ids=["C2"]),
             origin_object_type="code",
             origin_object_id="C2",
+        ),
+    ]
+    tmp_store.save(review_project)
+
+
+def _replace_with_two_patterns(tmp_store, review_project):
+    """Replace the review fixture observed patterns with two ordered rows."""
+    review_project.observed_patterns = [
+        ObservedPattern(
+            id="pattern-1",
+            source_stage="cross_interview",
+            pattern_kind=ObservedPatternKind.CONSENSUS_CODE,
+            summary="Theme A appeared across loaded documents.",
+            code_ids=["C1"],
+            doc_ids=["d1"],
+            application_ids=["A1"],
+            count=1,
+            total=1,
+            support_anchors=[
+                ClaimAnchor(
+                    doc_id="d1",
+                    start_char=0,
+                    end_char=8,
+                    quote_text="evidence",
+                    quote_hash="pattern-api-hash",
+                    code_application_id="A1",
+                )
+            ],
+        ),
+        ObservedPattern(
+            id="pattern-2",
+            source_stage="cross_interview",
+            pattern_kind=ObservedPatternKind.DIVERGENT_CODE,
+            summary="Theme B diverged.",
+            code_ids=["C2"],
+            doc_ids=["d2"],
         ),
     ]
     tmp_store.save(review_project)
@@ -438,6 +476,64 @@ class TestReviewCodesEndpoint:
     def test_404_for_missing_project(self, client):
         resp = client.get("/projects/nonexistent/review/codes")
         assert resp.status_code == 404
+
+
+class TestObservedPatternsEndpoint:
+    def test_project_patterns_endpoint_returns_bounded_rows(
+        self,
+        client,
+        tmp_store,
+        review_project,
+    ):
+        _replace_with_two_patterns(tmp_store, review_project)
+
+        resp = client.get("/projects/test-project-123/patterns?limit=1&offset=1")
+
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["returned"] == 1
+        assert data["total_patterns"] == 2
+        assert data["limit"] == 1
+        assert data["offset"] == 1
+        assert data["pattern_summary"]["total_patterns"] == 2
+        assert data["patterns"][0]["id"] == "pattern-2"
+        assert data["patterns"][0]["pattern_kind"] == "divergent_code"
+        assert data["patterns"][0]["causal_interpretation_status"] == "descriptive_only"
+        assert "not causal proof" in data["caveat"]
+
+    def test_project_patterns_endpoint_includes_anchor_details(
+        self,
+        client,
+        tmp_store,
+        review_project,
+    ):
+        _replace_with_two_patterns(tmp_store, review_project)
+
+        resp = client.get("/projects/test-project-123/patterns?limit=1")
+
+        assert resp.status_code == 200
+        pattern = resp.json()["patterns"][0]
+        assert pattern["support_anchor_count"] == 1
+        assert pattern["support_anchor_details"][0]["quote_hash"] == "pattern-api-hash"
+
+    def test_project_patterns_endpoint_bounds_limit_and_offset(
+        self,
+        client,
+        tmp_store,
+        review_project,
+    ):
+        _replace_with_two_patterns(tmp_store, review_project)
+
+        negative = client.get("/projects/test-project-123/patterns?limit=-5")
+        beyond_end = client.get("/projects/test-project-123/patterns?limit=1&offset=99")
+
+        assert negative.status_code == 200
+        assert negative.json()["returned"] == 0
+        assert negative.json()["limit"] == 0
+
+        assert beyond_end.status_code == 200
+        assert beyond_end.json()["returned"] == 0
+        assert beyond_end.json()["offset"] == 99
 
 
 class TestReviewClaimsEndpoint:

@@ -10,6 +10,8 @@ from qc_clean.schemas.domain import (
     ClaimScope,
     ClaimSupportStatus,
     CorpusScope,
+    ObservedPattern,
+    ObservedPatternKind,
     ProjectState,
 )
 
@@ -218,6 +220,36 @@ def test_markdown_export_includes_claim_ledger_summary(tmp_path):
     assert "**Total claims**: 1" in content
     assert "synthesis_finding" in content
     assert "AI changes workflow." in content
+
+
+def test_export_markdown_includes_observed_patterns(tmp_path):
+    from qc_clean.core.export.data_exporter import ProjectExporter
+
+    state = _claim_state()
+    state.observed_patterns = [
+        ObservedPattern(
+            id="pattern-1",
+            source_stage="cross_interview",
+            pattern_kind=ObservedPatternKind.CODE_CO_OCCURRENCE,
+            summary="Codes C1 and C2 co-occurred in the loaded corpus.",
+            code_ids=["C1", "C2"],
+            doc_ids=["d1"],
+            application_ids=["A1", "A2"],
+            count=1,
+            total=4,
+        )
+    ]
+    out = tmp_path / "patterns.md"
+    ProjectExporter().export_markdown(state, str(out))
+
+    content = Path(out).read_text()
+    assert "## Observed Patterns" in content
+    assert "Descriptive observed patterns only" in content
+    assert "**Total patterns**: 1" in content
+    assert "code_co_occurrence" in content
+    assert "descriptive_only" in content
+    assert "codes=C1,C2; docs=d1; applications=A1,A2" in content
+    assert "not causal proof" in content
 
 
 def test_markdown_claim_rows_include_scope_and_boundary_columns(tmp_path):

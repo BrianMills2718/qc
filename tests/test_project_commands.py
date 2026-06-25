@@ -29,6 +29,8 @@ from qc_clean.schemas.domain import (
     Entity,
     DomainEntityRelationship,
     Methodology,
+    ObservedPattern,
+    ObservedPatternKind,
     PipelineStatus,
     PerspectiveAnalysis,
     ParticipantPerspective,
@@ -1879,6 +1881,72 @@ class TestProjectClaimsCommand:
         assert "claim-cli-hash" not in out
         assert "scope: " not in out
 
+    def test_project_patterns_command_shows_descriptive_patterns(
+        self,
+        tmp_store,
+        capsys,
+    ):
+        from qc_clean.core.cli.commands.project import _show_patterns
+
+        state = ProjectState(
+            id="patterns-proj",
+            name="Patterns Project",
+            observed_patterns=[
+                ObservedPattern(
+                    id="pattern-1",
+                    source_stage="cross_interview",
+                    pattern_kind=ObservedPatternKind.CONSENSUS_CODE,
+                    summary="Theme A appeared in most loaded documents.",
+                    code_ids=["C1"],
+                    doc_ids=["d1", "d2"],
+                    application_ids=["A1"],
+                    count=2,
+                    total=3,
+                    support_anchors=[
+                        ClaimAnchor(
+                            doc_id="d1",
+                            start_char=1,
+                            end_char=12,
+                            quote_text="Theme A text",
+                            quote_hash="pattern-hash",
+                            code_application_id="A1",
+                        )
+                    ],
+                ),
+                ObservedPattern(
+                    id="pattern-2",
+                    source_stage="cross_interview",
+                    pattern_kind=ObservedPatternKind.DIVERGENT_CODE,
+                    summary="Theme B was divergent.",
+                    code_ids=["C2"],
+                    doc_ids=["d3"],
+                ),
+            ],
+        )
+        tmp_store.save(state)
+
+        args = MagicMock(
+            project_id="patterns-proj",
+            limit=1,
+            offset=0,
+            show_anchors=False,
+        )
+        result = _show_patterns(tmp_store, args)
+
+        assert result == 0
+        out = capsys.readouterr().out
+        assert "Observed Patterns: Patterns Project" in out
+        assert "Total patterns: 2" in out
+        assert "descriptive observed patterns only" in out
+        assert "consensus_code/cross_interview/descriptive_only" in out
+        assert "Theme A appeared in most loaded documents." in out
+        assert "codes: C1" in out
+        assert "docs: d1, d2" in out
+        assert "applications: A1" in out
+        assert "Showing patterns 1-1 of 2" in out
+        assert "... and 1 more" in out
+        assert "pattern-hash" not in out
+
     def test_project_claims_command_outputs_offset_page(
         self, tmp_store, capsys
     ):
@@ -2187,6 +2255,7 @@ class TestAPIEndpoints:
             paths = [e["path"] for e in server.endpoints]
             assert "/projects/{project_id}" in paths
             assert "/projects/{project_id}/claims" in paths
+            assert "/projects/{project_id}/patterns" in paths
             assert "/projects/{project_id}/review/claims" in paths
             assert "/projects/{project_id}/resume" in paths
         except ImportError:

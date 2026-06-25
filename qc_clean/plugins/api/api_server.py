@@ -824,6 +824,46 @@ class QCAPIServer:
                 "claims": rows,
             }
 
+        @self._app.get("/projects/{project_id}/patterns")
+        async def get_project_patterns(
+            project_id: str,
+            limit: int = 100,
+            offset: int = 0,
+        ):
+            """Get descriptive observed-pattern summary and bounded rows."""
+            from qc_clean.core.patterns import (
+                observed_pattern_row,
+                summarize_observed_patterns,
+            )
+            from qc_clean.core.persistence.project_store import ProjectStore
+            store = ProjectStore()
+            try:
+                state = store.load(project_id)
+            except FileNotFoundError:
+                raise HTTPException(status_code=404, detail=f"Project not found: {project_id}")
+            max_rows = max(0, int(self.config.get("observed_patterns_api_max_rows", 100)))
+            bounded_limit = min(max(0, limit), max_rows)
+            bounded_offset = max(0, offset)
+            rows = [
+                observed_pattern_row(pattern)
+                for pattern in state.observed_patterns[
+                    bounded_offset : bounded_offset + bounded_limit
+                ]
+            ]
+            return {
+                "project": state.name,
+                "pattern_summary": summarize_observed_patterns(state),
+                "returned": len(rows),
+                "total_patterns": len(state.observed_patterns),
+                "limit": bounded_limit,
+                "offset": bounded_offset,
+                "patterns": rows,
+                "caveat": (
+                    "Observed patterns are descriptive only; they are not "
+                    "causal proof or abductive synthesis."
+                ),
+            }
+
         self.endpoints = [
             {"method": "GET", "path": "/health", "description": "Health check"},
             {"method": "POST", "path": "/analyze", "description": "Start analysis"},
@@ -832,6 +872,7 @@ class QCAPIServer:
             {"method": "GET", "path": "/projects/{project_id}/scope", "description": "Get corpus scope"},
             {"method": "PUT", "path": "/projects/{project_id}/scope", "description": "Update corpus scope"},
             {"method": "GET", "path": "/projects/{project_id}/claims", "description": "Get claim ledger"},
+            {"method": "GET", "path": "/projects/{project_id}/patterns", "description": "Get observed patterns"},
             {"method": "GET", "path": "/graph/{project_id}", "description": "Graph visualization UI"},
             {"method": "GET", "path": "/projects/{project_id}/graph/codes", "description": "Code graph data"},
             {"method": "GET", "path": "/projects/{project_id}/graph/entities", "description": "Entity graph data"},

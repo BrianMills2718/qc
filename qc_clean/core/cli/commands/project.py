@@ -16,6 +16,7 @@ from qc_clean.core.claims import (
     summarize_claim_ledger,
     summarize_disconfirmation_coverage,
 )
+from qc_clean.core.patterns import observed_pattern_row, summarize_observed_patterns
 from qc_clean.core.persistence.project_store import ProjectStore
 from qc_clean.schemas.domain import (
     CorpusScope,
@@ -40,6 +41,8 @@ def handle_project_command(args) -> int:
         return _show_project(store, args)
     elif args.project_action == "claims":
         return _show_claims(store, args)
+    elif args.project_action == "patterns":
+        return _show_patterns(store, args)
     elif args.project_action == "scope":
         return _show_or_update_scope(store, args)
     elif args.project_action == "recode-policy":
@@ -123,6 +126,7 @@ def _show_project(store: ProjectStore, args) -> int:
     print(f"  Codes: {len(state.codebook.codes)}")
     print(f"  Applications: {len(state.code_applications)}")
     print(f"  Claims: {len(state.claims)}")
+    print(f"  Observed patterns: {len(state.observed_patterns)}")
     print(f"  Iteration: {state.iteration}")
     print(f"  Updated: {state.updated_at}")
 
@@ -707,6 +711,67 @@ def _show_claims(store: ProjectStore, args) -> int:
                 _print_claim_anchor_details("supporting", claim.supporting_anchors)
                 _print_claim_anchor_details("contrary", claim.contrary_anchors)
         remaining = max(0, len(state.claims) - offset - len(page))
+        if remaining:
+            print(f"    ... and {remaining} more")
+
+    return 0
+
+
+def _show_patterns(store: ProjectStore, args) -> int:
+    """Show a compact descriptive observed-pattern summary for a project."""
+    project_id = args.project_id
+    try:
+        state = store.load(project_id)
+    except FileNotFoundError:
+        print(f"Project not found: {project_id}", file=sys.stderr)
+        return 1
+
+    limit = max(0, int(getattr(args, "limit", 20)))
+    raw_offset = getattr(args, "offset", 0)
+    offset = max(0, int(raw_offset if isinstance(raw_offset, int) else 0))
+    summary = summarize_observed_patterns(state)
+    print(f"Observed Patterns: {state.name}")
+    print(f"  Total patterns: {summary['total_patterns']}")
+    print(f"  By kind: {summary['by_kind']}")
+    print(f"  By stage: {summary['by_stage']}")
+    print(
+        "  By causal interpretation status: "
+        f"{summary['by_causal_interpretation_status']}"
+    )
+    print("  Caveat: descriptive observed patterns only; not causal proof.")
+
+    if state.observed_patterns and limit:
+        print("\n  Patterns:")
+        show_anchors = getattr(args, "show_anchors", False) is True
+        page = state.observed_patterns[offset : offset + limit]
+        if offset or len(state.observed_patterns) > limit:
+            start = offset + 1 if page else 0
+            end = offset + len(page) if page else 0
+            print(f"    Showing patterns {start}-{end} of {len(state.observed_patterns)}")
+        for pattern in page:
+            row = observed_pattern_row(
+                pattern,
+                include_anchor_details=show_anchors,
+            )
+            count_part = (
+                f" ({row['count']}/{row['total']})"
+                if row["total"]
+                else ""
+            )
+            print(
+                f"    - [{row['pattern_kind']}/{row['source_stage']}/"
+                f"{row['causal_interpretation_status']}]{count_part} "
+                f"{row['summary']}"
+            )
+            if row["code_ids"]:
+                print(f"      codes: {', '.join(row['code_ids'])}")
+            if row["doc_ids"]:
+                print(f"      docs: {', '.join(row['doc_ids'])}")
+            if row["application_ids"]:
+                print(f"      applications: {', '.join(row['application_ids'])}")
+            if show_anchors:
+                _print_claim_anchor_details("support", pattern.support_anchors)
+        remaining = max(0, len(state.observed_patterns) - offset - len(page))
         if remaining:
             print(f"    ... and {remaining} more")
 
