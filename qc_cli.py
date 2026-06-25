@@ -1295,6 +1295,14 @@ Examples:
         help='Show bounded supporting anchor details for each displayed pattern',
     )
 
+    proj_abductive = project_subparsers.add_parser(
+        'abductive',
+        help='Show provisional abductive candidate explanations',
+    )
+    proj_abductive.add_argument('project_id', help='Project ID')
+    proj_abductive.add_argument('--limit', type=int, default=20, help='Maximum candidates to show (default: 20)')
+    proj_abductive.add_argument('--offset', type=int, default=0, help='Number of candidates to skip before showing rows')
+
     proj_scope = project_subparsers.add_parser('scope', help='Show or update project corpus scope')
     proj_scope.add_argument('project_id', help='Project ID')
     proj_scope.add_argument('--phenomenon', help='Phenomenon or topic the analysis is scoped to')

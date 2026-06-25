@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 
 from qc_clean.schemas.domain import (
+    AbductiveCandidateExplanation,
     AnalyticClaim,
     ClaimKind,
     ClaimScope,
@@ -249,6 +250,39 @@ def test_export_markdown_includes_observed_patterns(tmp_path):
     assert "code_co_occurrence" in content
     assert "descriptive_only" in content
     assert "codes=C1,C2; docs=d1; applications=A1,A2" in content
+    assert "not causal proof" in content
+
+
+def test_export_markdown_includes_abductive_candidates(tmp_path):
+    from qc_clean.core.export.data_exporter import ProjectExporter
+
+    state = _claim_state()
+    state.abductive_explanations = [
+        AbductiveCandidateExplanation(
+            id="abductive-1",
+            source_stage="abductive_synthesis",
+            source_pattern_ids=["pattern-1"],
+            explanation_text="Coordination friction may explain the pattern.",
+            mechanism_summary="More handoffs create adoption friction.",
+            rival_explanations=["Documentation artifacts could explain it."],
+            observable_implications=["High-handoff teams show more friction."],
+            evidence_gaps=["Need process evidence about handoffs."],
+            confidence=0.4,
+        )
+    ]
+    out = tmp_path / "abductive.md"
+    ProjectExporter().export_markdown(state, str(out))
+
+    content = Path(out).read_text()
+    assert "## Abductive Candidate Explanations" in content
+    assert "Provisional hypotheses only" in content
+    assert "**Total candidates**: 1" in content
+    assert "pattern-1" in content
+    assert "Coordination friction may explain the pattern." in content
+    assert "More handoffs create adoption friction." in content
+    assert "Rivals: Documentation artifacts could explain it." in content
+    assert "Observable implications: High-handoff teams show more friction." in content
+    assert "Evidence gaps: Need process evidence about handoffs." in content
     assert "not causal proof" in content
 
 

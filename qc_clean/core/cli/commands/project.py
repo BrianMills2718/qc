@@ -16,6 +16,10 @@ from qc_clean.core.claims import (
     summarize_claim_ledger,
     summarize_disconfirmation_coverage,
 )
+from qc_clean.core.abductive import (
+    abductive_candidate_row,
+    summarize_abductive_candidates,
+)
 from qc_clean.core.patterns import observed_pattern_row, summarize_observed_patterns
 from qc_clean.core.persistence.project_store import ProjectStore
 from qc_clean.schemas.domain import (
@@ -43,6 +47,8 @@ def handle_project_command(args) -> int:
         return _show_claims(store, args)
     elif args.project_action == "patterns":
         return _show_patterns(store, args)
+    elif args.project_action == "abductive":
+        return _show_abductive_candidates(store, args)
     elif args.project_action == "scope":
         return _show_or_update_scope(store, args)
     elif args.project_action == "recode-policy":
@@ -127,6 +133,7 @@ def _show_project(store: ProjectStore, args) -> int:
     print(f"  Applications: {len(state.code_applications)}")
     print(f"  Claims: {len(state.claims)}")
     print(f"  Observed patterns: {len(state.observed_patterns)}")
+    print(f"  Abductive candidates: {len(state.abductive_explanations)}")
     print(f"  Iteration: {state.iteration}")
     print(f"  Updated: {state.updated_at}")
 
@@ -778,6 +785,62 @@ def _show_patterns(store: ProjectStore, args) -> int:
             if show_anchors:
                 _print_claim_anchor_details("support", pattern.support_anchors)
         remaining = max(0, len(state.observed_patterns) - offset - len(page))
+        if remaining:
+            print(f"    ... and {remaining} more")
+
+    return 0
+
+
+def _show_abductive_candidates(store: ProjectStore, args) -> int:
+    """Show compact provisional abductive candidate explanations."""
+    project_id = args.project_id
+    try:
+        state = store.load(project_id)
+    except FileNotFoundError:
+        print(f"Project not found: {project_id}", file=sys.stderr)
+        return 1
+
+    limit = max(0, int(getattr(args, "limit", 20)))
+    raw_offset = getattr(args, "offset", 0)
+    offset = max(0, int(raw_offset if isinstance(raw_offset, int) else 0))
+    summary = summarize_abductive_candidates(state)
+    print(f"Abductive Candidate Explanations: {state.name}")
+    print(f"  Total candidates: {summary['total_candidates']}")
+    print(f"  By stage: {summary['by_stage']}")
+    print(f"  By status: {summary['by_status']}")
+    print("  Caveat: provisional hypotheses only; not causal proof.")
+
+    if state.abductive_explanations and limit:
+        print("\n  Candidates:")
+        page = state.abductive_explanations[offset : offset + limit]
+        if offset or len(state.abductive_explanations) > limit:
+            start = offset + 1 if page else 0
+            end = offset + len(page) if page else 0
+            print(
+                f"    Showing candidates {start}-{end} "
+                f"of {len(state.abductive_explanations)}"
+            )
+        for candidate in page:
+            row = abductive_candidate_row(candidate)
+            print(
+                f"    - [{row['status']}/{row['source_stage']}] "
+                f"{row['explanation_text']}"
+            )
+            if row["source_pattern_ids"]:
+                print(f"      source patterns: {', '.join(row['source_pattern_ids'])}")
+            print(f"      mechanism: {row['mechanism_summary']}")
+            if row["rival_explanations"]:
+                print(f"      rivals: {'; '.join(row['rival_explanations'])}")
+            if row["observable_implications"]:
+                print(
+                    "      observable implications: "
+                    f"{'; '.join(row['observable_implications'])}"
+                )
+            if row["evidence_gaps"]:
+                print(f"      evidence gaps: {'; '.join(row['evidence_gaps'])}")
+            if row["confidence"] is not None:
+                print(f"      provisional confidence: {row['confidence']:.2f}")
+        remaining = max(0, len(state.abductive_explanations) - offset - len(page))
         if remaining:
             print(f"    ... and {remaining} more")
 

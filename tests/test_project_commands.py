@@ -15,6 +15,7 @@ from unittest.mock import patch, MagicMock
 from qc_clean.core.cli.commands import project as project_commands
 from qc_clean.schemas.domain import (
     AnalyticClaim,
+    AbductiveCandidateExplanation,
     ClaimAnchor,
     ClaimKind,
     ClaimScope,
@@ -1957,6 +1958,58 @@ class TestProjectClaimsCommand:
         assert "... and 1 more" in out
         assert "pattern-hash" not in out
 
+    def test_project_abductive_command_shows_candidate_explanations(
+        self,
+        tmp_store,
+        capsys,
+    ):
+        from qc_clean.core.cli.commands.project import _show_abductive_candidates
+
+        state = ProjectState(
+            id="abductive-proj",
+            name="Abductive Project",
+            abductive_explanations=[
+                AbductiveCandidateExplanation(
+                    id="abductive-1",
+                    source_stage="abductive_synthesis",
+                    source_pattern_ids=["pattern-1"],
+                    explanation_text="Coordination friction may explain the pattern.",
+                    mechanism_summary="More handoffs create adoption friction.",
+                    rival_explanations=["Documentation artifacts could explain it."],
+                    observable_implications=["High-handoff teams show more friction."],
+                    evidence_gaps=["Need process evidence about handoffs."],
+                    confidence=0.4,
+                ),
+                AbductiveCandidateExplanation(
+                    id="abductive-2",
+                    source_stage="abductive_synthesis",
+                    source_pattern_ids=["pattern-2"],
+                    explanation_text="Training access may explain divergence.",
+                    mechanism_summary="Uneven access changes adoption paths.",
+                ),
+            ],
+        )
+        tmp_store.save(state)
+
+        args = MagicMock(project_id="abductive-proj", limit=1, offset=0)
+        result = _show_abductive_candidates(tmp_store, args)
+
+        assert result == 0
+        out = capsys.readouterr().out
+        assert "Abductive Candidate Explanations: Abductive Project" in out
+        assert "Total candidates: 2" in out
+        assert "provisional hypotheses only" in out
+        assert "candidate/abductive_synthesis" in out
+        assert "Coordination friction may explain the pattern." in out
+        assert "source patterns: pattern-1" in out
+        assert "mechanism: More handoffs create adoption friction." in out
+        assert "rivals: Documentation artifacts could explain it." in out
+        assert "observable implications: High-handoff teams show more friction." in out
+        assert "evidence gaps: Need process evidence about handoffs." in out
+        assert "provisional confidence: 0.40" in out
+        assert "Showing candidates 1-1 of 2" in out
+        assert "... and 1 more" in out
+
     def test_project_claims_command_outputs_offset_page(
         self, tmp_store, capsys
     ):
@@ -2266,6 +2319,7 @@ class TestAPIEndpoints:
             assert "/projects/{project_id}" in paths
             assert "/projects/{project_id}/claims" in paths
             assert "/projects/{project_id}/patterns" in paths
+            assert "/projects/{project_id}/abductive-explanations" in paths
             assert "/projects/{project_id}/review/claims" in paths
             assert "/projects/{project_id}/resume" in paths
         except ImportError:

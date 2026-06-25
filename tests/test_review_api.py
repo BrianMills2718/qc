@@ -13,6 +13,7 @@ from qc_clean.plugins.api.api_server import QCAPIServer
 from qc_clean.core.persistence.project_store import ProjectStore
 from qc_clean.schemas.domain import (
     AnalyticClaim,
+    AbductiveCandidateExplanation,
     ClaimAnchor,
     ClaimKind,
     ClaimScope,
@@ -189,6 +190,31 @@ def _replace_with_two_patterns(tmp_store, review_project):
             summary="Theme B diverged.",
             code_ids=["C2"],
             doc_ids=["d2"],
+        ),
+    ]
+    tmp_store.save(review_project)
+
+
+def _replace_with_two_abductive_candidates(tmp_store, review_project):
+    """Replace the review fixture abductive candidates with two ordered rows."""
+    review_project.abductive_explanations = [
+        AbductiveCandidateExplanation(
+            id="abductive-1",
+            source_stage="abductive_synthesis",
+            source_pattern_ids=["pattern-1"],
+            explanation_text="Coordination friction may explain the pattern.",
+            mechanism_summary="More handoffs create adoption friction.",
+            rival_explanations=["Documentation artifacts could explain it."],
+            observable_implications=["High-handoff teams show more friction."],
+            evidence_gaps=["Need process evidence about handoffs."],
+            confidence=0.4,
+        ),
+        AbductiveCandidateExplanation(
+            id="abductive-2",
+            source_stage="abductive_synthesis",
+            source_pattern_ids=["pattern-2"],
+            explanation_text="Training access may explain divergence.",
+            mechanism_summary="Uneven access changes adoption paths.",
         ),
     ]
     tmp_store.save(review_project)
@@ -526,6 +552,55 @@ class TestObservedPatternsEndpoint:
 
         negative = client.get("/projects/test-project-123/patterns?limit=-5")
         beyond_end = client.get("/projects/test-project-123/patterns?limit=1&offset=99")
+
+        assert negative.status_code == 200
+        assert negative.json()["returned"] == 0
+        assert negative.json()["limit"] == 0
+
+        assert beyond_end.status_code == 200
+        assert beyond_end.json()["returned"] == 0
+        assert beyond_end.json()["offset"] == 99
+
+
+class TestAbductiveExplanationsEndpoint:
+    def test_project_abductive_endpoint_returns_bounded_rows(
+        self,
+        client,
+        tmp_store,
+        review_project,
+    ):
+        _replace_with_two_abductive_candidates(tmp_store, review_project)
+
+        resp = client.get(
+            "/projects/test-project-123/abductive-explanations?limit=1&offset=1"
+        )
+
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["returned"] == 1
+        assert data["total_candidates"] == 2
+        assert data["limit"] == 1
+        assert data["offset"] == 1
+        assert data["candidate_summary"]["total_candidates"] == 2
+        assert data["candidates"][0]["id"] == "abductive-2"
+        assert data["candidates"][0]["status"] == "candidate"
+        assert data["candidates"][0]["source_pattern_ids"] == ["pattern-2"]
+        assert "not causal proof" in data["caveat"]
+
+    def test_project_abductive_endpoint_bounds_limit_and_offset(
+        self,
+        client,
+        tmp_store,
+        review_project,
+    ):
+        _replace_with_two_abductive_candidates(tmp_store, review_project)
+
+        negative = client.get(
+            "/projects/test-project-123/abductive-explanations?limit=-5"
+        )
+        beyond_end = client.get(
+            "/projects/test-project-123/abductive-explanations?limit=1&offset=99"
+        )
 
         assert negative.status_code == 200
         assert negative.json()["returned"] == 0

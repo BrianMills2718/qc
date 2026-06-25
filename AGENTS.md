@@ -189,6 +189,7 @@ python qc_cli.py project run <project_id> --abductive    # opt-in provisional ca
 python qc_cli.py project scope <project_id> --phenomenon "..."  # show/update corpus scope
 python qc_cli.py project claims <project_id> --limit 20 --offset 0 --show-scope --show-anchors  # inspect first-class claim ledger scope/anchors (INV-9)
 python qc_cli.py project patterns <project_id> --limit 20 --offset 0 --show-anchors  # inspect descriptive observed patterns
+python qc_cli.py project abductive <project_id> --limit 20 --offset 0  # inspect provisional abductive candidates
 python qc_cli.py project add-docs <project_id> --files new.txt --recode  # add then incremental recode
 ```
 
@@ -212,7 +213,8 @@ read `CLAUDE.md` directly.
 3. Human review via CLI or browser; IRR via `project irr`
 4. Inspect claim ledger via `project claims` or `/projects/{project_id}/claims?limit=100&offset=0`
 5. Inspect descriptive observed patterns via `project patterns` or `/projects/{project_id}/patterns?limit=100&offset=0`
-6. Export to JSON/CSV/Markdown/QDPX
+6. Inspect provisional abductive candidates via `project abductive` or `/projects/{project_id}/abductive-explanations?limit=100&offset=0`
+7. Export to JSON/CSV/Markdown/QDPX
 
 ## Machine-Readable Governance
 

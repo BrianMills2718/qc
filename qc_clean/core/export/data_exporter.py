@@ -19,6 +19,7 @@ from typing import Any, Dict, List, Optional
 from xml.etree.ElementTree import Element, SubElement, ElementTree
 
 from qc_clean.core.claims import format_claim_scope_summary, summarize_claim_ledger
+from qc_clean.core.abductive import summarize_abductive_candidates
 from qc_clean.core.patterns import summarize_observed_patterns
 from qc_clean.schemas.domain import ProjectState
 
@@ -656,6 +657,69 @@ class ProjectExporter:
             if len(state.observed_patterns) > 50:
                 _a("")
                 _a(f"*... and {len(state.observed_patterns) - 50} more patterns*")
+            _a("")
+
+        # Provisional abductive candidate explanations
+        if state.abductive_explanations:
+            summary = summarize_abductive_candidates(state)
+            _a("## Abductive Candidate Explanations")
+            _a("")
+            _a(
+                "*Provisional hypotheses only; not causal proof, process-tracing "
+                "results, methodological-validity evidence, or SOTA evidence.*"
+            )
+            _a("")
+            _a(f"**Total candidates**: {summary['total_candidates']}")
+            _a("")
+            _a("### Counts")
+            _a("")
+            _a(f"- By stage: {summary['by_stage']}")
+            _a(f"- By status: {summary['by_status']}")
+            _a("")
+            _a("### Candidates")
+            _a("")
+            _a("| Status | Source patterns | Confidence | Explanation | Mechanism |")
+            _a("|--------|-----------------|------------|-------------|-----------|")
+            for candidate in state.abductive_explanations[:50]:
+                explanation = _markdown_table_cell(candidate.explanation_text)
+                mechanism = _markdown_table_cell(candidate.mechanism_summary)
+                if len(explanation) > 120:
+                    explanation = explanation[:117] + "..."
+                if len(mechanism) > 120:
+                    mechanism = mechanism[:117] + "..."
+                source_patterns = _markdown_table_cell(
+                    ", ".join(candidate.source_pattern_ids) or "not recorded"
+                )
+                confidence = (
+                    f"{candidate.confidence:.2f}"
+                    if candidate.confidence is not None
+                    else ""
+                )
+                _a(
+                    f"| {candidate.status.value} | {source_patterns} | "
+                    f"{confidence} | {explanation} | {mechanism} |"
+                )
+                if candidate.rival_explanations:
+                    _a(
+                        f"- Rivals: "
+                        f"{_markdown_table_cell('; '.join(candidate.rival_explanations))}"
+                    )
+                if candidate.observable_implications:
+                    _a(
+                        f"- Observable implications: "
+                        f"{_markdown_table_cell('; '.join(candidate.observable_implications))}"
+                    )
+                if candidate.evidence_gaps:
+                    _a(
+                        f"- Evidence gaps: "
+                        f"{_markdown_table_cell('; '.join(candidate.evidence_gaps))}"
+                    )
+            if len(state.abductive_explanations) > 50:
+                _a("")
+                _a(
+                    f"*... and {len(state.abductive_explanations) - 50} "
+                    "more candidates*"
+                )
             _a("")
 
         # Perspectives
