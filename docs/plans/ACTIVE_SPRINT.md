@@ -28,11 +28,17 @@ highest-value documented lane.
    without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Plan #225 `GT_CANONICAL_SEGMENT_UNIVERSE.md` is planned.
-This slice unifies grounded-theory constant-comparison traversal with the
-canonical char-anchored INV-8 segment universe. It is software evidence-denominator
-plumbing only, not GT saturation, methodological-validity, abductive-synthesis,
-or SOTA evidence.
+**Active checkpoint:** None. Select the next highest-value documented lane from
+the roadmap and create its plan before implementation.
+
+**Completed checkpoint:** Plan #225
+`completed/GT_CANONICAL_SEGMENT_UNIVERSE.md` unified grounded-theory
+constant-comparison traversal with the canonical char-anchored INV-8 segment
+universe. GT now populates `ProjectState.segments` when missing, preserves
+existing canonical segment universes when present, and carries segment
+IDs/offsets into prompt data. This is software evidence-denominator plumbing
+only, not GT saturation, methodological-validity, abductive-synthesis, or SOTA
+evidence.
 
 **Completed checkpoint:** Plan #224
 `completed/SAMPLING_FRAME_ADEQUACY_PROTOCOL_PREFLIGHT.md` added governed

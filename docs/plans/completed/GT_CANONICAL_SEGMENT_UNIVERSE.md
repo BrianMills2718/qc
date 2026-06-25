@@ -1,5 +1,28 @@
 # Plan #225: GT Canonical Segment Universe
 
+## Outcome
+
+Completed 2026-06-25. Grounded-theory constant comparison now traverses the
+canonical char-anchored INV-8 `Segment` universe. `segment_documents()` remains
+as a compatibility helper, but it delegates to `segment_corpus()` and carries
+`segment_id`, `start_char`, and `end_char` through the GT prompt/merge dict
+shape. `GTConstantComparisonStage` populates `ProjectState.segments` when
+missing and preserves existing canonical segments when present. This unifies the
+software evidence denominator for GT traversal, coverage, review/export, and
+future abductive evidence bundles; it is not GT saturation, methodological
+validity, abductive-synthesis evidence, or SOTA evidence.
+
+Verification:
+
+- `python -m pytest tests/test_constant_comparison.py -q` — 26 passed.
+- `python -m pytest tests/test_anchoring_integration.py tests/test_claim_ledger_pipeline.py -q` — 11 passed.
+- `python -m pytest tests/test_prompt_boundaries_inv7.py -k gt_constant_comparison -q` — 1 passed, 25 deselected.
+- `python -m pytest tests/test_constant_comparison.py tests/test_anchoring_integration.py tests/test_claim_ledger_pipeline.py tests/test_prompt_boundaries_inv7.py -k 'constant_comparison or gt_constant_comparison' -q` — 29 passed, 34 deselected.
+- `python -m ruff check qc_clean/core/pipeline/stages/gt_constant_comparison.py qc_clean/core/segmentation.py tests/test_constant_comparison.py` — passed.
+- `make docs-check` — passed.
+- `git diff --check` — passed.
+- `make check` — 1323 passed, 1 skipped, 8 deselected; Ruff/docs passed; type check not configured.
+
 **Status:** Planned
 **Type:** implementation
 **Priority:** High
@@ -150,4 +173,3 @@ This plan intentionally keeps the compatibility dict shape inside
 `gt_constant_comparison.py` so the first slice is not a broad rewrite. The
 important contract change is that those dicts are derived from canonical
 `Segment` records rather than a second segmentation implementation.
-
