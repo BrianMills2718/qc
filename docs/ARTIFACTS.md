@@ -49,7 +49,7 @@ Wiki home: http://localhost:8088/index.php/Project_Wiki
 | Domain model | `qc_clean/schemas/domain.py` | The typed state contract for documents, segments, codes, claims, review decisions, and exports. |
 | Evaluation core | `qc_clean/core/bench.py` and scripts under `scripts/` | Phase 0 scorecards, package validation, preflight, and artifact verification. |
 | Export | `qc_clean/core/export/data_exporter.py` | JSON, CSV, Markdown, and QDPX handoff surfaces. |
-| Process-tracing handoff | `qc_clean/core/process_tracing_handoff.py`, `scripts/export_process_tracing_handoff.py`, `scripts/validate_process_tracing_handoff.py` | Strict QC-side package of qualitative evidence objects for future process-tracing consumer review; not causal proof or PT results. |
+| Process-tracing handoff | `qc_clean/core/process_tracing_handoff.py`, `scripts/export_process_tracing_handoff.py`, `scripts/validate_process_tracing_handoff.py` | Strict QC-side package of qualitative evidence objects. Process-tracing consumer review accepted it as a QC-side fixture/adaptor input on 2026-06-25; it is still not a runnable PT input, causal proof, or PT result. |
 
 ## Missing Portfolio Artifacts
 

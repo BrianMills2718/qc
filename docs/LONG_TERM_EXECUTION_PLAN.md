@@ -81,7 +81,7 @@ triage, commit, and push.
 |---:|---|---|---|---|
 | 1 | Abductive candidate review workflow | Deductive semantics over exploratory content | Provisional explanations now exist but cannot yet be adjudicated as first-class review targets. Without review semantics, downstream handoff would export unchecked hypotheses. | CLI/API/manager review can approve/reject/modify candidates, tests pass, demo packet shows reviewable candidates, and caveats remain provisional. |
 | 2 | Process-tracing handoff package | Deductive boundary, exploratory consumer quality | The future workbench boundary needs a typed export before process-tracing agents can align safely. | A versioned package exports patterns, candidate explanations, claims, anchors, scope, and caveats with validation and no Bayesian/process-tracing internals. |
-| 3 | Process-tracing consumer review | Exploratory instrument | The QC-side package needs a consumer readout before being treated as a stable seam. | The process-tracing agent can map the deterministic fixture to its own input expectations or returns concrete contract-change requests. |
+| 3 | Process-tracing consumer review | Exploratory instrument | The QC-side package needed a consumer readout before being treated as a stable QC fixture. | Complete on 2026-06-25: process-tracing review accepted the deterministic fixture as QC-side adapter input with no QC schema changes, while keeping runnable PT source-packet/research-design fields outside QC. |
 | 4 | Reviewer-facing abductive UI | Deductive UI contract over stabilized review semantics | Browser UI should follow stable CLI/API semantics, not define them. | UI plan exists first; browser surfaces expose candidate review without changing API semantics; screenshots/manual inspection pass. |
 | 5 | Sanitized corpus and adjudication seed | Exploratory evidence instrument | Software surfaces are now visible; next proof requires real or shareable data. | A small corpus, scope record, output packet, and adjudication protocol exist without claiming broad validity. |
 | 6 | Populated D3/D7/D8/D9 evaluation lanes | Deductive packages over exploratory quality | Existing protocols need populated results to become evidence. | Frozen inputs, protocols, result packages, scorecards, and caveated reports exist. |
@@ -139,23 +139,30 @@ area, avoid one-off JSON assembly, and document the consumer contract.
 
 ### Dependency Subplan: Process-Tracing Consumer Contract
 
-Blocks: full handoff-package promotion beyond a QC-side exporter.
+Blocks: full workbench bridge implementation, but no longer blocks treating the current package as an acceptable QC-side fixture.
 
 Known stub: QC can export qualitative evidence objects with IDs, anchors,
 scope, provenance, caveats, candidate explanations, rival explanations,
 observable implications, and evidence gaps.
 
-Unknowns: exact field names and likelihood-vector expectations in
-`~/projects/process_tracing`; whether the consumer wants candidate-level,
-claim-level, or event-level rows first.
+Resolved readout on 2026-06-25: process-tracing review found the package
+acceptable as a QC-side fixture/adaptor input. It can map `corpus_scope`,
+documents, anchors, observed patterns, abductive candidates, and analytic claims
+without importing `pt.schemas` into QC and without adding likelihood/posterior
+or comparative-support fields.
 
-Instrument: inspect `process_tracing` plans and ask that agent to review the
-QC package draft after Slice #233 creates a minimal fixture.
+Remaining unknowns: exact PT/workbench adapter shape and how a separate
+research-design/source-packet overlay will be supplied for runnable PT analysis.
 
-Readout: process-tracing agent can map the fixture to its own input contract
-without changing QC evidence semantics.
+Instrument: complete for the QC-side fixture. The next instrument belongs to
+the future PT/workbench adapter lane.
 
-Promotion: update the handoff schema and this plan after consumer review.
+Readout: accepted with caveat. The package is not a complete runnable PT input
+because it intentionally omits `research_question`, focal window, outcome,
+source candidates, known gaps, and pre-specified tests.
+
+Promotion: no QC schema update required now. Future work should define the
+PT/workbench adapter or overlay contract outside QC.
 
 ### Dependency Subplan: Quality Thresholds For Abductive Candidates
 
@@ -205,5 +212,7 @@ Stop only for:
 ## Current Position
 
 The latest completed implementation slice is Plan #233, process-tracing
-handoff package. The next slice is process-tracing consumer review of the
-deterministic handoff fixture, unless concern triage changes the risk order.
+handoff package. Process-tracing consumer review of the deterministic fixture
+completed on 2026-06-25 with no requested QC schema changes. The next slice is
+either the future PT/workbench adapter overlay or, if staying inside QC,
+reviewer-facing abductive UI after UI planning.

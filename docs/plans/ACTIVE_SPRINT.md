@@ -22,14 +22,25 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Request or prepare process-tracing consumer review of the deterministic
-   handoff fixture produced by Plan #233.
+1. Choose the next execution-spine slice after the process-tracing consumer
+   review accepted the QC handoff fixture with no QC schema changes.
 2. Continue through the execution spine without
    pausing after the verified commit unless a canonical stop condition is
    reached.
 
-**Active checkpoint:** None. Next action is process-tracing consumer review or
-the next documented execution-spine slice.
+**Active checkpoint:** None. Next action is selecting the next documented
+execution-spine slice.
+
+**Completed checkpoint:** Process-tracing consumer review
+On 2026-06-25, process-tracing consumer review accepted
+`test_output/reviewer_demo/handoff/process_tracing_handoff.json` and
+`qc_clean/core/process_tracing_handoff.py` as a QC-side fixture/adaptor input.
+No QC schema changes were requested. The reviewed boundary remains caveated:
+the package is not a runnable PT input and does not include PT-owned
+research-design/source-packet fields such as `research_question`, focal window,
+outcome, source candidates, known gaps, or pre-specified tests. QC must still
+not add likelihood vectors, Bayesian updates, posterior fields, or comparative
+support.
 
 **Completed checkpoint:** Plan #233
 `completed/PROCESS_TRACING_HANDOFF_PACKAGE.md` added a strict schema_version=1
