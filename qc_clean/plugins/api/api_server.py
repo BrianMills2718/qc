@@ -359,6 +359,10 @@ class QCAPIServer:
                 "hierarchy_edges": hierarchy_edges,
                 "relationship_edges": relationship_edges,
             }
+            if not relationship_edges:
+                response["empty_reason"] = (
+                    "No supported code-to-code relationships were produced for this project yet."
+                )
             if state.data_warnings:
                 response["data_warnings"] = list(state.data_warnings)
             return response
@@ -396,6 +400,10 @@ class QCAPIServer:
                 "nodes": nodes,
                 "edges": edges,
             }
+            if not edges:
+                response["empty_reason"] = (
+                    "No supported entity-to-entity relationships were produced for this project yet."
+                )
             if state.data_warnings:
                 response["data_warnings"] = list(state.data_warnings)
             return response

@@ -33,9 +33,10 @@ surfaces:
     default_paths: ["thematic_analysis", "grounded_theory"]
     producer_contracts:
       - path: thematic_analysis
-        status: missing
-        producers: []
-        note: Default thematic path currently exposes this surface without a compatible producer.
+        status: present
+        producers:
+          - qc_clean/core/pipeline/stages/relationship.py
+        note: Producer implemented in Plan #238; keep rollout caution until a fresh real-run graph replay is completed.
       - path: grounded_theory
         status: present
         producers:

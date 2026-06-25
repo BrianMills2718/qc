@@ -43,10 +43,35 @@ surfaces:
     assert registry.surfaces[0].surface_id == "graph.example_tab"
 
 
-def test_surface_contract_registry_warns_on_missing_default_producer():
-    registry = contracts.load_registry(
-        Path("docs/governance/default_path_surface_contracts.yaml")
+def test_surface_contract_registry_warns_on_missing_default_producer(tmp_path: Path):
+    registry_path = tmp_path / "contracts.yaml"
+    registry_path.write_text(
+        """
+version: 1
+policy:
+  scope: default_path_user_facing_analytic_surfaces
+  default_gate_mode: validate_config
+  strict_gate_mode: future
+surfaces:
+  - surface_id: graph.code_relationships_tab
+    label: Graph UI code relationships tab
+    visible_by_default: true
+    user_facing: true
+    claim_bearing: true
+    default_paths: ["thematic_analysis"]
+    producer_contracts:
+      - path: thematic_analysis
+        status: missing
+        producers: []
+    operational_validation:
+      real_run_requirement: required
+      rollout_status: warning_until_follow_on_fix
+""".strip()
+        + "\n",
+        encoding="utf-8",
     )
+
+    registry = contracts.load_registry(registry_path)
 
     warnings = contracts.warning_messages(registry)
 

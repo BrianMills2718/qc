@@ -7,6 +7,7 @@ import pytest
 from qc_clean.schemas.analysis_schemas import (
     AnalysisRecommendation,
     AnalysisSynthesis,
+    CodeRelationshipCandidate,
     CodeHierarchy,
     EntityMapping,
     EntityRelationship,
@@ -92,6 +93,15 @@ def sample_entity_mapping():
                 relationship_type="enables",
                 strength=0.9,
                 supporting_evidence=["AI accelerates research."],
+            )
+        ],
+        code_relationships=[
+            CodeRelationshipCandidate(
+                source_code="AI_USAGE",
+                target_code="AI limits",
+                relationship_type="qualifies",
+                strength=0.75,
+                supporting_evidence=["Usage is shaped by limits."],
             )
         ],
         cause_effect_chains=["AI -> faster research"],
@@ -269,17 +279,37 @@ class TestSpeakerAnalysisToPerspectives:
 
 class TestEntityMappingConversion:
     def test_entity_count(self, sample_entity_mapping):
-        entities, rels, chains, connections = entity_mapping_to_entities(sample_entity_mapping, "doc1")
+        entities, rels, code_rels, chains, connections = entity_mapping_to_entities(
+            sample_entity_mapping,
+            "doc1",
+            codebook=Codebook(codes=[
+                Code(id="AI_USAGE", name="AI Usage", description="desc"),
+                Code(id="AI_LIMITS", name="AI limits", description="desc"),
+            ]),
+        )
         assert len(entities) == 2
         assert len(rels) == 1
+        assert len(code_rels) == 1
 
     def test_relationship_fields(self, sample_entity_mapping):
-        _, rels, _, _ = entity_mapping_to_entities(sample_entity_mapping)
+        _, rels, _, _, _ = entity_mapping_to_entities(sample_entity_mapping)
         assert rels[0].relationship_type == "enables"
         assert rels[0].strength == 0.9
 
+    def test_code_relationship_fields(self, sample_entity_mapping):
+        _, _, code_rels, _, _ = entity_mapping_to_entities(
+            sample_entity_mapping,
+            codebook=Codebook(codes=[
+                Code(id="AI_USAGE", name="AI Usage", description="desc"),
+                Code(id="AI_LIMITS", name="AI limits", description="desc"),
+            ]),
+        )
+        assert code_rels[0].source_code_id == "AI_USAGE"
+        assert code_rels[0].target_code_id == "AI_LIMITS"
+        assert code_rels[0].relationship_type == "qualifies"
+
     def test_causal_chains_preserved(self, sample_entity_mapping):
-        _, _, chains, connections = entity_mapping_to_entities(sample_entity_mapping)
+        _, _, _, chains, connections = entity_mapping_to_entities(sample_entity_mapping)
         assert isinstance(chains, list)
         assert isinstance(connections, list)
 

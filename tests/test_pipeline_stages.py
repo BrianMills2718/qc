@@ -155,6 +155,7 @@ def _sample_entity_mapping(**overrides) -> EntityMapping:
                 supporting_evidence=["It changed our workflow completely"],
             ),
         ],
+        code_relationships=[],
         cause_effect_chains=["AI adoption -> workflow transformation"],
         conceptual_connections=["Technology and organizational change linked"],
         analytical_memo="Clear causal relationship in data.",
@@ -417,6 +418,44 @@ class TestRelationshipStage:
             result = asyncio.run(RelationshipStage().execute(state, ctx))
 
         assert len(result.memos) == 0
+
+    def test_populates_code_relationships(self):
+        from qc_clean.core.pipeline.stages.relationship import RelationshipStage
+        from qc_clean.schemas.analysis_schemas import CodeRelationshipCandidate
+
+        state = _make_state(
+            codebook=Codebook(codes=[
+                Code(id="AI_ADOPTION", name="AI Adoption", description="test"),
+                Code(id="WORKFLOW_CHANGE", name="Workflow Change", description="test"),
+            ])
+        )
+        ctx = PipelineContext(phase1_json="{}", phase2_json="{}")
+        mock_response = _sample_entity_mapping(
+            code_relationships=[
+                CodeRelationshipCandidate(
+                    source_code="AI_ADOPTION",
+                    target_code="Workflow Change",
+                    relationship_type="drives",
+                    strength=0.8,
+                    supporting_evidence=["AI adoption drove workflow change"],
+                    conditions=["Leadership support"],
+                    consequences=["Faster task completion"],
+                )
+            ]
+        )
+
+        with patch("qc_clean.core.llm.llm_handler.LLMHandler") as MockLLM:
+            instance = MockLLM.return_value
+            instance.extract_structured = AsyncMock(return_value=mock_response)
+            result = asyncio.run(RelationshipStage().execute(state, ctx))
+
+        assert len(result.code_relationships) == 1
+        rel = result.code_relationships[0]
+        assert rel.source_code_id == "AI_ADOPTION"
+        assert rel.target_code_id == "WORKFLOW_CHANGE"
+        assert rel.relationship_type == "drives"
+        assert rel.conditions == ["Leadership support"]
+        assert rel.consequences == ["Faster task completion"]
 
 
 # ---------------------------------------------------------------------------

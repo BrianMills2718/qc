@@ -40,7 +40,7 @@ class RelationshipStage(PipelineStage):
             ctx.require("phase2_json", self.name()),
         )
 
-        prompt = _build_phase3_prompt(combined_text, phase1_text, phase2_text)
+        prompt = _build_phase3_prompt(combined_text, phase1_text, phase2_text, state.codebook)
 
         phase3_response = await llm.extract_structured(
             prompt, EntityMapping, **ctx.llm_call_options(self.name())
@@ -48,11 +48,12 @@ class RelationshipStage(PipelineStage):
 
         # Convert to domain entities — pass all doc IDs since entities span documents
         all_doc_ids = [d.id for d in state.corpus.documents]
-        entities, entity_rels, causal_chains, connections = entity_mapping_to_entities(
-            phase3_response, all_doc_ids
+        entities, entity_rels, code_rels, causal_chains, connections = entity_mapping_to_entities(
+            phase3_response, all_doc_ids, codebook=state.codebook
         )
         state.entities = entities
         state.entity_relationships = entity_rels
+        state.code_relationships = code_rels
 
         # Extract analytical memo
         if phase3_response.analytical_memo:
@@ -88,9 +89,10 @@ class RelationshipStage(PipelineStage):
         )
 
         logger.info(
-            "Relationship mapping complete: %d entities, %d relationships",
+            "Relationship mapping complete: %d entities, %d entity relationships, %d code relationships",
             len(entities),
             len(entity_rels),
+            len(code_rels),
         )
         return state
 
@@ -104,14 +106,15 @@ def _build_phase3_prompt(
     phase1_text: str,
     phase2_text: str,
 ) -> str:
-    return f"""Identify key entities, concepts, and their relationships in the interview data.
+    return f"""Identify key entities, thematic-code relationships, and their relationships in the interview data.
 
 INSTRUCTIONS:
-1. Extract important entities (organizations, tools, concepts, methods, people)
-2. Map meaningful relationships — only include relationships that have clear evidence in the text
-3. Identify cause-effect chains grounded in what the interviewee(s) actually said
-4. Limit to 10-15 most important relationships, not an exhaustive list
-5. Relationship types should be specific verbs (e.g., "leads", "uses", "constrains") not vague labels
+1. Extract only important entities that participate in at least one supported relationship, causal chain, or conceptual connection.
+2. Map meaningful entity relationships — only include relationships that have clear evidence in the text.
+3. Map meaningful thematic code relationships using the exact code IDs or exact code names from Phase 1.
+4. Prefer a reusable graph over a long flat list: return roughly 6-12 entity relationships and 4-8 code relationships when the evidence supports them.
+5. Identify cause-effect chains grounded in what the interviewee(s) actually said.
+6. Relationship types should be specific verbs (e.g., "leads_to", "uses", "constrains", "qualifies") not vague labels.
 
 PREVIOUS ANALYSIS:
 Phase 1 Codes: {phase1_text}

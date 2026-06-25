@@ -88,10 +88,31 @@ class EntityRelationship(BaseModel):
     supporting_evidence: List[str] = Field(default_factory=list, description="Supporting quotes/evidence")
 
 
+class CodeRelationshipCandidate(BaseModel):
+    """Relationship between two thematic codes."""
+    source_code: str = Field(
+        ...,
+        description="Exact code ID or code name for the source code",
+    )
+    target_code: str = Field(
+        ...,
+        description="Exact code ID or code name for the target code",
+    )
+    relationship_type: str = Field(..., description="Type of analytic relationship")
+    strength: Confidence01 = Field(..., description="Relationship strength")
+    supporting_evidence: List[str] = Field(default_factory=list, description="Supporting quotes/evidence")
+    conditions: List[str] = Field(default_factory=list, description="Conditions shaping the relationship")
+    consequences: List[str] = Field(default_factory=list, description="Consequences or implications of the relationship")
+
+
 class EntityMapping(BaseModel):
     """Entity and relationship mapping from Phase 3"""
     entities: List[str] = Field(default_factory=list, description="Key entities identified")
     relationships: List[EntityRelationship] = Field(default_factory=list, description="Entity relationships")
+    code_relationships: List[CodeRelationshipCandidate] = Field(
+        default_factory=list,
+        description="Analytic relationships between thematic codes",
+    )
     cause_effect_chains: List[str] = Field(default_factory=list, description="Identified causal relationships")
     conceptual_connections: List[str] = Field(default_factory=list, description="Cross-cutting connections")
     analytical_memo: str = Field(

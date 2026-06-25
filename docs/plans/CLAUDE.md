@@ -6,13 +6,14 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 237 | Default-path operational credibility policy | High | Planned | `DEFAULT_PATH_OPERATIONAL_CREDIBILITY_POLICY.md` |
+| 238 | Thematic graph relationship hardening | High | Planned | `THEMATIC_GRAPH_RELATIONSHIP_HARDENING.md` |
 | 234 | Local Africa corpus and adjudication seed | High | Planned | `SANITIZED_CORPUS_ADJUDICATION_SEED.md` |
 
 ## Completed Plans
 
 | Name | Outcome | Record |
 |------|---------|--------|
+| Default-path operational credibility policy | Canonical docs now distinguish structural completion, operational verification, and methodological validation; a machine-readable surface-contract registry exists; active plans must declare operational-validation burden; and the docs gate validates the new policy while making default-path producer gaps explicit instead of leaving them only in chat | `DEFAULT_PATH_OPERATIONAL_CREDIBILITY_POLICY.md` |
 | Governance default enforcement hardening | Default `docs-check` now validates active plan files through the canonical plan validator, planning docs describe the stricter gate explicitly, and required-reading remains opt-in/session-based by deliberate decision rather than ambiguity | `completed/GOVERNANCE_DEFAULT_ENFORCEMENT_HARDENING.md` |
 | Governance review cleanup doc alignment | `CLAUDE.md`, `docs/plans/CLAUDE.md`, and `docs/plans/ACTIVE_SPRINT.md` now align on the repo-local governance workflow order, the sprint tracker no longer tells conflicting active-slice stories, the wrapper layer and soft-coupling policy are explicitly explained, and unresolved enforcement-scope concerns are carried forward into Plan #236 instead of being left only in chat | `completed/GOVERNANCE_REVIEW_CLEANUP_DOC_ALIGNMENT.md` |
 | Process-tracing handoff package | `qc_clean/core/process_tracing_handoff.py`, script wrappers, `qc_cli.py`, Make targets, and the reviewer-demo packet now export/validate a strict schema_version=1 QC-side package containing scope, document hashes, observed patterns, abductive candidates, analytic claims, anchors, provenance, and caveats while rejecting process-tracing inference fields; this is a boundary artifact for consumer review, not causal proof, process-tracing results, methodological-validity evidence, or SOTA evidence | `completed/PROCESS_TRACING_HANDOFF_PACKAGE.md` |

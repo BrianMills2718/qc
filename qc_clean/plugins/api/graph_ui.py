@@ -342,7 +342,7 @@ function renderRelationships() {
     animate: false,
   });
   if ((codeData.relationship_edges || []).length === 0) {
-    setEmptyNote("No code relationship edges are available for this project.");
+    setEmptyNote(codeData.empty_reason || "No code relationship edges are available for this project.");
   }
 }
 
@@ -358,7 +358,16 @@ function renderEntities() {
     "technology": "#dc2626",
   };
 
+  var relatedIds = new Set();
+  for (var edge of (entityData.edges || [])) {
+    relatedIds.add(edge.source);
+    relatedIds.add(edge.target);
+  }
+
+  var showAll = relatedIds.size === 0;
+
   for (var node of entityData.nodes) {
+    if (!showAll && !relatedIds.has(node.id)) continue;
     var color = TYPE_COLORS[node.type] || "#6b7280";
     elements.push({
       data: {
@@ -386,10 +395,13 @@ function renderEntities() {
     });
   }
 
-  var stats = entityData.nodes.length + " entities, " + (entityData.edges || []).length + " relationships";
+  var shownEntities = elements.filter(function(e) { return !e.data.source; }).length;
+  var hiddenIsolated = Math.max(0, entityData.nodes.length - shownEntities);
+  var stats = shownEntities + " linked entities, " + (entityData.edges || []).length + " relationships";
+  if (hiddenIsolated > 0) stats += ", " + hiddenIsolated + " isolated hidden";
   document.getElementById("statsBar").textContent = stats;
   document.getElementById("graphHelp").innerHTML =
-    "<strong>What this graph shows:</strong> Entity Map shows extracted entities and links between them.";
+    "<strong>What this graph shows:</strong> Entity Map shows extracted entities and links between them. Isolated entities are hidden when linked structure exists.";
 
   initCytoscape(elements, {
     name: "cose",
@@ -399,7 +411,7 @@ function renderEntities() {
     animate: false,
   });
   if ((entityData.edges || []).length === 0) {
-    setEmptyNote("No entity relationship edges are available for this project.");
+    setEmptyNote(entityData.empty_reason || "No entity relationship edges are available for this project.");
   }
 }
 

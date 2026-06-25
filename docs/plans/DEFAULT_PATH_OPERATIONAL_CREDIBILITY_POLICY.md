@@ -1,6 +1,6 @@
 # Plan #237: Default-Path Operational Credibility Policy
 
-**Status:** Planned
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** None
@@ -72,11 +72,11 @@ declared complete.
 
 ### Capability Validation
 
-- [ ] New governance artifacts are repo-local and machine-readable where
+- [x] New governance artifacts are repo-local and machine-readable where
   practical.
-- [ ] Default-path visible surfaces have an explicit policy home and validation
+- [x] Default-path visible surfaces have an explicit policy home and validation
   mode.
-- [ ] Default docs/planning gates fail loudly on clear policy violations, not on
+- [x] Default docs/planning gates fail loudly on clear policy violations, not on
   subjective quality judgments.
 
 ---
@@ -132,7 +132,7 @@ declared complete.
 | Test File | Test Function | What It Verifies |
 |-----------|---------------|------------------|
 | `tests/test_default_path_surface_contracts.py` | `test_contract_registry_validates_known_surface_fields` | The new registry schema rejects missing or malformed producer-contract entries. |
-| `tests/test_default_path_surface_contracts.py` | `test_surface_operational_readiness_flags_missing_default_producer` | The enforcement script fails loudly when a visible default-path surface has no compatible producer. |
+| `tests/test_default_path_surface_contracts.py` | `test_surface_operational_readiness_warns_when_rollout_is_warning_only` | The enforcement script records a visible default-path producer gap as a warning when the registry marks it warning-only. |
 
 ### Existing Tests (Must Pass)
 
@@ -149,21 +149,21 @@ declared complete.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] Canonical docs define a repo-wide but scoped default-path operational
+- [x] Canonical docs define a repo-wide but scoped default-path operational
   credibility policy.
-- [ ] The repo distinguishes structural completion, operational verification,
+- [x] The repo distinguishes structural completion, operational verification,
   and methodological validation in operator-facing docs.
-- [ ] A machine-readable registry exists for at least the highest-value
+- [x] A machine-readable registry exists for at least the highest-value
   default-path visible analytic surfaces.
-- [ ] The default docs/planning gate checks the new registry configuration.
-- [ ] Policy/tracker docs make clear that a visible default-path surface cannot
+- [x] The default docs/planning gate checks the new registry configuration.
+- [x] Policy/tracker docs make clear that a visible default-path surface cannot
   be called complete if its producer is absent on that path.
 
 > Process criteria:
-- [ ] This plan validates before implementation.
-- [ ] `make docs-check` passes after the changes.
-- [ ] `git diff --check` passes.
-- [ ] `make check` passes if new validator code is added.
+- [x] This plan validates before implementation.
+- [x] `make docs-check` passes after the changes.
+- [x] `git diff --check` passes.
+- [x] `make check` passes if new validator code is added.
 
 ---
 
@@ -193,3 +193,7 @@ declared complete.
 This policy is intentionally scoped. It is repo-wide as a governance standard,
 but enforcement should target default-path visible analytic surfaces and
 claim-bearing outputs, not every internal helper or compatibility wrapper.
+
+Completed on 2026-06-25 as the minimum viable rollout. The initial rollout left
+the thematic `graph.code_relationships_tab` gap explicit and warning-scoped;
+follow-on remediation and live replay validation now belong to Plan #238.

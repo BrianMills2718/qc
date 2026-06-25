@@ -163,7 +163,8 @@ def speaker_analysis_to_perspectives(
 def entity_mapping_to_entities(
     em: EntityMapping,
     doc_ids: Optional[list[str] | str] = None,
-) -> tuple[list[Entity], list[DomainEntityRelationship]]:
+    codebook: Optional[Codebook] = None,
+) -> tuple[list[Entity], list[DomainEntityRelationship], list[CodeRelationship], list[str], list[str]]:
     """Convert Phase 3 EntityMapping to domain Entities and relationships.
 
     *doc_ids* can be a single string or a list of document IDs.
@@ -196,7 +197,7 @@ def entity_mapping_to_entities(
                 )
                 entity_map[name] = ent
 
-    # Build relationships
+    # Build entity relationships
     relationships = []
     for rel in em.relationships:
         e1 = entity_map.get(rel.entity_1)
@@ -211,11 +212,46 @@ def entity_mapping_to_entities(
             )
             relationships.append(dr)
 
+    code_relationships: list[CodeRelationship] = []
+    if codebook:
+        for rel in em.code_relationships:
+            source_id = _resolve_code_identifier(rel.source_code, codebook)
+            target_id = _resolve_code_identifier(rel.target_code, codebook)
+            code_relationships.append(
+                CodeRelationship(
+                    source_code_id=source_id,
+                    target_code_id=target_id,
+                    relationship_type=rel.relationship_type,
+                    strength=rel.strength,
+                    evidence=rel.supporting_evidence,
+                    conditions=rel.conditions,
+                    consequences=rel.consequences,
+                )
+            )
+
     # Preserve cause-effect chains and conceptual connections
     causal_chains = getattr(em, "cause_effect_chains", []) or []
     connections = getattr(em, "conceptual_connections", []) or []
 
-    return list(entity_map.values()), relationships, causal_chains, connections
+    return list(entity_map.values()), relationships, code_relationships, causal_chains, connections
+
+
+def _resolve_code_identifier(identifier: str, codebook: Codebook) -> str:
+    """Resolve a code reference from phase-3 output to a domain code ID."""
+    for code in codebook.codes:
+        if code.id == identifier:
+            return code.id
+
+    by_name = codebook.get_code_by_name(identifier)
+    if by_name:
+        return by_name.id
+
+    normalized = identifier.strip().upper().replace(" ", "_")
+    for code in codebook.codes:
+        if code.id == normalized:
+            return code.id
+
+    return identifier
 
 
 # ---------------------------------------------------------------------------
@@ -402,9 +438,12 @@ def build_project_state_from_phases(
     state.perspective_analysis = speaker_analysis_to_perspectives(phase2)
 
     # Entities
-    entities, entity_rels, causal_chains, connections = entity_mapping_to_entities(phase3, doc_id)
+    entities, entity_rels, code_rels, causal_chains, connections = entity_mapping_to_entities(
+        phase3, doc_id, codebook=state.codebook
+    )
     state.entities = entities
     state.entity_relationships = entity_rels
+    state.code_relationships = code_rels
     if causal_chains or connections:
         memo_parts = []
         if causal_chains:

@@ -96,27 +96,26 @@ triage, commit, and push.
 
 ## Next Slices
 
-### Slice #237: Default-Path Operational Credibility Policy
+### Slice #238: Thematic Graph Relationship Hardening
 
-Advances: turns the newly exposed graph/review default-path gap into a
-repo-enforced governance rule rather than a one-off chat lesson.
+Advances: turns the now-explicit default-path graph warning into product
+remediation by making thematic graph surfaces truthful and useful on a real
+seed run.
 
-Vertical scope: repo-wide but scoped policy language, machine-readable
-default-path surface contracts, active-plan operational-validation
-declarations, and minimum viable docs-gate enforcement that distinguishes
-structural completion from operational verification.
+Vertical scope: default thematic relationship-stage output, graph API/UI
+truthfulness, surface-contract registry update, and real-run inspection on the
+3-document local seed corpus.
 
-De-risks: continuing default-path feature expansion while visible analytic
-surfaces remain structurally implemented but operationally hollow.
+De-risks: treating the graph as polish-stage when the default path still lacks
+first-class thematic code relationships and produces sparse entity maps.
 
-Acceptance: canonical docs distinguish structural completion, operational
-verification, and methodological validation; active plans explicitly classify
-their operational-validation burden; default-path surface contracts validate in
-the docs gate; known producer gaps remain visible rather than implicit.
+Acceptance: default thematic runs either produce first-class code
+relationships or explicitly disable the unsupported graph surface; the entity
+map is not silently hollow on the seed run; and the surface registry reflects
+the new state honestly.
 
-Audit: check for overbroad scope, noisy enforcement on internal-only work,
-hidden default-path gaps that remain undocumented, and tracker/docs mismatch
-about which slice currently has priority.
+Audit: check for fake graph density, misleading UI wording, schema drift
+between GT and thematic paths, and rerun failures on the isolated local seed.
 
 ### Slice #234: Local Africa Corpus And Adjudication Seed
 
@@ -146,6 +145,18 @@ presented as expert review, and Phase 0 package replay drift.
 Cleanup: keep artifacts in a repo-local benchmark/evidence directory with
 hashes and README caveats; update only the active docs needed to describe the
 new evidence status.
+
+### Completed Slice #237: Default-Path Operational Credibility Policy
+
+Complete on 2026-06-25. This slice turned the newly exposed graph/review
+default-path gap into a repo-enforced governance rule rather than a one-off
+chat lesson.
+
+Delivered: canonical docs now distinguish structural completion, operational
+verification, and methodological validation; a machine-readable default-path
+surface contract registry exists; active plans must declare operational-
+validation burden; and the docs gate validates the new policy while making
+default-path producer gaps explicit instead of leaving them only in chat.
 
 ## Dependency Subplans
 
