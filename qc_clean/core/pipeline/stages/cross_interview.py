@@ -11,10 +11,17 @@ import logging
 from collections import Counter, defaultdict
 from typing import Dict, List
 
-from qc_clean.core.claims import claims_for_cross_interview, replace_claims_for_stage
+from qc_clean.core.claims import (
+    claim_anchor_from_application,
+    claims_for_cross_interview,
+    replace_claims_for_stage,
+)
 from qc_clean.schemas.domain import (
     AnalysisMemo,
+    CausalInterpretationStatus,
     CrossInterviewResult,
+    ObservedPattern,
+    ObservedPatternKind,
     ProjectState,
     Provenance,
 )
@@ -50,6 +57,10 @@ class CrossInterviewStage(PipelineStage):
             created_by=Provenance.SYSTEM,
         )
         state.memos.append(memo)
+        state.observed_patterns = [
+            pattern for pattern in state.observed_patterns
+            if pattern.source_stage != self.name()
+        ] + observed_patterns_for_cross_interview(state, results, self.name())
         replace_claims_for_stage(
             state,
             self.name(),
@@ -125,17 +136,22 @@ def analyze_cross_interview_patterns(state: ProjectState) -> CrossInterviewResul
 
     # Co-occurrence: codes that appear together in the same documents
     code_pairs: Counter = Counter()
+    code_pair_docs: dict[tuple[str, str], set[str]] = defaultdict(set)
     for doc_id, codes in doc_codes.items():
         sorted_codes = sorted(codes)
         for i, c1 in enumerate(sorted_codes):
             for c2 in sorted_codes[i + 1:]:
                 code_pairs[(c1, c2)] += 1
+                code_pair_docs[(c1, c2)].add(doc_id)
 
     top_co_occurrences = [
         {
+            "code_1_id": pair[0],
+            "code_2_id": pair[1],
             "code_1": _code_name(state, pair[0]),
             "code_2": _code_name(state, pair[1]),
             "co_occurrence_count": count,
+            "doc_ids": sorted(code_pair_docs[pair]),
         }
         for pair, count in code_pairs.most_common(15)
         if count > 1
@@ -155,6 +171,110 @@ def analyze_cross_interview_patterns(state: ProjectState) -> CrossInterviewResul
 def _code_name(state: ProjectState, code_id: str) -> str:
     code = state.codebook.get_code(code_id)
     return code.name if code else code_id
+
+
+def observed_patterns_for_cross_interview(
+    state: ProjectState,
+    results: CrossInterviewResult,
+    source_stage: str = "cross_interview",
+) -> list[ObservedPattern]:
+    """Build first-class descriptive pattern records from cross-interview output."""
+    patterns: list[ObservedPattern] = []
+    apps_by_code: dict[str, list] = defaultdict(list)
+    for app in state.code_applications:
+        apps_by_code[app.code_id].append(app)
+
+    for consensus in results.consensus_themes:
+        code_id = consensus["code_id"]
+        doc_ids = sorted(results.code_doc_matrix.get(code_id, []))
+        apps = [
+            app for app in apps_by_code.get(code_id, [])
+            if app.doc_id in set(doc_ids)
+        ]
+        patterns.append(ObservedPattern(
+            id=f"pattern:{source_stage}:consensus_code:{code_id}",
+            source_stage=source_stage,
+            pattern_kind=ObservedPatternKind.CONSENSUS_CODE,
+            summary=(
+                f"Code '{consensus['code_name']}' appears in "
+                f"{consensus['doc_count']}/{consensus['total_docs']} documents."
+            ),
+            code_ids=[code_id],
+            doc_ids=doc_ids,
+            application_ids=[app.id for app in apps],
+            support_anchors=[
+                anchor for app in apps
+                if (anchor := claim_anchor_from_application(app)) is not None
+            ],
+            strength=consensus.get("strength"),
+            count=consensus["doc_count"],
+            total=consensus["total_docs"],
+            metadata={"denominator": "documents_with_code_applications"},
+            causal_interpretation_status=CausalInterpretationStatus.DESCRIPTIVE_ONLY,
+            created_by=Provenance.SYSTEM,
+        ))
+
+    for divergent in results.divergent_themes:
+        code_id = divergent["code_id"]
+        doc_ids = sorted(results.code_doc_matrix.get(code_id, []))
+        apps = [
+            app for app in apps_by_code.get(code_id, [])
+            if app.doc_id in set(doc_ids)
+        ]
+        patterns.append(ObservedPattern(
+            id=f"pattern:{source_stage}:divergent_code:{code_id}",
+            source_stage=source_stage,
+            pattern_kind=ObservedPatternKind.DIVERGENT_CODE,
+            summary=(
+                f"Code '{divergent['code_name']}' appears in "
+                f"{divergent['doc_count']}/{divergent['total_docs']} documents."
+            ),
+            code_ids=[code_id],
+            doc_ids=doc_ids,
+            application_ids=[app.id for app in apps],
+            support_anchors=[
+                anchor for app in apps
+                if (anchor := claim_anchor_from_application(app)) is not None
+            ],
+            count=divergent["doc_count"],
+            total=divergent["total_docs"],
+            metadata={"denominator": "documents_with_code_applications"},
+            causal_interpretation_status=CausalInterpretationStatus.DESCRIPTIVE_ONLY,
+            created_by=Provenance.SYSTEM,
+        ))
+
+    for co in results.co_occurrences:
+        code_ids = [co["code_1_id"], co["code_2_id"]]
+        doc_ids = sorted(co.get("doc_ids", []))
+        apps = [
+            app
+            for code_id in code_ids
+            for app in apps_by_code.get(code_id, [])
+            if app.doc_id in set(doc_ids)
+        ]
+        patterns.append(ObservedPattern(
+            id=f"pattern:{source_stage}:code_co_occurrence:{code_ids[0]}:{code_ids[1]}",
+            source_stage=source_stage,
+            pattern_kind=ObservedPatternKind.CODE_CO_OCCURRENCE,
+            summary=(
+                f"Codes '{co['code_1']}' and '{co['code_2']}' co-occur in "
+                f"{co['co_occurrence_count']} documents."
+            ),
+            code_ids=code_ids,
+            doc_ids=doc_ids,
+            application_ids=[app.id for app in apps],
+            support_anchors=[
+                anchor for app in apps
+                if (anchor := claim_anchor_from_application(app)) is not None
+            ],
+            count=co["co_occurrence_count"],
+            total=state.corpus.num_documents,
+            metadata={"denominator": "documents_with_both_codes"},
+            causal_interpretation_status=CausalInterpretationStatus.DESCRIPTIVE_ONLY,
+            created_by=Provenance.SYSTEM,
+        ))
+
+    return patterns
 
 
 def _format_cross_results(results: CrossInterviewResult) -> str:

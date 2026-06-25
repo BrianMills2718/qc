@@ -67,6 +67,21 @@ class ClaimAdjudicationStatus(str, Enum):
     NEEDS_REVIEW = "needs_review"
 
 
+class ObservedPatternKind(str, Enum):
+    """Descriptive pattern types derived from observed coding artifacts."""
+    CONSENSUS_CODE = "consensus_code"
+    DIVERGENT_CODE = "divergent_code"
+    CODE_CO_OCCURRENCE = "code_co_occurrence"
+
+
+class CausalInterpretationStatus(str, Enum):
+    """How far a descriptive pattern has moved toward causal interpretation."""
+    DESCRIPTIVE_ONLY = "descriptive_only"
+    CANDIDATE_EXPLANATION_GENERATED = "candidate_explanation_generated"
+    TESTED_BY_PROCESS_TRACING = "tested_by_process_tracing"
+    ELIGIBLE_FOR_CROSS_CASE_MODEL = "eligible_for_cross_case_model"
+
+
 class PipelineStatus(str, Enum):
     """Status of a pipeline stage."""
     PENDING = "pending"
@@ -283,6 +298,33 @@ class AnalysisMemo(BaseModel):
     code_refs: List[str] = Field(default_factory=list)
     doc_refs: List[str] = Field(default_factory=list)
     created_by: Provenance = Provenance.LLM
+    created_at: str = Field(default_factory=lambda: datetime.now().isoformat())
+
+
+class ObservedPattern(BaseModel):
+    """A first-class descriptive pattern observed in the analyzed corpus.
+
+    Patterns are accounting objects, not causal claims. They may become inputs to
+    later abductive or process-tracing stages, but they default to descriptive
+    status and must not be reported as causal proof.
+    """
+    id: str = Field(default_factory=lambda: f"pattern_{uuid.uuid4()}")
+    source_stage: str = Field(description="Pipeline stage or component that produced this pattern")
+    pattern_kind: ObservedPatternKind = Field(description="Kind of descriptive pattern observed")
+    summary: str = Field(description="Human-readable description of the observed pattern")
+    code_ids: List[str] = Field(default_factory=list, description="Code IDs involved in the pattern")
+    doc_ids: List[str] = Field(default_factory=list, description="Document IDs in the pattern scope")
+    application_ids: List[str] = Field(default_factory=list, description="CodeApplication IDs supporting the pattern")
+    support_anchors: List[ClaimAnchor] = Field(default_factory=list, description="Source spans supporting the pattern when available")
+    strength: Optional[float] = Field(default=None, description="Descriptive strength within the observed denominator, when applicable")
+    count: int = Field(default=0, description="Observed count for this pattern within the producing stage's denominator")
+    total: int = Field(default=0, description="Denominator count used by the producing stage, when applicable")
+    metadata: Dict[str, Any] = Field(default_factory=dict, description="Additional stage-specific descriptive metadata")
+    causal_interpretation_status: CausalInterpretationStatus = Field(
+        default=CausalInterpretationStatus.DESCRIPTIVE_ONLY,
+        description="Interpretive status; defaults to descriptive-only and is not causal proof.",
+    )
+    created_by: Provenance = Field(default=Provenance.SYSTEM, description="Who produced this pattern")
     created_at: str = Field(default_factory=lambda: datetime.now().isoformat())
 
 
@@ -679,6 +721,7 @@ class ProjectState(BaseModel):
 
     # Analytical artifacts
     memos: List[AnalysisMemo] = Field(default_factory=list)
+    observed_patterns: List[ObservedPattern] = Field(default_factory=list)
     claims: List[AnalyticClaim] = Field(default_factory=list)
     review_decisions: List[HumanReviewDecision] = Field(default_factory=list)
 

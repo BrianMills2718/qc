@@ -6,11 +6,13 @@ import asyncio
 import pytest
 
 from qc_clean.schemas.domain import (
+    CausalInterpretationStatus,
     Code,
     CodeApplication,
     Codebook,
     Corpus,
     Document,
+    ObservedPatternKind,
     ProjectState,
 )
 from qc_clean.core.pipeline.pipeline_engine import PipelineContext
@@ -113,6 +115,78 @@ class TestCrossInterviewAnalysis:
         )
         assert len(result.memos) == 1
         assert result.memos[0].memo_type == "cross_case"
+
+    def test_stage_populates_observed_patterns(self):
+        state = ProjectState(
+            corpus=Corpus(documents=[
+                Document(id="d1", name="one.txt", content="AI supports privacy."),
+                Document(id="d2", name="two.txt", content="AI supports privacy."),
+                Document(id="d3", name="three.txt", content="AI appears alone."),
+            ]),
+            codebook=Codebook(codes=[
+                Code(id="C1", name="AI Use"),
+                Code(id="C2", name="Privacy"),
+                Code(id="C3", name="Rare Concern"),
+            ]),
+            code_applications=[
+                CodeApplication(id="a1", code_id="C1", doc_id="d1", quote_text="AI"),
+                CodeApplication(id="a2", code_id="C2", doc_id="d1", quote_text="privacy"),
+                CodeApplication(id="a3", code_id="C1", doc_id="d2", quote_text="AI"),
+                CodeApplication(id="a4", code_id="C2", doc_id="d2", quote_text="privacy"),
+                CodeApplication(id="a5", code_id="C1", doc_id="d3", quote_text="AI"),
+                CodeApplication(id="a6", code_id="C3", doc_id="d3", quote_text="rare"),
+            ],
+        )
+
+        result = asyncio.run(CrossInterviewStage().execute(state, PipelineContext()))
+
+        kinds = {pattern.pattern_kind for pattern in result.observed_patterns}
+        assert ObservedPatternKind.CONSENSUS_CODE in kinds
+        assert ObservedPatternKind.DIVERGENT_CODE in kinds
+        assert ObservedPatternKind.CODE_CO_OCCURRENCE in kinds
+
+    def test_observed_patterns_are_descriptive_only(self, multi_doc_state):
+        result = asyncio.run(
+            CrossInterviewStage().execute(multi_doc_state, PipelineContext())
+        )
+
+        assert result.observed_patterns
+        assert {
+            pattern.causal_interpretation_status
+            for pattern in result.observed_patterns
+        } == {CausalInterpretationStatus.DESCRIPTIVE_ONLY}
+
+    def test_co_occurrence_pattern_records_code_and_doc_scope(self):
+        state = ProjectState(
+            corpus=Corpus(documents=[
+                Document(id="d1", name="one.txt", content="AI supports privacy."),
+                Document(id="d2", name="two.txt", content="AI supports privacy."),
+            ]),
+            codebook=Codebook(codes=[
+                Code(id="C1", name="AI Use"),
+                Code(id="C2", name="Privacy"),
+            ]),
+            code_applications=[
+                CodeApplication(id="a1", code_id="C1", doc_id="d1", quote_text="AI"),
+                CodeApplication(id="a2", code_id="C2", doc_id="d1", quote_text="privacy"),
+                CodeApplication(id="a3", code_id="C1", doc_id="d2", quote_text="AI"),
+                CodeApplication(id="a4", code_id="C2", doc_id="d2", quote_text="privacy"),
+            ],
+        )
+
+        result = asyncio.run(CrossInterviewStage().execute(state, PipelineContext()))
+
+        co_patterns = [
+            pattern for pattern in result.observed_patterns
+            if pattern.pattern_kind is ObservedPatternKind.CODE_CO_OCCURRENCE
+        ]
+        assert len(co_patterns) == 1
+        pattern = co_patterns[0]
+        assert pattern.code_ids == ["C1", "C2"]
+        assert pattern.doc_ids == ["d1", "d2"]
+        assert set(pattern.application_ids) == {"a1", "a2", "a3", "a4"}
+        assert pattern.count == 2
+        assert pattern.total == 2
 
 
 # ---------------------------------------------------------------------------
