@@ -858,6 +858,26 @@ class TestReviewAbductiveCandidatesEndpoint:
         resp = client.get("/projects/nonexistent/review/abductive-candidates")
         assert resp.status_code == 404
 
+    def test_bounds_limit_and_offset(self, client, tmp_store, review_project):
+        _replace_with_two_abductive_candidates(tmp_store, review_project)
+
+        resp = client.get(
+            "/projects/test-project-123/review/abductive-candidates?limit=1000"
+        )
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["limit"] == 100
+        assert data["returned"] == 2
+
+        resp = client.get(
+            "/projects/test-project-123/review/abductive-candidates?limit=-5&offset=-1"
+        )
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["limit"] == 0
+        assert data["offset"] == 0
+        assert data["returned"] == 0
+
 
 class TestReviewDecisionsEndpoint:
     def test_submit_decisions(self, client):

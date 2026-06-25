@@ -593,7 +593,7 @@ class QCAPIServer:
                 raise HTTPException(status_code=404, detail=f"Project not found: {project_id}")
 
             rm = ReviewManager(state)
-            bounded_limit = max(0, limit)
+            bounded_limit = min(max(0, limit), 100)
             bounded_offset = max(0, offset)
             all_candidates = rm.get_pending_abductive_candidates()
             candidates = all_candidates[
