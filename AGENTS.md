@@ -4,7 +4,7 @@
 <!-- generated_by: scripts/meta/render_agents_md.py -->
 <!-- canonical_claude: CLAUDE.md -->
 <!-- canonical_relationships: scripts/relationships.yaml -->
-<!-- canonical_relationships_sha256: a5ec5ec1be37 -->
+<!-- canonical_relationships_sha256: e19d71ff8243 -->
 <!-- sync_check: python scripts/meta/check_agents_sync.py --check -->
 
 This file is a generated Codex-oriented projection of repo governance.
@@ -46,6 +46,11 @@ qualitative/mixed-methods evaluation scaffolds. Do **not** reimplement
 process-tracing likelihood-vector Bayesian support here; instead make QC outputs
 exportable as evidence, patterns, claims, and candidate explanations that a
 causal/process-tracing engine can consume through typed contracts.
+
+**Governance workflow order:** For governance-sensitive repo work, follow this
+sequence unless a canonical plan says otherwise: `review -> cleanup ->
+documentation updates -> planning updates -> implementation`. Do not harden or
+expand enforcement before the policy surface has been reviewed and aligned.
 
 ## Commands
 

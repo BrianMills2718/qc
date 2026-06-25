@@ -12,6 +12,8 @@ Track all implementation work here.
 
 | Name | Outcome | Record |
 |------|---------|--------|
+| Governance default enforcement hardening | Default `docs-check` now validates active plan files through the canonical plan validator, planning docs describe the stricter gate explicitly, and required-reading remains opt-in/session-based by deliberate decision rather than ambiguity | `completed/GOVERNANCE_DEFAULT_ENFORCEMENT_HARDENING.md` |
+| Governance review cleanup doc alignment | `CLAUDE.md`, `docs/plans/CLAUDE.md`, and `docs/plans/ACTIVE_SPRINT.md` now align on the repo-local governance workflow order, the sprint tracker no longer tells conflicting active-slice stories, the wrapper layer and soft-coupling policy are explicitly explained, and unresolved enforcement-scope concerns are carried forward into Plan #236 instead of being left only in chat | `completed/GOVERNANCE_REVIEW_CLEANUP_DOC_ALIGNMENT.md` |
 | Process-tracing handoff package | `qc_clean/core/process_tracing_handoff.py`, script wrappers, `qc_cli.py`, Make targets, and the reviewer-demo packet now export/validate a strict schema_version=1 QC-side package containing scope, document hashes, observed patterns, abductive candidates, analytic claims, anchors, provenance, and caveats while rejecting process-tracing inference fields; this is a boundary artifact for consumer review, not causal proof, process-tracing results, methodological-validity evidence, or SOTA evidence | `completed/PROCESS_TRACING_HANDOFF_PACKAGE.md` |
 | Abductive candidate review workflow | `ReviewManager`, API review-list, shared review decision POST, CLI summary/JSON-file path, and reviewer-demo snapshots now support `target_type="abductive_candidate"` review for provisional candidate explanations; approve moves candidates to `needs_evidence_review`, reject marks `rejected`, and modify is restricted to bounded explanatory fields; this is governed hypothesis review, not causal proof, process-tracing evidence, methodological-validity evidence, or SOTA evidence | `completed/ABDUCTIVE_CANDIDATE_REVIEW_WORKFLOW.md` |
 | Design-plan long-term execution spine | `docs/LONG_TERM_EXECUTION_PLAN.md` now provides a design-plan-aligned execution spine with frame, authority order, modality split, risk-ordered roadmap, explicit next two slices, dependency subplans, concern cadence, and stop conditions; this is planning/governance only, not methodology evidence, causal proof, process-tracing evidence, or SOTA evidence | `completed/DESIGN_PLAN_LONG_TERM_EXECUTION_SPINE.md` |
@@ -258,6 +260,11 @@ Track all implementation work here.
 
 ## Creating a New Plan
 
+**Repo-local work order:** For governance-sensitive work, the default sequence
+is `review -> cleanup -> documentation updates -> planning updates ->
+implementation`. Do not jump straight to implementation hardening when review,
+cleanup, or canonical-doc alignment is still pending.
+
 1. Copy `TEMPLATE.md` to a descriptive `NAME.md` (e.g. `INV9_CLAIM_LEDGER.md`)
 2. Fill in gap, steps, required tests
 3. Add a row to the **Active Plans** table above
@@ -270,6 +277,10 @@ Not everything needs a plan. Use `[Trivial]` for:
 - No changes to `src/` (production code)
 - No new files created
 
+Anything outside that narrow exemption should assume a plan is required,
+especially for pipeline behavior, evaluation/governance checks, export/audit
+behavior, CLI/API/MCP surfaces, or claim-bearing documentation/status changes.
+
 ```bash
 git commit -m "[Trivial] Fix typo in README"
 ```
@@ -279,3 +290,19 @@ git commit -m "[Trivial] Fix typo in README"
 1. Move the plan doc to `completed/NAME.md` (add a one-paragraph outcome + verification evidence at the top)
 2. Remove its row from **Active Plans** and add one to **Completed Plans** pointing at `completed/NAME.md`
 3. `python scripts/sync_plan_status.py --check` (run by `make docs-check`) verifies every Completed row resolves and every record file is listed
+
+## Enforcement Notes
+
+`make docs-check` currently enforces:
+
+- markdown link integrity
+- doc-coupling config validation
+- completed-plan table consistency
+- active-plan validation through `scripts/meta/validate_plan.py`
+- `AGENTS.md` sync against canonical inputs
+
+Additional governance tools exist but are not in the default `docs-check`
+path yet, including session/read-log-based required-reading enforcement. That
+check remains opt-in because it depends on per-session read tracking rather than
+a repo-stable CI artifact. If a slice depends on it, say so explicitly in the
+plan and run it as a named gate.

@@ -490,10 +490,10 @@ check:  ## Run deterministic tests + lint + docs checks
 lint:  ## Run the configured Ruff lint gate
 	python -m ruff check .
 
-docs-check:  ## Run documentation and governance checks
+docs-check:  ## Run documentation and governance checks, including active plan validation
 	python scripts/check_markdown_links.py
 	python scripts/check_doc_coupling.py --validate-config
-	python scripts/sync_plan_status.py --check
+	python scripts/sync_plan_status.py --check --validate-active
 	python scripts/meta/check_agents_sync.py --check
 
 clean:  ## Remove local Python/test caches

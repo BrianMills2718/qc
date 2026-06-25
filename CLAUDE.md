@@ -31,6 +31,11 @@ process-tracing likelihood-vector Bayesian support here; instead make QC outputs
 exportable as evidence, patterns, claims, and candidate explanations that a
 causal/process-tracing engine can consume through typed contracts.
 
+**Governance workflow order:** For governance-sensitive repo work, follow this
+sequence unless a canonical plan says otherwise: `review -> cleanup ->
+documentation updates -> planning updates -> implementation`. Do not harden or
+expand enforcement before the policy surface has been reviewed and aligned.
+
 ## What This Project Does
 
 LLM-powered qualitative and mixed-methods research workbench. The product goal is

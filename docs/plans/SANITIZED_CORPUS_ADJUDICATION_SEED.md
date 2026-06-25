@@ -13,8 +13,8 @@
 **Current:** QC has protocol, validation, scorecard, package, review, and
 handoff surfaces, plus deterministic synthetic reviewer-demo packets. Those
 prove software pathways and provenance checks, but they do not provide a
-shareable corpus, adjudication seed, populated human labels, grounded-theory
-fidelity evidence, or SOTA evidence.
+reviewable local corpus instrument, adjudication seed, populated human labels,
+grounded-theory fidelity evidence, or SOTA evidence.
 
 **Target:** Create the first small, local QC evidence instrument: a discovered
 Africa transcript subset, explicit provenance/inventory record, explicit scope
@@ -28,9 +28,9 @@ adjudication packet and do not claim expert evidence.
 
 **Why:** The capability graph says the next risk is not more abductive UI; it
 is whether the qualitative evidence engine can produce and govern reviewable
-data on a corpus that can be inspected, shared, and later scored. This slice
-keeps grounded research and QC foundations ahead of mixed-methods/process-
-tracing integration.
+data on a corpus that can be locally inspected, caveated, and later scored.
+This slice keeps grounded research and QC foundations ahead of mixed-methods/
+process-tracing integration.
 
 ---
 
@@ -149,7 +149,9 @@ Potential implementation paths if gaps are found:
    inclusion/exclusion boundaries, population-generalization caveats, and
    license/provenance.
 4. Create an isolated repo-local project store for the seed so no default
-   project state is mutated.
+   project state is mutated. Use `QC_PROJECTS_DIR=<repo-local path>` for
+   commands that do not yet expose explicit `--projects-dir` / `PROJECTS_DIR`
+   flags, including the current adjudication-sample surface.
 5. Ingest and run the QC pipeline on the seed with the smallest defensible
    settings for reviewable output. Record trace IDs, model/config metadata, and
    D10 observability if live LLM calls are made.
@@ -249,8 +251,9 @@ implementation uncovers a missing CLI/Make/project-store capability.
 
 Do not use this slice to claim methodological validity, full grounded theory,
 human adjudication, SOTA evidence, causal/process-tracing proof, or abductive
-quality. The first valid outcome is a reviewable, shareable instrument. Evidence
-claims start only after real labels and scorecards exist.
+quality. The first valid outcome is a reviewable local instrument and manual-
+ready adjudication packet, not a publication-cleared or sanitized corpus.
+Evidence claims start only after real labels and scorecards exist.
 
 Longer term, sanitization should become an agent-drivable capability with
 review checkpoints, not an informal manual pre-step. That work is deferred and

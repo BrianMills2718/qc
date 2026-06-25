@@ -91,25 +91,26 @@ triage, commit, and push.
 
 ## Next Slices
 
-### Slice #234: Sanitized Corpus And Adjudication Seed
+### Slice #234: Local Africa Corpus And Adjudication Seed
 
 Advances: turns the existing software/provenance surfaces into a small
-shareable evidence instrument without claiming expert evidence before labels
-exist.
+reviewable local evidence instrument without claiming expert evidence before
+labels exist.
 
 Vertical scope: corpus policy, scope record, isolated project store, pipeline
 output packet, audit manifest, unlabeled adjudication sample, pre-registered
 adjudication protocol, and protocol/sample preflight. If human labels are
 supplied, include response validation, response preflight, D3/D7 import, strict
-Phase 0 package writing, and package replay.
+Phase 0 package writing, and package replay. Use `QC_PROJECTS_DIR` for any
+command path that still lacks explicit isolated-store flags.
 
 De-risks: building more abductive UI or workbench integration on top of
 synthetic-only software demos.
 
-Acceptance: a shareable corpus seed and manual-ready adjudication packet exist
-with explicit caveats. Any imported D3/D7 labels come only from explicit human
-review or from an explicitly synthetic smoke run. No methodological-validity,
-SOTA, full-GT, or causal/process-tracing claims are made.
+Acceptance: a reviewable local corpus seed and manual-ready adjudication packet
+exist with explicit caveats. Any imported D3/D7 labels come only from explicit
+human review or from an explicitly synthetic smoke run. No methodological-
+validity, SOTA, full-GT, or causal/process-tracing claims are made.
 
 Audit: check corpus license/provenance, scope overreach, hidden default project
 store mutation, stale sample/protocol hashes, accidental agent-generated labels

@@ -28,13 +28,29 @@ highest-value documented lane.
    pausing after the verified commit unless a canonical stop condition is
    reached.
 
-**Active checkpoint:** Plan #234
-`SANITIZED_CORPUS_ADJUDICATION_SEED.md` is the active slice. It should create a
-local Africa corpus instrument, scope record, output packet, unlabeled
-adjudication sample, and validated/preflighted protocol. If real human labels
-are supplied, it can import D3/D7 packages and run a strict Phase 0 package;
-otherwise it must stop at a manual-ready packet and say no expert evidence
-exists yet.
+**Active checkpoints:**
+
+- **Plan #234** `SANITIZED_CORPUS_ADJUDICATION_SEED.md`
+  is the current execution-roadmap slice after governance alignment. It
+  should create a local Africa corpus instrument, scope record, output packet,
+  unlabeled adjudication sample, and validated/preflighted protocol. If real
+  human labels are supplied, it can import D3/D7 packages and run a strict
+  Phase 0 package; otherwise it must stop at a manual-ready packet and say no
+  expert evidence exists yet. The corpus remains local/restricted in this
+  slice; sanitization and public-shareability are deferred.
+
+**Completed checkpoint:** Plan #236
+`completed/GOVERNANCE_DEFAULT_ENFORCEMENT_HARDENING.md` hardened the default
+governance path in a scoped way by making active-plan validation part of the
+default docs gate. Required-reading remains opt-in/session-based by explicit
+decision, and no soft couplings were promoted in this slice.
+
+**Completed checkpoint:** Plan #235
+`completed/GOVERNANCE_REVIEW_CLEANUP_DOC_ALIGNMENT.md` finished the governance
+review/cleanup/documentation/planning alignment slice. It aligned canonical
+workflow-order docs, removed the sprint tracker's conflicting active-slice
+story, clarified wrapper/soft-coupling intent, and carried unresolved concerns
+forward into Plan #236 instead of leaving them only in chat.
 
 **Completed checkpoint:** Capability dependency graph
 On 2026-06-25, `docs/CAPABILITY_DEPENDENCY_GRAPH.md` and
@@ -1401,3 +1417,13 @@ held-out live-baseline result,
 committed/scored live adversarial prompt-injection benchmark,
 public benchmark timing evidence, or expert-parity/SOTA
 evidence.
+Current governance sequencing note on 2026-06-25:
+
+1. Review
+2. Cleanup
+3. Documentation updates
+4. Planning updates
+5. Implementation
+
+This sequencing is now reflected in the active checkpoint section above through
+Plan #235.

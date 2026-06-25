@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
-"""Compatibility wrapper for the canonical doc-coupling checker."""
+"""Compatibility wrapper for the canonical doc-coupling checker.
+
+Canonical implementation lives in ``scripts/meta/check_doc_coupling.py``.
+Keep this wrapper because operator habits, hooks, and docs already point at the
+short path; the goal is one implementation with multiple stable entrypoints,
+not duplicate logic.
+"""
 
 from __future__ import annotations
 

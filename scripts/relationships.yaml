@@ -6,11 +6,18 @@ required_reading:
 
 governance: []
 
-# Doc-code couplings: when a `sources` file changes, the coupled `docs` should be
-# reconsidered. Kept `soft: true` so these warn (not hard-fail) — they flag
-# "you touched invariant-bearing code; check the doc still matches", which is the
-# real risk this repo's docs drifted into (claims outrunning code). Not vacuous:
-# `make docs-check` (--validate-config) verifies every doc path here exists.
+# Doc-code couplings: when a `sources` file changes, the coupled `docs` should
+# be reconsidered.
+#
+# Current repo policy keeps these `soft: true` so they remain review prompts,
+# not merge blockers: "you touched invariant-bearing code; check the doc still
+# matches." This is intentional while the repo is still aligning policy,
+# cleanup, and default enforcement. A later hardening slice may selectively
+# promote some couplings to hard checks once the canonical/default workflow is
+# settled.
+#
+# Not vacuous: `make docs-check` (`--validate-config`) still verifies every doc
+# path here exists, so the configuration itself cannot silently rot.
 couplings:
   - sources: ["qc_clean/core/grounding.py", "qc_clean/core/segmentation.py"]
     docs: ["docs/PROJECT_THEORY_AND_GOALS.md", "docs/EVALUATION_HARNESS.md"]
