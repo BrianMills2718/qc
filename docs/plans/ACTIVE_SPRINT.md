@@ -22,14 +22,18 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Brian review gate: Plan #208 clarified code-only bulk approval and repaired
-   graph tab rendering. The corrected demo server is running for review.
-2. After review or explicit continuation, continue through the ranked roadmap
-   without pausing after each verified
-   commit unless a canonical stop condition is reached.
+1. Complete Plan #231, the design-plan long-term execution spine. This is a
+   planning/documentation alignment slice that makes the continuation path
+   explicit before the next implementation slice.
+2. Continue to the next unambiguous slice named by that execution spine without
+   pausing after the verified commit unless a canonical stop condition is
+   reached.
 
-**Active checkpoint:** None. Select the next highest-value documented lane from
-the roadmap and create its plan before implementation.
+**Active checkpoint:** Plan #231
+`DESIGN_PLAN_LONG_TERM_EXECUTION_SPINE.md` will consolidate the scattered
+design-plan ingredients into one long-term execution plan with explicit next
+slices, concern-register cadence, dependency subplans, and stop conditions.
+This is planning/governance work only, not methodology evidence or SOTA proof.
 
 **Completed checkpoint:** Plan #230
 `completed/ABDUCTIVE_REVIEWER_DEMO_PACKET.md` extended the deterministic

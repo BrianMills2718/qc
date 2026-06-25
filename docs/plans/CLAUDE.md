@@ -6,7 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| — | — | — | — | — |
+| 231 | Design-plan long-term execution spine | High | Planned | `DESIGN_PLAN_LONG_TERM_EXECUTION_SPINE.md` |
 
 ## Completed Plans
 
