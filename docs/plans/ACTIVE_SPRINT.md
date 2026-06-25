@@ -28,11 +28,17 @@ highest-value documented lane.
    without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Plan #226 `OBSERVED_PATTERN_SUBSTRATE.md` is planned.
-This slice adds first-class descriptive observed-pattern records from
-cross-interview outputs as the substrate for future abductive synthesis and
-workbench handoff. It is descriptive pattern accounting only, not causal proof,
-abductive-synthesis evidence, methodological-validity evidence, or SOTA.
+**Active checkpoint:** None. Select the next highest-value documented lane from
+the roadmap and create its plan before implementation.
+
+**Completed checkpoint:** Plan #226
+`completed/OBSERVED_PATTERN_SUBSTRATE.md` added first-class descriptive
+`ObservedPattern` records for cross-interview consensus, divergent-code, and
+code co-occurrence outputs. Pattern records carry code/doc/application scope,
+anchors where available, and default
+`causal_interpretation_status="descriptive_only"`. This is descriptive pattern
+accounting only, not causal proof, abductive-synthesis evidence,
+methodological-validity evidence, or SOTA evidence.
 
 **Completed checkpoint:** Plan #225
 `completed/GT_CANONICAL_SEGMENT_UNIVERSE.md` unified grounded-theory

@@ -6,12 +6,13 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 226 | Observed pattern substrate | High | Planned | `OBSERVED_PATTERN_SUBSTRATE.md` |
+| — | — | — | — | — |
 
 ## Completed Plans
 
 | Name | Outcome | Record |
 |------|---------|--------|
+| Observed pattern substrate | Cross-interview consensus, divergent-code, and code co-occurrence outputs now become first-class descriptive `ObservedPattern` records with code/doc/application scope, anchors where available, and default `causal_interpretation_status="descriptive_only"`; this is descriptive pattern accounting only, not causal proof or abductive synthesis | `completed/OBSERVED_PATTERN_SUBSTRATE.md` |
 | GT canonical segment universe | GT constant comparison now traverses canonical char-anchored `Segment` records, populates `ProjectState.segments` when missing, preserves existing segment universes when present, and carries segment IDs/offsets into prompt data without claiming GT saturation, methodological validity, abductive synthesis, or SOTA evidence | `completed/GT_CANONICAL_SEGMENT_UNIVERSE.md` |
 | Sampling-frame adequacy protocol preflight | Sampling-frame adequacy protocols and reviewer result packages can now be validated/preflighted through core contracts, scripts, Make, and `qc_cli.py`, while remaining protocol/preflight infrastructure only rather than sampling-frame adequacy evidence, population-generalization permission, methodological validity, or SOTA evidence | `completed/SAMPLING_FRAME_ADEQUACY_PROTOCOL_PREFLIGHT.md` |
 | INV-4 theory ledger refresh | `docs/PROJECT_THEORY_AND_GOALS.md` and `CLAUDE.md` now record the committed synthetic INV-4 theoretical-sampling smoke artifact while preserving caveats that it is workflow/provenance smoke only, not theoretical sampling execution, sampling adequacy, category saturation, GT-fidelity, methodological validity, or SOTA evidence | `completed/INV4_THEORY_LEDGER_REFRESH.md` |

@@ -1,5 +1,28 @@
 # Plan #226: Observed Pattern Substrate
 
+## Outcome
+
+Completed 2026-06-25. Added a first-class descriptive `ObservedPattern` domain
+object plus `ObservedPatternKind` and `CausalInterpretationStatus` enums.
+`ProjectState.observed_patterns` now stores pattern records. Cross-interview
+execution writes deterministic observed patterns for consensus-code,
+divergent-code, and code co-occurrence outputs while preserving existing memos
+and claim-ledger behavior. Pattern records carry code/doc/application scope,
+support anchors where available, count/denominator metadata, and default
+`causal_interpretation_status="descriptive_only"`. This is descriptive pattern
+accounting and future abductive/workbench input only, not causal proof,
+abductive synthesis, methodological-validity evidence, or SOTA evidence.
+
+Verification:
+
+- `python -m pytest tests/test_cross_interview.py -q` — 18 passed.
+- `python -m pytest tests/test_claims.py -q` — 15 passed.
+- `python -m pytest tests/test_pipeline_stages.py -q` — 24 passed.
+- `python -m ruff check qc_clean/schemas/domain.py qc_clean/core/pipeline/stages/cross_interview.py tests/test_cross_interview.py` — passed.
+- `make docs-check` — passed.
+- `git diff --check` — passed.
+- `make check` — 1326 passed, 1 skipped, 8 deselected; Ruff/docs passed; type check not configured.
+
 **Status:** Planned
 **Type:** implementation
 **Priority:** High
@@ -161,4 +184,3 @@ capability will consume these patterns and should declare boundary contracts the
 This is the first abductive-substrate slice, not the abductive synthesis stage.
 It deliberately stops at descriptive pattern records so later causal/abductive
 work has a clean input without implying causal interpretation.
-
