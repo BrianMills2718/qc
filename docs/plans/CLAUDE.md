@@ -6,7 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| — | — | — | — | — |
+| #229 | Abductive candidate read surfaces | High | Planned | `ABDUCTIVE_CANDIDATE_READ_SURFACES.md` |
 
 ## Completed Plans
 
