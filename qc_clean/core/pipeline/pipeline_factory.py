@@ -16,6 +16,7 @@ def create_pipeline(
     methodology: str = "default",
     on_stage_complete=None,
     enable_human_review: bool = False,
+    enable_abductive_synthesis: bool = False,
 ) -> AnalysisPipeline:
     """
     Build an AnalysisPipeline with the appropriate stages.
@@ -28,6 +29,9 @@ def create_pipeline(
         Async callback invoked after each stage (e.g. for persistence).
     enable_human_review : bool
         If True, the coding stage will pause for human review.
+    enable_abductive_synthesis : bool
+        If True, insert the provisional abductive candidate explanation stage
+        after cross-interview analysis and before negative-case analysis.
     """
     from .stages.ingest import IngestStage
     from .stages.thematic_coding import ThematicCodingStage
@@ -37,6 +41,7 @@ def create_pipeline(
 
     from .stages.cross_interview import CrossInterviewStage
     from .stages.negative_case import NegativeCaseStage
+    from .stages.abductive_synthesis import AbductiveSynthesisStage
 
     if methodology == Methodology.GROUNDED_THEORY.value or methodology == "grounded_theory":
         from .stages.gt_constant_comparison import GTConstantComparisonStage
@@ -51,6 +56,7 @@ def create_pipeline(
             GTSelectiveCodingStage(),
             GTTheoryIntegrationStage(),
             CrossInterviewStage(),  # only runs if corpus > 1 doc
+            *([AbductiveSynthesisStage()] if enable_abductive_synthesis else []),
             # Disconfirmation runs LAST so it covers the codebook + cross-interview
             # claims. NOTE: it does not yet challenge synthesis/perspective/entity/
             # GT outputs — INV-6 is PARTIAL (see PROJECT_THEORY_AND_GOALS.md).
@@ -65,6 +71,7 @@ def create_pipeline(
             RelationshipStage(),
             SynthesisStage(),
             CrossInterviewStage(),  # only runs if corpus > 1 doc
+            *([AbductiveSynthesisStage()] if enable_abductive_synthesis else []),
             # Disconfirmation runs LAST so it covers the codebook + cross-interview
             # claims. NOTE: it does not yet challenge synthesis/perspective/entity/
             # GT outputs — INV-6 is PARTIAL (see PROJECT_THEORY_AND_GOALS.md).
@@ -72,8 +79,8 @@ def create_pipeline(
         ]
 
     logger.info(
-        "Created %s pipeline with %d stages (human_review=%s)",
-        methodology, len(stages), enable_human_review,
+        "Created %s pipeline with %d stages (human_review=%s, abductive=%s)",
+        methodology, len(stages), enable_human_review, enable_abductive_synthesis,
     )
     return AnalysisPipeline(stages=stages, on_stage_complete=on_stage_complete)
 

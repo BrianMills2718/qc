@@ -185,6 +185,7 @@ make errors             # Show recent error breakdown
 # Pipeline (local run; `project run` needs no server, `analyze` needs the API server)
 python qc_cli.py project run <project_id>
 python qc_cli.py project run <project_id> --exhaustive   # code every segment (INV-8)
+python qc_cli.py project run <project_id> --abductive    # opt-in provisional candidate explanations
 python qc_cli.py project scope <project_id> --phenomenon "..."  # show/update corpus scope
 python qc_cli.py project claims <project_id> --limit 20 --offset 0 --show-scope --show-anchors  # inspect first-class claim ledger scope/anchors (INV-9)
 python qc_cli.py project patterns <project_id> --limit 20 --offset 0 --show-anchors  # inspect descriptive observed patterns
@@ -207,7 +208,7 @@ read `CLAUDE.md` directly.
 ### Workflow
 
 1. Feed transcript files (txt/docx/pdf/rtf) to the pipeline
-2. Default 7-stage pipeline: Ingest → Thematic Coding → Perspective Analysis → Relationship Mapping → Synthesis → Cross-Interview → Negative Case (disconfirmation runs last; INV-6)
+2. Default 7-stage pipeline: Ingest → Thematic Coding → Perspective Analysis → Relationship Mapping → Synthesis → Cross-Interview → Negative Case (disconfirmation runs last; INV-6). `project run --abductive` inserts provisional abductive candidate explanation generation between Cross-Interview and Negative Case.
 3. Human review via CLI or browser; IRR via `project irr`
 4. Inspect claim ledger via `project claims` or `/projects/{project_id}/claims?limit=100&offset=0`
 5. Inspect descriptive observed patterns via `project patterns` or `/projects/{project_id}/patterns?limit=100&offset=0`

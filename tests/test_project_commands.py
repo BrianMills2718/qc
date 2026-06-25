@@ -694,7 +694,12 @@ class TestProjectRun:
         )
         tmp_store.save(state)
 
-        def fake_create_pipeline(methodology, on_stage_complete, enable_human_review):
+        def fake_create_pipeline(
+            methodology,
+            on_stage_complete,
+            enable_human_review,
+            enable_abductive_synthesis=False,
+        ):
             return AnalysisPipeline(
                 stages=[MockCodingStage()],
                 on_stage_complete=on_stage_complete,
@@ -737,7 +742,12 @@ class TestProjectRun:
         )
         tmp_store.save(state)
 
-        def fake_create_pipeline(methodology, on_stage_complete, enable_human_review):
+        def fake_create_pipeline(
+            methodology,
+            on_stage_complete,
+            enable_human_review,
+            enable_abductive_synthesis=False,
+        ):
             return AnalysisPipeline(
                 stages=[MockFailingRunStage()],
                 on_stage_complete=on_stage_complete,

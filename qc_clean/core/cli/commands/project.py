@@ -246,10 +246,12 @@ def _run_project(store: ProjectStore, args) -> int:
         store.save(s)
 
     enable_review = getattr(args, "review", False)
+    enable_abductive = getattr(args, "abductive", False)
     pipeline = create_pipeline(
         methodology=state.config.methodology.value,
         on_stage_complete=save_callback,
         enable_human_review=enable_review,
+        enable_abductive_synthesis=enable_abductive,
     )
 
     from qc_clean.core.pipeline.pipeline_engine import PipelineContext
@@ -271,6 +273,8 @@ def _run_project(store: ProjectStore, args) -> int:
         print("  Exhaustive coding: every segment decided (INV-8)")
     if enable_review:
         print("  Human review: enabled")
+    if enable_abductive:
+        print("  Abductive synthesis: enabled (provisional candidates only)")
     print()
 
     try:
@@ -321,6 +325,8 @@ def _run_project(store: ProjectStore, args) -> int:
             print(f"  Core categories: {len(state.core_categories)}")
         if state.theoretical_model:
             print(f"  Theoretical model: {state.theoretical_model.model_name}")
+        if state.abductive_explanations:
+            print(f"  Abductive candidates: {len(state.abductive_explanations)}")
         print(f"\n  Export with: qc_cli project export {project_id} --format json")
     else:
         print(f"\nPipeline ended with status: {state.pipeline_status.value}")

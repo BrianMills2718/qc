@@ -82,6 +82,14 @@ class CausalInterpretationStatus(str, Enum):
     ELIGIBLE_FOR_CROSS_CASE_MODEL = "eligible_for_cross_case_model"
 
 
+class AbductiveExplanationStatus(str, Enum):
+    """Review and promotion status for an abductive candidate explanation."""
+    CANDIDATE = "candidate"
+    NEEDS_EVIDENCE_REVIEW = "needs_evidence_review"
+    REJECTED = "rejected"
+    PROMOTED_TO_PROCESS_TRACING = "promoted_to_process_tracing"
+
+
 class PipelineStatus(str, Enum):
     """Status of a pipeline stage."""
     PENDING = "pending"
@@ -325,6 +333,44 @@ class ObservedPattern(BaseModel):
         description="Interpretive status; defaults to descriptive-only and is not causal proof.",
     )
     created_by: Provenance = Field(default=Provenance.SYSTEM, description="Who produced this pattern")
+    created_at: str = Field(default_factory=lambda: datetime.now().isoformat())
+
+
+class AbductiveCandidateExplanation(BaseModel):
+    """A provisional explanation candidate generated from observed patterns.
+
+    Candidate explanations are hypotheses for review and future process tracing.
+    They are not causal proof and are not promoted into analytic claims by
+    default.
+    """
+    id: str = Field(default_factory=lambda: f"abductive_{uuid.uuid4()}")
+    source_stage: str = Field(description="Pipeline stage or component that produced this candidate")
+    source_pattern_ids: List[str] = Field(description="ObservedPattern IDs this candidate attempts to explain")
+    explanation_text: str = Field(description="Plain-language provisional explanation")
+    mechanism_summary: str = Field(description="Concise mechanism or process implied by the explanation")
+    rival_explanations: List[str] = Field(
+        default_factory=list,
+        description="Plausible alternative explanations that could account for the same pattern",
+    )
+    observable_implications: List[str] = Field(
+        default_factory=list,
+        description="What should be observable in the data or future process trace if this explanation is right",
+    )
+    evidence_gaps: List[str] = Field(
+        default_factory=list,
+        description="Missing evidence needed before this candidate could be treated as more than provisional",
+    )
+    confidence: Optional[float] = Field(
+        default=None,
+        ge=0.0,
+        le=1.0,
+        description="Optional provisional confidence; not calibration evidence",
+    )
+    status: AbductiveExplanationStatus = Field(
+        default=AbductiveExplanationStatus.CANDIDATE,
+        description="Candidate review/promotion status; defaults to provisional candidate",
+    )
+    created_by: Provenance = Field(default=Provenance.LLM, description="Who produced this candidate")
     created_at: str = Field(default_factory=lambda: datetime.now().isoformat())
 
 
@@ -722,6 +768,7 @@ class ProjectState(BaseModel):
     # Analytical artifacts
     memos: List[AnalysisMemo] = Field(default_factory=list)
     observed_patterns: List[ObservedPattern] = Field(default_factory=list)
+    abductive_explanations: List[AbductiveCandidateExplanation] = Field(default_factory=list)
     claims: List[AnalyticClaim] = Field(default_factory=list)
     review_decisions: List[HumanReviewDecision] = Field(default_factory=list)
 

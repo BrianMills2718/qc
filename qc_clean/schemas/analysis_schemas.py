@@ -134,3 +134,47 @@ class AnalysisSynthesis(BaseModel):
         default="",
         description="Analytical memo: record your reasoning, uncertainties, and emerging patterns",
     )
+
+
+class AbductiveCandidateExplanationItem(BaseModel):
+    """One provisional explanation candidate for observed descriptive patterns."""
+    source_pattern_ids: List[str] = Field(
+        ...,
+        description="ObservedPattern IDs this candidate explains; every ID must come from the prompt",
+    )
+    explanation_text: str = Field(
+        ...,
+        description="Plain-language provisional explanation of the observed pattern",
+    )
+    mechanism_summary: str = Field(
+        ...,
+        description="Concise mechanism/process that would make the explanation plausible",
+    )
+    rival_explanations: List[str] = Field(
+        default_factory=list,
+        description="Alternative explanations that could account for the same observed pattern",
+    )
+    observable_implications: List[str] = Field(
+        default_factory=list,
+        description="Observable traces or data patterns expected if this explanation is right",
+    )
+    evidence_gaps: List[str] = Field(
+        default_factory=list,
+        description="Missing evidence needed before upgrading this candidate",
+    )
+    confidence: Confidence01 = Field(
+        default=0.5,
+        description="Provisional confidence only; not calibrated probability or validation evidence",
+    )
+
+
+class AbductiveCandidateExplanationResponse(BaseModel):
+    """Structured abductive candidate explanation response."""
+    candidates: List[AbductiveCandidateExplanationItem] = Field(
+        default_factory=list,
+        description="Provisional candidate explanations for observed patterns",
+    )
+    analytical_memo: str = Field(
+        default="",
+        description="Methodological memo noting uncertainty, rivalry, and evidence gaps",
+    )

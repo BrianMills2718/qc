@@ -1370,6 +1370,8 @@ Examples:
     proj_run.add_argument('--review', action='store_true', help='Enable human review pauses')
     proj_run.add_argument('--exhaustive', action='store_true',
                           help='Code every segment (examined-and-judged coverage, INV-8) instead of surfacing example quotes')
+    proj_run.add_argument('--abductive', action='store_true',
+                          help='Enable provisional abductive candidate explanations from observed patterns')
 
     proj_export = project_subparsers.add_parser('export', help='Export project results')
     proj_export.add_argument('project_id', help='Project ID')
