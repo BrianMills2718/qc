@@ -14,19 +14,19 @@ policy:
     methodological: "Frozen inputs, protocols, reviewer or benchmark evidence, statistical gates where relevant, and caveats."
 capabilities:
   - id: Q0
-    capability: "Corpus provenance + sanitization gate"
+    capability: "Local corpus provenance + inventory"
     owner: qualitative_coding
     depends_on: []
     status: planned
-    success_criteria: "Candidate corpus has recorded source, rights/consent/license status, de-identification decisions, exclusion log, and residual-risk caveat before ingestion."
-    verification: "Corpus manifest, sanitization/de-identification checklist, and future sanitizer tests."
-    claim_licensed: "Material is safe enough for the stated use; not proof of representativeness or validity."
+    success_criteria: "Candidate corpus is discoverable through tracked metadata; source, local path, file counts, git-ignore status, and current use restrictions are recorded without exposing raw contents."
+    verification: "docs/LOCAL_DATA_INVENTORY.md and future corpus manifest."
+    claim_licensed: "Local materials can be found and handled deliberately; this does not make them sanitized, publishable, representative, or valid."
   - id: Q1
     capability: "Ingestion + ProjectState"
     owner: qualitative_coding
     depends_on: [Q0]
     status: implemented
-    success_criteria: "Supported files load into one typed ProjectState; failures are explicit. For shareable/evidence corpora, Q0 passes before ingestion."
+    success_criteria: "Supported files load into one typed ProjectState; failures are explicit. For shareable/evidence corpora, Q0 inventory/provenance exists before ingestion."
     verification: "Deterministic tests and project-run smoke/e2e."
     claim_licensed: "Software can ingest and persist project state."
   - id: Q2

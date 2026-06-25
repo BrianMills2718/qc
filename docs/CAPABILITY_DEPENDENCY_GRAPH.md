@@ -33,7 +33,7 @@ product-central before the QC and grounded-research foundations are credible.
 ```mermaid
 flowchart TD
   subgraph QC["qualitative_coding"]
-    Q0["Q0 Corpus provenance + sanitization gate"]
+    Q0["Q0 Local corpus provenance + inventory"]
     Q1["Q1 Ingestion + ProjectState"]
     Q2["Q2 Span anchors + document hashes"]
     Q3["Q3 Segment universe + coverage denominator"]
@@ -84,7 +84,7 @@ flowchart TD
 
 | ID | Capability | Owner | Depends on | Current status | Success criteria | Verification / artifact | Claim licensed when passing |
 |---|---|---|---|---|---|---|---|
-| Q0 | Corpus provenance + sanitization gate | QC | none | Planned for Plan #234; future automation needed | Candidate corpus has recorded source, rights/consent/license status, de-identification decisions, exclusion log, and residual-risk caveat before ingestion. | corpus manifest; sanitization/de-identification checklist; future sanitizer tests | Material is safe enough for the stated use; not proof of representativeness or validity. |
+| Q0 | Local corpus provenance + inventory | QC | none | Planned for Plan #234 | Candidate corpus is discoverable through tracked metadata; source, local path, file counts, git-ignore status, and current use restrictions are recorded without exposing raw contents. | `docs/LOCAL_DATA_INVENTORY.md`; future corpus manifest | Local materials can be found and handled deliberately; this does not make them sanitized, publishable, representative, or valid. |
 | Q1 | Ingestion + `ProjectState` | QC | Q0 for shareable/evidence corpora; none for local synthetic smoke | Implemented | Supported file types load into one typed state; failures are explicit. | deterministic tests; `project run` smoke/e2e | Software can ingest and persist project state. |
 | Q2 | Span anchors + document hashes | QC | Q1 | Mostly met | Evidence quotes resolve to document ID, char offsets, and hash; unresolvable/ambiguous quotes are dropped or warned. | `make bench` D1; `verify_grounding` | Evidence is inspectable and anchored, not methodologically validated. |
 | Q3 | Segment universe + coverage denominator | QC | Q1, Q2 | Met in exhaustive mode; partial by default | Every segment has a stable ID and offsets; exhaustive mode records `coded` / `no_code` / `not_examined`. | `make bench` D2; `project run --exhaustive` | Coverage denominator exists; not code validity. |
@@ -117,8 +117,9 @@ flowchart TD
 
 1. **QC foundation hardening:** Q0-Q6, then a small real/shareable corpus and
    adjudication seed. This should precede more abductive UI work. For Brian's
-   possible Africa-related transcripts, locate them first, then run the Q0
-   provenance/sanitization gate before ingestion.
+   possible Africa-related transcripts, locate and inventory them first. Full
+   sanitization/de-identification tooling is a deferred feature, not a current
+   Plan #234 blocker.
 2. **Grounded-research legitimacy:** G1-G4 only if the project wants stronger
    grounded-theory claims. Otherwise keep the label "GT-inspired."
 3. **Evidence packages:** Q7-Q8 with populated D3/D7 and at least one benchmark

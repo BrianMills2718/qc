@@ -22,7 +22,7 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #234, sanitized corpus plus adjudication seed, before making
+1. Execute Plan #234, local Africa corpus plus adjudication seed, before making
    abductive UI/workbench reasoning more product-central.
 2. Continue through the execution spine without
    pausing after the verified commit unless a canonical stop condition is
@@ -30,7 +30,7 @@ highest-value documented lane.
 
 **Active checkpoint:** Plan #234
 `SANITIZED_CORPUS_ADJUDICATION_SEED.md` is the active slice. It should create a
-small shareable corpus instrument, scope record, output packet, unlabeled
+local Africa corpus instrument, scope record, output packet, unlabeled
 adjudication sample, and validated/preflighted protocol. If real human labels
 are supplied, it can import D3/D7 packages and run a strict Phase 0 package;
 otherwise it must stop at a manual-ready packet and say no expert evidence

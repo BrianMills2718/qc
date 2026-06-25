@@ -6,7 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| 234 | Sanitized corpus and adjudication seed | High | Planned | `SANITIZED_CORPUS_ADJUDICATION_SEED.md` |
+| 234 | Local Africa corpus and adjudication seed | High | Planned | `SANITIZED_CORPUS_ADJUDICATION_SEED.md` |
 
 ## Completed Plans
 

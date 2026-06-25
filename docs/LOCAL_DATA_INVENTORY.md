@@ -12,10 +12,10 @@ contents or full participant-level file listings.
 - Raw interview/transcript files under `data/interviews/` are local restricted
   materials unless a later manifest says otherwise.
 - Do not commit raw transcript contents.
-- Do not ingest these materials into evidence artifacts until Plan #234's Q0
-  provenance/sanitization gate passes.
-- Use this file to discover candidate corpora; use a separate corpus manifest
-  for any sanitized/evidence-ready subset.
+- This file is only a discovery/provenance aid. It does not sanitize or clear
+  the materials for publication.
+- Sanitization/de-identification tooling is deferred. Use a separate future
+  corpus manifest for any sanitized/evidence-ready subset.
 
 ## Candidate Africa Corpus
 
@@ -23,8 +23,8 @@ Likely source for Plan #234.
 
 | Path | Files | Size | Git status | Notes |
 |---|---:|---:|---|---|
-| `data/interviews/africa_interviews/` | 85 `.docx` | ~2.4 MB | ignored by `.gitignore` via `**/interviews/` | Larger local corpus. Contains a subfolder named `For Brian_cleaned notes`, but this name is not sufficient evidence that the files are safe to publish or ingest as sanitized evidence. |
-| `data/interviews/africa_3_interviews_for_test/` | 3 `.docx` | ~84 KB | ignored by `.gitignore` via `**/interviews/` | Small candidate subset for manual Q0 inspection. |
+| `data/interviews/africa_interviews/` | 85 `.docx` | ~2.4 MB | ignored by `.gitignore` via `**/interviews/` | Larger local corpus. Contains a subfolder named `For Brian_cleaned notes`, but this inventory does not verify sanitization or publication safety. |
+| `data/interviews/africa_3_interviews_for_test/` | 3 `.docx` | ~84 KB | ignored by `.gitignore` via `**/interviews/` | Small candidate subset for Plan #234 local work. |
 | `data/samples/temp_test_interviews/africa/` | 3 `.txt` | ~44 KB | ignored by `.gitignore` via `temp*` | Small text extracts. Treat as local restricted material until reviewed. |
 
 Metadata-only discovery commands run on 2026-06-25:
@@ -40,8 +40,8 @@ Result summary:
 - Candidate Africa materials exist locally in this repo.
 - They are not tracked by git.
 - The raw files should not be committed.
-- The next safe action is a metadata/sensitivity inventory, then manual
-  de-identification review on a small subset.
+- The next safe action is to use the 3-file subset for local Plan #234 corpus
+  work without committing raw contents. Sanitization is deferred.
 
 ## RAND-Related Check
 

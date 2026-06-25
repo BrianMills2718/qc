@@ -86,7 +86,7 @@ triage, commit, and push.
 | 2 | Process-tracing handoff package | Deductive boundary, exploratory consumer quality | The future workbench boundary needs a typed export before process-tracing agents can align safely. | A versioned package exports patterns, candidate explanations, claims, anchors, scope, and caveats with validation and no Bayesian/process-tracing internals. |
 | 3 | Process-tracing consumer review | Exploratory instrument | The QC-side package needed a consumer readout before being treated as a stable QC fixture. | Complete on 2026-06-25: process-tracing review accepted the deterministic fixture as QC-side adapter input with no QC schema changes, while keeping runnable PT source-packet/research-design fields outside QC. |
 | 4 | Reviewer-facing abductive UI | Deductive UI contract over stabilized review semantics | Browser UI should follow stable CLI/API semantics, not define them. | UI plan exists first; browser surfaces expose candidate review without changing API semantics; screenshots/manual inspection pass. |
-| 5 | Sanitized corpus and adjudication seed | Exploratory evidence instrument | Software surfaces are now visible; next proof requires real or shareable data. | A small corpus, scope record, output packet, and adjudication protocol exist without claiming broad validity. |
+| 5 | Local Africa corpus and adjudication seed | Exploratory evidence instrument | Software surfaces are now visible; next proof requires real data handled with explicit scope and caveats. | A small local corpus, scope record, output packet, and adjudication protocol exist without claiming broad validity or publication readiness. |
 | 6 | Populated D3/D7/D8/D9 evaluation lanes | Deductive packages over exploratory quality | Existing protocols need populated results to become evidence. | Frozen inputs, protocols, result packages, scorecards, and caveated reports exist. |
 
 ## Next Slices
@@ -202,5 +202,6 @@ completed on 2026-06-25 with no requested QC schema changes.
 Plan #234 is now the active QC-local slice. It follows
 `docs/CAPABILITY_DEPENDENCY_GRAPH.md` by hardening the qualitative/grounded-
 research foundation before making abductive reasoning more product-central.
-The recommended order remains: sanitized corpus plus adjudication seed,
-populated D3/D7 evidence, then more abductive UI/workbench integration.
+The recommended order remains: local Africa corpus plus adjudication seed,
+populated D3/D7 evidence, deferred sanitizer/public-corpus work, then more
+abductive UI/workbench integration.
