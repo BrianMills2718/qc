@@ -1,6 +1,6 @@
 # Qualitative Coding Analysis System
 
-*Last Updated: 2026-06-22*
+*Last Updated: 2026-06-25*
 
 > **Canonical status/theory docs (read before describing the system).** This
 > file is the **operational** reference (architecture, commands, config). The
@@ -13,9 +13,39 @@
 > "full grounded theory", "SOTA", or "inter-rater reliability" without the
 > caveats in theory doc §14.
 
+**Product philosophy:** Build a methodology-aware qualitative and mixed-methods
+research workbench that automates the labor-intensive parts of PhD-level
+research while adding technical rigor that many qualitative workflows lack:
+exhaustive evidence handling, quantitative pattern analysis, causal/abductive
+modeling, disconfirmation, reproducibility, and auditable exports. Do not frame
+the product as merely an LLM coding tool or a grounded-theory tool; grounded
+theory is one analytic mode inside the broader ambition.
+
 ## What This Project Does
 
-LLM-powered qualitative coding analysis for interview transcripts. Accepts .txt, .docx, .pdf, .rtf files. Supports two methodologies:
+LLM-powered qualitative and mixed-methods research workbench. The product goal is
+to ingest qualitative evidence and produce high-quality, PhD-level research
+artifacts: codebooks, grounded claims, themes, negative cases, mixed-methods
+patterns, causal/abductive hypotheses, review packets, and auditable exports.
+The motivation is explicit: qualitative and mixed-methods research are
+kneecapped by the human labor required for coding, comparison, memoing,
+disconfirmation, adjudication, and reporting, and by the technical barrier that
+keeps many qualitative workflows from using rigorous quantitative pattern
+analysis. This repo should automate the labor-intensive parts with LLMs and
+programmatic verification while making the quantitative/causal layer accessible
+inside the same research workflow.
+
+The long-term target is beyond-SOTA research automation across the whole bundle:
+qualitative depth, exhaustive/anchored evidence handling, mixed-methods pattern
+analysis, causal/abductive theory building, disconfirmation, reproducibility,
+cost visibility, human review, and standard QDA interop. Do not narrow the
+vision to "an LLM coding tool" or "a grounded-theory tool." Grounded theory is
+one supported analytic mode; the broader product is a methodology-aware
+qualitative and mixed-methods workbench that can move from data to defensible
+research outputs.
+
+Current software accepts .txt, .docx, .pdf, .rtf files. Supports two implemented
+methodologies:
 
 - **Default/Thematic Analysis** - 7-stage pipeline: Ingest -> Thematic Coding -> Perspective Analysis -> Relationship Mapping -> Synthesis -> Cross-Interview Analysis -> Negative Case Analysis
 - **Grounded Theory** - 7-stage pipeline: Ingest -> Constant Comparison Coding -> Axial Coding -> Selective Coding -> Theory Integration -> Cross-Interview Analysis -> Negative Case Analysis

@@ -16,7 +16,7 @@ Canonical governance sources:
 
 ## Purpose
 
-*Last Updated: 2026-06-22*
+*Last Updated: 2026-06-25*
 
 > **Canonical status/theory docs (read before describing the system).** This
 > file is the **operational** reference (architecture, commands, config). The
@@ -28,6 +28,14 @@ Canonical governance sources:
 > about *status or claims*, the theory doc wins. Do not assert "validated",
 > "full grounded theory", "SOTA", or "inter-rater reliability" without the
 > caveats in theory doc §14.
+
+**Product philosophy:** Build a methodology-aware qualitative and mixed-methods
+research workbench that automates the labor-intensive parts of PhD-level
+research while adding technical rigor that many qualitative workflows lack:
+exhaustive evidence handling, quantitative pattern analysis, causal/abductive
+modeling, disconfirmation, reproducibility, and auditable exports. Do not frame
+the product as merely an LLM coding tool or a grounded-theory tool; grounded
+theory is one analytic mode inside the broader ambition.
 
 ## Commands
 
