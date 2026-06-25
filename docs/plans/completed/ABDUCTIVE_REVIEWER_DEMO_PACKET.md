@@ -1,6 +1,32 @@
 # Plan #230: Abductive Reviewer Demo Packet
 
-**Status:** Planned
+## Outcome
+
+Completed 2026-06-25. Extended the deterministic reviewer demo packet with
+synthetic observed-pattern and provisional abductive-candidate outputs. The
+fixture state now includes three `ObservedPattern` records and two
+`AbductiveCandidateExplanation` records tied to those patterns. `make
+reviewer-demo OUTPUT=test_output/reviewer_demo` now writes pattern and
+abductive API snapshots, README inspection commands for `project patterns` and
+`project abductive`, and Markdown sections for both output surfaces. I generated
+the packet locally and self-inspected CLI, Markdown, and snapshot outputs before
+handoff. This remains synthetic software-surface demonstration only, not live
+LLM evidence, methodological-validity evidence, causal proof, or SOTA evidence.
+
+Verification:
+
+- `python -m pytest tests/test_reviewer_demo.py -q` — 2 passed.
+- `python -m ruff check scripts/build_reviewer_demo.py tests/test_reviewer_demo.py` — passed.
+- `make reviewer-demo OUTPUT=test_output/reviewer_demo` — passed and wrote `patterns_snapshot` / `abductive_snapshot`.
+- `QC_PROJECTS_DIR=test_output/reviewer_demo/projects python qc_cli.py project patterns reviewer-demo --show-anchors --limit 5` — self-inspected 3 observed patterns with anchors/caveats.
+- `QC_PROJECTS_DIR=test_output/reviewer_demo/projects python qc_cli.py project abductive reviewer-demo --limit 5` — self-inspected 2 provisional candidates with rivals/implications/gaps/caveats.
+- `grep` inspection of `test_output/reviewer_demo/exports/reviewer-demo-report.md` confirmed `Observed Patterns` and `Abductive Candidate Explanations` sections.
+- `python -m json.tool test_output/reviewer_demo/api_snapshots/abductive_snapshot.json` and `patterns_snapshot.json` confirmed expected row shapes.
+- `make docs-check` — passed.
+- `git diff --check` — passed.
+- `make check` — 1340 passed, 1 skipped, 8 deselected; Ruff/docs passed; type check not configured.
+
+**Status:** Complete
 **Type:** implementation
 **Priority:** High
 **Blocked By:** #226, #227, #228, #229
@@ -60,10 +86,10 @@ already-implemented local surfaces.
 
 ### Capability Validation
 
-- [ ] Packet includes local project state and exports.
-- [ ] Packet includes observed-pattern and abductive candidate API snapshots.
-- [ ] README contains CLI/API inspection commands for both surfaces.
-- [ ] Demo output caveats say synthetic packet only, not validity/SOTA evidence.
+- [x] Packet includes local project state and exports.
+- [x] Packet includes observed-pattern and abductive candidate API snapshots.
+- [x] README contains CLI/API inspection commands for both surfaces.
+- [x] Demo output caveats say synthetic packet only, not validity/SOTA evidence.
 
 ---
 
@@ -125,24 +151,24 @@ already-implemented local surfaces.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] Demo project state contains synthetic observed patterns.
-- [ ] Demo project state contains synthetic provisional abductive candidate
+- [x] Demo project state contains synthetic observed patterns.
+- [x] Demo project state contains synthetic provisional abductive candidate
   explanations tied to observed patterns.
-- [ ] Packet manifest includes observed-pattern and abductive-candidate API
+- [x] Packet manifest includes observed-pattern and abductive-candidate API
   snapshots.
-- [ ] Markdown report includes observed-pattern and abductive-candidate sections.
-- [ ] README tells Brian exactly which CLI/API surfaces to inspect.
-- [ ] All demo caveats remain synthetic/software-surface only.
+- [x] Markdown report includes observed-pattern and abductive-candidate sections.
+- [x] README tells Brian exactly which CLI/API surfaces to inspect.
+- [x] All demo caveats remain synthetic/software-surface only.
 
 > Process criteria:
-- [ ] Required focused tests pass.
-- [ ] `make reviewer-demo OUTPUT=test_output/reviewer_demo` passes.
-- [ ] Self-inspection commands are run and summarized.
-- [ ] Ruff passes for touched files.
-- [ ] `make docs-check` passes.
-- [ ] `git diff --check` passes.
-- [ ] `make check` passes.
-- [ ] Verified work is committed and pushed.
+- [x] Required focused tests pass.
+- [x] `make reviewer-demo OUTPUT=test_output/reviewer_demo` passes.
+- [x] Self-inspection commands are run and summarized.
+- [x] Ruff passes for touched files.
+- [x] `make docs-check` passes.
+- [x] `git diff --check` passes.
+- [x] `make check` passes.
+- [x] Verified work is committed and pushed.
 
 ---
 

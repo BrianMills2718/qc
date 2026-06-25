@@ -28,12 +28,17 @@ highest-value documented lane.
    without pausing after each verified
    commit unless a canonical stop condition is reached.
 
-**Active checkpoint:** Plan #230 `ABDUCTIVE_REVIEWER_DEMO_PACKET.md` will extend
-the deterministic reviewer demo packet with synthetic observed-pattern and
-provisional abductive-candidate outputs, API snapshots, README inspection
-commands, and self-inspection before Brian review. This is a synthetic
-software-surface demo only, not live LLM evidence, methodological-validity
-evidence, or SOTA evidence.
+**Active checkpoint:** None. Select the next highest-value documented lane from
+the roadmap and create its plan before implementation.
+
+**Completed checkpoint:** Plan #230
+`completed/ABDUCTIVE_REVIEWER_DEMO_PACKET.md` extended the deterministic
+reviewer demo packet with synthetic observed-pattern and provisional
+abductive-candidate outputs, API snapshots, README inspection commands, and
+Markdown report sections. The packet was generated at
+`test_output/reviewer_demo` and self-inspected through CLI, Markdown, and JSON
+snapshot surfaces. This is a synthetic software-surface demo only, not live LLM
+evidence, causal proof, methodological-validity evidence, or SOTA evidence.
 
 **Completed checkpoint:** Plan #229
 `completed/ABDUCTIVE_CANDIDATE_READ_SURFACES.md` added bounded read surfaces for

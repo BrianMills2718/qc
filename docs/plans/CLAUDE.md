@@ -6,12 +6,13 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
-| #230 | Abductive reviewer demo packet | High | Planned | `ABDUCTIVE_REVIEWER_DEMO_PACKET.md` |
+| — | — | — | — | — |
 
 ## Completed Plans
 
 | Name | Outcome | Record |
 |------|---------|--------|
+| Abductive reviewer demo packet | `make reviewer-demo` now builds a deterministic synthetic packet with observed-pattern and provisional abductive-candidate fixture rows, API snapshots, README inspection commands, and Markdown report sections; the packet was generated and self-inspected locally and remains a software-surface demo only, not live LLM evidence, causal proof, methodological-validity evidence, or SOTA evidence | `completed/ABDUCTIVE_REVIEWER_DEMO_PACKET.md` |
 | Abductive candidate read surfaces | `project abductive`, `/projects/{project_id}/abductive-explanations`, project summary counts, and Markdown report output now expose bounded provisional abductive candidate explanation rows with source pattern IDs, mechanisms, rivals, observable implications, evidence gaps, confidence, and candidate status; this is inspection only, not causal proof, process-tracing results, methodological-validity evidence, or SOTA evidence | `completed/ABDUCTIVE_CANDIDATE_READ_SURFACES.md` |
 | Abductive candidate explanation substrate | `project run --abductive` now inserts an opt-in abductive synthesis stage after cross-interview analysis and before negative-case analysis, persisting typed provisional `AbductiveCandidateExplanation` records with source pattern IDs, mechanism summaries, rivals, observable implications, evidence gaps, and candidate status while keeping default pipeline order unchanged; these are hypotheses for review and future process-tracing handoff, not causal proof or methodological-validity/SOTA evidence | `completed/ABDUCTIVE_CANDIDATE_EXPLANATION_SUBSTRATE.md` |
 | Observed pattern read surfaces | `project patterns`, `/projects/{project_id}/patterns`, project summary counts, and Markdown report output now expose bounded first-class observed-pattern rows with kind/stage/scope/count metadata and descriptive-only causal interpretation status; this is read-surface work only, not causal proof, abductive synthesis, methodological-validity evidence, or SOTA evidence | `completed/OBSERVED_PATTERN_READ_SURFACES.md` |
