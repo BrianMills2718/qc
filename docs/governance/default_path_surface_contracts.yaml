@@ -33,17 +33,17 @@ surfaces:
     default_paths: ["thematic_analysis", "grounded_theory"]
     producer_contracts:
       - path: thematic_analysis
-        status: partial
+        status: present
         producers:
           - qc_clean/core/pipeline/stages/relationship.py
-        note: Relationship stage uses explicit codebook reference to extract code relationships; output density varies with corpus and LLM.
+        note: Validated on the 3-document local seed replay in Plan #238; output density still varies by corpus and LLM.
       - path: grounded_theory
         status: present
         producers:
           - qc_clean/core/pipeline/stages/gt_axial_coding.py
     operational_validation:
       real_run_requirement: required
-      rollout_status: warning_until_density_criteria_exist
+      rollout_status: enforced_now
 
   - surface_id: graph.entity_map_tab
     label: Graph UI entity map tab

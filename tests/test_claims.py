@@ -520,6 +520,58 @@ def test_relationship_evidence_anchors_are_not_guessed_when_ambiguous_or_missing
         assert claim.supporting_anchors == []
 
 
+def test_long_relationship_evidence_is_skipped_but_code_scope_support_remains():
+    """Long relationship evidence should not trigger expensive fuzzy grounding."""
+    doc = Document(id="d1", name="d.txt", content="AI changed workflow in the clinic.")
+    app = CodeApplication(
+        id="a1",
+        code_id="C1",
+        doc_id="d1",
+        quote_text="AI changed workflow",
+        start_char=0,
+        end_char=19,
+        quote_hash="hash-a1",
+    )
+    long_evidence = " ".join(["This summary paraphrases the broader relationship evidence."] * 12)
+    state = ProjectState(
+        corpus=Corpus(documents=[doc]),
+        codebook=Codebook(codes=[
+            Code(id="C1", name="AI Use"),
+            Code(id="C2", name="Workflow"),
+        ]),
+        code_applications=[app],
+        code_relationships=[
+            CodeRelationship(
+                id="cr-long",
+                source_code_id="C1",
+                target_code_id="C2",
+                relationship_type="changes",
+                evidence=[long_evidence],
+            )
+        ],
+        entity_relationships=[
+            DomainEntityRelationship(
+                id="er-long",
+                entity_1_id="e1",
+                entity_2_id="e2",
+                relationship_type="changes",
+                supporting_evidence=[long_evidence],
+            )
+        ],
+    )
+    state.entities = [Entity(id="e1", name="AI"), Entity(id="e2", name="Workflow")]
+
+    claims = {claim.origin_object_id: claim for claim in claims_for_relationships(state)}
+
+    code_claim = claims["cr-long"]
+    assert code_claim.support_status == ClaimSupportStatus.SUPPORTED
+    assert [anchor.code_application_id for anchor in code_claim.supporting_anchors] == ["a1"]
+
+    entity_claim = claims["er-long"]
+    assert entity_claim.support_status == ClaimSupportStatus.NEEDS_ANCHOR
+    assert entity_claim.supporting_anchors == []
+
+
 def test_cross_case_builder_uses_code_application_support():
     """Cross-case claims inherit support from code applications for their code."""
     docs = [

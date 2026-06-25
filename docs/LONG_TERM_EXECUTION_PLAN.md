@@ -96,27 +96,6 @@ triage, commit, and push.
 
 ## Next Slices
 
-### Slice #238: Thematic Graph Relationship Hardening
-
-Advances: turns the now-explicit default-path graph warning into product
-remediation by making thematic graph surfaces truthful and useful on a real
-seed run.
-
-Vertical scope: default thematic relationship-stage output, graph API/UI
-truthfulness, surface-contract registry update, and real-run inspection on the
-3-document local seed corpus.
-
-De-risks: treating the graph as polish-stage when the default path still lacks
-first-class thematic code relationships and produces sparse entity maps.
-
-Acceptance: default thematic runs either produce first-class code
-relationships or explicitly disable the unsupported graph surface; the entity
-map is not silently hollow on the seed run; and the surface registry reflects
-the new state honestly.
-
-Audit: check for fake graph density, misleading UI wording, schema drift
-between GT and thematic paths, and rerun failures on the isolated local seed.
-
 ### Slice #234: Local Africa Corpus And Adjudication Seed
 
 Advances: turns the existing software/provenance surfaces into a small
@@ -157,6 +136,18 @@ verification, and methodological validation; a machine-readable default-path
 surface contract registry exists; active plans must declare operational-
 validation burden; and the docs gate validates the new policy while making
 default-path producer gaps explicit instead of leaving them only in chat.
+
+### Completed Slice #238: Thematic Graph Relationship Hardening
+
+Complete on 2026-06-25. This slice turned the explicit default-path graph
+warning into product remediation.
+
+Delivered: the default thematic relationship stage now emits first-class code
+relationships; graph API/UI empty states are truthful; linked-only entity
+rendering reduces misleading sparsity; long relationship-evidence paraphrases
+no longer trigger pathological fuzzy grounding; and real-run replay on the
+3-document local seed produced 6 code relationships plus a denser 15-node/8-edge
+entity graph.
 
 ## Dependency Subplans
 

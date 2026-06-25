@@ -74,11 +74,11 @@ not add a new external callable boundary.
 
 ### Capability Validation
 
-- [ ] Default thematic runs produce truthful graph data for visible graph tabs,
+- [x] Default thematic runs produce truthful graph data for visible graph tabs,
   or the UI/API clearly marks unsupported surfaces unavailable.
-- [ ] Relationship-stage schema/adapter changes preserve typed domain-model
+- [x] Relationship-stage schema/adapter changes preserve typed domain-model
   contracts.
-- [ ] Real-run graph inspection on the 3-document local seed is part of
+- [x] Real-run graph inspection on the 3-document local seed is part of
   acceptance, not an optional afterthought.
 
 ---
@@ -153,21 +153,21 @@ not add a new external callable boundary.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] Default thematic runs produce non-empty `state.code_relationships`, or
+- [x] Default thematic runs produce non-empty `state.code_relationships`, or
   the graph surface is explicitly disabled/unavailable on that path.
-- [ ] The entity map is not trivially sparse on the 3-document local seed
+- [x] The entity map is not trivially sparse on the 3-document local seed
   relative to extracted entities, or the remaining limitation is explicitly
   documented in UI/registry wording.
-- [ ] Graph API/UI wording is truthful about what each graph view is showing and
+- [x] Graph API/UI wording is truthful about what each graph view is showing and
   what is unavailable.
-- [ ] The surface-contract registry no longer treats the thematic
+- [x] The surface-contract registry no longer treats the thematic
   `graph.code_relationships_tab` gap as implicit.
 
 > Process criteria:
-- [ ] Focused tests pass.
-- [ ] Relevant docs/plans are updated.
-- [ ] Real-run inspection is performed on the local seed corpus.
-- [ ] `git diff --check` passes.
+- [x] Focused tests pass.
+- [x] Relevant docs/plans are updated.
+- [x] Real-run inspection is performed on the local seed corpus.
+- [x] `git diff --check` passes.
 
 ---
 
@@ -187,7 +187,9 @@ This slice should prefer truthful end-to-end default-path behavior over adding
 more graph surface area. If the best immediate fix is to disable or relabel an
 unsupported surface before a stronger producer lands, do that first.
 
-Update on 2026-06-25: the thematic producer contract has been implemented and
-focused tests/governance checks are green, but a fresh live local replay on the
-3-document seed did not complete in-turn. Treat real-run graph validation as
-still pending before marking this slice complete.
+Completed on 2026-06-25. Real-run validation used the saved 3-document local
+seed from Plan #234 and replayed the patched relationship stage into
+`test_output/plan238_graph_hardening_2026_06_25/relationship_stage_replay_state.json`.
+That replay produced 6 thematic code relationships, 8 entity relationships, and
+15 linked entities, replacing the earlier sparse default-path result of 0 code
+relationships, 14 entity relationships, and 59 extracted entities.

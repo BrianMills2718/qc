@@ -21,6 +21,9 @@ from qc_clean.schemas.domain import (
     Provenance,
 )
 
+MAX_RELATIONSHIP_EVIDENCE_CHARS_FOR_ANCHORING = 280
+MAX_RELATIONSHIP_EVIDENCE_TOKENS_FOR_ANCHORING = 48
+
 NEGATIVE_CASE_TARGET_KINDS = {
     ClaimKind.CODE,
     ClaimKind.CROSS_CASE,
@@ -634,6 +637,8 @@ def _anchors_for_evidence(
     anchors: list[ClaimAnchor] = []
     seen: set[tuple[str, int | None, int | None]] = set()
     for evidence in evidence_items:
+        if not _should_attempt_evidence_anchor(evidence):
+            continue
         anchor = _anchor_from_quote(state, evidence)
         if anchor is None:
             continue
@@ -643,6 +648,23 @@ def _anchors_for_evidence(
         seen.add(key)
         anchors.append(anchor)
     return anchors
+
+
+def _should_attempt_evidence_anchor(evidence: str) -> bool:
+    """Return whether an evidence string is short enough for quote anchoring.
+
+    Relationship evidence often contains paraphrases or multi-sentence summaries
+    rather than direct quotes. Long fuzzy grounding attempts on those strings are
+    expensive and not reliable enough to justify the cost.
+    """
+    normalized = evidence.strip()
+    if not normalized:
+        return False
+    if len(normalized) > MAX_RELATIONSHIP_EVIDENCE_CHARS_FOR_ANCHORING:
+        return False
+    if len(normalized.split()) > MAX_RELATIONSHIP_EVIDENCE_TOKENS_FOR_ANCHORING:
+        return False
+    return True
 
 
 def _merge_scoped_and_evidence_anchors(

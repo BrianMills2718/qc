@@ -39,16 +39,16 @@ highest-value documented lane.
   Phase 0 package; otherwise it must stop at a manual-ready packet and say no
   expert evidence exists yet. The corpus remains local/restricted in this
   slice; sanitization and public-shareability are deferred. The first local
-  seed packet now exists, but graph inspection exposed a separate default-path
-  graph utility gap, which is why Plan #238 now precedes further continuation.
+  seed packet now exists, and the separate default-path graph utility gap that
+  had blocked continuation has now been addressed in completed Plan #238.
 
 **Completed checkpoint:** Plan #238
-`THEMATIC_GRAPH_RELATIONSHIP_HARDENING.md` made the thematic relationship stage
-reliably produce `state.code_relationships` by passing an explicit codebook
-reference list to the LLM prompt. Surface registry updated from missing/warning
-to partial/warning-until-density-criteria-exist. All 4 required tests pass
-(test_relationship_stage.py, test_graph_api.py); 1366/1366 deterministic tests
-pass.
+`THEMATIC_GRAPH_RELATIONSHIP_HARDENING.md` made the default thematic graph path
+truthful and materially more useful by emitting first-class code relationships,
+reducing misleading entity-map sparsity, tightening long-evidence relationship
+claim grounding, and validating the result on a real 3-document local seed
+replay that produced 6 code relationships and an 8-edge / 15-node linked
+entity graph.
 
 **Completed checkpoint:** Plan #237
 `DEFAULT_PATH_OPERATIONAL_CREDIBILITY_POLICY.md` established the repo-wide but
