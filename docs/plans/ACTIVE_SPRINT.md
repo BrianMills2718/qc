@@ -22,13 +22,23 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #234, local Africa corpus plus adjudication seed, before making
-   abductive UI/workbench reasoning more product-central.
-2. Continue through the execution spine without
+1. Execute Plan #237, default-path operational credibility policy and minimum
+   governance enforcement, before resuming further default-path feature
+   expansion or treating current UI/graph surfaces as polish-stage work.
+2. Resume Plan #234, local Africa corpus plus adjudication seed, with the
+   current local packet treated as a successful review instrument rather than a
+   completed default-path product proof.
+3. Continue through the execution spine without
    pausing after the verified commit unless a canonical stop condition is
    reached.
 
 **Active checkpoints:**
+
+- **Plan #237** `DEFAULT_PATH_OPERATIONAL_CREDIBILITY_POLICY.md`
+  is the current governance slice before further default-path qualitative-coding
+  implementation continues. It should document and enforce the rule that
+  visible default-path analytic surfaces need declared producers and
+  operational-validation requirements before they are treated as complete.
 
 - **Plan #234** `SANITIZED_CORPUS_ADJUDICATION_SEED.md`
   is the current execution-roadmap slice after governance alignment. It
@@ -37,7 +47,10 @@ highest-value documented lane.
   human labels are supplied, it can import D3/D7 packages and run a strict
   Phase 0 package; otherwise it must stop at a manual-ready packet and say no
   expert evidence exists yet. The corpus remains local/restricted in this
-  slice; sanitization and public-shareability are deferred.
+  slice; sanitization and public-shareability are deferred. The first local
+  seed packet now exists, but the graph/review inspection surfaced a separate
+  policy/governance gap around default-path operational credibility, which is
+  why Plan #237 now precedes further continuation.
 
 **Completed checkpoint:** Plan #236
 `completed/GOVERNANCE_DEFAULT_ENFORCEMENT_HARDENING.md` hardened the default

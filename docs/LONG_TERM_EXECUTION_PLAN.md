@@ -33,6 +33,11 @@ is evidenced only by frozen corpora, protocols, benchmark artifacts, or
 human-adjudicated packages. SOTA or methodological-validity language remains
 blocked by `docs/PROJECT_THEORY_AND_GOALS.md` claim discipline.
 
+For default-path visible analytic surfaces, there is now a middle bar between
+"implemented" and "methodologically validated": operational verification. A
+surface can be structurally implemented and still fail operational credibility
+if its producer is absent or weak on the default path.
+
 ## Authority Order
 
 1. `CLAUDE.md` / `AGENTS.md` - operational rules and current commands.
@@ -90,6 +95,28 @@ triage, commit, and push.
 | 6 | Populated D3/D7/D8/D9 evaluation lanes | Deductive packages over exploratory quality | Existing protocols need populated results to become evidence. | Frozen inputs, protocols, result packages, scorecards, and caveated reports exist. |
 
 ## Next Slices
+
+### Slice #237: Default-Path Operational Credibility Policy
+
+Advances: turns the newly exposed graph/review default-path gap into a
+repo-enforced governance rule rather than a one-off chat lesson.
+
+Vertical scope: repo-wide but scoped policy language, machine-readable
+default-path surface contracts, active-plan operational-validation
+declarations, and minimum viable docs-gate enforcement that distinguishes
+structural completion from operational verification.
+
+De-risks: continuing default-path feature expansion while visible analytic
+surfaces remain structurally implemented but operationally hollow.
+
+Acceptance: canonical docs distinguish structural completion, operational
+verification, and methodological validation; active plans explicitly classify
+their operational-validation burden; default-path surface contracts validate in
+the docs gate; known producer gaps remain visible rather than implicit.
+
+Audit: check for overbroad scope, noisy enforcement on internal-only work,
+hidden default-path gaps that remain undocumented, and tracker/docs mismatch
+about which slice currently has priority.
 
 ### Slice #234: Local Africa Corpus And Adjudication Seed
 
@@ -200,9 +227,15 @@ The latest completed implementation slice is Plan #233, process-tracing
 handoff package. Process-tracing consumer review of the deterministic fixture
 completed on 2026-06-25 with no requested QC schema changes.
 
-Plan #234 is now the active QC-local slice. It follows
-`docs/CAPABILITY_DEPENDENCY_GRAPH.md` by hardening the qualitative/grounded-
-research foundation before making abductive reasoning more product-central.
-The recommended order remains: local Africa corpus plus adjudication seed,
-populated D3/D7 evidence, deferred sanitizer/public-corpus work, then more
-abductive UI/workbench integration.
+Plan #237 is now the active governance slice. The immediate trigger was a real
+local Plan #234 seed run whose graph/review inspection exposed a default-path
+operational-credibility gap: a visible code-relationships graph surface was not
+actually produced on the default thematic path, and the entity map remained too
+sparse to justify a polish-stage interpretation.
+
+Plan #234 remains the active QC-local evidence slice, but only as a bounded
+local review instrument until Plan #237 lands the policy/enforcement needed to
+stop similar false-completion signals earlier. The recommended order is now:
+default-path operational-credibility policy, resume local Africa corpus and
+adjudication seed follow-through, populated D3/D7 evidence, deferred
+sanitizer/public-corpus work, then more abductive UI/workbench integration.

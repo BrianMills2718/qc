@@ -78,6 +78,19 @@ If no additional research beyond repo-local references was needed, write:
 
 ---
 
+## Operational Validation
+
+> **REQUIRED:** Explicitly classify whether this slice touches default-path
+> visible analytic surfaces or claim-bearing outputs. This feeds the repo's
+> operational-readiness policy gate.
+
+**Classification:** governance_only | internal_only | claim_bearing_output | default_path_visible_surface
+**Surface IDs:** None | `surface.id`, `other.surface.id`
+**Real-Run Requirement:** required | not_required | deferred
+**Deferred Reason:** [Required only when Real-Run Requirement is `deferred`]
+
+---
+
 ## Files Affected
 
 > **REQUIRED:** Declare upfront what files will be touched.

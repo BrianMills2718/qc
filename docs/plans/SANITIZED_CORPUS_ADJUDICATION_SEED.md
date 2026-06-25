@@ -111,6 +111,14 @@ and fitness before ingestion.
 
 ---
 
+## Operational Validation
+
+**Classification:** claim_bearing_output
+**Surface IDs:** `export.markdown_report`, `review.codes_page`, `graph.entity_map_tab`
+**Real-Run Requirement:** required
+
+---
+
 ## Files Affected
 
 Planned documentation and artifact paths:

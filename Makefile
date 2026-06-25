@@ -493,6 +493,8 @@ lint:  ## Run the configured Ruff lint gate
 docs-check:  ## Run documentation and governance checks, including active plan validation
 	python scripts/check_markdown_links.py
 	python scripts/check_doc_coupling.py --validate-config
+	python scripts/check_default_path_surface_contracts.py --validate-config
+	python scripts/check_surface_operational_readiness.py
 	python scripts/sync_plan_status.py --check --validate-active
 	python scripts/meta/check_agents_sync.py --check
 

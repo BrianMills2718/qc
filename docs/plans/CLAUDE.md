@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 237 | Default-path operational credibility policy | High | Planned | `DEFAULT_PATH_OPERATIONAL_CREDIBILITY_POLICY.md` |
 | 234 | Local Africa corpus and adjudication seed | High | Planned | `SANITIZED_CORPUS_ADJUDICATION_SEED.md` |
 
 ## Completed Plans
@@ -265,6 +266,11 @@ is `review -> cleanup -> documentation updates -> planning updates ->
 implementation`. Do not jump straight to implementation hardening when review,
 cleanup, or canonical-doc alignment is still pending.
 
+**Operational-readiness declaration:** Every active plan must include an
+`## Operational Validation` section. Plans touching default-path visible
+analytic surfaces or claim-bearing outputs must declare surface IDs and whether
+real-run validation is required for completion.
+
 1. Copy `TEMPLATE.md` to a descriptive `NAME.md` (e.g. `INV9_CLAIM_LEDGER.md`)
 2. Fill in gap, steps, required tests
 3. Add a row to the **Active Plans** table above
@@ -297,6 +303,8 @@ git commit -m "[Trivial] Fix typo in README"
 
 - markdown link integrity
 - doc-coupling config validation
+- default-path surface-contract registry config validation
+- active-plan operational-readiness declarations
 - completed-plan table consistency
 - active-plan validation through `scripts/meta/validate_plan.py`
 - `AGENTS.md` sync against canonical inputs

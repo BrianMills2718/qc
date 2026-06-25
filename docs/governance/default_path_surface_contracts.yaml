@@ -1,0 +1,103 @@
+version: 1
+
+policy:
+  scope: default_path_user_facing_analytic_surfaces
+  default_gate_mode: validate_config
+  strict_gate_mode: future
+
+surfaces:
+  - surface_id: graph.code_hierarchy_tab
+    label: Graph UI code hierarchy tab
+    visible_by_default: true
+    user_facing: true
+    claim_bearing: false
+    default_paths: ["thematic_analysis", "grounded_theory"]
+    producer_contracts:
+      - path: thematic_analysis
+        status: present
+        producers:
+          - qc_clean/core/pipeline/stages/thematic_coding.py
+      - path: grounded_theory
+        status: present
+        producers:
+          - qc_clean/core/pipeline/stages/gt_constant_comparison.py
+    operational_validation:
+      real_run_requirement: required
+      rollout_status: enforced_now
+
+  - surface_id: graph.code_relationships_tab
+    label: Graph UI code relationships tab
+    visible_by_default: true
+    user_facing: true
+    claim_bearing: true
+    default_paths: ["thematic_analysis", "grounded_theory"]
+    producer_contracts:
+      - path: thematic_analysis
+        status: missing
+        producers: []
+        note: Default thematic path currently exposes this surface without a compatible producer.
+      - path: grounded_theory
+        status: present
+        producers:
+          - qc_clean/core/pipeline/stages/gt_axial_coding.py
+    operational_validation:
+      real_run_requirement: required
+      rollout_status: warning_until_follow_on_fix
+
+  - surface_id: graph.entity_map_tab
+    label: Graph UI entity map tab
+    visible_by_default: true
+    user_facing: true
+    claim_bearing: true
+    default_paths: ["thematic_analysis", "grounded_theory"]
+    producer_contracts:
+      - path: thematic_analysis
+        status: present
+        producers:
+          - qc_clean/core/pipeline/stages/relationship.py
+      - path: grounded_theory
+        status: partial
+        producers:
+          - qc_clean/core/pipeline/stages/relationship.py
+        note: Present, but density/utility still depends on the default relationship mapping contract.
+    operational_validation:
+      real_run_requirement: required
+      rollout_status: warning_until_density_criteria_exist
+
+  - surface_id: review.codes_page
+    label: Review UI codes page
+    visible_by_default: true
+    user_facing: true
+    claim_bearing: true
+    default_paths: ["thematic_analysis", "grounded_theory"]
+    producer_contracts:
+      - path: thematic_analysis
+        status: present
+        producers:
+          - qc_clean/core/pipeline/stages/thematic_coding.py
+      - path: grounded_theory
+        status: present
+        producers:
+          - qc_clean/core/pipeline/stages/gt_constant_comparison.py
+    operational_validation:
+      real_run_requirement: required
+      rollout_status: enforced_now
+
+  - surface_id: export.markdown_report
+    label: Markdown report export
+    visible_by_default: true
+    user_facing: true
+    claim_bearing: true
+    default_paths: ["thematic_analysis", "grounded_theory"]
+    producer_contracts:
+      - path: thematic_analysis
+        status: present
+        producers:
+          - qc_clean/core/export/data_exporter.py
+      - path: grounded_theory
+        status: present
+        producers:
+          - qc_clean/core/export/data_exporter.py
+    operational_validation:
+      real_run_requirement: required
+      rollout_status: enforced_now

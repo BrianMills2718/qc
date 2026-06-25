@@ -36,6 +36,13 @@ sequence unless a canonical plan says otherwise: `review -> cleanup ->
 documentation updates -> planning updates -> implementation`. Do not harden or
 expand enforcement before the policy surface has been reviewed and aligned.
 
+**Default-path operational credibility:** For default-path visible analytic
+surfaces, structural completion is not enough. Use
+`docs/DEFAULT_PATH_OPERATIONAL_CREDIBILITY_POLICY.md` and
+`docs/governance/default_path_surface_contracts.yaml` as the governing policy
+for producer contracts, operational verification requirements, and rollout
+status.
+
 ## What This Project Does
 
 LLM-powered qualitative and mixed-methods research workbench. The product goal is

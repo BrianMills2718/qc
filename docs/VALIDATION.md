@@ -14,11 +14,19 @@ The right distinction is:
   designed;
 - **workflow validation:** the system preserves reviewability, provenance,
   grounding, coverage accounting, and export boundaries;
+- **operational verification:** default-path visible analytic surfaces have a
+  declared producer, explicit real-run inspection requirements, and are not
+  treated as complete from schema/tests/synthetic fixtures alone;
 - **methodological validation:** expert- or gold-set-backed evidence shows the
   outputs are substantively valid for a defined corpus and task.
 
-The first two have substantial substrate. The third is the key remaining
-portfolio gap.
+The first three have meaningful substrate, but operational verification is now a
+separate governance gate rather than an implied property of software/workflow
+validation. Methodological validation remains the key remaining portfolio gap.
+
+See `docs/DEFAULT_PATH_OPERATIONAL_CREDIBILITY_POLICY.md` for the specific
+default-path surface policy and `docs/governance/default_path_surface_contracts.yaml`
+for the current machine-readable registry.
 
 ## Current Evidence
 
@@ -60,6 +68,8 @@ Focused documentation verification:
 
 ```bash
 python scripts/check_markdown_links.py
+python scripts/check_default_path_surface_contracts.py --validate-config
+python scripts/check_surface_operational_readiness.py
 python scripts/sync_plan_status.py --check
 python scripts/meta/check_agents_sync.py --check
 ```
@@ -93,4 +103,3 @@ following:
 
 Until then, present this as strong analyst-methods engineering and evaluation
 infrastructure, not as completed methodological proof.
-
