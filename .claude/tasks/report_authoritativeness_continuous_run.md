@@ -40,10 +40,10 @@ Add the scored side-by-side comparison artifact so baseline runs can be evaluate
 - Reviewer Markdown now filters only superseded historical `cross_case` memo families, preserves non-cross-case memo repetition, and emits an explicit omission note when cross-case histories are hidden from the reviewer report.
 - CSV memo export is covered to preserve historical `cross_case` memos for audit.
 - Commit `286fd0db` was pushed to `origin/main` for the baseline substrate and reviewer Markdown authoritativeness fix.
-- Report-baseline comparison scoring now has a deterministic package design and canonical CLI surface in progress.
-- Export-time prevalence conflict gate is now in progress so reviewer Markdown fails loud if incompatible X/Y document-count facts remain.
-- Recommendation traceability/support-status gating is now in progress for reviewer Markdown.
-- Markdown reviewer/full profile split is now in progress so the default audit export can coexist with a cleaner reviewer-facing report.
+- Report-baseline comparison scoring has a deterministic package design and canonical CLI surface.
+- Export-time prevalence conflict gate makes reviewer Markdown fail loud if incompatible X/Y document-count facts remain.
+- Recommendation traceability/support-status gating is present in reviewer Markdown.
+- Markdown reviewer/full profile split lets the default audit export coexist with a cleaner reviewer-facing report.
 
 ## Progress Log
 
