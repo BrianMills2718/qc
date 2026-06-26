@@ -12,7 +12,12 @@ from qc_clean.core.claims import (
     claims_for_codes,
     replace_claims_for_stage,
 )
-from qc_clean.core.grounding import MatchStatus, resolve_and_anchor, warn_unanchored as _warn_unanchored
+from qc_clean.core.grounding import (
+    MatchStatus,
+    grounding_issue,
+    resolve_and_anchor,
+    warn_unanchored as _warn_unanchored,
+)
 from qc_clean.core.prompting import (
     format_untrusted_data_block,
     format_untrusted_documents,
@@ -24,7 +29,6 @@ from qc_clean.schemas.adapters import code_hierarchy_to_codebook
 from qc_clean.schemas.domain import (
     AnalysisMemo,
     CodeApplication,
-    GroundingIssue,
     GroundingIssueStatus,
     ProjectState,
     Provenance,
@@ -110,7 +114,7 @@ class ThematicCodingStage(PipelineStage):
                     all_applications.append(app)
                 elif match.status is MatchStatus.AMBIGUOUS:
                     ambiguous += 1  # occurs >1x -> can't uniquely anchor (INV-1)
-                    state.grounding_issues.append(_grounding_issue(
+                    state.grounding_issues.append(grounding_issue(
                         stage_name=self.name(),
                         code_id=tc.id,
                         quote=quote,
@@ -119,7 +123,7 @@ class ThematicCodingStage(PipelineStage):
                     ))
                 else:
                     unresolvable += 1  # no source match -> drop (INV-1)
-                    state.grounding_issues.append(_grounding_issue(
+                    state.grounding_issues.append(grounding_issue(
                         stage_name=self.name(),
                         code_id=tc.id,
                         quote=quote,
@@ -287,34 +291,6 @@ Also write a brief analytical_memo (3-5 sentences) on key decisions, surprises, 
 
 def _build_combined_text(state: ProjectState) -> str:
     return format_untrusted_documents(state.corpus.documents, label_prefix="Interview")
-
-
-def _grounding_issue(
-    *,
-    stage_name: str,
-    code_id: str,
-    quote: str,
-    status: GroundingIssueStatus,
-    occurrence_count: int,
-) -> GroundingIssue:
-    remediation = {
-        GroundingIssueStatus.NO_SOURCE_MATCH: (
-            "Review the source transcript and either correct the quote text, "
-            "replace it with an exact source span, or remove the evidence item."
-        ),
-        GroundingIssueStatus.AMBIGUOUS_MATCH: (
-            "Review duplicate source occurrences and select the intended "
-            "document/span before using this quote as evidence."
-        ),
-    }[status]
-    return GroundingIssue(
-        stage_name=stage_name,
-        code_id=code_id,
-        quote_text=quote,
-        status=status,
-        occurrence_count=occurrence_count,
-        remediation_hint=remediation,
-    )
 
 
 def _build_phase1_prompt(combined_text: str, num_interviews: int) -> str:

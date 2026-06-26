@@ -799,3 +799,12 @@ language, while full state and audit exports preserve the raw memo history.
 Report-authoritativeness conflict detection was extended to recognize both the
 legacy prevalence wording and the new anchored-application wording, so the
 safer phrasing does not weaken contradiction checks.
+
+Product-gate implementation checkpoint on 2026-06-26 (incremental grounding
+ledger): dropped quote remediation records are no longer limited to the initial
+default thematic pass. The shared grounding module now builds
+`GroundingIssue` remediation records, and incremental thematic plus incremental
+GT coding append those records for ambiguous and no-source dropped quote
+candidates while retaining the existing count warnings. This closes the
+incremental regression where corpus mutation could return unanchored evidence
+handling to warning-only behavior.

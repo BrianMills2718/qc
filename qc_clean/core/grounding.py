@@ -385,6 +385,37 @@ def warn_unanchored(state, unresolvable: int, ambiguous: int, label: str = "") -
         )
 
 
+def grounding_issue(
+    *,
+    stage_name: str,
+    code_id: str,
+    quote: str,
+    status,
+    occurrence_count: int,
+):
+    """Build a remediation record for a dropped quote candidate."""
+    from qc_clean.schemas.domain import GroundingIssue, GroundingIssueStatus
+
+    remediation = {
+        GroundingIssueStatus.NO_SOURCE_MATCH: (
+            "Review the source transcript and either correct the quote text, "
+            "replace it with an exact source span, or remove the evidence item."
+        ),
+        GroundingIssueStatus.AMBIGUOUS_MATCH: (
+            "Review duplicate source occurrences and select the intended "
+            "document/span before using this quote as evidence."
+        ),
+    }[status]
+    return GroundingIssue(
+        stage_name=stage_name,
+        code_id=code_id,
+        quote_text=quote,
+        status=status,
+        occurrence_count=occurrence_count,
+        remediation_hint=remediation,
+    )
+
+
 def verify_anchor(content: str, start: Optional[int], end: Optional[int],
                   expected_hash: Optional[str]) -> bool:
     """True iff the span at [start:end] still hashes to ``expected_hash``."""

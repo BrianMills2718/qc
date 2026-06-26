@@ -11,7 +11,12 @@ import logging
 from datetime import datetime
 from typing import List
 
-from qc_clean.core.grounding import MatchStatus, resolve_and_anchor, warn_unanchored
+from qc_clean.core.grounding import (
+    MatchStatus,
+    grounding_issue,
+    resolve_and_anchor,
+    warn_unanchored,
+)
 from qc_clean.core.prompting import format_untrusted_data_block, format_untrusted_documents
 from qc_clean.core.pipeline.irr import normalize_code_name
 from qc_clean.core.pipeline.saturation import calculate_codebook_change
@@ -23,6 +28,7 @@ from qc_clean.schemas.domain import (
     CodeApplication,
     Codebook,
     Document,
+    GroundingIssueStatus,
     Methodology,
     ProjectState,
     Provenance,
@@ -402,8 +408,22 @@ def _process_thematic_response(
                 new_applications.append(app)
             elif match.status is MatchStatus.AMBIGUOUS:
                 ambiguous += 1
+                state.grounding_issues.append(grounding_issue(
+                    stage_name="incremental_coding",
+                    code_id=code_id,
+                    quote=quote,
+                    status=GroundingIssueStatus.AMBIGUOUS_MATCH,
+                    occurrence_count=match.total_occurrences,
+                ))
             else:
                 unresolvable += 1
+                state.grounding_issues.append(grounding_issue(
+                    stage_name="incremental_coding",
+                    code_id=code_id,
+                    quote=quote,
+                    status=GroundingIssueStatus.NO_SOURCE_MATCH,
+                    occurrence_count=match.total_occurrences,
+                ))
 
     warn_unanchored(state, unresolvable, ambiguous, label="Incremental coding")
     return new_applications
@@ -461,8 +481,22 @@ def _process_gt_response(
                 new_applications.append(app)
             elif match.status is MatchStatus.AMBIGUOUS:
                 ambiguous += 1
+                state.grounding_issues.append(grounding_issue(
+                    stage_name="incremental_gt_coding",
+                    code_id=code_id,
+                    quote=quote,
+                    status=GroundingIssueStatus.AMBIGUOUS_MATCH,
+                    occurrence_count=match.total_occurrences,
+                ))
             else:
                 unresolvable += 1
+                state.grounding_issues.append(grounding_issue(
+                    stage_name="incremental_gt_coding",
+                    code_id=code_id,
+                    quote=quote,
+                    status=GroundingIssueStatus.NO_SOURCE_MATCH,
+                    occurrence_count=match.total_occurrences,
+                ))
 
     warn_unanchored(state, unresolvable, ambiguous, label="Incremental GT coding")
     return new_applications

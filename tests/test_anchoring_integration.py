@@ -131,3 +131,50 @@ def test_incremental_thematic_anchors_and_drops_ambiguous():
     assert apps[0].doc_id == "n1"
     assert apps[0].quote_hash is not None
     assert any("uniquely anchored" in w for w in state.data_warnings)
+    assert len(state.grounding_issues) == 1
+    issue = state.grounding_issues[0]
+    assert issue.stage_name == "incremental_coding"
+    assert issue.code_id == "FOCUS"
+    assert issue.quote_text == "we felt rushed"
+    assert issue.status.value == "ambiguous_match"
+    assert issue.occurrence_count == 2
+    assert "select the intended document/span" in issue.remediation_hint
+
+
+def test_incremental_gt_records_grounding_issues_for_dropped_quotes():
+    """Incremental GT coding records dropped quote candidates for remediation."""
+    from qc_clean.core.pipeline.stages.incremental_coding import _process_gt_response
+    from qc_clean.schemas.domain import Code, Codebook, Corpus, Document
+    from qc_clean.schemas.gt_schemas import OpenCode, OpenCodesResponse
+
+    new_docs = [
+        Document(id="n1", name="n1.txt", content="Pat: We felt rushed."),
+        Document(id="n2", name="n2.txt", content="Lee: We felt rushed again."),
+    ]
+    state = _two_doc_state()
+    state.corpus = Corpus(documents=new_docs)
+    state.codebook = Codebook(codes=[Code(id="PACE", name="Pace", description="d")])
+
+    resp = OpenCodesResponse(
+        open_codes=[
+            OpenCode(
+                code_name="Pace",
+                description="d",
+                supporting_quotes=["not in either transcript"],
+                frequency=1,
+                confidence=0.7,
+            )
+        ],
+    )
+    apps = _process_gt_response(resp, state, new_docs, {"n1", "n2"})
+
+    assert apps == []
+    assert any("matched no source document" in w for w in state.data_warnings)
+    assert len(state.grounding_issues) == 1
+    issue = state.grounding_issues[0]
+    assert issue.stage_name == "incremental_gt_coding"
+    assert issue.code_id == "PACE"
+    assert issue.quote_text == "not in either transcript"
+    assert issue.status.value == "no_source_match"
+    assert issue.occurrence_count == 0
+    assert "correct the quote text" in issue.remediation_hint
