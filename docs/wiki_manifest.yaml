@@ -13,6 +13,14 @@ publish:
     type: Methodology
     title: Qualitative Coding Methodology
     tags: [portfolio, qualitative-coding, methodology]
+  - path: docs/QUALITATIVE_CODING_SOTA_AND_AUTOMATION_STRATEGY.md
+    type: Reference
+    title: Qualitative Coding SOTA And Automation Strategy
+    tags: [analysis, qualitative-coding, methodology, landscape]
+  - path: docs/PIPELINE_PROMPT_DATAFLOW_AUDIT.md
+    type: Reference
+    title: Pipeline Prompt And Dataflow Audit
+    tags: [analysis, qualitative-coding, prompts, architecture]
   - path: docs/LONG_TERM_EXECUTION_PLAN.md
     type: Roadmap
     title: Qualitative Coding Long-Term Execution Plan

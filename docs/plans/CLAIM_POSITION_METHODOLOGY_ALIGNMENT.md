@@ -1,6 +1,6 @@
 # Plan #240: Claim/Position Methodology Alignment
 
-**Status:** Planned
+**Status:** Complete
 **Type:** design
 **Priority:** High
 **Blocked By:** None
@@ -130,16 +130,16 @@ No code tests in this design slice.
 ## Acceptance Criteria
 
 > Feature-level criteria:
-- [ ] Canonical docs explicitly state that broad themes are not sufficient
+- [x] Canonical docs explicitly state that broad themes are not sufficient
   substitutes for claim/position structure.
-- [ ] The repo's intended ontology for codes versus claims/positions is written
+- [x] The repo's intended ontology for codes versus claims/positions is written
   clearly enough to guide follow-on implementation.
-- [ ] The next implementation slice is framed as a methodology-alignment task,
+- [x] The next implementation slice is framed as a methodology-alignment task,
   not just a graph/prompt polish task.
 
 > Process criteria:
-- [ ] Active-plan docs are updated coherently.
-- [ ] Governance checks pass.
+- [x] Active-plan docs are updated coherently.
+- [x] Governance checks pass.
 
 ---
 
@@ -148,3 +148,8 @@ No code tests in this design slice.
 This slice should stay disciplined. The purpose is to align methodology,
 ontology, and roadmap priorities before more implementation proceeds. It should
 not drift into half-implemented claim-graph features or ad hoc prompt edits.
+
+Completed on 2026-06-25. Canonical methodology/theory docs now record that the
+default path is stronger at topic/theme extraction than at claim/position
+structure, and Plan #241 now carries the broader SOTA-methodology audit,
+prompt/dataflow documentation, and follow-on implementation program.

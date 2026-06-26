@@ -234,14 +234,15 @@ Plans #234, #237, and #238 are now complete. The repo has:
 - a repo-enforced default-path operational-credibility policy from Plan #237;
 - and a validated thematic graph remediation from Plan #238.
 
-User review of the fresh local seed packet exposed a new methodology-priority
-gap: the default path can now show code and entity relationships more
-truthfully, but it still centers themes more strongly than claims, positions,
-framings, and contested assertions. That is a real qualitative-methodology
-alignment issue, not just a graph UX concern.
+User review of the fresh local seed packet exposed a broader methodology-
+priority gap: the default path can now show code and entity relationships more
+truthfully, but the repo still lacked a canonical SOTA-methodology document, a
+clear labor-bottleneck frame, and a prompt/dataflow audit tying those concerns
+to actual code surfaces.
 
-The current nonblocked next slice is therefore claim/position methodology
-alignment design. The recommended order is now: reviewed claim/position
-alignment design, then reviewed sanitizer/public-corpus workflow design, then
-populated D3/D7 evidence when labels exist, then more abductive UI/workbench
-integration.
+The current nonblocked next slice is therefore SOTA methodology and pipeline
+realignment. The recommended order is now: reviewed SOTA-methodology and
+prompt/dataflow audit work, then methodology-aligned implementation plus rerun
+critique, then reviewed sanitizer/public-corpus workflow design, then
+populated D3/D7 evidence when labels exist, then more abductive
+UI/workbench integration.

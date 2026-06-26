@@ -12,12 +12,14 @@ Wiki home: http://localhost:8088/index.php/Project_Wiki
 | [docs/portfolio/QUALITATIVE_CODING_EVIDENCE_BUNDLE.md](portfolio/QUALITATIVE_CODING_EVIDENCE_BUNDLE.md) | Evidence bundle | Maps built features to caveats and next evidence. |
 | [docs/PROJECT_THEORY_AND_GOALS.md](PROJECT_THEORY_AND_GOALS.md) | Canonical theory and claim discipline | Prevents overclaiming and defines the long-term target. |
 | [docs/EVALUATION_HARNESS.md](EVALUATION_HARNESS.md) | Evaluation design | Defines how SOTA, parity, and methodological-validity claims would be earned. |
+| [docs/QUALITATIVE_CODING_SOTA_AND_AUTOMATION_STRATEGY.md](QUALITATIVE_CODING_SOTA_AND_AUTOMATION_STRATEGY.md) | SOTA methodology and labor frame | Explains what current qualitative-coding SOTA requires, how human labor limits rigor at scale, and what automation should and should not try to solve. |
 
 ## Methodology And Governance Artifacts
 
 | Artifact | Role | Notes |
 |---|---|---|
 | [docs/METHODOLOGY.md](METHODOLOGY.md) | Methodology spine | Summarizes goals, modality, evidence-promotion rules, and failure modes. |
+| [docs/PIPELINE_PROMPT_DATAFLOW_AUDIT.md](PIPELINE_PROMPT_DATAFLOW_AUDIT.md) | Prompt/dataflow audit | Maps the default and GT pipelines, prompt surfaces, and where claim/position structure is strengthened or flattened. |
 | [docs/LONG_TERM_EXECUTION_PLAN.md](LONG_TERM_EXECUTION_PLAN.md) | Long-term execution spine | Maps the design-plan protocol to current roadmap slices, next actions, dependency subplans, and stop conditions. |
 | [docs/CAPABILITY_DEPENDENCY_GRAPH.md](CAPABILITY_DEPENDENCY_GRAPH.md) | Capability dependency graph | Orders QC, grounded-research, abductive, process-tracing, and mixed-methods workbench capabilities by dependency and success criteria. |
 | [docs/VALIDATION.md](VALIDATION.md) | Validation register | Separates software evidence from methodological evidence. |

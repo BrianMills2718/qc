@@ -22,9 +22,8 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #240, claim/position methodology alignment design, before
-   treating default-path qualitative outputs as near-polish or centering more
-   graph/export work around theme-only structure.
+1. Execute Plan #241, SOTA methodology and pipeline realignment, before
+   further default-path polish or major sanitizer-first sequencing.
 2. Execute Plan #239, agent-drivable sanitization workflow design, before any
    public/shareable corpus packaging or publication-cleared reviewer packet
    work.
@@ -33,15 +32,24 @@ highest-value documented lane.
 
 **Active checkpoints:**
 
-- **Plan #240** `CLAIM_POSITION_METHODOLOGY_ALIGNMENT.md`
-  is the current design/governance slice. It should document the gap between
-  theme-centric extraction and stronger qualitative claim/position structure,
-  then specify the next implementation/evaluation boundary.
+- **Plan #241** `SOTA_METHODODOLOGY_PIPELINE_REALIGNMENT.md`
+  is the current methodology/program slice. It should define the SOTA
+  methodology target, labor-bottleneck frame, prompt/dataflow audit, docs/plan
+  alignment, code-audit sequence, and follow-on implementation plus rerun
+  critique.
 
 - **Plan #239** `AGENT_DRIVABLE_SANITIZATION_WORKFLOW.md`
   is the next queued design/governance slice. It should define the reviewed
   sanitizer workflow boundary now that the local restricted Plan #234 packet is
   complete.
+
+**Completed checkpoint:** Plan #240
+`CLAIM_POSITION_METHODOLOGY_ALIGNMENT.md` documented the key methodology gap:
+the default path was stronger at topic/theme extraction than at claim/position
+structure. Canonical methodology/theory docs now state that broad themes are
+not sufficient substitutes for bounded claims, positions, framings, or
+contested assertions, and the concern is now carried forward as a broader
+realignment program rather than left only in chat.
 
 **Completed checkpoint:** Plan #234
 `SANITIZED_CORPUS_ADJUDICATION_SEED.md` — a fresh post-fix rerun on the
