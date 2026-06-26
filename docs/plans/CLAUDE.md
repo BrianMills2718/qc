@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 240 | Claim/position methodology alignment | High | Planned | `CLAIM_POSITION_METHODOLOGY_ALIGNMENT.md` |
 | 239 | Agent-drivable sanitization workflow | High | Planned | `AGENT_DRIVABLE_SANITIZATION_WORKFLOW.md` |
 
 ## Completed Plans

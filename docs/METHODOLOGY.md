@@ -18,6 +18,13 @@ The operating theory is:
   interpretation;
 - benchmark and preflight artifacts decide which claims are licensed.
 
+The current repo is stronger at extracting themes, entities, and bounded
+relationships than at representing interpretive stance. That means broad theme
+labels can still outrun the more methodologically important question of what
+participants are asserting, contesting, framing, or evaluating about those
+themes. In practice, qualitative usefulness often depends on claim/position
+structure, not theme labels alone.
+
 ## Methodological Boundary
 
 The repo supports thematic analysis and a grounded-theory-inspired path. The
@@ -43,6 +50,12 @@ The key design pattern is a single typed state object:
 
 This makes the analysis inspectable and portable. It does not by itself prove
 the analysis is correct.
+
+It also does not guarantee that the default path centers the most
+methodologically important analytic object. Right now the system gives strong
+surface prominence to codes/themes and only secondary prominence to claims,
+even though contested positions, framings, and scoped assertions are often the
+more substantively useful outputs.
 
 ## Modality Split
 
@@ -102,3 +115,4 @@ held-out protocol with appropriate statistical comparison and explicit caveats.
 | Calling the GT path "full grounded theory" | Current stages mimic parts of GT but do not complete GT's epistemic loop. | Use "grounded-theory-inspired" unless D8/GT-fidelity evidence is available. |
 | Treating negative-case output as proof of disconfirmation coverage | Prompting for contrary evidence is not a held-out D7 result. | Use D7 gold packages and comparison artifacts before making recall claims. |
 | Treating prompt-boundary fixtures as general robustness | Fixture/canary success is not a broad adversarial guarantee. | Keep INV-7 caveats and expand held-out adversarial evaluation. |
+| Treating broad themes as sufficient analytic outputs | Topic/theme labels can hide stance, contestation, attribution, evaluation, and rival interpretations. | Promote claim/position-aware extraction and review surfaces rather than treating code graphs alone as the analytic center. |

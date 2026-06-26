@@ -22,16 +22,24 @@ highest-value documented lane.
 - Final state before any handoff is either clean or precisely summarized.
 
 **Current queue:**
-1. Execute Plan #239, agent-drivable sanitization workflow design, before any
+1. Execute Plan #240, claim/position methodology alignment design, before
+   treating default-path qualitative outputs as near-polish or centering more
+   graph/export work around theme-only structure.
+2. Execute Plan #239, agent-drivable sanitization workflow design, before any
    public/shareable corpus packaging or publication-cleared reviewer packet
    work.
-2. Keep D3/D7 populated evidence lanes blocked on explicit human labels; do not
+3. Keep D3/D7 populated evidence lanes blocked on explicit human labels; do not
    simulate expert evidence to bypass that dependency.
 
 **Active checkpoints:**
 
+- **Plan #240** `CLAIM_POSITION_METHODOLOGY_ALIGNMENT.md`
+  is the current design/governance slice. It should document the gap between
+  theme-centric extraction and stronger qualitative claim/position structure,
+  then specify the next implementation/evaluation boundary.
+
 - **Plan #239** `AGENT_DRIVABLE_SANITIZATION_WORKFLOW.md`
-  is the current design/governance slice. It should define the reviewed
+  is the next queued design/governance slice. It should define the reviewed
   sanitizer workflow boundary now that the local restricted Plan #234 packet is
   complete.
 

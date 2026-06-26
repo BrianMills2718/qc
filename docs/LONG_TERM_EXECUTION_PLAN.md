@@ -234,8 +234,14 @@ Plans #234, #237, and #238 are now complete. The repo has:
 - a repo-enforced default-path operational-credibility policy from Plan #237;
 - and a validated thematic graph remediation from Plan #238.
 
-The current nonblocked next slice is the deferred sanitizer/public-corpus work.
-Populated D3/D7 evidence remains blocked on explicit human labels. The
-recommended order is now: reviewed sanitizer/public-corpus workflow design,
-then populated D3/D7 evidence when labels exist, then more abductive
-UI/workbench integration.
+User review of the fresh local seed packet exposed a new methodology-priority
+gap: the default path can now show code and entity relationships more
+truthfully, but it still centers themes more strongly than claims, positions,
+framings, and contested assertions. That is a real qualitative-methodology
+alignment issue, not just a graph UX concern.
+
+The current nonblocked next slice is therefore claim/position methodology
+alignment design. The recommended order is now: reviewed claim/position
+alignment design, then reviewed sanitizer/public-corpus workflow design, then
+populated D3/D7 evidence when labels exist, then more abductive UI/workbench
+integration.

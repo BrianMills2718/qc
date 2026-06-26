@@ -251,6 +251,39 @@ Two distinct measures, both **consistency, not validity** (§15):
 
 The distinction is the point: IRR ≈ "does the method agree with itself under variation"; stability ≈ "is the model deterministic." Neither says the codes are *correct*.
 
+## 11.1 Current Default-Path Methodology Gap
+
+The current default/thematic path is still better at extracting **what the
+corpus is about** than **what positions, framings, or bounded assertions the
+participants are making about it**.
+
+That matters because many qualitative questions are not primarily answered by a
+broad theme label. A node like `NATURE_OF_INFORMATION_THREATS` may organize
+subject matter, but the more substantively useful analytic object may be a
+claim or stance such as:
+
+- participants frame information threats as real and consequential;
+- participants contest whether the threat is externally driven or locally
+  amplified;
+- participants describe specific institutional responses as inadequate.
+
+Those are not interchangeable with theme labels. They carry stance, framing,
+scope, contestation, and inferential value that theme-only outputs can flatten.
+
+The repo already has a first-class claim ledger object layer (INV-9), but the
+default analytic UX still gives more immediate prominence to codes/themes and
+their graphs than to claim/position structure. This is a methodology alignment
+gap, not merely a graph cosmetic issue or a prompt-tuning defect.
+
+Implications:
+
+- code/theme outputs should not be treated as sufficient proxies for analytic
+  position structure;
+- default-path maturity should not be judged only by codebook and graph
+  quality;
+- claim/position-aware extraction, review, and visualization are now a
+  priority design problem.
+
 ## 12. Export and interoperability (`data_exporter.py`)
 
 `ProjectExporter` renders `ProjectState` to:
