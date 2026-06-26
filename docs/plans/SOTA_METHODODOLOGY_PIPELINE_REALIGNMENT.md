@@ -270,3 +270,22 @@ Replay critique after this checkpoint:
   participant claims;
 - the next higher-value target is therefore not merely "more read surfaces" but
   sharper relation selectivity and, after that, a stance/claim graph view.
+
+Implementation checkpoint on 2026-06-26 (relation selectivity): divergence /
+contrast claim relationships are now more selective. Instead of linking each
+cross-interview divergence claim to every participant perspective claim in
+scope, deterministic alias matching now narrows links using participant names
+and role tokens mentioned in the divergence text, with a scope-wide fallback
+only when no alias is detectable. On the copied replay artifact this reduced
+`contrasts` rows from 9 to 6 and total claim-relationship rows from 33 to 30,
+which is a materially better fit to the actual divergence descriptions.
+
+Critique after the selectivity checkpoint:
+
+- this is still not semantic contradiction detection; it is bounded string/role
+  alias matching over already-produced divergence text;
+- but it is a real improvement in reviewer honesty because the relation table
+  no longer implies that every divergence claim equally contrasts with every
+  participant perspective in scope;
+- the next unambiguous target remains a reviewer-facing stance/claim graph or a
+  more selective participant-position linking rule for consensus claims.

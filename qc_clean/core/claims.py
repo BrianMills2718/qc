@@ -633,7 +633,8 @@ def claim_relationships_for_cross_interview(
             if relationship_type == "synthesizes"
             else "Cross-interview divergence claims contrast participant-level perspective claims."
         )
-        for participant_name in claim.scope.participant_names:
+        participant_names = _participant_names_for_cross_interview_claim(state, claim)
+        for participant_name in participant_names:
             participant_claim = participant_summary_claims.get((participant_name,))
             if participant_claim is None:
                 continue
@@ -646,6 +647,57 @@ def claim_relationships_for_cross_interview(
                 created_by=Provenance.SYSTEM,
             ))
     return relationships
+
+
+def _participant_names_for_cross_interview_claim(
+    state: ProjectState,
+    claim: AnalyticClaim,
+) -> list[str]:
+    """Select participant names for a cross-interview perspective claim.
+
+    Consensus claims continue to link to all in-scope participants. Divergence
+    claims try to narrow their links using participant name/role aliases
+    mentioned in the divergence text, and only fall back to all in-scope
+    participants when no alias is detectable.
+    """
+    if claim.origin_object_type != "cross_interview_perspective_divergence":
+        return list(claim.scope.participant_names)
+
+    alias_map = _participant_alias_map(state)
+    claim_text = claim.claim_text.lower()
+    matched: list[str] = []
+    for participant_name, aliases in alias_map.items():
+        if any(alias in claim_text for alias in aliases):
+            matched.append(participant_name)
+
+    if matched:
+        return matched
+    return list(claim.scope.participant_names)
+
+
+def _participant_alias_map(state: ProjectState) -> dict[str, set[str]]:
+    """Build deterministic lowercase aliases for participant matching."""
+    alias_map: dict[str, set[str]] = {}
+    if state.perspective_analysis is None:
+        return alias_map
+
+    for participant in state.perspective_analysis.participants:
+        aliases: set[str] = set()
+        full_name = participant.name.strip().lower()
+        if full_name:
+            aliases.add(full_name)
+        for token in participant.name.lower().replace("/", " ").split():
+            if len(token) >= 4:
+                aliases.add(token)
+        role = participant.role.strip().lower()
+        if role:
+            aliases.add(role)
+        for token in role.replace("/", " ").replace("(", " ").replace(")", " ").split():
+            cleaned = token.strip(",.;:")
+            if len(cleaned) >= 4:
+                aliases.add(cleaned)
+        alias_map[participant.name] = aliases
+    return alias_map
 
 
 def format_claim_anchor_details(

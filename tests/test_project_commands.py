@@ -2025,6 +2025,30 @@ class TestProjectClaimsCommand:
         assert "Participants converge on the position: AI should be governed." in out
         assert "target: Alice sees AI as useful with guardrails." in out
 
+    def test_show_project_includes_claim_relationship_count(self, tmp_store, capsys):
+        from qc_clean.core.cli.commands.project import _show_project
+
+        state = ProjectState(
+            id="show-claim-rel-proj",
+            name="Show Claim Relation Project",
+            claim_relationships=[
+                ClaimRelationship(
+                    source_stage="cross_interview",
+                    source_claim_id="claim-2",
+                    target_claim_id="claim-1",
+                    relationship_type="synthesizes",
+                )
+            ],
+        )
+        tmp_store.save(state)
+
+        args = MagicMock(project_id="show-claim-rel-proj")
+        result = _show_project(tmp_store, args)
+
+        assert result == 0
+        out = capsys.readouterr().out
+        assert "Claim relationships: 1" in out
+
     def test_project_abductive_command_shows_candidate_explanations(
         self,
         tmp_store,

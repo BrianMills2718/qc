@@ -751,6 +751,144 @@ def test_cross_case_builder_emits_position_aware_cross_case_claims():
     relationships = claim_relationships_for_cross_interview(state)
     assert any(rel.relationship_type == "synthesizes" for rel in relationships)
     assert any(rel.relationship_type == "contrasts" for rel in relationships)
+    contrast_targets = {
+        rel.target_claim_id
+        for rel in relationships
+        if rel.relationship_type == "contrasts"
+    }
+    assert contrast_targets == {"claim-alice", "claim-bob"}
+
+
+def test_cross_case_relationships_narrow_divergence_links_by_participant_alias():
+    """Divergence relations should narrow to participants named in the claim text."""
+    state = ProjectState(
+        perspective_analysis=PerspectiveAnalysis(
+            participants=[
+                ParticipantPerspective(
+                    name="ALFS France representative",
+                    role="French government / information integrity official",
+                ),
+                ParticipantPerspective(
+                    name="Aristide Kanga",
+                    role="Benevole EMI / UNESCO (media literacy educator)",
+                ),
+                ParticipantPerspective(
+                    name="Chris Runyan",
+                    role="USAID information resilience lead / senior adviser",
+                ),
+            ],
+        ),
+        claims=[
+            AnalyticClaim(
+                id="claim-france",
+                claim_kind=ClaimKind.PERSPECTIVE,
+                source_stage="perspective",
+                claim_text="France perspective summary.",
+                scope=ClaimScope(participant_names=["ALFS France representative"]),
+                origin_object_type="participant_perspective",
+                origin_object_id="ALFS France representative",
+            ),
+            AnalyticClaim(
+                id="claim-aristide",
+                claim_kind=ClaimKind.PERSPECTIVE,
+                source_stage="perspective",
+                claim_text="Aristide perspective summary.",
+                scope=ClaimScope(participant_names=["Aristide Kanga"]),
+                origin_object_type="participant_perspective",
+                origin_object_id="Aristide Kanga",
+            ),
+            AnalyticClaim(
+                id="claim-chris",
+                claim_kind=ClaimKind.PERSPECTIVE,
+                source_stage="perspective",
+                claim_text="Chris perspective summary.",
+                scope=ClaimScope(participant_names=["Chris Runyan"]),
+                origin_object_type="participant_perspective",
+                origin_object_id="Chris Runyan",
+            ),
+            AnalyticClaim(
+                id="claim-divergence",
+                claim_kind=ClaimKind.CROSS_CASE,
+                source_stage="cross_interview",
+                claim_text=(
+                    "Participants diverge on the position: Attribution/public exposure: "
+                    "France emphasizes caution while USAID accepts discrete attribution."
+                ),
+                scope=ClaimScope(
+                    corpus_level=True,
+                    participant_names=[
+                        "ALFS France representative",
+                        "Aristide Kanga",
+                        "Chris Runyan",
+                    ],
+                ),
+                origin_object_type="cross_interview_perspective_divergence",
+                origin_object_id="perspective_divergence:0",
+            ),
+        ],
+    )
+
+    relationships = claim_relationships_for_cross_interview(state)
+
+    contrast_targets = [
+        rel.target_claim_id
+        for rel in relationships
+        if rel.relationship_type == "contrasts"
+    ]
+    assert contrast_targets == ["claim-france", "claim-chris"]
+
+
+def test_cross_case_relationships_fallback_to_scope_when_no_alias_matches():
+    """If no participant alias is detectable, divergence links stay scope-wide."""
+    state = ProjectState(
+        perspective_analysis=PerspectiveAnalysis(
+            participants=[
+                ParticipantPerspective(name="Alice Doe", role="Policy lead"),
+                ParticipantPerspective(name="Bob Roe", role="Operations lead"),
+            ],
+        ),
+        claims=[
+            AnalyticClaim(
+                id="claim-alice",
+                claim_kind=ClaimKind.PERSPECTIVE,
+                source_stage="perspective",
+                claim_text="Alice summary.",
+                scope=ClaimScope(participant_names=["Alice Doe"]),
+                origin_object_type="participant_perspective",
+                origin_object_id="Alice Doe",
+            ),
+            AnalyticClaim(
+                id="claim-bob",
+                claim_kind=ClaimKind.PERSPECTIVE,
+                source_stage="perspective",
+                claim_text="Bob summary.",
+                scope=ClaimScope(participant_names=["Bob Roe"]),
+                origin_object_type="participant_perspective",
+                origin_object_id="Bob Roe",
+            ),
+            AnalyticClaim(
+                id="claim-divergence",
+                claim_kind=ClaimKind.CROSS_CASE,
+                source_stage="cross_interview",
+                claim_text="Participants diverge on the position: timing remains contested.",
+                scope=ClaimScope(
+                    corpus_level=True,
+                    participant_names=["Alice Doe", "Bob Roe"],
+                ),
+                origin_object_type="cross_interview_perspective_divergence",
+                origin_object_id="perspective_divergence:0",
+            ),
+        ],
+    )
+
+    relationships = claim_relationships_for_cross_interview(state)
+
+    contrast_targets = [
+        rel.target_claim_id
+        for rel in relationships
+        if rel.relationship_type == "contrasts"
+    ]
+    assert contrast_targets == ["claim-alice", "claim-bob"]
 
 
 def test_gt_builders_emit_category_and_proposition_claims():

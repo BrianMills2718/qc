@@ -136,6 +136,7 @@ def _show_project(store: ProjectStore, args) -> int:
     print(f"  Codes: {len(state.codebook.codes)}")
     print(f"  Applications: {len(state.code_applications)}")
     print(f"  Claims: {len(state.claims)}")
+    print(f"  Claim relationships: {len(state.claim_relationships)}")
     print(f"  Observed patterns: {len(state.observed_patterns)}")
     print(f"  Abductive candidates: {len(state.abductive_explanations)}")
     print(f"  Iteration: {state.iteration}")
