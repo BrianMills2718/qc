@@ -84,6 +84,7 @@ Examples:
   qc_cli run-report-baselines <project_id> --output report_baselines.json --mode direct_report --mode qa_report
   qc_cli compare-report-baselines report.md report_baselines.json --output report_baseline_comparison.json
   qc_cli write-report-review-packet report.md report_baselines.json --output report_review_packet.json
+  qc_cli run-report-review report_review_packet.json --output report_review_response.json
   qc_cli validate-d7-baseline-package baseline.json
   qc_cli validate-d7-comparison-protocol d7_protocol.json
   qc_cli d7-comparison-preflight d7_protocol.json d7_gold.json lexical.json embedding.json
@@ -969,6 +970,18 @@ Examples:
     report_review_packet_parser.add_argument('baseline_package', help='Report-baseline JSON package path')
     report_review_packet_parser.add_argument('--output', help='Optional JSON output path')
 
+    report_review_parser = subparsers.add_parser(
+        'run-report-review',
+        help='Run agent review over report comparison packet',
+        description='Run a structured agent review over a report review packet',
+    )
+    report_review_parser.add_argument('packet', help='Report review packet JSON path')
+    report_review_parser.add_argument('--output', help='Optional JSON output path')
+    report_review_parser.add_argument('--model', help='Model name')
+    report_review_parser.add_argument('--reviewer-id', help='Reviewer identifier')
+    report_review_parser.add_argument('--trace-id', help='Optional llm_client trace ID')
+    report_review_parser.add_argument('--max-budget', type=float)
+
     # D7 retrieval comparison command
     d7_comparison_parser = subparsers.add_parser(
         'compare-d7-retrieval',
@@ -1661,6 +1674,8 @@ def main() -> int:
             return handle_compare_report_baselines_command(args)
         elif args.command == 'write-report-review-packet':
             return handle_write_report_review_packet_command(args)
+        elif args.command == 'run-report-review':
+            return handle_run_report_review_command(args)
         elif args.command == 'compare-d7-retrieval':
             return handle_compare_d7_retrieval_command(args)
         elif args.command == 'verify-d7-comparison-artifact':
@@ -2259,6 +2274,24 @@ def handle_write_report_review_packet_command(args) -> int:
     if args.output:
         argv.extend(["--output", args.output])
     return write_report_review_packet.main(argv)
+
+
+def handle_run_report_review_command(args) -> int:
+    """Run an agent report review through the CLI."""
+    from scripts import run_report_review
+
+    argv = [args.packet]
+    for attr, flag in [
+        ("output", "--output"),
+        ("model", "--model"),
+        ("reviewer_id", "--reviewer-id"),
+        ("trace_id", "--trace-id"),
+        ("max_budget", "--max-budget"),
+    ]:
+        value = getattr(args, attr)
+        if value is not None:
+            argv.extend([flag, str(value)])
+    return run_report_review.main(argv)
 
 
 def handle_compare_d7_retrieval_command(args) -> int:

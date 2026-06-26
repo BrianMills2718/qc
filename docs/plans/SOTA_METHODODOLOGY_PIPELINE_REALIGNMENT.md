@@ -655,3 +655,27 @@ This makes the next evaluation step agent-drivable and reviewable without
 pretending the deterministic scorer is the final judge. Copied-seed verification
 wrote an ignored local `report_review_packet.json` containing the reviewer
 report, both transcript baselines, and all rubric dimensions.
+
+Implementation checkpoint on 2026-06-26 (agent report review response): the repo
+now has a structured agent-review response workflow for report review packets.
+`scripts/run_report_review.py` and `qc_cli.py run-report-review
+<report_review_packet.json>` call `llm_client` with schema-validated output and
+write a versioned `qualitative_coding.report_review_response` package.
+
+Copied-seed live review: running `gpt-5-mini` over the copied seed review packet
+wrote an ignored local `report_review_response.json`. The agent reviewer ranked:
+
+1. `structured_report`
+2. `transcript_qa_report`
+3. `transcript_direct_report`
+
+The comparative summary judged the structured reviewer report most useful
+because it is anchored with claim IDs and anchor counts, while the QA baseline
+is a stronger simple baseline than the direct report due to concrete examples.
+Residual concerns recorded by the reviewer:
+
+- dropped/unanchored quotes still reduce confidence that all relevant evidence
+  was preserved;
+- the three-transcript seed limits generalizability across all artifacts;
+- numeric confidences and codebook counts need clearer derivation to avoid
+  being misread as precise measures.
