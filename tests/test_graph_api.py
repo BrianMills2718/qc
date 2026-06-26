@@ -148,6 +148,10 @@ def test_graph_claims_endpoint_returns_claim_nodes_and_relationship_edges(tmp_st
             "id": "rel-1",
             "source": "claim-2",
             "target": "claim-1",
+            "source_label": "Participants converge on the position: AI should be governed.",
+            "target_label": "Alice sees AI as useful with guardrails.",
+            "source_claim_text": "Participants converge on the position: AI should be governed.",
+            "target_claim_text": "Alice sees AI as useful with guardrails.",
             "type": "synthesizes",
             "rationale": "Cross-case synthesis summarizes a participant-level claim.",
         }
@@ -168,4 +172,5 @@ def test_graph_ui_page_exposes_claim_graph_tab(client, tmp_store):
     assert 'data-view="claims"' in resp.text
     assert "/projects/\" + PROJECT_ID + \"/graph/claims" in resp.text
     assert 'cy.on("tap", "edge"' in resp.text
-    assert 'else if (data.edgeType)' in resp.text
+    assert 'sourceLabel: edge.source_label || edge.source || ""' in resp.text
+    assert 'Source claim text' in resp.text

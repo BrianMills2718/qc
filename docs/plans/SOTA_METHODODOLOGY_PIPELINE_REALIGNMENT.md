@@ -322,3 +322,22 @@ Critique after the inspectability checkpoint:
   than humanized source/target labels, so one further polish step remains if we
   keep investing in this surface;
 - the larger remaining gap is still semantic breadth, not basic inspectability.
+
+Implementation checkpoint on 2026-06-26 (humanized claim-edge detail): the
+claim-graph API and browser UI now expose human-readable source/target labels
+for claim-relationship edges, along with full source/target claim text in the
+detail panel. This preserves deterministic graph scope while removing the need
+for reviewers to cross-reference opaque claim IDs manually. Focused graph API
+tests, Ruff, and copied-replay verification passed.
+
+Replay critique after the humanized-edge checkpoint:
+
+- the copied replay claim graph still yields 22 nodes and 30 edges, so the
+  underlying deterministic relation structure is unchanged by this UI/API
+  improvement;
+- reviewer usability is materially better because edge inspection now shows
+  readable claim summaries and full source/target claim text rather than only
+  internal IDs;
+- the next-week queue for the current claim-graph surface is now effectively
+  exhausted: the main remaining gap is semantic breadth/selectivity, not basic
+  reviewer readability.

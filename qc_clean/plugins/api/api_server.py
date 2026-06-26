@@ -426,6 +426,7 @@ class QCAPIServer:
                 for relationship in state.claim_relationships
             }
 
+            claim_lookup = {claim.id: claim for claim in state.claims}
             nodes = []
             for claim in state.claims:
                 if involved_claim_ids and claim.id not in involved_claim_ids:
@@ -446,10 +447,24 @@ class QCAPIServer:
 
             edges = []
             for relationship in state.claim_relationships:
+                source_claim = claim_lookup.get(relationship.source_claim_id)
+                target_claim = claim_lookup.get(relationship.target_claim_id)
                 edges.append({
                     "id": relationship.id,
                     "source": relationship.source_claim_id,
                     "target": relationship.target_claim_id,
+                    "source_label": (
+                        source_claim.claim_text[:72] + "..."
+                        if source_claim and len(source_claim.claim_text) > 72
+                        else (source_claim.claim_text if source_claim else relationship.source_claim_id)
+                    ),
+                    "target_label": (
+                        target_claim.claim_text[:72] + "..."
+                        if target_claim and len(target_claim.claim_text) > 72
+                        else (target_claim.claim_text if target_claim else relationship.target_claim_id)
+                    ),
+                    "source_claim_text": source_claim.claim_text if source_claim else "",
+                    "target_claim_text": target_claim.claim_text if target_claim else "",
                     "type": relationship.relationship_type,
                     "rationale": relationship.rationale,
                 })

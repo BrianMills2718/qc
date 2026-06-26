@@ -490,6 +490,10 @@ function renderClaims() {
         width: 3,
         edgeType: "claim_relationship",
         relationshipType: edge.type || "",
+        sourceLabel: edge.source_label || edge.source || "",
+        targetLabel: edge.target_label || edge.target || "",
+        sourceClaimText: edge.source_claim_text || "",
+        targetClaimText: edge.target_claim_text || "",
         rationale: edge.rationale || "",
       }
     });
@@ -620,9 +624,17 @@ function showDetail(data) {
   } else if (data.edgeType) {
     html += '<div class="field"><span class="badge">' + escapeHtml(data.edgeType) + '</span></div>';
     html += '<div class="field"><span class="field-label">Source</span>';
-    html += '<div class="field-value">' + escapeHtml(data.source || "") + '</div></div>';
+    html += '<div class="field-value">' + escapeHtml(data.sourceLabel || data.source || "") + '</div></div>';
+    if (data.sourceClaimText) {
+      html += '<div class="field"><span class="field-label">Source claim text</span>';
+      html += '<div class="field-value">' + escapeHtml(data.sourceClaimText) + '</div></div>';
+    }
     html += '<div class="field"><span class="field-label">Target</span>';
-    html += '<div class="field-value">' + escapeHtml(data.target || "") + '</div></div>';
+    html += '<div class="field-value">' + escapeHtml(data.targetLabel || data.target || "") + '</div></div>';
+    if (data.targetClaimText) {
+      html += '<div class="field"><span class="field-label">Target claim text</span>';
+      html += '<div class="field-value">' + escapeHtml(data.targetClaimText) + '</div></div>';
+    }
     if (data.relationshipType) {
       html += '<div class="field"><span class="field-label">Relationship</span>';
       html += '<div class="field-value">' + escapeHtml(data.relationshipType) + '</div></div>';
