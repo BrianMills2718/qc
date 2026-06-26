@@ -85,6 +85,7 @@ Examples:
   qc_cli compare-report-baselines report.md report_baselines.json --output report_baseline_comparison.json
   qc_cli write-report-review-packet report.md report_baselines.json --output report_review_packet.json
   qc_cli run-report-review report_review_packet.json --output report_review_response.json
+  qc_cli write-product-gate-package <project_id> --reviewer-report reviewer_report.md --output product_gate_package.json
   qc_cli validate-d7-baseline-package baseline.json
   qc_cli validate-d7-comparison-protocol d7_protocol.json
   qc_cli d7-comparison-preflight d7_protocol.json d7_gold.json lexical.json embedding.json
@@ -982,6 +983,21 @@ Examples:
     report_review_parser.add_argument('--trace-id', help='Optional llm_client trace ID')
     report_review_parser.add_argument('--max-budget', type=float)
 
+    product_gate_parser = subparsers.add_parser(
+        'write-product-gate-package',
+        help='Write a product-gate evidence package',
+        description='Write a versioned product-gate evidence package with artifact hashes',
+    )
+    product_gate_parser.add_argument('project_id', help='Project ID for the evidence package')
+    product_gate_parser.add_argument('--reviewer-report', required=True, help='Reviewer Markdown report path')
+    product_gate_parser.add_argument('--audit-report', help='Audit/full Markdown report path')
+    product_gate_parser.add_argument('--baseline-package', help='Report-baseline JSON package path')
+    product_gate_parser.add_argument('--baseline-comparison', help='Report-baseline comparison JSON path')
+    product_gate_parser.add_argument('--review-packet', help='Report review packet JSON path')
+    product_gate_parser.add_argument('--review-response', help='Report review response JSON path')
+    product_gate_parser.add_argument('--export-manifest', help='Export audit manifest JSON path')
+    product_gate_parser.add_argument('--output', help='Optional JSON output path')
+
     # D7 retrieval comparison command
     d7_comparison_parser = subparsers.add_parser(
         'compare-d7-retrieval',
@@ -1676,6 +1692,8 @@ def main() -> int:
             return handle_write_report_review_packet_command(args)
         elif args.command == 'run-report-review':
             return handle_run_report_review_command(args)
+        elif args.command == 'write-product-gate-package':
+            return handle_write_product_gate_package_command(args)
         elif args.command == 'compare-d7-retrieval':
             return handle_compare_d7_retrieval_command(args)
         elif args.command == 'verify-d7-comparison-artifact':
@@ -2292,6 +2310,30 @@ def handle_run_report_review_command(args) -> int:
         if value is not None:
             argv.extend([flag, str(value)])
     return run_report_review.main(argv)
+
+
+def handle_write_product_gate_package_command(args) -> int:
+    """Write a product-gate evidence package through the CLI."""
+    from scripts import write_product_gate_package
+
+    argv = [
+        args.project_id,
+        "--reviewer-report",
+        args.reviewer_report,
+    ]
+    for attr, flag in [
+        ("audit_report", "--audit-report"),
+        ("baseline_package", "--baseline-package"),
+        ("baseline_comparison", "--baseline-comparison"),
+        ("review_packet", "--review-packet"),
+        ("review_response", "--review-response"),
+        ("export_manifest", "--export-manifest"),
+        ("output", "--output"),
+    ]:
+        value = getattr(args, attr)
+        if value is not None:
+            argv.extend([flag, str(value)])
+    return write_product_gate_package.main(argv)
 
 
 def handle_compare_d7_retrieval_command(args) -> int:

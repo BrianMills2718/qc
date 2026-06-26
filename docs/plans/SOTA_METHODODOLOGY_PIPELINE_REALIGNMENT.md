@@ -808,3 +808,16 @@ GT coding append those records for ambiguous and no-source dropped quote
 candidates while retaining the existing count warnings. This closes the
 incremental regression where corpus mutation could return unanchored evidence
 handling to warning-only behavior.
+
+Product-gate implementation checkpoint on 2026-06-26 (evidence package):
+`qc_cli.py write-product-gate-package` and
+`scripts/write_product_gate_package.py` now write a versioned
+`qualitative_coding.product_gate_evidence` package that hashes product-gate
+artifacts by role. The package can include reviewer report, audit report,
+report baselines, baseline comparison, report review packet, report review
+response, and export manifest paths. Known JSON artifacts are checked for the
+expected package type and project ID before packaging, and the package includes
+an explicit caution that it is evidence packaging, not a SOTA or
+finished-product pass claim. A copied-seed run wrote
+`test_output/plan241_position_claims_replay_2026_06_25/product_gate_package.json`
+with reviewer/audit/baseline/review artifacts.

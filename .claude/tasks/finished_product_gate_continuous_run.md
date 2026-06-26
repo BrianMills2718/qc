@@ -15,20 +15,21 @@ must never be treated as product completion.
 
 ## Current Phase
 
-Close the incremental grounding-ledger gap: adding documents and running
-incremental recode must not regress dropped quote candidates back to count-only
-warnings.
+Close the product-gate evidence packaging gap: reviewer/audit/baseline/review
+artifacts must be bundleable into one versioned, hash-checked package rather
+than remaining only as scattered ignored local files.
 
 ## Acceptance Criteria For Current Slice
 
-- [x] Default thematic coding and incremental coding share one remediation-record
-  builder for dropped quote candidates.
-- [x] Incremental thematic recode records `GroundingIssue` rows for ambiguous
-  and no-source dropped quote candidates.
-- [x] Incremental GT recode records `GroundingIssue` rows for ambiguous and
-  no-source dropped quote candidates.
-- [x] Focused tests cover default thematic, incremental thematic, incremental
-  GT, domain round-trip, CSV export, and Markdown export behavior.
+- [x] A core product-gate evidence package contract records project ID,
+  generated timestamp, artifact roles, paths, byte sizes, hashes, recognized
+  package types, and a claim-discipline caution.
+- [x] Known JSON artifacts fail loudly when their package type or project ID
+  does not match the requested product-gate package.
+- [x] The package writer is available through an agent-drivable script and
+  canonical `qc_cli.py write-product-gate-package` command.
+- [x] Focused tests cover core package construction, mismatch failure, script
+  output/error behavior, and top-level CLI forwarding.
 - [x] Ruff, focused pytest, plan/docs checks, `git diff --check`, and `make
   check` pass before commit.
 - [ ] Slice is documented, committed, pushed, and the worktree is clean before
@@ -78,4 +79,19 @@ warnings.
 - 2026-06-26: Verification passed for the incremental grounding-ledger slice:
   focused pytest, Ruff, plan validation, Markdown links, surface readiness,
   `git diff --check`, and full `make check` (`1416 passed, 1 skipped, 8
+  deselected`).
+- 2026-06-26: Incremental grounding issues were committed and pushed in commit
+  `705cfa6b`.
+- 2026-06-26: Next product-gate gap selected: report, baseline, comparison,
+  review packet, and review response artifacts existed as separate ignored local
+  files. The slice will add a product-gate evidence package that hashes and
+  validates the current bundle without claiming the finished-product gate has
+  passed.
+- 2026-06-26: `qc_cli.py write-product-gate-package` successfully wrote
+  `test_output/plan241_position_claims_replay_2026_06_25/product_gate_package.json`
+  for the copied seed artifacts, including reviewer report, audit report,
+  report baselines, baseline comparison, review packet, and review response.
+- 2026-06-26: Verification passed for the product-gate evidence-package slice:
+  focused pytest, Ruff, plan validation, Markdown links, surface readiness,
+  `git diff --check`, and full `make check` (`1421 passed, 1 skipped, 8
   deselected`).
