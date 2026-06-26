@@ -167,3 +167,5 @@ def test_graph_ui_page_exposes_claim_graph_tab(client, tmp_store):
     assert resp.status_code == 200
     assert 'data-view="claims"' in resp.text
     assert "/projects/\" + PROJECT_ID + \"/graph/claims" in resp.text
+    assert 'cy.on("tap", "edge"' in resp.text
+    assert 'else if (data.edgeType)' in resp.text

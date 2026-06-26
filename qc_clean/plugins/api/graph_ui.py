@@ -234,6 +234,10 @@ function initCytoscape(elements, layout) {
     showDetail(evt.target.data());
   });
 
+  cy.on("tap", "edge", function(evt) {
+    showDetail(evt.target.data());
+  });
+
   cy.on("tap", function(evt) {
     if (evt.target === cy) closeDetail();
   });
@@ -266,11 +270,14 @@ function renderHierarchy() {
   for (var edge of (codeData.hierarchy_edges || [])) {
     elements.push({
       data: {
+        id: "hierarchy:" + edge.source + ":" + edge.target,
         source: edge.source,
         target: edge.target,
         label: "",
         color: "#94a3b8",
         width: 2,
+        edgeType: "hierarchy",
+        rationale: "Parent-child codebook hierarchy link.",
       }
     });
   }
@@ -331,11 +338,15 @@ function renderRelationships() {
     var w = Math.max(1, Math.min(6, (edge.strength || 0.5) * 6));
     elements.push({
       data: {
+        id: "code-rel:" + edge.source + ":" + edge.target + ":" + (edge.type || ""),
         source: edge.source,
         target: edge.target,
         label: edge.type || "",
         color: relColor,
         width: w,
+        edgeType: "code_relationship",
+        relationshipType: edge.type || "",
+        strength: edge.strength || 0,
       }
     });
   }
@@ -398,11 +409,15 @@ function renderEntities() {
     var w = Math.max(1, Math.min(6, (edge.strength || 0.5) * 6));
     elements.push({
       data: {
+        id: "entity-rel:" + edge.source + ":" + edge.target + ":" + (edge.type || ""),
         source: edge.source,
         target: edge.target,
         label: edge.type || "",
         color: "#94a3b8",
         width: w,
+        edgeType: "entity_relationship",
+        relationshipType: edge.type || "",
+        strength: edge.strength || 0,
       }
     });
   }
@@ -473,6 +488,8 @@ function renderClaims() {
         label: edge.type || "",
         color: CLAIM_REL_COLORS[edge.type] || "#6b7280",
         width: 3,
+        edgeType: "claim_relationship",
+        relationshipType: edge.type || "",
         rationale: edge.rationale || "",
       }
     });
@@ -599,6 +616,24 @@ function showDetail(data) {
     if (data.claimText) {
       html += '<div class="field"><span class="field-label">Claim text</span>';
       html += '<div class="field-value">' + escapeHtml(data.claimText) + '</div></div>';
+    }
+  } else if (data.edgeType) {
+    html += '<div class="field"><span class="badge">' + escapeHtml(data.edgeType) + '</span></div>';
+    html += '<div class="field"><span class="field-label">Source</span>';
+    html += '<div class="field-value">' + escapeHtml(data.source || "") + '</div></div>';
+    html += '<div class="field"><span class="field-label">Target</span>';
+    html += '<div class="field-value">' + escapeHtml(data.target || "") + '</div></div>';
+    if (data.relationshipType) {
+      html += '<div class="field"><span class="field-label">Relationship</span>';
+      html += '<div class="field-value">' + escapeHtml(data.relationshipType) + '</div></div>';
+    }
+    if (data.strength !== undefined) {
+      html += '<div class="field"><span class="field-label">Strength</span>';
+      html += '<div class="field-value">' + escapeHtml(String(data.strength)) + '</div></div>';
+    }
+    if (data.rationale) {
+      html += '<div class="field"><span class="field-label">Rationale</span>';
+      html += '<div class="field-value">' + escapeHtml(data.rationale) + '</div></div>';
     }
   }
 

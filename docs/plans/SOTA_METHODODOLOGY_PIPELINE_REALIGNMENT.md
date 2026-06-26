@@ -307,3 +307,18 @@ Replay critique after the claim-graph checkpoint:
   ledger;
 - this is therefore a real product milestone, but not yet a full semantic
   claims graph.
+
+Implementation checkpoint on 2026-06-26 (graph inspectability): the graph UI
+now supports edge-level detail inspection, including claim-relationship
+rationales. Reviewers can click claim-graph edges to inspect relation type,
+source/target IDs, and deterministic rationale, rather than only seeing an
+undifferentiated visual edge. Focused graph tests passed.
+
+Critique after the inspectability checkpoint:
+
+- this materially improves reviewer utility because the claim graph is no
+  longer only a visual topology; it now exposes why a link exists;
+- but the UI still displays raw source/target claim IDs for edge details rather
+  than humanized source/target labels, so one further polish step remains if we
+  keep investing in this surface;
+- the larger remaining gap is still semantic breadth, not basic inspectability.
