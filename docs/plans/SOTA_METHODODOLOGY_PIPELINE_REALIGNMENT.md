@@ -137,6 +137,59 @@ selected.
 
 ## Acceptance Criteria
 
+> Finished-product criteria (outer gate; no slice may close the whole product
+> unless these pass):
+- [ ] The default workflow can take a real multi-document corpus from ingest to
+  reviewer-ready export through a documented, repeatable command/API path, with
+  no manual state surgery and no ignored local-only artifacts required.
+- [ ] Every default-path reviewer-facing analytic claim is represented as a
+  first-class claim object with explicit scope, source-stage provenance,
+  support status, and source-span anchors or a local `needs_anchor`/unsupported
+  label at the point where the claim appears.
+- [ ] Every default-path code application and quoted evidence item resolves to
+  a verifiable source span, or is dropped/flagged with stage-level provenance
+  and an auditable remediation path; unanchored quote candidates are not merely
+  summarized as acceptable residual noise.
+- [ ] Exhaustive segment coverage is available on the default reviewer path, or
+  the default path explicitly avoids prevalence/coverage language that depends
+  on an exhaustive denominator.
+- [ ] Disconfirmation is evaluated against the final claim set with a validated
+  retrieval/reviewer policy and held-out D7 evidence; absence of found negative
+  cases is not presented as proof until that gate passes.
+- [ ] Human/agent review covers code applications, claims, relationships,
+  negative cases, recommendations, and provisional abductive candidates through
+  an agent-drivable workflow with importable decisions and audit history.
+- [ ] Reviewer and audit exports are separate products: reviewer exports are
+  coherent, non-duplicative, locally caveated, and publish-preflightable; audit
+  exports preserve full memo/history/claim/retrieval/provenance detail.
+- [ ] Baseline comparisons against direct transcript-to-report, QA-report, and
+  relevant commercial/research baselines are reproducible from versioned
+  artifacts, not chat-only observations.
+- [ ] The evaluation harness has populated evidence, not only protocol
+  substrate, for D1-D10 where claimed; product claims are licensed only for
+  dimensions whose confidence intervals clear the registered baseline/human
+  ceiling.
+- [ ] Expert/adjudicator review packages exist and have completed responses for
+  codebook quality, application validity, disconfirmation, interpretive
+  preference, bias, sampling-frame adequacy, and GT fidelity where those claims
+  are made.
+- [ ] Prompt-injection and untrusted-data boundaries are validated on a frozen,
+  independently curated live suite across the supported model/provider set; no
+  robustness claim is made from structural fixtures alone.
+- [ ] Incremental corpus mutation cannot leave stale higher-order outputs in the
+  reviewer path; default refresh/invalidation policy is live-validated and
+  documented.
+- [ ] The product has an operator-ready surface: CLI/API/UI paths are documented,
+  smoke-tested on a clean environment, and expose every human-visible operation
+  through an agent-drivable interface.
+- [ ] Observability and auditability are production-ready: LLM traces, costs,
+  artifact hashes, export manifests, event logs, and verification commands are
+  generated and checked as part of the normal handoff path.
+- [ ] A fresh end-to-end benchmark run on a held-out corpus passes the registered
+  product gate, produces reviewer/audit artifacts, runs baseline comparisons,
+  imports review/adjudication responses, and leaves a clean committed benchmark
+  package.
+
 > Feature-level criteria:
 - [ ] Canonical docs clearly describe SOTA qualitative coding methodology and
   the current software/research landscape.
