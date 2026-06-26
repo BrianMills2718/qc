@@ -47,6 +47,7 @@ Add the scored side-by-side comparison artifact so baseline runs can be evaluate
 - Report review packet writer exists so deterministic scoring can be followed by human/agent adjudication.
 - Agent report review response workflow exists and was run on the copied seed packet.
 - Codebook count/confidence caveat is present in Markdown exports.
+- Repeated dropped-quote grounding warnings are summarized in Markdown exports before raw warning details.
 
 ## Progress Log
 
@@ -63,3 +64,4 @@ Add the scored side-by-side comparison artifact so baseline runs can be evaluate
 - 2026-06-26: Added report review packet writer and CLI. Focused tests pass for packet schema, script output, and CLI forwarding. Copied-seed packet includes reviewer report, direct baseline, QA baseline, rubric questions, and response instructions.
 - 2026-06-26: Added and ran agent report-review response workflow. Live `gpt-5-mini` review ranked structured report first, QA baseline second, direct baseline third. Residual concerns: dropped/unanchored quotes, three-transcript scope, and numeric confidence/count derivation clarity.
 - 2026-06-26: Added Codebook section caveat that mentions/confidence are local pipeline signals, not validated prevalence or methodological-certainty measures. Copied-seed reviewer report was regenerated with the caveat.
+- 2026-06-26: Added a Markdown grounding-warning summary for repeated dropped-quote warning events. Copied-seed reviewer report now reports 13 dropped quote candidates across 2 grounding events and 37 retained anchored code applications before listing the raw warnings.

@@ -16,6 +16,7 @@ from qc_clean.schemas.domain import (
     ClaimRelationship,
     ClaimKind,
     ClaimScope,
+    CodeApplication,
     CodeRelationship,
     Corpus,
     CoreCategoryResult,
@@ -220,6 +221,37 @@ def test_markdown_export_surfaces_data_warnings(tmp_path):
     text = out.read_text()
     assert "Data warnings" in text
     assert "invalidated: synthesis" in text
+
+
+def test_markdown_export_summarizes_repeated_grounding_warnings(tmp_path):
+    """Repeated dropped-quote warnings should be grouped without hiding details."""
+    from qc_clean.core.export.data_exporter import ProjectExporter
+
+    state = _state(
+        data_warnings=[
+            "8 quote(s) matched no source document and were dropped as unanchored (INV-1).",
+            "5 quote(s) matched no source document and were dropped as unanchored (INV-1).",
+        ],
+        code_applications=[
+            CodeApplication(
+                code_id="c1",
+                doc_id="d1",
+                quote_text="content",
+                start_char=0,
+                end_char=7,
+                quote_hash="hash",
+            )
+        ],
+    )
+    out = tmp_path / "report.md"
+    ProjectExporter().export_markdown(state, str(out))
+    text = out.read_text()
+    assert "Grounding summary" in text
+    assert "13 quote candidate(s) matched no source document" in text
+    assert "2 grounding warning event(s)" in text
+    assert "1 anchored code application(s) remain available for audit" in text
+    assert "8 quote(s) matched no source document" in text
+    assert "5 quote(s) matched no source document" in text
 
 
 def _claim(source_stage: str, kind: ClaimKind, *, claim_id: str | None = None) -> AnalyticClaim:

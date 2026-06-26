@@ -686,3 +686,11 @@ that mention counts and confidence values are local pipeline signals for the
 loaded corpus, not validated prevalence estimates or methodological-certainty
 measures. This directly addresses one residual concern from the agent review
 without pretending the metrics are more rigorous than they are.
+
+Implementation checkpoint on 2026-06-26 (grounding warning clarity): Markdown
+exports now summarize repeated dropped-quote grounding warnings before listing
+the raw warnings. The copied-seed reviewer report now states that 13 quote
+candidates matched no source document across 2 grounding warning events, while
+37 anchored code applications remain available for audit. This does not hide
+evidence loss; it makes the warning interpretable and distinguishes dropped
+quote candidates from retained anchored evidence.

@@ -46,6 +46,13 @@ MISSING_SAMPLING_FRAME_WARNING_MESSAGE = (
     "the population field as a defensible generalization boundary until the "
     "selection basis is stated."
 )
+_NO_SOURCE_QUOTE_WARNING_RE = re.compile(
+    r"(?P<count>\d+) quote\(s\) matched no source document and were dropped as unanchored"
+)
+_AMBIGUOUS_QUOTE_WARNING_RE = re.compile(
+    r"(?P<count>\d+) quote\(s\) occurred more than once in the corpus and "
+    r"could not be uniquely anchored"
+)
 
 
 def _safe_filename_stem(value: str, fallback: str = "project") -> str:
@@ -69,6 +76,42 @@ def _ensure_can_write_all(paths: List[Path], *, overwrite: bool) -> None:
     """Fail before writing any artifact when one target would be clobbered."""
     for path in paths:
         _ensure_can_write(path, overwrite=overwrite)
+
+
+def _format_data_warning_summary(state: ProjectState) -> str | None:
+    """Summarize repeated grounding warnings without hiding the raw warning text."""
+    no_source = 0
+    ambiguous = 0
+    grounding_events = 0
+    for warning in state.data_warnings:
+        matched = False
+        if match := _NO_SOURCE_QUOTE_WARNING_RE.search(warning):
+            no_source += int(match.group("count"))
+            matched = True
+        if match := _AMBIGUOUS_QUOTE_WARNING_RE.search(warning):
+            ambiguous += int(match.group("count"))
+            matched = True
+        if matched:
+            grounding_events += 1
+
+    if not grounding_events:
+        return None
+
+    anchored_apps = sum(
+        1
+        for app in state.code_applications
+        if app.quote_hash and app.start_char is not None and app.end_char is not None
+    )
+    parts = []
+    if no_source:
+        parts.append(f"{no_source} quote candidate(s) matched no source document")
+    if ambiguous:
+        parts.append(f"{ambiguous} quote candidate(s) were non-unique")
+    dropped = "; ".join(parts)
+    return (
+        f"{dropped} across {grounding_events} grounding warning event(s). "
+        f"{anchored_apps} anchored code application(s) remain available for audit."
+    )
 
 
 def _corpus_scope_export_warnings(
@@ -495,6 +538,8 @@ class ProjectExporter:
         # never silently rendered as current (INV-11/INV-1).
         if state.data_warnings:
             _a("> ⚠️ **Data warnings** — read before relying on the results below:")
+            if warning_summary := _format_data_warning_summary(state):
+                _a(f"> **Grounding summary**: {warning_summary}")
             for w in state.data_warnings:
                 _a(f"> - {w}")
             _a("")
