@@ -16,6 +16,7 @@ from qc_clean.schemas.domain import (
     AbductiveCandidateExplanation,
     AbductiveExplanationStatus,
     ClaimAnchor,
+    ClaimRelationship,
     ClaimKind,
     ClaimScope,
     Code,
@@ -216,6 +217,58 @@ def _replace_with_two_abductive_candidates(tmp_store, review_project):
             source_pattern_ids=["pattern-2"],
             explanation_text="Training access may explain divergence.",
             mechanism_summary="Uneven access changes adoption paths.",
+        ),
+    ]
+    tmp_store.save(review_project)
+
+
+def _replace_with_two_claim_relationships(tmp_store, review_project):
+    """Replace the review fixture claim relationships with two ordered rows."""
+    review_project.claims = [
+        AnalyticClaim(
+            id="claim-1",
+            claim_kind=ClaimKind.PERSPECTIVE,
+            source_stage="perspective",
+            claim_text="Alice sees AI as useful with guardrails.",
+            scope=ClaimScope(participant_names=["Alice"]),
+            origin_object_type="participant_perspective",
+            origin_object_id="Alice",
+        ),
+        AnalyticClaim(
+            id="claim-2",
+            claim_kind=ClaimKind.CROSS_CASE,
+            source_stage="cross_interview",
+            claim_text="Participants converge on the position: AI should be governed.",
+            scope=ClaimScope(corpus_level=True, participant_names=["Alice", "Bob"]),
+            origin_object_type="cross_interview_perspective_consensus",
+            origin_object_id="perspective_consensus:0",
+        ),
+        AnalyticClaim(
+            id="claim-3",
+            claim_kind=ClaimKind.CROSS_CASE,
+            source_stage="cross_interview",
+            claim_text="Participants diverge on the position: Oversight timing remains contested.",
+            scope=ClaimScope(corpus_level=True, participant_names=["Alice", "Bob"]),
+            origin_object_type="cross_interview_perspective_divergence",
+            origin_object_id="perspective_divergence:0",
+        ),
+    ]
+    review_project.claim_relationships = [
+        ClaimRelationship(
+            id="claim-rel-1",
+            source_stage="cross_interview",
+            source_claim_id="claim-2",
+            target_claim_id="claim-1",
+            relationship_type="synthesizes",
+            rationale="Cross-case synthesis summarizes a participant-level claim.",
+        ),
+        ClaimRelationship(
+            id="claim-rel-2",
+            source_stage="cross_interview",
+            source_claim_id="claim-3",
+            target_claim_id="claim-1",
+            relationship_type="contrasts",
+            rationale="Cross-case divergence contrasts participant-level perspective claims.",
         ),
     ]
     tmp_store.save(review_project)
@@ -601,6 +654,56 @@ class TestAbductiveExplanationsEndpoint:
         )
         beyond_end = client.get(
             "/projects/test-project-123/abductive-explanations?limit=1&offset=99"
+        )
+
+        assert negative.status_code == 200
+        assert negative.json()["returned"] == 0
+        assert negative.json()["limit"] == 0
+
+        assert beyond_end.status_code == 200
+        assert beyond_end.json()["returned"] == 0
+        assert beyond_end.json()["offset"] == 99
+
+
+class TestClaimRelationshipsEndpoint:
+    def test_project_claim_relationships_endpoint_returns_bounded_rows(
+        self,
+        client,
+        tmp_store,
+        review_project,
+    ):
+        _replace_with_two_claim_relationships(tmp_store, review_project)
+
+        resp = client.get(
+            "/projects/test-project-123/claim-relationships?limit=1&offset=1"
+        )
+
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["returned"] == 1
+        assert data["total_relationships"] == 2
+        assert data["limit"] == 1
+        assert data["offset"] == 1
+        assert data["claim_relationship_summary"]["total_relationships"] == 2
+        row = data["claim_relationships"][0]
+        assert row["id"] == "claim-rel-2"
+        assert row["relationship_type"] == "contrasts"
+        assert row["source_claim_text"] == (
+            "Participants diverge on the position: Oversight timing remains contested."
+        )
+        assert "not a full semantic stance graph" in data["caveat"]
+
+    def test_project_claim_relationships_endpoint_bounds_limit_and_offset(
+        self,
+        client,
+        tmp_store,
+        review_project,
+    ):
+        _replace_with_two_claim_relationships(tmp_store, review_project)
+
+        negative = client.get("/projects/test-project-123/claim-relationships?limit=-5")
+        beyond_end = client.get(
+            "/projects/test-project-123/claim-relationships?limit=1&offset=99"
         )
 
         assert negative.status_code == 200

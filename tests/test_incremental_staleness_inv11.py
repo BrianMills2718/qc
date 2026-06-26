@@ -13,6 +13,7 @@ from qc_clean.core.pipeline.stages.incremental_coding import (
 from qc_clean.schemas.domain import (
     AnalyticClaim,
     AnalysisPhaseResult,
+    ClaimRelationship,
     ClaimKind,
     ClaimScope,
     CodeRelationship,
@@ -111,6 +112,20 @@ def test_invalidate_stale_higher_order_outputs_clears_outputs_phase_results_and_
             _claim("cross_interview", ClaimKind.CROSS_CASE),
             _claim("negative_case_analysis", ClaimKind.NEGATIVE_CASE),
         ],
+        claim_relationships=[
+            ClaimRelationship(
+                source_stage="perspective",
+                source_claim_id="claim-perspective",
+                target_claim_id="claim-synthesis",
+                relationship_type="elaborates",
+            ),
+            ClaimRelationship(
+                source_stage="cross_interview",
+                source_claim_id="claim-cross_interview",
+                target_claim_id="claim-thematic_coding",
+                relationship_type="synthesizes",
+            ),
+        ],
         phase_results=[
             AnalysisPhaseResult(phase_name="synthesis", status=PipelineStatus.COMPLETED),
             AnalysisPhaseResult(phase_name="relationship", status=PipelineStatus.COMPLETED),
@@ -142,6 +157,9 @@ def test_invalidate_stale_higher_order_outputs_clears_outputs_phase_results_and_
         "thematic_coding",
         "cross_interview",
         "negative_case_analysis",
+    }
+    assert {rel.source_stage for rel in state.claim_relationships} == {
+        "cross_interview",
     }
     assert [result.phase_name for result in state.phase_results] == [
         "thematic_coding",

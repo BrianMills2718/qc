@@ -36,6 +36,7 @@ from qc_clean.schemas.gt_schemas import (
 )
 from qc_clean.schemas.domain import (
     Code,
+    CodeApplication,
     Codebook,
     Corpus,
     CoreCategoryResult,
@@ -303,6 +304,7 @@ class TestPerspectiveStage:
         ]
         assert result.perspective_analysis.consensus_themes == ["AI is beneficial"]
         assert result.perspective_analysis.perspective_mapping == {"Jane": ["AI_ADOPTION", "WORKFLOW_CHANGE"]}
+        assert any(rel.relationship_type == "elaborates" for rel in result.claim_relationships)
         assert ctx.phase2_json is not None
 
     def test_single_speaker_detection(self):
@@ -766,6 +768,63 @@ class TestCrossInterviewStage:
 
         assert "CONSENSUS" in consensus_ids
         assert "DIVERGENT" in divergent_ids
+
+    def test_cross_interview_creates_claim_relationships_for_perspective_synthesis(self):
+        from qc_clean.core.pipeline.stages.cross_interview import CrossInterviewStage
+        from qc_clean.schemas.domain import (
+            AnalyticClaim,
+            ClaimKind,
+            ClaimScope,
+            CodeApplication,
+            ParticipantPerspective,
+            PerspectiveAnalysis,
+        )
+
+        state = _make_state(
+            corpus=Corpus(documents=[
+                Document(id="d1", name="doc1.txt", content="Alice: AI helps when governed."),
+                Document(id="d2", name="doc2.txt", content="Bob: AI needs oversight first."),
+            ]),
+            codebook=Codebook(codes=[Code(id="AI_USE", name="AI Use")]),
+        )
+        state.code_applications = [
+            CodeApplication(id="a1", code_id="AI_USE", doc_id="d1", quote_text="AI helps when governed"),
+            CodeApplication(id="a2", code_id="AI_USE", doc_id="d2", quote_text="AI needs oversight first"),
+        ]
+        state.perspective_analysis = PerspectiveAnalysis(
+            participants=[
+                ParticipantPerspective(name="Alice", perspective_summary="AI is useful with guardrails.", codes_emphasized=["AI_USE"]),
+                ParticipantPerspective(name="Bob", perspective_summary="AI requires oversight.", codes_emphasized=["AI_USE"]),
+            ],
+            consensus_themes=["AI should be governed rather than used casually."],
+            divergent_viewpoints=["Alice emphasizes adoption value while Bob emphasizes oversight risk."],
+        )
+        state.claims = [
+            AnalyticClaim(
+                id="claim-alice",
+                claim_kind=ClaimKind.PERSPECTIVE,
+                source_stage="perspective",
+                claim_text="AI is useful with guardrails.",
+                scope=ClaimScope(participant_names=["Alice"], code_ids=["AI_USE"]),
+                origin_object_type="participant_perspective",
+                origin_object_id="Alice",
+            ),
+            AnalyticClaim(
+                id="claim-bob",
+                claim_kind=ClaimKind.PERSPECTIVE,
+                source_stage="perspective",
+                claim_text="AI requires oversight.",
+                scope=ClaimScope(participant_names=["Bob"], code_ids=["AI_USE"]),
+                origin_object_type="participant_perspective",
+                origin_object_id="Bob",
+            ),
+        ]
+
+        result = asyncio.run(CrossInterviewStage().execute(state, PipelineContext()))
+
+        relationship_types = {rel.relationship_type for rel in result.claim_relationships}
+        assert "synthesizes" in relationship_types
+        assert "contrasts" in relationship_types
 
 
 # ---------------------------------------------------------------------------

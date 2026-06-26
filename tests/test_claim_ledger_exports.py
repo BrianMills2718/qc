@@ -7,6 +7,7 @@ from pathlib import Path
 from qc_clean.schemas.domain import (
     AbductiveCandidateExplanation,
     AnalyticClaim,
+    ClaimRelationship,
     ClaimKind,
     ClaimScope,
     ClaimSupportStatus,
@@ -251,6 +252,41 @@ def test_export_markdown_includes_observed_patterns(tmp_path):
     assert "descriptive_only" in content
     assert "codes=C1,C2; docs=d1; applications=A1,A2" in content
     assert "not causal proof" in content
+
+
+def test_export_markdown_includes_claim_relationships(tmp_path):
+    from qc_clean.core.export.data_exporter import ProjectExporter
+
+    state = _claim_state()
+    state.claims.append(
+        AnalyticClaim(
+            id="claim-2",
+            claim_kind=ClaimKind.PERSPECTIVE,
+            source_stage="perspective",
+            claim_text="AI should be governed in routine work.",
+            scope=ClaimScope(participant_names=["Alice"]),
+            origin_object_type="participant_perspective",
+            origin_object_id="Alice",
+            support_status=ClaimSupportStatus.SUPPORTED,
+        )
+    )
+    state.claim_relationships = [
+        ClaimRelationship(
+            source_stage="cross_interview",
+            source_claim_id="claim-1",
+            target_claim_id="claim-2",
+            relationship_type="synthesizes",
+            rationale="Cross-case synthesis summarizes a participant-level claim.",
+        )
+    ]
+    out = tmp_path / "claim_relationships.md"
+    ProjectExporter().export_markdown(state, str(out))
+
+    content = Path(out).read_text()
+    assert "## Claim Relationships" in content
+    assert "**Total claim relationships**: 1" in content
+    assert "synthesizes" in content
+    assert "Cross-case synthesis summarizes a participant-level claim." in content
 
 
 def test_export_markdown_includes_abductive_candidates(tmp_path):

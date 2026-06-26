@@ -13,7 +13,9 @@ from typing import Dict, List
 
 from qc_clean.core.claims import (
     claim_anchor_from_application,
+    claim_relationships_for_cross_interview,
     claims_for_cross_interview,
+    replace_claim_relationships_for_stage,
     replace_claims_for_stage,
 )
 from qc_clean.schemas.domain import (
@@ -66,6 +68,11 @@ class CrossInterviewStage(PipelineStage):
             self.name(),
             claims_for_cross_interview(state, results, self.name()),
             no_claims_reason="cross-interview analysis produced no consensus, divergence, or co-occurrence claims",
+        )
+        replace_claim_relationships_for_stage(
+            state,
+            self.name(),
+            claim_relationships_for_cross_interview(state, self.name()),
         )
 
         logger.info(
@@ -157,12 +164,42 @@ def analyze_cross_interview_patterns(state: ProjectState) -> CrossInterviewResul
         if count > 1
     ]
 
+    participant_names = []
+    perspective_consensus = []
+    perspective_divergence = []
+    if state.perspective_analysis is not None:
+        participant_names = [
+            participant.name
+            for participant in state.perspective_analysis.participants
+            if participant.name
+        ]
+        perspective_consensus = [
+            {
+                "summary": theme,
+                "participant_names": participant_names,
+                "participant_count": len(participant_names),
+            }
+            for theme in state.perspective_analysis.consensus_themes
+            if theme
+        ]
+        perspective_divergence = [
+            {
+                "summary": viewpoint,
+                "participant_names": participant_names,
+                "participant_count": len(participant_names),
+            }
+            for viewpoint in state.perspective_analysis.divergent_viewpoints
+            if viewpoint
+        ]
+
     return CrossInterviewResult(
         shared_codes=shared_codes,
         unique_codes=unique_codes,
         consensus_themes=consensus_themes,
         divergent_themes=divergent_themes,
         co_occurrences=top_co_occurrences,
+        perspective_consensus=perspective_consensus,
+        perspective_divergence=perspective_divergence,
         code_doc_matrix={cid: list(dids) for cid, dids in code_docs.items()},
         doc_code_matrix={did: list(cids) for did, cids in doc_codes.items()},
     )
@@ -274,6 +311,41 @@ def observed_patterns_for_cross_interview(
             created_by=Provenance.SYSTEM,
         ))
 
+    all_doc_ids = [doc.id for doc in state.corpus.documents]
+    for idx, item in enumerate(results.perspective_consensus):
+        patterns.append(ObservedPattern(
+            id=f"pattern:{source_stage}:perspective_consensus:{idx}",
+            source_stage=source_stage,
+            pattern_kind=ObservedPatternKind.PERSPECTIVE_CONSENSUS,
+            summary=f"Participants converge on the position: {item['summary']}",
+            doc_ids=all_doc_ids,
+            count=item.get("participant_count", 0),
+            total=state.corpus.num_documents,
+            metadata={
+                "denominator": "participants_in_perspective_analysis",
+                "participant_names": item.get("participant_names", []),
+            },
+            causal_interpretation_status=CausalInterpretationStatus.DESCRIPTIVE_ONLY,
+            created_by=Provenance.SYSTEM,
+        ))
+
+    for idx, item in enumerate(results.perspective_divergence):
+        patterns.append(ObservedPattern(
+            id=f"pattern:{source_stage}:perspective_divergence:{idx}",
+            source_stage=source_stage,
+            pattern_kind=ObservedPatternKind.PERSPECTIVE_DIVERGENCE,
+            summary=f"Participants diverge on the position: {item['summary']}",
+            doc_ids=all_doc_ids,
+            count=item.get("participant_count", 0),
+            total=state.corpus.num_documents,
+            metadata={
+                "denominator": "participants_in_perspective_analysis",
+                "participant_names": item.get("participant_names", []),
+            },
+            causal_interpretation_status=CausalInterpretationStatus.DESCRIPTIVE_ONLY,
+            created_by=Provenance.SYSTEM,
+        ))
+
     return patterns
 
 
@@ -304,6 +376,18 @@ def _format_cross_results(results: CrossInterviewResult) -> str:
             lines.append(
                 f"- {co['code_1']} + {co['code_2']}: co-occur in {co['co_occurrence_count']} documents"
             )
+        lines.append("")
+
+    if results.perspective_consensus:
+        lines.append("### Perspective Consensus")
+        for item in results.perspective_consensus:
+            lines.append(f"- {item['summary']}")
+        lines.append("")
+
+    if results.perspective_divergence:
+        lines.append("### Perspective Divergence")
+        for item in results.perspective_divergence:
+            lines.append(f"- {item['summary']}")
         lines.append("")
 
     return "\n".join(lines)

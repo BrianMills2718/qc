@@ -230,6 +230,13 @@ def invalidate_stale_higher_order_outputs(state: ProjectState) -> List[str]:
         for claim in state.claims
         if claim.source_stage not in _STALE_CLAIM_SOURCE_STAGES
     ]
+    state.claim_relationships = [
+        relationship
+        for relationship in state.claim_relationships
+        if relationship.source_stage not in _STALE_CLAIM_SOURCE_STAGES
+        and relationship.source_claim_id not in removed_claim_ids
+        and relationship.target_claim_id not in removed_claim_ids
+    ]
     _mark_review_decisions_for_invalidated_claims(state, removed_claim_ids)
     return stale
 

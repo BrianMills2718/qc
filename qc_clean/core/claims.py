@@ -10,6 +10,7 @@ from qc_clean.schemas.domain import (
     AnalyticClaim,
     ClaimAdjudicationStatus,
     ClaimAnchor,
+    ClaimRelationship,
     ClaimKind,
     ClaimScope,
     ClaimSupportStatus,
@@ -332,6 +333,52 @@ def claims_for_cross_interview(
             created_by=Provenance.SYSTEM,
         ))
 
+    participant_names: list[str] = []
+    doc_ids = [doc.id for doc in state.corpus.documents]
+    code_ids: list[str] = []
+    if state.perspective_analysis is not None:
+        participant_names = [
+            participant.name
+            for participant in state.perspective_analysis.participants
+            if participant.name
+        ]
+        code_ids = sorted({
+            code_id
+            for participant in state.perspective_analysis.participants
+            for code_id in participant.codes_emphasized
+        })
+
+    perspective_scope = ClaimScope(
+        participant_names=participant_names,
+        doc_ids=doc_ids,
+        code_ids=code_ids,
+        corpus_level=True,
+    )
+
+    for i, item in enumerate(results.perspective_consensus):
+        claims.append(_needs_anchor_claim(
+            kind=ClaimKind.CROSS_CASE,
+            source_stage=source_stage,
+            text=f"Participants converge on the position: {item['summary']}",
+            scope=perspective_scope,
+            origin_type="cross_interview_perspective_consensus",
+            origin_id=f"perspective_consensus:{i}",
+            supporting_anchors=_anchors_for_scope(state, perspective_scope),
+            created_by=Provenance.SYSTEM,
+        ))
+
+    for i, item in enumerate(results.perspective_divergence):
+        claims.append(_needs_anchor_claim(
+            kind=ClaimKind.CROSS_CASE,
+            source_stage=source_stage,
+            text=f"Participants diverge on the position: {item['summary']}",
+            scope=perspective_scope,
+            origin_type="cross_interview_perspective_divergence",
+            origin_id=f"perspective_divergence:{i}",
+            supporting_anchors=_anchors_for_scope(state, perspective_scope),
+            created_by=Provenance.SYSTEM,
+        ))
+
     return claims
 
 
@@ -455,6 +502,36 @@ def replace_claims_for_stage(
     state.claims.extend(fresh_claims)
 
 
+def replace_claim_relationships_for_stage(
+    state: ProjectState,
+    source_stage: str,
+    relationships: Iterable[ClaimRelationship],
+) -> None:
+    """Replace a stage's prior claim-relationship rows with fresh ones."""
+    state.claim_relationships = [
+        relationship for relationship in state.claim_relationships
+        if relationship.source_stage != source_stage
+    ]
+    state.claim_relationships.extend(list(relationships))
+
+
+def summarize_claim_relationships(state: ProjectState) -> dict[str, Any]:
+    """Return a compact deterministic summary of claim relationships."""
+    by_type = Counter(
+        relationship.relationship_type
+        for relationship in state.claim_relationships
+    )
+    by_stage = Counter(
+        relationship.source_stage
+        for relationship in state.claim_relationships
+    )
+    return {
+        "total_relationships": len(state.claim_relationships),
+        "by_type": dict(sorted(by_type.items())),
+        "by_stage": dict(sorted(by_stage.items())),
+    }
+
+
 def summarize_claim_ledger(state: ProjectState) -> dict[str, Any]:
     """Return a compact deterministic summary of a project's claim ledger."""
     by_kind = Counter(claim.claim_kind.value for claim in state.claims)
@@ -492,6 +569,83 @@ def format_claim_scope_summary(scope: ClaimScope) -> str:
         if values:
             parts.append(f"{label}={','.join(values)}")
     return ";".join(parts) if parts else "unspecified"
+
+
+def claim_relationships_for_perspectives(
+    state: ProjectState,
+    source_stage: str = "perspective",
+) -> list[ClaimRelationship]:
+    """Link participant position claims back to their participant summary claim."""
+    relationships: list[ClaimRelationship] = []
+    summary_claims_by_participant = {
+        tuple(claim.scope.participant_names): claim
+        for claim in state.claims
+        if claim.source_stage == source_stage
+        and claim.origin_object_type == "participant_perspective"
+        and claim.scope.participant_names
+    }
+    for claim in state.claims:
+        if claim.source_stage != source_stage or claim.origin_object_type != "participant_position":
+            continue
+        key = tuple(claim.scope.participant_names)
+        summary_claim = summary_claims_by_participant.get(key)
+        if summary_claim is None:
+            continue
+        relationships.append(ClaimRelationship(
+            source_stage=source_stage,
+            source_claim_id=claim.id,
+            target_claim_id=summary_claim.id,
+            relationship_type="elaborates",
+            rationale="Participant position statements elaborate the participant-level perspective summary.",
+            created_by=Provenance.SYSTEM,
+        ))
+    return relationships
+
+
+def claim_relationships_for_cross_interview(
+    state: ProjectState,
+    source_stage: str = "cross_interview",
+) -> list[ClaimRelationship]:
+    """Link cross-interview perspective synthesis claims to participant claims."""
+    relationships: list[ClaimRelationship] = []
+    participant_summary_claims = {
+        tuple(claim.scope.participant_names): claim
+        for claim in state.claims
+        if claim.source_stage == "perspective"
+        and claim.origin_object_type == "participant_perspective"
+        and claim.scope.participant_names
+    }
+    for claim in state.claims:
+        if claim.source_stage != source_stage:
+            continue
+        if claim.origin_object_type not in {
+            "cross_interview_perspective_consensus",
+            "cross_interview_perspective_divergence",
+        }:
+            continue
+        relationship_type = (
+            "synthesizes"
+            if claim.origin_object_type == "cross_interview_perspective_consensus"
+            else "contrasts"
+        )
+        rationale = (
+            "Cross-interview consensus claims synthesize participant-level perspective claims."
+            if relationship_type == "synthesizes"
+            else "Cross-interview divergence claims contrast participant-level perspective claims."
+        )
+        for participant_name in claim.scope.participant_names:
+            participant_claim = participant_summary_claims.get((participant_name,))
+            if participant_claim is None:
+                continue
+            relationships.append(ClaimRelationship(
+                source_stage=source_stage,
+                source_claim_id=claim.id,
+                target_claim_id=participant_claim.id,
+                relationship_type=relationship_type,
+                rationale=rationale,
+                created_by=Provenance.SYSTEM,
+            ))
+    return relationships
 
 
 def format_claim_anchor_details(

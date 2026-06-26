@@ -3,6 +3,8 @@
 import hashlib
 
 from qc_clean.core.claims import (
+    claim_relationships_for_cross_interview,
+    claim_relationships_for_perspectives,
     claims_for_code_applications,
     claims_for_codes,
     claims_for_cross_interview,
@@ -362,6 +364,40 @@ def test_higher_order_builders_mark_unanchored_claims_as_needing_anchors():
     )
 
 
+def test_perspective_claim_relationship_builder_links_position_claims_to_summary_claim():
+    """Participant position claims should elaborate their participant summary claim."""
+    state = ProjectState(
+        claims=[
+            AnalyticClaim(
+                id="claim-summary",
+                claim_kind=ClaimKind.PERSPECTIVE,
+                source_stage="perspective",
+                claim_text="Alex sees AI as a time saver.",
+                scope=ClaimScope(participant_names=["Alex"], code_ids=["C1"]),
+                origin_object_type="participant_perspective",
+                origin_object_id="Alex",
+            ),
+            AnalyticClaim(
+                id="claim-position",
+                claim_kind=ClaimKind.PERSPECTIVE,
+                source_stage="perspective",
+                claim_text="Alex position: AI is worth using when it saves time.",
+                scope=ClaimScope(participant_names=["Alex"], code_ids=["C1"]),
+                origin_object_type="participant_position",
+                origin_object_id="Alex:position:0",
+            ),
+        ]
+    )
+
+    relationships = claim_relationships_for_perspectives(state)
+
+    assert len(relationships) == 1
+    rel = relationships[0]
+    assert rel.relationship_type == "elaborates"
+    assert rel.source_claim_id == "claim-position"
+    assert rel.target_claim_id == "claim-summary"
+
+
 def test_code_scoped_higher_order_claims_inherit_code_application_anchors():
     """Higher-order claims with code scope cite existing exact code evidence."""
     doc = Document(id="d1", name="d.txt", content="Alex: AI saved time.")
@@ -618,6 +654,103 @@ def test_cross_case_builder_uses_code_application_support():
     assert consensus[0].claim_kind == ClaimKind.CROSS_CASE
     assert consensus[0].support_status == ClaimSupportStatus.SUPPORTED
     assert {a.code_application_id for a in consensus[0].supporting_anchors} == {"a1", "a2"}
+
+
+def test_cross_case_builder_emits_position_aware_cross_case_claims():
+    """Cross-case claims promote perspective consensus/divergence into claim rows."""
+    docs = [
+        Document(id="d1", name="a.txt", content="Alice: AI helps when governed."),
+        Document(id="d2", name="b.txt", content="Bob: AI needs oversight first."),
+    ]
+    apps = [
+        CodeApplication(
+            id="a1",
+            code_id="C1",
+            doc_id="d1",
+            quote_text="AI helps when governed",
+            start_char=7,
+            end_char=28,
+            quote_hash="h1",
+        ),
+        CodeApplication(
+            id="a2",
+            code_id="C1",
+            doc_id="d2",
+            quote_text="AI needs oversight first",
+            start_char=5,
+            end_char=29,
+            quote_hash="h2",
+        ),
+    ]
+    state = ProjectState(
+        corpus=Corpus(documents=docs),
+        codebook=Codebook(codes=[Code(id="C1", name="AI Use")]),
+        code_applications=apps,
+        perspective_analysis=PerspectiveAnalysis(
+            participants=[
+                ParticipantPerspective(
+                    name="Alice",
+                    perspective_summary="AI is useful with guardrails.",
+                    codes_emphasized=["C1"],
+                ),
+                ParticipantPerspective(
+                    name="Bob",
+                    perspective_summary="AI requires oversight.",
+                    codes_emphasized=["C1"],
+                ),
+            ],
+            consensus_themes=["AI should be governed rather than used casually."],
+            divergent_viewpoints=["Alice emphasizes adoption value while Bob emphasizes oversight risk."],
+        ),
+    )
+    results = analyze_cross_interview_patterns(state)
+
+    claims = claims_for_cross_interview(state, results)
+
+    assert any(
+        claim.claim_text == "Participants converge on the position: AI should be governed rather than used casually."
+        for claim in claims
+    )
+    assert any(
+        claim.claim_text == "Participants diverge on the position: Alice emphasizes adoption value while Bob emphasizes oversight risk."
+        for claim in claims
+    )
+    position_claims = [
+        claim for claim in claims
+        if claim.origin_object_type in {
+            "cross_interview_perspective_consensus",
+            "cross_interview_perspective_divergence",
+        }
+    ]
+    assert position_claims
+    assert all(claim.support_status == ClaimSupportStatus.SUPPORTED for claim in position_claims)
+    assert all(claim.scope.participant_names == ["Alice", "Bob"] for claim in position_claims)
+
+    state.claims = claims + [
+        AnalyticClaim(
+            id="claim-alice",
+            claim_kind=ClaimKind.PERSPECTIVE,
+            source_stage="perspective",
+            claim_text="AI is useful with guardrails.",
+            scope=ClaimScope(participant_names=["Alice"], code_ids=["C1"]),
+            origin_object_type="participant_perspective",
+            origin_object_id="Alice",
+            support_status=ClaimSupportStatus.SUPPORTED,
+        ),
+        AnalyticClaim(
+            id="claim-bob",
+            claim_kind=ClaimKind.PERSPECTIVE,
+            source_stage="perspective",
+            claim_text="AI requires oversight.",
+            scope=ClaimScope(participant_names=["Bob"], code_ids=["C1"]),
+            origin_object_type="participant_perspective",
+            origin_object_id="Bob",
+            support_status=ClaimSupportStatus.SUPPORTED,
+        ),
+    ]
+    relationships = claim_relationships_for_cross_interview(state)
+    assert any(rel.relationship_type == "synthesizes" for rel in relationships)
+    assert any(rel.relationship_type == "contrasts" for rel in relationships)
 
 
 def test_gt_builders_emit_category_and_proposition_claims():

@@ -6,7 +6,12 @@ from __future__ import annotations
 
 import logging
 
-from qc_clean.core.claims import claims_for_perspectives, replace_claims_for_stage
+from qc_clean.core.claims import (
+    claim_relationships_for_perspectives,
+    claims_for_perspectives,
+    replace_claim_relationships_for_stage,
+    replace_claims_for_stage,
+)
 from qc_clean.core.prompting import format_untrusted_data_block, format_untrusted_documents
 from qc_clean.schemas.analysis_schemas import SpeakerAnalysis
 from qc_clean.schemas.adapters import speaker_analysis_to_perspectives
@@ -71,6 +76,11 @@ class PerspectiveStage(PipelineStage):
             self.name(),
             claims_for_perspectives(state, self.name()),
             no_claims_reason="perspective analysis produced no participants or themes",
+        )
+        replace_claim_relationships_for_stage(
+            state,
+            self.name(),
+            claim_relationships_for_perspectives(state, self.name()),
         )
 
         logger.info(

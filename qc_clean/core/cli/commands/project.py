@@ -14,6 +14,7 @@ from qc_clean.core.claims import (
     format_claim_anchor_details,
     format_claim_scope_summary,
     summarize_claim_ledger,
+    summarize_claim_relationships,
     summarize_disconfirmation_coverage,
 )
 from qc_clean.core.abductive import (
@@ -48,6 +49,8 @@ def handle_project_command(args) -> int:
         return _show_claims(store, args)
     elif args.project_action == "patterns":
         return _show_patterns(store, args)
+    elif args.project_action == "claim-relationships":
+        return _show_claim_relationships(store, args)
     elif args.project_action == "abductive":
         return _show_abductive_candidates(store, args)
     elif args.project_action == "scope":
@@ -786,6 +789,58 @@ def _show_patterns(store: ProjectStore, args) -> int:
             if show_anchors:
                 _print_claim_anchor_details("support", pattern.support_anchors)
         remaining = max(0, len(state.observed_patterns) - offset - len(page))
+        if remaining:
+            print(f"    ... and {remaining} more")
+
+    return 0
+
+
+def _show_claim_relationships(store: ProjectStore, args) -> int:
+    """Show a compact claim-relationship summary for a project."""
+    project_id = args.project_id
+    try:
+        state = store.load(project_id)
+    except FileNotFoundError:
+        print(f"Project not found: {project_id}", file=sys.stderr)
+        return 1
+
+    limit = max(0, int(getattr(args, "limit", 20)))
+    raw_offset = getattr(args, "offset", 0)
+    offset = max(0, int(raw_offset if isinstance(raw_offset, int) else 0))
+    summary = summarize_claim_relationships(state)
+    claim_text_by_id = {claim.id: claim.claim_text for claim in state.claims}
+    print(f"Claim Relationships: {state.name}")
+    print(f"  Total relationships: {summary['total_relationships']}")
+    print(f"  By type: {summary['by_type']}")
+    print(f"  By stage: {summary['by_stage']}")
+
+    if state.claim_relationships and limit:
+        print("\n  Relationships:")
+        page = state.claim_relationships[offset : offset + limit]
+        if offset or len(state.claim_relationships) > limit:
+            start = offset + 1 if page else 0
+            end = offset + len(page) if page else 0
+            print(
+                f"    Showing relationships {start}-{end} "
+                f"of {len(state.claim_relationships)}"
+            )
+        for relationship in page:
+            source_text = claim_text_by_id.get(
+                relationship.source_claim_id,
+                relationship.source_claim_id,
+            )
+            target_text = claim_text_by_id.get(
+                relationship.target_claim_id,
+                relationship.target_claim_id,
+            )
+            print(
+                f"    - [{relationship.relationship_type}/{relationship.source_stage}] "
+                f"{source_text}"
+            )
+            print(f"      target: {target_text}")
+            if relationship.rationale:
+                print(f"      rationale: {relationship.rationale}")
+        remaining = max(0, len(state.claim_relationships) - offset - len(page))
         if remaining:
             print(f"    ... and {remaining} more")
 

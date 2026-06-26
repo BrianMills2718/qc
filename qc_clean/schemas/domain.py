@@ -72,6 +72,8 @@ class ObservedPatternKind(str, Enum):
     CONSENSUS_CODE = "consensus_code"
     DIVERGENT_CODE = "divergent_code"
     CODE_CO_OCCURRENCE = "code_co_occurrence"
+    PERSPECTIVE_CONSENSUS = "perspective_consensus"
+    PERSPECTIVE_DIVERGENCE = "perspective_divergence"
 
 
 class CausalInterpretationStatus(str, Enum):
@@ -427,6 +429,18 @@ class AnalyticClaim(BaseModel):
     created_at: str = Field(default_factory=lambda: datetime.now().isoformat(), description="Claim creation timestamp")
 
 
+class ClaimRelationship(BaseModel):
+    """A first-class directed relationship between two analytic claims."""
+    id: str = Field(default_factory=lambda: f"claim_rel_{uuid.uuid4()}", description="System-assigned relationship identifier")
+    source_stage: str = Field(description="Pipeline stage or component that produced the relationship")
+    source_claim_id: str = Field(description="Upstream or summarizing claim ID")
+    target_claim_id: str = Field(description="Related claim ID")
+    relationship_type: str = Field(description="Directed relation type such as elaborates, synthesizes, or contrasts")
+    rationale: str = Field(default="", description="Deterministic explanation for why the relationship exists")
+    created_by: Provenance = Field(default=Provenance.SYSTEM, description="Who produced the relationship")
+    created_at: str = Field(default_factory=lambda: datetime.now().isoformat(), description="Relationship creation timestamp")
+
+
 class HumanReviewDecision(BaseModel):
     """Record of a human review action."""
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -647,6 +661,8 @@ class CrossInterviewResult(BaseModel):
     consensus_themes: List[Dict[str, Any]] = Field(default_factory=list)
     divergent_themes: List[Dict[str, Any]] = Field(default_factory=list)
     co_occurrences: List[Dict[str, Any]] = Field(default_factory=list)
+    perspective_consensus: List[Dict[str, Any]] = Field(default_factory=list)
+    perspective_divergence: List[Dict[str, Any]] = Field(default_factory=list)
     code_doc_matrix: Dict[str, List[str]] = Field(default_factory=dict)
     doc_code_matrix: Dict[str, List[str]] = Field(default_factory=dict)
 
@@ -772,6 +788,7 @@ class ProjectState(BaseModel):
     observed_patterns: List[ObservedPattern] = Field(default_factory=list)
     abductive_explanations: List[AbductiveCandidateExplanation] = Field(default_factory=list)
     claims: List[AnalyticClaim] = Field(default_factory=list)
+    claim_relationships: List[ClaimRelationship] = Field(default_factory=list)
     review_decisions: List[HumanReviewDecision] = Field(default_factory=list)
 
     # Pipeline tracking

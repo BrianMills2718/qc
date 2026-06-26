@@ -69,9 +69,12 @@ def format_analysis_results(result_data: Dict[str, Any]) -> str:
                 name = p.get('name', 'Unknown')
                 role = p.get('role', '')
                 perspective = p.get('perspective', '')
+                position_statements = p.get('position_statements', [])
                 output.append(f"  {name}" + (f" ({role})" if role else ""))
                 if perspective:
                     output.append(f"    {perspective[:100]}")
+                for statement in position_statements:
+                    output.append(f"    - {statement}")
             else:
                 output.append(f"  {p}")
         output.append("")

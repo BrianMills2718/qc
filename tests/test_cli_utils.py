@@ -330,13 +330,21 @@ class TestHumanFormatter:
             "status": "done",
             "results": {
                 "speakers_identified": [
-                    {"name": "Alice", "role": "Manager", "perspective": "Positive outlook"},
+                    {
+                        "name": "Alice",
+                        "role": "Manager",
+                        "perspective": "Positive outlook",
+                        "position_statements": [
+                            "AI should be used for repetitive work.",
+                        ],
+                    },
                 ],
             },
         }
         result = format_analysis_results(data)
         assert "Alice" in result
         assert "Manager" in result
+        assert "AI should be used for repetitive work." in result
 
     def test_format_analysis_results_with_warnings(self):
         data = {

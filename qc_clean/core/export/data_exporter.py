@@ -18,7 +18,11 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 from xml.etree.ElementTree import Element, SubElement, ElementTree
 
-from qc_clean.core.claims import format_claim_scope_summary, summarize_claim_ledger
+from qc_clean.core.claims import (
+    format_claim_scope_summary,
+    summarize_claim_ledger,
+    summarize_claim_relationships,
+)
 from qc_clean.core.abductive import summarize_abductive_candidates
 from qc_clean.core.patterns import summarize_observed_patterns
 from qc_clean.schemas.domain import ProjectState
@@ -609,6 +613,45 @@ class ProjectExporter:
                 _a(f"*... and {len(state.claims) - 50} more claims*")
             _a("")
 
+        if state.claim_relationships:
+            summary = summarize_claim_relationships(state)
+            _a("## Claim Relationships")
+            _a("")
+            _a(f"**Total claim relationships**: {summary['total_relationships']}")
+            _a("")
+            _a("### Counts")
+            _a("")
+            _a(f"- By type: {summary['by_type']}")
+            _a(f"- By stage: {summary['by_stage']}")
+            _a("")
+            _a("### Relationships")
+            _a("")
+            _a("| Type | Stage | Source claim | Target claim | Rationale |")
+            _a("|------|-------|--------------|--------------|-----------|")
+            claim_text_by_id = {claim.id: claim.claim_text for claim in state.claims}
+            for relationship in state.claim_relationships[:50]:
+                source_text = _markdown_table_cell(
+                    claim_text_by_id.get(relationship.source_claim_id, relationship.source_claim_id)
+                )
+                target_text = _markdown_table_cell(
+                    claim_text_by_id.get(relationship.target_claim_id, relationship.target_claim_id)
+                )
+                rationale = _markdown_table_cell(relationship.rationale)
+                if len(source_text) > 80:
+                    source_text = source_text[:77] + "..."
+                if len(target_text) > 80:
+                    target_text = target_text[:77] + "..."
+                if len(rationale) > 100:
+                    rationale = rationale[:97] + "..."
+                _a(
+                    f"| {relationship.relationship_type} | {relationship.source_stage} | "
+                    f"{source_text} | {target_text} | {rationale} |"
+                )
+            if len(state.claim_relationships) > 50:
+                _a("")
+                _a(f"*... and {len(state.claim_relationships) - 50} more claim relationships*")
+            _a("")
+
         # Descriptive observed patterns
         if state.observed_patterns:
             summary = summarize_observed_patterns(state)
@@ -732,6 +775,11 @@ class ProjectExporter:
                     _a(f"**Role**: {p.role}")
                 if p.perspective_summary:
                     _a(f"\n{p.perspective_summary}")
+                if p.position_statements:
+                    _a("")
+                    _a("**Position statements:**")
+                    for statement in p.position_statements:
+                        _a(f"- {statement}")
                 _a("")
 
         # Entity relationships

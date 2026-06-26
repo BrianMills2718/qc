@@ -188,7 +188,8 @@ See `qc_clean/core/claims.py` and `qc_clean/schemas/domain.py`.
 But the repo still lacks:
 
 - a claims graph;
-- claim-to-claim relation extraction;
+- a robust claim-to-claim relation extraction layer beyond narrow deterministic
+  perspective/cross-interview links;
 - claim-to-speaker/group visualization;
 - a prompt stage where claims/positions are clearly primary rather than
   derivative.
@@ -225,7 +226,8 @@ Current weaknesses:
 
 1. Add a dedicated claim/position extraction stage, or strengthen perspective
    and cross-interview outputs so they emit more explicit bounded positions.
-2. Add claim-to-claim and claim-to-speaker/group relations.
+2. Extend the new deterministic claim-relationship substrate into richer
+   claim-to-claim and claim-to-speaker/group relations.
 3. Add a claims graph or stance map surface.
 4. Add evaluation criteria for interpretive usefulness of claims, not just code
    stability or graph population.
@@ -257,5 +259,12 @@ The current repo is not missing methodology awareness entirely. It already has:
 
 The core problem is that the **default prompt/dataflow stack still makes codes
 the center of gravity** and treats claims as important but somewhat downstream.
+
+Update on 2026-06-26: the repo now has a narrow first-class claim-relationship
+substrate for claim-bearing perspective outputs. Participant position claims can
+`elaborate` participant perspective claims, and cross-interview
+perspective-consensus / perspective-divergence claims can `synthesize` or
+`contrast` participant perspective claims. This improves reviewer-facing
+traceability, but it is not yet a full semantic claim graph or stance map.
 
 That is the main design pressure that should now shape follow-on implementation.

@@ -952,6 +952,59 @@ class QCAPIServer:
                 ),
             }
 
+        @self._app.get("/projects/{project_id}/claim-relationships")
+        async def get_project_claim_relationships(
+            project_id: str,
+            limit: int = 100,
+            offset: int = 0,
+        ):
+            """Get first-class claim relationship rows."""
+            from qc_clean.core.claims import summarize_claim_relationships
+            from qc_clean.core.persistence.project_store import ProjectStore
+            store = ProjectStore()
+            try:
+                state = store.load(project_id)
+            except FileNotFoundError:
+                raise HTTPException(status_code=404, detail=f"Project not found: {project_id}")
+            max_rows = max(0, int(self.config.get("claim_relationship_api_max_rows", 100)))
+            bounded_limit = min(max(0, limit), max_rows)
+            bounded_offset = max(0, offset)
+            claim_text_by_id = {claim.id: claim.claim_text for claim in state.claims}
+            rows = [
+                {
+                    "id": relationship.id,
+                    "source_stage": relationship.source_stage,
+                    "relationship_type": relationship.relationship_type,
+                    "source_claim_id": relationship.source_claim_id,
+                    "target_claim_id": relationship.target_claim_id,
+                    "source_claim_text": claim_text_by_id.get(
+                        relationship.source_claim_id,
+                        relationship.source_claim_id,
+                    ),
+                    "target_claim_text": claim_text_by_id.get(
+                        relationship.target_claim_id,
+                        relationship.target_claim_id,
+                    ),
+                    "rationale": relationship.rationale,
+                }
+                for relationship in state.claim_relationships[
+                    bounded_offset : bounded_offset + bounded_limit
+                ]
+            ]
+            return {
+                "project": state.name,
+                "claim_relationship_summary": summarize_claim_relationships(state),
+                "returned": len(rows),
+                "total_relationships": len(state.claim_relationships),
+                "limit": bounded_limit,
+                "offset": bounded_offset,
+                "claim_relationships": rows,
+                "caveat": (
+                    "Claim relationships are deterministic analytic links over the "
+                    "current claim ledger; they are not a full semantic stance graph."
+                ),
+            }
+
         self.endpoints = [
             {"method": "GET", "path": "/health", "description": "Health check"},
             {"method": "POST", "path": "/analyze", "description": "Start analysis"},
@@ -960,6 +1013,7 @@ class QCAPIServer:
             {"method": "GET", "path": "/projects/{project_id}/scope", "description": "Get corpus scope"},
             {"method": "PUT", "path": "/projects/{project_id}/scope", "description": "Update corpus scope"},
             {"method": "GET", "path": "/projects/{project_id}/claims", "description": "Get claim ledger"},
+            {"method": "GET", "path": "/projects/{project_id}/claim-relationships", "description": "Get claim relationships"},
             {"method": "GET", "path": "/projects/{project_id}/patterns", "description": "Get observed patterns"},
             {"method": "GET", "path": "/projects/{project_id}/abductive-explanations", "description": "Get abductive candidate explanations"},
             {"method": "GET", "path": "/graph/{project_id}", "description": "Graph visualization UI"},
@@ -1064,6 +1118,7 @@ class QCAPIServer:
                         "name": p.name,
                         "role": p.role,
                         "perspective": p.perspective_summary,
+                        "position_statements": list(p.position_statements),
                     } for p in state.perspective_analysis.participants
                 ]
 

@@ -16,6 +16,7 @@ from qc_clean.core.cli.commands import project as project_commands
 from qc_clean.schemas.domain import (
     AnalyticClaim,
     AbductiveCandidateExplanation,
+    ClaimRelationship,
     ClaimAnchor,
     ClaimKind,
     ClaimScope,
@@ -89,7 +90,15 @@ def sample_state():
         ],
         perspective_analysis=PerspectiveAnalysis(
             participants=[
-                ParticipantPerspective(name="Alice", role="Manager", perspective_summary="Focused on outcomes"),
+                ParticipantPerspective(
+                    name="Alice",
+                    role="Manager",
+                    perspective_summary="Focused on outcomes",
+                    position_statements=[
+                        "AI should support measurable outcome improvements.",
+                        "Teams need clearer review criteria before scaling use.",
+                    ],
+                ),
             ],
         ),
         synthesis=Synthesis(
@@ -883,6 +892,8 @@ class TestProjectExporter:
         assert "this is a test" in content
         assert "## Participant Perspectives" in content
         assert "Alice" in content
+        assert "Position statements" in content
+        assert "AI should support measurable outcome improvements." in content
         assert "## Entity Relationships" in content
         assert "Team A" in content
         assert "## Recommendations" in content
@@ -1961,6 +1972,59 @@ class TestProjectClaimsCommand:
         assert "... and 1 more" in out
         assert "pattern-hash" not in out
 
+    def test_project_claim_relationships_command_shows_relationship_rows(
+        self,
+        tmp_store,
+        capsys,
+    ):
+        from qc_clean.core.cli.commands.project import _show_claim_relationships
+
+        state = ProjectState(
+            id="claim-rel-proj",
+            name="Claim Relation Project",
+            claims=[
+                AnalyticClaim(
+                    id="claim-1",
+                    claim_kind=ClaimKind.PERSPECTIVE,
+                    source_stage="perspective",
+                    claim_text="Alice sees AI as useful with guardrails.",
+                    scope=ClaimScope(participant_names=["Alice"]),
+                    origin_object_type="participant_perspective",
+                    origin_object_id="Alice",
+                ),
+                AnalyticClaim(
+                    id="claim-2",
+                    claim_kind=ClaimKind.CROSS_CASE,
+                    source_stage="cross_interview",
+                    claim_text="Participants converge on the position: AI should be governed.",
+                    scope=ClaimScope(corpus_level=True, participant_names=["Alice", "Bob"]),
+                    origin_object_type="cross_interview_perspective_consensus",
+                    origin_object_id="perspective_consensus:0",
+                ),
+            ],
+            claim_relationships=[
+                ClaimRelationship(
+                    source_stage="cross_interview",
+                    source_claim_id="claim-2",
+                    target_claim_id="claim-1",
+                    relationship_type="synthesizes",
+                    rationale="Cross-case synthesis summarizes a participant-level claim.",
+                ),
+            ],
+        )
+        tmp_store.save(state)
+
+        args = MagicMock(project_id="claim-rel-proj", limit=10, offset=0)
+        result = _show_claim_relationships(tmp_store, args)
+
+        assert result == 0
+        out = capsys.readouterr().out
+        assert "Claim Relationships: Claim Relation Project" in out
+        assert "Total relationships: 1" in out
+        assert "synthesizes" in out
+        assert "Participants converge on the position: AI should be governed." in out
+        assert "target: Alice sees AI as useful with guardrails." in out
+
     def test_project_abductive_command_shows_candidate_explanations(
         self,
         tmp_store,
@@ -2321,6 +2385,7 @@ class TestAPIEndpoints:
             paths = [e["path"] for e in server.endpoints]
             assert "/projects/{project_id}" in paths
             assert "/projects/{project_id}/claims" in paths
+            assert "/projects/{project_id}/claim-relationships" in paths
             assert "/projects/{project_id}/patterns" in paths
             assert "/projects/{project_id}/abductive-explanations" in paths
             assert "/projects/{project_id}/review/claims" in paths

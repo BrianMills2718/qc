@@ -1317,6 +1317,14 @@ Examples:
         help='Show bounded supporting anchor details for each displayed pattern',
     )
 
+    proj_claim_relationships = project_subparsers.add_parser(
+        'claim-relationships',
+        help='Show first-class claim relationships',
+    )
+    proj_claim_relationships.add_argument('project_id', help='Project ID')
+    proj_claim_relationships.add_argument('--limit', type=int, default=20, help='Maximum relationships to show (default: 20)')
+    proj_claim_relationships.add_argument('--offset', type=int, default=0, help='Number of relationships to skip before showing rows')
+
     proj_abductive = project_subparsers.add_parser(
         'abductive',
         help='Show provisional abductive candidate explanations',

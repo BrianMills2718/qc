@@ -13,6 +13,8 @@ from qc_clean.schemas.domain import (
     Corpus,
     Document,
     ObservedPatternKind,
+    ParticipantPerspective,
+    PerspectiveAnalysis,
     ProjectState,
 )
 from qc_clean.core.pipeline.pipeline_engine import PipelineContext
@@ -144,6 +146,53 @@ class TestCrossInterviewAnalysis:
         assert ObservedPatternKind.CONSENSUS_CODE in kinds
         assert ObservedPatternKind.DIVERGENT_CODE in kinds
         assert ObservedPatternKind.CODE_CO_OCCURRENCE in kinds
+
+    def test_stage_promotes_perspective_consensus_and_divergence_patterns(self):
+        state = ProjectState(
+            corpus=Corpus(documents=[
+                Document(id="d1", name="one.txt", content="Alice: AI saves time."),
+                Document(id="d2", name="two.txt", content="Bob: AI requires oversight."),
+            ]),
+            codebook=Codebook(codes=[
+                Code(id="C1", name="AI Use"),
+                Code(id="C2", name="Governance"),
+            ]),
+            code_applications=[
+                CodeApplication(id="a1", code_id="C1", doc_id="d1", quote_text="AI saves time"),
+                CodeApplication(id="a2", code_id="C2", doc_id="d2", quote_text="requires oversight"),
+            ],
+            perspective_analysis=PerspectiveAnalysis(
+                participants=[
+                    ParticipantPerspective(
+                        name="Alice",
+                        perspective_summary="AI is useful when governed.",
+                        codes_emphasized=["C1", "C2"],
+                    ),
+                    ParticipantPerspective(
+                        name="Bob",
+                        perspective_summary="AI needs structured oversight.",
+                        codes_emphasized=["C1", "C2"],
+                    ),
+                ],
+                consensus_themes=["AI can be useful when governed well."],
+                divergent_viewpoints=["Alice emphasizes adoption speed while Bob emphasizes oversight first."],
+            ),
+        )
+
+        result = asyncio.run(CrossInterviewStage().execute(state, PipelineContext()))
+
+        kinds = {pattern.pattern_kind for pattern in result.observed_patterns}
+        assert ObservedPatternKind.PERSPECTIVE_CONSENSUS in kinds
+        assert ObservedPatternKind.PERSPECTIVE_DIVERGENCE in kinds
+        assert any(
+            pattern.summary == "Participants converge on the position: AI can be useful when governed well."
+            for pattern in result.observed_patterns
+        )
+        assert any(
+            pattern.metadata.get("participant_names") == ["Alice", "Bob"]
+            for pattern in result.observed_patterns
+            if pattern.pattern_kind is ObservedPatternKind.PERSPECTIVE_CONSENSUS
+        )
 
     def test_observed_patterns_are_descriptive_only(self, multi_doc_state):
         result = asyncio.run(
