@@ -72,6 +72,7 @@ def sample_speaker_analysis():
         role="Researcher",
         characteristics=["quantitative"],
         perspective_summary="Favors AI.",
+        position_statements=["AI improves research throughput."],
         codes_emphasized=["AI_USAGE"],
     )
     return SpeakerAnalysis(
@@ -273,6 +274,7 @@ class TestSpeakerAnalysisToPerspectives:
         pa = speaker_analysis_to_perspectives(sample_speaker_analysis)
         assert len(pa.participants) == 1
         assert pa.participants[0].name == "Alice"
+        assert pa.participants[0].position_statements == ["AI improves research throughput."]
         assert pa.consensus_themes == ["AI saves time"]
         assert pa.perspective_mapping == {"Alice": ["AI_USAGE"]}
 

@@ -58,6 +58,10 @@ class ParticipantProfile(BaseModel):
     role: str = Field(..., description="Professional role or position")
     characteristics: List[str] = Field(default_factory=list, description="Key characteristics noted")
     perspective_summary: str = Field(..., description="Summary of their viewpoint")
+    position_statements: List[str] = Field(
+        default_factory=list,
+        description="2-5 bounded position statements that capture what this participant is asserting, valuing, contesting, or evaluating",
+    )
     codes_emphasized: List[str] = Field(default_factory=list, description="Top 5-7 code IDs this participant emphasized MOST (not all codes, only the strongest)")
 
 

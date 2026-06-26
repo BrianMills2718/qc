@@ -162,3 +162,13 @@ selected.
 This slice is intentionally broader than a prompt-only patch. It should not
 skip from “we need SOTA” to ad hoc coding changes without first making the
 target methodology, labor model, and dataflow weaknesses explicit.
+
+Implementation checkpoint on 2026-06-25: the first selected low-disruption
+change was to make participant-level position statements first-class in the
+perspective path. `ParticipantProfile` / `ParticipantPerspective` now carry
+`position_statements`, the perspective prompt now asks for stance-bearing
+assertions rather than only summaries/themes, adapters preserve them into
+domain state, and `claims_for_perspectives()` now emits participant-position
+claims into the claim ledger. Focused tests and lint passed. A copied local
+project-store replay was started to inspect real output, but did not finish
+within the current increment; live output critique remains pending.

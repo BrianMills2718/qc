@@ -476,6 +476,7 @@ class ParticipantPerspective(BaseModel):
     role: str = ""
     characteristics: List[str] = Field(default_factory=list)
     perspective_summary: str = ""
+    position_statements: List[str] = Field(default_factory=list)
     codes_emphasized: List[str] = Field(default_factory=list)
     doc_id: Optional[str] = None
 

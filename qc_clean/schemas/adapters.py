@@ -141,6 +141,7 @@ def speaker_analysis_to_perspectives(
             role=p.role,
             characteristics=p.characteristics,
             perspective_summary=p.perspective_summary,
+            position_statements=p.position_statements,
             codes_emphasized=p.codes_emphasized,
         )
         participants.append(pp)

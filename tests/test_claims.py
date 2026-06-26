@@ -316,6 +316,7 @@ def test_higher_order_builders_mark_unanchored_claims_as_needing_anchors():
                 ParticipantPerspective(
                     name="Alex",
                     perspective_summary="Alex sees AI as a time saver.",
+                    position_statements=["AI is worth using when it saves time."],
                     codes_emphasized=["C1"],
                 )
             ],
@@ -355,6 +356,10 @@ def test_higher_order_builders_mark_unanchored_claims_as_needing_anchors():
     assert any(claim.scope.participant_names == ["Alex"] for claim in claims)
     assert any(claim.scope.entity_ids == ["e1", "e2"] for claim in claims)
     assert any(claim.scope.code_ids == ["C1"] for claim in claims)
+    assert any(
+        claim.claim_text == "Alex position: AI is worth using when it saves time."
+        for claim in claims
+    )
 
 
 def test_code_scoped_higher_order_claims_inherit_code_application_anchors():

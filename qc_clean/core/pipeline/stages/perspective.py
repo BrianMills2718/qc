@@ -98,10 +98,11 @@ CRITICAL: This is a SINGLE-SPEAKER interview. Do NOT fabricate consensus or disa
 INSTRUCTIONS:
 1. Identify the speaker by name and role from the interview content
 2. Analyze their perspective in relation to the discovered codes
-3. For "codes_emphasized": list ONLY the top 5-7 code IDs this speaker discusses MOST, not every code
-4. For "consensus_themes": list the speaker's strongest, most consistent positions (things they state firmly and repeatedly)
-5. For "divergent_viewpoints": identify any INTERNAL tensions, ambivalences, or contradictions within the speaker's OWN views (e.g., "sees AI as useful but worries about IP"). If there are none, return an empty list — do NOT fabricate tensions
-6. For "perspective_mapping": map the speaker's name to their top 5-7 most emphasized code IDs
+3. For each participant, fill "position_statements" with 2-5 short bounded assertions that capture what they are actually claiming, valuing, contesting, or evaluating. These should be stance-bearing statements, not just topic labels.
+4. For "codes_emphasized": list ONLY the top 5-7 code IDs this speaker discusses MOST, not every code
+5. For "consensus_themes": list the speaker's strongest, most consistent positions (things they state firmly and repeatedly)
+6. For "divergent_viewpoints": identify any INTERNAL tensions, ambivalences, or contradictions within the speaker's OWN views (e.g., "sees AI as useful but worries about IP"). If there are none, return an empty list — do NOT fabricate tensions
+7. For "perspective_mapping": map the speaker's name to their top 5-7 most emphasized code IDs
 
 PHASE 1 CODES (for reference):
 {phase1_text}
@@ -121,10 +122,11 @@ Provide detailed single-speaker analysis."""
 INSTRUCTIONS:
 1. Identify each distinct speaker by name and role
 2. Analyze how different perspectives relate to the discovered codes
-3. For "codes_emphasized": list ONLY the top 5-7 code IDs each speaker discusses MOST
-4. For "consensus_themes": identify genuine areas where multiple speakers AGREE
-5. For "divergent_viewpoints": identify genuine areas where speakers DISAGREE or hold different positions
-6. For "perspective_mapping": map each speaker's name to their top 5-7 most emphasized code IDs
+3. For each participant, fill "position_statements" with 2-5 short bounded assertions that capture what they are actually claiming, valuing, contesting, or evaluating. These should be stance-bearing statements, not just topic labels.
+4. For "codes_emphasized": list ONLY the top 5-7 code IDs each speaker discusses MOST
+5. For "consensus_themes": identify genuine areas where multiple speakers AGREE
+6. For "divergent_viewpoints": identify genuine areas where speakers DISAGREE or hold different positions
+7. For "perspective_mapping": map each speaker's name to their top 5-7 most emphasized code IDs
 
 PHASE 1 CODES (for reference):
 {phase1_text}

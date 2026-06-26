@@ -131,6 +131,7 @@ def _sample_speaker_analysis(**overrides) -> SpeakerAnalysis:
                 role="Manager",
                 characteristics=["tech-savvy", "pragmatic"],
                 perspective_summary="Views AI as transformative for workflows.",
+                position_statements=["AI should be integrated into routine workflows."],
                 codes_emphasized=["AI_ADOPTION", "WORKFLOW_CHANGE"],
             ),
         ],
@@ -297,6 +298,9 @@ class TestPerspectiveStage:
 
         assert len(result.perspective_analysis.participants) == 1
         assert result.perspective_analysis.participants[0].name == "Jane"
+        assert result.perspective_analysis.participants[0].position_statements == [
+            "AI should be integrated into routine workflows."
+        ]
         assert result.perspective_analysis.consensus_themes == ["AI is beneficial"]
         assert result.perspective_analysis.perspective_mapping == {"Jane": ["AI_ADOPTION", "WORKFLOW_CHANGE"]}
         assert ctx.phase2_json is not None

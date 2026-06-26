@@ -133,6 +133,16 @@ def claims_for_perspectives(
             origin_id=participant.name,
             supporting_anchors=_anchors_for_scope(state, scope),
         ))
+        for idx, statement in enumerate(participant.position_statements):
+            claims.append(_needs_anchor_claim(
+                kind=ClaimKind.PERSPECTIVE,
+                source_stage=source_stage,
+                text=f"{participant.name} position: {statement}",
+                scope=scope,
+                origin_type="participant_position",
+                origin_id=f"{participant.name}:position:{idx}",
+                supporting_anchors=_anchors_for_scope(state, scope),
+            ))
 
     for i, theme in enumerate(state.perspective_analysis.consensus_themes):
         claims.append(_needs_anchor_claim(
