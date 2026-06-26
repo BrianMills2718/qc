@@ -364,6 +364,9 @@ def _export_project(store: ProjectStore, args) -> int:
     fmt = getattr(args, "format", "json")
     output_file = getattr(args, "output_file", None)
     output_dir = getattr(args, "output_dir", None)
+    markdown_profile = getattr(args, "markdown_profile", None)
+    if not isinstance(markdown_profile, str):
+        markdown_profile = "full"
     overwrite = not bool(vars(args).get("no_overwrite", False))
     audit_manifest = vars(args).get("audit_manifest")
     audit_log = vars(args).get("audit_log")
@@ -402,7 +405,12 @@ def _export_project(store: ProjectStore, args) -> int:
             for p in paths:
                 print(f"  {p}")
         elif fmt == "markdown":
-            path = exporter.export_markdown(state, output_file, overwrite=overwrite)
+            path = exporter.export_markdown(
+                state,
+                output_file,
+                overwrite=overwrite,
+                markdown_profile=markdown_profile,
+            )
             artifact_paths = [path]
             print(f"Exported Markdown to: {path}")
         elif fmt == "qdpx":

@@ -16,6 +16,7 @@ from qc_clean.core.cli.commands import project as project_commands
 from qc_clean.schemas.domain import (
     AnalyticClaim,
     AbductiveCandidateExplanation,
+    AnalysisMemo,
     ClaimRelationship,
     ClaimAnchor,
     ClaimKind,
@@ -927,6 +928,70 @@ class TestProjectExporter:
         assert "**Communication**" in content
         assert "Active Listening" in content
 
+    def test_export_markdown_reviewer_profile_omits_audit_sections(
+        self,
+        tmp_path,
+        sample_state,
+    ):
+        from qc_clean.core.export.data_exporter import ProjectExporter
+
+        sample_state.memos = [
+            AnalysisMemo(
+                memo_type="cross_case",
+                title="Cross-Interview Pattern Analysis",
+                content="- **Communication**: present in 1/1 documents.",
+                created_at="2026-06-25T18:22:38",
+            ),
+            AnalysisMemo(
+                memo_type="coding",
+                title="Thematic Coding Analysis Memo",
+                content="Internal coding memo.",
+                created_at="2026-06-25T18:22:39",
+            ),
+        ]
+        sample_state.claims = [
+            AnalyticClaim(
+                id="claim-rec-1",
+                claim_kind=ClaimKind.SYNTHESIS_FINDING,
+                source_stage="synthesis",
+                claim_text="Recommendation: Improve listening. Train team on active listening",
+                scope=ClaimScope(corpus_level=True),
+                origin_object_type="synthesis_recommendation",
+                origin_object_id="recommendation:0",
+                support_status=ClaimSupportStatus.NEEDS_ANCHOR,
+            )
+        ]
+        sample_state.observed_patterns = [
+            ObservedPattern(
+                source_stage="cross_interview",
+                pattern_kind=ObservedPatternKind.CONSENSUS_CODE,
+                summary="Code 'Communication' appears in 1/1 documents.",
+                code_ids=["C1"],
+                doc_ids=["d1"],
+                count=1,
+                total=1,
+            )
+        ]
+
+        out = tmp_path / "reviewer-report.md"
+        path = ProjectExporter().export_markdown(
+            sample_state,
+            str(out),
+            markdown_profile="reviewer",
+        )
+        content = Path(path).read_text()
+
+        assert "## Cross-Interview Analysis" in content
+        assert "### Cross-Interview Pattern Analysis" in content
+        assert "Internal coding memo." not in content
+        assert "## Key Quotes" not in content
+        assert "## Analytical Memos" not in content
+        assert "## Claim Ledger" not in content
+        assert "## Observed Patterns" not in content
+        assert "## Recommendations" in content
+        assert "**Evidence status**: needs_anchor" in content
+        assert "**Trace claim(s)**: claim-rec-1" in content
+
     def test_export_json_default_filename(self, tmp_path, sample_state):
         """Export JSON without specifying output file."""
         from qc_clean.core.export.data_exporter import ProjectExporter
@@ -1036,6 +1101,47 @@ class TestProjectExporter:
         assert result == 1
         assert out.read_text(encoding="utf-8") == "old"
         assert "Refusing to overwrite existing export artifact" in capsys.readouterr().err
+
+    def test_project_export_command_uses_markdown_profile(
+        self,
+        tmp_path,
+        tmp_store,
+        sample_state,
+        capsys,
+    ):
+        from qc_clean.core.cli.commands.project import _export_project
+
+        sample_state.memos = [
+            AnalysisMemo(
+                memo_type="coding",
+                title="Internal Memo",
+                content="Should only appear in full profile.",
+            )
+        ]
+        tmp_store.save(sample_state)
+        out = tmp_path / "reviewer.md"
+        args = MagicMock(
+            project_id=sample_state.id,
+            format="markdown",
+            output_file=str(out),
+            output_dir=None,
+            markdown_profile="reviewer",
+            audit_manifest=None,
+            verify_audit_manifest=False,
+            audit_log=None,
+            audit_db=None,
+            publish_preflight=False,
+            scope_lint=False,
+            no_overwrite=False,
+        )
+
+        result = _export_project(tmp_store, args)
+
+        assert result == 0
+        assert "Exported Markdown" in capsys.readouterr().out
+        content = out.read_text(encoding="utf-8")
+        assert "Should only appear in full profile." not in content
+        assert "## Analytical Memos" not in content
 
     def test_project_export_command_writes_audit_manifest_for_json(
         self,

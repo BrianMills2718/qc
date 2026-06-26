@@ -1446,6 +1446,12 @@ Examples:
     proj_export.add_argument('--format', choices=['json', 'csv', 'markdown', 'qdpx'], default='json', help='Export format (default: json)')
     proj_export.add_argument('--output-file', help='Output file path (for json/markdown/qdpx)')
     proj_export.add_argument('--output-dir', help='Output directory (for csv)')
+    proj_export.add_argument(
+        '--markdown-profile',
+        choices=['full', 'reviewer'],
+        default='full',
+        help='Markdown export profile: full audit report or reviewer-facing report',
+    )
     proj_export.add_argument('--no-overwrite', action='store_true', help='Fail if any target export artifact already exists')
     proj_export.add_argument('--audit-manifest', help='Optional export audit manifest output path')
     proj_export.add_argument('--audit-log', help='Optional export audit event JSONL log path; requires --audit-manifest')

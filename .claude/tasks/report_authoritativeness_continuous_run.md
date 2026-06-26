@@ -43,6 +43,7 @@ Add the scored side-by-side comparison artifact so baseline runs can be evaluate
 - Report-baseline comparison scoring now has a deterministic package design and canonical CLI surface in progress.
 - Export-time prevalence conflict gate is now in progress so reviewer Markdown fails loud if incompatible X/Y document-count facts remain.
 - Recommendation traceability/support-status gating is now in progress for reviewer Markdown.
+- Markdown reviewer/full profile split is now in progress so the default audit export can coexist with a cleaner reviewer-facing report.
 
 ## Progress Log
 
@@ -54,3 +55,4 @@ Add the scored side-by-side comparison artifact so baseline runs can be evaluate
 - 2026-06-26: Added deterministic report-baseline comparison scorer, script, and top-level CLI. Focused tests passed for scoring behavior, script output, and CLI forwarding. Copied-seed run wrote ignored local `report_baseline_comparison.json` and ranked structured report above both transcript baselines under the heuristic rubric; this is instrumentation, not adjudicated superiority evidence.
 - 2026-06-26: Added shared prevalence-conflict detector and Markdown export gate. Focused tests passed for the original bold/colon prevalence form, consistent repeated counts, and fail-loud export behavior. Copied-seed Markdown export still succeeds under the gate.
 - 2026-06-26: Added local recommendation evidence context in Markdown export. Focused tests pass for traced recommendations and untraced recommendations. Copied-seed report now shows recommendation evidence status, trace claim IDs, anchor counts, and supporting themes.
+- 2026-06-26: Added Markdown `full`/`reviewer` profile split. Focused tests pass for reviewer profile audit-section omission and project export command profile forwarding. Copied-seed reviewer export keeps the analytic story and recommendation trace lines while omitting audit-heavy sections.

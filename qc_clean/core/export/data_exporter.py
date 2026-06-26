@@ -467,8 +467,12 @@ class ProjectExporter:
         output_file: Optional[str] = None,
         *,
         overwrite: bool = True,
+        markdown_profile: str = "full",
     ) -> str:
         """Export a human-readable Markdown report. Returns the output path."""
+        if markdown_profile not in {"full", "reviewer"}:
+            raise ValueError("markdown_profile must be one of: full, reviewer")
+        reviewer_profile = markdown_profile == "reviewer"
         path = Path(output_file) if output_file else _default_export_path(
             f"{state.name}_report",
             ".md",
@@ -595,7 +599,7 @@ class ProjectExporter:
 
         # Audit trail (per-code reasoning)
         codes_with_reasoning = [c for c in state.codebook.codes if c.reasoning]
-        if codes_with_reasoning:
+        if codes_with_reasoning and not reviewer_profile:
             _a("## Audit Trail")
             _a("")
             _a("*Per-code reasoning explaining why each code was created.*")
@@ -605,7 +609,7 @@ class ProjectExporter:
             _a("")
 
         # Key quotes (sample)
-        if state.code_applications:
+        if state.code_applications and not reviewer_profile:
             _a("## Key Quotes")
             _a("")
             code_names = {c.id: c.name for c in state.codebook.codes}
@@ -623,7 +627,7 @@ class ProjectExporter:
                 shown += 1
 
         # Analytical Memos
-        if state.memos:
+        if state.memos and not reviewer_profile:
             markdown_memos, omitted_cross_case_count = _memos_for_markdown(state.memos)
             _a("## Analytical Memos")
             _a("")
@@ -640,9 +644,28 @@ class ProjectExporter:
                 _a("")
                 _a(memo.content)
                 _a("")
+        elif state.memos and reviewer_profile:
+            markdown_memos, omitted_cross_case_count = _memos_for_markdown(state.memos)
+            cross_case_memos = [memo for memo in markdown_memos if memo.memo_type == "cross_case"]
+            if cross_case_memos:
+                _a("## Cross-Interview Analysis")
+                _a("")
+                if omitted_cross_case_count:
+                    _a(
+                        f"*Reviewer report omitted {omitted_cross_case_count} superseded "
+                        "cross-case memo(s); full memo history remains available in "
+                        "full Markdown, state, and CSV exports.*"
+                    )
+                    _a("")
+                for memo in cross_case_memos:
+                    _a(f"### {memo.title or memo.memo_type}")
+                    _a(f"*Generated: {memo.created_at[:10]}*")
+                    _a("")
+                    _a(memo.content)
+                    _a("")
 
         # First-class claim ledger (INV-9)
-        if state.claims:
+        if state.claims and not reviewer_profile:
             summary = summarize_claim_ledger(state)
             _a("## Claim Ledger")
             _a("")
@@ -677,7 +700,7 @@ class ProjectExporter:
                 _a(f"*... and {len(state.claims) - 50} more claims*")
             _a("")
 
-        if state.claim_relationships:
+        if state.claim_relationships and not reviewer_profile:
             summary = summarize_claim_relationships(state)
             _a("## Claim Relationships")
             _a("")
@@ -717,7 +740,7 @@ class ProjectExporter:
             _a("")
 
         # Descriptive observed patterns
-        if state.observed_patterns:
+        if state.observed_patterns and not reviewer_profile:
             summary = summarize_observed_patterns(state)
             _a("## Observed Patterns")
             _a("")

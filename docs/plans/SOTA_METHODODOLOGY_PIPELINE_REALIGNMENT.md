@@ -599,3 +599,25 @@ Copied-seed verification: regenerating the copied seed report now shows every
 recommendation with `Evidence status: supported`, a trace claim ID, supporting
 anchor counts, and supporting themes. This closes the immediate reviewer-facing
 gap where recommendation prose read more settled than the evidence trail.
+
+Implementation checkpoint on 2026-06-26 (Markdown reviewer/full profile split):
+Markdown export now has an explicit profile:
+
+- `markdown_profile="full"` / `--markdown-profile full` preserves the existing
+  audit-heavy Markdown report and remains the default for backward
+  compatibility;
+- `markdown_profile="reviewer"` / `--markdown-profile reviewer` renders a
+  cleaner reviewer-facing report that omits audit-heavy sections such as full
+  key quotes, analytical memo history, claim ledger, claim relationships, and
+  observed-pattern tables.
+
+Reviewer profile keeps the latest cross-interview analysis, participant
+perspectives, entity relationships, recommendations, and local recommendation
+evidence status/trace lines. The full profile remains the audit surface.
+
+Copied-seed verification: exporting the copied seed with
+`--markdown-profile reviewer` produced `reviewer_report.md` with corpus scope,
+executive summary, codebook, latest cross-interview analysis, participant
+perspectives, entity relationships, recommendation evidence status, and
+pipeline phases, while omitting `Key Quotes`, `Analytical Memos`, `Claim
+Ledger`, and `Observed Patterns`.
