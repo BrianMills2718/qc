@@ -578,3 +578,24 @@ Focused coverage proves:
 Copied-seed verification: the fixed copied seed report still exports cleanly
 under the new gate, confirming the earlier memo-authoritativeness fix resolved
 the stale cross-case prevalence conflict for that artifact.
+
+Implementation checkpoint on 2026-06-26 (recommendation traceability and local
+support gating): reviewer Markdown recommendations now include local evidence
+context instead of standing as unsupported action prose. For each synthesis
+recommendation, export looks for the matching `synthesis_recommendation` claim
+ledger entry (`recommendation:<index>`) and renders:
+
+- evidence/support status;
+- trace claim ID(s);
+- supporting and contrary anchor counts;
+- supporting themes.
+
+If no matching recommendation claim exists, the report says so locally and
+instructs reviewers to treat the recommendation as unverified until claims are
+generated. This preserves the distinction between plausible advice and
+grounded/traced analytic recommendation.
+
+Copied-seed verification: regenerating the copied seed report now shows every
+recommendation with `Evidence status: supported`, a trace claim ID, supporting
+anchor counts, and supporting themes. This closes the immediate reviewer-facing
+gap where recommendation prose read more settled than the evidence trail.

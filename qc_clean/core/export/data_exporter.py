@@ -225,6 +225,16 @@ def _assert_no_markdown_prevalence_conflicts(markdown: str) -> None:
     )
 
 
+def _recommendation_claims_by_origin(state: ProjectState) -> dict[str, list]:
+    """Index synthesis recommendation claims by stable recommendation origin ID."""
+    claims_by_origin: dict[str, list] = {}
+    for claim in state.claims:
+        if claim.origin_object_type != "synthesis_recommendation":
+            continue
+        claims_by_origin.setdefault(claim.origin_object_id, []).append(claim)
+    return claims_by_origin
+
+
 # ---------------------------------------------------------------------------
 # ProjectExporter -- works directly with ProjectState
 # ---------------------------------------------------------------------------
@@ -851,12 +861,33 @@ class ProjectExporter:
 
         # Recommendations
         if state.synthesis and state.synthesis.recommendations:
+            recommendation_claims = _recommendation_claims_by_origin(state)
             _a("## Recommendations")
             _a("")
-            for rec in state.synthesis.recommendations:
+            for index, rec in enumerate(state.synthesis.recommendations):
                 _a(f"### {rec.title}")
                 _a(f"**Priority**: {rec.priority}")
                 _a(f"\n{rec.description}")
+                _a("")
+                claims = recommendation_claims.get(f"recommendation:{index}", [])
+                if claims:
+                    support_statuses = sorted({claim.support_status.value for claim in claims})
+                    total_supporting_anchors = sum(len(claim.supporting_anchors) for claim in claims)
+                    total_contrary_anchors = sum(len(claim.contrary_anchors) for claim in claims)
+                    claim_ids = ", ".join(claim.id for claim in claims)
+                    _a(f"**Evidence status**: {', '.join(support_statuses)}")
+                    _a(f"**Trace claim(s)**: {claim_ids}")
+                    _a(
+                        f"**Anchor counts**: {total_supporting_anchors} supporting, "
+                        f"{total_contrary_anchors} contrary"
+                    )
+                else:
+                    _a(
+                        "**Evidence status**: no recommendation claim ledger entry "
+                        "found; treat as unverified until claims are generated."
+                    )
+                if rec.supporting_themes:
+                    _a(f"**Supporting themes**: {', '.join(rec.supporting_themes)}")
                 _a("")
 
         # GT-specific

@@ -15,6 +15,8 @@ from qc_clean.schemas.domain import (
     ObservedPattern,
     ObservedPatternKind,
     ProjectState,
+    Recommendation,
+    Synthesis,
 )
 
 
@@ -412,3 +414,71 @@ def test_markdown_export_includes_corpus_scope(tmp_path):
     assert "- Participated in the AI workflow pilot" in content
     assert "- No direct workflow involvement" in content
     assert "Bounded to the loaded transcript corpus." in content
+
+
+def test_markdown_recommendations_include_claim_trace_and_support_status(tmp_path):
+    from qc_clean.core.export.data_exporter import ProjectExporter
+
+    state = ProjectState(
+        id="recommendation-trace",
+        name="Recommendation Trace Study",
+        synthesis=Synthesis(
+            recommendations=[
+                Recommendation(
+                    title="Train staff",
+                    description="Invest in staff training.",
+                    priority="high",
+                    supporting_themes=["C1"],
+                )
+            ],
+        ),
+        claims=[
+            AnalyticClaim(
+                id="claim-rec-1",
+                claim_kind=ClaimKind.SYNTHESIS_FINDING,
+                source_stage="synthesis",
+                claim_text="Recommendation: Train staff. Invest in staff training.",
+                scope=ClaimScope(corpus_level=True, code_ids=["C1"]),
+                origin_object_type="synthesis_recommendation",
+                origin_object_id="recommendation:0",
+                support_status=ClaimSupportStatus.NEEDS_ANCHOR,
+            )
+        ],
+    )
+
+    out = tmp_path / "recommendations.md"
+    ProjectExporter().export_markdown(state, str(out))
+
+    content = Path(out).read_text()
+    assert "## Recommendations" in content
+    assert "### Train staff" in content
+    assert "**Evidence status**: needs_anchor" in content
+    assert "**Trace claim(s)**: claim-rec-1" in content
+    assert "**Anchor counts**: 0 supporting, 0 contrary" in content
+    assert "**Supporting themes**: C1" in content
+
+
+def test_markdown_recommendations_without_claim_trace_are_marked_unverified(tmp_path):
+    from qc_clean.core.export.data_exporter import ProjectExporter
+
+    state = ProjectState(
+        id="recommendation-untraced",
+        name="Recommendation Untraced Study",
+        synthesis=Synthesis(
+            recommendations=[
+                Recommendation(
+                    title="Monitor narratives",
+                    description="Create a monitoring process.",
+                    priority="medium",
+                )
+            ],
+        ),
+    )
+
+    out = tmp_path / "recommendations-untraced.md"
+    ProjectExporter().export_markdown(state, str(out))
+
+    content = Path(out).read_text()
+    assert "### Monitor narratives" in content
+    assert "no recommendation claim ledger entry found" in content
+    assert "treat as unverified" in content
