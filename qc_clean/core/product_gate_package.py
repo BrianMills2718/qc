@@ -78,6 +78,19 @@ class ProductGatePackage(BaseModel):
         return self
 
 
+class ProductGateVerificationFailure(BaseModel):
+    """One product-gate package verification failure."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    role: ArtifactRole = Field(description="Artifact role that failed verification")
+    path: str = Field(description="Artifact path from the package")
+    code: str = Field(description="Stable machine-readable failure code")
+    message: str = Field(description="Human-readable failure summary")
+    expected: str | None = Field(default=None, description="Expected value")
+    actual: str | None = Field(default=None, description="Actual value")
+
+
 def build_product_gate_package(
     *,
     project_id: str,
@@ -118,6 +131,64 @@ def build_product_gate_package(
         artifacts=artifacts,
     )
     return package.model_dump(mode="json")
+
+
+def verify_product_gate_package(
+    package_path: Path,
+    *,
+    base_dir: Path | None = None,
+) -> dict:
+    """Verify artifact hashes in a product-gate evidence package."""
+    package_payload = json.loads(package_path.read_text(encoding="utf-8"))
+    package = ProductGatePackage.model_validate(package_payload)
+    root = base_dir if base_dir is not None else Path.cwd()
+    failures: list[ProductGateVerificationFailure] = []
+
+    for artifact in package.artifacts:
+        artifact_path = Path(artifact.path)
+        if not artifact_path.is_absolute():
+            artifact_path = root / artifact_path
+        if not artifact_path.exists():
+            failures.append(ProductGateVerificationFailure(
+                role=artifact.role,
+                path=artifact.path,
+                code="artifact_missing",
+                message="Artifact path from product-gate package does not exist",
+            ))
+            continue
+        content = artifact_path.read_bytes()
+        actual_hash = hashlib.sha256(content).hexdigest()
+        if actual_hash != artifact.sha256:
+            failures.append(ProductGateVerificationFailure(
+                role=artifact.role,
+                path=artifact.path,
+                code="artifact_sha256_mismatch",
+                message="Artifact SHA-256 does not match product-gate package",
+                expected=artifact.sha256,
+                actual=actual_hash,
+            ))
+        actual_size = len(content)
+        if actual_size != artifact.byte_size:
+            failures.append(ProductGateVerificationFailure(
+                role=artifact.role,
+                path=artifact.path,
+                code="artifact_byte_size_mismatch",
+                message="Artifact byte size does not match product-gate package",
+                expected=str(artifact.byte_size),
+                actual=str(actual_size),
+            ))
+
+    return {
+        "package_type": "qualitative_coding.product_gate_verification",
+        "schema_version": 1,
+        "verified_at": datetime.now(timezone.utc).isoformat(),
+        "product_gate_package_path": str(package_path),
+        "project_id": package.project_id,
+        "ok": not failures,
+        "artifact_count": len(package.artifacts),
+        "failures": [failure.model_dump(mode="json") for failure in failures],
+        "caution": PRODUCT_GATE_PACKAGE_CAUTION,
+    }
 
 
 def build_product_gate_package_from_files(

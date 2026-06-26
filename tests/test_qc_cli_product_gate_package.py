@@ -3,7 +3,7 @@
 import sys
 
 import qc_cli
-from scripts import write_product_gate_package
+from scripts import verify_product_gate_package, write_product_gate_package
 
 
 def test_qc_cli_write_product_gate_package_forwards_flags(monkeypatch):
@@ -59,4 +59,36 @@ def test_qc_cli_write_product_gate_package_forwards_flags(monkeypatch):
         "manifest.json",
         "--output",
         "product_gate_package.json",
+    ]
+
+
+def test_qc_cli_verify_product_gate_package_forwards_flags(monkeypatch):
+    captured = {}
+
+    def fake_main(argv):
+        captured["argv"] = argv
+        return 0
+
+    monkeypatch.setattr(verify_product_gate_package, "main", fake_main)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "qc_cli.py",
+            "verify-product-gate-package",
+            "product_gate_package.json",
+            "--base-dir",
+            "artifact-root",
+            "--output",
+            "verification.json",
+        ],
+    )
+
+    assert qc_cli.main() == 0
+    assert captured["argv"] == [
+        "product_gate_package.json",
+        "--base-dir",
+        "artifact-root",
+        "--output",
+        "verification.json",
     ]

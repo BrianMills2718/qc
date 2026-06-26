@@ -2,7 +2,7 @@
 
 import json
 
-from scripts import write_product_gate_package
+from scripts import verify_product_gate_package, write_product_gate_package
 
 
 def test_write_product_gate_package_script_writes_output(tmp_path, capsys):
@@ -49,6 +49,54 @@ def test_write_product_gate_package_script_reports_invalid_json(tmp_path, capsys
 
     assert exit_code == 1
     assert "error" in json.loads(capsys.readouterr().out)
+
+
+def test_verify_product_gate_package_script_reports_hash_status(tmp_path, capsys):
+    reviewer = tmp_path / "reviewer_report.md"
+    package_path = tmp_path / "product_gate_package.json"
+    report_path = tmp_path / "product_gate_verification.json"
+    reviewer.write_text("# Reviewer\n", encoding="utf-8")
+    assert write_product_gate_package.main([
+        "project-1",
+        "--reviewer-report",
+        str(reviewer),
+        "--output",
+        str(package_path),
+    ]) == 0
+    capsys.readouterr()
+
+    exit_code = verify_product_gate_package.main([
+        str(package_path),
+        "--output",
+        str(report_path),
+    ])
+
+    assert exit_code == 0
+    stdout_payload = json.loads(capsys.readouterr().out)
+    file_payload = json.loads(report_path.read_text(encoding="utf-8"))
+    assert stdout_payload == file_payload
+    assert stdout_payload["ok"] is True
+
+
+def test_verify_product_gate_package_script_returns_failure_on_mismatch(tmp_path, capsys):
+    reviewer = tmp_path / "reviewer_report.md"
+    package_path = tmp_path / "product_gate_package.json"
+    reviewer.write_text("# Reviewer\n", encoding="utf-8")
+    assert write_product_gate_package.main([
+        "project-1",
+        "--reviewer-report",
+        str(reviewer),
+        "--output",
+        str(package_path),
+    ]) == 0
+    capsys.readouterr()
+    reviewer.write_text("# Changed\n", encoding="utf-8")
+
+    exit_code = verify_product_gate_package.main([str(package_path)])
+
+    assert exit_code == 1
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["ok"] is False
 
 
 def _baseline_package(project_id: str) -> dict:

@@ -15,21 +15,19 @@ must never be treated as product completion.
 
 ## Current Phase
 
-Close the product-gate evidence packaging gap: reviewer/audit/baseline/review
-artifacts must be bundleable into one versioned, hash-checked package rather
-than remaining only as scattered ignored local files.
+Close the product-gate evidence package verification gap: product-gate bundles
+must be re-checkable after writing, not merely hash-stamped once.
 
 ## Acceptance Criteria For Current Slice
 
-- [x] A core product-gate evidence package contract records project ID,
-  generated timestamp, artifact roles, paths, byte sizes, hashes, recognized
-  package types, and a claim-discipline caution.
-- [x] Known JSON artifacts fail loudly when their package type or project ID
-  does not match the requested product-gate package.
-- [x] The package writer is available through an agent-drivable script and
-  canonical `qc_cli.py write-product-gate-package` command.
-- [x] Focused tests cover core package construction, mismatch failure, script
-  output/error behavior, and top-level CLI forwarding.
+- [x] Product-gate packages can be verified by recomputing artifact hashes and
+  byte sizes.
+- [x] Missing or modified artifacts produce machine-readable verification
+  failures and a non-zero script exit.
+- [x] Verification is available through an agent-drivable script and canonical
+  `qc_cli.py verify-product-gate-package` command.
+- [x] Focused tests cover successful verification, hash mismatch failure, script
+  output/exit behavior, and top-level CLI forwarding.
 - [x] Ruff, focused pytest, plan/docs checks, `git diff --check`, and `make
   check` pass before commit.
 - [ ] Slice is documented, committed, pushed, and the worktree is clean before
@@ -94,4 +92,16 @@ than remaining only as scattered ignored local files.
 - 2026-06-26: Verification passed for the product-gate evidence-package slice:
   focused pytest, Ruff, plan validation, Markdown links, surface readiness,
   `git diff --check`, and full `make check` (`1421 passed, 1 skipped, 8
+  deselected`).
+- 2026-06-26: Product-gate evidence package writer was committed and pushed in
+  commit `d1f806c2`.
+- 2026-06-26: Next product-gate gap selected: evidence packages had hashes but
+  no verifier. The slice will add package verification so artifact drift fails
+  loudly.
+- 2026-06-26: `qc_cli.py verify-product-gate-package` verified the copied-seed
+  `product_gate_package.json` and wrote `product_gate_verification.json` with
+  `ok=true`, `artifact_count=6`, and no failures.
+- 2026-06-26: Verification passed for the product-gate package verifier slice:
+  focused pytest, Ruff, plan validation, Markdown links, surface readiness,
+  `git diff --check`, and full `make check` (`1426 passed, 1 skipped, 8
   deselected`).

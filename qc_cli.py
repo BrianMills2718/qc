@@ -86,6 +86,7 @@ Examples:
   qc_cli write-report-review-packet report.md report_baselines.json --output report_review_packet.json
   qc_cli run-report-review report_review_packet.json --output report_review_response.json
   qc_cli write-product-gate-package <project_id> --reviewer-report reviewer_report.md --output product_gate_package.json
+  qc_cli verify-product-gate-package product_gate_package.json
   qc_cli validate-d7-baseline-package baseline.json
   qc_cli validate-d7-comparison-protocol d7_protocol.json
   qc_cli d7-comparison-preflight d7_protocol.json d7_gold.json lexical.json embedding.json
@@ -998,6 +999,15 @@ Examples:
     product_gate_parser.add_argument('--export-manifest', help='Export audit manifest JSON path')
     product_gate_parser.add_argument('--output', help='Optional JSON output path')
 
+    product_gate_verify_parser = subparsers.add_parser(
+        'verify-product-gate-package',
+        help='Verify a product-gate evidence package',
+        description='Verify artifact hashes in a versioned product-gate evidence package',
+    )
+    product_gate_verify_parser.add_argument('package', help='Product-gate package JSON path')
+    product_gate_verify_parser.add_argument('--base-dir', help='Base directory for relative artifact paths')
+    product_gate_verify_parser.add_argument('--output', help='Optional JSON output path')
+
     # D7 retrieval comparison command
     d7_comparison_parser = subparsers.add_parser(
         'compare-d7-retrieval',
@@ -1694,6 +1704,8 @@ def main() -> int:
             return handle_run_report_review_command(args)
         elif args.command == 'write-product-gate-package':
             return handle_write_product_gate_package_command(args)
+        elif args.command == 'verify-product-gate-package':
+            return handle_verify_product_gate_package_command(args)
         elif args.command == 'compare-d7-retrieval':
             return handle_compare_d7_retrieval_command(args)
         elif args.command == 'verify-d7-comparison-artifact':
@@ -2334,6 +2346,21 @@ def handle_write_product_gate_package_command(args) -> int:
         if value is not None:
             argv.extend([flag, str(value)])
     return write_product_gate_package.main(argv)
+
+
+def handle_verify_product_gate_package_command(args) -> int:
+    """Verify a product-gate evidence package through the CLI."""
+    from scripts import verify_product_gate_package
+
+    argv = [args.package]
+    for attr, flag in [
+        ("base_dir", "--base-dir"),
+        ("output", "--output"),
+    ]:
+        value = getattr(args, attr)
+        if value is not None:
+            argv.extend([flag, str(value)])
+    return verify_product_gate_package.main(argv)
 
 
 def handle_compare_d7_retrieval_command(args) -> int:

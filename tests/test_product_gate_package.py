@@ -4,7 +4,10 @@ import json
 
 import pytest
 
-from qc_clean.core.product_gate_package import build_product_gate_package
+from qc_clean.core.product_gate_package import (
+    build_product_gate_package,
+    verify_product_gate_package,
+)
 
 
 def test_build_product_gate_package_hashes_artifacts_and_validates_project_ids(tmp_path):
@@ -46,6 +49,44 @@ def test_build_product_gate_package_fails_on_mismatched_known_project_id(tmp_pat
             reviewer_report=reviewer,
             baseline_package=baseline,
         )
+
+
+def test_verify_product_gate_package_accepts_matching_hashes(tmp_path):
+    reviewer = tmp_path / "reviewer_report.md"
+    package_path = tmp_path / "product_gate_package.json"
+    reviewer.write_text("# Reviewer\n", encoding="utf-8")
+    package = build_product_gate_package(
+        project_id="project-1",
+        reviewer_report=reviewer,
+    )
+    package_path.write_text(json.dumps(package), encoding="utf-8")
+
+    report = verify_product_gate_package(package_path, base_dir=tmp_path)
+
+    assert report["package_type"] == "qualitative_coding.product_gate_verification"
+    assert report["ok"] is True
+    assert report["artifact_count"] == 1
+    assert report["failures"] == []
+
+
+def test_verify_product_gate_package_detects_hash_mismatch(tmp_path):
+    reviewer = tmp_path / "reviewer_report.md"
+    package_path = tmp_path / "product_gate_package.json"
+    reviewer.write_text("# Reviewer\n", encoding="utf-8")
+    package = build_product_gate_package(
+        project_id="project-1",
+        reviewer_report=reviewer,
+    )
+    package_path.write_text(json.dumps(package), encoding="utf-8")
+    reviewer.write_text("# Changed\n", encoding="utf-8")
+
+    report = verify_product_gate_package(package_path, base_dir=tmp_path)
+
+    assert report["ok"] is False
+    assert any(
+        failure["code"] == "artifact_sha256_mismatch"
+        for failure in report["failures"]
+    )
 
 
 def _baseline_package(project_id: str) -> dict:

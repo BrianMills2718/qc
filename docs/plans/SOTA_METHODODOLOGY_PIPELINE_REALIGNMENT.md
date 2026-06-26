@@ -821,3 +821,12 @@ an explicit caution that it is evidence packaging, not a SOTA or
 finished-product pass claim. A copied-seed run wrote
 `test_output/plan241_position_claims_replay_2026_06_25/product_gate_package.json`
 with reviewer/audit/baseline/review artifacts.
+
+Product-gate implementation checkpoint on 2026-06-26 (evidence package
+verification): `qc_cli.py verify-product-gate-package` and
+`scripts/verify_product_gate_package.py` now recompute artifact hashes and byte
+sizes for a `qualitative_coding.product_gate_evidence` package. Missing or
+modified artifacts produce machine-readable failures and a non-zero script exit.
+The copied-seed product-gate package verified with `ok=true`, six artifacts, and
+no failures, writing
+`test_output/plan241_position_claims_replay_2026_06_25/product_gate_verification.json`.
