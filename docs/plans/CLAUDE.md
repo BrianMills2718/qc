@@ -6,6 +6,7 @@ Track all implementation work here.
 
 | # | Name | Priority | Status | Plan doc |
 |---|------|----------|--------|----------|
+| 242 | Mixed-methods workbench export fixture | High | Planned | `MIXED_METHODS_WORKBENCH_EXPORT_FIXTURE.md` |
 | 241 | SOTA methodology and pipeline realignment | High | Planned | `SOTA_METHODODOLOGY_PIPELINE_REALIGNMENT.md` |
 | 239 | Agent-drivable sanitization workflow | High | Planned | `AGENT_DRIVABLE_SANITIZATION_WORKFLOW.md` |
 
