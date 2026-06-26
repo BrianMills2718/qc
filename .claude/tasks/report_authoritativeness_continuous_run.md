@@ -1,0 +1,46 @@
+# Mission: Report Authoritativeness Continuous Run
+
+## Objective
+Complete the current report-baseline and reviewer-report-authoritativeness program so the structured pipeline can be compared fairly against simpler transcript-to-report baselines. The immediate product problem is that reviewer Markdown can present historical memo accumulation as if it were final analysis, causing incompatible prevalence facts inside one report.
+
+## Success Criteria For Full Completion
+
+- [ ] Active plan records the exact completion contract for this run.
+- [ ] Baseline substrate remains runnable through `qc_cli.py run-report-baselines` and has focused tests.
+- [ ] Reviewer Markdown no longer renders superseded historical `cross_case` memo accumulation as final peer analysis.
+- [ ] Audit/history surfaces still preserve full memo history outside reviewer Markdown.
+- [ ] Export tests prove both the diagnosed failure mode and the intended reviewer-report behavior.
+- [ ] Contradiction/authoritativeness risk is documented honestly: this slice removes stale cross-case memo duplication from reviewer Markdown but does not claim full semantic contradiction detection.
+- [ ] Focused pytest targets pass.
+- [ ] Ruff passes for touched Python files.
+- [ ] Governance/documentation checks pass.
+- [ ] `git diff --check` passes.
+- [ ] Diff is reviewed after implementation, with risks and remaining gaps recorded.
+- [ ] Worktree is left commit-ready, with pre-existing and new changes distinguishable.
+
+## Constraints
+
+- Do not hide unresolved live contradictions by arbitrarily choosing a preferred fact.
+- Keep the fix scoped to the diagnosed reviewer Markdown failure unless tests justify broader memo filtering.
+- Preserve full memo history in audit/state/CSV exports.
+- Do not claim the structured system beats baselines until a scored comparison exists.
+
+## Current Phase
+
+Fix the exporter/test mismatch from the interrupted patch, narrow the memo filtering contract, and verify the reviewer Markdown behavior.
+
+## Completed
+
+- Baseline-comparison plan documented in `docs/plans/SOTA_METHODODOLOGY_PIPELINE_REALIGNMENT.md`.
+- Transcript-only baseline substrate added for `direct_report` and `qa_report`.
+- Both baselines were run on the copied seed artifact and the early comparison was recorded.
+- Exact diagnosis recorded in conversation: historical `cross_case` memos accumulate in `state.memos`, Markdown rendered them all, and current observed patterns were rendered beside them.
+- Reviewer Markdown now filters only superseded historical `cross_case` memo families, preserves non-cross-case memo repetition, and emits an explicit omission note when cross-case histories are hidden from the reviewer report.
+- CSV memo export is covered to preserve historical `cross_case` memos for audit.
+
+## Progress Log
+
+- 2026-06-26: Continuous run started after interrupted exporter patch. Initial focused review found the current patch red: one characterization test still asserts old behavior, and an `xfail(strict=True)` regression now XPASSes after the helper change.
+- 2026-06-26: Reworked the exporter patch to narrowly filter only superseded `cross_case` memo histories in Markdown. Focused verification passed: `pytest tests/test_memos.py::TestMarkdownExportMemos tests/test_memos.py::TestCSVExportMemos -q`; combined baseline/export focused tests passed; Ruff passed for touched Python files.
+- 2026-06-26: Regenerated `test_output/plan241_position_claims_replay_2026_06_25/report.md` from the copied seed store. The report now contains one `### Cross-Interview Pattern Analysis` memo and the note `Reviewer report omitted 2 superseded cross-case memo(s)`.
+- 2026-06-26: Final review found missing schema descriptions on LLM-facing baseline output models; added `Field(description=...)` metadata. Final verification passed with `make check`: 1391 deterministic tests passed, 1 skipped, 8 live tests deselected; Ruff passed; docs/governance checks passed; type check is not configured.

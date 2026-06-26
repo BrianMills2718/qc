@@ -25,7 +25,7 @@ from qc_clean.core.claims import (
 )
 from qc_clean.core.abductive import summarize_abductive_candidates
 from qc_clean.core.patterns import summarize_observed_patterns
-from qc_clean.schemas.domain import ProjectState
+from qc_clean.schemas.domain import AnalysisMemo, ProjectState
 
 logger = logging.getLogger(__name__)
 
@@ -177,6 +177,36 @@ def _corpus_scope_boundary_for_export(state: ProjectState) -> str:
 def _markdown_table_cell(value: str) -> str:
     """Escape one value for a Markdown table cell."""
     return value.replace("\n", " ").replace("|", "\\|")
+
+
+def _memos_for_markdown(memos: List[AnalysisMemo]) -> tuple[List[AnalysisMemo], int]:
+    """Return reviewer-facing memos and count omitted cross-case histories.
+
+    ProjectState.memos is an audit/history surface and may accumulate multiple
+    cross-case memos with the same title across reruns. Markdown export is a
+    reviewer-facing surface, so it renders only the latest memo for each stable
+    cross-case family instead of dumping historical duplicates as if they were
+    all final analysis. Other memo types remain untouched until they have an
+    explicit reviewer-report supersession contract.
+    """
+    latest_cross_case_by_family: dict[str, AnalysisMemo] = {}
+    for memo in memos:
+        if memo.memo_type != "cross_case":
+            continue
+        family = memo.title or memo.memo_type
+        current = latest_cross_case_by_family.get(family)
+        if current is None or memo.created_at >= current.created_at:
+            latest_cross_case_by_family[family] = memo
+
+    latest_cross_case_ids = {memo.id for memo in latest_cross_case_by_family.values()}
+    reviewer_memos: List[AnalysisMemo] = []
+    omitted_cross_case_count = 0
+    for memo in memos:
+        if memo.memo_type == "cross_case" and memo.id not in latest_cross_case_ids:
+            omitted_cross_case_count += 1
+            continue
+        reviewer_memos.append(memo)
+    return reviewer_memos, omitted_cross_case_count
 
 
 # ---------------------------------------------------------------------------
@@ -568,9 +598,17 @@ class ProjectExporter:
 
         # Analytical Memos
         if state.memos:
+            markdown_memos, omitted_cross_case_count = _memos_for_markdown(state.memos)
             _a("## Analytical Memos")
             _a("")
-            for memo in state.memos:
+            if omitted_cross_case_count:
+                _a(
+                    f"*Reviewer report omitted {omitted_cross_case_count} superseded "
+                    "cross-case memo(s); full memo history remains available in "
+                    "state and CSV exports.*"
+                )
+                _a("")
+            for memo in markdown_memos:
                 _a(f"### {memo.title or memo.memo_type}")
                 _a(f"*Type: {memo.memo_type} | Generated: {memo.created_at[:10]}*")
                 _a("")

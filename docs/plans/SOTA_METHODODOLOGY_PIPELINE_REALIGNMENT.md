@@ -341,3 +341,172 @@ Replay critique after the humanized-edge checkpoint:
 - the next-week queue for the current claim-graph surface is now effectively
   exhausted: the main remaining gap is semantic breadth/selectivity, not basic
   reviewer readability.
+
+Output-audit checkpoint on 2026-06-26 (report authoritativeness failure): the
+copied replay report is now materially richer than before, but the export still
+fails a core reviewer contract. A single final report currently contains
+multiple competing cross-interview analyses with conflicting prevalence facts
+for the same themes/codes (for example, one section reports local
+actors/diaspora as `2/3` while a later section reports the same theme as `3/3`;
+one section reports nature-of-threats as `1/3` divergent while a later section
+reports it as `2/3` consensus). This is not merely interpretive variation; it
+is incompatible reported analysis state inside one artifact.
+
+Implications of this audit finding:
+
+- the current default-path problem is no longer only "claims/positions are too
+  hidden"; it is also "the final report is not authoritative";
+- the traced failure mode is export composition: historical `cross_case` memo
+  layers and newer structured cross-interview outputs were rendered side by
+  side without a reviewer-report supersession rule;
+- recommendation prose currently reads more settled than the local evidence
+  status warrants, because the report combines strong executive prose with
+  `needs_anchor` material and duplicated analytic layers.
+
+High-confidence remediation path recorded from this audit:
+
+1. Define one canonical final-analysis object for each main report section,
+   especially cross-interview analysis.
+2. Render only that canonical object in the reviewer report; move draft,
+   challenge, and superseded memo layers to appendix/debug/audit exports.
+3. Add export-time contradiction checks so a final report fails loudly if the
+   same code/theme family appears with incompatible prevalence labels.
+4. Integrate negative-case output by revising or qualifying final findings,
+   rather than letting it appear as a peer competing truth layer.
+5. Split reviewer-facing and audit-facing artifacts more cleanly so the main
+   report gives one authoritative answer and the audit export preserves full
+   traceability.
+
+Baseline-comparison track opened from the same audit:
+
+- We should not assume the structured pipeline is winning merely because it is
+  more elaborate. Add two explicit comparison baselines against the same corpus:
+  1. a direct-report baseline where an LLM receives the transcripts plus a fair
+     analytic brief and writes a qualitative report;
+  2. a QA-report baseline where an LLM receives the transcripts plus a fixed
+     question set, answers each question with evidence/uncertainty, and then
+     optionally synthesizes those answers into a short report.
+
+Baseline evaluation should compare at least:
+
+- internal consistency;
+- evidence grounding / quote traceability;
+- handling of participant disagreement and boundary conditions;
+- scope discipline and caveating;
+- recommendation traceability;
+- reviewer usefulness / readability;
+- auditability.
+
+Expected use of this baseline track:
+
+- determine whether the current structured pipeline is genuinely outperforming
+  simpler transcript-to-report workflows;
+- identify whether the main current weakness is extraction quality,
+  synthesis/report composition quality, or both;
+- provide a fair external comparator before further architecture expansion.
+
+Recommended implementation order for the baseline track:
+
+1. define fair prompt specs for the direct-report and QA-report baselines;
+2. define a scoring rubric and artifact schema for side-by-side comparison;
+3. run both baselines on the same bounded local seed corpus;
+4. compare them directly to the current exported report;
+5. use that evidence to prioritize either report-authoritativeness/export fixes
+   or deeper extraction/claim-model redesign.
+
+Implementation checkpoint on 2026-06-26 (baseline substrate): the repo now has
+a first runnable transcript-to-report baseline export surface. `scripts/run_report_baselines.py`
+and `qc_cli.py run-report-baselines <project_id>` can generate a versioned
+baseline package in two modes:
+
+- `direct_report`: transcripts plus a fair reviewer-facing analytic brief;
+- `qa_report`: transcripts plus a fixed reviewer question set, with synthesized
+  report output.
+
+Current command surface:
+
+- `python qc_cli.py run-report-baselines <project_id> --output report_baselines.json`
+- optional `--mode direct_report --mode qa_report`
+- optional `--projects-dir path`
+- optional `--model <model>`
+- optional `--max-chars-per-doc N`
+
+Current scope/limitations of this substrate:
+
+- it is transcript-only by design and intentionally does not consume the repo's
+  derived codes, claims, or memos;
+- it is a generation/provenance surface, not yet a scored benchmark;
+- it creates a versioned comparison artifact so the same corpus can be compared
+  against the current structured report;
+- no baseline run has yet been committed/evaluated on the copied seed in this
+  slice, so no comparative conclusion is licensed yet.
+
+Baseline run checkpoint on 2026-06-26 (copied seed): both transcript-only
+baselines were executed against the copied Plan 234 seed project and written to
+`test_output/plan241_position_claims_replay_2026_06_25/report_baselines.json`.
+
+Early comparison result from that run:
+
+- both baselines produced cleaner, more internally coherent reviewer prose than
+  the current structured export because they give one answer rather than
+  multiple competing cross-interview sections;
+- both baselines preserved key substantive content already visible in the seed
+  corpus: local + strategic actors, media-literacy responses, operational harms,
+  capacity gaps, and sovereignty/attribution tensions;
+- neither baseline matches the structured system's auditability or object-level
+  trace substrate (claim ledger, claim relationships, observed patterns,
+  reviewer-visible position statements);
+- this comparison increases confidence that the current highest-value fix is
+  report composition/authoritativeness, not merely extracting more objects.
+
+Continuous-run completion contract opened on 2026-06-26:
+
+This run is complete only when the repo has a verified, reviewed, commit-ready
+implementation slice for the baseline + reviewer-report-authoritativeness
+program. The concrete success criteria are:
+
+- baseline generation remains runnable through
+  `qc_cli.py run-report-baselines` and covered by focused tests;
+- reviewer Markdown no longer renders superseded historical `cross_case` memo
+  accumulation as final peer analysis;
+- memo history remains available through audit/state/CSV surfaces;
+- export tests prove both the diagnosed failure mode and the intended
+  reviewer-report contract;
+- the plan and progress file record that this slice removes stale cross-case
+  memo duplication from reviewer Markdown but does not claim full semantic
+  contradiction detection;
+- focused pytest targets, Ruff for touched Python files, plan/governance
+  checks, Markdown-link checks, surface-readiness checks, and `git diff
+  --check` pass;
+- the final diff is reviewed and remaining risks are recorded before the
+  worktree is declared complete.
+
+Progress file for this continuous run:
+`.claude/tasks/report_authoritativeness_continuous_run.md`.
+
+Implementation checkpoint on 2026-06-26 (reviewer Markdown memo
+authoritativeness): the Markdown exporter now treats `ProjectState.memos` as
+audit history rather than blindly rendering every historical `cross_case` memo
+as final peer analysis. For reviewer Markdown only, it keeps the latest
+`cross_case` memo per stable title/family, leaves other memo types untouched,
+and emits an explicit note when superseded cross-case memos are omitted. CSV
+export still preserves full memo history.
+
+Focused regression coverage now proves:
+
+- superseded `cross_case` memo history is omitted from Markdown while current
+  structured observed patterns remain visible;
+- repeated non-`cross_case` memos with the same title are still rendered, so
+  the fix is scoped to the diagnosed failure mode;
+- CSV memo export preserves historical `cross_case` memos for audit.
+
+Copied-seed replay verification: regenerating
+`test_output/plan241_position_claims_replay_2026_06_25/report.md` from the
+local copied project store now yields one `### Cross-Interview Pattern
+Analysis` memo and an explicit note that two superseded cross-case memos were
+omitted from the reviewer report.
+
+Residual limitation: this checkpoint prevents stale cross-case memo
+accumulation from creating incompatible prevalence facts in the reviewer
+Markdown. It does not yet implement a general semantic contradiction detector
+for all possible prose claims or negative-case critique text.

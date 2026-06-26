@@ -33,6 +33,8 @@ from qc_clean.schemas.domain import (
     Corpus,
     Document,
     Methodology,
+    ObservedPattern,
+    ObservedPatternKind,
     ProjectConfig,
     ProjectState,
     Provenance,
@@ -433,6 +435,85 @@ class TestMarkdownExportMemos:
 
         assert "## Analytical Memos" not in content
 
+    def test_markdown_omits_superseded_cross_case_memos_but_keeps_current_patterns(self, tmp_path):
+        state = _make_state(
+            memos=[
+                AnalysisMemo(
+                    id="old-cross-case",
+                    memo_type="cross_case",
+                    title="Cross-Interview Pattern Analysis",
+                    content=(
+                        "## Cross-Interview Pattern Analysis\n\n"
+                        "### Consensus Themes (shared across majority of interviews)\n"
+                        "- **Nature of Information Threats**: present in 1/3 documents\n"
+                    ),
+                    created_at="2026-06-25T16:43:52",
+                ),
+                AnalysisMemo(
+                    id="new-cross-case",
+                    memo_type="cross_case",
+                    title="Cross-Interview Pattern Analysis",
+                    content=(
+                        "## Cross-Interview Pattern Analysis\n\n"
+                        "### Consensus Themes (shared across majority of interviews)\n"
+                        "- **Nature of information threats and media dynamics**: present in 2/3 documents (strength=0.67)\n"
+                    ),
+                    created_at="2026-06-25T17:55:15",
+                ),
+            ],
+            observed_patterns=[
+                ObservedPattern(
+                    source_stage="cross_interview",
+                    pattern_kind=ObservedPatternKind.CONSENSUS_CODE,
+                    summary="Code 'Nature of information threats and media dynamics' appears in 2/3 documents.",
+                    code_ids=["NATURE_OF_INFORMATION_THREATS"],
+                    doc_ids=["d1", "d2"],
+                    count=2,
+                    total=3,
+                )
+            ],
+        )
+
+        output_file = tmp_path / "report.md"
+        ProjectExporter().export_markdown(state, str(output_file))
+        content = output_file.read_text()
+
+        assert content.count("### Cross-Interview Pattern Analysis") == 1
+        assert "omitted 1 superseded cross-case memo" in content
+        assert "present in 1/3 documents" not in content
+        assert "present in 2/3 documents (strength=0.67)" in content
+        assert "## Observed Patterns" in content
+        assert "appears in 2/3 documents." in content
+
+    def test_markdown_preserves_repeated_non_cross_case_memos(self, tmp_path):
+        state = _make_state(
+            memos=[
+                AnalysisMemo(
+                    id="coding-memo-1",
+                    memo_type="coding",
+                    title="Thematic Coding Analysis Memo",
+                    content="First coding pass memo.",
+                    created_at="2026-06-25T16:43:52",
+                ),
+                AnalysisMemo(
+                    id="coding-memo-2",
+                    memo_type="coding",
+                    title="Thematic Coding Analysis Memo",
+                    content="Second coding pass memo.",
+                    created_at="2026-06-25T17:55:15",
+                ),
+            ],
+        )
+
+        output_file = tmp_path / "report.md"
+        ProjectExporter().export_markdown(state, str(output_file))
+        content = output_file.read_text()
+
+        assert content.count("### Thematic Coding Analysis Memo") == 2
+        assert "First coding pass memo." in content
+        assert "Second coding pass memo." in content
+        assert "superseded cross-case" not in content
+
 
 class TestCSVExportMemos:
     def test_memos_csv_created(self, tmp_path):
@@ -461,6 +542,39 @@ class TestCSVExportMemos:
         assert rows[0]["title"] == "Test Memo"
         assert rows[0]["content"] == "Memo content here."
         assert rows[0]["code_refs"] == "CODE_1;CODE_2"
+
+    def test_memos_csv_preserves_historical_cross_case_memos(self, tmp_path):
+        state = _make_state(
+            memos=[
+                AnalysisMemo(
+                    id="old-cross-case",
+                    memo_type="cross_case",
+                    title="Cross-Interview Pattern Analysis",
+                    content="Older cross-case facts.",
+                    created_at="2026-06-25T16:43:52",
+                ),
+                AnalysisMemo(
+                    id="new-cross-case",
+                    memo_type="cross_case",
+                    title="Cross-Interview Pattern Analysis",
+                    content="Newer cross-case facts.",
+                    created_at="2026-06-25T17:55:15",
+                ),
+            ],
+        )
+
+        paths = ProjectExporter().export_csv(state, str(tmp_path))
+        memo_paths = [p for p in paths if "memos.csv" in p]
+        assert len(memo_paths) == 1
+
+        with open(memo_paths[0], newline="", encoding="utf-8") as f:
+            reader = csv.DictReader(f)
+            rows = list(reader)
+
+        assert [row["content"] for row in rows] == [
+            "Older cross-case facts.",
+            "Newer cross-case facts.",
+        ]
 
     def test_no_memos_csv_when_empty(self, tmp_path):
         state = _make_state()

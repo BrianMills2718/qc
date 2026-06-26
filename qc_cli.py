@@ -81,6 +81,7 @@ Examples:
   qc_cli d3-comparison-preflight d3_protocol.json d3_gold.json baseline_a.json baseline_b.json
   qc_cli run-d7-retrieval <project_id> --output predictions.json
   qc_cli run-d7-live-baseline <project_id> --output live_baseline.json --model gpt-5-mini
+  qc_cli run-report-baselines <project_id> --output report_baselines.json --mode direct_report --mode qa_report
   qc_cli validate-d7-baseline-package baseline.json
   qc_cli validate-d7-comparison-protocol d7_protocol.json
   qc_cli d7-comparison-preflight d7_protocol.json d7_gold.json lexical.json embedding.json
@@ -929,6 +930,25 @@ Examples:
     d7_live_baseline_parser.add_argument('--trace-id')
     d7_live_baseline_parser.add_argument('--max-budget', type=float)
 
+    report_baseline_parser = subparsers.add_parser(
+        'run-report-baselines',
+        help='Generate transcript-to-report comparison baselines',
+        description='Generate direct-report and QA-report transcript-only baseline artifacts',
+    )
+    report_baseline_parser.add_argument('project_id', help='Project ID to export')
+    report_baseline_parser.add_argument('--projects-dir', help='Optional project store directory')
+    report_baseline_parser.add_argument('--output', help='Optional JSON output path')
+    report_baseline_parser.add_argument(
+        '--mode',
+        action='append',
+        choices=['direct_report', 'qa_report'],
+        help='Baseline mode to run; repeat to request multiple modes',
+    )
+    report_baseline_parser.add_argument('--model', help='Model name')
+    report_baseline_parser.add_argument('--max-chars-per-doc', type=int)
+    report_baseline_parser.add_argument('--trace-id')
+    report_baseline_parser.add_argument('--max-budget', type=float)
+
     # D7 retrieval comparison command
     d7_comparison_parser = subparsers.add_parser(
         'compare-d7-retrieval',
@@ -1609,6 +1629,8 @@ def main() -> int:
             return handle_run_d7_retrieval_command(args)
         elif args.command == 'run-d7-live-baseline':
             return handle_run_d7_live_baseline_command(args)
+        elif args.command == 'run-report-baselines':
+            return handle_run_report_baselines_command(args)
         elif args.command == 'compare-d7-retrieval':
             return handle_compare_d7_retrieval_command(args)
         elif args.command == 'verify-d7-comparison-artifact':
@@ -2165,6 +2187,28 @@ def handle_run_d7_live_baseline_command(args) -> int:
         if value is not None:
             argv.extend([flag, str(value)])
     return run_d7_live_baseline.main(argv)
+
+
+def handle_run_report_baselines_command(args) -> int:
+    """Generate transcript-to-report comparison baselines through the canonical CLI."""
+    from scripts import run_report_baselines
+
+    argv = [args.project_id]
+    for attr, flag in [
+        ("projects_dir", "--projects-dir"),
+        ("output", "--output"),
+        ("model", "--model"),
+        ("max_chars_per_doc", "--max-chars-per-doc"),
+        ("trace_id", "--trace-id"),
+        ("max_budget", "--max-budget"),
+    ]:
+        value = getattr(args, attr)
+        if value is not None:
+            argv.extend([flag, str(value)])
+    if args.mode:
+        for mode in args.mode:
+            argv.extend(["--mode", mode])
+    return run_report_baselines.main(argv)
 
 
 def handle_compare_d7_retrieval_command(args) -> int:
