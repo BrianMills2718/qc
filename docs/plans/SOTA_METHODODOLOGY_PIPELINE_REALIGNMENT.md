@@ -621,3 +621,19 @@ executive summary, codebook, latest cross-interview analysis, participant
 perspectives, entity relationships, recommendation evidence status, and
 pipeline phases, while omitting `Key Quotes`, `Analytical Memos`, `Claim
 Ledger`, and `Observed Patterns`.
+
+Reviewer-profile comparison checkpoint: running
+`qc_cli.py compare-report-baselines` on the copied seed `reviewer_report.md`
+and the transcript-only baseline package produced an ignored local
+`reviewer_report_baseline_comparison.json`. The heuristic readout showed:
+
+- reviewer-profile structured report: `word_count=2705`,
+  `overall_score=0.845`, `prevalence_conflict_count=0`;
+- direct transcript baseline: `word_count=606`, `overall_score=0.446`;
+- QA transcript baseline: `word_count=386`, `overall_score=0.435`.
+
+This is the fairer comparison artifact for reviewer usability than the full
+audit Markdown. It shows the structured report can be made substantially less
+dense while retaining enough trace/audit signal to beat the simple baselines
+under the deterministic rubric. It still does not replace human preference
+review or expert adjudication.
