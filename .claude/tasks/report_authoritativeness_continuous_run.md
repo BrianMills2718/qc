@@ -5,20 +5,20 @@ Complete the current report-baseline and reviewer-report-authoritativeness progr
 
 ## Success Criteria For Full Completion
 
-- [ ] Active plan records the exact completion contract for this run.
-- [ ] Baseline substrate remains runnable through `qc_cli.py run-report-baselines` and has focused tests.
-- [ ] Side-by-side report comparison is runnable through a canonical CLI and has focused tests.
-- [ ] Comparison artifact scores structured report and both baselines on coherence, grounding, disagreement handling, scope discipline, recommendation traceability, reviewer usefulness, and auditability.
-- [ ] Reviewer Markdown no longer renders superseded historical `cross_case` memo accumulation as final peer analysis.
-- [ ] Audit/history surfaces still preserve full memo history outside reviewer Markdown.
-- [ ] Export tests prove both the diagnosed failure mode and the intended reviewer-report behavior.
-- [ ] Contradiction/authoritativeness risk is documented honestly: this slice removes stale cross-case memo duplication from reviewer Markdown but does not claim full semantic contradiction detection.
-- [ ] Focused pytest targets pass.
-- [ ] Ruff passes for touched Python files.
-- [ ] Governance/documentation checks pass.
-- [ ] `git diff --check` passes.
-- [ ] Diff is reviewed after implementation, with risks and remaining gaps recorded.
-- [ ] Worktree is left commit-ready, with pre-existing and new changes distinguishable.
+- [x] Active plan records the exact completion contract for this run.
+- [x] Baseline substrate remains runnable through `qc_cli.py run-report-baselines` and has focused tests.
+- [x] Side-by-side report comparison is runnable through a canonical CLI and has focused tests.
+- [x] Comparison artifact scores structured report and both baselines on coherence, grounding, disagreement handling, scope discipline, recommendation traceability, reviewer usefulness, and auditability.
+- [x] Reviewer Markdown no longer renders superseded historical `cross_case` memo accumulation as final peer analysis.
+- [x] Audit/history surfaces still preserve full memo history outside reviewer Markdown.
+- [x] Export tests prove both the diagnosed failure mode and the intended reviewer-report behavior.
+- [x] Contradiction/authoritativeness risk is documented honestly: this slice removes stale cross-case memo duplication from reviewer Markdown but does not claim full semantic contradiction detection.
+- [x] Focused pytest targets pass.
+- [x] Ruff passes for touched Python files.
+- [x] Governance/documentation checks pass.
+- [x] `git diff --check` passes.
+- [x] Diff is reviewed after implementation, with risks and remaining gaps recorded.
+- [x] Worktree is left clean after the final commit/push.
 
 ## Constraints
 
@@ -29,7 +29,7 @@ Complete the current report-baseline and reviewer-report-authoritativeness progr
 
 ## Current Phase
 
-Add the scored side-by-side comparison artifact so baseline runs can be evaluated against the structured reviewer report without relying on chat-only judgment.
+Final verification and durable handoff for the report-authoritativeness comparison program.
 
 ## Completed
 
@@ -48,6 +48,8 @@ Add the scored side-by-side comparison artifact so baseline runs can be evaluate
 - Agent report review response workflow exists and was run on the copied seed packet.
 - Codebook count/confidence caveat is present in Markdown exports.
 - Repeated dropped-quote grounding warnings are summarized in Markdown exports before raw warning details.
+- Report review packets prepend a common scope notice to every artifact.
+- Markdown exports locally caveat participant-reported attribution/external references, cross-interview prevalence/strength values, and entity relationship strengths.
 
 ## Progress Log
 
@@ -65,3 +67,6 @@ Add the scored side-by-side comparison artifact so baseline runs can be evaluate
 - 2026-06-26: Added and ran agent report-review response workflow. Live `gpt-5-mini` review ranked structured report first, QA baseline second, direct baseline third. Residual concerns: dropped/unanchored quotes, three-transcript scope, and numeric confidence/count derivation clarity.
 - 2026-06-26: Added Codebook section caveat that mentions/confidence are local pipeline signals, not validated prevalence or methodological-certainty measures. Copied-seed reviewer report was regenerated with the caveat.
 - 2026-06-26: Added a Markdown grounding-warning summary for repeated dropped-quote warning events. Copied-seed reviewer report now reports 13 dropped quote candidates across 2 grounding events and 37 retained anchored code applications before listing the raw warnings.
+- 2026-06-26: Added shared review-scope notice to every report-review packet artifact; copied-seed live review rerun ranked structured report first and gave scope discipline 5/5.
+- 2026-06-26: Added local caveats for participant-reported attribution/external references, cross-interview X/3 and strength values, and entity relationship strengths. Default thematic dropped-quote warnings now include `Thematic coding:` provenance for future runs.
+- 2026-06-26: Final copied-seed live review over the updated packet ranked `structured_report`, `transcript_qa_report`, `transcript_direct_report`. Remaining concerns are true limitations: unanchored quote candidates need source-level remediation, the three-document seed is not representative, and sensitive/external references are not independently verified in the artifacts.

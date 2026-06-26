@@ -18,6 +18,10 @@ def test_build_report_review_packet_includes_reports_and_rubric():
         "structured_report",
         "transcript_direct_report",
     ]
+    for artifact in packet["artifacts"]:
+        assert artifact["report_markdown"].startswith("> **Review scope notice**")
+        assert "with 1 loaded transcript document(s)" in artifact["report_markdown"]
+        assert "not population-representativeness evidence" in artifact["report_markdown"]
     assert {row["dimension"] for row in packet["rubric_questions"]} == {
         "internal_consistency",
         "evidence_grounding",

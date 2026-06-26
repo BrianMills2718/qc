@@ -106,7 +106,7 @@ class ThematicCodingStage(PipelineStage):
                 else:
                     unresolvable += 1  # no source match -> drop (INV-1)
         state.code_applications = all_applications
-        _warn_unanchored(state, unresolvable, ambiguous)
+        _warn_unanchored(state, unresolvable, ambiguous, label="Thematic coding")
 
         # Extract analytical memo
         if phase1_response.analytical_memo:
@@ -306,4 +306,3 @@ ANALYTICAL MEMO: After completing the analysis above, write a brief analytical m
 - Key analytical decisions you made and why
 - Patterns or surprises that emerged during analysis
 - Uncertainties or areas needing further investigation"""
-

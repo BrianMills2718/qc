@@ -65,6 +65,7 @@ def test_thematic_applications_are_span_anchored_and_ambiguous_dropped():
     assert verify_anchor(alex.content, app.start_char, app.end_char, app.quote_hash)
     # The ambiguous drop is surfaced, never silently misattributed.
     assert any("uniquely anchored" in w for w in result.data_warnings)
+    assert any(w.startswith("Thematic coding:") for w in result.data_warnings)
 
 
 def test_constant_comparison_merge_populates_anchors():

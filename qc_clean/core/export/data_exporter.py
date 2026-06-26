@@ -600,6 +600,12 @@ class ProjectExporter:
         if state.synthesis and state.synthesis.key_findings:
             _a("## Key Findings")
             _a("")
+            _a(
+                "*Attribution statements and references to external events are "
+                "participant-reported within the loaded corpus unless separately "
+                "verified outside this export.*"
+            )
+            _a("")
             for finding in state.synthesis.key_findings:
                 _a(f"- {finding}")
             _a("")
@@ -700,6 +706,13 @@ class ProjectExporter:
             cross_case_memos = [memo for memo in markdown_memos if memo.memo_type == "cross_case"]
             if cross_case_memos:
                 _a("## Cross-Interview Analysis")
+                _a("")
+                _a(
+                    "*Document prevalence counts and strength values in this "
+                    "section are local occurrence summaries over the loaded "
+                    "documents, not population prevalence or methodological "
+                    "certainty estimates.*"
+                )
                 _a("")
                 if omitted_cross_case_count:
                     _a(
@@ -923,6 +936,12 @@ class ProjectExporter:
         # Entity relationships
         if state.entity_relationships:
             _a("## Entity Relationships")
+            _a("")
+            _a(
+                "*Relationship strengths are local analytic confidence signals "
+                "for this loaded corpus, not validated causal weights or "
+                "population-level certainty measures.*"
+            )
             _a("")
             _a("| Entity 1 | Relationship | Entity 2 | Strength |")
             _a("|----------|-------------|----------|----------|")

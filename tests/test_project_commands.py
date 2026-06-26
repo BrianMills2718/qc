@@ -897,10 +897,12 @@ class TestProjectExporter:
         assert "Position statements" in content
         assert "AI should support measurable outcome improvements." in content
         assert "## Entity Relationships" in content
+        assert "not validated causal weights" in content
         assert "Team A" in content
         assert "## Recommendations" in content
         assert "Improve listening" in content
         assert "## Key Findings" in content
+        assert "participant-reported within the loaded corpus" in content
         assert "Finding 1" in content
 
     def test_export_markdown_no_overwrite_rejects_existing_path(
@@ -983,6 +985,7 @@ class TestProjectExporter:
         content = Path(path).read_text()
 
         assert "## Cross-Interview Analysis" in content
+        assert "not population prevalence or methodological certainty estimates" in content
         assert "### Cross-Interview Pattern Analysis" in content
         assert "Internal coding memo." not in content
         assert "## Key Quotes" not in content

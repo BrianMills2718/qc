@@ -694,3 +694,32 @@ candidates matched no source document across 2 grounding warning events, while
 37 anchored code applications remain available for audit. This does not hide
 evidence loss; it makes the warning interpretable and distinguishes dropped
 quote candidates from retained anchored evidence.
+
+Implementation checkpoint on 2026-06-26 (review-scope and local-signal
+caveats): report review packets now prepend a common review-scope notice to
+every artifact, including both transcript-only baselines. Reviewer Markdown now
+adds local caveats that attribution statements and external-event references are
+participant-reported unless separately verified, cross-interview X/3 and
+strength values are loaded-corpus occurrence summaries, and entity relationship
+strengths are local analytic confidence signals rather than validated causal
+weights. Future default thematic dropped-quote warnings now include `Thematic
+coding:` provenance.
+
+Final copied-seed live review on 2026-06-26: after regenerating
+`reviewer_report.md`, `report_review_packet.json`, and
+`report_review_response.json`, the `gpt-5-mini` reviewer again ranked:
+
+1. `structured_report`
+2. `transcript_qa_report`
+3. `transcript_direct_report`
+
+The structured report scored 5 overall, with 5/5 internal consistency,
+disagreement handling, scope discipline, recommendation traceability, and
+reviewer usefulness; evidence grounding and auditability remained 4/5 because
+13 quote candidates were not source-anchored. Remaining concerns are now
+recorded as real limitations rather than report-composition defects:
+
+- unanchored quote candidates need source-level remediation or re-extraction;
+- the three-document local seed is not representative;
+- sensitive, classified, or external-reference claims are not independently
+  verified inside these artifacts.

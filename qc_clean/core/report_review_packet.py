@@ -108,12 +108,13 @@ def build_report_review_packet(
 ) -> dict:
     """Build a report review packet from report text and baseline outputs."""
     baseline_package = ReportBaselinePackage.model_validate(baseline_package_payload)
+    scope_notice = _review_scope_notice(baseline_package)
     artifacts = [
         ReportReviewArtifact(
             artifact_name="structured_report",
             artifact_kind="structured_report",
             source_path=structured_report_path,
-            report_markdown=structured_report_markdown,
+            report_markdown=_with_review_scope_notice(structured_report_markdown, scope_notice),
         )
     ]
     for artifact in baseline_package.report_baselines:
@@ -121,7 +122,7 @@ def build_report_review_packet(
             artifact_name=artifact.name,
             artifact_kind=artifact.mode,
             source_path=f"{baseline_package_path}#{artifact.name}",
-            report_markdown=artifact.output.report_markdown,
+            report_markdown=_with_review_scope_notice(artifact.output.report_markdown, scope_notice),
         ))
 
     packet = ReportReviewPacket(
@@ -147,6 +148,26 @@ def build_report_review_packet(
         ],
     )
     return packet.model_dump(mode="json")
+
+
+def _review_scope_notice(baseline_package: ReportBaselinePackage) -> str:
+    """Build the shared review-scope notice prepended to every packet artifact."""
+    run = baseline_package.report_baseline_run
+    return (
+        "> **Review scope notice**: This artifact is being compared only for "
+        f"`{run.project_name}` with {run.corpus_document_count} loaded transcript "
+        "document(s). Treat findings as bounded to that loaded corpus; this packet "
+        "is not population-representativeness evidence, methodological-validity "
+        "evidence, or system-superiority evidence."
+    )
+
+
+def _with_review_scope_notice(report_markdown: str, scope_notice: str) -> str:
+    """Prepend a common scope notice unless the exact packet notice is already present."""
+    stripped = report_markdown.lstrip()
+    if scope_notice in stripped[:1000]:
+        return report_markdown
+    return f"{scope_notice}\n\n{report_markdown}"
 
 
 def build_report_review_packet_from_files(
