@@ -467,6 +467,12 @@ program. The concrete success criteria are:
 
 - baseline generation remains runnable through
   `qc_cli.py run-report-baselines` and covered by focused tests;
+- side-by-side report comparison remains runnable through
+  `qc_cli.py compare-report-baselines` and covered by focused tests;
+- comparison artifacts score structured reports and transcript baselines on
+  internal consistency, evidence grounding, disagreement handling, scope
+  discipline, recommendation traceability, reviewer usefulness, and
+  auditability;
 - reviewer Markdown no longer renders superseded historical `cross_case` memo
   accumulation as final peer analysis;
 - memo history remains available through audit/state/CSV surfaces;
@@ -510,3 +516,46 @@ Residual limitation: this checkpoint prevents stale cross-case memo
 accumulation from creating incompatible prevalence facts in the reviewer
 Markdown. It does not yet implement a general semantic contradiction detector
 for all possible prose claims or negative-case critique text.
+
+Implementation checkpoint on 2026-06-26 (report-baseline comparison scoring):
+the repo now has a deterministic side-by-side comparison surface for the
+structured reviewer report and transcript-only baselines. `scripts/compare_report_baselines.py`
+and `qc_cli.py compare-report-baselines <report.md> <report_baselines.json>`
+write a versioned comparison package with rubric dimensions for:
+
+- internal consistency;
+- evidence grounding;
+- disagreement handling;
+- scope discipline;
+- recommendation traceability;
+- reviewer usefulness;
+- auditability.
+
+This scorer is intentionally heuristic and transparent. It uses deterministic
+signals such as conflicting prevalence-count labels, quote/table/claim-ID
+signals, consensus/divergence mentions, scope/caveat markers, and audit-surface
+signals. It is a triage readout, not human adjudication, held-out evidence, or
+proof that one report is superior.
+
+Copied-seed scoring checkpoint: running
+`qc_cli.py compare-report-baselines` over the copied seed structured report and
+`report_baselines.json` wrote an ignored local
+`test_output/plan241_position_claims_replay_2026_06_25/report_baseline_comparison.json`
+artifact. The deterministic readout ranked:
+
+1. `structured_report` (`overall_score=0.957`)
+2. `transcript_direct_report` (`overall_score=0.446`)
+3. `transcript_qa_report` (`overall_score=0.435`)
+
+Interpretation of that readout:
+
+- after the Markdown memo-authoritativeness fix, the structured report no
+  longer shows the earlier stale prevalence-count conflict under the heuristic
+  detector;
+- the structured report dominates auditability/evidence-signal dimensions
+  because it carries claim IDs, tables, observed patterns, and relationship
+  surfaces;
+- the baselines remain much shorter and cleaner to read, but score weakly on
+  auditability and explicit evidence/claim trace signals;
+- this still does not license a SOTA or superiority claim because the scorer is
+  deterministic instrumentation, not an adjudicated reviewer preference study.

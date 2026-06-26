@@ -7,6 +7,8 @@ Complete the current report-baseline and reviewer-report-authoritativeness progr
 
 - [ ] Active plan records the exact completion contract for this run.
 - [ ] Baseline substrate remains runnable through `qc_cli.py run-report-baselines` and has focused tests.
+- [ ] Side-by-side report comparison is runnable through a canonical CLI and has focused tests.
+- [ ] Comparison artifact scores structured report and both baselines on coherence, grounding, disagreement handling, scope discipline, recommendation traceability, reviewer usefulness, and auditability.
 - [ ] Reviewer Markdown no longer renders superseded historical `cross_case` memo accumulation as final peer analysis.
 - [ ] Audit/history surfaces still preserve full memo history outside reviewer Markdown.
 - [ ] Export tests prove both the diagnosed failure mode and the intended reviewer-report behavior.
@@ -27,7 +29,7 @@ Complete the current report-baseline and reviewer-report-authoritativeness progr
 
 ## Current Phase
 
-Fix the exporter/test mismatch from the interrupted patch, narrow the memo filtering contract, and verify the reviewer Markdown behavior.
+Add the scored side-by-side comparison artifact so baseline runs can be evaluated against the structured reviewer report without relying on chat-only judgment.
 
 ## Completed
 
@@ -37,6 +39,8 @@ Fix the exporter/test mismatch from the interrupted patch, narrow the memo filte
 - Exact diagnosis recorded in conversation: historical `cross_case` memos accumulate in `state.memos`, Markdown rendered them all, and current observed patterns were rendered beside them.
 - Reviewer Markdown now filters only superseded historical `cross_case` memo families, preserves non-cross-case memo repetition, and emits an explicit omission note when cross-case histories are hidden from the reviewer report.
 - CSV memo export is covered to preserve historical `cross_case` memos for audit.
+- Commit `286fd0db` was pushed to `origin/main` for the baseline substrate and reviewer Markdown authoritativeness fix.
+- Report-baseline comparison scoring now has a deterministic package design and canonical CLI surface in progress.
 
 ## Progress Log
 
@@ -44,3 +48,5 @@ Fix the exporter/test mismatch from the interrupted patch, narrow the memo filte
 - 2026-06-26: Reworked the exporter patch to narrowly filter only superseded `cross_case` memo histories in Markdown. Focused verification passed: `pytest tests/test_memos.py::TestMarkdownExportMemos tests/test_memos.py::TestCSVExportMemos -q`; combined baseline/export focused tests passed; Ruff passed for touched Python files.
 - 2026-06-26: Regenerated `test_output/plan241_position_claims_replay_2026_06_25/report.md` from the copied seed store. The report now contains one `### Cross-Interview Pattern Analysis` memo and the note `Reviewer report omitted 2 superseded cross-case memo(s)`.
 - 2026-06-26: Final review found missing schema descriptions on LLM-facing baseline output models; added `Field(description=...)` metadata. Final verification passed with `make check`: 1391 deterministic tests passed, 1 skipped, 8 live tests deselected; Ruff passed; docs/governance checks passed; type check is not configured.
+- 2026-06-26: User correctly challenged the premature stop after the first slice. Continuous run resumed with the next unambiguous missing program piece: a scored comparison package for structured report versus direct-report and QA baselines.
+- 2026-06-26: Added deterministic report-baseline comparison scorer, script, and top-level CLI. Focused tests passed for scoring behavior, script output, and CLI forwarding. Copied-seed run wrote ignored local `report_baseline_comparison.json` and ranked structured report above both transcript baselines under the heuristic rubric; this is instrumentation, not adjudicated superiority evidence.

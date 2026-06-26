@@ -82,6 +82,7 @@ Examples:
   qc_cli run-d7-retrieval <project_id> --output predictions.json
   qc_cli run-d7-live-baseline <project_id> --output live_baseline.json --model gpt-5-mini
   qc_cli run-report-baselines <project_id> --output report_baselines.json --mode direct_report --mode qa_report
+  qc_cli compare-report-baselines report.md report_baselines.json --output report_baseline_comparison.json
   qc_cli validate-d7-baseline-package baseline.json
   qc_cli validate-d7-comparison-protocol d7_protocol.json
   qc_cli d7-comparison-preflight d7_protocol.json d7_gold.json lexical.json embedding.json
@@ -949,6 +950,15 @@ Examples:
     report_baseline_parser.add_argument('--trace-id')
     report_baseline_parser.add_argument('--max-budget', type=float)
 
+    report_comparison_parser = subparsers.add_parser(
+        'compare-report-baselines',
+        help='Score structured report against transcript-to-report baselines',
+        description='Generate a heuristic side-by-side report-baseline comparison package',
+    )
+    report_comparison_parser.add_argument('structured_report', help='Structured Markdown report path')
+    report_comparison_parser.add_argument('baseline_package', help='Report-baseline JSON package path')
+    report_comparison_parser.add_argument('--output', help='Optional JSON output path')
+
     # D7 retrieval comparison command
     d7_comparison_parser = subparsers.add_parser(
         'compare-d7-retrieval',
@@ -1631,6 +1641,8 @@ def main() -> int:
             return handle_run_d7_live_baseline_command(args)
         elif args.command == 'run-report-baselines':
             return handle_run_report_baselines_command(args)
+        elif args.command == 'compare-report-baselines':
+            return handle_compare_report_baselines_command(args)
         elif args.command == 'compare-d7-retrieval':
             return handle_compare_d7_retrieval_command(args)
         elif args.command == 'verify-d7-comparison-artifact':
@@ -2209,6 +2221,16 @@ def handle_run_report_baselines_command(args) -> int:
         for mode in args.mode:
             argv.extend(["--mode", mode])
     return run_report_baselines.main(argv)
+
+
+def handle_compare_report_baselines_command(args) -> int:
+    """Compare structured report and transcript baseline outputs through the CLI."""
+    from scripts import compare_report_baselines
+
+    argv = [args.structured_report, args.baseline_package]
+    if args.output:
+        argv.extend(["--output", args.output])
+    return compare_report_baselines.main(argv)
 
 
 def handle_compare_d7_retrieval_command(args) -> int:
