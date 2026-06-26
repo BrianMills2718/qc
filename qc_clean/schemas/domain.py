@@ -67,6 +67,12 @@ class ClaimAdjudicationStatus(str, Enum):
     NEEDS_REVIEW = "needs_review"
 
 
+class GroundingIssueStatus(str, Enum):
+    """Why an evidence quote candidate could not become a verified anchor."""
+    NO_SOURCE_MATCH = "no_source_match"
+    AMBIGUOUS_MATCH = "ambiguous_match"
+
+
 class ObservedPatternKind(str, Enum):
     """Descriptive pattern types derived from observed coding artifacts."""
     CONSENSUS_CODE = "consensus_code"
@@ -235,6 +241,18 @@ class CodeApplication(BaseModel):
     confidence: float = 0.0
     applied_by: Provenance = Provenance.LLM
     codebook_version: int = 1
+
+
+class GroundingIssue(BaseModel):
+    """A dropped quote candidate that needs audit/remediation instead of use."""
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    stage_name: str
+    code_id: str = ""
+    quote_text: str
+    status: GroundingIssueStatus
+    occurrence_count: int = 0
+    remediation_hint: str = ""
+    created_at: str = Field(default_factory=lambda: datetime.now().isoformat())
 
 
 # ---------------------------------------------------------------------------
@@ -762,6 +780,7 @@ class ProjectState(BaseModel):
     # Coding layer
     codebook: Codebook = Field(default_factory=Codebook)
     code_applications: List[CodeApplication] = Field(default_factory=list)
+    grounding_issues: List[GroundingIssue] = Field(default_factory=list)
     segments: List[Segment] = Field(default_factory=list)  # the INV-8 segment universe
     code_relationships: List[CodeRelationship] = Field(default_factory=list)
 

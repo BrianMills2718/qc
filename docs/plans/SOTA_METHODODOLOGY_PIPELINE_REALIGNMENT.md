@@ -776,3 +776,15 @@ recorded as real limitations rather than report-composition defects:
 - the three-document local seed is not representative;
 - sensitive, classified, or external-reference claims are not independently
   verified inside these artifacts.
+
+Product-gate implementation checkpoint on 2026-06-26 (grounding issue ledger):
+default thematic coding now persists dropped quote candidates as first-class
+`GroundingIssue` records with stage provenance, code ID, quote text, match
+status, occurrence count, and remediation guidance. CSV export writes
+`grounding_issues.csv` when issues exist, and Markdown export renders a
+`Grounding Issues` table before analytic conclusions. Historical states that
+only contain count-based grounding warnings now render an explicit
+`Grounding issue ledger unavailable` notice instructing operators to rerun
+coding to capture quote-level remediation records. This is the first product
+gate slice for the criterion that unanchored evidence cannot remain merely a
+counted residual.

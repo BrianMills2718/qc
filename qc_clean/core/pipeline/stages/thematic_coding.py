@@ -21,7 +21,14 @@ from qc_clean.core.prompting import (
 from qc_clean.core.prompt_override_registry import get_prompt_override_surface
 from qc_clean.schemas.analysis_schemas import CodeHierarchy
 from qc_clean.schemas.adapters import code_hierarchy_to_codebook
-from qc_clean.schemas.domain import AnalysisMemo, CodeApplication, ProjectState, Provenance
+from qc_clean.schemas.domain import (
+    AnalysisMemo,
+    CodeApplication,
+    GroundingIssue,
+    GroundingIssueStatus,
+    ProjectState,
+    Provenance,
+)
 from ..pipeline_engine import PipelineContext, PipelineStage
 
 logger = logging.getLogger(__name__)
@@ -92,7 +99,7 @@ class ThematicCodingStage(PipelineStage):
         ambiguous = 0
         for tc in phase1_response.codes:
             for quote in tc.example_quotes:
-                app, status = resolve_and_anchor(
+                app, match = resolve_and_anchor(
                     quote, state.corpus.documents,
                     code_id=tc.id, codebook_version=codebook.version,
                     confidence=tc.discovery_confidence,
@@ -101,10 +108,24 @@ class ThematicCodingStage(PipelineStage):
                 )
                 if app is not None:
                     all_applications.append(app)
-                elif status is MatchStatus.AMBIGUOUS:
+                elif match.status is MatchStatus.AMBIGUOUS:
                     ambiguous += 1  # occurs >1x -> can't uniquely anchor (INV-1)
+                    state.grounding_issues.append(_grounding_issue(
+                        stage_name=self.name(),
+                        code_id=tc.id,
+                        quote=quote,
+                        status=GroundingIssueStatus.AMBIGUOUS_MATCH,
+                        occurrence_count=match.total_occurrences,
+                    ))
                 else:
                     unresolvable += 1  # no source match -> drop (INV-1)
+                    state.grounding_issues.append(_grounding_issue(
+                        stage_name=self.name(),
+                        code_id=tc.id,
+                        quote=quote,
+                        status=GroundingIssueStatus.NO_SOURCE_MATCH,
+                        occurrence_count=match.total_occurrences,
+                    ))
         state.code_applications = all_applications
         _warn_unanchored(state, unresolvable, ambiguous, label="Thematic coding")
 
@@ -266,6 +287,34 @@ Also write a brief analytical_memo (3-5 sentences) on key decisions, surprises, 
 
 def _build_combined_text(state: ProjectState) -> str:
     return format_untrusted_documents(state.corpus.documents, label_prefix="Interview")
+
+
+def _grounding_issue(
+    *,
+    stage_name: str,
+    code_id: str,
+    quote: str,
+    status: GroundingIssueStatus,
+    occurrence_count: int,
+) -> GroundingIssue:
+    remediation = {
+        GroundingIssueStatus.NO_SOURCE_MATCH: (
+            "Review the source transcript and either correct the quote text, "
+            "replace it with an exact source span, or remove the evidence item."
+        ),
+        GroundingIssueStatus.AMBIGUOUS_MATCH: (
+            "Review duplicate source occurrences and select the intended "
+            "document/span before using this quote as evidence."
+        ),
+    }[status]
+    return GroundingIssue(
+        stage_name=stage_name,
+        code_id=code_id,
+        quote_text=quote,
+        status=status,
+        occurrence_count=occurrence_count,
+        remediation_hint=remediation,
+    )
 
 
 def _build_phase1_prompt(combined_text: str, num_interviews: int) -> str:

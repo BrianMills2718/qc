@@ -339,7 +339,7 @@ def resolve_and_anchor(
 ):
     """Resolve ``quote`` across ``documents`` and build an anchored application.
 
-    Returns ``(CodeApplication | None, MatchStatus)``. UNIQUE → a fully anchored
+    Returns ``(CodeApplication | None, DocSpanMatch)``. UNIQUE → a fully anchored
     application (doc_id + offsets + hash); AMBIGUOUS / NONE → ``(None, status)`` so
     the caller can drop it and count the reason. Shared by the thematic and both
     incremental coding paths (was duplicated three times). When ``segments`` are
@@ -348,7 +348,7 @@ def resolve_and_anchor(
     from qc_clean.schemas.domain import CodeApplication, Provenance
     m = resolve_against_docs(quote, documents, allow_fuzzy=allow_fuzzy)
     if m.status is not MatchStatus.UNIQUE:
-        return None, m.status
+        return None, m
     segment_speaker = _speaker_for_containing_segment(
         m.doc_id,
         m.start_char,
@@ -367,7 +367,7 @@ def resolve_and_anchor(
         confidence=confidence,
         applied_by=Provenance.LLM,
         codebook_version=codebook_version,
-    ), m.status
+    ), m
 
 
 def warn_unanchored(state, unresolvable: int, ambiguous: int, label: str = "") -> None:

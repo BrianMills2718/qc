@@ -319,6 +319,7 @@ class ProjectExporter:
 
         codes_path = out / "codes.csv"
         apps_path = out / "applications.csv"
+        grounding_issues_path = out / "grounding_issues.csv"
         memos_path = out / "memos.csv"
         claims_path = out / "claims.csv"
         warnings_path = out / "export_warnings.csv"
@@ -327,6 +328,8 @@ class ProjectExporter:
         decision_path = out / "irr_segment_decisions.csv"
         stab_path = out / "stability.csv"
         planned_paths = [codes_path, apps_path]
+        if state.grounding_issues:
+            planned_paths.append(grounding_issues_path)
         if state.memos:
             planned_paths.append(memos_path)
         if state.claims:
@@ -382,6 +385,28 @@ class ProjectExporter:
                     f"{app.confidence:.2f}",
                 ])
         paths.append(str(apps_path))
+
+        # -- grounding_issues.csv (only if dropped quote candidates exist) --
+        if state.grounding_issues:
+            with open(grounding_issues_path, "w", newline="", encoding="utf-8") as f:
+                writer = csv.writer(f)
+                writer.writerow([
+                    "issue_id", "stage_name", "code_id", "status",
+                    "occurrence_count", "quote_text", "remediation_hint",
+                    "created_at",
+                ])
+                for issue in state.grounding_issues:
+                    writer.writerow([
+                        issue.id,
+                        issue.stage_name,
+                        issue.code_id,
+                        issue.status.value,
+                        issue.occurrence_count,
+                        issue.quote_text,
+                        issue.remediation_hint,
+                        issue.created_at,
+                    ])
+            paths.append(str(grounding_issues_path))
 
         # -- memos.csv (only if memos exist) --
         if state.memos:
@@ -540,8 +565,35 @@ class ProjectExporter:
             _a("> ⚠️ **Data warnings** — read before relying on the results below:")
             if warning_summary := _format_data_warning_summary(state):
                 _a(f"> **Grounding summary**: {warning_summary}")
+                if not state.grounding_issues:
+                    _a(
+                        "> **Grounding issue ledger unavailable**: this state has "
+                        "count-only grounding warnings from an older run. Re-run "
+                        "coding to capture quote-level remediation records."
+                    )
             for w in state.data_warnings:
                 _a(f"> - {w}")
+            _a("")
+
+        if state.grounding_issues:
+            _a("## Grounding Issues")
+            _a("")
+            _a(
+                "Dropped quote candidates below were not used as evidence. "
+                "They require remediation before they can support reviewer-facing claims."
+            )
+            _a("")
+            _a("| Stage | Code | Status | Occurrences | Quote Candidate | Remediation |")
+            _a("|-------|------|--------|-------------|-----------------|-------------|")
+            for issue in state.grounding_issues:
+                quote = _markdown_table_cell(issue.quote_text[:160])
+                remediation = _markdown_table_cell(issue.remediation_hint)
+                _a(
+                    f"| {_markdown_table_cell(issue.stage_name)} | "
+                    f"{_markdown_table_cell(issue.code_id)} | "
+                    f"{issue.status.value} | {issue.occurrence_count} | "
+                    f"{quote} | {remediation} |"
+                )
             _a("")
 
         scope_warnings = _corpus_scope_export_warnings(state)

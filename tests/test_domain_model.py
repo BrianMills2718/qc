@@ -20,6 +20,8 @@ from qc_clean.schemas.domain import (
     Document,
     DomainEntityRelationship,
     Entity,
+    GroundingIssue,
+    GroundingIssueStatus,
     HumanReviewDecision,
     Methodology,
     ParticipantPerspective,
@@ -105,6 +107,30 @@ class TestCorpusScope:
             "Vendors and implementation consultants"
         ]
         assert loaded.corpus_scope.notes == "Findings are bounded to early-adopter clinics."
+
+    def test_project_state_grounding_issues_round_trip(self):
+        state = ProjectState(
+            name="Grounding Study",
+            grounding_issues=[
+                GroundingIssue(
+                    stage_name="thematic_coding",
+                    code_id="C1",
+                    quote_text="invented quote",
+                    status=GroundingIssueStatus.NO_SOURCE_MATCH,
+                    occurrence_count=0,
+                    remediation_hint="Correct or remove the quote.",
+                )
+            ],
+        )
+
+        loaded = ProjectState.model_validate_json(state.model_dump_json())
+
+        assert len(loaded.grounding_issues) == 1
+        issue = loaded.grounding_issues[0]
+        assert issue.stage_name == "thematic_coding"
+        assert issue.code_id == "C1"
+        assert issue.status is GroundingIssueStatus.NO_SOURCE_MATCH
+        assert issue.occurrence_count == 0
 
 
 # ---------------------------------------------------------------------------

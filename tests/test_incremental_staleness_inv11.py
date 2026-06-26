@@ -254,6 +254,22 @@ def test_markdown_export_summarizes_repeated_grounding_warnings(tmp_path):
     assert "5 quote(s) matched no source document" in text
 
 
+def test_markdown_export_flags_legacy_grounding_warnings_without_issue_ledger(tmp_path):
+    """Count-only grounding warnings need an explicit rerun/remediation notice."""
+    from qc_clean.core.export.data_exporter import ProjectExporter
+
+    state = _state(
+        data_warnings=[
+            "8 quote(s) matched no source document and were dropped as unanchored (INV-1).",
+        ],
+    )
+    out = tmp_path / "report.md"
+    ProjectExporter().export_markdown(state, str(out))
+    text = out.read_text()
+    assert "Grounding issue ledger unavailable" in text
+    assert "Re-run coding to capture quote-level remediation records" in text
+
+
 def _claim(source_stage: str, kind: ClaimKind, *, claim_id: str | None = None) -> AnalyticClaim:
     return AnalyticClaim(
         id=claim_id or f"claim-{source_stage}",

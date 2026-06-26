@@ -31,6 +31,8 @@ from qc_clean.schemas.domain import (
     Document,
     Entity,
     DomainEntityRelationship,
+    GroundingIssue,
+    GroundingIssueStatus,
     Methodology,
     ObservedPattern,
     ObservedPatternKind,
@@ -858,6 +860,38 @@ class TestProjectExporter:
         assert rows[0]["code_name"] == "Communication"
         assert rows[0]["doc_name"] == "interview1.txt"
 
+    def test_export_csv_writes_grounding_issues(self, tmp_path, sample_state):
+        from qc_clean.core.export.data_exporter import ProjectExporter
+
+        sample_state.grounding_issues = [
+            GroundingIssue(
+                id="GI1",
+                stage_name="thematic_coding",
+                code_id="C1",
+                quote_text="not actually present",
+                status=GroundingIssueStatus.NO_SOURCE_MATCH,
+                occurrence_count=0,
+                remediation_hint="Correct or remove the quote.",
+            )
+        ]
+
+        paths = ProjectExporter().export_csv(sample_state, str(tmp_path))
+
+        issues_path = tmp_path / "grounding_issues.csv"
+        assert str(issues_path) in paths
+        with open(issues_path) as f:
+            rows = list(csv.DictReader(f))
+        assert rows == [{
+            "issue_id": "GI1",
+            "stage_name": "thematic_coding",
+            "code_id": "C1",
+            "status": "no_source_match",
+            "occurrence_count": "0",
+            "quote_text": "not actually present",
+            "remediation_hint": "Correct or remove the quote.",
+            "created_at": sample_state.grounding_issues[0].created_at,
+        }]
+
     def test_export_csv_no_overwrite_checks_all_targets_before_writing(
         self,
         tmp_path,
@@ -877,6 +911,16 @@ class TestProjectExporter:
     def test_export_markdown(self, tmp_path, sample_state):
         from qc_clean.core.export.data_exporter import ProjectExporter
         exporter = ProjectExporter()
+        sample_state.grounding_issues = [
+            GroundingIssue(
+                stage_name="thematic_coding",
+                code_id="C1",
+                quote_text="not actually present",
+                status=GroundingIssueStatus.NO_SOURCE_MATCH,
+                occurrence_count=0,
+                remediation_hint="Correct or remove the quote.",
+            )
+        ]
 
         out = tmp_path / "report.md"
         path = exporter.export_markdown(sample_state, str(out))
@@ -887,6 +931,9 @@ class TestProjectExporter:
         assert "## Executive Summary" in content
         assert "communication patterns" in content
         assert "## Codebook" in content
+        assert "## Grounding Issues" in content
+        assert "not actually present" in content
+        assert "Correct or remove the quote." in content
         assert "not validated prevalence estimates" in content
         assert "Communication" in content
         assert "Active Listening" in content

@@ -392,7 +392,7 @@ def _process_thematic_response(
 
         # Build applications only for new documents, span-anchored (INV-1).
         for quote in tc.example_quotes:
-            app, status = resolve_and_anchor(
+            app, match = resolve_and_anchor(
                 quote, new_docs, code_id=code_id,
                 codebook_version=state.codebook.version,
                 confidence=tc.discovery_confidence,
@@ -400,7 +400,7 @@ def _process_thematic_response(
             )
             if app is not None:
                 new_applications.append(app)
-            elif status is MatchStatus.AMBIGUOUS:
+            elif match.status is MatchStatus.AMBIGUOUS:
                 ambiguous += 1
             else:
                 unresolvable += 1
@@ -451,7 +451,7 @@ def _process_gt_response(
 
         # Build applications for new documents, span-anchored (INV-1).
         for quote in oc.supporting_quotes:
-            app, status = resolve_and_anchor(
+            app, match = resolve_and_anchor(
                 quote, new_docs, code_id=code_id,
                 codebook_version=state.codebook.version,
                 confidence=oc.confidence,
@@ -459,7 +459,7 @@ def _process_gt_response(
             )
             if app is not None:
                 new_applications.append(app)
-            elif status is MatchStatus.AMBIGUOUS:
+            elif match.status is MatchStatus.AMBIGUOUS:
                 ambiguous += 1
             else:
                 unresolvable += 1

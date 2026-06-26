@@ -66,6 +66,14 @@ def test_thematic_applications_are_span_anchored_and_ambiguous_dropped():
     # The ambiguous drop is surfaced, never silently misattributed.
     assert any("uniquely anchored" in w for w in result.data_warnings)
     assert any(w.startswith("Thematic coding:") for w in result.data_warnings)
+    assert len(result.grounding_issues) == 1
+    issue = result.grounding_issues[0]
+    assert issue.stage_name == "thematic_coding"
+    assert issue.code_id == "AUTONOMY"
+    assert issue.quote_text == "I felt ignored"
+    assert issue.status.value == "ambiguous_match"
+    assert issue.occurrence_count == 2
+    assert "select the intended document/span" in issue.remediation_hint
 
 
 def test_constant_comparison_merge_populates_anchors():

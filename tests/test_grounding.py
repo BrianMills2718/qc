@@ -198,19 +198,19 @@ def test_resolve_and_anchor_builds_app_or_returns_status():
     from qc_clean.core.grounding import MatchStatus, resolve_and_anchor
     docs = [_Doc("d1", "Alex values autonomy."), _Doc("d2", "Sam felt rushed. Sam felt rushed.")]
     # unique -> anchored application
-    app, status = resolve_and_anchor("values autonomy", docs, code_id="C1",
+    app, match = resolve_and_anchor("values autonomy", docs, code_id="C1",
                                      codebook_version=1, confidence=0.8)
-    assert status is MatchStatus.UNIQUE
+    assert match.status is MatchStatus.UNIQUE
     assert app is not None and app.code_id == "C1" and app.doc_id == "d1"
     assert app.quote_hash is not None and app.confidence == 0.8
     # ambiguous (twice in d2) -> no app
-    app2, status2 = resolve_and_anchor("Sam felt rushed", docs, code_id="C1",
+    app2, match2 = resolve_and_anchor("Sam felt rushed", docs, code_id="C1",
                                        codebook_version=1, confidence=0.5)
-    assert app2 is None and status2 is MatchStatus.AMBIGUOUS
+    assert app2 is None and match2.status is MatchStatus.AMBIGUOUS
     # none -> no app
-    app3, status3 = resolve_and_anchor("not present", docs, code_id="C1",
+    app3, match3 = resolve_and_anchor("not present", docs, code_id="C1",
                                        codebook_version=1, confidence=0.5)
-    assert app3 is None and status3 is MatchStatus.NONE
+    assert app3 is None and match3.status is MatchStatus.NONE
 
 
 def test_resolve_and_anchor_derives_speaker_from_containing_segment():
@@ -232,7 +232,7 @@ def test_resolve_and_anchor_derives_speaker_from_containing_segment():
         )
     ]
 
-    app, status = resolve_and_anchor(
+    app, match = resolve_and_anchor(
         "values autonomy",
         docs,
         code_id="C1",
@@ -241,7 +241,7 @@ def test_resolve_and_anchor_derives_speaker_from_containing_segment():
         segments=segments,
     )
 
-    assert status is MatchStatus.UNIQUE
+    assert match.status is MatchStatus.UNIQUE
     assert app is not None
     assert app.speaker == "Alex"
 
@@ -252,7 +252,7 @@ def test_resolve_and_anchor_derives_speaker_from_source_prefix_without_segments(
     content = "Alex: values autonomy.\nSam: felt rushed."
     docs = [_Doc("d1", content)]
 
-    app, status = resolve_and_anchor(
+    app, match = resolve_and_anchor(
         "values autonomy",
         docs,
         code_id="C1",
@@ -260,7 +260,7 @@ def test_resolve_and_anchor_derives_speaker_from_source_prefix_without_segments(
         confidence=0.8,
     )
 
-    assert status is MatchStatus.UNIQUE
+    assert match.status is MatchStatus.UNIQUE
     assert app is not None
     assert app.speaker == "Alex"
 
@@ -284,7 +284,7 @@ def test_resolve_and_anchor_prefers_containing_segment_speaker_over_prefix():
         )
     ]
 
-    app, status = resolve_and_anchor(
+    app, match = resolve_and_anchor(
         "values autonomy",
         docs,
         code_id="C1",
@@ -293,7 +293,7 @@ def test_resolve_and_anchor_prefers_containing_segment_speaker_over_prefix():
         segments=segments,
     )
 
-    assert status is MatchStatus.UNIQUE
+    assert match.status is MatchStatus.UNIQUE
     assert app is not None
     assert app.speaker == "Segment Speaker"
 
@@ -304,7 +304,7 @@ def test_resolve_and_anchor_does_not_infer_speaker_from_plain_prefix_text():
     content = "The interviewer notes values autonomy as important."
     docs = [_Doc("d1", content)]
 
-    app, status = resolve_and_anchor(
+    app, match = resolve_and_anchor(
         "values autonomy",
         docs,
         code_id="C1",
@@ -312,7 +312,7 @@ def test_resolve_and_anchor_does_not_infer_speaker_from_plain_prefix_text():
         confidence=0.8,
     )
 
-    assert status is MatchStatus.UNIQUE
+    assert match.status is MatchStatus.UNIQUE
     assert app is not None
     assert app.speaker is None
 
@@ -334,7 +334,7 @@ def test_resolve_and_anchor_leaves_speaker_empty_without_containing_segment():
         )
     ]
 
-    app, status = resolve_and_anchor(
+    app, match = resolve_and_anchor(
         "values autonomy",
         docs,
         code_id="C1",
@@ -343,7 +343,7 @@ def test_resolve_and_anchor_leaves_speaker_empty_without_containing_segment():
         segments=segments,
     )
 
-    assert status is MatchStatus.UNIQUE
+    assert match.status is MatchStatus.UNIQUE
     assert app is not None
     assert app.speaker is None
 
@@ -371,7 +371,7 @@ def test_resolve_and_anchor_can_disable_fuzzy_fallback():
 
     docs = [_Doc("d1", "I do my best work when no one is hovering nearby during planning.")]
 
-    app, status = resolve_and_anchor(
+    app, match = resolve_and_anchor(
         "I do best work when no one hovering nearby during planning",
         docs,
         code_id="C1",
@@ -381,4 +381,4 @@ def test_resolve_and_anchor_can_disable_fuzzy_fallback():
     )
 
     assert app is None
-    assert status is MatchStatus.NONE
+    assert match.status is MatchStatus.NONE
