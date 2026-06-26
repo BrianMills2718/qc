@@ -44,6 +44,7 @@ Add the scored side-by-side comparison artifact so baseline runs can be evaluate
 - Export-time prevalence conflict gate makes reviewer Markdown fail loud if incompatible X/Y document-count facts remain.
 - Recommendation traceability/support-status gating is present in reviewer Markdown.
 - Markdown reviewer/full profile split lets the default audit export coexist with a cleaner reviewer-facing report.
+- Report review packet writer exists so deterministic scoring can be followed by human/agent adjudication.
 
 ## Progress Log
 
@@ -57,3 +58,4 @@ Add the scored side-by-side comparison artifact so baseline runs can be evaluate
 - 2026-06-26: Added local recommendation evidence context in Markdown export. Focused tests pass for traced recommendations and untraced recommendations. Copied-seed report now shows recommendation evidence status, trace claim IDs, anchor counts, and supporting themes.
 - 2026-06-26: Added Markdown `full`/`reviewer` profile split. Focused tests pass for reviewer profile audit-section omission and project export command profile forwarding. Copied-seed reviewer export keeps the analytic story and recommendation trace lines while omitting audit-heavy sections.
 - 2026-06-26: Compared copied-seed reviewer report against transcript baselines. Heuristic scores: reviewer structured report `0.845` at 2705 words, direct baseline `0.446` at 606 words, QA baseline `0.435` at 386 words; no prevalence conflicts detected.
+- 2026-06-26: Added report review packet writer and CLI. Focused tests pass for packet schema, script output, and CLI forwarding. Copied-seed packet includes reviewer report, direct baseline, QA baseline, rubric questions, and response instructions.

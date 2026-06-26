@@ -83,6 +83,7 @@ Examples:
   qc_cli run-d7-live-baseline <project_id> --output live_baseline.json --model gpt-5-mini
   qc_cli run-report-baselines <project_id> --output report_baselines.json --mode direct_report --mode qa_report
   qc_cli compare-report-baselines report.md report_baselines.json --output report_baseline_comparison.json
+  qc_cli write-report-review-packet report.md report_baselines.json --output report_review_packet.json
   qc_cli validate-d7-baseline-package baseline.json
   qc_cli validate-d7-comparison-protocol d7_protocol.json
   qc_cli d7-comparison-preflight d7_protocol.json d7_gold.json lexical.json embedding.json
@@ -959,6 +960,15 @@ Examples:
     report_comparison_parser.add_argument('baseline_package', help='Report-baseline JSON package path')
     report_comparison_parser.add_argument('--output', help='Optional JSON output path')
 
+    report_review_packet_parser = subparsers.add_parser(
+        'write-report-review-packet',
+        help='Write human/agent report comparison review packet',
+        description='Write a review packet containing structured and baseline reports plus rubric questions',
+    )
+    report_review_packet_parser.add_argument('structured_report', help='Structured Markdown report path')
+    report_review_packet_parser.add_argument('baseline_package', help='Report-baseline JSON package path')
+    report_review_packet_parser.add_argument('--output', help='Optional JSON output path')
+
     # D7 retrieval comparison command
     d7_comparison_parser = subparsers.add_parser(
         'compare-d7-retrieval',
@@ -1649,6 +1659,8 @@ def main() -> int:
             return handle_run_report_baselines_command(args)
         elif args.command == 'compare-report-baselines':
             return handle_compare_report_baselines_command(args)
+        elif args.command == 'write-report-review-packet':
+            return handle_write_report_review_packet_command(args)
         elif args.command == 'compare-d7-retrieval':
             return handle_compare_d7_retrieval_command(args)
         elif args.command == 'verify-d7-comparison-artifact':
@@ -2237,6 +2249,16 @@ def handle_compare_report_baselines_command(args) -> int:
     if args.output:
         argv.extend(["--output", args.output])
     return compare_report_baselines.main(argv)
+
+
+def handle_write_report_review_packet_command(args) -> int:
+    """Write a report-comparison review packet through the CLI."""
+    from scripts import write_report_review_packet
+
+    argv = [args.structured_report, args.baseline_package]
+    if args.output:
+        argv.extend(["--output", args.output])
+    return write_report_review_packet.main(argv)
 
 
 def handle_compare_d7_retrieval_command(args) -> int:

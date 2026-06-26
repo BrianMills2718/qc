@@ -637,3 +637,21 @@ audit Markdown. It shows the structured report can be made substantially less
 dense while retaining enough trace/audit signal to beat the simple baselines
 under the deterministic rubric. It still does not replace human preference
 review or expert adjudication.
+
+Implementation checkpoint on 2026-06-26 (report review packet): the repo now
+has a human/agent adjudication packet for report comparison. `scripts/write_report_review_packet.py`
+and `qc_cli.py write-report-review-packet <reviewer_report.md>
+<report_baselines.json>` write a versioned packet containing:
+
+- the structured reviewer report;
+- direct-report and QA-report baseline Markdown;
+- fixed rubric questions for internal consistency, evidence grounding,
+  disagreement handling, scope discipline, recommendation traceability,
+  reviewer usefulness, and auditability;
+- response instructions for 1-5 scores, evidence notes, overall ranking, and
+  unsupported/contradictory/over-scoped claim flags.
+
+This makes the next evaluation step agent-drivable and reviewable without
+pretending the deterministic scorer is the final judge. Copied-seed verification
+wrote an ignored local `report_review_packet.json` containing the reviewer
+report, both transcript baselines, and all rubric dimensions.
