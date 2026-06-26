@@ -887,6 +887,7 @@ class TestProjectExporter:
         assert "## Executive Summary" in content
         assert "communication patterns" in content
         assert "## Codebook" in content
+        assert "not validated prevalence estimates" in content
         assert "Communication" in content
         assert "Active Listening" in content
         assert "## Key Quotes" in content

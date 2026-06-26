@@ -46,6 +46,7 @@ Add the scored side-by-side comparison artifact so baseline runs can be evaluate
 - Markdown reviewer/full profile split lets the default audit export coexist with a cleaner reviewer-facing report.
 - Report review packet writer exists so deterministic scoring can be followed by human/agent adjudication.
 - Agent report review response workflow exists and was run on the copied seed packet.
+- Codebook count/confidence caveat is present in Markdown exports.
 
 ## Progress Log
 
@@ -61,3 +62,4 @@ Add the scored side-by-side comparison artifact so baseline runs can be evaluate
 - 2026-06-26: Compared copied-seed reviewer report against transcript baselines. Heuristic scores: reviewer structured report `0.845` at 2705 words, direct baseline `0.446` at 606 words, QA baseline `0.435` at 386 words; no prevalence conflicts detected.
 - 2026-06-26: Added report review packet writer and CLI. Focused tests pass for packet schema, script output, and CLI forwarding. Copied-seed packet includes reviewer report, direct baseline, QA baseline, rubric questions, and response instructions.
 - 2026-06-26: Added and ran agent report-review response workflow. Live `gpt-5-mini` review ranked structured report first, QA baseline second, direct baseline third. Residual concerns: dropped/unanchored quotes, three-transcript scope, and numeric confidence/count derivation clarity.
+- 2026-06-26: Added Codebook section caveat that mentions/confidence are local pipeline signals, not validated prevalence or methodological-certainty measures. Copied-seed reviewer report was regenerated with the caveat.

@@ -679,3 +679,10 @@ Residual concerns recorded by the reviewer:
 - the three-transcript seed limits generalizability across all artifacts;
 - numeric confidences and codebook counts need clearer derivation to avoid
   being misread as precise measures.
+
+Implementation checkpoint on 2026-06-26 (codebook count/confidence caveat):
+reviewer and full Markdown exports now state locally in the Codebook section
+that mention counts and confidence values are local pipeline signals for the
+loaded corpus, not validated prevalence estimates or methodological-certainty
+measures. This directly addresses one residual concern from the agent review
+without pretending the metrics are more rigorous than they are.

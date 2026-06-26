@@ -563,6 +563,12 @@ class ProjectExporter:
         if state.codebook.codes:
             _a("## Codebook")
             _a("")
+            _a(
+                "*Mentions and confidence are local pipeline signals for this "
+                "loaded corpus, not validated prevalence estimates or "
+                "methodological-certainty measures.*"
+            )
+            _a("")
             _a("| Code | Description | Mentions | Confidence |")
             _a("|------|-------------|----------|------------|")
             for code in sorted(state.codebook.codes, key=lambda c: c.mention_count, reverse=True):
