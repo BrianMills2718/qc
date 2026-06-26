@@ -989,7 +989,10 @@ class TestProjectExporter:
             AnalysisMemo(
                 memo_type="cross_case",
                 title="Cross-Interview Pattern Analysis",
-                content="- **Communication**: present in 1/1 documents.",
+                content=(
+                    "- **Communication**: anchored application evidence in "
+                    "1/1 loaded documents."
+                ),
                 created_at="2026-06-25T18:22:38",
             ),
             AnalysisMemo(
@@ -1015,7 +1018,7 @@ class TestProjectExporter:
             ObservedPattern(
                 source_stage="cross_interview",
                 pattern_kind=ObservedPatternKind.CONSENSUS_CODE,
-                summary="Code 'Communication' appears in 1/1 documents.",
+                summary="Code 'Communication' has anchored application evidence in 1/1 loaded documents.",
                 code_ids=["C1"],
                 doc_ids=["d1"],
                 count=1,

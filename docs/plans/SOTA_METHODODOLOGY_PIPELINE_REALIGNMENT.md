@@ -788,3 +788,14 @@ only contain count-based grounding warnings now render an explicit
 coding to capture quote-level remediation records. This is the first product
 gate slice for the criterion that unanchored evidence cannot remain merely a
 counted residual.
+
+Product-gate implementation checkpoint on 2026-06-26 (denominator-safe
+cross-interview language): cross-interview memos, observed-pattern summaries,
+and cross-interview claim ledger text now describe application-derived X/Y
+document counts as anchored application evidence over loaded documents, not as
+corpus prevalence or coverage. Reviewer Markdown also display-migrates legacy
+cross-case memo wording from older states onto the same denominator-safe
+language, while full state and audit exports preserve the raw memo history.
+Report-authoritativeness conflict detection was extended to recognize both the
+legacy prevalence wording and the new anchored-application wording, so the
+safer phrasing does not weaken contradiction checks.

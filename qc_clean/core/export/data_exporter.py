@@ -253,6 +253,37 @@ def _memos_for_markdown(memos: List[AnalysisMemo]) -> tuple[List[AnalysisMemo], 
     return reviewer_memos, omitted_cross_case_count
 
 
+def _reviewer_cross_case_content(content: str) -> str:
+    """Render legacy cross-case memo counts with default-path-safe wording."""
+    migrated = content
+    migrated = migrated.replace(
+        "### Consensus Themes (shared across majority of interviews)",
+        "### Shared Application Evidence",
+    )
+    migrated = migrated.replace(
+        "### Divergent Themes (present in only some interviews)",
+        "### Limited Application Evidence",
+    )
+    migrated = re.sub(
+        r": present in (?P<count>\d+/\d+) documents? "
+        r"\(strength=(?P<strength>[0-9.]+)\)",
+        r": anchored application evidence in \g<count> loaded documents "
+        r"(application-document strength=\g<strength>)",
+        migrated,
+    )
+    migrated = re.sub(
+        r": present in (?P<count>\d+/\d+) documents?",
+        r": anchored application evidence in \g<count> loaded documents",
+        migrated,
+    )
+    migrated = re.sub(
+        r": co-occur in (?P<count>\d+) documents?",
+        r": anchored co-application evidence in \g<count> loaded documents",
+        migrated,
+    )
+    return migrated
+
+
 def _assert_no_markdown_prevalence_conflicts(markdown: str) -> None:
     """Fail loudly when reviewer Markdown contains incompatible prevalence facts."""
     conflicts = find_prevalence_conflicts(markdown)
@@ -777,7 +808,7 @@ class ProjectExporter:
                     _a(f"### {memo.title or memo.memo_type}")
                     _a(f"*Generated: {memo.created_at[:10]}*")
                     _a("")
-                    _a(memo.content)
+                    _a(_reviewer_cross_case_content(memo.content))
                     _a("")
 
         # First-class claim ledger (INV-9)

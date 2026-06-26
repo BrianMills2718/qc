@@ -456,7 +456,7 @@ class TestMarkdownExportMemos:
                     content=(
                         "## Cross-Interview Pattern Analysis\n\n"
                         "### Consensus Themes (shared across majority of interviews)\n"
-                        "- **Nature of information threats and media dynamics**: present in 2/3 documents (strength=0.67)\n"
+                        "- **Nature of information threats and media dynamics**: anchored application evidence in 2/3 loaded documents (application-document strength=0.67)\n"
                     ),
                     created_at="2026-06-25T17:55:15",
                 ),
@@ -465,7 +465,7 @@ class TestMarkdownExportMemos:
                 ObservedPattern(
                     source_stage="cross_interview",
                     pattern_kind=ObservedPatternKind.CONSENSUS_CODE,
-                    summary="Code 'Nature of information threats and media dynamics' appears in 2/3 documents.",
+                    summary="Code 'Nature of information threats and media dynamics' has anchored application evidence in 2/3 loaded documents.",
                     code_ids=["NATURE_OF_INFORMATION_THREATS"],
                     doc_ids=["d1", "d2"],
                     count=2,
@@ -481,9 +481,9 @@ class TestMarkdownExportMemos:
         assert content.count("### Cross-Interview Pattern Analysis") == 1
         assert "omitted 1 superseded cross-case memo" in content
         assert "present in 1/3 documents" not in content
-        assert "present in 2/3 documents (strength=0.67)" in content
+        assert "anchored application evidence in 2/3 loaded documents (application-document strength=0.67)" in content
         assert "## Observed Patterns" in content
-        assert "appears in 2/3 documents." in content
+        assert "anchored application evidence in 2/3 loaded documents." in content
 
     def test_markdown_preserves_repeated_non_cross_case_memos(self, tmp_path):
         state = _make_state(

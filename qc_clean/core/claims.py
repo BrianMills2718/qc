@@ -289,8 +289,8 @@ def claims_for_cross_interview(
             claim_kind=ClaimKind.CROSS_CASE,
             source_stage=source_stage,
             claim_text=(
-                f"Code '{item['code_name']}' is present in "
-                f"{item['doc_count']}/{item['total_docs']} documents."
+                f"Code '{item['code_name']}' has anchored application evidence in "
+                f"{item['doc_count']}/{item['total_docs']} loaded documents."
             ),
             scope=ClaimScope(doc_ids=doc_ids, code_ids=[code_id], corpus_level=True),
             origin_object_type="cross_interview_consensus",
@@ -308,8 +308,8 @@ def claims_for_cross_interview(
             claim_kind=ClaimKind.CROSS_CASE,
             source_stage=source_stage,
             claim_text=(
-                f"Code '{item['code_name']}' is divergent: present in "
-                f"{item['doc_count']}/{item['total_docs']} documents."
+                f"Code '{item['code_name']}' has limited anchored application evidence in "
+                f"{item['doc_count']}/{item['total_docs']} loaded documents."
             ),
             scope=ClaimScope(doc_ids=doc_ids, code_ids=[code_id], corpus_level=True),
             origin_object_type="cross_interview_divergent",
@@ -324,8 +324,9 @@ def claims_for_cross_interview(
             kind=ClaimKind.CROSS_CASE,
             source_stage=source_stage,
             text=(
-                f"Codes '{item['code_1']}' and '{item['code_2']}' co-occur in "
-                f"{item['co_occurrence_count']} documents."
+                f"Codes '{item['code_1']}' and '{item['code_2']}' have anchored "
+                f"co-application evidence in {item['co_occurrence_count']} "
+                "loaded documents."
             ),
             scope=ClaimScope(corpus_level=True),
             origin_type="cross_interview_co_occurrence",

@@ -117,6 +117,8 @@ class TestCrossInterviewAnalysis:
         )
         assert len(result.memos) == 1
         assert result.memos[0].memo_type == "cross_case"
+        assert "anchored application evidence in 3/3 loaded documents" in result.memos[0].content
+        assert "present in 3/3 documents" not in result.memos[0].content
 
     def test_stage_populates_observed_patterns(self):
         state = ProjectState(
@@ -146,6 +148,11 @@ class TestCrossInterviewAnalysis:
         assert ObservedPatternKind.CONSENSUS_CODE in kinds
         assert ObservedPatternKind.DIVERGENT_CODE in kinds
         assert ObservedPatternKind.CODE_CO_OCCURRENCE in kinds
+        assert any(
+            "anchored application evidence in 3/3 loaded documents" in pattern.summary
+            for pattern in result.observed_patterns
+        )
+        assert not any("appears in" in pattern.summary for pattern in result.observed_patterns)
 
     def test_stage_promotes_perspective_consensus_and_divergence_patterns(self):
         state = ProjectState(

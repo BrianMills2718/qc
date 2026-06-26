@@ -21,3 +21,14 @@ def test_find_prevalence_conflicts_ignores_consistent_repeated_counts():
     )
 
     assert conflicts == {}
+
+
+def test_find_prevalence_conflicts_detects_anchored_application_evidence_form():
+    conflicts = find_prevalence_conflicts(
+        "- **Local actors**: anchored application evidence in 2/3 loaded documents.\n"
+        "- **Local actors**: anchored application evidence in 3/3 loaded documents.\n"
+    )
+
+    assert conflicts == {
+        "local actors": ["2/3", "3/3"],
+    }

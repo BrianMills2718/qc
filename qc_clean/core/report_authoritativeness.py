@@ -7,8 +7,12 @@ import re
 
 PREVALENCE_PATTERN = re.compile(
     r"(?P<label>[*A-Za-z][*A-Za-z0-9 ,/&+'().:-]{3,140}?)"
-    r"\s*:?\s+(?:appears|present)\s+in\s+"
-    r"(?P<count>\d+)\s*/\s*(?P<total>\d+)\s+documents?",
+    r"\s*:?\s+(?:"
+    r"(?:appears|present)\s+in|"
+    r"has\s+(?:limited\s+)?anchored\s+application\s+evidence\s+in|"
+    r"anchored\s+application\s+evidence\s+in"
+    r")\s+"
+    r"(?P<count>\d+)\s*/\s*(?P<total>\d+)\s+(?:loaded\s+)?documents?",
     re.IGNORECASE,
 )
 

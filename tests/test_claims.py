@@ -649,7 +649,7 @@ def test_cross_case_builder_uses_code_application_support():
     claims = claims_for_cross_interview(state, results)
 
     assert len(claims) >= 1
-    consensus = [claim for claim in claims if "present in 2/2 documents" in claim.claim_text]
+    consensus = [claim for claim in claims if "anchored application evidence in 2/2 loaded documents" in claim.claim_text]
     assert consensus
     assert consensus[0].claim_kind == ClaimKind.CROSS_CASE
     assert consensus[0].support_status == ClaimSupportStatus.SUPPORTED

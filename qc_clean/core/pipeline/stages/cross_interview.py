@@ -233,8 +233,9 @@ def observed_patterns_for_cross_interview(
             source_stage=source_stage,
             pattern_kind=ObservedPatternKind.CONSENSUS_CODE,
             summary=(
-                f"Code '{consensus['code_name']}' appears in "
-                f"{consensus['doc_count']}/{consensus['total_docs']} documents."
+                f"Code '{consensus['code_name']}' has anchored application "
+                f"evidence in {consensus['doc_count']}/{consensus['total_docs']} "
+                "loaded documents."
             ),
             code_ids=[code_id],
             doc_ids=doc_ids,
@@ -246,7 +247,7 @@ def observed_patterns_for_cross_interview(
             strength=consensus.get("strength"),
             count=consensus["doc_count"],
             total=consensus["total_docs"],
-            metadata={"denominator": "documents_with_code_applications"},
+            metadata={"denominator": "loaded_documents_with_anchored_code_applications"},
             causal_interpretation_status=CausalInterpretationStatus.DESCRIPTIVE_ONLY,
             created_by=Provenance.SYSTEM,
         ))
@@ -263,8 +264,9 @@ def observed_patterns_for_cross_interview(
             source_stage=source_stage,
             pattern_kind=ObservedPatternKind.DIVERGENT_CODE,
             summary=(
-                f"Code '{divergent['code_name']}' appears in "
-                f"{divergent['doc_count']}/{divergent['total_docs']} documents."
+                f"Code '{divergent['code_name']}' has anchored application "
+                f"evidence in {divergent['doc_count']}/{divergent['total_docs']} "
+                "loaded documents."
             ),
             code_ids=[code_id],
             doc_ids=doc_ids,
@@ -275,7 +277,7 @@ def observed_patterns_for_cross_interview(
             ],
             count=divergent["doc_count"],
             total=divergent["total_docs"],
-            metadata={"denominator": "documents_with_code_applications"},
+            metadata={"denominator": "loaded_documents_with_anchored_code_applications"},
             causal_interpretation_status=CausalInterpretationStatus.DESCRIPTIVE_ONLY,
             created_by=Provenance.SYSTEM,
         ))
@@ -294,8 +296,9 @@ def observed_patterns_for_cross_interview(
             source_stage=source_stage,
             pattern_kind=ObservedPatternKind.CODE_CO_OCCURRENCE,
             summary=(
-                f"Codes '{co['code_1']}' and '{co['code_2']}' co-occur in "
-                f"{co['co_occurrence_count']} documents."
+                f"Codes '{co['code_1']}' and '{co['code_2']}' have anchored "
+                f"co-application evidence in {co['co_occurrence_count']} "
+                "loaded documents."
             ),
             code_ids=code_ids,
             doc_ids=doc_ids,
@@ -306,7 +309,7 @@ def observed_patterns_for_cross_interview(
             ],
             count=co["co_occurrence_count"],
             total=state.corpus.num_documents,
-            metadata={"denominator": "documents_with_both_codes"},
+            metadata={"denominator": "loaded_documents_with_anchored_co_applications"},
             causal_interpretation_status=CausalInterpretationStatus.DESCRIPTIVE_ONLY,
             created_by=Provenance.SYSTEM,
         ))
@@ -354,19 +357,21 @@ def _format_cross_results(results: CrossInterviewResult) -> str:
     lines = ["## Cross-Interview Pattern Analysis\n"]
 
     if results.consensus_themes:
-        lines.append("### Consensus Themes (shared across majority of interviews)")
+        lines.append("### Shared Application Evidence")
         for ct in results.consensus_themes:
             lines.append(
-                f"- **{ct['code_name']}**: present in {ct['doc_count']}/{ct['total_docs']} "
-                f"documents (strength={ct['strength']:.2f})"
+                f"- **{ct['code_name']}**: anchored application evidence in "
+                f"{ct['doc_count']}/{ct['total_docs']} loaded documents "
+                f"(application-document strength={ct['strength']:.2f})"
             )
         lines.append("")
 
     if results.divergent_themes:
-        lines.append("### Divergent Themes (present in only some interviews)")
+        lines.append("### Limited Application Evidence")
         for dt in results.divergent_themes:
             lines.append(
-                f"- **{dt['code_name']}**: present in {dt['doc_count']}/{dt['total_docs']} documents"
+                f"- **{dt['code_name']}**: anchored application evidence in "
+                f"{dt['doc_count']}/{dt['total_docs']} loaded documents"
             )
         lines.append("")
 
@@ -374,7 +379,8 @@ def _format_cross_results(results: CrossInterviewResult) -> str:
         lines.append("### Top Code Co-occurrences")
         for co in results.co_occurrences:
             lines.append(
-                f"- {co['code_1']} + {co['code_2']}: co-occur in {co['co_occurrence_count']} documents"
+                f"- {co['code_1']} + {co['code_2']}: anchored co-application "
+                f"evidence in {co['co_occurrence_count']} loaded documents"
             )
         lines.append("")
 
