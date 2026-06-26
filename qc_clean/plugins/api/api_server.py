@@ -408,6 +408,65 @@ class QCAPIServer:
                 response["data_warnings"] = list(state.data_warnings)
             return response
 
+        @self._app.get("/projects/{project_id}/graph/claims")
+        async def get_graph_claims(project_id: str):
+            """Get claim nodes and claim-relationship edges for graph visualization."""
+            from qc_clean.core.persistence.project_store import ProjectStore
+            store = ProjectStore()
+            try:
+                state = store.load(project_id)
+            except FileNotFoundError:
+                raise HTTPException(status_code=404, detail=f"Project not found: {project_id}")
+
+            involved_claim_ids = {
+                relationship.source_claim_id
+                for relationship in state.claim_relationships
+            } | {
+                relationship.target_claim_id
+                for relationship in state.claim_relationships
+            }
+
+            nodes = []
+            for claim in state.claims:
+                if involved_claim_ids and claim.id not in involved_claim_ids:
+                    continue
+                label = claim.claim_text
+                if len(label) > 72:
+                    label = label[:69] + "..."
+                nodes.append({
+                    "id": claim.id,
+                    "label": label,
+                    "claim_text": claim.claim_text,
+                    "kind": claim.claim_kind.value,
+                    "source_stage": claim.source_stage,
+                    "support_status": claim.support_status.value,
+                    "participant_names": list(claim.scope.participant_names),
+                    "origin_object_type": claim.origin_object_type,
+                })
+
+            edges = []
+            for relationship in state.claim_relationships:
+                edges.append({
+                    "id": relationship.id,
+                    "source": relationship.source_claim_id,
+                    "target": relationship.target_claim_id,
+                    "type": relationship.relationship_type,
+                    "rationale": relationship.rationale,
+                })
+
+            response = {
+                "project_name": state.name,
+                "nodes": nodes,
+                "edges": edges,
+            }
+            if not edges:
+                response["empty_reason"] = (
+                    "No claim relationship edges were produced for this project yet."
+                )
+            if state.data_warnings:
+                response["data_warnings"] = list(state.data_warnings)
+            return response
+
         # ----- Review UI -----
         @self._app.get("/review/{project_id}")
         async def review_ui_page(project_id: str):
@@ -1019,6 +1078,7 @@ class QCAPIServer:
             {"method": "GET", "path": "/graph/{project_id}", "description": "Graph visualization UI"},
             {"method": "GET", "path": "/projects/{project_id}/graph/codes", "description": "Code graph data"},
             {"method": "GET", "path": "/projects/{project_id}/graph/entities", "description": "Entity graph data"},
+            {"method": "GET", "path": "/projects/{project_id}/graph/claims", "description": "Claim graph data"},
             {"method": "GET", "path": "/review/{project_id}", "description": "Review UI page"},
             {"method": "GET", "path": "/projects/{project_id}/review/codes", "description": "Get codes for review UI"},
             {"method": "GET", "path": "/projects/{project_id}/review/claims", "description": "Get claims for review UI"},

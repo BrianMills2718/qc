@@ -78,6 +78,7 @@ a:hover { text-decoration: underline; }
   <div class="tab active" data-view="hierarchy" onclick="switchView('hierarchy')">Code Hierarchy</div>
   <div class="tab" data-view="relationships" onclick="switchView('relationships')">Code Relationships</div>
   <div class="tab" data-view="entities" onclick="switchView('entities')">Entity Map</div>
+  <div class="tab" data-view="claims" onclick="switchView('claims')">Claim Graph</div>
 </div>
 
 <div class="toolbar">
@@ -110,6 +111,7 @@ let cy = null;
 let currentView = "hierarchy";
 let codeData = null;
 let entityData = null;
+let claimData = null;
 
 // -------------------------------------------------------------------
 // Color palettes
@@ -145,6 +147,16 @@ async function loadEntityData() {
     entityData = await resp.json();
   } catch (e) {
     console.error("Entity load error:", e);
+  }
+}
+
+async function loadClaimData() {
+  try {
+    const resp = await fetch(API_BASE + "/projects/" + PROJECT_ID + "/graph/claims");
+    if (!resp.ok) throw new Error("Failed to load claim data");
+    claimData = await resp.json();
+  } catch (e) {
+    console.error("Claim load error:", e);
   }
 }
 
@@ -415,6 +427,74 @@ function renderEntities() {
   }
 }
 
+function renderClaims() {
+  if (!claimData) return;
+  var elements = [];
+
+  const CLAIM_KIND_COLORS = {
+    "perspective": "#2563eb",
+    "cross_case": "#d97706",
+    "synthesis_finding": "#059669",
+    "relationship": "#7c3aed",
+    "negative_case": "#dc2626",
+    "code": "#6b7280",
+    "code_application": "#64748b",
+  };
+  const CLAIM_REL_COLORS = {
+    "elaborates": "#2563eb",
+    "synthesizes": "#059669",
+    "contrasts": "#dc2626",
+  };
+
+  for (var node of (claimData.nodes || [])) {
+    elements.push({
+      data: {
+        id: node.id,
+        label: node.label,
+        color: CLAIM_KIND_COLORS[node.kind] || "#6b7280",
+        size: 46,
+        claimText: node.claim_text || "",
+        claimKind: node.kind || "claim",
+        sourceStage: node.source_stage || "",
+        supportStatus: node.support_status || "",
+        participantNames: node.participant_names || [],
+        originObjectType: node.origin_object_type || "",
+        nodeType: "claim",
+      }
+    });
+  }
+
+  for (var edge of (claimData.edges || [])) {
+    elements.push({
+      data: {
+        id: edge.id,
+        source: edge.source,
+        target: edge.target,
+        label: edge.type || "",
+        color: CLAIM_REL_COLORS[edge.type] || "#6b7280",
+        width: 3,
+        rationale: edge.rationale || "",
+      }
+    });
+  }
+
+  var stats = (claimData.nodes || []).length + " claims, " + (claimData.edges || []).length + " relationships";
+  document.getElementById("statsBar").textContent = stats;
+  document.getElementById("graphHelp").innerHTML =
+    "<strong>What this graph shows:</strong> Claim Graph shows first-class claim nodes and deterministic links such as elaborates, synthesizes, and contrasts.";
+
+  initCytoscape(elements, {
+    name: "cose",
+    idealEdgeLength: 180,
+    nodeOverlap: 20,
+    padding: 30,
+    animate: false,
+  });
+  if ((claimData.edges || []).length === 0) {
+    setEmptyNote(claimData.empty_reason || "No claim relationship edges are available for this project.");
+  }
+}
+
 function setEmptyNote(message) {
   const note = document.getElementById("emptyNote");
   if (!note) return;
@@ -439,6 +519,7 @@ function switchView(view) {
   if (view === "hierarchy") renderHierarchy();
   else if (view === "relationships") renderRelationships();
   else if (view === "entities") renderEntities();
+  else if (view === "claims") renderClaims();
 }
 
 // -------------------------------------------------------------------
@@ -501,6 +582,24 @@ function showDetail(data) {
       html += '<div class="field"><span class="field-label">Description</span>';
       html += '<div class="field-value">' + escapeHtml(data.description) + '</div></div>';
     }
+  } else if (data.nodeType === "claim") {
+    html += '<div class="field"><span class="badge">' + escapeHtml(data.claimKind || "claim") + '</span></div>';
+    html += '<div class="field"><span class="field-label">Stage</span>';
+    html += '<div class="field-value">' + escapeHtml(data.sourceStage || "") + '</div></div>';
+    html += '<div class="field"><span class="field-label">Support</span>';
+    html += '<div class="field-value">' + escapeHtml(data.supportStatus || "") + '</div></div>';
+    if (data.participantNames && data.participantNames.length > 0) {
+      html += '<div class="field"><span class="field-label">Participants</span>';
+      html += '<div class="field-value">' + escapeHtml(data.participantNames.join(", ")) + '</div></div>';
+    }
+    if (data.originObjectType) {
+      html += '<div class="field"><span class="field-label">Origin</span>';
+      html += '<div class="field-value">' + escapeHtml(data.originObjectType) + '</div></div>';
+    }
+    if (data.claimText) {
+      html += '<div class="field"><span class="field-label">Claim text</span>';
+      html += '<div class="field-value">' + escapeHtml(data.claimText) + '</div></div>';
+    }
   }
 
   document.getElementById("detailContent").innerHTML = html;
@@ -539,7 +638,7 @@ function escapeHtml(s) {
 // Init
 // -------------------------------------------------------------------
 async function init() {
-  await Promise.all([loadCodeData(), loadEntityData()]);
+  await Promise.all([loadCodeData(), loadEntityData(), loadClaimData()]);
   renderHierarchy();
 }
 

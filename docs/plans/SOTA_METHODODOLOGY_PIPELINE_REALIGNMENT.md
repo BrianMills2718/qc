@@ -289,3 +289,21 @@ Critique after the selectivity checkpoint:
   participant perspective in scope;
 - the next unambiguous target remains a reviewer-facing stance/claim graph or a
   more selective participant-position linking rule for consensus claims.
+
+Implementation checkpoint on 2026-06-26 (claim graph surface): the repo now has
+a reviewer-visible claim graph surface. `/projects/{project_id}/graph/claims`
+returns claim nodes plus deterministic `elaborates` / `synthesizes` /
+`contrasts` edges, and the browser graph UI now exposes a `Claim Graph` tab
+alongside Code Hierarchy, Code Relationships, and Entity Map. Focused graph API
+tests passed.
+
+Replay critique after the claim-graph checkpoint:
+
+- the copied replay now yields a nontrivial claim graph with 22 nodes and 30
+  edges, which is enough to count as a meaningful reviewer-visible stance-map
+  substrate rather than a placeholder surface;
+- the graph is still deterministic and partial: it covers perspective-derived
+  claims and cross-interview synthesis/divergence links, not the full claim
+  ledger;
+- this is therefore a real product milestone, but not yet a full semantic
+  claims graph.
