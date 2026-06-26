@@ -559,3 +559,22 @@ Interpretation of that readout:
   auditability and explicit evidence/claim trace signals;
 - this still does not license a SOTA or superiority claim because the scorer is
   deterministic instrumentation, not an adjudicated reviewer preference study.
+
+Implementation checkpoint on 2026-06-26 (export-time prevalence conflict gate):
+the reviewer Markdown exporter now reuses the same prevalence-conflict detector
+as the comparison scorer and fails loudly before writing if the final Markdown
+contains incompatible `present/appears in X/Y documents` facts for the same
+normalized theme/code label. This is the hard gate counterpart to the
+post-export comparison readout.
+
+Focused coverage proves:
+
+- the detector catches the original Markdown form
+  `**Theme**: present in 2/3 documents` versus `**Theme**: present in 3/3 documents`;
+- consistent repeated prevalence counts do not trip the gate;
+- Markdown export raises `ValueError` and writes no file when two live
+  cross-case memo families still create a conflicting prevalence fact.
+
+Copied-seed verification: the fixed copied seed report still exports cleanly
+under the new gate, confirming the earlier memo-authoritativeness fix resolved
+the stale cross-case prevalence conflict for that artifact.

@@ -41,6 +41,7 @@ Add the scored side-by-side comparison artifact so baseline runs can be evaluate
 - CSV memo export is covered to preserve historical `cross_case` memos for audit.
 - Commit `286fd0db` was pushed to `origin/main` for the baseline substrate and reviewer Markdown authoritativeness fix.
 - Report-baseline comparison scoring now has a deterministic package design and canonical CLI surface in progress.
+- Export-time prevalence conflict gate is now in progress so reviewer Markdown fails loud if incompatible X/Y document-count facts remain.
 
 ## Progress Log
 
@@ -50,3 +51,4 @@ Add the scored side-by-side comparison artifact so baseline runs can be evaluate
 - 2026-06-26: Final review found missing schema descriptions on LLM-facing baseline output models; added `Field(description=...)` metadata. Final verification passed with `make check`: 1391 deterministic tests passed, 1 skipped, 8 live tests deselected; Ruff passed; docs/governance checks passed; type check is not configured.
 - 2026-06-26: User correctly challenged the premature stop after the first slice. Continuous run resumed with the next unambiguous missing program piece: a scored comparison package for structured report versus direct-report and QA baselines.
 - 2026-06-26: Added deterministic report-baseline comparison scorer, script, and top-level CLI. Focused tests passed for scoring behavior, script output, and CLI forwarding. Copied-seed run wrote ignored local `report_baseline_comparison.json` and ranked structured report above both transcript baselines under the heuristic rubric; this is instrumentation, not adjudicated superiority evidence.
+- 2026-06-26: Added shared prevalence-conflict detector and Markdown export gate. Focused tests passed for the original bold/colon prevalence form, consistent repeated counts, and fail-loud export behavior. Copied-seed Markdown export still succeeds under the gate.

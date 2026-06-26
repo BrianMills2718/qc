@@ -10,6 +10,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from qc_clean.core.report_authoritativeness import find_prevalence_conflicts
 from qc_clean.core.report_baseline import ReportBaselinePackage
 
 
@@ -32,12 +33,6 @@ RUBRIC_DIMENSIONS: tuple[str, ...] = (
     "auditability",
 )
 
-_PREVALENCE_PATTERN = re.compile(
-    r"(?P<label>[*A-Za-z][*A-Za-z0-9 ,/&+'().:-]{3,140}?)"
-    r"\s*:?\s+(?:appears|present)\s+in\s+"
-    r"(?P<count>\d+)\s*/\s*(?P<total>\d+)\s+documents?",
-    re.IGNORECASE,
-)
 _QUOTE_PATTERN = re.compile(r"(^>|\n>|\"[^\"]{20,}\")")
 _CLAIM_ID_PATTERN = re.compile(r"\b(?:claim|claims?)[: #_-]*[A-Za-z0-9-]{6,}\b", re.IGNORECASE)
 
@@ -219,12 +214,8 @@ def score_report_artifact(
 
 def _text_metrics(text: str) -> dict:
     lower = text.lower()
-    prevalence_counts = _prevalence_counts(text)
-    conflicts = {
-        label: sorted(counts)
-        for label, counts in prevalence_counts.items()
-        if len(counts) > 1
-    }
+    prevalence_mentions = re.findall(r"\b(?:appears|present)\s+in\s+\d+\s*/\s*\d+\s+documents?", text, flags=re.IGNORECASE)
+    conflicts = find_prevalence_conflicts(text)
     heading_count = len(re.findall(r"^#{1,4}\s+", text, flags=re.MULTILINE))
     bullet_count = len(re.findall(r"^\s*[-*]\s+", text, flags=re.MULTILINE))
     recommendation_mentions = len(re.findall(r"\brecommend(?:ation|ed|s)?\b", lower))
@@ -235,7 +226,7 @@ def _text_metrics(text: str) -> dict:
         "quote_count": len(_QUOTE_PATTERN.findall(text)),
         "claim_id_count": len(_CLAIM_ID_PATTERN.findall(text)),
         "table_count": text.count("\n|"),
-        "prevalence_count_count": sum(len(counts) for counts in prevalence_counts.values()),
+        "prevalence_count_count": len(prevalence_mentions),
         "prevalence_conflicts": conflicts,
         "needs_anchor_count": lower.count("needs_anchor") + lower.count("needs anchor"),
         "unsupported_count": lower.count("unsupported"),
@@ -246,19 +237,6 @@ def _text_metrics(text: str) -> dict:
         "traceability_mentions": lower.count("claim") + lower.count("evidence") + lower.count("quote"),
         "audit_mentions": lower.count("audit") + lower.count("ledger") + lower.count("relationship") + lower.count("observed pattern"),
     }
-
-
-def _prevalence_counts(text: str) -> dict[str, set[str]]:
-    counts: dict[str, set[str]] = {}
-    for match in _PREVALENCE_PATTERN.finditer(text):
-        label = _normalize_label(match.group("label"))
-        counts.setdefault(label, set()).add(f"{match.group('count')}/{match.group('total')}")
-    return counts
-
-
-def _normalize_label(label: str) -> str:
-    compact = re.sub(r"[^a-z0-9]+", " ", label.lower().strip("*")).strip()
-    return re.sub(r"\s+", " ", compact)
 
 
 def _score_internal_consistency(metrics: dict) -> ReportDimensionScore:

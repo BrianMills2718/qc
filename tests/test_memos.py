@@ -514,6 +514,31 @@ class TestMarkdownExportMemos:
         assert "Second coding pass memo." in content
         assert "superseded cross-case" not in content
 
+    def test_markdown_export_fails_on_conflicting_live_prevalence_statements(self, tmp_path):
+        state = _make_state(
+            memos=[
+                AnalysisMemo(
+                    id="local-actors-older",
+                    memo_type="cross_case",
+                    title="Cross-Interview Pattern Analysis",
+                    content="- **Local actors**: present in 2/3 documents.",
+                    created_at="2026-06-25T17:55:15",
+                ),
+                AnalysisMemo(
+                    id="local-actors-newer",
+                    memo_type="cross_case",
+                    title="Cross-Interview Rival Analysis",
+                    content="- **Local actors**: present in 3/3 documents.",
+                    created_at="2026-06-25T18:22:38",
+                ),
+            ],
+        )
+
+        output_file = tmp_path / "report.md"
+        with pytest.raises(ValueError, match="conflicting prevalence statements"):
+            ProjectExporter().export_markdown(state, str(output_file))
+        assert not output_file.exists()
+
 
 class TestCSVExportMemos:
     def test_memos_csv_created(self, tmp_path):

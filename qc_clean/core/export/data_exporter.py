@@ -25,6 +25,7 @@ from qc_clean.core.claims import (
 )
 from qc_clean.core.abductive import summarize_abductive_candidates
 from qc_clean.core.patterns import summarize_observed_patterns
+from qc_clean.core.report_authoritativeness import find_prevalence_conflicts
 from qc_clean.schemas.domain import AnalysisMemo, ProjectState
 
 logger = logging.getLogger(__name__)
@@ -207,6 +208,21 @@ def _memos_for_markdown(memos: List[AnalysisMemo]) -> tuple[List[AnalysisMemo], 
             continue
         reviewer_memos.append(memo)
     return reviewer_memos, omitted_cross_case_count
+
+
+def _assert_no_markdown_prevalence_conflicts(markdown: str) -> None:
+    """Fail loudly when reviewer Markdown contains incompatible prevalence facts."""
+    conflicts = find_prevalence_conflicts(markdown)
+    if not conflicts:
+        return
+    details = "; ".join(
+        f"{label}: {', '.join(counts)}"
+        for label, counts in sorted(conflicts.items())
+    )
+    raise ValueError(
+        "Markdown export contains conflicting prevalence statements; "
+        f"resolve report authoritativeness before export. Conflicts: {details}"
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -955,7 +971,9 @@ class ProjectExporter:
                 _a(f"| {pr.phase_name} | {pr.status.value} |")
             _a("")
 
-        path.write_text("\n".join(lines), encoding="utf-8")
+        markdown = "\n".join(lines)
+        _assert_no_markdown_prevalence_conflicts(markdown)
+        path.write_text(markdown, encoding="utf-8")
         logger.info("Exported Markdown to %s", path)
         return str(path)
 
