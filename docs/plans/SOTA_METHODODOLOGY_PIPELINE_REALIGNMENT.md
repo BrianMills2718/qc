@@ -830,3 +830,10 @@ modified artifacts produce machine-readable failures and a non-zero script exit.
 The copied-seed product-gate package verified with `ok=true`, six artifacts, and
 no failures, writing
 `test_output/plan241_position_claims_replay_2026_06_25/product_gate_verification.json`.
+
+Product-gate implementation checkpoint on 2026-06-26 (operator surface): the
+product-gate package writer and verifier are now exposed through Makefile
+targets (`make write-product-gate-package` and
+`make verify-product-gate-package`) as well as `qc_cli.py`. Canonical command
+docs in `CLAUDE.md` were updated and `AGENTS.md` was regenerated from them.
+Both Make targets ran successfully against the copied-seed product-gate bundle.

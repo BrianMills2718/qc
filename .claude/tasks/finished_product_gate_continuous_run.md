@@ -15,19 +15,19 @@ must never be treated as product completion.
 
 ## Current Phase
 
-Close the product-gate evidence package verification gap: product-gate bundles
-must be re-checkable after writing, not merely hash-stamped once.
+Close the product-gate package operator-surface gap: package write/verify
+commands must be visible through Makefile help and canonical command docs, not
+only buried in `qc_cli.py`.
 
 ## Acceptance Criteria For Current Slice
 
-- [x] Product-gate packages can be verified by recomputing artifact hashes and
-  byte sizes.
-- [x] Missing or modified artifacts produce machine-readable verification
-  failures and a non-zero script exit.
-- [x] Verification is available through an agent-drivable script and canonical
-  `qc_cli.py verify-product-gate-package` command.
-- [x] Focused tests cover successful verification, hash mismatch failure, script
-  output/exit behavior, and top-level CLI forwarding.
+- [x] Makefile exposes `write-product-gate-package` and
+  `verify-product-gate-package` targets with required-argument guards.
+- [x] Canonical `CLAUDE.md` command docs list Make and `qc_cli.py` product-gate
+  package write/verify commands.
+- [x] Generated `AGENTS.md` is regenerated from the canonical docs and remains
+  synchronized.
+- [x] Copied-seed Make writer and verifier targets run successfully.
 - [x] Ruff, focused pytest, plan/docs checks, `git diff --check`, and `make
   check` pass before commit.
 - [ ] Slice is documented, committed, pushed, and the worktree is clean before
@@ -105,3 +105,18 @@ must be re-checkable after writing, not merely hash-stamped once.
   focused pytest, Ruff, plan validation, Markdown links, surface readiness,
   `git diff --check`, and full `make check` (`1426 passed, 1 skipped, 8
   deselected`).
+- 2026-06-26: Product-gate evidence package verifier was committed and pushed in
+  commit `003c103f`.
+- 2026-06-26: Next product-gate gap selected: package write/verify commands
+  existed in `qc_cli.py` but were not exposed through Makefile help or canonical
+  command docs. The slice will update operator surfaces and regenerate
+  `AGENTS.md`.
+- 2026-06-26: Makefile `write-product-gate-package` and
+  `verify-product-gate-package` targets both ran successfully against the copied
+  seed artifact bundle.
+- 2026-06-26: Verification passed for the product-gate package operator-surface
+  slice: Make help surfaced both targets, AGENTS sync passed, plan validation,
+  Markdown links, surface readiness, `git diff --check`, and full `make check`
+  (`1426 passed, 1 skipped, 8 deselected`). A mistaken Ruff invocation against
+  Makefile/Markdown failed because those are not Python files; the canonical
+  `make lint` Ruff gate passed inside `make check`.

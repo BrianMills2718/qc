@@ -269,6 +269,8 @@ make export-publish-preflight MANIFEST=manifest.json BASE_DIR=. ID=<project_id> 
 make verify-export-audit-log LOG=export_audit_events.jsonl
 make mirror-export-audit-db LOG=export_audit_events.jsonl DB=export_audit_events.sqlite
 make verify-export-audit-db DB=export_audit_events.sqlite
+make write-product-gate-package ID=<project_id> REVIEWER=reviewer_report.md OUTPUT=product_gate_package.json AUDIT=report.md BASELINES=report_baselines.json COMPARISON=report_baseline_comparison.json PACKET=report_review_packet.json RESPONSE=report_review_response.json
+make verify-product-gate-package PACKAGE=product_gate_package.json OUTPUT=product_gate_verification.json
 python qc_cli.py export-audit-manifest <project_id> --format markdown --artifact report.md --output manifest.json --audit-log export_audit_events.jsonl --audit-db export_audit_events.sqlite
 python qc_cli.py verify-export-audit-manifest manifest.json --base-dir . --project-id <project_id> --audit-log export_audit_events.jsonl --audit-db export_audit_events.sqlite
 python qc_cli.py export-publish-preflight --manifest manifest.json --base-dir . --project-id <project_id> --audit-log export_audit_events.jsonl --audit-db export_audit_events.sqlite
@@ -277,6 +279,8 @@ python qc_cli.py project export <project_id> --format markdown --output-file rep
 python qc_cli.py verify-export-audit-log export_audit_events.jsonl
 python qc_cli.py mirror-export-audit-db export_audit_events.jsonl --db export_audit_events.sqlite
 python qc_cli.py verify-export-audit-db export_audit_events.sqlite
+python qc_cli.py write-product-gate-package <project_id> --reviewer-report reviewer_report.md --audit-report report.md --baseline-package report_baselines.json --baseline-comparison report_baseline_comparison.json --review-packet report_review_packet.json --review-response report_review_response.json --output product_gate_package.json
+python qc_cli.py verify-product-gate-package product_gate_package.json --output product_gate_verification.json
 python qc_cli.py bench <project_id>                                     # Phase 0 scorecard (same engine as make bench)
 python qc_cli.py bench <project_id> --confidence-calibration-protocol-file protocol.json --confidence-calibration-file calibration.json  # Same Phase 0 file/protocol flags as scripts/bench_phase0.py
 python qc_cli.py bench <project_id> --artifact-dir benchmark_results    # Write versioned Phase 0 scorecard package
@@ -602,6 +606,8 @@ make export-publish-preflight MANIFEST=manifest.json BASE_DIR=. ID=<project_id> 
 make verify-export-audit-log LOG=export_audit_events.jsonl  # Verify opt-in local hash-linked export audit event log
 make mirror-export-audit-db LOG=export_audit_events.jsonl DB=export_audit_events.sqlite  # Mirror verified event log into local SQLite
 make verify-export-audit-db DB=export_audit_events.sqlite  # Verify local SQLite export audit event mirror
+make write-product-gate-package ID=<project_id> REVIEWER=reviewer_report.md OUTPUT=product_gate_package.json AUDIT=report.md BASELINES=report_baselines.json COMPARISON=report_baseline_comparison.json PACKET=report_review_packet.json RESPONSE=report_review_response.json  # Write product-gate evidence package
+make verify-product-gate-package PACKAGE=product_gate_package.json OUTPUT=product_gate_verification.json  # Verify product-gate evidence package hashes
 python qc_cli.py export-audit-manifest <project_id> --format markdown --artifact report.md --output manifest.json --audit-log events.jsonl --audit-db events.sqlite  # Canonical CLI wrapper for export audit manifest writing
 python qc_cli.py verify-export-audit-manifest manifest.json --base-dir . --project-id <project_id> --audit-log events.jsonl --audit-db events.sqlite  # Canonical CLI wrapper for export audit manifest verification
 python qc_cli.py export-publish-preflight --manifest manifest.json --base-dir . --project-id <project_id> --audit-log events.jsonl --audit-db events.sqlite  # Canonical CLI wrapper for export publish preflight
@@ -610,6 +616,8 @@ python qc_cli.py project export <project_id> --format markdown --output-file rep
 python qc_cli.py verify-export-audit-log export_audit_events.jsonl  # Canonical CLI wrapper for export audit event-log verification
 python qc_cli.py mirror-export-audit-db export_audit_events.jsonl --db export_audit_events.sqlite  # Canonical CLI wrapper for export audit SQLite mirroring
 python qc_cli.py verify-export-audit-db export_audit_events.sqlite  # Canonical CLI wrapper for export audit SQLite verification
+python qc_cli.py write-product-gate-package <project_id> --reviewer-report reviewer_report.md --audit-report report.md --baseline-package report_baselines.json --baseline-comparison report_baseline_comparison.json --review-packet report_review_packet.json --review-response report_review_response.json --output product_gate_package.json  # Canonical CLI wrapper for product-gate evidence packages
+python qc_cli.py verify-product-gate-package product_gate_package.json --output product_gate_verification.json  # Canonical CLI wrapper for product-gate evidence package verification
 make validate-d3-baseline-package PACKAGE=d3_baseline.json  # Validate versioned D3 application baseline package
 make validate-d3-comparison-protocol PROTOCOL=d3_protocol.json  # Validate pre-run D3 baseline comparison protocol, including optional metric criteria
 make d3-comparison-preflight PROTOCOL=d3_protocol.json GOLD=d3_gold.json PREDICTIONS="baseline.json"  # Preflight D3 comparison inputs before scoring

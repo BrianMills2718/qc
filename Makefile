@@ -1,4 +1,4 @@
-.PHONY: help test test-quick test-e2e test-all bench bench-package verify-phase0-benchmark-artifact write-phase0-adjudication-package validate-d3-gold validate-d7-gold validate-d3-baseline-package validate-d7-baseline-package validate-inv7-package validate-inv7-live-protocol inv7-live-preflight compare-inv7-packages export-process-tracing-handoff validate-process-tracing-handoff validate-d6-bias-protocol d6-bias-preflight validate-d4-codebook-quality-protocol d4-codebook-quality-preflight validate-d8-gt-fidelity-protocol d8-gt-fidelity-preflight validate-sampling-frame-adequacy-protocol sampling-frame-adequacy-preflight validate-d9-interpretive-preference-protocol d9-interpretive-preference-preflight validate-confidence-calibration-protocol confidence-calibration-preflight validate-theoretical-sampling-protocol theoretical-sampling-preflight export-theoretical-sampling-candidates export-theoretical-sampling-results validate-d3-comparison-protocol d3-comparison-preflight validate-d7-comparison-protocol d7-comparison-preflight validate-adjudication-responses validate-adjudication-protocol adjudication-protocol-preflight adjudication-response-preflight import-adjudication-responses lint-scope-phrasing lint-prompt-overrides export-audit-manifest verify-export-audit-manifest export-publish-preflight verify-export-audit-log mirror-export-audit-db verify-export-audit-db run-d7-retrieval run-d7-live-baseline compare-d7-retrieval write-d7-comparison-package compare-d7-package verify-d7-comparison-artifact run-inv7-fixtures run-inv7-live-fixtures adjudication-sample reviewer-demo check lint docs-check clean status cost errors
+.PHONY: help test test-quick test-e2e test-all bench bench-package verify-phase0-benchmark-artifact write-phase0-adjudication-package validate-d3-gold validate-d7-gold validate-d3-baseline-package validate-d7-baseline-package validate-inv7-package validate-inv7-live-protocol inv7-live-preflight compare-inv7-packages export-process-tracing-handoff validate-process-tracing-handoff validate-d6-bias-protocol d6-bias-preflight validate-d4-codebook-quality-protocol d4-codebook-quality-preflight validate-d8-gt-fidelity-protocol d8-gt-fidelity-preflight validate-sampling-frame-adequacy-protocol sampling-frame-adequacy-preflight validate-d9-interpretive-preference-protocol d9-interpretive-preference-preflight validate-confidence-calibration-protocol confidence-calibration-preflight validate-theoretical-sampling-protocol theoretical-sampling-preflight export-theoretical-sampling-candidates export-theoretical-sampling-results validate-d3-comparison-protocol d3-comparison-preflight validate-d7-comparison-protocol d7-comparison-preflight validate-adjudication-responses validate-adjudication-protocol adjudication-protocol-preflight adjudication-response-preflight import-adjudication-responses lint-scope-phrasing lint-prompt-overrides export-audit-manifest verify-export-audit-manifest export-publish-preflight verify-export-audit-log mirror-export-audit-db verify-export-audit-db write-product-gate-package verify-product-gate-package run-d7-retrieval run-d7-live-baseline compare-d7-retrieval write-d7-comparison-package compare-d7-package verify-d7-comparison-artifact run-inv7-fixtures run-inv7-live-fixtures adjudication-sample reviewer-demo check lint docs-check clean status cost errors
 
 DAYS ?= 7
 PROJECT ?= qualitative_coding
@@ -361,6 +361,24 @@ ifndef DB
 	$(error DB is required. Usage: make verify-export-audit-db DB=events.sqlite)
 endif
 	python scripts/verify_export_audit_event_db.py $(DB)
+
+write-product-gate-package:  ## Write product-gate evidence package (ID=<project_id> REVIEWER=reviewer_report.md OUTPUT=product_gate_package.json [AUDIT=report.md] [BASELINES=report_baselines.json] [COMPARISON=report_baseline_comparison.json] [PACKET=report_review_packet.json] [RESPONSE=report_review_response.json] [MANIFEST=manifest.json])
+ifndef ID
+	$(error ID is required. Usage: make write-product-gate-package ID=<project_id> REVIEWER=reviewer_report.md OUTPUT=product_gate_package.json)
+endif
+ifndef REVIEWER
+	$(error REVIEWER is required. Usage: make write-product-gate-package ID=<project_id> REVIEWER=reviewer_report.md OUTPUT=product_gate_package.json)
+endif
+ifndef OUTPUT
+	$(error OUTPUT is required. Usage: make write-product-gate-package ID=<project_id> REVIEWER=reviewer_report.md OUTPUT=product_gate_package.json)
+endif
+	python scripts/write_product_gate_package.py $(ID) --reviewer-report $(REVIEWER) --output $(OUTPUT) $(if $(AUDIT),--audit-report $(AUDIT),) $(if $(BASELINES),--baseline-package $(BASELINES),) $(if $(COMPARISON),--baseline-comparison $(COMPARISON),) $(if $(PACKET),--review-packet $(PACKET),) $(if $(RESPONSE),--review-response $(RESPONSE),) $(if $(MANIFEST),--export-manifest $(MANIFEST),)
+
+verify-product-gate-package:  ## Verify product-gate evidence package (PACKAGE=product_gate_package.json [BASE_DIR=.] [OUTPUT=verification.json])
+ifndef PACKAGE
+	$(error PACKAGE is required. Usage: make verify-product-gate-package PACKAGE=product_gate_package.json)
+endif
+	python scripts/verify_product_gate_package.py $(PACKAGE) $(if $(BASE_DIR),--base-dir $(BASE_DIR),) $(if $(OUTPUT),--output $(OUTPUT),)
 
 MODE ?= lexical_bm25
 
